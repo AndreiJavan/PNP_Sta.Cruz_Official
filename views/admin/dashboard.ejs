@@ -19,29 +19,65 @@
         </div>
     </a>
 
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center items-center text-center group hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
-        <span class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-3">8-Focus Crimes</span>
-        <div class="text-3xl font-black text-red-600 dark:text-red-500 mb-1"><%= todayStats.focus %></div>
-        <div class="w-12 h-1 bg-red-100 dark:bg-red-900/30 rounded-full overflow-hidden">
-            <div class="h-full bg-red-600 transition-all" style="width: <%= Math.min((todayStats.focus / (todayStats.total || 1)) * 100, 100) %>%"></div>
+    <!-- Bulletins Card -->
+    <a href="/admin/bulletins" class="bg-gradient-to-br from-red-600 to-red-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+        <div class="relative z-10">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[10px] text-red-100 font-black uppercase tracking-widest">Number of Existing Bulletins</span>
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                    <i class="fas fa-bullhorn text-sm"></i>
+                </div>
+            </div>
+            <div class="flex items-end space-x-3 mb-2">
+                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.totalBulletins %></h2>
+                <div class="flex items-center space-x-1 mb-1">
+                    <span class="text-[10px] font-bold text-red-200">Active Notices</span>
+                </div>
+            </div>
+            <p class="text-[8px] text-red-100/60 font-bold uppercase tracking-tighter">Community Alerts Hub</p>
         </div>
-    </div>
+    </a>
 
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center items-center text-center group hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
-        <span class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-3">Non-Index Crimes</span>
-        <div class="text-3xl font-black text-pnp-blue dark:text-pnp-gold mb-1"><%= todayStats.nonIndex %></div>
-        <div class="w-12 h-1 bg-blue-100 dark:bg-blue-900/30 rounded-full overflow-hidden">
-            <div class="h-full bg-pnp-blue transition-all" style="width: <%= Math.min((todayStats.nonIndex / (todayStats.total || 1)) * 100, 100) %>%"></div>
+    <!-- Reports Card -->
+    <a href="/admin/reports" class="bg-gradient-to-br from-pnp-blue to-slate-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+        <div class="relative z-10">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[10px] text-blue-100 font-black uppercase tracking-widest">Total Records of reports</span>
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                    <i class="fas fa-file-invoice text-sm"></i>
+                </div>
+            </div>
+            <div class="flex items-end space-x-3 mb-2">
+                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.totalReports %></h2>
+                <div class="flex items-center space-x-1 mb-1">
+                    <span class="text-[10px] font-bold text-blue-200">Scanned Datasets</span>
+                </div>
+            </div>
+            <p class="text-[8px] text-blue-100/60 font-bold uppercase tracking-tighter">Periodic Intelligence Repository</p>
         </div>
-    </div>
+    </a>
 
-    <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center items-center text-center group hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
-        <span class="text-[9px] text-gray-400 font-black uppercase tracking-widest mb-3">PSI Cases</span>
-        <div class="text-3xl font-black text-purple-600 dark:text-purple-400 mb-1"><%= todayStats.psi %></div>
-        <div class="w-12 h-1 bg-purple-100 dark:bg-purple-900/30 rounded-full overflow-hidden">
-            <div class="h-full bg-purple-600 transition-all" style="width: <%= Math.min((todayStats.psi / (todayStats.total || 1)) * 100, 100) %>%"></div>
+    <!-- Map Card -->
+    <a href="/admin/map" class="bg-gradient-to-br from-emerald-600 to-teal-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+        <div class="relative z-10">
+            <div class="flex justify-between items-start mb-4">
+                <span class="text-[10px] text-emerald-100 font-black uppercase tracking-widest leading-tight">Highlight of most incidents or crime in the Map</span>
+                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                    <i class="fas fa-map-location-dot text-sm"></i>
+                </div>
+            </div>
+            <div class="flex items-end space-x-3 mb-2">
+                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.total %></h2>
+                <div class="flex items-center space-x-1 mb-1">
+                    <span class="text-[10px] font-bold text-emerald-200">Tactical Points</span>
+                </div>
+            </div>
+            <p class="text-[8px] text-emerald-100/60 font-bold uppercase tracking-tighter">Geospatial Awareness Panel</p>
         </div>
-    </div>
+    </a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -102,63 +138,6 @@
     </div>
 </div>
 
-<!-- Alerts Feed -->
-<div class="bg-[#001F3F] p-8 rounded-[3rem] shadow-2xl border border-white/5 relative overflow-hidden">
-    <div class="absolute -left-20 -bottom-20 w-60 h-60 bg-pnp-gold/5 rounded-full blur-3xl"></div>
-    <div class="relative z-10">
-        <div class="flex items-center justify-between mb-8">
-            <div class="flex items-center space-x-4">
-                <div class="w-10 h-10 bg-pnp-gold rounded-xl flex items-center justify-center text-pnp-blue shadow-lg shadow-pnp-gold/20">
-                    <i class="fas fa-satellite text-sm"></i>
-                </div>
-                <div>
-                    <h3 class="text-pnp-gold font-black uppercase tracking-[0.3em] text-[11px]">Tactical Command Stream</h3>
-                    <div class="flex items-center space-x-2 mt-1">
-                        <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                        <span class="text-[8px] text-white/50 font-bold uppercase tracking-widest">Live Security Feed Active</span>
-                    </div>
-                </div>
-            </div>
-            <% if (notifications && notifications.length > 0) { %>
-                <div class="flex items-center space-x-3 bg-red-500/20 px-4 py-2 rounded-xl border border-red-500/30 animate-pulse">
-                    <i class="fas fa-bell text-red-500 text-[10px]"></i>
-                    <span class="text-[9px] text-red-500 font-black uppercase tracking-widest"><%= notifications.length %> New Tips</span>
-                </div>
-            <% } %>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <% alerts.forEach(alert => { %>
-                <div class="p-6 bg-white/5 rounded-3xl border border-white/5 hover:bg-white/10 transition-all group flex flex-col h-full border-l-2 <%= alert.severity === 'Critical' ? 'border-l-red-500' : (alert.severity === 'Warning' ? 'border-l-pnp-gold' : 'border-l-blue-400') %>">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas <%= alert.severity === 'Critical' ? 'fa-exclamation-triangle text-red-500' : (alert.severity === 'Warning' ? 'fa-bolt text-pnp-gold' : 'fa-info-circle text-blue-400') %> text-[10px]"></i>
-                            <span class="text-[8px] font-black uppercase tracking-widest <%= alert.severity === 'Critical' ? 'text-red-500' : (alert.severity === 'Warning' ? 'text-pnp-gold' : 'text-blue-400') %>"><%= alert.severity %> Alert</span>
-                        </div>
-                        <% 
-                            let timeStr = 'N/A';
-                            try {
-                                if (alert.timestamp) {
-                                    timeStr = new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                }
-                            } catch (e) {
-                                console.error('Date error:', e);
-                            }
-                        %>
-                        <span class="text-[8px] text-white/30 font-bold uppercase"><%= timeStr %></span>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-[10px] text-white font-black uppercase leading-tight mb-2 group-hover:text-pnp-gold transition-colors"><%= alert.message %></p>
-                        <div class="flex items-center text-[8px] text-white/50 font-bold uppercase tracking-wide">
-                            <i class="fas fa-map-marker-alt mr-2 text-pnp-gold"></i>
-                            Brgy. <%= alert.location %>
-                        </div>
-                    </div>
-                </div>
-            <% }) %>
-        </div>
-    </div>
-</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>

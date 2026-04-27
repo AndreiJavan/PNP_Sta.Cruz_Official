@@ -55,16 +55,22 @@ export const getDashboard = async (req: Request, res: Response) => {
       allMapPointsSnap,
       anonymousTipsSnap,
       totalTipsSnap,
-      notificationsSnap
+      notificationsSnap,
+      totalBulletinsSnap,
+      totalReportsSnap
     ] = await Promise.all([
       db.collection('map_points').get(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
       db.collection('anonymous_tips').count().get(),
-      db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get()
+      db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
+      db.collection('bulletins').count().get(),
+      db.collection('intelligence_scans').count().get()
     ]);
 
     const allPoints = allMapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     const totalTipsCount = totalTipsSnap.data().count;
+    const totalBulletinsCount = totalBulletinsSnap.data().count;
+    const totalReportsCount = totalReportsSnap.data().count;
     const notifications = notificationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     
     // Time-based calculations
@@ -84,7 +90,9 @@ export const getDashboard = async (req: Request, res: Response) => {
       nonIndex: todayPoints.filter((p: any) => p.category === 'Non-Index').length,
       psi: todayPoints.filter((p: any) => p.category === 'PSI').length,
       comparison: 0,
-      totalTips: totalTipsCount
+      totalTips: totalTipsCount,
+      totalBulletins: totalBulletinsCount,
+      totalReports: totalReportsCount
     };
 
     if (yesterdayPoints.length > 0) {
