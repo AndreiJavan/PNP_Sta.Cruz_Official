@@ -197,6 +197,20 @@
             mobileMenu.classList.add('hidden');
             document.body.style.overflow = 'auto';
         });
+
+        // Hide Header on Scroll logic
+        let lastScrollTop = 0;
+        const mainHeader = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 80) {
+                mainHeader.style.transform = 'translateY(-100%)';
+                mainHeader.style.transition = 'transform 0.3s ease-in-out';
+            } else {
+                mainHeader.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
     </script>
 </body>
 </html>

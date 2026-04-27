@@ -108,32 +108,23 @@
         </div>
     </div>
 
-    <!-- High-Risk Barangays -->
+    <!-- Crime Rate Distribution Pie Chart -->
     <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[500px]">
         <div class="flex items-center justify-between mb-8 border-b border-gray-50 dark:border-slate-700 pb-4">
-            <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">High-Risk Barangays</h3>
-            <i class="fas fa-biohazard text-red-500 text-sm animate-pulse"></i>
+            <div>
+                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Crime Rate Distribution</h3>
+                <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Sectoral Risk Proportions</p>
+            </div>
+            <i class="fas fa-chart-pie text-pnp-gold text-sm"></i>
         </div>
         
-        <div class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar">
-            <% highRiskBarangays.forEach(item => { %>
-                <div class="p-5 bg-gray-50 dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700 group hover:shadow-lg transition-all duration-300">
-                    <div class="flex justify-between items-center mb-3">
-                        <div class="flex items-center space-x-3">
-                            <div class="text-xs font-black text-pnp-blue dark:text-white uppercase">Brgy. <%= item.name %></div>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest <%= item.risk === 'High' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : (item.risk === 'Medium' ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-green-500/10 text-green-500 border border-green-500/20') %>">
-                            <%= item.risk %> Risk
-                        </span>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-1 h-1.5 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full <%= item.risk === 'High' ? 'bg-red-500' : (item.risk === 'Medium' ? 'bg-orange-500' : 'bg-green-500') %> transition-all duration-1000" style="width: <%= Math.min((item.count / 30) * 100, 100) %>%"></div>
-                        </div>
-                        <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold"><%= item.count %></span>
-                    </div>
-                </div>
-            <% }) %>
+        <div class="flex-1 relative flex flex-col justify-center">
+            <div class="h-64 mb-6">
+                <canvas id="crimeDistributionChart"></canvas>
+            </div>
+            <div id="pieLegend" class="grid grid-cols-2 gap-3 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                <!-- Legend items will be injected here if needed -->
+            </div>
         </div>
     </div>
 </div>
@@ -142,10 +133,11 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const ctx = document.getElementById('crimeTrendChart').getContext('2d');
+        // Trend Chart
+        const trendCtx = document.getElementById('crimeTrendChart').getContext('2d');
         const trendsData = JSON.parse('<%- monthlyTrends %>');
         
-        new Chart(ctx, {
+        new Chart(trendCtx, {
             type: 'bar',
             data: {
                 labels: trendsData.map(d => d.month),
@@ -197,6 +189,89 @@
                             stepSize: 5,
                             font: { size: 9, weight: 'bold' },
                             color: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Distribution Pie Chart (Crime Types)
+        const distCtx = document.getElementById('crimeDistributionChart').getContext('2d');
+        const points = <%- JSON.stringify(points) %>;
+        
+        // Count crime types
+        const crimeCounts = {};
+        let totalVal = 0;
+        points.forEach(p => {
+            const type = p.incident_type || 'Other';
+            crimeCounts[type] = (crimeCounts[type] || 0) + 1;
+            totalVal++;
+        });
+
+        const crimeLabels = Object.keys(crimeCounts);
+        const crimeData = Object.values(crimeCounts);
+
+        const colors = [
+            '#ef4444', // Red
+            '#1A3A5C', // PNP Blue
+            '#D4AF37', // PNP Gold
+            '#10b981', // Emerald
+            '#8b5cf6', // Violet
+            '#f59e0b', // Amber
+            '#475569'  // Slate
+        ];
+
+        new Chart(distCtx, {
+            type: 'doughnut',
+            data: {
+                labels: crimeLabels,
+                datasets: [{
+                    data: crimeData,
+                    backgroundColor: colors.slice(0, crimeLabels.length),
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '0%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 8,
+                                weight: 'bold',
+                                family: 'Inter'
+                            },
+                            color: '#94a3b8',
+                            generateLabels: (chart) => {
+                                const data = chart.data;
+                                return data.labels.map((label, i) => {
+                                    const val = data.datasets[0].data[i];
+                                    const percentage = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
+                                    return {
+                                        text: `${label} (${percentage}%)`,
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        hidden: false,
+                                        index: i,
+                                        pointStyle: 'circle'
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const val = context.raw;
+                                const percentage = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${val} (${percentage}%)`;
+                            }
                         }
                     }
                 }

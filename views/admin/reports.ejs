@@ -1,34 +1,35 @@
 <div class="space-y-8 animate-fade-in">
     <!-- Header Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
-            <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Datasets</span>
-            <div class="text-3xl font-black text-pnp-blue dark:text-pnp-gold leading-none"><%= allIncidents.length %></div>
-            <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">Active Strategic Records</p>
-        </div>
-        
         <% 
             let total8FocusAll = allIncidents.filter(i => i.category === '8-Focus').length;
             let totalPSIAll = allIncidents.filter(i => i.category === 'PSI').length;
+            let totalNonIndexAll = allIncidents.filter(i => (i.category === 'Non-Index' || !i.category)).length;
         %>
 
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center text-left hover:scale-[1.02] transition-transform group cursor-pointer" onclick="openCategorySpreadsheet('8-Focus')">
             <span class="text-[10px] text-red-500 font-black uppercase tracking-widest mb-1">Focus Volume</span>
             <div class="text-3xl font-black text-red-500 leading-none"><%= total8FocusAll %></div>
             <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">8-Focus Incidents</p>
         </div>
 
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center text-left hover:scale-[1.02] transition-transform group cursor-pointer" onclick="openCategorySpreadsheet('PSI')">
             <span class="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-1">PSI Volume</span>
             <div class="text-3xl font-black text-blue-500 leading-none"><%= totalPSIAll %></div>
             <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">Priority Investigations</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center text-left hover:scale-[1.02] transition-transform group cursor-pointer" onclick="openCategorySpreadsheet('Non-Index')">
+            <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Non-Index</span>
+            <div class="text-3xl font-black text-slate-700 dark:text-slate-200 leading-none"><%= totalNonIndexAll %></div>
+            <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">Miscellaneous Reports</p>
         </div>
 
         <button onclick="document.getElementById('fileConverterInput').click()" class="bg-pnp-blue dark:bg-pnp-gold p-6 rounded-[2rem] shadow-xl flex flex-col justify-center border-2 border-white/10 text-left transition-all hover:scale-[1.02] hover:shadow-pnp-gold/20 group">
             <span class="text-[10px] text-pnp-gold dark:text-pnp-blue font-black uppercase tracking-widest mb-1 group-hover:animate-pulse">File Scanner</span>
             <div class="text-xl font-black text-white dark:text-pnp-blue leading-none uppercase">Unit Crime Periodic Report</div>
             <p class="text-[8px] text-blue-200 dark:text-pnp-blue/60 font-bold uppercase mt-2 italic shadow-sm">Strategic Document Processing</p>
-            <input type="file" id="fileConverterInput" accept="image/*,.pdf,.xlsx,.xls,.csv,.txt" class="hidden" onchange="handleIntelConvert(this)">
+            <input type="file" id="fileConverterInput" accept=".pdf,.xlsx,.xls,.docx" class="hidden" onchange="handleIntelConvert(this)">
         </button>
     </div>
 
@@ -274,121 +275,64 @@
 </div>
 
 <script type="module">
-    import { GoogleGenAI, Type } from "https://esm.sh/@google/genai";
-    import * as XLSX from "https://esm.sh/xlsx";
- 
-     const GEMINI_API_KEY = "<%= GEMINI_API_KEY %>";
-     const VALID_BARANGAYS = [
+
+    const VALID_BARANGAYS = [
         "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", 
         "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", 
         "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", 
         "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", 
         "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
-     ];
+    ];
 
      window.handleIntelConvert = async function(input) {
-         if (!input.files || !input.files[0]) return;
-         
-         const file = input.files[0];
-         const loadingOverlay = document.getElementById('intelLoadingOverlay');
-         
-         // Show loading
-         loadingOverlay.classList.remove('hidden');
-         
-         try {
-             if (!GEMINI_API_KEY || GEMINI_API_KEY === "undefined") {
-                 throw new Error("Intelligence System Key is not configured.");
-             }
-  
-             const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-             let aiParts = [];
-             const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv') || file.type === 'text/csv' || file.type.includes('spreadsheet');
-             const isText = file.name.endsWith('.txt') || file.type === 'text/plain';
-  
-             if (isExcel) {
-                const data = await file.arrayBuffer();
-                const workbook = XLSX.read(data);
-                let excelText = "";
-                workbook.SheetNames.forEach(sheetName => {
-                    const sheet = workbook.Sheets[sheetName];
-                    excelText += XLSX.utils.sheet_to_csv(sheet);
-                });
-                aiParts.push({ text: `Extract intelligence from: ${excelText}` });
-             } else if (isText) {
-                const text = await file.text();
-                aiParts.push({ text: text });
-             } else {
-                const base64Data = await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result.split(',')[1]);
-                    reader.readAsDataURL(file);
-                });
-                aiParts.push({ inlineData: { data: base64Data, mimeType: file.type } });
-             }
-  
-             const prompt = `
-             Convert the input into grouped JSON by barangay.
-             - Categories: "8-Focus" (Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping MV, Carnapping MC), "PSI", "Non-Index"
-             - Barangay MUST be one of: ${VALID_BARANGAYS.join(', ')}.
-             - Format: { "BarangayName": [{ date, offense, category, description }] }
-             `;
-             aiParts.push({ text: prompt });
-  
-             const response = await ai.models.generateContent({
-                 model: "gemini-2.5-flash",
-                 contents: { parts: aiParts },
-                 config: {
-                     responseMimeType: "application/json",
-                     responseSchema: {
-                        type: Type.OBJECT,
-                        properties: Object.fromEntries(VALID_BARANGAYS.map(b => [b, {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    date: { type: Type.STRING },
-                                    offense: { type: Type.STRING },
-                                    category: { type: Type.STRING },
-                                    description: { type: Type.STRING }
-                                },
-                                required: ["date", "offense", "category", "description"]
-                            }
-                        }]))
-                     }
-                 }
-             });
-  
-            const results = JSON.parse(response.text);
-            const flattened = [];
-            for (const [brgy, incidents] of Object.entries(results)) {
-                if (Array.isArray(incidents)) {
-                    incidents.forEach(inc => {
-                        flattened.push({
-                            barangay: brgy,
-                            date_committed: inc.date,
-                            offense: inc.offense,
-                            category: inc.category,
-                            description: inc.description || ""
-                        });
-                    });
-                }
+        if (!input.files || !input.files[0]) return;
+
+        const file = input.files[0];
+        const loadingOverlay = document.getElementById('intelLoadingOverlay');
+        const statusText = document.getElementById('intelLoadingText');
+
+        loadingOverlay.classList.remove('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            statusText.textContent = "Uploading and scanning document...";
+            await new Promise(r => setTimeout(r, 1000));
+
+            // ✅ Targeted route for AI processing
+            const res = await fetch('/admin/process-ai', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText);
             }
-            
-            const statusText = document.getElementById('intelLoadingText');
-            statusText.textContent = `${flattened.length} records identified. Finalizing spreadsheet...`;
+
+            const result = await res.json();
+
+            if (!result.success) {
+                throw new Error(result.error || "AI processing failed");
+            }
+
+            const flattened = result.data;
+
+            statusText.textContent = `${flattened.length} records identified. Finalizing...`;
+
             setTimeout(() => {
                 showIntelReview(flattened);
-                statusText.textContent = "System is processing intelligence data...";
-            }, 1500);
-  
-         } catch (error) {
-             console.error("AI Error:", error);
-             alert("Extraction failed: " + error.message);
-         } finally {
-             loadingOverlay.classList.add('hidden');
-             input.value = '';
-         }
-     };
+                loadingOverlay.classList.add('hidden');
+            }, 1000);
+
+        } catch (error) {
+            console.error("AI Error:", error);
+            alert("Extraction failed: " + error.message);
+        } finally {
+            input.value = '';
+        }
+    };
   
      let reviewData = [];
      window.showIntelReview = function(data) {
@@ -417,8 +361,8 @@
              tr.innerHTML = `
                  <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-100 dark:border-slate-700/50">${displayIndex++}</td>
                  <td class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-white uppercase border-r border-gray-100 dark:border-slate-700/50">${item.barangay}</td>
-                 <td class="px-6 py-4 text-[10px] font-bold text-slate-500 border-r border-gray-100 dark:border-slate-700/50">${item.date_committed}</td>
-                 <td class="px-6 py-4 text-[10px] font-black text-pnp-gold uppercase border-r border-gray-100 dark:border-slate-700/50">${item.offense}</td>
+                 <td class="px-6 py-4 text-[10px] font-bold text-slate-500 border-r border-gray-100 dark:border-slate-700/50">${item.date_committed || item.date}</td>
+                 <td class="px-6 py-4 text-[10px] font-black text-pnp-gold uppercase border-r border-gray-100 dark:border-slate-700/50">${item.offense || item.incident_type}</td>
                  <td class="px-6 py-4 border-r border-gray-100 dark:border-slate-700/50"><span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${badgeClass}">${cat}</span></td>
                  <td class="px-6 py-4 text-right space-x-2">
                      <button onclick="editReviewRow(${index})" class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-pnp-blue hover:scale-110 active:scale-90 transition-all"><i class="fas fa-edit text-[10px]"></i></button>
@@ -428,10 +372,17 @@
              tbody.appendChild(tr);
          });
   
-         document.getElementById('reviewRowCount').textContent = `${reviewData.length} records detected in periodic report`;
-         document.getElementById('count8Focus').textContent = stats['8-Focus'];
-         document.getElementById('countNonIndex').textContent = stats['Non-Index'];
-         document.getElementById('countPSI').textContent = stats['PSI'];
+         const reviewRowCount = document.getElementById('reviewRowCount');
+         if (reviewRowCount) reviewRowCount.textContent = `${reviewData.length} records detected in periodic report`;
+         
+         const count8Focus = document.getElementById('count8Focus');
+         if (count8Focus) count8Focus.textContent = stats['8-Focus'];
+         
+         const countNonIndex = document.getElementById('countNonIndex');
+         if (countNonIndex) countNonIndex.textContent = stats['Non-Index'];
+         
+         const countPSI = document.getElementById('countPSI');
+         if (countPSI) countPSI.textContent = stats['PSI'];
      };
   
      window.editReviewRow = function(index) {
@@ -458,27 +409,37 @@
      };
   
      window.confirmIntelReview = async function() {
+         if (!confirm("Sector Confirmation: Commit these records to the CPICRS Central Database?")) return;
          try {
-             const response = await fetch('/admin/map/bulk-add', {
+             const response = await fetch('/admin/reports/save', {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json' },
                  body: JSON.stringify({ entries: reviewData })
              });
-             if (response.ok) { window.location.reload(); }
+             const result = await response.json();
+
+             await new Promise(r => setTimeout(r, 1200));
+             if (result.success) {
+                 alert(`Tactical deployment successful. ${result.count} records registered.`);
+                 window.location.reload();
+             } else {
+                 throw new Error(result.message || "Bulk Transmit Failed");
+             }
          } catch (error) { alert("Error: " + error.message); }
      };
 </script>
 
 <script>
     const reports = <%- JSON.stringify(reports) %>;
+    const allIncidents = <%- JSON.stringify(allIncidents) %>;
 
-    function filterDataset(category) {
+    window.filterDataset = function(category) {
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.classList.remove('bg-pnp-blue', 'text-white', 'shadow-lg');
             tab.classList.add('text-gray-400', 'hover:text-pnp-blue');
         });
         const activeTab = document.getElementById(`tab-${category}`);
-        activeTab.classList.add('bg-pnp-blue', 'text-white', 'shadow-lg');
+        if (activeTab) activeTab.classList.add('bg-pnp-blue', 'text-white', 'shadow-lg');
 
         document.querySelectorAll('.incident-row').forEach(row => {
             row.style.display = (category === 'all' || row.dataset.category === category) ? '' : 'none';
@@ -489,14 +450,88 @@
         const report = reports.find(r => r.id === reportId);
         if (!report) return;
         
+        window.currentViewingReport = report;
+        renderReportDetailsModalContent('All');
+    }
+
+    function renderReportDetailsModalContent(filter) {
+        const report = window.currentViewingReport;
         const rawData = report.raw_data || [];
+        const filteredData = filter === 'All' ? rawData : rawData.filter(item => item.category === filter);
+        
         const content = document.getElementById('reportDetailsContent');
         content.innerHTML = `
-            <div class="bg-gray-50 dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div><span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-2">Extraction Origin</span><p class="text-[11px] font-black dark:text-white uppercase tracking-tight">${report.admin_name}</p></div>
-                <div><span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-2">Tactical Time</span><p class="text-[11px] font-black dark:text-white uppercase tracking-tight font-mono">${new Date(report.timestamp).toLocaleString()}</p></div>
-                <div><span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-2">Record Volume</span><p class="text-[11px] font-black dark:text-white uppercase tracking-tight">${report.total_records} Strategic Items</p></div>
-                <div class="text-right"><span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-2">Audit Hash</span><p class="text-[11px] font-mono font-black text-pnp-gold">#${report.id.slice(-8).toUpperCase()}</p></div>
+            <div class="bg-gray-50 dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div><span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-1">Origin</span><p class="text-[11px] font-black dark:text-white uppercase">${report.admin_name}</p></div>
+                <div><span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-1">Time</span><p class="text-[11px] font-black dark:text-white uppercase font-mono">${new Date(report.timestamp).toLocaleString()}</p></div>
+                <div class="md:col-span-2 flex flex-col md:flex-row md:items-center md:justify-end gap-4">
+                    <div class="flex items-center space-x-2 bg-white dark:bg-slate-800 p-2 rounded-xl border border-gray-100 dark:border-slate-700">
+                        <button onclick="renderReportDetailsModalContent('All')" class="px-3 py-1 text-[8px] font-black uppercase rounded-lg ${filter === 'All' ? 'bg-pnp-blue text-white' : 'text-gray-400'}">All</button>
+                        <button onclick="renderReportDetailsModalContent('8-Focus')" class="px-3 py-1 text-[8px] font-black uppercase rounded-lg ${filter === '8-Focus' ? 'bg-red-500 text-white' : 'text-gray-400'}">8-Focus</button>
+                        <button onclick="renderReportDetailsModalContent('PSI')" class="px-3 py-1 text-[8px] font-black uppercase rounded-lg ${filter === 'PSI' ? 'bg-blue-500 text-white' : 'text-gray-400'}">PSI</button>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-1">Batch ID</span>
+                        <p class="text-[11px] font-mono font-black text-pnp-gold">#${report.id.slice(-8).toUpperCase()}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto p-4">
+                <table class="w-full text-left border-separate border-spacing-y-2">
+                    <thead>
+                        <tr class="bg-gray-50/50 dark:bg-slate-900/50 rounded-2xl">
+                            <th class="px-8 py-4 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Timeline</th>
+                            <th class="px-8 py-4 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Intelligence Type</th>
+                            <th class="px-8 py-4 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">Sector</th>
+                            <th class="px-8 py-4 text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50 dark:divide-white/5">
+                        ${filteredData.length === 0 ? \`<tr><td colspan="4" class="px-8 py-10 text-center text-gray-400 text-[10px] font-bold uppercase">No \${filter} records in this batch</td></tr>\` : 
+                        filteredData.map(item => `
+                            <tr class="bg-white dark:bg-slate-800/10 border border-gray-100 dark:border-slate-700/50 rounded-2xl shadow-sm transition-all hover:scale-[1.002]">
+                                <td class="px-8 py-5 text-[10px] font-bold text-slate-500 font-mono">${item.date_committed || item.date || 'N/A'}</td>
+                                <td class="px-8 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-tight">${item.offense || item.incident_type || 'Unknown'}</td>
+                                <td class="px-8 py-5 text-[10px] font-black text-slate-700 dark:text-white uppercase">Brgy. ${item.barangay || 'Unknown'}</td>
+                                <td class="px-8 py-5 text-center">
+                                    <span class="px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${item.category === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (item.category === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20')}">
+                                        ${item.category || 'Non-Index'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        const modal = document.getElementById('reportDetailsModal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
+    function openCategorySpreadsheet(category) {
+        const filteredData = allIncidents.filter(item => {
+            if (category === 'Non-Index') {
+                return item.category === 'Non-Index' || !item.category;
+            }
+            return item.category === category;
+        });
+
+        const content = document.getElementById('reportDetailsContent');
+        content.innerHTML = `
+            <div class="bg-gray-50 dark:bg-slate-900 border-b border-gray-100 dark:border-slate-700 p-8 flex justify-between items-center text-left">
+                <div>
+                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-2">Category View</span>
+                    <p class="text-[14px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-tight">${category} Crimes Spreadsheet</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-2">Total Records</span>
+                    <p class="text-[14px] font-black dark:text-white uppercase tracking-tight">${filteredData.length}</p>
+                </div>
             </div>
             
             <div class="overflow-x-auto p-4">
@@ -510,10 +545,14 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-white/5">
-                        ${rawData.map(item => `
+                        ${filteredData.length === 0 ? `
+                            <tr>
+                                <td colspan="4" class="px-8 py-10 text-center text-gray-400 text-xs font-bold uppercase">No records found for this category</td>
+                            </tr>
+                        ` : filteredData.map(item => `
                             <tr class="bg-white dark:bg-slate-800/10 border border-gray-100 dark:border-slate-700/50 rounded-2xl shadow-sm transition-all hover:scale-[1.002]">
-                                <td class="px-8 py-5 text-[10px] font-bold text-slate-500 font-mono">${item.date_committed || item.date || 'N/A'}</td>
-                                <td class="px-8 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-tight">${item.offense || item.incident_type || 'Unknown'}</td>
+                                <td class="px-8 py-5 text-[10px] font-bold text-slate-500 font-mono">${item.incident_date || 'N/A'}</td>
+                                <td class="px-8 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-tight">${item.incident_type || 'Unknown'}</td>
                                 <td class="px-8 py-5 text-[10px] font-black text-slate-700 dark:text-white uppercase">Brgy. ${item.barangay || 'Unknown'}</td>
                                 <td class="px-8 py-5 text-center">
                                     <span class="px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.2em] border ${item.category === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (item.category === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20')}">

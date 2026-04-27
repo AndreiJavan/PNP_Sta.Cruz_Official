@@ -2,8 +2,10 @@ import { Router } from 'express';
 import * as adminController from '../controllers/adminController.js';
 import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
+import multer from 'multer';
 
 const router = Router();
+const memoryUpload = multer({ storage: multer.memoryStorage() });
 
 // Public Admin Routes
 router.get('/login', adminController.getLogin);
@@ -32,9 +34,13 @@ router.get('/map', adminController.getMap);
 router.post('/map/add', adminController.postMapPoint);
 router.post('/map/delete/:id', adminController.deleteMapPoint);
 router.post('/map/bulk-add', adminController.bulkAddMapPoints);
+router.post('/map/purge-placeholders', adminController.purgePlaceholders);
 
 // Intelligence Reports
 router.get('/reports', adminController.getReports);
+router.post('/reports/extract', memoryUpload.single('file'), adminController.processAIExtraction);
+router.post('/process-ai', memoryUpload.single('file'), adminController.processAIExtraction);
+router.post('/reports/save', adminController.saveReportBatch);
 router.post('/reports/:id/delete', adminController.deleteReport);
 
 // Hotlines

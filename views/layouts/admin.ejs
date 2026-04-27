@@ -134,7 +134,7 @@
     <!-- Main Content Area -->
     <div id="mainContent" class="flex-grow ml-72 flex flex-col min-h-screen transition-all duration-300">
         <!-- Top Header -->
-        <header class="bg-white dark:bg-slate-800 h-20 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between px-6 md:px-10 sticky top-0 z-40">
+        <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md h-20 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between px-6 md:px-10 fixed top-0 right-0 z-40 transition-all duration-300" style="left: 18rem;" id="layoutHeader">
             <div class="flex items-center space-x-4">
                 <button id="sidebarToggle" class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition border border-gray-100 dark:border-slate-600">
                     <i class="fas fa-bars"></i>
@@ -164,16 +164,16 @@
         </header>
 
         <!-- Page Body -->
-        <main class="p-10 flex-grow">
+        <main class="flex-grow <%= title === 'Map Management' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !== 'undefined' && success_msg) { %>
-                <div class="bg-green-50 text-green-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-green-100 flex items-center space-x-4 shadow-sm">
+                <div class="bg-green-50 text-green-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-green-100 flex items-center space-x-4 shadow-sm mx-10">
                     <i class="fas fa-check-circle text-lg"></i>
                     <span><%= success_msg %></span>
                 </div>
             <% } %>
             <% if (typeof error_msg !== 'undefined' && error_msg) { %>
-                <div class="bg-red-50 text-red-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-red-100 flex items-center space-x-4 shadow-sm">
+                <div class="bg-red-50 text-red-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-red-100 flex items-center space-x-4 shadow-sm mx-10">
                     <i class="fas fa-exclamation-circle text-lg"></i>
                     <span><%= error_msg %></span>
                 </div>
@@ -183,15 +183,13 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white dark:bg-slate-800 py-6 px-10 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center">
+        <% if (title !== 'Map Management') { %>
+        <footer class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md py-6 px-10 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center fixed bottom-0 right-0 z-40 transition-all duration-300" style="left: 18rem;" id="layoutFooter">
             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                 &copy; 2026 PNP Sta. Cruz Municipal Police Station - CPICRS Admin
             </p>
-            <div class="flex items-center space-x-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                <span>System Online</span>
-            </div>
         </footer>
+        <% } %>
     </div>
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -205,23 +203,56 @@
         const sidebarClose = document.getElementById('sidebarClose');
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
+        const layoutHeader = document.getElementById('layoutHeader');
+        const layoutFooter = document.getElementById('layoutFooter');
 
         const toggleSidebar = () => {
             sidebar.classList.toggle('sidebar-hidden');
             mainContent.classList.toggle('main-content-expanded');
-            localStorage.setItem('sidebarHidden', sidebar.classList.contains('sidebar-hidden'));
+            
+            const isHidden = sidebar.classList.contains('sidebar-hidden');
+            if (isHidden) {
+                layoutHeader.style.left = '0';
+                if (layoutFooter) layoutFooter.style.left = '0';
+            } else {
+                layoutHeader.style.left = '18rem';
+                if (layoutFooter) layoutFooter.style.left = '18rem';
+            }
+            
+            localStorage.setItem('sidebarHidden', isHidden);
         };
 
         sidebarToggle.addEventListener('click', toggleSidebar);
         sidebarClose.addEventListener('click', toggleSidebar);
 
+        // Hide Header and Footer on Scroll logic
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scroll down
+                layoutHeader.style.transform = 'translateY(-100%)';
+                if (layoutFooter) layoutFooter.style.transform = 'translateY(100%)';
+            } else {
+                // Scroll up
+                layoutHeader.style.transform = 'translateY(0)';
+                if (layoutFooter) layoutFooter.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+
         // Responsive Sidebar Initial State
         if (window.innerWidth < 1024) {
             sidebar.classList.add('sidebar-hidden');
             mainContent.classList.add('main-content-expanded');
+            layoutHeader.style.left = '0';
+            if (layoutFooter) layoutFooter.style.left = '0';
         } else if (localStorage.getItem('sidebarHidden') === 'true') {
             sidebar.classList.add('sidebar-hidden');
             mainContent.classList.add('main-content-expanded');
+            layoutHeader.style.left = '0';
+            if (layoutFooter) layoutFooter.style.left = '0';
         }
     </script>
 </body>
