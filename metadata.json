@@ -1,6 +1,6 @@
 {
-  "name": "Sta. Cruz Crime Mapping \u0026 Reporting System",
-  "description": "A specialized crime visualization and incident reporting platform for PNP Sta. Cruz, Laguna, featuring interactive geospatial mapping and public safety analytics.",
+  "name": "CPICRS: Sta. Cruz Tactical Crime Intelligence System",
+  "description": "The Crime Prevention and Incident Command Reporting System (CPICRS) is the official tactical intelligence platform for Sta. Cruz, Laguna, providing advanced geospatial crime mapping, public safety analytics, and community-driven incident reporting.",
   "requestFramePermissions": [
     "geolocation"
   ]

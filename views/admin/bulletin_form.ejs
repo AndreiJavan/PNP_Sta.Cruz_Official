@@ -10,7 +10,7 @@
       method="POST"
       enctype="multipart/form-data"
       class="p-8 space-y-8"
-      onsubmit="return confirmSubmit()">
+      onsubmit="handleBulletinSubmit(event)">
 
     <!-- 2 COLUMN MAIN LAYOUT -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
@@ -183,10 +183,19 @@
         }
     }
 
-    function confirmSubmit() {
+    async function handleBulletinSubmit(event) {
+        event.preventDefault();
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
-        return confirm(`Are you sure you want to ${action} this bulletin?`);
+        const confirmed = await strategicConfirm({
+            title: isEdit ? 'Update Confirmation' : 'Post Confirmation',
+            message: `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`,
+            confirmText: isEdit ? 'Update Now' : 'Post Now',
+            type: 'info'
+        });
+        if (confirmed) {
+            document.getElementById('bulletinForm').submit();
+        }
     }
 
     const fileInput = document.getElementById('photo');

@@ -7,12 +7,12 @@
             </div>
             <form action="/admin/hotlines/add" method="POST" class="p-6 space-y-6">
                 <div class="space-y-2">
-                    <label for="agency_name" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Agency Name</label>
-                    <input type="text" name="agency_name" id="agency_name" required placeholder="e.g., PNP Sta. Cruz" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                    <label for="name" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Agency Name</label>
+                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
-                    <label for="contact_number" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Contact Number</label>
-                    <input type="text" name="contact_number" id="contact_number" required placeholder="e.g., 0912-345-6789" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                    <label for="number" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Contact Number</label>
+                    <input type="text" name="number" id="number" required placeholder="e.g., 0912-345-6789" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
                     <label for="category" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Category</label>
@@ -51,15 +51,15 @@
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
                         <% hotlines.forEach(h => { %>
                             <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition">
-                                <td class="px-6 py-4 font-bold text-pnp-blue dark:text-pnp-gold"><%= h.agency_name %></td>
-                                <td class="px-6 py-4 font-mono text-gray-700 dark:text-gray-300"><%= h.contact_number %></td>
+                                <td class="px-6 py-4 font-bold text-pnp-blue dark:text-pnp-gold"><%= h.name %></td>
+                                <td class="px-6 py-4 font-mono text-gray-700 dark:text-gray-300"><%= h.number %></td>
                                 <td class="px-6 py-4">
                                     <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
                                         <%= h.category %>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <form action="/admin/hotlines/<%= h.id %>/delete" method="POST" onsubmit="return confirm('Delete this hotline?')">
+                                    <form action="/admin/hotlines/<%= h.id %>/delete" method="POST" onsubmit="confirmOperationalAction(event, { title: 'Delete Hotline', message: 'Are you sure you want to remove this emergency contact?', confirmText: 'Remove', type: 'danger' })">
                                         <button type="submit" class="text-red-600 hover:text-red-800 font-bold text-xs uppercase tracking-widest">Delete</button>
                                     </form>
                                 </td>

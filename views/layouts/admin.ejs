@@ -40,13 +40,13 @@
         .text-pnp-gold { color: #C8A415; }
         .border-pnp-gold { border-color: #C8A415; }
 
-        /* Sidebar scrollbar hiding */
-        .sidebar-scroll {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+        /* Global scrollbar hiding */
+        * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
         }
-        .sidebar-scroll::-webkit-scrollbar {
-            display: none;
+        *::-webkit-scrollbar {
+            display: none !important;
         }
 
         /* Sidebar toggle states */
@@ -62,6 +62,10 @@
             #sidebar:not(.sidebar-hidden) + #mainContent {
                 margin-left: 18rem; /* w-72 matches aside width */
             }
+        }
+        
+        #layoutHeader, #layoutFooter {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
@@ -225,22 +229,70 @@
         sidebarToggle.addEventListener('click', toggleSidebar);
         sidebarClose.addEventListener('click', toggleSidebar);
 
-        // Hide Header and Footer on Scroll logic
+        // Global Double-Click and Repetitive Action Prevention
+        document.addEventListener('submit', (e) => {
+            const form = e.target;
+            const submitButtons = form.querySelectorAll('button[type="submit"]');
+            submitButtons.forEach(btn => {
+                if (btn.dataset.isPruned === 'true') {
+                    e.preventDefault();
+                    return;
+                }
+                btn.dataset.isPruned = 'true';
+                const originalText = btn.innerHTML;
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Transmitting...';
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                }, 10);
+            });
+        });
+
+        // Confirmation guard to prevent multiple prompts
+        let isConfirming = false;
+        async function strategicConfirm({ title, message, confirmText = "Confirm", type = "primary" }) {
+            if (isConfirming) return false;
+            isConfirming = true;
+            try {
+                const result = await confirmOperationalAction(null, { title, message, confirmText, type }, true);
+                isConfirming = false;
+                return result;
+            } catch (e) {
+                isConfirming = false;
+                return false;
+            }
+        }
+        window.strategicConfirm = strategicConfirm;
+
+        // Hide Header and only show Footer at the bottom
         let lastScrollTop = 0;
+        const footer = document.getElementById('layoutFooter');
+        
         window.addEventListener('scroll', () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            let windowHeight = window.innerHeight;
+            let documentHeight = document.documentElement.scrollHeight;
             
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scroll down
+            // Header logic: hide on scroll down, show on scroll up
+            if (scrollTop > lastScrollTop && scrollTop > 50) {
                 layoutHeader.style.transform = 'translateY(-100%)';
-                if (layoutFooter) layoutFooter.style.transform = 'translateY(100%)';
             } else {
-                // Scroll up
                 layoutHeader.style.transform = 'translateY(0)';
-                if (layoutFooter) layoutFooter.style.transform = 'translateY(0)';
             }
+            
+            // Footer logic: only show when near the bottom
+            if (footer) {
+                if ((windowHeight + scrollTop) >= (documentHeight - 100)) {
+                    footer.style.transform = 'translateY(0)';
+                    footer.style.opacity = '1';
+                } else {
+                    footer.style.transform = 'translateY(100%)';
+                    footer.style.opacity = '0';
+                }
+            }
+            
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        }, false);
+        }, { passive: true });
 
         // Responsive Sidebar Initial State
         if (window.innerWidth < 1024) {
@@ -255,5 +307,6 @@
             if (layoutFooter) layoutFooter.style.left = '0';
         }
     </script>
+    <%- include('../partials/notifications') %>
 </body>
 </html>

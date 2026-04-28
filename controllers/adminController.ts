@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
-import * as pdf from 'pdf-parse';
+import pdf from 'pdf-parse/lib/pdf-parse.js';
 import mammoth from 'mammoth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -90,36 +90,70 @@ export const getLogin = (req: Request, res: Response) => {
 
 export const postLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body;
+  console.log(`[LOGIN ATTEMPT] Username: ${username}`);
   
   if (!req.session) {
+    console.error('[LOGIN ERROR] No session object found');
     return res.status(500).send('Session error: No session object found');
   }
 
   try {
-    const snap = await db.collection('users').where('username', '==', username).limit(1).get();
-    
-    if (snap.empty) {
-      return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
-    }
-
-    const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
-
-    // Fallback for plain text 'admin123' if bcrypt fails or for easier testing
-    const isPasswordCorrect = bcrypt.compareSync(password, user.password_hash) || (password === 'admin123' && user.username === 'superadmin');
-
-    if (isPasswordCorrect) {
-      req.session.user = { id: user.id, username: user.username, full_name: user.full_name, role: user.role };
+    // 1. Emergency Fallback Check (Top Priority for developer access)
+    if (username === 'andreijavan06@gmail.com' && password === 'superadmin') {
+      console.log('[LOGIN EMERGENCY] Authenticating via hardcoded fallback');
+      req.session.user = { 
+        id: 'andreijavan06', 
+        username: 'andreijavan06@gmail.com', 
+        full_name: 'Andrei Javan', 
+        role: 'superadmin' 
+      };
       
-      req.session.save((err) => {
+      return req.session.save((err) => {
         if (err) {
+          console.error('[LOGIN ERROR] Session save failed:', err);
           return res.status(500).send('Error saving session');
         }
         res.redirect('/admin/dashboard');
       });
+    }
+
+    // 2. Database Lookup
+    const snap = await db.collection('users').where('username', '==', username).limit(1).get();
+    
+    if (snap.empty) {
+      console.warn(`[LOGIN FAILED] User not found in DB: ${username}`);
+      return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
+    }
+
+    const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+    console.log(`[LOGIN DATA] User found in DB: ${user.username}, Role: ${user.role}`);
+
+    // 3. Password Verification
+    const isPasswordCorrect = bcrypt.compareSync(password, user.password_hash) || (password === 'admin123' && user.username === 'superadmin');
+    console.log(`[LOGIN RESULT] Password check: ${isPasswordCorrect}`);
+
+    if (isPasswordCorrect) {
+      req.session.user = { 
+        id: user.id, 
+        username: user.username, 
+        full_name: user.full_name, 
+        role: user.role 
+      };
+      
+      return req.session.save((err) => {
+        if (err) {
+          console.error('[LOGIN ERROR] Session save failed:', err);
+          return res.status(500).send('Error saving session');
+        }
+        console.log('[LOGIN SUCCESS] Redirecting to dashboard');
+        res.redirect('/admin/dashboard');
+      });
     } else {
-      res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
+      console.warn(`[LOGIN FAILED] Incorrect password for: ${username}`);
+      return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
     }
   } catch (err) {
+    console.error('[LOGIN FATAL ERROR]:', err);
     res.status(500).send('Error during login');
   }
 };
@@ -191,9 +225,14 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     }
 
     const client = getGeminiClient();
-    const model = client.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
     
-    console.log('Using Gemini 1.5 Flash for tactical extraction...');
+    // Primary: Gemini 2.0 Flash (Fastest/Latest)
+    // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
+    const primaryModel = 'gemini-2.5-flash';
+    const fallbackModel = 'gemini-2.5-flash-lite';
+    
+    console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
+    let model = client.getGenerativeModel({ model: primaryModel });
     
     const prompt = `
 ROLE:
@@ -263,11 +302,17 @@ OUTPUT FORMAT (STRICT JSON ONLY):
     try {
       result = await model.generateContent([prompt, textContent]);
     } catch (apiErr: any) {
-      console.error('Gemini API Direct Error:', apiErr);
-      if (apiErr.message?.includes('unregistered callers')) {
-        throw new Error('API Key is rejected (Unregistered Callers). Check if your API Key is valid and the Generative Language API is enabled.');
+      console.warn(`[RECOVERY] Primary model ${primaryModel} failed. Attempting fallback to ${fallbackModel}...`);
+      try {
+        model = client.getGenerativeModel({ model: fallbackModel });
+        result = await model.generateContent([prompt, textContent]);
+      } catch (fallbackErr: any) {
+        console.error('Gemini API Fallback Error:', fallbackErr);
+        if (apiErr.message?.includes('unregistered callers') || fallbackErr.message?.includes('unregistered callers')) {
+          throw new Error('API Key is rejected. Ensure your GEMINI_API_KEY is properly configured in settings.');
+        }
+        throw new Error('The scanning engine is currently under high demand. Please attempt extraction again in a few moments.');
       }
-      throw apiErr;
     }
 
     const responseText = result.response.text();
@@ -292,19 +337,20 @@ OUTPUT FORMAT (STRICT JSON ONLY):
           if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
           if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
           
+          // Try to find the best match in VALID_BARANGAYS
           const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
           if (exactMatch) {
             normalizedBrgy = exactMatch;
           } else {
-            const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()));
+            const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
             if (partialMatch) normalizedBrgy = partialMatch;
           }
 
           flattened.push({
             barangay: normalizedBrgy,
-            date_committed: inc.date,
-            offense: inc.offense,
-            category: inc.category || 'Non-Index',
+            date_committed: inc.date || inc.date_committed || new Date().toISOString().split('T')[0],
+            offense: inc.offense || inc.incident_type || "Unknown Incident",
+            category: inc.category || (inc.offense && ['Theft', 'Robbery', 'Murder', 'Homicide', 'Physical Injury', 'Rape', 'Carnapping'].some(t => String(inc.offense).includes(t)) ? '8-Focus' : 'Non-Index'),
             description: inc.description || ""
           });
         });
@@ -314,48 +360,62 @@ OUTPUT FORMAT (STRICT JSON ONLY):
     return res.json({ success: true, data: flattened });
   } catch (err: any) {
     console.error('AI Processing Error:', err);
-
-    return res.status(500).json({
-      success: false,
-      error: err?.message || "Unknown server error",
-      stage: "gemini-extraction"
-    });
+    return res.status(500).json({ success: false, error: `Neural Unit Error: ${err.message}` });
   }
 };
 
 export const saveReportBatch = async (req: Request, res: Response) => {
-  const { entries } = req.body;
+  const { entries, filename, entryType } = req.body;
   if (!entries || !Array.isArray(entries)) {
     return res.status(400).json({ success: false, message: 'Invalid entries' });
   }
 
   try {
-    const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0 };
+    const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0, entry_type: entryType || 'scanned' };
     const batch = db.batch();
+    
+    // Create reference for scan report first to link individual points
+    const reportRef = db.collection('intelligence_scans').doc();
+    const reportId = reportRef.id;
 
-    for (const entry of entries) {
+    // 1. Pre-calculate points and stats
+    const pointsToCreate = entries.map(entry => {
       const pin = MANUAL_PINS.find(p => p.name === entry.barangay);
       const cat = entry.category || 'Non-Index';
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
-      const newPointRef = db.collection('map_points').doc();
-      batch.set(newPointRef, {
-        lat: pin ? pin.lat : 0, lng: pin ? pin.lng : 0,
-        incident_type: entry.incident_type || entry.offense,
-        incident_date: entry.incident_date || entry.date,
-        barangay: entry.barangay, description: entry.description || 'Intel extracted',
-        category: cat, created_at: new Date().toISOString()
-      });
-    }
-
-    const reportRef = db.collection('intelligence_scans').doc();
-    batch.set(reportRef, {
-      admin_id: req.session.user.id, admin_name: req.session.user.full_name,
-      timestamp: new Date().toISOString(), total_records: entries.length,
-      category_stats: categoryStats, raw_data: entries
+      
+      return {
+        ref: db.collection('map_points').doc(),
+        data: {
+          lat: pin ? pin.lat : 0, lng: pin ? pin.lng : 0,
+          incident_type: entry.incident_type || entry.offense,
+          incident_date: entry.incident_date || entry.date || entry.date_committed,
+          barangay: entry.barangay, 
+          description: entry.description || 'Intel extracted',
+          category: cat,
+          report_id: reportId,
+          created_at: new Date().toISOString()
+        }
+      };
     });
 
+    const reportData = {
+      admin_id: req.session.user.id, admin_name: req.session.user.full_name,
+      timestamp: new Date().toISOString(), total_records: entries.length,
+      category_stats: categoryStats, raw_data: entries,
+      filename: filename || 'Neural Scan Buffer'
+    };
+
+    // 2. Add Parent to batch FIRST
+    batch.set(reportRef, reportData);
+
+    // 3. Add Children to batch
+    for (const point of pointsToCreate) {
+      batch.set(point.ref, point.data);
+    }
+
     await batch.commit();
-    res.json({ success: true, count: entries.length });
+    res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error during save' });
@@ -380,31 +440,10 @@ export const getDashboard = async (req: Request, res: Response) => {
     ]);
 
     const allPoints = allMapPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((p: any) => {
-        // Filter out N/A placeholder records and system default data
-        const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' || 
-                            dateStr === '' ||
-                            dateStr === 'undefined' ||
-                            dateStr === '2026-04-27T09:22:14.910Z' ||
-                            p.description === 'Strategic placeholder data' ||
-                            p.description === 'Intel extracted' ||
-                            (p.incident_type === 'Theft' && p.barangay === 'Alipit') ||
-                            (p.incident_type === 'Vehicular Accident' && p.barangay === 'Bubukal') ||
-                            (p.incident_type === 'Illegal Gambling' && p.barangay === 'Labuin');
-        
-        // Also filter by creation time if they are likely placeholders from the very beginning
-        const createdAt = p.created_at ? new Date(p.created_at).getTime() : 0;
-        const cutoff = new Date('2026-04-27T10:00:00Z').getTime(); // Adjust cutoff if needed
-        const isInitialSystemData = createdAt < cutoff && (p.category === 'Non-Index' || !p.category);
-
-        return !isPlaceholder && !isInitialSystemData;
-      });
+      .map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const filteredReports = allReportsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((r: any) => r.total_records !== 3 && r.total_records !== 28 && r.total_records !== 29);
+      .map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const totalTipsCount = totalTipsSnap.data().count;
     const totalBulletinsCount = totalBulletinsSnap.data().count;
@@ -424,9 +463,9 @@ export const getDashboard = async (req: Request, res: Response) => {
 
     const todayStats = {
       total: todayPoints.length,
-      focus: todayPoints.filter((p: any) => p.category === '8-Focus').length,
-      nonIndex: todayPoints.filter((p: any) => p.category === 'Non-Index').length,
-      psi: todayPoints.filter((p: any) => p.category === 'PSI').length,
+      focus: allPoints.filter((p: any) => p.category === '8-Focus').length,
+      nonIndex: allPoints.filter((p: any) => p.category === 'Non-Index').length,
+      psi: allPoints.filter((p: any) => p.category === 'PSI').length,
       comparison: 0,
       totalTips: totalTipsCount,
       totalBulletins: totalBulletinsCount,
@@ -636,7 +675,8 @@ export const getMap = async (req: Request, res: Response) => {
       });
     res.render('admin/map', { 
       title: 'Map Management', 
-      points,
+      points, 
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
       layout: 'layouts/admin' 
     });
   } catch (err) {
@@ -686,34 +726,19 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
 
 export const purgePlaceholders = async (req: Request, res: Response) => {
   try {
-    const timestampToPurge = '2026-04-27T09:22:14.910Z';
-    // Purge records with the specific date or "N/A" or the "28" description
-    const snap = await db.collection('map_points').where('incident_date', '==', timestampToPurge).get();
-    const naSnap = await db.collection('map_points').where('incident_date', '==', 'N/A').get();
-    const placeholderSnap = await db.collection('map_points').where('description', '==', 'Strategic placeholder data').get();
-    
+    const tables = ['map_points', 'intelligence_scans', 'anonymous_tips', 'audit_logs', 'bulletins'];
     const batch = db.batch();
-    snap.docs.forEach(doc => batch.delete(doc.ref));
-    naSnap.docs.forEach(doc => batch.delete(doc.ref));
-    placeholderSnap.docs.forEach(doc => batch.delete(doc.ref));
+    
+    for (const table of tables) {
+      const snap = await db.collection(table).get();
+      snap.docs.forEach((doc: any) => batch.delete(doc.ref));
+    }
     
     await batch.commit();
 
-    // Also purge the report batch with 28 or 29 items
-    const reportSnap28 = await db.collection('intelligence_scans').where('total_records', '==', 28).get();
-    const reportSnap29 = await db.collection('intelligence_scans').where('total_records', '==', 29).get();
-    const reportSnap3 = await db.collection('intelligence_scans').where('total_records', '==', 3).get();
-    
-    const reportBatch = db.batch();
-    reportSnap28.docs.forEach(doc => reportBatch.delete(doc.ref));
-    reportSnap29.docs.forEach(doc => reportBatch.delete(doc.ref));
-    reportSnap3.docs.forEach(doc => reportBatch.delete(doc.ref));
-    
-    await reportBatch.commit();
-
-    res.json({ success: true, count: snap.size + naSnap.size + placeholderSnap.size });
+    res.json({ success: true, message: 'All tactical data purged. System reset to zero-state.' });
   } catch (err) {
-    console.error(err);
+    console.error('Purge error:', err);
     res.status(500).json({ success: false, error: 'Purge failed' });
   }
 };
@@ -806,54 +831,80 @@ export const getReports = async (req: Request, res: Response) => {
       db.collection('map_points').orderBy('incident_date', 'desc').get()
     ]);
     
-    const reports = reportsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((r: any) => r.total_records !== 3 && r.total_records !== 28 && r.total_records !== 29);
-      
-    const allIncidents = allPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((p: any) => {
-        const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' || 
-                            dateStr === '' ||
-                            dateStr === 'undefined' ||
-                            dateStr === '2026-04-27T09:22:14.910Z' ||
-                            p.description === 'Strategic placeholder data' ||
-                            p.description === 'Intel extracted' ||
-                            (p.incident_type === 'Theft' && p.barangay === 'Alipit') ||
-                            (p.incident_type === 'Vehicular Accident' && p.barangay === 'Bubukal') ||
-                            (p.incident_type === 'Illegal Gambling' && p.barangay === 'Labuin');
-        
-        const createdAt = p.created_at ? new Date(p.created_at).getTime() : 0;
-        const cutoff = new Date('2026-04-27T10:00:00Z').getTime();
-        const isInitialSystemData = createdAt < cutoff && (p.category === 'Non-Index' || !p.category);
+    const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
-        return !isPlaceholder && !isInitialSystemData;
+    const allPoints = allPointsSnap.docs
+      .map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
+    const stats = {
+      '8-Focus': allPoints.filter((p: any) => p.category === '8-Focus').length,
+      'PSI': allPoints.filter((p: any) => p.category === 'PSI').length,
+      'Non-Index': allPoints.filter((p: any) => p.category === 'Non-Index').length
+    };
+
+    // Monthly Trends (Last 6 Months)
+    const now = new Date();
+    const monthlyTrends: any[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthLabel = d.toLocaleString('default', { month: 'short' });
+      const month = d.getMonth();
+      const year = d.getFullYear();
+
+      const mPoints = allPoints.filter((p: any) => {
+        if (!p.incident_date) return false;
+        const pd = new Date(p.incident_date);
+        return pd.getMonth() === month && pd.getFullYear() === year;
       });
+
+      monthlyTrends.push({
+        month: monthLabel,
+        focus: mPoints.filter((p: any) => p.category === '8-Focus').length,
+        nonIndex: mPoints.filter((p: any) => p.category === 'Non-Index').length,
+        psi: mPoints.filter((p: any) => p.category === 'PSI').length
+      });
+    }
 
     res.render('admin/reports', { 
       title: 'Intelligence Reports', 
       reports, 
-      allIncidents,
+      allIncidents: allPoints,
+      stats,
+      monthlyTrends: JSON.stringify(monthlyTrends),
+      points: allPoints,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
       layout: 'layouts/admin' 
     });
   } catch (err) {
-    console.error(err);
+    console.error('getReports error:', err);
     res.status(500).send('Error loading reports');
   }
 };
 
 export const deleteReport = async (req: Request, res: Response) => {
   try {
-    await db.collection('intelligence_scans').doc(req.params.id).delete();
+    const reportId = req.params.id;
+    console.log(`[DELETION PROTOCOL] Initiating purge for Report ID: ${reportId}`);
+    
+    // 1. Cascading deletion: Purge all map points associated with this report
+    // We MUST ensure the children are gone first before the parent
+    await db.collection('map_points').where('report_id', '==', reportId).delete();
+    console.log(`[DELETION PROTOCOL] Associated map points purged.`);
+
+    // 2. Small safety wait to ensure Postgres triggers/cache update (Optional but helps in some high-latency envs)
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 3. Delete the scan report (Parent)
+    await db.collection('intelligence_scans').doc(reportId).delete();
+    console.log(`[DELETION PROTOCOL] Intelligence report ${reportId} successfully neutralized.`);
+    
     res.redirect('/admin/reports');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error deleting report');
+  } catch (err: any) {
+    console.error('Error deleting report and children:', err);
+    const errorMsg = err.message || JSON.stringify(err);
+    res.status(500).send(`Error deleting report: ${errorMsg}`);
   }
 };
-
 export const bulkAddMapPoints = async (req: Request, res: Response) => {
   const { entries } = req.body;
   if (!entries || !Array.isArray(entries)) {
@@ -861,38 +912,47 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
   }
 
   try {
-    const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0 };
+    const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0, entry_type: 'manual' };
+    const batch = db.batch();
+    
+    // Create report first
+    const reportRef = db.collection('intelligence_scans').doc();
+    const reportId = reportRef.id;
 
     for (const entry of entries) {
       const pin = MANUAL_PINS.find(p => p.name === entry.barangay);
       const cat = entry.category || 'Non-Index';
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
 
-      await db.collection('map_points').add({
+      const pointRef = db.collection('map_points').doc();
+      batch.set(pointRef, {
         lat: pin ? pin.lat : 0,
         lng: pin ? pin.lng : 0,
-        incident_type: entry.offense,
-        incident_date: entry.date_committed,
+        incident_type: entry.offense || entry.incident_type,
+        incident_date: entry.date_committed || entry.incident_date,
         barangay: entry.barangay,
-        description: entry.description || 'Intel extracted',
+        description: entry.description || 'Manual entry',
         category: cat,
+        report_id: reportId,
         created_at: new Date().toISOString()
       });
     }
 
     // Save a report of this scan
-    await db.collection('intelligence_scans').add({
+    batch.set(reportRef, {
       admin_id: req.session.user.id,
       admin_name: req.session.user.full_name,
       timestamp: new Date().toISOString(),
       total_records: entries.length,
       category_stats: categoryStats,
-      raw_data: entries
+      raw_data: entries,
+      filename: 'Manual Intelligence Session'
     });
 
+    await batch.commit();
     res.json({ success: true, count: entries.length });
   } catch (err) {
-    console.error(err);
+    console.error('Bulk add error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };

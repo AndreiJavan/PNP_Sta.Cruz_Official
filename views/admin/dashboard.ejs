@@ -1,105 +1,127 @@
+<% 
+    // Safety defaults
+    const safeStats = (typeof todayStats !== 'undefined' && todayStats) ? todayStats : { total: 0, focus: 0, nonIndex: 0, psi: 0, totalTips: 0, totalBulletins: 0, totalReports: 0 };
+    const safeTrends = (typeof monthlyTrends !== 'undefined' && monthlyTrends) ? monthlyTrends : JSON.stringify([]);
+    const safePoints = (typeof points !== 'undefined' && points) ? points : [];
+%>
 <!-- Top Row: Intelligence KPIs -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <a href="/admin/tips" class="bg-gradient-to-br from-purple-700 to-indigo-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+    <a href="/admin/tips" class="bg-slate-900 border border-white/5 p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pnp-blue/20 rounded-full blur-3xl group-hover:bg-pnp-blue/30 transition-all"></div>
         <div class="relative z-10">
             <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] text-purple-200 font-black uppercase tracking-widest">Anonymous Tips</span>
-                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                <span class="text-[10px] text-pnp-blue font-black uppercase tracking-widest leading-none">Confidential Stream</span>
+                <div class="w-9 h-9 rounded-xl bg-pnp-blue/20 flex items-center justify-center text-pnp-blue border border-pnp-blue/20 shadow-inner">
                     <i class="fas fa-user-secret text-sm"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.totalTips %></h2>
-                <div class="flex items-center space-x-1 mb-1">
-                    <span class="text-[10px] font-bold text-purple-300">Intel Received</span>
+                <h2 class="text-4xl font-black text-white leading-none tabular-nums"><%= safeStats.totalTips %></h2>
+                <div class="w-px h-6 bg-white/10"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-pnp-blue leading-none">TIPS</span>
+                    <span class="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-1">Acquired</span>
                 </div>
             </div>
-            <p class="text-[8px] text-purple-200/60 font-bold uppercase tracking-tighter">Strategic Intelligence Stream</p>
+            <div class="mt-4 pt-4 border-t border-white/5">
+                <p class="text-[8px] text-white/40 font-bold uppercase tracking-widest">Confidential Intel Feed</p>
+            </div>
         </div>
     </a>
 
     <!-- Bulletins Card -->
-    <a href="/admin/bulletins" class="bg-gradient-to-br from-red-600 to-red-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+    <a href="/admin/bulletins" class="bg-slate-900 border border-white/5 p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pnp-gold/20 rounded-full blur-3xl group-hover:bg-pnp-gold/30 transition-all"></div>
         <div class="relative z-10">
             <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] text-red-100 font-black uppercase tracking-widest">Number of Existing Bulletins</span>
-                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                <span class="text-[10px] text-pnp-gold font-black uppercase tracking-widest leading-none">Public Broadcasts</span>
+                <div class="w-9 h-9 rounded-xl bg-pnp-gold/10 flex items-center justify-center text-pnp-gold border border-pnp-gold/20 shadow-inner">
                     <i class="fas fa-bullhorn text-sm"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.totalBulletins %></h2>
-                <div class="flex items-center space-x-1 mb-1">
-                    <span class="text-[10px] font-bold text-red-200">Active Notices</span>
+                <h2 class="text-4xl font-black text-white leading-none tabular-nums"><%= safeStats.totalBulletins %></h2>
+                <div class="w-px h-6 bg-white/10"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-pnp-gold leading-none">ALERTS</span>
+                    <span class="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-1">Disseminated</span>
                 </div>
             </div>
-            <p class="text-[8px] text-red-100/60 font-bold uppercase tracking-tighter">Community Alerts Hub</p>
+            <div class="mt-4 pt-4 border-t border-white/5">
+                <p class="text-[8px] text-white/40 font-bold uppercase tracking-widest">Public Safety Network</p>
+            </div>
         </div>
     </a>
 
     <!-- Reports Card -->
-    <a href="/admin/reports" class="bg-gradient-to-br from-pnp-blue to-slate-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+    <a href="/admin/reports" class="bg-slate-900 border border-white/5 p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-400/10 rounded-full blur-3xl group-hover:bg-blue-400/20 transition-all"></div>
         <div class="relative z-10">
             <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] text-blue-100 font-black uppercase tracking-widest">Total Records of reports</span>
-                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
-                    <i class="fas fa-file-invoice text-sm"></i>
+                <span class="text-[10px] text-blue-400 font-black uppercase tracking-widest leading-none">Neural Processing</span>
+                <div class="w-9 h-9 rounded-xl bg-blue-400/10 flex items-center justify-center text-blue-400 border border-blue-400/20 shadow-inner">
+                    <i class="fas fa-microchip text-sm"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.totalReports %></h2>
-                <div class="flex items-center space-x-1 mb-1">
-                    <span class="text-[10px] font-bold text-blue-200">Scanned Datasets</span>
+                <h2 class="text-4xl font-black text-white leading-none tabular-nums"><%= safeStats.totalReports %></h2>
+                <div class="w-px h-6 bg-white/10"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-blue-400 leading-none">SCANS</span>
+                    <span class="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-1">Analyzed</span>
                 </div>
             </div>
-            <p class="text-[8px] text-blue-100/60 font-bold uppercase tracking-tighter">Periodic Intelligence Repository</p>
+            <div class="mt-4 pt-4 border-t border-white/5">
+                <p class="text-[8px] text-white/40 font-bold uppercase tracking-widest">Intelligence Data Batches</p>
+            </div>
         </div>
     </a>
 
     <!-- Map Card -->
-    <a href="/admin/map" class="bg-gradient-to-br from-emerald-600 to-teal-900 p-6 rounded-[2rem] shadow-2xl relative overflow-hidden group border border-white/10 transition-all hover:scale-[1.02]">
-        <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+    <a href="/admin/map" class="bg-slate-900 border border-white/5 p-6 rounded-[2.5rem] shadow-2xl relative overflow-hidden group transition-all hover:scale-[1.02]">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-all"></div>
         <div class="relative z-10">
             <div class="flex justify-between items-start mb-4">
-                <span class="text-[10px] text-emerald-100 font-black uppercase tracking-widest leading-tight">Highlight of most incidents or crime in the Map</span>
-                <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white">
+                <span class="text-[10px] text-white/60 font-black uppercase tracking-widest leading-none">Sector Intelligence</span>
+                <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-white/60 border border-white/10 shadow-inner">
                     <i class="fas fa-map-location-dot text-sm"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-4xl font-black text-white leading-none"><%= todayStats.total %></h2>
-                <div class="flex items-center space-x-1 mb-1">
-                    <span class="text-[10px] font-bold text-emerald-200">Tactical Points</span>
+                <h2 class="text-4xl font-black text-white leading-none tabular-nums"><%= safeStats.total %></h2>
+                <div class="w-px h-6 bg-white/10"></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-white leading-none">PNTS</span>
+                    <span class="text-[8px] font-bold text-white/40 uppercase tracking-widest mt-1">Mapped</span>
                 </div>
             </div>
-            <p class="text-[8px] text-emerald-100/60 font-bold uppercase tracking-tighter">Geospatial Awareness Panel</p>
+            <div class="mt-4 pt-4 border-t border-white/5">
+                <p class="text-[8px] text-white/40 font-bold uppercase tracking-widest">Strategic Asset Plotting</p>
+            </div>
         </div>
     </a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
     <!-- Monthly Crime Trend Graph -->
-    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[500px]">
+    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[500px] transition-all hover:shadow-xl">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Monthly Crime Trends</h3>
-                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Geospatial Intelligence Analysis (Last 6 Months)</p>
+                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Monthly Longitudinal Analytics</h3>
+                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Tactical Trend Oscillations (6-Month Horizon)</p>
             </div>
-            <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-6 bg-gray-50 dark:bg-slate-900 p-3 rounded-2xl border border-gray-100 dark:border-slate-700">
                 <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-[#ef4444]"></div>
-                    <span class="text-[8px] font-black text-gray-400 uppercase">8-Focus</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                    <span class="text-[8px] font-black text-slate-500 uppercase tracking-tighter">8-Focus</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-[#001F3F]"></div>
-                    <span class="text-[8px] font-black text-gray-400 uppercase">Non-Index</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-pnp-blue"></div>
+                    <span class="text-[8px] font-black text-slate-500 uppercase tracking-tighter">Non-Index</span>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-[#D4AF37]"></div>
-                    <span class="text-[8px] font-black text-gray-400 uppercase">PSI</span>
+                    <div class="w-2.5 h-2.5 rounded-full bg-pnp-gold"></div>
+                    <span class="text-[8px] font-black text-slate-500 uppercase tracking-tighter">PSI</span>
                 </div>
             </div>
         </div>
@@ -108,34 +130,97 @@
         </div>
     </div>
 
-    <!-- Crime Rate Distribution Pie Chart -->
-    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[500px]">
-        <div class="flex items-center justify-between mb-8 border-b border-gray-50 dark:border-slate-700 pb-4">
-            <div>
-                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Crime Rate Distribution</h3>
-                <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Sectoral Risk Proportions</p>
+    <!-- Crime Rate Distribution Chart -->
+    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[500px] relative overflow-hidden">
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-8 border-b border-gray-50 dark:border-slate-700 pb-4">
+                <div>
+                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Sectoral Risk Proportions</h3>
+                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Cross-Categorical Distribution</p>
+                </div>
             </div>
-            <i class="fas fa-chart-pie text-pnp-gold text-sm"></i>
-        </div>
-        
-        <div class="flex-1 relative flex flex-col justify-center">
-            <div class="h-64 mb-6">
+            
+            <div class="h-[300px] mb-6">
                 <canvas id="crimeDistributionChart"></canvas>
-            </div>
-            <div id="pieLegend" class="grid grid-cols-2 gap-3 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
-                <!-- Legend items will be injected here if needed -->
             </div>
         </div>
     </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    let distChart;
+    const points = <%- JSON.stringify(safePoints) %>;
+
+    function getCategoryForType(type) {
+        const focusTypes = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping'];
+        const psiTypes = ['Search Warrant', 'Warrant of Arrest', 'Checkpoint', 'Buy-Bust', 'Oplan Bakal', 'Oplan Galugad', 'Checkpoint'];
+        
+        if (focusTypes.some(f => type.toLowerCase().includes(f.toLowerCase()))) return '8-Focus';
+        if (psiTypes.some(p => type.toLowerCase().includes(p.toLowerCase()))) return 'PSI';
+        return 'Non-Index';
+    }
+
+    function updateDistributionChart() {
+        const ctx = document.getElementById('crimeDistributionChart').getContext('2d');
+        const filteredPoints = points;
+        
+        const counts = {};
+        filteredPoints.forEach(p => {
+            const type = p.incident_type || 'Other';
+            counts[type] = (counts[type] || 0) + 1;
+        });
+
+        const labels = Object.keys(counts);
+        const data = Object.values(counts);
+        const total = data.reduce((a, b) => a + b, 0);
+
+        const tacticalColors = [
+            '#ef4444', '#1A3A5C', '#D4AF37', '#10b981', '#6366f1', 
+            '#f59e0b', '#ec4899', '#14b8a6', '#8b5cf6', '#475569'
+        ];
+
+        if (distChart) distChart.destroy();
+
+        distChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: tacticalColors.slice(0, labels.length),
+                    borderWidth: 0,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 9,
+                                family: 'Inter',
+                                weight: 'bold'
+                            },
+                            usePointStyle: true,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+
+        // Details update logic removed as UI element was decommissioned
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         // Trend Chart
         const trendCtx = document.getElementById('crimeTrendChart').getContext('2d');
-        const trendsData = JSON.parse('<%- monthlyTrends %>');
+        const trendsData = JSON.parse('<%- safeTrends %>');
         
         new Chart(trendCtx, {
             type: 'bar',
@@ -143,25 +228,25 @@
                 labels: trendsData.map(d => d.month),
                 datasets: [
                     {
-                        label: '8-Focus Crimes',
+                        label: '8-Focus',
                         data: trendsData.map(d => d.focus),
                         backgroundColor: '#ef4444',
-                        borderRadius: 6,
-                        barThickness: 12
+                        borderRadius: 8,
+                        barThickness: 16
                     },
                     {
-                        label: 'Non-Index Crimes',
+                        label: 'Non-Index',
                         data: trendsData.map(d => d.nonIndex),
-                        backgroundColor: '#001F3F',
-                        borderRadius: 6,
-                        barThickness: 12
+                        backgroundColor: '#1A3A5C',
+                        borderRadius: 8,
+                        barThickness: 16
                     },
                     {
-                        label: 'PSI Cases',
+                        label: 'PSI',
                         data: trendsData.map(d => d.psi),
                         backgroundColor: '#D4AF37',
-                        borderRadius: 6,
-                        barThickness: 12
+                        borderRadius: 8,
+                        barThickness: 16
                     }
                 ]
             },
@@ -174,109 +259,19 @@
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { 
-                            font: { size: 9, weight: 'bold' },
-                            color: '#94a3b8'
-                        }
+                        ticks: { font: { size: 9, weight: 'bold' }, color: '#94a3b8' }
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { 
-                            color: 'rgba(0, 0, 0, 0.05)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            stepSize: 5,
-                            font: { size: 9, weight: 'bold' },
-                            color: '#94a3b8'
-                        }
+                        grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
+                        ticks: { font: { size: 9, weight: 'bold' }, color: '#94a3b8' }
                     }
                 }
             }
         });
 
-        // Distribution Pie Chart (Crime Types)
-        const distCtx = document.getElementById('crimeDistributionChart').getContext('2d');
-        const points = <%- JSON.stringify(points) %>;
-        
-        // Count crime types
-        const crimeCounts = {};
-        let totalVal = 0;
-        points.forEach(p => {
-            const type = p.incident_type || 'Other';
-            crimeCounts[type] = (crimeCounts[type] || 0) + 1;
-            totalVal++;
-        });
-
-        const crimeLabels = Object.keys(crimeCounts);
-        const crimeData = Object.values(crimeCounts);
-
-        const colors = [
-            '#ef4444', // Red
-            '#1A3A5C', // PNP Blue
-            '#D4AF37', // PNP Gold
-            '#10b981', // Emerald
-            '#8b5cf6', // Violet
-            '#f59e0b', // Amber
-            '#475569'  // Slate
-        ];
-
-        new Chart(distCtx, {
-            type: 'doughnut',
-            data: {
-                labels: crimeLabels,
-                datasets: [{
-                    data: crimeData,
-                    backgroundColor: colors.slice(0, crimeLabels.length),
-                    borderWidth: 0,
-                    hoverOffset: 15
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '0%',
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            font: {
-                                size: 8,
-                                weight: 'bold',
-                                family: 'Inter'
-                            },
-                            color: '#94a3b8',
-                            generateLabels: (chart) => {
-                                const data = chart.data;
-                                return data.labels.map((label, i) => {
-                                    const val = data.datasets[0].data[i];
-                                    const percentage = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
-                                    return {
-                                        text: `${label} (${percentage}%)`,
-                                        fillStyle: data.datasets[0].backgroundColor[i],
-                                        hidden: false,
-                                        index: i,
-                                        pointStyle: 'circle'
-                                    };
-                                });
-                            }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const val = context.raw;
-                                const percentage = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
-                                return `${context.label}: ${val} (${percentage}%)`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        // Initialize Distribution Chart
+        updateDistributionChart();
     });
 </script>
 

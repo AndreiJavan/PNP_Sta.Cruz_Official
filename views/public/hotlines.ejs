@@ -62,11 +62,11 @@
                     <% hotlines.forEach(h => { %>
                         <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition group">
                             <td class="px-10 py-8">
-                                <p class="text-lg font-black text-pnp-blue dark:text-pnp-gold group-hover:text-pnp-gold dark:group-hover:text-white transition"><%= h.agency_name %></p>
+                                <p class="text-lg font-black text-pnp-blue dark:text-pnp-gold group-hover:text-pnp-gold dark:group-hover:text-white transition"><%= h.name %></p>
                                 <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-1">Sta. Cruz, Laguna</p>
                             </td>
                             <td class="px-10 py-8">
-                                <p class="text-xl font-black text-gray-700 dark:text-gray-300 font-mono tracking-tighter"><%= h.contact_number %></p>
+                                <p class="text-xl font-black text-gray-700 dark:text-gray-300 font-mono tracking-tighter"><%= h.number %></p>
                             </td>
                             <td class="px-10 py-8">
                                 <% 
@@ -83,7 +83,7 @@
                                 </span>
                             </td>
                             <td class="px-10 py-8">
-                                <a href="tel:<%= h.contact_number ? h.contact_number.replace(/[^0-9]/g, '') : '' %>" class="inline-flex items-center justify-center w-12 h-12 bg-pnp-blue text-white rounded-2xl hover:bg-pnp-gold transition duration-300 shadow-lg">
+                                <a href="tel:<%= h.number ? h.number.replace(/[^0-9]/g, '') : '' %>" class="inline-flex items-center justify-center w-12 h-12 bg-pnp-blue text-white rounded-2xl hover:bg-pnp-gold transition duration-300 shadow-lg">
                                     <i class="fas fa-phone"></i>
                                 </a>
                             </td>

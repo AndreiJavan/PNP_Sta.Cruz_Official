@@ -1,0 +1,156 @@
+<!-- Strategic Intelligence Notification System -->
+<div id="strategicAlert" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 animate-fade-in">
+    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md"></div>
+    
+    <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="alertContainer">
+        <!-- Decoration -->
+        <div class="absolute top-0 left-0 w-full h-1.5 bg-pnp-blue dark:bg-pnp-gold"></div>
+        
+        <div class="p-8 space-y-6">
+            <div class="flex items-center space-x-4">
+                <div id="alertIconContainer" class="w-14 h-14 bg-pnp-blue/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold">
+                    <i id="alertIcon" class="fas fa-shield-alt text-2xl"></i>
+                </div>
+                <div>
+                    <h3 id="alertTitle" class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">Strategic Alert</h3>
+                    <p id="alertSubtitle" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Operational Protocol Active</p>
+                </div>
+            </div>
+            
+            <p id="alertMessage" class="text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
+                Confirming intelligence parameters for deployment...
+            </p>
+            
+            <div class="flex items-center space-x-3 pt-2">
+                <button id="alertCancelBtn" class="flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
+                    Abort
+                </button>
+                <button id="alertConfirmBtn" class="flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95">
+                    Proceed
+                </button>
+            </div>
+        </div>
+
+        <!-- Progress bar for auto-close if implemented later -->
+        <div id="alertProgress" class="h-1 bg-pnp-blue/20 w-0"></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const modal = document.getElementById('strategicAlert');
+        const container = document.getElementById('alertContainer');
+        const title = document.getElementById('alertTitle');
+        const message = document.getElementById('alertMessage');
+        const cancelBtn = document.getElementById('alertCancelBtn');
+        const confirmBtn = document.getElementById('alertConfirmBtn');
+        const icon = document.getElementById('alertIcon');
+        const iconContainer = document.getElementById('alertIconContainer');
+        
+        let activeCallback = null;
+        let activeCancelCallback = null;
+
+        window.strategicConfirm = function(options) {
+            return new Promise((resolve) => {
+                const { 
+                    title: t = 'Strategic Confirmation', 
+                    message: m = 'Proceed with operation?', 
+                    confirmText = 'Proceed', 
+                    cancelText = 'Abort',
+                    type = 'info' // info, warning, danger
+                } = options;
+
+                title.textContent = t;
+                message.textContent = m;
+                confirmBtn.textContent = confirmText;
+                cancelBtn.textContent = cancelText;
+                cancelBtn.classList.remove('hidden');
+
+                // Tone adjustment
+                if (type === 'danger') {
+                    iconContainer.className = 'w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500';
+                    icon.className = 'fas fa-exclamation-triangle text-2xl';
+                    confirmBtn.className = 'flex-2 px-10 py-4 bg-red-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-red-500/20 transition-all hover:scale-[1.02] active:scale-95';
+                } else if (type === 'warning') {
+                    iconContainer.className = 'w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500';
+                    icon.className = 'fas fa-radiation text-2xl';
+                    confirmBtn.className = 'flex-2 px-10 py-4 bg-amber-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-95';
+                } else {
+                    iconContainer.className = 'w-14 h-14 bg-pnp-blue/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold';
+                    icon.className = 'fas fa-shield-alt text-2xl';
+                    confirmBtn.className = 'flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95';
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                
+                setTimeout(() => {
+                    container.classList.remove('scale-95', 'opacity-0');
+                    container.classList.add('scale-100', 'opacity-100');
+                }, 10);
+
+                const cleanup = () => {
+                    container.classList.remove('scale-100', 'opacity-100');
+                    container.classList.add('scale-95', 'opacity-0');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }, 300);
+                    
+                    confirmBtn.removeEventListener('click', onConfirm);
+                    cancelBtn.removeEventListener('click', onCancel);
+                };
+
+                const onConfirm = () => {
+                    cleanup();
+                    resolve(true);
+                };
+
+                const onCancel = () => {
+                    cleanup();
+                    resolve(false);
+                };
+
+                confirmBtn.addEventListener('click', onConfirm);
+                cancelBtn.addEventListener('click', onCancel);
+            });
+        };
+
+        window.strategicAlert = function(options) {
+            const { 
+                title: t = 'System Notification', 
+                message: m = '', 
+                confirmText = 'Acknowledged',
+                type = 'info' 
+            } = options;
+
+            return strategicConfirm({
+                title: t,
+                message: m,
+                confirmText,
+                cancelText: '',
+                type
+            }).then(() => true);
+        };
+
+        window.confirmOperationalAction = async function(event, options = {}) {
+            event.preventDefault();
+            const form = event.target.closest('form');
+            if (!form) return;
+
+            const confirmed = await strategicConfirm({
+                title: options.title || 'Operational Confirmation',
+                message: options.message || 'Are you sure you want to proceed with this action?',
+                confirmText: options.confirmText || 'Proceed',
+                type: options.type || 'warning'
+            });
+
+            if (confirmed) {
+                form.submit();
+            }
+        };
+
+        // Override default alert/confirm if requested (optional but helpful)
+        // window.alert = (msg) => strategicAlert({ message: msg });
+    })();
+</script>
