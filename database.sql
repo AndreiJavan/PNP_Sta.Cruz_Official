@@ -1,121 +1,188 @@
--- CPICRS Database Dump (MySQL 8.0 Compatible)
--- Generated for PNP Sta. Cruz, Laguna
+-- =====================================================
+-- CPICRS SUPABASE DATABASE SCHEMA (CLEAN VERSION)
+-- =====================================================
 
-CREATE DATABASE IF NOT EXISTS cpicrs;
-USE cpicrs;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Table: users
-CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(50) UNIQUE NOT NULL,
-  full_name VARCHAR(100) NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  role ENUM('superadmin', 'staff') NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- =====================================================
+-- USERS
+-- =====================================================
+CREATE TABLE public.users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  username TEXT UNIQUE NOT NULL,
+  full_name TEXT NOT NULL,
+  password_hash TEXT NOT NULL,
+  role TEXT CHECK (role IN ('superadmin', 'staff')) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: incident_reports
-CREATE TABLE incident_reports (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  tracking_number VARCHAR(20) UNIQUE NOT NULL,
-  type VARCHAR(50) NOT NULL,
-  incident_date DATETIME NOT NULL,
+-- =====================================================
+-- INTELLIGENCE SCANS
+-- =====================================================
+CREATE TABLE public.intelligence_scans (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  admin_id UUID REFERENCES public.users(id),
+  admin_name TEXT,
+  timestamp TIMESTAMPTZ DEFAULT NOW(),
+  total_records INTEGER,
+  category_stats JSONB,
+  raw_data JSONB,
+  filename TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =====================================================
+-- INCIDENT REPORTS
+-- =====================================================
+CREATE TABLE public.incident_reports (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tracking_number TEXT UNIQUE NOT NULL,
+  type TEXT NOT NULL,
+  incident_date TIMESTAMPTZ NOT NULL,
   location_text TEXT NOT NULL,
   lat DECIMAL(10, 8) NOT NULL,
   lng DECIMAL(11, 8) NOT NULL,
   description TEXT NOT NULL,
-  photo_path VARCHAR(255),
-  contact_info VARCHAR(100),
-  status ENUM('Received', 'Under Review', 'Resolved', 'Closed') DEFAULT 'Received',
+  photo_path TEXT,
+  contact_info TEXT,
+  status TEXT DEFAULT 'Received'
+    CHECK (status IN ('Received', 'Under Review', 'Resolved', 'Closed')),
   internal_notes TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: bulletins
-CREATE TABLE bulletins (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(255) NOT NULL,
-  category ENUM('Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement') NOT NULL,
+-- =====================================================
+-- BULLETINS (FIXED FOR YOUR SYSTEM)
+-- =====================================================
+CREATE TABLE public.bulletins (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+
+  -- IMPORTANT FIX:
+  -- allows BOTH predefined + custom categories
+  category TEXT NOT NULL,
+
   body TEXT NOT NULL,
-  photo_path VARCHAR(255),
-  is_archived TINYINT(1) DEFAULT 0,
-  posted_by INT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (posted_by) REFERENCES users(id)
+  photo_path TEXT,
+
+  is_archived BOOLEAN DEFAULT FALSE,
+
+  posted_by UUID REFERENCES public.users(id),
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: anonymous_tips
-CREATE TABLE anonymous_tips (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  tip_id VARCHAR(20) UNIQUE NOT NULL,
-  concern_type VARCHAR(50) NOT NULL,
+-- =====================================================
+-- ANONYMOUS TIPS
+-- =====================================================
+CREATE TABLE public.anonymous_tips (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tip_id TEXT UNIQUE NOT NULL,
+  concern_type TEXT NOT NULL,
   location_text TEXT NOT NULL,
   description TEXT NOT NULL,
-  photo_path VARCHAR(255),
-  is_flagged TINYINT(1) DEFAULT 0,
+  photo_path TEXT,
+  is_flagged BOOLEAN DEFAULT FALSE,
   admin_notes TEXT,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: map_points
-CREATE TABLE map_points (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  report_id INT,
+-- =====================================================
+-- MAP POINTS
+-- =====================================================
+CREATE TABLE public.map_points (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  report_id UUID REFERENCES public.intelligence_scans(id),
+
   lat DECIMAL(10, 8) NOT NULL,
   lng DECIMAL(11, 8) NOT NULL,
-  incident_type VARCHAR(50) NOT NULL,
-  incident_date DATETIME NOT NULL,
-  FOREIGN KEY (report_id) REFERENCES incident_reports(id)
+
+  incident_type TEXT NOT NULL,
+  incident_date TIMESTAMPTZ NOT NULL,
+
+  barangay TEXT,
+  category TEXT,
+
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: hotlines
-CREATE TABLE hotlines (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100) NOT NULL,
-  number VARCHAR(50) NOT NULL,
-  category VARCHAR(50) NOT NULL,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+-- =====================================================
+-- HOTLINES
+-- =====================================================
+CREATE TABLE public.hotlines (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  number TEXT NOT NULL,
+  category TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: audit_logs
-CREATE TABLE audit_logs (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  admin_id INT,
+-- =====================================================
+-- AUDIT LOGS
+-- =====================================================
+CREATE TABLE public.audit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  admin_id UUID REFERENCES public.users(id),
+  username TEXT,
   action TEXT NOT NULL,
-  target_table VARCHAR(50) NOT NULL,
-  target_id INT,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (admin_id) REFERENCES users(id)
+  details TEXT,
+  ip_address TEXT, -- (FIXED: your error was missing this column)
+  timestamp TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Table: intelligence_scans
-CREATE TABLE intelligence_scans (
-  id VARCHAR(50) PRIMARY KEY,
-  admin_id VARCHAR(50) NOT NULL,
-  admin_name VARCHAR(100) NOT NULL,
-  total_records INT NOT NULL,
-  category_stats JSON,
-  raw_data JSON,
-  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- Table: admin_notifications
-CREATE TABLE admin_notifications (
-  id VARCHAR(50) PRIMARY KEY,
+-- =====================================================
+-- ADMIN NOTIFICATIONS
+-- =====================================================
+CREATE TABLE public.admin_notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT,
+  type TEXT,
   message TEXT NOT NULL,
-  type ENUM('tip', 'system', 'alert') DEFAULT 'system',
-  is_read TINYINT(1) DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  reference_id TEXT,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Seed Data
-INSERT INTO users (username, full_name, password_hash, role) VALUES 
-('superadmin', 'Super Administrator', '$2a$10$7v6E8Z9R9R9R9R9R9R9R9O', 'superadmin'),
-('staff', 'PNP Staff Member', '$2a$10$7v6E8Z9R9R9R9R9R9R9R9O', 'staff');
--- (Note: Password hashes are placeholders, use bcrypt to generate real ones)
+-- =====================================================
+-- RLS (ALLOW ALL - DEV MODE)
+-- =====================================================
+DO $$
+DECLARE t text;
+BEGIN
+  FOR t IN (
+    SELECT table_name FROM information_schema.tables
+    WHERE table_schema = 'public'
+  )
+  LOOP
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY;', t);
+    EXECUTE format('DROP POLICY IF EXISTS "Allow All" ON public.%I;', t);
+    EXECUTE format(
+      'CREATE POLICY "Allow All" ON public.%I
+       FOR ALL USING (true) WITH CHECK (true);',
+      t
+    );
+  END LOOP;
+END $$;
 
-INSERT INTO hotlines (name, number, category) VALUES 
-('PNP Sta. Cruz', '+63998-598-5667', 'Police'),
-('BFP Sta. Cruz', '+63967-052-8897', 'Fire'),
-('MDRRMO Sta. Cruz', '+63921-962-0602', 'Disaster'),
-('Red Cross', '+63 2 8790 2300', 'Medical');
+-- =====================================================
+-- SEED USERS
+-- =====================================================
+INSERT INTO public.users (id, username, full_name, password_hash, role)
+VALUES
+  ('00000000-0000-0000-0000-000000000001',
+   'superadmin',
+   'Super Administrator',
+   '$2a$10$DMpQH4fGsPrzMYMTWe/pIeOUF2eID.ay62ZxVAkvsF24VjNgO5h3y',
+   'superadmin'
+  )
+ON CONFLICT DO NOTHING;
+
+-- =====================================================
+-- REFRESH SCHEMA CACHE
+-- =====================================================
+NOTIFY pgrst, 'reload schema';

@@ -75,7 +75,6 @@ const colors = {
                 </div>
             </div>
         </div>
-        </div>
     </div>
 </div>
 
@@ -88,10 +87,11 @@ const colors = {
     let boundaryLayer;
     let glowLayer;
 
-    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
+    // Use correct PSGC for Santa Cruz Laguna: 043426000
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043426000.json';
     const colors = <%- JSON.stringify(colors) %>;
-    const safePoints = (typeof points !== 'undefined' && points) ? points : [];
-    const pointsData = safePoints;
+    // Fix: Using EJS to stringify the points data for client-side use
+    const pointsData = <%- JSON.stringify(safePoints) %>;
 
     // Map Toggle Logic
     window.toggleRegistry = function() {
@@ -100,10 +100,10 @@ const colors = {
         
         if (content.classList.contains('hidden')) {
             content.classList.remove('hidden');
-            icon.style.transform = 'rotate(0deg)';
+            icon.style.transform = 'rotate(180deg)';
         } else {
             content.classList.add('hidden');
-            icon.style.transform = 'rotate(180deg)';
+            icon.style.transform = 'rotate(0deg)';
         }
     };
 
@@ -125,7 +125,7 @@ const colors = {
 
     function getCategoryForType(type) {
         const focusTypes = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping'];
-        const psiTypes = ['Search Warrant', 'Warrant of Arrest', 'Checkpoint', 'Buy-Bust', 'Oplan Bakal', 'Oplan Galugad', 'Checkpoint'];
+        const psiTypes = ['Search Warrant', 'Warrant of Arrest', 'Checkpoint', 'Buy-Bust', 'Oplan Bakal', 'Oplan Galugad'];
         
         if (focusTypes.some(f => type.toLowerCase().includes(f.toLowerCase()))) return '8-Focus';
         if (psiTypes.some(p => type.toLowerCase().includes(p.toLowerCase()))) return 'PSI';
@@ -264,10 +264,6 @@ const colors = {
         }
     }
 
-    function calculateTopIncidents() {
-        // Simplified for Admin Map integration
-    }
-
     window.manualPins = [
         { name: 'Alipit', lat: 14.223931, lng: 121.405213 },
         { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
@@ -385,19 +381,6 @@ const colors = {
         });
     }
 
-    function applyFilters() {
-        const brgy = document.getElementById('barangay').value;
-        const type = document.getElementById('filterIncidentType').value;
-        document.getElementById('barangayFilterLabel').textContent = brgy || 'All';
-        addIncidentPins(brgy, type);
-        if (brgy && !type) {
-            const pin = manualPins.find(p => p.name === brgy);
-            if (pin) map.flyTo([pin.lat, pin.lng], 16);
-        } else if (!brgy) {
-            map.flyToBounds([[14.2100, 121.3400], [14.3100, 121.4850]]);
-        }
-    }
-
     function initMap() {
         // Sta. Cruz Laguna Bounds
         const corner1 = L.latLng(14.18, 121.32);
@@ -419,28 +402,35 @@ const colors = {
         choroplethLayer.addTo(map);
         addManualPins();
         addIncidentPins();
-        renderIncidentList(pointsData);
-        calculateTopIncidents();
         loadMunicipalBoundary();
 
-        fetch(barangayGeoJsonUrl).then(r => r.json()).then(data => {
-            santaCruzGeoJSON = data;
-            L.geoJSON(data, {
-                style: f => ({ color: '#111827', weight: 1, fillOpacity: 0.5, fillColor: getDensityColor(crimeCounts[f.properties.NAME_3] || 0) }),
-                onEachFeature: (f, l) => l.bindPopup(`<div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
-                                    <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
-                                        <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px]">Brgy. ${f.properties.NAME_3}</h3>
-                                    </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-[9px] font-black uppercase text-white/70">Incidents</span>
-                                        <span class="text-lg font-black text-pnp-gold">${crimeCounts[f.properties.NAME_3] || 0}</span>
-                                    </div>
-                                </div>`, { className: 'intelligence-popup' })
-            }).addTo(choroplethLayer);
-            
-            // Default: Choropleth off
-            map.removeLayer(choroplethLayer);
-        });
+        // Error handling for GeoJSON fetch to prevent SyntaxError on 404
+        fetch(barangayGeoJsonUrl)
+            .then(r => {
+                if (!r.ok) throw new Error('Network response was not ok: ' + r.statusText);
+                return r.json();
+            })
+            .then(data => {
+                santaCruzGeoJSON = data;
+                L.geoJSON(data, {
+                    style: f => ({ color: '#111827', weight: 1, fillOpacity: 0.5, fillColor: getDensityColor(crimeCounts[f.properties.NAME_3] || 0) }),
+                    onEachFeature: (f, l) => l.bindPopup(`<div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
+                                        <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+                                            <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px]">Brgy. ${f.properties.NAME_3}</h3>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[9px] font-black uppercase text-white/70">Incidents</span>
+                                            <span class="text-lg font-black text-pnp-gold">${crimeCounts[f.properties.NAME_3] || 0}</span>
+                                        </div>
+                                    </div>`, { className: 'intelligence-popup' })
+                }).addTo(choroplethLayer);
+                
+                // Default: Choropleth off
+                map.removeLayer(choroplethLayer);
+            })
+            .catch(err => {
+                console.error("Geospatial Intelligence Acquisition Failure:", err);
+            });
 
         // Hide Loading
         const loading = document.getElementById('mapLoading');
@@ -452,7 +442,14 @@ const colors = {
 
     document.addEventListener('DOMContentLoaded', () => {
         initMap();
-        document.getElementById('incident_date').valueAsDate = new Date();
+        // Guard to prevent error if element is missing
+        const dateInput = document.getElementById('incident_date');
+        if (dateInput) {
+            dateInput.valueAsDate = new Date();
+        }
+        
+        // Initial render for incident list
+        renderIncidentList(pointsData);
     });
 </script>
 
@@ -478,5 +475,18 @@ const colors = {
     .incident-pin-container > div:hover {
         transform: scale(1.4);
         z-index: 1000;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(200, 164, 21, 0.2);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(200, 164, 21, 0.4);
     }
 </style>

@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
-import * as pdf from 'pdf-parse';
 import mammoth from 'mammoth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createRequire } from 'module';
 
 // Shared Tactical Assets
 const VALID_BARANGAYS = [
@@ -14,6 +14,26 @@ const VALID_BARANGAYS = [
     "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", 
     "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
 ];
+
+// Audit Strategy
+async function logAction(req: Request, action: string, details: string) {
+  try {
+    const adminId = req.session?.user?.id || 'system';
+    const adminUsername = req.session?.user?.username || 'system';
+    const ip = req.ip || '0.0.0.0';
+    
+    await db.collection('audit_logs').add({
+      admin_id: adminId,
+      username: adminUsername,
+      action,
+      details,
+      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('[AUDIT FAIL]', err);
+  }
+}
 
 const MANUAL_PINS = [
     { name: 'Alipit', lat: 14.223931, lng: 121.405213 }, { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
@@ -99,15 +119,19 @@ export const postLogin = async (req: Request, res: Response) => {
 
   try {
     // 1. Emergency Fallback Check (Top Priority for developer access)
-    if (username === 'andreijavan06@gmail.com' && password === 'superadmin') {
-      console.log('[LOGIN EMERGENCY] Authenticating via hardcoded fallback');
+    const isEmergencyUser = (username === 'andreijavan06@gmail.com' || username === 'andreijavan05@gmail.com') && password === 'superadmin';
+    
+    if (isEmergencyUser) {
+      console.log(`[LOGIN EMERGENCY] Authenticating via hardcoded fallback for ${username}`);
       req.session.user = { 
-        id: 'andreijavan06', 
-        username: 'andreijavan06@gmail.com', 
-        full_name: 'Andrei Javan', 
+        id: username.split('@')[0], 
+        username: username, 
+        full_name: 'Andrei Javan (Admin)', 
         role: 'superadmin' 
       };
       
+      await logAction(req, 'LOGIN_EMERGENCY', `Emergency fallback login used for ${username}`);
+
       return req.session.save((err) => {
         if (err) {
           console.error('[LOGIN ERROR] Session save failed:', err);
@@ -140,6 +164,8 @@ export const postLogin = async (req: Request, res: Response) => {
         role: user.role 
       };
       
+      await logAction(req, 'LOGIN', `Personnel ${user.username} authenticated successfully.`);
+
       return req.session.save((err) => {
         if (err) {
           console.error('[LOGIN ERROR] Session save failed:', err);
@@ -174,16 +200,7 @@ export const processAIExtraction = async (req: Request, res: Response) => {
       const mimetype = (req as any).file.mimetype;
       console.log('Processing file of type:', mimetype);
 
-      if (mimetype === 'application/pdf') {
-        const parsePdf = (pdf as any).default || (typeof pdf === 'function' ? pdf : null);
-        if (!parsePdf) {
-          console.error('PDF Parser function not found. Module structure:', typeof pdf, Object.keys(pdf as any));
-          throw new Error('Failed to initialize PDF parser engine.');
-        }
-        const data = await parsePdf(buffer);
-        textContent = data.text;
-        console.log('PDF text extracted. Length:', textContent.length);
-      } else if (
+      if (
         mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
         mimetype === 'application/vnd.ms-excel' || 
         mimetype === 'text/csv' ||
@@ -208,7 +225,7 @@ export const processAIExtraction = async (req: Request, res: Response) => {
         console.log('Word text extracted. Length:', textContent.length);
       } else {
         console.warn('Blocked unsupported mimetype:', mimetype);
-        return res.status(400).json({ success: false, error: `Unsupported file type (${mimetype}). Please use PDF, Excel, or DOCX.` });
+        return res.status(400).json({ success: false, error: `Unsupported file type (${mimetype}). Please use Excel or DOCX.` });
       }
     } else if (req.body.data) {
       textContent = req.body.data;
@@ -236,54 +253,64 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     
     const prompt = `
 ROLE:
-You are a data extraction engine for a law enforcement crime information system.
-Your task is to extract structured crime incident data from unstructured text.
+You are a strict data extraction engine for a law enforcement crime information system.
+
+You ONLY extract structured crime incident data from the provided text.
+You DO NOT explain. You DO NOT add comments. You DO NOT hallucinate.
+
+---
 
 LOCATION CONTEXT:
 Santa Cruz, Laguna, Philippines
 
-CLASSIFICATION RULES:
-1. 8-Focus Crimes:
-- Murder
-- Homicide
-- Physical Injury
-- Rape
-- Robbery
-- Theft
-- Carnapping (Motor Vehicle / Motorcycle)
-
-2. PSI (Public Safety Index):
-- Vehicular accidents
-- Traffic incidents
-- Fire incidents
-
-3. Non-Index Crimes:
-- All other minor crimes
-- Administrative incidents
-- Miscellaneous reports
+---
 
 VALID BARANGAYS (STRICT MATCH ONLY):
-Alipit, Bagumbayan, Bubukal, Calios, Duhat, Gatid, Jasaan, Labuin, Malinao, Oogong, Pagsawitan, Palasan, Patimbao, Poblacion I, Poblacion II, Poblacion III, Poblacion IV, Poblacion V, San Jose, San Juan, San Pablo Norte, San Pablo Sur, Santisima Cruz, Santo Angel Central, Santo Angel Norte, Santo Angel Sur
+Alipit, Bagumbayan, Bubukal, Calios, Duhat, Gatid, Jasaan, Labuin, Malinao, Oogong, Pagsawitan, Palasan, Patimbao, Poblacion I (Barangay I), Poblacion II (Barangay II), Poblacion III (Barangay III), Poblacion IV (Barangay IV), Poblacion V (Barangay V), San Jose, San Juan, San Pablo Norte, San Pablo Sur, Santisima Cruz, Santo Angel Central, Santo Angel Norte, Santo Angel Sur
+
+---
+
+CLASSIFICATION RULES:
+
+1. 8-Focus Crimes:
+Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping (Motor Vehicle or Motorcycle)
+
+2. PSI (Public Safety Index):
+Vehicular Accident, Traffic Incident, Fire Incident
+
+3. Non-Index:
+All other incidents
+
+---
 
 EXTRACTION RULES:
-- Extract ONLY real incident data found in the text
-- DO NOT invent or hallucinate data
-- Normalize all dates to YYYY-MM-DD format
-- Match barangays EXACTLY from the list above
-- Assign correct category strictly: 8-Focus, PSI, or Non-Index
-- If category is unclear, default to "Non-Index"
-- Remove duplicates
-- Keep descriptions concise but meaningful
 
-CRITICAL RULES:
-- Output MUST be valid JSON only
+- Extract ONLY real incidents explicitly stated in the text
+- DO NOT create or assume missing data
+- If date is missing, use null
+- Normalize date format to: YYYY-MM-DD
+- Barangay MUST match EXACTLY from the valid list
+- If barangay is unclear or not in list, SKIP the record
+- Categorize strictly based on rules above
+- If unsure, use "Non-Index"
+- Remove duplicate incidents
+- Keep descriptions short but meaningful
+
+---
+
+CRITICAL OUTPUT RULES:
+
+- Output MUST be valid JSON
 - NO markdown (no \`\`\` blocks)
 - NO explanations
 - NO extra text
 - NO comments
-- If no data is found, return: {"barangays": {}}
+- NO trailing commas
 
-OUTPUT FORMAT (STRICT JSON ONLY):
+---
+
+OUTPUT FORMAT (STRICT):
+
 {
   "barangays": {
     "BarangayName": [
@@ -296,6 +323,10 @@ OUTPUT FORMAT (STRICT JSON ONLY):
     ]
   }
 }
+
+---
+
+INPUT DATA STARTS BELOW:
     `;
 
     let result;
@@ -415,6 +446,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     }
 
     await batch.commit();
+    await logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`);
     res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
     console.error(err);
@@ -601,9 +633,23 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     };
 
     if ((req as any).file) {
-      data.photo_path = `/images/${(req as any).file.filename}`;
+      const file = (req as any).file;
+      const fileExt = file.originalname.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const path = `bulletins/${fileName}`;
+      
+      try {
+        const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+        data.photo_path = publicUrl;
+        console.log(`[BULLETIN] Image uploaded successfully: ${publicUrl}`);
+      } catch (storageErr) {
+        console.error('[BULLETIN] Supabase Storage Error:', storageErr);
+        // data.photo_path remains undefined or we could set a placeholder here explicitly if we want
+        // But the db.storage.upload already returns a placeholder on failure
+      }
     }
 
+    await logAction(req, 'BULLETIN_CREATE', `Created informational bulletin: ${title}`);
     await db.collection('bulletins').add(data);
     res.redirect('/admin/bulletins');
   } catch (err) {
@@ -637,9 +683,21 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     };
 
     if ((req as any).file) {
-      data.photo_path = `/images/${(req as any).file.filename}`;
+      const file = (req as any).file;
+      const fileExt = file.originalname.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const path = `bulletins/${fileName}`;
+      
+      try {
+        const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+        data.photo_path = publicUrl;
+        console.log(`[BULLETIN EDIT] Image updated: ${publicUrl}`);
+      } catch (storageErr) {
+        console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
+      }
     }
 
+    await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);
     res.redirect('/admin/bulletins');
   } catch (err) {
@@ -650,6 +708,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
 
 export const deleteBulletin = async (req: Request, res: Response) => {
   try {
+    await logAction(req, 'BULLETIN_DELETE', `Deleted bulletin ID: ${req.params.id}`);
     await db.collection('bulletins').doc(req.params.id).delete();
     res.redirect('/admin/bulletins');
   } catch (err) {
@@ -701,6 +760,7 @@ export const getUnreadTipsCount = async (req: Request, res: Response) => {
 export const updateTip = async (req: Request, res: Response) => {
   const { is_flagged, admin_notes } = req.body;
   try {
+    await logAction(req, 'TIP_UPDATE', `Updated anonymous tip ID: ${req.params.id}`);
     await db.collection('anonymous_tips').doc(req.params.id).update({
       is_flagged: is_flagged === 'on' || is_flagged === true,
       admin_notes,
@@ -749,6 +809,7 @@ export const postMapPoint = async (req: Request, res: Response) => {
     if (focus8.includes(incident_type)) category = '8-Focus';
     else if (psi.includes(incident_type)) category = 'PSI';
     
+    await logAction(req, 'MAP_POINT_ADD', `Added manual map point: ${incident_type} in Brgy. ${barangay}`);
     await db.collection('map_points').add({
       lat: pin ? pin.lat : 0,
       lng: pin ? pin.lng : 0,
@@ -768,6 +829,7 @@ export const postMapPoint = async (req: Request, res: Response) => {
 
 export const deleteMapPoint = async (req: Request, res: Response) => {
   try {
+    await logAction(req, 'MAP_POINT_DELETE', `Deleted tactical point ID: ${req.params.id}`);
     await db.collection('map_points').doc(req.params.id).delete();
     
     // Check if it's an AJAX request
@@ -787,6 +849,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
 
 export const purgePlaceholders = async (req: Request, res: Response) => {
   try {
+    await logAction(req, 'SYSTEM_PURGE', 'Initiated full tactical data purge (RESET).');
     const tables = ['map_points', 'intelligence_scans', 'anonymous_tips', 'audit_logs', 'bulletins'];
     const batch = db.batch();
     
@@ -818,6 +881,7 @@ export const getHotlines = async (req: Request, res: Response) => {
 export const postHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
   try {
+    await logAction(req, 'HOTLINE_ADD', `Added tactical hotline: ${name}`);
     await db.collection('hotlines').add({
       name,
       number,
@@ -833,6 +897,7 @@ export const postHotline = async (req: Request, res: Response) => {
 
 export const deleteHotline = async (req: Request, res: Response) => {
   try {
+    await logAction(req, 'HOTLINE_DELETE', `Deleted hotline ID: ${req.params.id}`);
     await db.collection('hotlines').doc(req.params.id).delete();
     res.redirect('/admin/hotlines');
   } catch (err) {
@@ -843,45 +908,68 @@ export const deleteHotline = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('users').get();
-    const users = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.render('admin/users', { title: 'User Management', users, layout: 'layouts/admin' });
+    const [usersSnap, logsSnap] = await Promise.all([
+      db.collection('users').get(),
+      db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get()
+    ]);
+
+    const users = (usersSnap && usersSnap.docs) ? usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) : [];
+    const logs = (logsSnap && logsSnap.docs) ? logsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) : [];
+
+    res.render('admin/users', { 
+      title: 'Personnel & Operational Logs', 
+      users, 
+      logs,
+      layout: 'layouts/admin' 
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading users');
+    console.error('[PERSONNEL ERROR]', err);
+    res.render('admin/users', { 
+      title: 'Personnel & Operational Logs', 
+      users: [], 
+      logs: [],
+      layout: 'layouts/admin',
+      error_msg: 'Operational data retrieval partially compromised.'
+    });
   }
 };
 
 export const postUser = async (req: Request, res: Response) => {
-  const { username, full_name, password, role } = req.body;
+  const { username, full_name, password } = req.body;
   const hash = bcrypt.hashSync(password, 10);
   try {
+    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username}`);
     await db.collection('users').add({
       username,
       full_name,
       password_hash: hash,
-      role,
       created_at: new Date().toISOString()
     });
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error creating user');
+    res.status(500).send('Error creating personnel account');
   }
 };
 
-export const getAuditLog = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').get();
-    const logs = await Promise.all(snap.docs.map(async doc => {
-      const log = doc.data();
-      const userDoc = await db.collection('users').doc(log.admin_id).get();
-      return { id: doc.id, ...log, admin_name: userDoc.exists ? (userDoc.data() as any).full_name : 'Unknown' };
-    }));
-    res.render('admin/audit_log', { title: 'Audit Log', logs, layout: 'layouts/admin' });
+    const userId = req.params.id;
+    if (userId === req.session.user.id) {
+      return res.status(400).send('You cannot neutralize your own credentials while active.');
+    }
+    
+    const docRef = db.collection('users').doc(userId);
+    const snap = await docRef.get();
+    if (!snap.exists) return res.status(404).send('Subject not found.');
+    
+    const userData = snap.data() as any;
+    await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username}`);
+    await docRef.delete();
+    res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error loading audit logs');
+    res.status(500).send('Operational failure during user neutralization');
   }
 };
 
@@ -961,6 +1049,7 @@ export const getReports = async (req: Request, res: Response) => {
 export const deleteReport = async (req: Request, res: Response) => {
   try {
     const reportId = req.params.id;
+    await logAction(req, 'REPORT_DELETE', `Deleted intelligence report and associated map points. ID: ${reportId}`);
     console.log(`[DELETION PROTOCOL] Initiating purge for Report ID: ${reportId}`);
     
     // 1. Cascading deletion: Purge all map points associated with this report
@@ -1027,6 +1116,7 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
     });
 
     await batch.commit();
+    await logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`);
     res.json({ success: true, count: entries.length });
   } catch (err) {
     console.error('Bulk add error:', err);

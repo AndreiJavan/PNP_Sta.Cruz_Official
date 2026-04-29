@@ -44,7 +44,7 @@
             </div>
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Unit Periodic Report</div>
             <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI Extraction Neural Link</p>
-            <input type="file" id="fileConverterInput" accept=".pdf,.xlsx,.xls,.docx" class="hidden" onchange="handleIntelConvert(this)">
+            <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
     </div>
 
@@ -258,7 +258,7 @@
         
         // Verification Protocol: Check for existing intelligence batches
         if (window.reports && window.reports.some(r => r.filename === file.name)) {
-            strategicAlert({
+            window.strategicAlert({
                 title: "Duplicate Signal Detected",
                 message: `The intelligence batch [${file.name}] is already archived in the CPICRS database. Re-scanning duplicate datasets is restricted to preserve structural integrity.`,
                 type: "warning"
@@ -298,7 +298,7 @@
             const flattened = result.data;
 
             if (flattened.length === 0) {
-                strategicAlert({
+                window.strategicAlert({
                     title: "Neural Scan Negative",
                     message: "No incident records detected in this document. Please verify source data.",
                     type: "warning"
@@ -311,7 +311,7 @@
 
         } catch (error) {
             console.error("AI Error:", error);
-            strategicAlert({
+            window.strategicAlert({
                 title: "Extraction Failure",
                 message: error.message,
                 type: "danger"
@@ -474,7 +474,7 @@
          const syncBtn = document.querySelector('button[onclick="confirmIntelReview()"]');
          if (syncBtn.disabled) return;
 
-         const confirmed = await strategicConfirm({
+         const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
              title: "Tactical Confirmation",
              message: `Commit ${reviewData.length} records to the CPICRS Central Database?`,
              confirmText: "Sync Now",
@@ -500,7 +500,7 @@
              const result = await response.json();
 
              if (result.success) {
-                    await strategicAlert({
+                    await window.strategicAlert({
                         title: "Sync Successful",
                         message: `Archive Updated: ${result.count} tactical records committed.`,
                         type: "success"
@@ -510,7 +510,7 @@
                  throw new Error(result.message || "Disk Sync Failed");
              }
          } catch (error) { 
-             strategicAlert({
+             window.strategicAlert({
                  title: "Synchronization Error",
                  message: error.message,
                  type: "danger"
@@ -647,7 +647,7 @@
         const btn = document.querySelector('span[onclick*="purgeTacticalData"]');
         if (btn && btn.dataset.isPurging === 'true') return;
 
-        const confirmed = await strategicConfirm({
+        const confirmed = await (window.strategicConfirm || (async () => confirm("This will purge all system placeholders and test intelligence batches. Dashboard counts will be reset. Proceed?")))({
             title: "Tactical Data Purge",
             message: "This will purge all system placeholders and test intelligence batches. Dashboard counts will be reset. Proceed?",
             confirmText: "Execute Purge",
@@ -661,7 +661,7 @@
             const res = await fetch('/admin/map/purge-placeholders', { method: 'POST' });
             const result = await res.json();
             if (result.success) {
-                await strategicAlert({
+                await window.strategicAlert({
                     title: "Purge Executed",
                     message: `${result.count} pins and ${result.reportsPurged} records have been identified and neutralized.`,
                     type: "info"
@@ -669,7 +669,7 @@
                 location.reload();
             }
         } catch (error) {
-            strategicAlert({
+            window.strategicAlert({
                 title: "Command Failure",
                 message: "Intelligence link lost. Purge sequence interrupted.",
                 type: "danger"
@@ -684,7 +684,7 @@
         const btn = document.querySelector(`#deleteReportForm_${reportId} button`);
         if (btn && btn.disabled) return false;
 
-        const confirmed = await strategicConfirm({
+        const confirmed = await window.strategicConfirm({
             title: "Purge Confirmation",
             message: "Secure Warning: Purging this intelligence record is irreversible. Are you sure you want to proceed?",
             confirmText: "Delete Permanently",

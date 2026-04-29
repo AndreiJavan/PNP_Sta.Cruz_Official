@@ -6,9 +6,9 @@
                 <i class="fas fa-bullhorn text-2xl"></i>
             </div>
             <div>
-                <h4 class="text-[10px] font-black text-blue-300 uppercase tracking-[0.2em] leading-none opacity-70">Intelligence Grid</h4>
-                <p class="text-4xl font-black text-white mt-2 tracking-tighter"><%= bulletins.length %></p>
-                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Live Notifications</p>
+                <h4 class="text-[10px] font-black text-blue-300 uppercase tracking-[0.2em] leading-none opacity-70">Intelligence Bulletins</h4>
+                <div class="text-3xl font-black text-white mt-2 tabular-nums"><%= String(bulletins.length).padStart(2, '0') %></div>
+                <p class="text-[9px] text-blue-300/50 mt-1 uppercase font-bold">Active Public Notices</p>
             </div>
         </div>
 
@@ -66,7 +66,7 @@
                                 <td class="px-8 py-7">
                                     <div class="flex flex-col">
                                         <span class="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-tight leading-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-300"><%= bulletin.title %></span>
-                                        <span class="text-[10px] text-slate-400 font-bold uppercase mt-1.5 opacity-70 truncate max-w-sm"><%= (bulletin.content || '').substring(0, 100) %>...</span>
+                                        <span class="text-[10px] text-slate-400 font-bold uppercase mt-1.5 opacity-70 truncate max-w-sm"><%= (bulletin.body || '').substring(0, 100) %>...</span>
                                     </div>
                                 </td>
                                 <td class="px-8 py-7">
@@ -114,15 +114,19 @@
 <script>
     async function handleBulletinDelete(e, id) {
         e.preventDefault();
-        const confirmed = await strategicConfirm({
+        const confirmFn = window.strategicConfirm || window.confirmOperationalAction || (async (args) => {
+            return confirm(args?.message || "Delete this entry?");
+        });
+
+        const confirmed = await confirmFn({
             title: "Delete Bulletin",
             message: "Permanently remove this intelligence notice from the public grid?",
             confirmText: "Purge Entry",
             type: "danger"
         });
+        
         if (confirmed) {
-            e.target.submit();
+            e.target.closest('form').submit();
         }
-        return false;
     }
 </script>

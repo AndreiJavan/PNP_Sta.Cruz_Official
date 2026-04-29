@@ -26,17 +26,18 @@
             <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
 
                 <div id="dropZone"
-                    class="w-full min-h-64 flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300">
+                    onclick="document.getElementById('photo').click()"
+                    class="w-full min-h-[300px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue">
 
                     <!-- Existing image OR preview -->
                     <% if (bulletin && bulletin.photo_path) { %>
                         <img id="previewImage"
-                            onclick="openImageModal(this.src)"
                             src="<%= bulletin.photo_path %>"
+                            onerror="this.style.display='none'; document.getElementById('placeholderIcon').style.display='block';"
                             class="w-full h-full object-cover">
+                        <i id="placeholderIcon" class="fas fa-image text-gray-400 text-4xl" style="display: none;"></i>
                     <% } else { %>
                         <img id="previewImage"
-                            onclick="openImageModal(this.src)"
                             class="w-full h-full object-cover hidden">
                         <i id="placeholderIcon" class="fas fa-image text-gray-400 text-4xl"></i>
                     <% } %>
@@ -187,12 +188,18 @@
         event.preventDefault();
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
-        const confirmed = await strategicConfirm({
+        
+        const confirmFn = window.strategicConfirm || (async (args) => {
+            return confirm(args?.message || `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`);
+        });
+        
+        const confirmed = await confirmFn({
             title: isEdit ? 'Update Confirmation' : 'Post Confirmation',
             message: `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`,
             confirmText: isEdit ? 'Update Now' : 'Post Now',
             type: 'info'
         });
+        
         if (confirmed) {
             document.getElementById('bulletinForm').submit();
         }
@@ -203,44 +210,52 @@
     const placeholderIcon = document.getElementById('placeholderIcon');
     const dropZone = document.getElementById('dropZone');
 
-    // FILE SELECT PREVIEW
-    fileInput.addEventListener('change', function () {
-        handleFile(this.files[0]);
-    });
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            handleFile(this.files[0]);
+        });
+    }
 
-    // DRAG OVER
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('ring-2', 'ring-pnp-blue');
-    });
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('ring-2', 'ring-pnp-blue');
+        });
 
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('ring-2', 'ring-pnp-blue');
-    });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('ring-2', 'ring-pnp-blue');
+        });
 
-    // DROP FILE
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('ring-2', 'ring-pnp-blue');
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ring-2', 'ring-pnp-blue');
 
-        const file = e.dataTransfer.files[0];
-        fileInput.files = e.dataTransfer.files; // sync input
-        handleFile(file);
-    });
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files; // sync input
+            handleFile(file);
+        });
+    }
 
-    // HANDLE PREVIEW UPDATE
     function handleFile(file) {
         if (!file) return;
 
         const reader = new FileReader();
+        const previewImage = document.getElementById('previewImage');
+        const placeholderIcon = document.getElementById('placeholderIcon');
 
         reader.onload = function (e) {
-            previewImage.src = e.target.result;
-            previewImage.classList.remove('hidden');
+            if (previewImage) {
+                previewImage.src = e.target.result;
+                previewImage.classList.remove('hidden');
+                previewImage.style.display = 'block';
+            }
 
             if (placeholderIcon) {
                 placeholderIcon.style.display = 'none';
             }
+            
+            // Sync height again after image might have changed layout
+            syncPanels();
         };
 
         reader.readAsDataURL(file);
@@ -250,26 +265,30 @@
     const modalImage = document.getElementById('modalImage');
 
     function openImageModal(src) {
-        if (!src) return;
+        // Fallback to previewImage src if not provided
+        const finalSrc = src || document.getElementById('previewImage')?.src;
+        if (!finalSrc || finalSrc.includes('hidden')) return;
 
-        modalImage.src = src;
+        modalImage.src = finalSrc;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
     function closeImageModal() {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
     }
 
-    // close when clicking outside image
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeImageModal();
-        }
-    });
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeImageModal();
+            }
+        });
+    }
 
-    // ESC key support
     document.addEventListener('keydown', (e) => {
         if (e.key === "Escape") {
             closeImageModal();
@@ -277,19 +296,25 @@
     });
     
     function syncPanels() {
-    const rightPanel = document.getElementById('rightPanel');
-    const leftPanel = document.getElementById('leftPanel');
-    const dropZone = document.getElementById('dropZone');
+        const rightPanel = document.getElementById('rightPanel');
+        const leftPanel = document.getElementById('leftPanel');
+        const dropZone = document.getElementById('dropZone');
 
-    // Wait for DOM update
-    setTimeout(() => {
-        const rightHeight = rightPanel.offsetHeight;
+        if (!rightPanel || !leftPanel || !dropZone) return;
 
-        // Force left side to match right side height
-        leftPanel.style.height = rightHeight + "px";
+        // Use requestAnimationFrame for smoother sync
+        requestAnimationFrame(() => {
+            const rightHeight = rightPanel.offsetHeight;
+            if (rightHeight > 0) {
+                leftPanel.style.minHeight = rightHeight + "px";
+            }
+        });
+    }
 
-        // Make image zone stretch inside
-        dropZone.style.height = "100%";
-    }, 50);
-}
+    window.addEventListener('load', () => {
+        syncPanels();
+        // Additional sync after small delay to catch late layout shifts
+        setTimeout(syncPanels, 500);
+    });
+    window.addEventListener('resize', syncPanels);
 </script>

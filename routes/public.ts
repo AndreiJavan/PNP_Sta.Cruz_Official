@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import * as publicController from '../controllers/publicController.js';
 import { isPublicAuthenticated } from '../middleware/publicAuth.js';
-import upload from '../middleware/upload.js';
+import multer from 'multer';
 
 const router = Router();
+const memoryUpload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', publicController.getHome);
 router.get('/map', publicController.getMap);
@@ -14,7 +15,7 @@ router.get('/bulletins/:id', publicController.getBulletinDetail);
 router.get('/login', publicController.getLogin);
 router.post('/login', publicController.postLogin);
 router.get('/register', publicController.getRegister);
-router.post('/register', upload.single('government_id'), publicController.postRegister);
+router.post('/register', memoryUpload.single('government_id'), publicController.postRegister);
 router.get('/logout', publicController.getLogout);
 
 router.get('/tip', isPublicAuthenticated, publicController.getTip);

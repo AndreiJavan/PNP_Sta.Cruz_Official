@@ -1,6 +1,12 @@
 import { Router } from 'express';
-import * as adminController from '../controllers/adminController.js';
-import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
+import {
+  getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
+  postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getTips, getUnreadTipsCount,
+  updateTip, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
+  getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
+  postHotline, deleteHotline, getUsers, postUser, deleteUser
+} from '../controllers/adminController.js';
+import { isAuthenticated } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
 import multer from 'multer';
 
@@ -8,50 +14,50 @@ const router = Router();
 const memoryUpload = multer({ storage: multer.memoryStorage() });
 
 // Public Admin Routes
-router.get('/login', adminController.getLogin);
-router.post('/login', adminController.postLogin);
-router.get('/logout', adminController.getLogout);
+router.get('/login', getLogin);
+router.post('/login', postLogin);
+router.get('/logout', getLogout);
 
 // Protected Admin Routes
 router.use(isAuthenticated);
 
-router.get('/dashboard', adminController.getDashboard);
+router.get('/dashboard', getDashboard);
 
 // Bulletins
-router.get('/bulletins', adminController.getBulletins);
-router.get('/bulletins/create', adminController.getCreateBulletin);
-router.post('/bulletins/create', upload.single('photo'), adminController.postCreateBulletin);
-router.get('/bulletins/:id/edit', adminController.getEditBulletin);
-router.post('/bulletins/:id/edit', upload.single('photo'), adminController.postEditBulletin);
-router.post('/bulletins/:id/delete', adminController.deleteBulletin);
+router.get('/bulletins', getBulletins);
+router.get('/bulletins/create', getCreateBulletin);
+router.post('/bulletins/create', memoryUpload.single('photo'), postCreateBulletin);
+router.get('/bulletins/:id/edit', getEditBulletin);
+router.post('/bulletins/:id/edit', memoryUpload.single('photo'), postEditBulletin);
+router.post('/bulletins/:id/delete', deleteBulletin);
 
 // Tips
-router.get('/tips', adminController.getTips);
-router.post('/tips/:id/update', adminController.updateTip);
-router.get('/api/unread-tips', adminController.getUnreadTipsCount);
+router.get('/tips', getTips);
+router.get('/api/unread-tips', getUnreadTipsCount);
+router.post('/tips/:id/update', updateTip);
 
 // Map
-router.get('/map', adminController.getMap);
-router.post('/map/add', adminController.postMapPoint);
-router.post('/map/:id/delete', adminController.deleteMapPoint);
-router.post('/map/bulk-add', adminController.bulkAddMapPoints);
-router.post('/map/purge-placeholders', adminController.purgePlaceholders);
+router.get('/map', getMap);
+router.post('/map/add', postMapPoint);
+router.post('/map/delete/:id', deleteMapPoint);
+router.post('/map/bulk-add', bulkAddMapPoints);
+router.post('/map/purge-placeholders', purgePlaceholders);
 
 // Intelligence Reports
-router.get('/reports', adminController.getReports);
-router.post('/reports/extract', memoryUpload.single('file'), adminController.processAIExtraction);
-router.post('/process-ai', memoryUpload.single('file'), adminController.processAIExtraction);
-router.post('/reports/save', adminController.saveReportBatch);
-router.post('/reports/:id/delete', adminController.deleteReport);
+router.get('/reports', getReports);
+router.post('/reports/extract', memoryUpload.single('file'), processAIExtraction);
+router.post('/process-ai', memoryUpload.single('file'), processAIExtraction);
+router.post('/reports/save', saveReportBatch);
+router.post('/reports/:id/delete', deleteReport);
 
 // Hotlines
-router.get('/hotlines', adminController.getHotlines);
-router.post('/hotlines/add', adminController.postHotline);
-router.post('/hotlines/:id/delete', adminController.deleteHotline);
+router.get('/hotlines', getHotlines);
+router.post('/hotlines/add', postHotline);
+router.post('/hotlines/:id/delete', deleteHotline);
 
-// Superadmin Only
-router.get('/users', isSuperAdmin, adminController.getUsers);
-router.post('/users/add', isSuperAdmin, adminController.postUser);
-router.get('/audit-log', isSuperAdmin, adminController.getAuditLog);
+// Personnel Management
+router.get('/users', getUsers);
+router.post('/users/add', postUser);
+router.post('/users/:id/delete', deleteUser);
 
 export default router;
