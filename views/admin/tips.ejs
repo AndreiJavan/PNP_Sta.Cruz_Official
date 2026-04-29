@@ -1,0 +1,134 @@
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-50 dark:border-slate-700">
+        <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">Anonymous Tips Inbox</h3>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[10px] font-bold tracking-widest">
+                <tr>
+                    <th class="px-6 py-4">Tip ID</th>
+                    <th class="px-6 py-4">Concern Type</th>
+                    <th class="px-6 py-4">Location</th>
+                    <th class="px-6 py-4">Date Received</th>
+                    <th class="px-6 py-4">Flagged</th>
+                    <th class="px-6 py-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
+                        <% tips.forEach(tip => { %>
+                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+                                <td class="px-6 py-4 font-mono font-bold text-pnp-blue dark:text-pnp-gold"><%= tip.tip_id %></td>
+                                <td class="px-6 py-4 font-medium text-gray-700 dark:text-gray-300"><%= tip.concern_type %></td>
+                                <td class="px-6 py-4 text-gray-500 dark:text-gray-400"><%= tip.location_text %></td>
+                                <td class="px-6 py-4 text-gray-400 dark:text-gray-500 text-xs"><%= new Date(tip.created_at).toLocaleDateString() %></td>
+                                <td class="px-6 py-4">
+                                    <% if (tip.is_flagged) { %>
+                                        <span class="text-red-500"><i class="fas fa-flag"></i></span>
+                                    <% } else { %>
+                                        <span class="text-gray-200 dark:text-gray-700"><i class="fas fa-flag"></i></span>
+                                    <% } %>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button 
+                                        type="button"
+                                        class="view-tip-btn text-pnp-blue dark:text-pnp-gold hover:text-pnp-gold dark:hover:text-white font-bold text-xs uppercase tracking-widest"
+                                        data-id="<%= tip.id %>"
+                                        data-tip-id="<%= tip.tip_id %>"
+                                        data-concern="<%= tip.concern_type %>"
+                                        data-location="<%= tip.location_text %>"
+                                        data-description="<%= tip.description || '' %>"
+                                        data-flagged="<%= tip.is_flagged ? '1' : '0' %>"
+                                        data-notes="<%= tip.admin_notes || '' %>"
+                                    >
+                                        View Detail
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tip Detail Modal -->
+<div id="tipModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden animate-fade-in">
+        <div class="bg-pnp-blue p-6 text-white flex justify-between items-center">
+            <h3 class="font-bold uppercase tracking-widest text-sm" id="modalTipId">Tip Detail</h3>
+            <button onclick="closeTipModal()" class="text-white hover:text-pnp-gold transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="tipUpdateForm" method="POST" class="p-8 space-y-6">
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-1">Concern Type</p>
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200" id="modalConcernType"></p>
+                </div>
+                <div>
+                    <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-1">Location</p>
+                    <p class="text-sm font-bold text-gray-800 dark:text-gray-200" id="modalLocation"></p>
+                </div>
+            </div>
+            <div>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-2">Description</p>
+                <div class="bg-gray-50 dark:bg-slate-900 p-4 rounded-xl border border-gray-100 dark:border-slate-700 text-sm text-gray-700 dark:text-gray-300 leading-relaxed max-h-48 overflow-y-auto" id="modalDescription"></div>
+            </div>
+            
+            <div class="pt-6 border-t border-gray-100 dark:border-slate-700 space-y-4">
+                <div class="flex items-center space-x-3">
+                    <input type="checkbox" name="is_flagged" id="modalIsFlagged" value="1" class="w-5 h-5 rounded text-red-600 focus:ring-red-500 border-gray-300 dark:border-slate-600 dark:bg-slate-700">
+                    <label for="modalIsFlagged" class="text-sm font-bold text-red-600 uppercase tracking-widest">Flag this tip as urgent/important</label>
+                </div>
+                <div class="space-y-2">
+                    <label for="modalAdminNotes" class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Admin Notes (Internal)</label>
+                    <textarea name="admin_notes" id="modalAdminNotes" rows="3" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm text-gray-700 dark:text-gray-300" placeholder="Add internal notes..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-pnp-blue text-white font-bold py-3 rounded-lg text-xs uppercase tracking-widest hover:bg-blue-900 transition shadow-lg">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-tip-btn')) {
+            const btn = e.target;
+            const id = btn.getAttribute('data-id');
+            const tipId = btn.getAttribute('data-tip-id');
+            const concern = btn.getAttribute('data-concern');
+            const location = btn.getAttribute('data-location');
+            const description = btn.getAttribute('data-description');
+            const flagged = btn.getAttribute('data-flagged');
+            const notes = btn.getAttribute('data-notes');
+            
+            openTipModal(id, tipId, concern, location, description, flagged, notes);
+        }
+    });
+
+    function openTipModal(id, tipId, concern, location, description, flagged, notes) {
+        document.getElementById('modalTipId').textContent = 'Tip: ' + tipId;
+        document.getElementById('modalConcernType').textContent = concern;
+        document.getElementById('modalLocation').textContent = location;
+        document.getElementById('modalDescription').textContent = description;
+        document.getElementById('modalIsFlagged').checked = flagged == '1';
+        document.getElementById('modalAdminNotes').value = notes;
+        document.getElementById('tipUpdateForm').action = '/admin/tips/' + id + '/update';
+        document.getElementById('tipModal').classList.remove('hidden');
+    }
+
+    function closeTipModal() {
+        document.getElementById('tipModal').classList.add('hidden');
+    }
+</script>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+</style>

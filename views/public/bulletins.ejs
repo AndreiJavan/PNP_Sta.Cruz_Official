@@ -1,0 +1,92 @@
+<div class="bg-pnp-blue py-24 text-center relative overflow-hidden">
+    <div class="container mx-auto px-4 relative z-10">
+        <h1 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-4">Official Advisories</h1>
+        <h2 class="text-5xl font-black text-white tracking-tighter mb-8">Community Bulletin Board</h2>
+        <div class="w-20 h-1.5 bg-pnp-gold mx-auto rounded-full"></div>
+    </div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+</div>
+
+<div class="container mx-auto px-4 py-20">
+    <!-- Search & Filter -->
+    <div class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16">
+        <form action="/bulletins" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="relative">
+                <input type="text" name="search" placeholder="Search bulletins..." class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
+            </div>
+            <div class="relative">
+                <select name="category" class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-900 dark:text-white appearance-none">
+                    <option value="">All Categories</option>
+                    <option value="Wanted Person">Wanted Person</option>
+                    <option value="Missing Person">Missing Person</option>
+                    <option value="Crime Advisory">Crime Advisory</option>
+                    <option value="Recovered Property">Recovered Property</option>
+                    <option value="General Announcement">General Announcement</option>
+                </select>
+                <i class="fas fa-layer-group absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
+            </div>
+            <button type="submit" class="bg-pnp-blue hover:bg-blue-900 text-white font-black py-4 rounded-2xl shadow-xl transition duration-300 uppercase tracking-widest text-xs">
+                Filter Results
+            </button>
+        </form>
+    </div>
+
+    <!-- Bulletin Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <% bulletins.forEach(bulletin => { %>
+            <div class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col">
+                <% if (bulletin.photo_path) { %>
+                    <div class="h-64 overflow-hidden">
+                        <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    </div>
+                <% } else { %>
+                    <div class="h-64 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center">
+                        <i class="fas fa-image text-4xl text-gray-200 dark:text-slate-700"></i>
+                    </div>
+                <% } %>
+                
+                <div class="p-10 flex-grow flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <% 
+                            const badgeColors = {
+                                'Wanted Person': 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+                                'Missing Person': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+                                'Crime Advisory': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+                                'Recovered Property': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                                'General Announcement': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                            };
+                        %>
+                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= badgeColors[bulletin.category] %>">
+                            <%= bulletin.category %>
+                        </span>
+                        <span class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
+                            <%= new Date(bulletin.created_at).toLocaleDateString() %>
+                        </span>
+                    </div>
+                    
+                    <h3 class="text-xl font-black text-pnp-blue dark:text-white mb-4 leading-tight group-hover:text-pnp-gold transition duration-300"><%= bulletin.title %></h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-8 line-clamp-3">
+                        <%= bulletin.body %>
+                    </p>
+                    
+                    <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700">
+                        <a href="/bulletins/<%= bulletin.id %>" class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition">
+                            Read Full Details <i class="fas fa-arrow-right ml-3 text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <% if (bulletins.length === 0) { %>
+        <div class="text-center py-20">
+            <div class="w-20 h-20 bg-gray-50 dark:bg-slate-900/50 text-gray-200 dark:text-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-search text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">No bulletins found</h3>
+            <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your search or filter criteria.</p>
+        </div>
+    <% } %>
+</div>

@@ -1,0 +1,116 @@
+<div class="max-w-md mx-auto px-4 py-20">
+    <div class="bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl p-8 border border-gray-100 dark:border-slate-700">
+        <div
+            class="w-16 h-16 bg-pnp-gold text-pnp-blue rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <i class="fas fa-user-plus text-2xl"></i>
+        </div>
+        <h2 class="text-2xl font-black text-center text-gray-900 dark:text-white mb-2 uppercase tracking-tighter">
+            Citizen Registration</h2>
+        <p class="text-xs text-center text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mb-8">Join to
+            submit secure tips</p>
+
+        <% if (locals.error_msg) { %>
+            <div
+                class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl text-sm font-medium mb-6">
+                <%= error_msg %>
+            </div>
+            <% } %>
+
+                <form action="/register" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <div class="space-y-2">
+                        <label for="full_name"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Full Legal
+                            Name</label>
+                        <input type="text" name="full_name" id="full_name" required minlength="2"
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="email"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Email
+                            Address</label>
+                        <input type="email" name="email" id="email" required
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="password"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Password</label>
+                        <input type="password" name="password" id="password" required minlength="8"
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm"
+                            placeholder="Min. 8 characters">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="confirm_password"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Confirm
+                            Password</label>
+                        <input type="password" id="confirm_password" required
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm">
+                        <p id="password_error" class="text-[9px] text-red-500 font-bold hidden">Passwords do not match.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="government_id"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Government ID
+                            (Image or PDF)</label>
+                        <input type="file" name="government_id" id="government_id" accept="image/*,.pdf" required
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-gray-300 outline-none transition text-sm">
+                        <p class="text-[9px] text-gray-500 font-medium mt-1">Please upload a clear copy of a valid
+                            government-issued ID (Max 5MB).</p>
+                        <p id="file_error" class="text-[9px] text-red-500 font-bold hidden">File exceeds 5MB limit.</p>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-pnp-gold hover:bg-yellow-500 text-pnp-blue font-black py-4 rounded-xl shadow-xl transition transform hover:-translate-y-1 uppercase tracking-widest text-sm">
+                        Create Account
+                    </button>
+                </form>
+
+                <p class="mt-8 text-center text-sm text-gray-600 dark:text-gray-400 font-medium">
+                    Already have an account? <a href="/login"
+                        class="text-pnp-gold font-bold hover:underline tracking-wide">Login here</a>
+                </p>
+    </div>
+</div>
+
+<script>
+    document.querySelector('form').addEventListener('submit', function (e) {
+        let valid = true;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const passwordError = document.getElementById('password_error');
+
+        if (password !== confirmPassword) {
+            passwordError.classList.remove('hidden');
+            valid = false;
+        } else {
+            passwordError.classList.add('hidden');
+        }
+
+        const fileInput = document.getElementById('government_id');
+        const fileError = document.getElementById('file_error');
+        if (fileInput.files.length > 0) {
+            const sizeInMB = fileInput.files[0].size / (1024 * 1024);
+            if (sizeInMB > 5) {
+                fileError.classList.remove('hidden');
+                valid = false;
+            } else {
+                fileError.classList.add('hidden');
+            }
+        }
+
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+
+    // Real-time validation clears
+    document.getElementById('confirm_password').addEventListener('input', () => {
+        document.getElementById('password_error').classList.add('hidden');
+    });
+    document.getElementById('government_id').addEventListener('change', () => {
+        document.getElementById('file_error').classList.add('hidden');
+    });
+</script>
