@@ -157,14 +157,40 @@
 
                 if (distance <= MAX_DISTANCE_KM) {
                     statusMsg.classList.replace('text-gray-500', 'text-green-500');
-                    statusMsg.innerText = 'Location verified! You are within Sta. Cruz bounds.';
+                    statusMsg.innerText = 'Location verified! You are inside Sta. Cruz bounds.';
+
+                    // Fetch place name via OpenStreetMap's free reverse geocoding
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const placeName = data.address.city || data.address.town || data.address.municipality || data.address.village || 'Sta. Cruz area';
+                            verifyBtn.innerHTML = `<i class="fas fa-check text-green-500"></i> <span class="text-green-600 font-black">Verified: ${placeName}</span>`;
+                        })
+                        .catch(() => {
+                            verifyBtn.innerHTML = `<i class="fas fa-check text-green-500"></i> <span class="text-green-600 font-black">Verified: Sta. Cruz Bounds</span>`;
+                        });
+
                     verifyBtn.classList.replace('border-gray-300', 'border-green-500');
-                    verifyBtn.innerHTML = '<i class="fas fa-check text-green-500"></i> <span class="text-green-600">Verified</span>';
                     verifyBtn.disabled = true;
                     submitBtn.disabled = false;
                 } else {
                     statusMsg.classList.replace('text-gray-500', 'text-red-500');
                     statusMsg.innerText = `Access restricted: You are approx. ${Math.round(distance)}km outside Sta. Cruz borders.`;
+
+                    // Fetch place name via OpenStreetMap's free reverse geocoding for REJECTED location
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLat}&lon=${userLng}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            const placeName = data.address.city || data.address.town || data.address.municipality || data.address.village || 'an external area';
+                            verifyBtn.innerHTML = `<i class="fas fa-times text-red-500"></i> <span class="text-red-600 font-black">Restricted: ${placeName}</span>`;
+                        })
+                        .catch(() => {
+                            verifyBtn.innerHTML = `<i class="fas fa-times text-red-500"></i> <span class="text-red-600 font-black">Restricted: Out of Bounds</span>`;
+                        });
+
+                    verifyBtn.classList.replace('border-gray-300', 'border-red-500');
+                    verifyBtn.disabled = true;
+                    // Submit button remains strictly disabled
                 }
             },
             (error) => {
