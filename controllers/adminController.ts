@@ -228,8 +228,8 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     
     // Primary: Gemini 2.0 Flash (Fastest/Latest)
     // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
-    const primaryModel = 'gemini-2.5-flash';
-    const fallbackModel = 'gemini-2.5-flash-lite';
+    const primaryModel = 'gemini-2.0-flash';
+    const fallbackModel = 'gemini-2.0-flash-lite';
     
     console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
     let model = client.getGenerativeModel({ model: primaryModel });
@@ -440,7 +440,15 @@ export const getDashboard = async (req: Request, res: Response) => {
     ]);
 
     const allPoints = allMapPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .filter((p: any) => {
+        const dateStr = String(p.incident_date || '');
+        const isPlaceholder = dateStr === 'N/A' || 
+                            dateStr === '' ||
+                            dateStr === '2026-04-27T09:22:14.910Z' ||
+                            p.description === 'Strategic placeholder data';
+        return !isPlaceholder;
+      });
 
     const filteredReports = allReportsSnap.docs
       .map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -450,10 +458,24 @@ export const getDashboard = async (req: Request, res: Response) => {
     const totalReportsCount = filteredReports.length;
     const notifications = notificationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     
-    // Time-based calculations
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    const yesterday = new Date(now);
+    // Time-based calculations - Reference date is latest of (Now, Latest Record)
+    let referenceDate = new Date();
+    if (allPoints.length > 0) {
+      // Improved date parsing: handle ISO strings and standard date strings
+      const dates = allPoints.map((p: any) => {
+        const d = new Date(p.incident_date);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      }).filter((t: number) => t > 0);
+      
+      if (dates.length > 0) {
+        const maxDate = new Date(Math.max(...dates));
+        // If maxDate is significantly in the future or past, we still want to anchor to Now if it's the current year
+        if (maxDate > referenceDate) referenceDate = maxDate;
+      }
+    }
+
+    const todayStr = referenceDate.toISOString().split('T')[0];
+    const yesterday = new Date(referenceDate);
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
 
@@ -494,11 +516,11 @@ export const getDashboard = async (req: Request, res: Response) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // Monthly Trends (Last 6 Months)
+    // Monthly Trends (Last 12 Months from Reference)
     const monthlyTrends: any[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthLabel = d.toLocaleString('default', { month: 'short' });
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
+      const monthLabel = d.toLocaleString('en-US', { month: 'short' });
       const month = d.getMonth();
       const year = d.getFullYear();
 
@@ -526,6 +548,7 @@ export const getDashboard = async (req: Request, res: Response) => {
       })
       .slice(0, 10)
       .map((p: any) => ({
+        id: p.id,
         message: `${p.incident_type || 'Incident'} reported`,
         location: p.barangay || 'Unknown',
         timestamp: p.created_at || p.incident_date,
@@ -639,10 +662,39 @@ export const getTips = async (req: Request, res: Response) => {
   try {
     const snap = await db.collection('anonymous_tips').orderBy('created_at', 'desc').get();
     const tips = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Mark tip-related notifications as read when viewed
+    const unreadNotifs = await db.collection('admin_notifications')
+      .where('type', '==', 'TIP')
+      .where('is_read', '==', false)
+      .get();
+    
+    if (!unreadNotifs.empty) {
+      const batch = db.batch();
+      unreadNotifs.docs.forEach(doc => {
+        batch.update(doc.ref, { is_read: true, updated_at: new Date().toISOString() });
+      });
+      await batch.commit();
+    }
+
     res.render('admin/tips', { title: 'Anonymous Tips', tips, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading tips');
+  }
+};
+
+export const getUnreadTipsCount = async (req: Request, res: Response) => {
+  try {
+    const snap = await db.collection('admin_notifications')
+      .where('type', '==', 'TIP')
+      .where('is_read', '==', false)
+      .count()
+      .get();
+    res.json({ unreadCount: snap.data().count });
+  } catch (err) {
+    console.error('Error fetching unread tips count:', err);
+    res.status(500).json({ unreadCount: 0 });
   }
 };
 
@@ -717,9 +769,18 @@ export const postMapPoint = async (req: Request, res: Response) => {
 export const deleteMapPoint = async (req: Request, res: Response) => {
   try {
     await db.collection('map_points').doc(req.params.id).delete();
+    
+    // Check if it's an AJAX request
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.json({ success: true, message: 'Tactical point neutralized' });
+    }
+    
     res.redirect('/admin/map');
   } catch (err) {
     console.error(err);
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(500).json({ success: false, message: 'Neutralization sequence failed' });
+    }
     res.status(500).send('Error deleting map point');
   }
 };
@@ -834,7 +895,15 @@ export const getReports = async (req: Request, res: Response) => {
     const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const allPoints = allPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .filter((p: any) => {
+        const dateStr = String(p.incident_date || '');
+        const isPlaceholder = dateStr === 'N/A' || 
+                            dateStr === '' ||
+                            dateStr === '2026-04-27T09:22:14.910Z' ||
+                            p.description === 'Strategic placeholder data';
+        return !isPlaceholder;
+      });
 
     const stats = {
       '8-Focus': allPoints.filter((p: any) => p.category === '8-Focus').length,
@@ -842,12 +911,20 @@ export const getReports = async (req: Request, res: Response) => {
       'Non-Index': allPoints.filter((p: any) => p.category === 'Non-Index').length
     };
 
-    // Monthly Trends (Last 6 Months)
-    const now = new Date();
+    // Monthly Trends (Last 12 Months from Latest Data)
+    let referenceDate = new Date();
+    if (allPoints.length > 0) {
+      const dates = allPoints.map((p: any) => new Date(p.incident_date).getTime()).filter((t: number) => !isNaN(t));
+      if (dates.length > 0) {
+        const maxDate = new Date(Math.max(...dates));
+        if (maxDate > referenceDate) referenceDate = maxDate;
+      }
+    }
+    
     const monthlyTrends: any[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const monthLabel = d.toLocaleString('default', { month: 'short' });
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
+      const monthLabel = d.toLocaleString('en-US', { month: 'short' });
       const month = d.getMonth();
       const year = d.getFullYear();
 
@@ -866,7 +943,7 @@ export const getReports = async (req: Request, res: Response) => {
     }
 
     res.render('admin/reports', { 
-      title: 'Intelligence Reports', 
+      title: 'Records', 
       reports, 
       allIncidents: allPoints,
       stats,

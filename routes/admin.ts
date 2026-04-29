@@ -28,11 +28,12 @@ router.post('/bulletins/:id/delete', adminController.deleteBulletin);
 // Tips
 router.get('/tips', adminController.getTips);
 router.post('/tips/:id/update', adminController.updateTip);
+router.get('/api/unread-tips', adminController.getUnreadTipsCount);
 
 // Map
 router.get('/map', adminController.getMap);
 router.post('/map/add', adminController.postMapPoint);
-router.post('/map/delete/:id', adminController.deleteMapPoint);
+router.post('/map/:id/delete', adminController.deleteMapPoint);
 router.post('/map/bulk-add', adminController.bulkAddMapPoints);
 router.post('/map/purge-placeholders', adminController.purgePlaceholders);
 

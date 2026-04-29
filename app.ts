@@ -40,8 +40,8 @@ app.use(session({
   saveUninitialized: true,
   proxy: true, // Trust the reverse proxy
   cookie: { 
-    secure: true,
-    sameSite: 'none',
+    secure: false,
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));

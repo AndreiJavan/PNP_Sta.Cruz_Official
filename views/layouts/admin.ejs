@@ -12,8 +12,32 @@
                 extend: {
                     colors: {
                         pnp: {
-                            blue: '#1A3A5C',
-                            gold: '#C8A415',
+                            blue: {
+                                50: '#EBF1F7',
+                                100: '#D1DEEB',
+                                200: '#A3BDD7',
+                                300: '#759CC3',
+                                400: '#477BAF',
+                                500: '#1A3A5C',
+                                600: '#152E4A',
+                                700: '#102237',
+                                800: '#0A1725',
+                                900: '#050B12',
+                                DEFAULT: '#1A3A5C',
+                            },
+                            gold: {
+                                50: '#FAF7E8',
+                                100: '#F5F0D1',
+                                200: '#EBE1A3',
+                                300: '#E1D275',
+                                400: '#D7C347',
+                                500: '#C8A415',
+                                600: '#A08311',
+                                700: '#78620D',
+                                800: '#504109',
+                                900: '#282104',
+                                DEFAULT: '#C8A415',
+                            }
                         }
                     }
                 }
@@ -39,6 +63,38 @@
         .bg-pnp-gold { background-color: #C8A415; }
         .text-pnp-gold { color: #C8A415; }
         .border-pnp-gold { border-color: #C8A415; }
+        
+        .pnp-gradient-blue {
+            background: linear-gradient(135deg, #1A3A5C 0%, #0A1725 100%);
+        }
+
+        .pnp-card {
+            @apply bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 shadow-sm transition-all duration-300;
+        }
+
+        .pnp-card:hover {
+            @apply shadow-xl border-pnp-blue/20 transform -translate-y-1;
+        }
+        
+        .pnp-glass {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pnp-glass-dark {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .text-shadow-tactical {
+            text-shadow: 0 0 20px rgba(200, 164, 21, 0.3);
+        }
+
+        .sidebar-item-active {
+            @apply bg-white/10 border-l-4 border-pnp-gold/80 shadow-[inset_-10px_0_20px_rgba(0,0,0,0.1)];
+        }
 
         /* Global scrollbar hiding */
         * {
@@ -71,15 +127,13 @@
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-72 bg-pnp-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold transition-transform duration-300 sidebar-scroll overflow-y-auto">
+    <aside id="sidebar" class="w-72 pnp-gradient-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto">
         <div class="p-8 border-b border-white/10 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                    <i class="fas fa-shield-halved text-pnp-blue text-xl"></i>
-                </div>
+                <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg" onerror="this.onerror=null; this.src='/favicon.ico';">
                 <div>
                     <h1 class="text-lg font-black tracking-tighter leading-none">CPICRS</h1>
-                    <p class="text-[9px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">Admin</p>
+                    <p class="text-[10px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">Records</p>
                 </div>
             </div>
             <button id="sidebarClose" class="lg:hidden text-white/50 hover:text-white transition">
@@ -87,42 +141,69 @@
             </button>
         </div>
 
-        <nav class="flex-grow p-5 space-y-1">
-            <p class="text-[9px] text-blue-400 uppercase tracking-widest font-black mb-3 px-4">Navigation</p>
-            <a href="/admin/dashboard" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Admin Command Center' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                <i class="fas fa-chart-pie text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Dashboard</span>
+        <nav class="flex-grow p-4 space-y-1.5">
+            <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mb-4 px-4 opacity-50">Operational Hub</p>
+            
+            <a href="/admin/dashboard" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Admin Command Center' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-chart-line text-xs"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Command Center</span>
             </a>
-            <a href="/admin/bulletins" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Bulletins' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                <i class="fas fa-bullhorn text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Bulletins</span>
+
+            <a href="/admin/bulletins" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Bulletins' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-bullhorn text-xs"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Directives</span>
             </a>
-            <a href="/admin/reports" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Intelligence Reports' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                <i class="fas fa-file-invoice text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Reports</span>
+
+            <a href="/admin/reports" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Records' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-file-invoice text-xs"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Records</span>
             </a>
-            <a href="/admin/tips" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Anonymous Tips' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                <i class="fas fa-user-secret text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Tips</span>
+
+            <a href="/admin/tips" class="flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Anonymous Tips' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-user-secret text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Informant Tips</span>
+                </div>
+                <div id="tipsNotificationDot" class="hidden w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
             </a>
-            <a href="/admin/map" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Map Data' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                <i class="fas fa-map-marked-alt text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Map</span>
+
+            <a href="/admin/map" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Map Data' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-map-marked-alt text-xs"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Tactical Map</span>
             </a>
-            <a href="/admin/hotlines" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Hotlines' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                <i class="fas fa-phone-volume text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Hotlines</span>
+
+            <a href="/admin/hotlines" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Hotlines' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-phone-volume text-xs"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Hotlines</span>
             </a>
 
             <% if (user && user.role === 'superadmin') { %>
-                <p class="text-[9px] text-blue-400 uppercase tracking-widest font-black mt-8 mb-3 px-4">System</p>
-                <a href="/admin/users" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'User Management' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                    <i class="fas fa-users-cog text-[10px] group-hover:scale-110 transition"></i>
-                    <span class="text-[10px] font-bold uppercase tracking-widest">Users</span>
+                <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mt-10 mb-4 px-4 opacity-50">System Custodian</p>
+                
+                <a href="/admin/users" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'User Management' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                    <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-users-cog text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Personnel</span>
                 </a>
-                <a href="/admin/audit-log" class="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/10 transition duration-300 group <%= title === 'Audit Log' ? 'bg-white/10 text-pnp-gold' : '' %>">
-                    <i class="fas fa-history text-[10px] group-hover:scale-110 transition"></i>
-                    <span class="text-[10px] font-bold uppercase tracking-widest">Audit</span>
+
+                <a href="/admin/audit-log" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Audit Log' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                    <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-history text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Audit logs</span>
                 </a>
             <% } %>
         </nav>
@@ -145,8 +226,6 @@
                 </button>
                 <div class="hidden sm:flex items-center space-x-4">
                     <h2 class="text-xl font-black text-pnp-blue dark:text-white tracking-tighter uppercase"><%= title %></h2>
-                    <div class="w-1 h-1 bg-pnp-gold rounded-full"></div>
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Intelligence Command</p>
                 </div>
             </div>
 
@@ -156,14 +235,6 @@
                     <i class="fas fa-moon dark:hidden"></i>
                     <i class="fas fa-sun hidden dark:block text-pnp-gold"></i>
                 </button>
-
-                <div class="text-right hidden sm:block">
-                    <p class="text-xs font-black text-pnp-blue dark:text-white uppercase tracking-widest"><%= user ? user.full_name : 'Administrator' %></p>
-                    <p class="text-[10px] text-pnp-gold font-bold uppercase tracking-widest"><%= user ? user.role : 'Staff' %></p>
-                </div>
-                <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-100 shadow-sm">
-                    <i class="fas fa-user-shield text-pnp-blue"></i>
-                </div>
             </div>
         </header>
 
@@ -306,6 +377,31 @@
             layoutHeader.style.left = '0';
             if (layoutFooter) layoutFooter.style.left = '0';
         }
+
+        // Real-time Intelligence Polling (Anonymous Tips)
+        const pollIntelligence = async () => {
+            try {
+                const response = await fetch('/admin/api/unread-tips');
+                if (response.ok) {
+                    const data = await response.json();
+                    const dot = document.getElementById('tipsNotificationDot');
+                    const dashDot = document.getElementById('tipsNotificationDotDashboard');
+                    if (data.unreadCount > 0) {
+                        if (dot) dot.classList.remove('hidden');
+                        if (dashDot) dashDot.classList.remove('hidden');
+                    } else {
+                        if (dot) dot.classList.add('hidden');
+                        if (dashDot) dashDot.classList.add('hidden');
+                    }
+                }
+            } catch (err) {
+                console.error('Neural grid connection interrupted');
+            }
+        };
+
+        // Check immediately and then every 30 seconds
+        pollIntelligence();
+        setInterval(pollIntelligence, 30000);
     </script>
     <%- include('../partials/notifications') %>
 </body>

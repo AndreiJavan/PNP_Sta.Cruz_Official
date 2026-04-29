@@ -12,8 +12,32 @@
                 extend: {
                     colors: {
                         pnp: {
-                            blue: '#1A3A5C',
-                            gold: '#C8A415',
+                            blue: {
+                                50: '#EBF1F7',
+                                100: '#D1DEEB',
+                                200: '#A3BDD7',
+                                300: '#759CC3',
+                                400: '#477BAF',
+                                500: '#1A3A5C',
+                                600: '#152E4A',
+                                700: '#102237',
+                                800: '#0A1725',
+                                900: '#050B12',
+                                DEFAULT: '#1A3A5C',
+                            },
+                            gold: {
+                                50: '#FAF7E8',
+                                100: '#F5F0D1',
+                                200: '#EBE1A3',
+                                300: '#E1D275',
+                                400: '#D7C347',
+                                500: '#C8A415',
+                                600: '#A08311',
+                                700: '#78620D',
+                                800: '#504109',
+                                900: '#282104',
+                                DEFAULT: '#C8A415',
+                            }
                         }
                     }
                 }
@@ -106,8 +130,8 @@
             <div class="flex items-center justify-between h-20 md:h-24">
                 <!-- Logo -->
                 <a href="/" class="flex items-center space-x-4 group">
-                    <div class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300">
-                        <i class="fas fa-shield-halved text-pnp-blue text-2xl md:text-3xl"></i>
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300 overflow-hidden">
+                        <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 md:w-14 md:h-14 object-contain">
                     </div>
                     <div class="hidden sm:block">
                         <h1 class="text-lg md:text-xl font-black tracking-tighter leading-none">CRIME MAP <span class="text-pnp-gold">STA. CRUZ</span></h1>
@@ -151,8 +175,8 @@
     <div id="mobileMenu" class="fixed inset-0 bg-pnp-blue z-[100] hidden flex flex-col p-8 animate-fade-in">
         <div class="flex justify-between items-center mb-12">
             <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center">
-                    <i class="fas fa-shield-halved text-pnp-blue text-2xl"></i>
+                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center overflow-hidden">
+                    <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain">
                 </div>
                 <h1 class="text-white text-xl font-black tracking-tighter">CPICRS</h1>
             </div>
