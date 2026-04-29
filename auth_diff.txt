@@ -1,0 +1,18 @@
+diff --git a/middleware/auth.ts b/middleware/auth.ts
+index 8a11184..c1f00d6 100644
+--- a/middleware/auth.ts
++++ b/middleware/auth.ts
+@@ -4,13 +4,6 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
+   if (req.session && req.session.user) {
+     return next();
+   }
+-  console.log(`[AUTH PROTECT] Redirecting to login:
+-    URL: ${req.url}
+-    SessionID: ${req.sessionID}
+-    UserInSession: NO
+-    Cookie: ${JSON.stringify(req.session?.cookie)}
+-    Headers: ${JSON.stringify(req.headers)}
+-  `);
+   res.redirect('/admin/login');
+ };
+ 
