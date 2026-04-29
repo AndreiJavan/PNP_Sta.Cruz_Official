@@ -123,25 +123,23 @@ export const postTip = async (req: Request, res: Response) => {
   const tip_id = `TIP-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
   
   try {
-    await db.runTransaction(async (transaction) => {
-      const tipRef = db.collection('anonymous_tips').doc();
-      transaction.set(tipRef, {
-        tip_id,
-        concern_type,
-        location_text,
-        description,
-        created_at: new Date().toISOString()
-      });
-
-      const notifRef = db.collection('admin_notifications').doc();
-      transaction.set(notifRef, {
-        type: 'TIP',
-        message: `New Anonymous Tip received: ${concern_type}`,
-        reference_id: tip_id,
-        is_read: false,
-        created_at: new Date().toISOString()
-      });
+    await db.collection('anonymous_tips').add({
+      tip_id,
+      concern_type,
+      location_text,
+      description,
+      is_flagged: false,
+      created_at: new Date().toISOString()
     });
+
+    await db.collection('admin_notifications').add({
+      type: 'TIP',
+      message: `New Anonymous Tip received: ${concern_type}`,
+      reference_id: tip_id,
+      is_read: false,
+      created_at: new Date().toISOString()
+    });
+
     res.render('public/tip_success', { title: 'Success', tip_id });
   } catch (err) {
     console.error(err);
