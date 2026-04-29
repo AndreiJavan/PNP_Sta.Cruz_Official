@@ -16,19 +16,20 @@
             </div>
             <% } %>
 
-                <form action="/register" method="POST" class="space-y-6">
+                <form action="/register" method="POST" enctype="multipart/form-data" class="space-y-6">
                     <div class="space-y-2">
                         <label for="full_name"
-                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Full Name (Or
-                            Alias)</label>
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Full Legal
+                            Name</label>
                         <input type="text" name="full_name" id="full_name" required
                             class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm">
                     </div>
 
                     <div class="space-y-2">
-                        <label for="username"
-                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Username</label>
-                        <input type="text" name="username" id="username" required
+                        <label for="email"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Email
+                            Address</label>
+                        <input type="email" name="email" id="email" required
                             class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm">
                     </div>
 
@@ -37,6 +38,16 @@
                             class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Password</label>
                         <input type="password" name="password" id="password" required
                             class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-white outline-none transition font-bold text-sm">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="government_id"
+                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Government ID
+                            (Image or PDF)</label>
+                        <input type="file" name="government_id" id="government_id" accept="image/*,.pdf" required
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-gray-300 outline-none transition text-sm">
+                        <p class="text-[9px] text-gray-500 font-medium mt-1">Please upload a clear copy of a valid
+                            government-issued ID.</p>
                     </div>
 
                     <button type="submit"

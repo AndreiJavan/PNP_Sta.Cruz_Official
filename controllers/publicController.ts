@@ -9,19 +9,19 @@ export const getLogin = (req: Request, res: Response) => {
 };
 
 export const postLogin = async (req: Request, res: Response) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    const snap = await db.collection('public_users').where('username', '==', username).limit(1).get();
+    const snap = await db.collection('public_users').where('email', '==', email).limit(1).get();
     if (snap.empty) {
-      return res.render('public/login', { title: 'Login', error_msg: 'Invalid username or password' });
+      return res.render('public/login', { title: 'Login', error_msg: 'Invalid email or password' });
     }
     const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
 
     if (bcrypt.compareSync(password, user.password_hash)) {
-      (req.session as any).publicUser = { id: user.id, username: user.username, full_name: user.full_name };
+      (req.session as any).publicUser = { id: user.id, email: user.email, full_name: user.full_name };
       req.session.save(() => res.redirect('/tip'));
     } else {
-      res.render('public/login', { title: 'Login', error_msg: 'Invalid username or password' });
+      res.render('public/login', { title: 'Login', error_msg: 'Invalid email or password' });
     }
   } catch (err) {
     res.status(500).send('Error during login');
@@ -34,21 +34,25 @@ export const getRegister = (req: Request, res: Response) => {
 };
 
 export const postRegister = async (req: Request, res: Response) => {
-  const { username, full_name, password } = req.body;
+  const { email, full_name, password } = req.body;
   try {
-    const snap = await db.collection('public_users').where('username', '==', username).limit(1).get();
+    const snap = await db.collection('public_users').where('email', '==', email).limit(1).get();
     if (!snap.empty) {
-      return res.render('public/register', { title: 'Register', error_msg: 'Username already taken' });
+      return res.render('public/register', { title: 'Register', error_msg: 'Email already registered' });
     }
     const hash = bcrypt.hashSync(password, 10);
-    const result = await db.collection('public_users').add({
-      username,
+    const data: any = {
+      email,
       full_name,
       password_hash: hash,
       created_at: new Date().toISOString()
-    });
+    };
+    if ((req as any).file) {
+      data.government_id_path = `/images/${(req as any).file.filename}`;
+    }
+    const result = await db.collection('public_users').add(data);
 
-    (req.session as any).publicUser = { id: result.id, username, full_name };
+    (req.session as any).publicUser = { id: result.id, email, full_name };
     req.session.save(() => res.redirect('/tip'));
   } catch (err) {
     res.status(500).send('Error during registration');
