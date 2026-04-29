@@ -34,7 +34,7 @@ export const getRegister = (req: Request, res: Response) => {
 };
 
 export const postRegister = async (req: Request, res: Response) => {
-  const { email, full_name, password } = req.body;
+  const { email, password } = req.body;
   try {
     const snap = await db.collection('public_users').where('email', '==', email).limit(1).get();
     if (!snap.empty) {
@@ -43,14 +43,14 @@ export const postRegister = async (req: Request, res: Response) => {
     const hash = bcrypt.hashSync(password, 10);
     const data: any = {
       email,
-      full_name,
+      full_name: "Anonymous Citizen",
       password_hash: hash,
       created_at: new Date().toISOString()
     };
 
     const result = await db.collection('public_users').add(data);
 
-    (req.session as any).publicUser = { id: result.id, email, full_name };
+    (req.session as any).publicUser = { id: result.id, email, full_name: "Anonymous Citizen" };
     req.session.save(() => res.redirect('/tip'));
   } catch (err) {
     res.status(500).send('Error during registration');
