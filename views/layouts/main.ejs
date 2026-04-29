@@ -235,150 +235,157 @@
         <%- body %>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-pnp-blue text-white dark:bg-slate-900 border-t-4 border-pnp-gold mt-auto py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                <!-- Brand Section -->
-                <div class="flex flex-col space-y-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                            <i class="fas fa-shield-halved text-pnp-blue text-xl"></i>
+    <% if (!locals.hideFooter) { %>
+        <!-- Footer -->
+        <footer class="bg-pnp-blue text-white dark:bg-slate-900 border-t-4 border-pnp-gold mt-auto py-12">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                    <!-- Brand Section -->
+                    <div class="flex flex-col space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
+                                <i class="fas fa-shield-halved text-pnp-blue text-xl"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-lg font-black tracking-tighter leading-none">CPICRS</h2>
+                                <p class="text-[9px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">PNP Sta.
+                                    Cruz
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 class="text-lg font-black tracking-tighter leading-none">CPICRS</h2>
-                            <p class="text-[9px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">PNP Sta. Cruz
-                            </p>
+                        <p class="text-xs text-blue-200/80 max-w-sm leading-relaxed">
+                            To enforce the law, prevent and control crimes, maintain peace and order, and ensure public
+                            safety and internal security with the active support of the community.
+                        </p>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Quick Links</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="/"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Home
+                            </a>
+                            <a href="/map"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Crime Map
+                            </a>
+                            <a href="/bulletins"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Bulletins
+                            </a>
+                            <a href="/tip"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Submit Tip
+                            </a>
+                            <a href="/hotlines"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Hotlines
+                            </a>
+                            <a href="/about"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                About
+                            </a>
+                            <a href="/admin/login"
+                                class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
+                                <i class="fas fa-lock text-[8px] mr-2 transition"></i> Admin Portal
+                            </a>
                         </div>
                     </div>
-                    <p class="text-xs text-blue-200/80 max-w-sm leading-relaxed">
-                        To enforce the law, prevent and control crimes, maintain peace and order, and ensure public
-                        safety and internal security with the active support of the community.
+
+                    <!-- Contact Info / Hotlines -->
+                    <div class="flex flex-col space-y-3">
+                        <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Emergency Hotlines
+                        </h3>
+
+                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                            <span>PNP Sta. Cruz: <strong class="text-white">0998 598 5667</strong></span>
+                        </div>
+                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                            <span>BFP Sta. Cruz: <strong class="text-white">0923-456-7890</strong></span>
+                        </div>
+                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                            <span>Sta. Cruz Rescue: <strong class="text-white">0934-567-8901</strong></span>
+                        </div>
+                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                            <span>MDRRMO: <strong class="text-white">0945-678-9012</strong></span>
+                        </div>
+                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                            <span>Red Cross Laguna: <strong class="text-white">0956-789-0123</strong></span>
+                        </div>
+
+                        <div
+                            class="mt-4 text-xs text-blue-200 flex space-x-3 items-start border-t border-white/10 pt-4">
+                            <i class="fas fa-map-marker-alt mt-1 text-pnp-gold w-3 text-center"></i>
+                            <span>Sta. Cruz Municipal Police Station<br>Sta. Cruz, Laguna, Philippines</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Bar -->
+                <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p
+                        class="text-[10px] text-blue-200/60 font-bold uppercase tracking-widest text-center md:text-left">
+                        &copy; 2026 PNP Sta. Cruz Municipal Police Station. All rights reserved.
                     </p>
-                </div>
-
-                <!-- Quick Links -->
-                <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Quick Links</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <a href="/" class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                            <i
-                                class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
-                            Home
+                    <div class="flex space-x-4">
+                        <a href="https://www.facebook.com/PnpStaCruzLaguna" target="_blank"
+                            class="w-8 h-8 rounded-full bg-white/5 hover:bg-pnp-gold flex items-center justify-center text-blue-200 hover:text-pnp-blue transition duration-300">
+                            <i class="fab fa-facebook-f"></i>
                         </a>
-                        <a href="/map"
-                            class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                            <i
-                                class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
-                            Crime Map
-                        </a>
-                        <a href="/bulletins"
-                            class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                            <i
-                                class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
-                            Bulletins
-                        </a>
-                        <a href="/tip"
-                            class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                            <i
-                                class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
-                            Submit Tip
-                        </a>
-                        <a href="/hotlines"
-                            class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                            <i
-                                class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
-                            Hotlines
-                        </a>
-                        <a href="/about"
-                            class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                            <i
-                                class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
-                            About
-                        </a>
-                        <a href="/admin/login"
-                            class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
-                            <i class="fas fa-lock text-[8px] mr-2 transition"></i> Admin Portal
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Contact Info / Hotlines -->
-                <div class="flex flex-col space-y-3">
-                    <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Emergency Hotlines</h3>
-
-                    <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                        <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                        <span>PNP Sta. Cruz: <strong class="text-white">0998 598 5667</strong></span>
-                    </div>
-                    <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                        <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                        <span>BFP Sta. Cruz: <strong class="text-white">0923-456-7890</strong></span>
-                    </div>
-                    <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                        <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                        <span>Sta. Cruz Rescue: <strong class="text-white">0934-567-8901</strong></span>
-                    </div>
-                    <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                        <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                        <span>MDRRMO: <strong class="text-white">0945-678-9012</strong></span>
-                    </div>
-                    <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                        <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                        <span>Red Cross Laguna: <strong class="text-white">0956-789-0123</strong></span>
-                    </div>
-
-                    <div class="mt-4 text-xs text-blue-200 flex space-x-3 items-start border-t border-white/10 pt-4">
-                        <i class="fas fa-map-marker-alt mt-1 text-pnp-gold w-3 text-center"></i>
-                        <span>Sta. Cruz Municipal Police Station<br>Sta. Cruz, Laguna, Philippines</span>
                     </div>
                 </div>
             </div>
+        </footer>
+        <% } %>
 
-            <!-- Bottom Bar -->
-            <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-[10px] text-blue-200/60 font-bold uppercase tracking-widest text-center md:text-left">
-                    &copy; 2026 PNP Sta. Cruz Municipal Police Station. All rights reserved.
-                </p>
-                <div class="flex space-x-4">
-                    <a href="https://www.facebook.com/PnpStaCruzLaguna" target="_blank"
-                        class="w-8 h-8 rounded-full bg-white/5 hover:bg-pnp-gold flex items-center justify-center text-blue-200 hover:text-pnp-blue transition duration-300">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </footer>
+            <!-- Floating Dark Mode Toggle -->
+            <button id="darkModeToggle"
+                class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white dark:bg-slate-800 shadow-2xl rounded-full flex items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
+                <i class="fas fa-moon text-lg dark:hidden"></i>
+                <i class="fas fa-sun text-lg hidden dark:block"></i>
+            </button>
 
-    <!-- Floating Dark Mode Toggle -->
-    <button id="darkModeToggle"
-        class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white dark:bg-slate-800 shadow-2xl rounded-full flex items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
-        <i class="fas fa-moon text-lg dark:hidden"></i>
-        <i class="fas fa-sun text-lg hidden dark:block"></i>
-    </button>
+            <script>
+                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                const closeMenuBtn = document.getElementById('closeMenuBtn');
+                const mobileMenu = document.getElementById('mobileMenu');
+                const darkModeToggle = document.getElementById('darkModeToggle');
 
-    <script>
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const closeMenuBtn = document.getElementById('closeMenuBtn');
-        const mobileMenu = document.getElementById('mobileMenu');
-        const darkModeToggle = document.getElementById('darkModeToggle');
+                // Dark Mode Logic
+                darkModeToggle.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+                });
 
-        // Dark Mode Logic
-        darkModeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-        });
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('hidden');
+                    document.body.style.overflow = 'hidden';
+                });
 
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        });
-
-        closeMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        });
-    </script>
+                closeMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                });
+            </script>
 </body>
 
 </html>

@@ -10,7 +10,7 @@ export const getHome = async (req: Request, res: Response) => {
     const activeBulletinsSnap = await db.collection('bulletins')
       .where('is_archived', '==', false)
       .count().get();
-    
+
     const tipsReceivedSnap = await db.collection('anonymous_tips')
       .count().get();
 
@@ -27,12 +27,12 @@ export const getHome = async (req: Request, res: Response) => {
 };
 
 export const getMap = (req: Request, res: Response) => {
-  res.render('public/map', { title: 'Crime Map' });
+  res.render('public/map', { title: 'Crime Map', hideFooter: true });
 };
 
 export const getMapPoints = async (req: Request, res: Response) => {
   const { type, range, barangay } = req.query;
-  
+
   let query: any = db.collection('map_points');
 
   if (type) {
@@ -49,7 +49,7 @@ export const getMapPoints = async (req: Request, res: Response) => {
     if (range === '7days') dateLimit = new Date(now.setDate(now.getDate() - 7));
     else if (range === '30days') dateLimit = new Date(now.setDate(now.getDate() - 30));
     else if (range === '6months') dateLimit = new Date(now.setMonth(now.getMonth() - 6));
-    
+
     if (dateLimit) {
       query = query.where('incident_date', '>=', dateLimit.toISOString());
     }
@@ -69,7 +69,7 @@ export const getBulletins = async (req: Request, res: Response) => {
   const { category, search, page = 1 } = req.query;
   const limit = 10;
   // For simplicity, we'll just fetch with limit.
-  
+
   try {
     let query: any = db.collection('bulletins').where('is_archived', '==', false);
 
@@ -79,13 +79,13 @@ export const getBulletins = async (req: Request, res: Response) => {
 
     // We'll fetch and filter in memory if search is present.
     // Given the small scale, we'll fetch and filter.
-    
+
     const snap = await query.orderBy('created_at', 'desc').get();
     let bulletins = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     if (search) {
       const s = String(search).toLowerCase();
-      bulletins = bulletins.filter((b: any) => 
+      bulletins = bulletins.filter((b: any) =>
         b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s)
       );
     }
@@ -121,7 +121,7 @@ export const getTip = (req: Request, res: Response) => {
 export const postTip = async (req: Request, res: Response) => {
   const { concern_type, location_text, description } = req.body;
   const tip_id = `TIP-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-  
+
   try {
     await db.collection('anonymous_tips').add({
       tip_id,
