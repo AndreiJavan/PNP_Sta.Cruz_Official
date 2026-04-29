@@ -381,6 +381,28 @@
                     localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
                 });
 
+                // Active Navigation Link Highlighting
+                const currentPath = window.location.pathname;
+
+                // Desktop Nav
+                const desktopLinks = document.querySelectorAll('header nav a');
+                desktopLinks.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
+                        link.classList.add('bg-white/20', 'text-pnp-gold');
+                    }
+                });
+
+                // Mobile Nav
+                const mobileLinks = document.querySelectorAll('#mobileMenu nav a');
+                mobileLinks.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
+                        link.classList.remove('text-white');
+                        link.classList.add('text-pnp-gold');
+                    }
+                });
+
                 mobileMenuBtn.addEventListener('click', () => {
                     mobileMenu.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
