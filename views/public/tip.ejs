@@ -1,26 +1,34 @@
 <div class="max-w-3xl mx-auto px-4 py-20">
-    <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
+    <div
+        class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
         <!-- Header -->
         <div class="bg-gray-900 p-12 text-center relative overflow-hidden">
             <div class="relative z-10">
-                <div class="w-20 h-20 bg-pnp-gold text-gray-900 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+                <div
+                    class="w-20 h-20 bg-pnp-gold text-gray-900 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
                     <i class="fas fa-user-secret text-3xl"></i>
                 </div>
                 <h1 class="text-3xl font-black text-white mb-2 tracking-tighter uppercase">Anonymous Tip Line</h1>
                 <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Your identity is 100% protected</p>
             </div>
-            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full">
+            </div>
         </div>
 
         <div class="p-12">
-            <div class="bg-red-50 dark:bg-red-900/20 p-8 rounded-[2rem] border border-red-100 dark:border-red-900/30 mb-12 flex items-start space-x-6">
-                <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <div
+                class="bg-red-50 dark:bg-red-900/20 p-8 rounded-[2rem] border border-red-100 dark:border-red-900/30 mb-12 flex items-start space-x-6">
+                <div
+                    class="w-12 h-12 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-exclamation-triangle text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-sm font-black text-red-800 dark:text-red-400 uppercase tracking-widest mb-2">Important Disclaimer</h3>
+                    <h3 class="text-sm font-black text-red-800 dark:text-red-400 uppercase tracking-widest mb-2">
+                        Important Disclaimer</h3>
                     <p class="text-xs text-red-600 dark:text-red-300 leading-relaxed font-medium">
-                        This service is for providing information about crimes or suspicious activities. For immediate emergencies requiring police, fire, or medical assistance, please call <strong>911</strong> or our emergency hotlines directly.
+                        This service is for providing information about crimes or suspicious activities. For immediate
+                        emergencies requiring police, fire, or medical assistance, please call <strong>911</strong> or
+                        our emergency hotlines directly.
                     </p>
                 </div>
             </div>
@@ -28,8 +36,11 @@
             <form action="/tip" method="POST" class="space-y-10" id="tipForm">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-2">
-                        <label for="concern_type" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Type of Concern <span class="text-red-500">*</span></label>
-                        <select name="concern_type" id="concern_type" required class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition font-bold text-sm text-gray-900 dark:text-white">
+                        <label for="concern_type"
+                            class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Type
+                            of Concern <span class="text-red-500">*</span></label>
+                        <select name="concern_type" id="concern_type" required
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition font-bold text-sm text-gray-900 dark:text-white">
                             <option value="" disabled selected>Select Concern Type</option>
                             <option value="Illegal Drugs">Illegal Drugs</option>
                             <option value="Illegal Gambling">Illegal Gambling</option>
@@ -41,32 +52,60 @@
                         </select>
                     </div>
                     <div class="space-y-2">
-                        <label for="location_text" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Location / Area <span class="text-red-500">*</span></label>
-                        <input type="text" name="location_text" id="location_text" required placeholder="e.g. Brgy. Labuin, near the market" class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
+                        <label for="location_text"
+                            class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Location
+                            / Area <span class="text-red-500">*</span></label>
+                        <input type="text" name="location_text" id="location_text" required
+                            placeholder="e.g. Brgy. Labuin, near the market"
+                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
                     </div>
                 </div>
 
                 <div class="space-y-2">
-                    <label for="description" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Details of the Information <span class="text-red-500">*</span></label>
-                    <textarea name="description" id="description" rows="6" required placeholder="Provide as much detail as possible (names, descriptions, vehicles, times, etc.)..." class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition text-sm text-gray-700 dark:text-gray-300 leading-relaxed"></textarea>
+                    <label for="description"
+                        class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Details
+                        of the Information <span class="text-red-500">*</span></label>
+                    <textarea name="description" id="description" rows="6" required
+                        placeholder="Provide as much detail as possible (names, descriptions, vehicles, times, etc.)..."
+                        class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-gray-900/5 focus:border-gray-900 outline-none transition text-sm text-gray-700 dark:text-gray-300 leading-relaxed"></textarea>
                 </div>
 
                 <div class="pt-6 border-t border-gray-100 dark:border-slate-700">
                     <div class="flex items-start space-x-4 mb-10">
                         <div class="pt-1">
-                            <input type="checkbox" id="confirm" required class="w-6 h-6 rounded-lg text-gray-900 dark:text-white focus:ring-gray-900 border-gray-300 dark:border-slate-600 dark:bg-slate-700">
+                            <input type="checkbox" id="confirm" required
+                                class="w-6 h-6 rounded-lg text-gray-900 dark:text-white focus:ring-gray-900 border-gray-300 dark:border-slate-600 dark:bg-slate-700">
                         </div>
-                        <label for="confirm" class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed cursor-pointer">
-                            I understand that providing false information is a crime. I am submitting this tip in good faith to help maintain peace and order in Sta. Cruz.
+                        <label for="confirm"
+                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed cursor-pointer">
+                            I understand that providing false information is a crime. I am submitting this tip in good
+                            faith to help maintain peace and order in Sta. Cruz.
+                        </label>
                         </label>
                     </div>
 
-                    <button type="submit" class="w-full bg-gray-900 hover:bg-black text-white font-black py-6 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-4 uppercase tracking-widest text-sm">
+                    <div class="space-y-4 mb-10">
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Location
+                            Verification <span class="text-red-500">*</span></label>
+                        <p class="text-xs text-gray-500 font-medium">To prevent spam and false reports, we must verify
+                            you are physically inside the Sta. Cruz region before you can send your tip. Your exact
+                            location will <strong class="text-red-500">not</strong> be saved in our system.</p>
+                        <button type="button" id="verify_location_btn"
+                            class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-pnp-blue dark:text-white font-bold py-4 rounded-xl transition flex items-center justify-center space-x-2 text-sm border-2 border-dashed border-gray-300 dark:border-slate-500">
+                            <i class="fas fa-location-dot"></i>
+                            <span>Verify My Location</span>
+                        </button>
+                        <p id="location_status" class="text-[10px] text-gray-500 font-bold hidden"></p>
+                    </div>
+
+                    <button type="submit" id="submit_btn" disabled
+                        class="w-full bg-gray-900 hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed text-white font-black py-6 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 disabled:hover:translate-y-0 flex items-center justify-center space-x-4 uppercase tracking-widest text-sm">
                         <i class="fas fa-shield-halved text-xl text-pnp-gold"></i>
                         <span>Submit Anonymous Tip</span>
                     </button>
-                    
-                    <p class="text-center text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-8">
+
+                    <p
+                        class="text-center text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-8">
                         <i class="fas fa-lock mr-2"></i> Encrypted & Secure Submission
                     </p>
                 </div>
@@ -74,3 +113,65 @@
         </div>
     </div>
 </div>
+</div>
+
+<script>
+    // Haversine Distance Calculator (km)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    // Geofencing Logic
+    const STA_CRUZ_LAT = 14.275;
+    const STA_CRUZ_LNG = 121.410;
+    const MAX_DISTANCE_KM = 20;
+
+    const verifyBtn = document.getElementById('verify_location_btn');
+    const submitBtn = document.getElementById('submit_btn');
+    const statusMsg = document.getElementById('location_status');
+
+    verifyBtn.addEventListener('click', () => {
+        statusMsg.classList.remove('hidden', 'text-red-500', 'text-green-500');
+        statusMsg.classList.add('text-gray-500');
+        statusMsg.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Checking location...';
+
+        if (!navigator.geolocation) {
+            statusMsg.classList.replace('text-gray-500', 'text-red-500');
+            statusMsg.innerText = 'Geolocation is not supported by your browser.';
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const distance = calculateDistance(userLat, userLng, STA_CRUZ_LAT, STA_CRUZ_LNG);
+
+                if (distance <= MAX_DISTANCE_KM) {
+                    statusMsg.classList.replace('text-gray-500', 'text-green-500');
+                    statusMsg.innerText = 'Location verified! You are within Sta. Cruz bounds.';
+                    verifyBtn.classList.replace('border-gray-300', 'border-green-500');
+                    verifyBtn.innerHTML = '<i class="fas fa-check text-green-500"></i> <span class="text-green-600">Verified</span>';
+                    verifyBtn.disabled = true;
+                    submitBtn.disabled = false;
+                } else {
+                    statusMsg.classList.replace('text-gray-500', 'text-red-500');
+                    statusMsg.innerText = `Access restricted: You are approx. ${Math.round(distance)}km outside Sta. Cruz borders.`;
+                }
+            },
+            (error) => {
+                statusMsg.classList.replace('text-gray-500', 'text-red-500');
+                statusMsg.innerText = 'Unable to retrieve location. Please allow location access to submit a tip.';
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    });
+</script>
