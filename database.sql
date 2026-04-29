@@ -115,13 +115,7 @@ INSERT INTO users (username, full_name, password_hash, role) VALUES
 -- (Note: Password hashes are placeholders, use bcrypt to generate real ones)
 
 INSERT INTO hotlines (name, number, category) VALUES 
-('PNP Sta. Cruz', '0912-345-6789', 'Police'),
-('BFP Sta. Cruz', '0923-456-7890', 'Fire'),
-('Sta. Cruz Rescue', '0934-567-8901', 'Emergency'),
-('MDRRMO', '0945-678-9012', 'Disaster'),
-('Red Cross Laguna', '0956-789-0123', 'Medical'),
-('Laguna Medical Center', '(049) 501-1234', 'Medical'),
-('Meralco', '16211', 'Utility'),
-('Water District', '0967-890-1234', 'Utility'),
-('DOH Hotline', '1555', 'Health'),
-('Women & Children Desk', '0978-901-2345', 'Social Services');
+('PNP Sta. Cruz', '+63998-598-5667', 'Police'),
+('BFP Sta. Cruz', '+63967-052-8897', 'Fire'),
+('MDRRMO Sta. Cruz', '+63921-962-0602', 'Disaster'),
+('Red Cross', '+63 2 8790 2300', 'Medical');

@@ -1,4 +1,9 @@
-export const mockHotlines = [];
+export const mockHotlines = [
+  { id: 'h1', agency_name: 'PNP Sta. Cruz', contact_number: '+63998-598-5667', category: 'Police' },
+  { id: 'h2', agency_name: 'BFP Sta. Cruz', contact_number: '+63967-052-8897', category: 'Fire' },
+  { id: 'h3', agency_name: 'MDRRMO Sta. Cruz', contact_number: '+63921-962-0602', category: 'Disaster' },
+  { id: 'h4', agency_name: 'Red Cross', contact_number: '+63 2 8790 2300', category: 'Medical' }
+];
 
 export const mockBulletins = [];
 
