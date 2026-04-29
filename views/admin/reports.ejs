@@ -1,39 +1,54 @@
 <div class="space-y-8 animate-fade-in">
     <!-- Header Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
+        <div
+            class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
             <span class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Total Datasets</span>
-            <div class="text-3xl font-black text-pnp-blue dark:text-pnp-gold leading-none"><%= allIncidents.length %></div>
+            <div class="text-3xl font-black text-pnp-blue dark:text-pnp-gold leading-none">
+                <%= allIncidents.length %>
+            </div>
             <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">Active Strategic Records</p>
         </div>
-        
-        <% 
-            let total8FocusAll = allIncidents.filter(i => i.category === '8-Focus').length;
+
+        <% let total8FocusAll=allIncidents.filter(i=> i.category === '8-Focus').length;
             let totalPSIAll = allIncidents.filter(i => i.category === 'PSI').length;
-        %>
+            %>
 
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
-            <span class="text-[10px] text-red-500 font-black uppercase tracking-widest mb-1">Focus Volume</span>
-            <div class="text-3xl font-black text-red-500 leading-none"><%= total8FocusAll %></div>
-            <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">8-Focus Incidents</p>
-        </div>
+            <div
+                class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
+                <span class="text-[10px] text-red-500 font-black uppercase tracking-widest mb-1">Focus Volume</span>
+                <div class="text-3xl font-black text-red-500 leading-none">
+                    <%= total8FocusAll %>
+                </div>
+                <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">8-Focus Incidents</p>
+            </div>
 
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
-            <span class="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-1">PSI Volume</span>
-            <div class="text-3xl font-black text-blue-500 leading-none"><%= totalPSIAll %></div>
-            <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">Priority Investigations</p>
-        </div>
+            <div
+                class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col justify-center">
+                <span class="text-[10px] text-blue-500 font-black uppercase tracking-widest mb-1">PSI Volume</span>
+                <div class="text-3xl font-black text-blue-500 leading-none">
+                    <%= totalPSIAll %>
+                </div>
+                <p class="text-[8px] text-slate-400 font-bold uppercase mt-2">Priority Investigations</p>
+            </div>
 
-        <button onclick="document.getElementById('fileConverterInput').click()" class="bg-pnp-blue dark:bg-pnp-gold p-6 rounded-[2rem] shadow-xl flex flex-col justify-center border-2 border-white/10 text-left transition-all hover:scale-[1.02] hover:shadow-pnp-gold/20 group">
-            <span class="text-[10px] text-pnp-gold dark:text-pnp-blue font-black uppercase tracking-widest mb-1 group-hover:animate-pulse">File Scanner</span>
-            <div class="text-xl font-black text-white dark:text-pnp-blue leading-none uppercase">Unit Crime Periodic Report</div>
-            <p class="text-[8px] text-blue-200 dark:text-pnp-blue/60 font-bold uppercase mt-2 italic shadow-sm">Strategic Document Processing</p>
-            <input type="file" id="fileConverterInput" accept="image/*,.pdf,.xlsx,.xls,.csv,.txt" class="hidden" onchange="handleIntelConvert(this)">
-        </button>
+            <button onclick="document.getElementById('fileConverterInput').click()"
+                class="bg-pnp-blue dark:bg-pnp-gold p-6 rounded-[2rem] shadow-xl flex flex-col justify-center border-2 border-white/10 text-left transition-all hover:scale-[1.02] hover:shadow-pnp-gold/20 group">
+                <span
+                    class="text-[10px] text-pnp-gold dark:text-pnp-blue font-black uppercase tracking-widest mb-1 group-hover:animate-pulse">File
+                    Scanner</span>
+                <div class="text-xl font-black text-white dark:text-pnp-blue leading-none uppercase">Unit Crime Periodic
+                    Report</div>
+                <p class="text-[8px] text-blue-200 dark:text-pnp-blue/60 font-bold uppercase mt-2 italic shadow-sm">
+                    Strategic Document Processing</p>
+                <input type="file" id="fileConverterInput" accept="image/*,.pdf,.xlsx,.xls,.csv,.txt" class="hidden"
+                    onchange="handleIntelConvert(this)">
+            </button>
     </div>
 
     <!-- Hidden Loading Overlay -->
-    <div id="intelLoadingOverlay" class="hidden fixed inset-0 z-[2000] flex flex-col items-center justify-center space-y-6 bg-slate-900/90 backdrop-blur-md">
+    <div id="intelLoadingOverlay"
+        class="hidden fixed inset-0 z-[2000] flex flex-col items-center justify-center space-y-6 bg-slate-900/90 backdrop-blur-md">
         <div class="relative">
             <div class="w-20 h-20 border-b-4 border-pnp-gold rounded-full animate-spin"></div>
             <div class="absolute inset-0 flex items-center justify-center">
@@ -42,27 +57,37 @@
         </div>
         <div class="text-center space-y-2">
             <h4 class="text-[10px] font-black text-pnp-gold uppercase tracking-[0.3em]">Processing Periodic Report</h4>
-            <p id="intelLoadingText" class="text-[8px] text-white/50 uppercase font-bold tracking-widest">System is extracting tactical data...</p>
+            <p id="intelLoadingText" class="text-[8px] text-white/50 uppercase font-bold tracking-widest">System is
+                extracting tactical data...</p>
         </div>
     </div>
 
     <!-- Tactical Dataset (Spreadsheet View) -->
-    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
-        <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center bg-gray-50/10 gap-6">
+    <div
+        class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div
+            class="p-8 border-b border-gray-50 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center bg-gray-50/10 gap-6">
             <div class="flex items-center space-x-4">
                 <div class="w-12 h-12 bg-pnp-gold rounded-2xl flex items-center justify-center text-pnp-blue shadow-lg">
                     <i class="fas fa-table text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">Strategic Crime Database</h3>
+                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">Strategic
+                        Crime Database</h3>
                 </div>
             </div>
 
-            <div class="flex items-center bg-white dark:bg-slate-700 rounded-2xl p-1 border border-gray-100 dark:border-slate-600 shadow-inner">
-                <button onclick="filterDataset('all')" id="tab-all" class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-pnp-blue text-white shadow-lg">All Records</button>
-                <button onclick="filterDataset('8-Focus')" id="tab-8-Focus" class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-pnp-blue">8-Focus</button>
-                <button onclick="filterDataset('PSI')" id="tab-PSI" class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-pnp-blue">PSI</button>
-                <button onclick="filterDataset('Non-Index')" id="tab-Non-Index" class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-pnp-blue">Non-Index</button>
+            <div
+                class="flex items-center bg-white dark:bg-slate-700 rounded-2xl p-1 border border-gray-100 dark:border-slate-600 shadow-inner">
+                <button onclick="filterDataset('all')" id="tab-all"
+                    class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all bg-pnp-blue text-white shadow-lg">All
+                    Records</button>
+                <button onclick="filterDataset('8-Focus')" id="tab-8-Focus"
+                    class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-pnp-blue">8-Focus</button>
+                <button onclick="filterDataset('PSI')" id="tab-PSI"
+                    class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-pnp-blue">PSI</button>
+                <button onclick="filterDataset('Non-Index')" id="tab-Non-Index"
+                    class="filter-tab px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all text-gray-400 hover:text-pnp-blue">Non-Index</button>
             </div>
         </div>
 
@@ -70,119 +95,172 @@
             <table class="w-full text-left border-collapse" id="incidentSpreadsheet">
                 <thead class="bg-blue-50/30 dark:bg-slate-900/50">
                     <tr>
-                        <th class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Date Committed</th>
-                        <th class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Type of Offense</th>
-                        <th class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Barangay</th>
-                        <th class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">Category</th>
-                        <th class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Description</th>
+                        <th
+                            class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Date Committed</th>
+                        <th
+                            class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Type of Offense</th>
+                        <th
+                            class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Barangay</th>
+                        <th
+                            class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">
+                            Category</th>
+                        <th
+                            class="px-8 py-4 text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Description</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
-                    <% allIncidents.forEach(incident => { %>
-                        <tr class="incident-row hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors" data-category="<%= incident.category || 'Non-Index' %>">
-                            <td class="px-8 py-5 text-[10px] font-bold text-slate-600 dark:text-slate-300"><%= incident.incident_date || 'N/A' %></td>
-                            <td class="px-8 py-5">
-                                <span class="text-[10px] font-black text-slate-800 dark:text-white uppercase"><%= incident.incident_type %></span>
+                    <% allIncidents.forEach(incident=> { %>
+                        <tr class="incident-row hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors"
+                            data-category="<%= incident.category || 'Non-Index' %>">
+                            <td class="px-8 py-5 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                <%= incident.incident_date || 'N/A' %>
                             </td>
                             <td class="px-8 py-5">
-                                <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-tighter">Brgy. <%= incident.barangay %></span>
+                                <span class="text-[10px] font-black text-slate-800 dark:text-white uppercase">
+                                    <%= incident.incident_type %>
+                                </span>
+                            </td>
+                            <td class="px-8 py-5">
+                                <span
+                                    class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-tighter">Brgy.
+                                    <%= incident.barangay %></span>
                             </td>
                             <td class="px-8 py-5 text-center">
-                                <span class="px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border <%= incident.category === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (incident.category === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20') %>">
+                                <span
+                                    class="px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border <%= incident.category === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (incident.category === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20') %>">
                                     <%= incident.category || 'Non-Index' %>
                                 </span>
                             </td>
                             <td class="px-8 py-5 max-w-xs">
-                                <p class="text-[9px] text-slate-400 font-medium truncate"><%= incident.description || 'Intel Extraction Log' %></p>
+                                <p class="text-[9px] text-slate-400 font-medium truncate">
+                                    <%= incident.description || 'Intel Extraction Log' %>
+                                </p>
                             </td>
                         </tr>
-                    <% }) %>
+                        <% }) %>
                 </tbody>
             </table>
         </div>
     </div>
 
     <!-- Extraction Batches View -->
-    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+    <div
+        class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
         <div class="p-8 border-b border-gray-50 dark:border-slate-700 bg-gray-50/10">
-            <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">Historical Intelligence Batches</h3>
+            <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">Historical
+                Intelligence Batches</h3>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-50/50 dark:bg-slate-900/50">
                     <tr>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Timestamp</th>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Scanned By</th>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">Total Records</th>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">8-Focus</th>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">PSI</th>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">Non-Index</th>
-                        <th class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-right">Actions</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Timestamp</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Scanned By</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700">
+                            Total Records</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">
+                            8-Focus</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">
+                            PSI</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-center">
+                            Non-Index</th>
+                        <th
+                            class="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-widest border-b border-gray-100 dark:border-slate-700 text-right">
+                            Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
-                    <% if (reports.length === 0) { %>
+                    <% if (reports.length===0) { %>
                         <tr>
                             <td colspan="7" class="px-8 py-20 text-center">
                                 <i class="fas fa-search text-gray-200 text-4xl mb-4 block"></i>
-                                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">No intelligence scans captured yet</span>
+                                <span class="text-xs text-gray-400 font-bold uppercase tracking-widest">No intelligence
+                                    scans captured yet</span>
                             </td>
                         </tr>
-                    <% } else { %>
-                        <% reports.forEach(report => { %>
-                            <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors group">
-                                <td class="px-8 py-6">
-                                    <div class="flex flex-col">
-                                        <span class="text-[10px] font-black text-slate-700 dark:text-slate-200">
-                                            <%= new Date(report.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) %>
-                                        </span>
-                                        <span class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">
-                                            <%= new Date(report.timestamp).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) %>
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    <div class="flex items-center space-x-3">
-                                        <div class="w-8 h-8 rounded-full bg-pnp-blue flex items-center justify-center text-[10px] font-black text-pnp-gold border border-pnp-gold/20">
-                                            <%= (report.admin_name || 'A').charAt(0) %>
+                        <% } else { %>
+                            <% reports.forEach(report=> { %>
+                                <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors group">
+                                    <td class="px-8 py-6">
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-black text-slate-700 dark:text-slate-200">
+                                                <%= new Date(report.timestamp).toLocaleDateString(undefined, {
+                                                    month: 'short' , day: 'numeric' , year: 'numeric' }) %>
+                                            </span>
+                                            <span
+                                                class="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">
+                                                <%= new Date(report.timestamp).toLocaleTimeString(undefined, {
+                                                    hour: '2-digit' , minute: '2-digit' }) %>
+                                            </span>
                                         </div>
-                                        <span class="text-[10px] font-black uppercase text-slate-600 dark:text-slate-300 tracking-tight"><%= report.admin_name || 'System Administrator' %></span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6">
-                                    <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold"><%= report.total_records || 0 %></span>
-                                </td>
-                                <td class="px-8 py-6 text-center">
-                                    <span class="px-3 py-1 rounded-full text-[9px] font-black <%= (report.category_stats && report.category_stats['8-Focus']) > 0 ? 'bg-red-500/10 text-red-500' : 'bg-gray-100 text-gray-400' %>">
-                                        <%= (report.category_stats && report.category_stats['8-Focus']) || 0 %>
-                                    </span>
-                                </td>
-                                <td class="px-8 py-6 text-center">
-                                    <span class="px-3 py-1 rounded-full text-[9px] font-black <%= (report.category_stats && report.category_stats['PSI']) > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-100 text-gray-400' %>">
-                                        <%= (report.category_stats && report.category_stats['PSI']) || 0 %>
-                                    </span>
-                                </td>
-                                <td class="px-8 py-6 text-center">
-                                    <span class="px-3 py-1 rounded-full text-[9px] font-black <%= (report.category_stats && report.category_stats['Non-Index']) > 0 ? 'bg-slate-500/10 text-slate-500' : 'bg-gray-100 text-gray-400' %>">
-                                        <%= (report.category_stats && report.category_stats['Non-Index']) || 0 %>
-                                    </span>
-                                </td>
-                                <td class="px-8 py-6 text-right">
-                                    <div class="flex items-center justify-end space-x-3">
-                                        <button type="button" onclick="viewReportDetails('<%= report.id %>')" class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-700 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-pnp-blue/10 transition-all flex items-center justify-center border border-transparent hover:border-pnp-gold/30">
-                                            <i class="fas fa-eye text-xs"></i>
-                                        </button>
-                                        <form action="/admin/reports/<%= report.id %>/delete" method="POST" onsubmit="return confirm('Secure Warning: Purging this intelligence record is irreversible. Proceed?')" class="inline-block">
-                                            <button type="submit" class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-700 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all flex items-center justify-center border border-transparent hover:border-red-500/30">
-                                                <i class="fas fa-trash-alt text-xs"></i>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center space-x-3">
+                                            <div
+                                                class="w-8 h-8 rounded-full bg-pnp-blue flex items-center justify-center text-[10px] font-black text-pnp-gold border border-pnp-gold/20">
+                                                <%= (report.admin_name || 'A' ).charAt(0) %>
+                                            </div>
+                                            <span
+                                                class="text-[10px] font-black uppercase text-slate-600 dark:text-slate-300 tracking-tight">
+                                                <%= report.admin_name || 'System Administrator' %>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold">
+                                            <%= report.total_records || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span
+                                            class="px-3 py-1 rounded-full text-[9px] font-black <%= (report.category_stats && report.category_stats['8-Focus']) > 0 ? 'bg-red-500/10 text-red-500' : 'bg-gray-100 text-gray-400' %>">
+                                            <%= (report.category_stats && report.category_stats['8-Focus']) || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span
+                                            class="px-3 py-1 rounded-full text-[9px] font-black <%= (report.category_stats && report.category_stats['PSI']) > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-100 text-gray-400' %>">
+                                            <%= (report.category_stats && report.category_stats['PSI']) || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span
+                                            class="px-3 py-1 rounded-full text-[9px] font-black <%= (report.category_stats && report.category_stats['Non-Index']) > 0 ? 'bg-slate-500/10 text-slate-500' : 'bg-gray-100 text-gray-400' %>">
+                                            <%= (report.category_stats && report.category_stats['Non-Index']) || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex items-center justify-end space-x-3">
+                                            <button type="button" onclick="viewReportDetails('<%= report.id %>')"
+                                                class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-700 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-pnp-blue/10 transition-all flex items-center justify-center border border-transparent hover:border-pnp-gold/30">
+                                                <i class="fas fa-eye text-xs"></i>
                                             </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        <% }) %>
-                    <% } %>
+                                            <form action="/admin/reports/<%= report.id %>/delete" method="POST"
+                                                onsubmit="return confirm('Secure Warning: Purging this intelligence record is irreversible. Proceed?')"
+                                                class="inline-block">
+                                                <button type="submit"
+                                                    class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-700 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all flex items-center justify-center border border-transparent hover:border-red-500/30">
+                                                    <i class="fas fa-trash-alt text-xs"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                                    <% } %>
                 </tbody>
             </table>
         </div>
@@ -190,19 +268,26 @@
 </div>
 
 <!-- Modal for raw data view (Polished Spreadsheet Style) -->
-<div id="reportDetailsModal" class="fixed inset-0 z-[1500] hidden items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-5xl rounded-[3rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
-        <div class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
+<div id="reportDetailsModal"
+    class="fixed inset-0 z-[1500] hidden items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
+    <div
+        class="bg-white dark:bg-slate-800 w-full max-w-5xl rounded-[3rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
+        <div
+            class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
             <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-pnp-blue rounded-2xl flex items-center justify-center text-pnp-gold border border-pnp-gold/30">
+                <div
+                    class="w-12 h-12 bg-pnp-blue rounded-2xl flex items-center justify-center text-pnp-gold border border-pnp-gold/30">
                     <i class="fas fa-file-invoice text-xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] text-sm">Strategic Intelligence Batch Details</h3>
-                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Granular Transactional Audit Trail</p>
+                    <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] text-sm">Strategic
+                        Intelligence Batch Details</h3>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Granular Transactional
+                        Audit Trail</p>
                 </div>
             </div>
-            <button onclick="closeReportDetails()" class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 text-gray-500 hover:bg-red-500 hover:text-white transition-all transform hover:rotate-90">
+            <button onclick="closeReportDetails()"
+                class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 text-gray-500 hover:bg-red-500 hover:text-white transition-all transform hover:rotate-90">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -211,21 +296,29 @@
 </div>
 
 <!-- Intelligence Review Modal (Polished Grid Spreadsheet Style) -->
-<div id="intelReviewModal" class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-900/95 backdrop-blur-xl p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-6xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
-        <div class="p-8 border-b border-gray-100 dark:border-slate-700 bg-pnp-blue/5 dark:bg-slate-900/50 flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
+<div id="intelReviewModal"
+    class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-900/95 backdrop-blur-xl p-4">
+    <div
+        class="bg-white dark:bg-slate-800 w-full max-w-6xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div
+            class="p-8 border-b border-gray-100 dark:border-slate-700 bg-pnp-blue/5 dark:bg-slate-900/50 flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
             <div class="flex items-center space-x-5">
-                <div class="w-14 h-14 bg-pnp-blue dark:bg-pnp-gold rounded-2xl flex items-center justify-center text-white dark:text-pnp-blue shadow-2xl rotate-3 border-2 border-white/20">
+                <div
+                    class="w-14 h-14 bg-pnp-blue dark:bg-pnp-gold rounded-2xl flex items-center justify-center text-white dark:text-pnp-blue shadow-2xl rotate-3 border-2 border-white/20">
                     <i class="fas fa-file-excel text-2xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] text-xs">Intelligence Accuracy Verified</h3>
-                    <p id="reviewRowCount" class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Staging Area: Validating Real-time Synchronization...</p>
+                    <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] text-xs">
+                        Intelligence Accuracy Verified</h3>
+                    <p id="reviewRowCount" class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                        Staging Area: Validating Real-time Synchronization...</p>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-4 bg-white dark:bg-slate-700 p-2 rounded-2xl border border-gray-100 dark:border-slate-600 shadow-inner">
-                <select id="reviewCategoryFilter" onchange="renderReviewTable()" class="bg-transparent border-none text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase px-6 py-2 outline-none">
+            <div
+                class="flex items-center space-x-4 bg-white dark:bg-slate-700 p-2 rounded-2xl border border-gray-100 dark:border-slate-600 shadow-inner">
+                <select id="reviewCategoryFilter" onchange="renderReviewTable()"
+                    class="bg-transparent border-none text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase px-6 py-2 outline-none">
                     <option value="All">Global Filter</option>
                     <option value="8-Focus">8-Focus Target</option>
                     <option value="PSI">PSI Sector</option>
@@ -233,24 +326,46 @@
                 </select>
                 <div class="w-px h-6 bg-gray-100 dark:bg-slate-600"></div>
                 <div class="flex items-center space-x-5 px-6 py-2">
-                    <div class="flex items-center space-x-2"><div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></div><span id="count8Focus" class="text-[10px] font-black text-pnp-blue dark:text-white">0</span></div>
-                    <div class="flex items-center space-x-2"><div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div><span id="countPSI" class="text-[10px] font-black text-pnp-blue dark:text-white">0</span></div>
-                    <div class="flex items-center space-x-2"><div class="w-2.5 h-2.5 rounded-full bg-slate-500 shadow-sm shadow-slate-500/50"></div><span id="countNonIndex" class="text-[10px] font-black text-pnp-blue dark:text-white">0</span></div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></div><span
+                            id="count8Focus" class="text-[10px] font-black text-pnp-blue dark:text-white">0</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div><span
+                            id="countPSI" class="text-[10px] font-black text-pnp-blue dark:text-white">0</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shadow-sm shadow-slate-500/50"></div><span
+                            id="countNonIndex" class="text-[10px] font-black text-pnp-blue dark:text-white">0</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="flex-grow overflow-auto p-6 bg-gray-50/50 dark:bg-slate-900/30 custom-scrollbar">
-            <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200/50 dark:border-slate-700/50 shadow-inner overflow-hidden">
+            <div
+                class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200/50 dark:border-slate-700/50 shadow-inner overflow-hidden">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-gray-50 dark:bg-slate-900/80 border-b border-gray-200 dark:border-slate-700">
-                            <th class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700 w-16">Row</th>
-                            <th class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">Sector (Barangay)</th>
-                            <th class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">Tactical Timeline</th>
-                            <th class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">Offense Classification</th>
-                            <th class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">Risk Pillar</th>
-                            <th class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-right">Operational Actions</th>
+                            <th
+                                class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700 w-16">
+                                Row</th>
+                            <th
+                                class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">
+                                Sector (Barangay)</th>
+                            <th
+                                class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">
+                                Tactical Timeline</th>
+                            <th
+                                class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">
+                                Offense Classification</th>
+                            <th
+                                class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200/50 dark:border-slate-700">
+                                Risk Pillar</th>
+                            <th
+                                class="px-6 py-5 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-right">
+                                Operational Actions</th>
                         </tr>
                     </thead>
                     <tbody id="reviewTableBody" class="divide-y divide-gray-100 dark:divide-slate-700/50"></tbody>
@@ -258,13 +373,18 @@
             </div>
         </div>
 
-        <div class="p-8 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center relative z-10">
-            <button onclick="addNewReviewRow()" class="px-8 py-4 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-2xl text-[10px] font-black text-pnp-blue dark:text-white uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-slate-600 transition shadow-sm group">
+        <div
+            class="p-8 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center relative z-10">
+            <button onclick="addNewReviewRow()"
+                class="px-8 py-4 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-2xl text-[10px] font-black text-pnp-blue dark:text-white uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-slate-600 transition shadow-sm group">
                 <i class="fas fa-plus mr-2 group-hover:scale-125 transition"></i> Append Dataset Entry
             </button>
             <div class="flex items-center space-x-4">
-                <button onclick="closeIntelReview()" class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-red-500 transition-all">Abort Scan</button>
-                <button onclick="confirmIntelReview()" class="px-12 py-5 bg-pnp-blue hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-pnp-blue/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center space-x-3">
+                <button onclick="closeIntelReview()"
+                    class="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-red-500 transition-all">Abort
+                    Scan</button>
+                <button onclick="confirmIntelReview()"
+                    class="px-12 py-5 bg-pnp-blue hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] shadow-2xl shadow-pnp-blue/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center space-x-3">
                     <i class="fas fa-shield-check"></i>
                     <span>Real-time Synchronization</span>
                 </button>
@@ -276,36 +396,36 @@
 <script type="module">
     import { GoogleGenAI, Type } from "https://esm.sh/@google/genai";
     import * as XLSX from "https://esm.sh/xlsx";
- 
-     const GEMINI_API_KEY = "<%= GEMINI_API_KEY %>";
-     const VALID_BARANGAYS = [
-        "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", 
-        "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", 
-        "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", 
-        "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", 
-        "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
-     ];
 
-     window.handleIntelConvert = async function(input) {
-         if (!input.files || !input.files[0]) return;
-         
-         const file = input.files[0];
-         const loadingOverlay = document.getElementById('intelLoadingOverlay');
-         
-         // Show loading
-         loadingOverlay.classList.remove('hidden');
-         
-         try {
-             if (!GEMINI_API_KEY || GEMINI_API_KEY === "undefined") {
-                 throw new Error("Intelligence System Key is not configured.");
-             }
-  
-             const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-             let aiParts = [];
-             const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv') || file.type === 'text/csv' || file.type.includes('spreadsheet');
-             const isText = file.name.endsWith('.txt') || file.type === 'text/plain';
-  
-             if (isExcel) {
+    const GEMINI_API_KEY = "<%= GEMINI_API_KEY %>";
+    const VALID_BARANGAYS = [
+        "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
+        "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
+        "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)",
+        "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur",
+        "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
+    ];
+
+    window.handleIntelConvert = async function (input) {
+        if (!input.files || !input.files[0]) return;
+
+        const file = input.files[0];
+        const loadingOverlay = document.getElementById('intelLoadingOverlay');
+
+        // Show loading
+        loadingOverlay.classList.remove('hidden');
+
+        try {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "undefined") {
+                throw new Error("Intelligence System Key is not configured.");
+            }
+
+            const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+            let aiParts = [];
+            const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv') || file.type === 'text/csv' || file.type.includes('spreadsheet');
+            const isText = file.name.endsWith('.txt') || file.type === 'text/plain';
+
+            if (isExcel) {
                 const data = await file.arrayBuffer();
                 const workbook = XLSX.read(data);
                 let excelText = "";
@@ -314,50 +434,69 @@
                     excelText += XLSX.utils.sheet_to_csv(sheet);
                 });
                 aiParts.push({ text: `Extract intelligence from: ${excelText}` });
-             } else if (isText) {
+            } else if (isText) {
                 const text = await file.text();
                 aiParts.push({ text: text });
-             } else {
+            } else {
                 const base64Data = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = () => resolve(reader.result.split(',')[1]);
                     reader.readAsDataURL(file);
                 });
                 aiParts.push({ inlineData: { data: base64Data, mimeType: file.type } });
-             }
-  
-             const prompt = `
+            }
+
+            const prompt = `
              Convert the input into grouped JSON by barangay.
              - Categories: "8-Focus" (Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping MV, Carnapping MC), "PSI", "Non-Index"
              - Barangay MUST be one of: ${VALID_BARANGAYS.join(', ')}.
              - Format: { "BarangayName": [{ date, offense, category, description }] }
              `;
-             aiParts.push({ text: prompt });
-  
-             const response = await ai.models.generateContent({
-                 model: "gemini-2.5-flash",
-                 contents: { parts: aiParts },
-                 config: {
-                     responseMimeType: "application/json",
-                     responseSchema: {
-                        type: Type.OBJECT,
-                        properties: Object.fromEntries(VALID_BARANGAYS.map(b => [b, {
-                            type: Type.ARRAY,
-                            items: {
+            aiParts.push({ text: prompt });
+
+            let response = null;
+            let retryCount = 0;
+            const maxRetries = 3;
+
+            while (retryCount < maxRetries) {
+                try {
+                    response = await ai.models.generateContent({
+                        model: "gemini-2.5-flash",
+                        contents: { parts: aiParts },
+                        config: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
                                 type: Type.OBJECT,
-                                properties: {
-                                    date: { type: Type.STRING },
-                                    offense: { type: Type.STRING },
-                                    category: { type: Type.STRING },
-                                    description: { type: Type.STRING }
-                                },
-                                required: ["date", "offense", "category", "description"]
+                                properties: Object.fromEntries(VALID_BARANGAYS.map(b => [b, {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            date: { type: Type.STRING },
+                                            offense: { type: Type.STRING },
+                                            category: { type: Type.STRING },
+                                            description: { type: Type.STRING }
+                                        },
+                                        required: ["date", "offense", "category", "description"]
+                                    }
+                                }]))
                             }
-                        }]))
-                     }
-                 }
-             });
-  
+                        }
+                    });
+                    break; // success
+                } catch (genErr) {
+                    const errorStr = genErr.message || String(genErr);
+                    if ((errorStr.includes('"code":503') || errorStr.includes('503') || errorStr.includes('429')) && retryCount < maxRetries - 1) {
+                        retryCount++;
+                        const statusText = document.getElementById('intelLoadingText');
+                        statusText.textContent = `Server busy (High demand). Retrying... (${retryCount}/${maxRetries - 1})`;
+                        await new Promise(r => setTimeout(r, retryCount * 3000));
+                    } else {
+                        throw genErr;
+                    }
+                }
+            }
+
             const results = JSON.parse(response.text);
             const flattened = [];
             for (const [brgy, incidents] of Object.entries(results)) {
@@ -373,48 +512,48 @@
                     });
                 }
             }
-            
+
             const statusText = document.getElementById('intelLoadingText');
             statusText.textContent = `${flattened.length} records identified. Finalizing spreadsheet...`;
             setTimeout(() => {
                 showIntelReview(flattened);
                 statusText.textContent = "System is processing intelligence data...";
             }, 1500);
-  
-         } catch (error) {
-             console.error("AI Error:", error);
-             alert("Extraction failed: " + error.message);
-         } finally {
-             loadingOverlay.classList.add('hidden');
-             input.value = '';
-         }
-     };
-  
-     let reviewData = [];
-     window.showIntelReview = function(data) {
-         reviewData = data;
-         const modal = document.getElementById('intelReviewModal');
-         renderReviewTable();
-         modal.classList.remove('hidden');
-         modal.classList.add('flex');
-     };
-  
-     window.renderReviewTable = function() {
-         const tbody = document.getElementById('reviewTableBody');
-         const filter = document.getElementById('reviewCategoryFilter').value;
-         tbody.innerHTML = '';
-         let stats = { '8-Focus': 0, 'Non-Index': 0, 'PSI': 0 };
-         let displayIndex = 1;
 
-         reviewData.forEach((item, index) => {
-             const cat = item.category || 'Non-Index';
-             stats[cat]++;
-             if (filter !== 'All' && cat !== filter) return;
-  
-             const tr = document.createElement('tr');
-             tr.className = 'bg-white dark:bg-slate-900 transition-all hover:bg-gray-50/50 dark:hover:bg-slate-700/30';
-             const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500' : cat === 'PSI' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500';
-             tr.innerHTML = `
+        } catch (error) {
+            console.error("AI Error:", error);
+            alert("Extraction failed: " + error.message);
+        } finally {
+            loadingOverlay.classList.add('hidden');
+            input.value = '';
+        }
+    };
+
+    let reviewData = [];
+    window.showIntelReview = function (data) {
+        reviewData = data;
+        const modal = document.getElementById('intelReviewModal');
+        renderReviewTable();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    };
+
+    window.renderReviewTable = function () {
+        const tbody = document.getElementById('reviewTableBody');
+        const filter = document.getElementById('reviewCategoryFilter').value;
+        tbody.innerHTML = '';
+        let stats = { '8-Focus': 0, 'Non-Index': 0, 'PSI': 0 };
+        let displayIndex = 1;
+
+        reviewData.forEach((item, index) => {
+            const cat = item.category || 'Non-Index';
+            stats[cat]++;
+            if (filter !== 'All' && cat !== filter) return;
+
+            const tr = document.createElement('tr');
+            tr.className = 'bg-white dark:bg-slate-900 transition-all hover:bg-gray-50/50 dark:hover:bg-slate-700/30';
+            const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500' : cat === 'PSI' ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500';
+            tr.innerHTML = `
                  <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-100 dark:border-slate-700/50">${displayIndex++}</td>
                  <td class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-white uppercase border-r border-gray-100 dark:border-slate-700/50">${item.barangay}</td>
                  <td class="px-6 py-4 text-[10px] font-bold text-slate-500 border-r border-gray-100 dark:border-slate-700/50">${item.date_committed}</td>
@@ -425,52 +564,52 @@
                      <button onclick="deleteReviewRow(${index})" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/30 text-red-400 hover:scale-110 active:scale-90 transition-all"><i class="fas fa-trash text-[10px]"></i></button>
                  </td>
              `;
-             tbody.appendChild(tr);
-         });
-  
-         document.getElementById('reviewRowCount').textContent = `${reviewData.length} records detected in periodic report`;
-         document.getElementById('count8Focus').textContent = stats['8-Focus'];
-         document.getElementById('countNonIndex').textContent = stats['Non-Index'];
-         document.getElementById('countPSI').textContent = stats['PSI'];
-     };
-  
-     window.editReviewRow = function(index) {
-         const item = reviewData[index];
-         const brgy = prompt("Barangay:", item.barangay);
-         if (brgy) reviewData[index].barangay = brgy;
-         const offense = prompt("Offense:", item.offense);
-         if (offense) reviewData[index].offense = offense;
-         renderReviewTable();
-     };
-  
-     window.deleteReviewRow = function(index) {
-         reviewData.splice(index, 1);
-         renderReviewTable();
-     };
-  
-     window.addNewReviewRow = function() {
-         reviewData.unshift({ barangay: 'Alipit', date_committed: new Date().toISOString().split('T')[0], offense: 'Other', category: 'Non-Index', description: '' });
-         renderReviewTable();
-     };
-  
-     window.closeIntelReview = function() {
-         document.getElementById('intelReviewModal').classList.add('hidden');
-     };
-  
-     window.confirmIntelReview = async function() {
-         try {
-             const response = await fetch('/admin/map/bulk-add', {
-                 method: 'POST',
-                 headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify({ entries: reviewData })
-             });
-             if (response.ok) { window.location.reload(); }
-         } catch (error) { alert("Error: " + error.message); }
-     };
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('reviewRowCount').textContent = `${reviewData.length} records detected in periodic report`;
+        document.getElementById('count8Focus').textContent = stats['8-Focus'];
+        document.getElementById('countNonIndex').textContent = stats['Non-Index'];
+        document.getElementById('countPSI').textContent = stats['PSI'];
+    };
+
+    window.editReviewRow = function (index) {
+        const item = reviewData[index];
+        const brgy = prompt("Barangay:", item.barangay);
+        if (brgy) reviewData[index].barangay = brgy;
+        const offense = prompt("Offense:", item.offense);
+        if (offense) reviewData[index].offense = offense;
+        renderReviewTable();
+    };
+
+    window.deleteReviewRow = function (index) {
+        reviewData.splice(index, 1);
+        renderReviewTable();
+    };
+
+    window.addNewReviewRow = function () {
+        reviewData.unshift({ barangay: 'Alipit', date_committed: new Date().toISOString().split('T')[0], offense: 'Other', category: 'Non-Index', description: '' });
+        renderReviewTable();
+    };
+
+    window.closeIntelReview = function () {
+        document.getElementById('intelReviewModal').classList.add('hidden');
+    };
+
+    window.confirmIntelReview = async function () {
+        try {
+            const response = await fetch('/admin/map/bulk-add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ entries: reviewData })
+            });
+            if (response.ok) { window.location.reload(); }
+        } catch (error) { alert("Error: " + error.message); }
+    };
 </script>
 
 <script>
-    const reports = <%- JSON.stringify(reports) %>;
+    const reports = <% - JSON.stringify(reports) %>;
 
     function filterDataset(category) {
         document.querySelectorAll('.filter-tab').forEach(tab => {
@@ -488,7 +627,7 @@
     function viewReportDetails(reportId) {
         const report = reports.find(r => r.id === reportId);
         if (!report) return;
-        
+
         const rawData = report.raw_data || [];
         const content = document.getElementById('reportDetailsContent');
         content.innerHTML = `
