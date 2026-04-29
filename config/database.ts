@@ -1,4 +1,4 @@
-import { mockHotlines, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints, mockIntelligenceScans, mockAdminNotifications } from '../data/mockData.js';
+import { mockHotlines, mockBulletins, mockUsers, mockTips, mockAuditLogs, mockMapPoints, mockIntelligenceScans, mockAdminNotifications, mockPublicUsers } from '../data/mockData.js';
 
 // Mock Data Service to simulate a database without any external SDKs
 class DataService {
@@ -8,6 +8,7 @@ class DataService {
     else if (path === 'bulletins') data = mockBulletins;
     else if (path === 'users') data = mockUsers;
     else if (path === 'anonymous_tips') data = mockTips;
+    else if (path === 'public_users') data = mockPublicUsers;
     else if (path === 'audit_logs') data = mockAuditLogs;
     else if (path === 'map_points') data = mockMapPoints;
     else if (path === 'intelligence_scans') data = mockIntelligenceScans;

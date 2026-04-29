@@ -14,9 +14,11 @@ export const mockUsers = [
   }
 ];
 
-export const mockTips = [];
+export const mockTips: any[] = [];
 
-export const mockAuditLogs = [];
+export const mockPublicUsers: any[] = [];
+
+export const mockAuditLogs: any[] = [];
 
 export const mockMapPoints = [
   // Alipit

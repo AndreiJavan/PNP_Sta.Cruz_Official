@@ -39,7 +39,7 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   proxy: true, // Trust the reverse proxy
-  cookie: { 
+  cookie: {
     secure: false,
     sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
@@ -57,11 +57,12 @@ app.use((req, res, next) => {
   res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
   res.header('Expires', '-1');
   res.header('Pragma', 'no-cache');
-  
+
   res.locals.sessionId = req.sessionID;
-  
+
   if (req.session) {
     res.locals.user = req.session.user || null;
+    res.locals.publicUser = (req.session as any).publicUser || null;
     res.locals.success_msg = req.session.success_msg || null;
     res.locals.error_msg = req.session.error_msg || null;
     // Safely delete session messages
@@ -70,6 +71,7 @@ app.use((req, res, next) => {
     delete sessionAny.error_msg;
   } else {
     res.locals.user = null;
+    res.locals.publicUser = null;
     res.locals.success_msg = null;
     res.locals.error_msg = null;
   }
@@ -88,7 +90,7 @@ app.use('/admin', adminRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {
-  res.status(404).render('error', { 
+  res.status(404).render('error', {
     error: new Error('The page you are looking for does not exist.')
   });
 });
@@ -97,9 +99,9 @@ app.use((req, res, next) => {
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server Error:', err);
   const status = err.status || 500;
-  
+
   try {
-    res.status(status).render('error', { 
+    res.status(status).render('error', {
       error: {
         message: err.message || 'An unexpected error occurred.',
         stack: process.env.NODE_ENV === 'development' ? err.stack : undefined

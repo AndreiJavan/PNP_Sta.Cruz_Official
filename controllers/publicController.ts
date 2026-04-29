@@ -1,6 +1,64 @@
 import { Request, Response } from 'express';
 import { db } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
+
+export const getLogin = (req: Request, res: Response) => {
+  if ((req.session as any).publicUser) return res.redirect('/');
+  res.render('public/login', { title: 'Login' });
+};
+
+export const postLogin = async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+  try {
+    const snap = await db.collection('public_users').where('username', '==', username).limit(1).get();
+    if (snap.empty) {
+      return res.render('public/login', { title: 'Login', error_msg: 'Invalid username or password' });
+    }
+    const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
+
+    if (bcrypt.compareSync(password, user.password_hash)) {
+      (req.session as any).publicUser = { id: user.id, username: user.username, full_name: user.full_name };
+      req.session.save(() => res.redirect('/tip'));
+    } else {
+      res.render('public/login', { title: 'Login', error_msg: 'Invalid username or password' });
+    }
+  } catch (err) {
+    res.status(500).send('Error during login');
+  }
+};
+
+export const getRegister = (req: Request, res: Response) => {
+  if ((req.session as any).publicUser) return res.redirect('/');
+  res.render('public/register', { title: 'Register' });
+};
+
+export const postRegister = async (req: Request, res: Response) => {
+  const { username, full_name, password } = req.body;
+  try {
+    const snap = await db.collection('public_users').where('username', '==', username).limit(1).get();
+    if (!snap.empty) {
+      return res.render('public/register', { title: 'Register', error_msg: 'Username already taken' });
+    }
+    const hash = bcrypt.hashSync(password, 10);
+    const result = await db.collection('public_users').add({
+      username,
+      full_name,
+      password_hash: hash,
+      created_at: new Date().toISOString()
+    });
+
+    (req.session as any).publicUser = { id: result.id, username, full_name };
+    req.session.save(() => res.redirect('/tip'));
+  } catch (err) {
+    res.status(500).send('Error during registration');
+  }
+};
+
+export const getLogout = (req: Request, res: Response) => {
+  delete (req.session as any).publicUser;
+  req.session.save(() => res.redirect('/login'));
+};
 
 export const getHome = async (req: Request, res: Response) => {
   try {
@@ -122,6 +180,8 @@ export const postTip = async (req: Request, res: Response) => {
   const { concern_type, location_text, description } = req.body;
   const tip_id = `TIP-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
 
+  const publicUser = (req.session as any).publicUser;
+
   try {
     await db.collection('anonymous_tips').add({
       tip_id,
@@ -129,6 +189,8 @@ export const postTip = async (req: Request, res: Response) => {
       location_text,
       description,
       is_flagged: false,
+      public_user_id: publicUser ? publicUser.id : null,
+      public_user_name: publicUser ? publicUser.full_name : 'Anonymous',
       created_at: new Date().toISOString()
     });
 
