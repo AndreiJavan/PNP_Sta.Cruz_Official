@@ -47,9 +47,7 @@ export const postRegister = async (req: Request, res: Response) => {
       password_hash: hash,
       created_at: new Date().toISOString()
     };
-    if ((req as any).file) {
-      data.government_id_path = `/images/${(req as any).file.filename}`;
-    }
+
     const result = await db.collection('public_users').add(data);
 
     (req.session as any).publicUser = { id: result.id, email, full_name };

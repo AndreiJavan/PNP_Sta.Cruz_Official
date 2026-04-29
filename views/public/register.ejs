@@ -52,18 +52,18 @@
                     </div>
 
                     <div class="space-y-2">
-                        <label for="government_id"
-                            class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Government ID
-                            (Image or PDF)</label>
-                        <input type="file" name="government_id" id="government_id" accept="image/*,.pdf" required
-                            class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-4 focus:ring-pnp-gold/20 focus:border-pnp-gold dark:text-gray-300 outline-none transition text-sm">
-                        <p class="text-[9px] text-gray-500 font-medium mt-1">Please upload a clear copy of a valid
-                            government-issued ID (Max 5MB).</p>
-                        <p id="file_error" class="text-[9px] text-red-500 font-bold hidden">File exceeds 5MB limit.</p>
+                        <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest">Location
+                            Verification</label>
+                        <button type="button" id="verify_location_btn"
+                            class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-pnp-blue dark:text-white font-bold py-4 rounded-xl transition flex items-center justify-center space-x-2 text-sm border-2 border-dashed border-gray-300 dark:border-slate-500">
+                            <i class="fas fa-location-dot"></i>
+                            <span>Verify My Location</span>
+                        </button>
+                        <p id="location_status" class="text-[9px] text-gray-500 font-bold hidden"></p>
                     </div>
 
-                    <button type="submit"
-                        class="w-full bg-pnp-gold hover:bg-yellow-500 text-pnp-blue font-black py-4 rounded-xl shadow-xl transition transform hover:-translate-y-1 uppercase tracking-widest text-sm">
+                    <button type="submit" id="submit_btn" disabled
+                        class="w-full bg-pnp-gold hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed text-pnp-blue font-black py-4 rounded-xl shadow-xl transition transform hover:-translate-y-1 disabled:hover:translate-y-0 uppercase tracking-widest text-sm">
                         Create Account
                     </button>
                 </form>
@@ -89,18 +89,6 @@
             passwordError.classList.add('hidden');
         }
 
-        const fileInput = document.getElementById('government_id');
-        const fileError = document.getElementById('file_error');
-        if (fileInput.files.length > 0) {
-            const sizeInMB = fileInput.files[0].size / (1024 * 1024);
-            if (sizeInMB > 5) {
-                fileError.classList.remove('hidden');
-                valid = false;
-            } else {
-                fileError.classList.add('hidden');
-            }
-        }
-
         if (!valid) {
             e.preventDefault();
         }
@@ -110,7 +98,63 @@
     document.getElementById('confirm_password').addEventListener('input', () => {
         document.getElementById('password_error').classList.add('hidden');
     });
-    document.getElementById('government_id').addEventListener('change', () => {
-        document.getElementById('file_error').classList.add('hidden');
+
+    // Haversine Distance Calculator (km)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    // Geofencing Logic
+    const STA_CRUZ_LAT = 14.275;
+    const STA_CRUZ_LNG = 121.410;
+    const MAX_DISTANCE_KM = 20;
+
+    const verifyBtn = document.getElementById('verify_location_btn');
+    const submitBtn = document.getElementById('submit_btn');
+    const statusMsg = document.getElementById('location_status');
+
+    verifyBtn.addEventListener('click', () => {
+        statusMsg.classList.remove('hidden', 'text-red-500', 'text-green-500');
+        statusMsg.classList.add('text-gray-500');
+        statusMsg.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Checking location...';
+
+        if (!navigator.geolocation) {
+            statusMsg.classList.replace('text-gray-500', 'text-red-500');
+            statusMsg.innerText = 'Geolocation is not supported by your browser.';
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+                const distance = calculateDistance(userLat, userLng, STA_CRUZ_LAT, STA_CRUZ_LNG);
+
+                if (distance <= MAX_DISTANCE_KM) {
+                    statusMsg.classList.replace('text-gray-500', 'text-green-500');
+                    statusMsg.innerText = 'Location verified! You are within Sta. Cruz bounds.';
+                    verifyBtn.classList.replace('border-gray-300', 'border-green-500');
+                    verifyBtn.innerHTML = '<i class="fas fa-check text-green-500"></i> <span class="text-green-600">Verified</span>';
+                    verifyBtn.disabled = true;
+                    submitBtn.disabled = false;
+                } else {
+                    statusMsg.classList.replace('text-gray-500', 'text-red-500');
+                    statusMsg.innerText = `Registration restricted: You are approx. ${Math.round(distance)}km outside Sta. Cruz borders.`;
+                }
+            },
+            (error) => {
+                statusMsg.classList.replace('text-gray-500', 'text-red-500');
+                statusMsg.innerText = 'Unable to retrieve location. Please allow location access to register.';
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
     });
 </script>
