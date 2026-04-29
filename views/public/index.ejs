@@ -1,0 +1,153 @@
+<div class="relative min-h-[85vh] flex items-center overflow-hidden">
+    <!-- Hero Background with Overlay -->
+    <div class="absolute inset-0 z-0">
+        <img src="https://picsum.photos/seed/police/1920/1080?blur=4" alt="Sta. Cruz Laguna" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-r from-pnp-blue via-pnp-blue/90 to-transparent dark:from-slate-950 dark:via-slate-900/95 dark:to-transparent"></div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center space-x-2 bg-pnp-gold/20 text-pnp-gold px-4 py-2 rounded-full mb-8 border border-pnp-gold/30 animate-fade-in">
+                <i class="fas fa-shield-halved text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-widest">Official Public Safety Portal</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
+                Protecting <span class="text-pnp-gold italic">Sta. Cruz</span>, <br>
+                Serving with <span class="underline decoration-pnp-gold underline-offset-8">Integrity</span>.
+            </h1>
+            
+            <p class="text-xl text-blue-100 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl">
+                The Crime Prevention and Incident Community Reporting System (CPICRS) empowers citizens to stay informed about public safety and submit anonymous tips in our municipality.
+            </p>
+            
+            <div class="flex flex-wrap gap-4">
+                <a href="/tip" class="bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-black py-5 px-10 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center space-x-3">
+                    <i class="fas fa-user-secret text-xl"></i>
+                    <span class="uppercase tracking-widest text-sm">Submit Anonymous Tip</span>
+                </a>
+                <a href="/bulletins" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold py-5 px-10 rounded-2xl border border-white/30 transition duration-300 flex items-center space-x-3">
+                    <i class="fas fa-bullhorn text-xl"></i>
+                    <span class="uppercase tracking-widest text-sm">View Bulletins</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Badge -->
+    <div class="absolute bottom-12 right-12 hidden lg:block animate-bounce-slow">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-2xl border border-gray-100 dark:border-slate-700 flex items-center space-x-4">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center">
+                <i class="fas fa-phone-volume text-3xl"></i>
+            </div>
+            <div>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Emergency Hotline</p>
+                <p class="text-2xl font-black text-pnp-blue dark:text-pnp-gold tracking-tighter">911 / 0912-345-6789</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="py-24 bg-white dark:bg-slate-950">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-20">
+            <h2 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-4">Our Services</h2>
+            <h3 class="text-4xl font-black text-pnp-blue dark:text-white tracking-tight">Community Safety at Your Fingertips</h3>
+            <div class="w-20 h-1.5 bg-pnp-gold mx-auto mt-8 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <!-- Feature 1 -->
+            <div class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
+                <div class="w-16 h-16 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition duration-500">
+                    <i class="fas fa-map-marked-alt text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-4 group-hover:text-white transition">Crime Mapping</h4>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed group-hover:text-blue-100 transition">Visualize incident trends in your area through our interactive crime map and heatmap data.</p>
+                <a href="/map" class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
+                    Explore Map <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
+                <div class="w-16 h-16 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition duration-500">
+                    <i class="fas fa-bullhorn text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-4 group-hover:text-white transition">Public Bulletins</h4>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed group-hover:text-blue-100 transition">Stay updated with the latest safety advisories, missing persons, and wanted person alerts.</p>
+                <a href="/bulletins" class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
+                    View Bulletins <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
+                <div class="w-16 h-16 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition duration-500">
+                    <i class="fas fa-user-secret text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-4 group-hover:text-white transition">Anonymous Tips</h4>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed group-hover:text-blue-100 transition">Provide critical information to the police without revealing your identity. Secure and private.</p>
+                <a href="/tip" class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
+                    Submit a Tip <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
+                </a>
+            </div>
+
+            <!-- Feature 4 -->
+            <div class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
+                <div class="w-16 h-16 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition duration-500">
+                    <i class="fas fa-phone-volume text-2xl"></i>
+                </div>
+                <h4 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-4 group-hover:text-white transition">Hotlines</h4>
+                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed group-hover:text-blue-100 transition">Quick access to all emergency services, fire departments, and medical facilities in Sta. Cruz.</p>
+                <a href="/hotlines" class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
+                    Call Directory <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-20 bg-pnp-blue dark:bg-slate-900 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-full opacity-10">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border-[50px] border-white rounded-full"></div>
+    </div>
+    
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+            <div>
+                <p class="text-5xl font-black text-pnp-gold mb-2">100%</p>
+                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Confidentiality</p>
+            </div>
+            <div>
+                <p class="text-5xl font-black text-white mb-2">24/7</p>
+                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Monitoring</p>
+            </div>
+            <div>
+                <p class="text-5xl font-black text-pnp-gold mb-2">26</p>
+                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Barangays Served</p>
+            </div>
+            <div>
+                <p class="text-5xl font-black text-white mb-2">0</p>
+                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Compromise</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+    
+    @keyframes bounce-slow {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .animate-bounce-slow { animation: bounce-slow 3s ease-in-out infinite; }
+</style>

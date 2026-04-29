@@ -1,0 +1,286 @@
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs"><%= bulletin ? 'Edit Bulletin' : 'Create New Bulletin' %></h3>
+            <a href="/admin/bulletins" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
+        </div>
+        
+        <form id="bulletinForm"
+      action="<%= bulletin ? '/admin/bulletins/' + bulletin.id + '/edit' : '/admin/bulletins/create' %>"
+      method="POST"
+      enctype="multipart/form-data"
+      class="p-8 space-y-8"
+      onsubmit="return confirmSubmit()">
+
+    <!-- 2 COLUMN MAIN LAYOUT -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+
+        <!-- LEFT SIDE: IMAGE -->
+        <div id="leftPanel" class="space-y-4 flex flex-col transition-all duration-300">
+
+            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                Upload Image
+            </label>
+
+            <!-- IMAGE PREVIEW BOX -->
+            <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+
+                <div id="dropZone"
+                    class="w-full min-h-64 flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300">
+
+                    <!-- Existing image OR preview -->
+                    <% if (bulletin && bulletin.photo_path) { %>
+                        <img id="previewImage"
+                            onclick="openImageModal(this.src)"
+                            src="<%= bulletin.photo_path %>"
+                            class="w-full h-full object-cover">
+                    <% } else { %>
+                        <img id="previewImage"
+                            onclick="openImageModal(this.src)"
+                            class="w-full h-full object-cover hidden">
+                        <i id="placeholderIcon" class="fas fa-image text-gray-400 text-4xl"></i>
+                    <% } %>
+
+                </div>
+
+                <!-- FILE INPUT -->
+                <div class="mt-4">
+                    <input type="file"
+                        name="photo"
+                        id="photo"
+                        accept="image/*"
+                        class="hidden">
+
+                    <button type="button"
+                            onclick="document.getElementById('photo').click()"
+                            class="w-full bg-pnp-blue text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition">
+                        Choose / Replace Image
+                    </button>
+
+                    <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase">
+                        PNG, JPG, JPEG or WEBP up to 5MB
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: FORM FIELDS -->
+        <div id="rightPanel" class="space-y-6 flex flex-col transition-all duration-300">
+
+            <!-- TITLE -->
+            <div class="space-y-2">
+                <label for="title" class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin Title</label>
+                <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>" required placeholder="Enter a clear, descriptive title" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+            </div>
+
+            <!-- CATEGORY -->
+            <div class="space-y-2">
+                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                    Category
+                </label>
+
+                <% 
+                    const standardCategories = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
+                    const isCustomCategory = bulletin && bulletin.category && !standardCategories.includes(bulletin.category);
+                %>
+
+                <select name="category"
+                        id="category"
+                        required
+                        onchange="toggleCustomCategory(this.value)"
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+
+                    <option value="" disabled <%= !bulletin ? 'selected' : '' %>>Select Category</option>
+
+                    <% standardCategories.forEach(cat => { %>
+                        <option value="<%= cat %>" <%= bulletin && bulletin.category === cat ? 'selected' : '' %>>
+                            <%= cat %>
+                        </option>
+                    <% }) %>
+
+                    <option value="Other" <%= isCustomCategory ? 'selected' : '' %>>
+                        Other (Custom)
+                    </option>
+
+                </select>
+            </div>
+
+            <!-- CUSTOM CATEGORY -->
+            <div id="customCategoryContainer" class="space-y-2 <%= isCustomCategory ? '' : 'hidden' %>">
+                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                    New Category
+                </label>
+
+                <input type="text"
+                       name="custom_category"
+                       id="custom_category"
+                       value="<%= isCustomCategory ? bulletin.category : '' %>"
+                       placeholder="Enter custom category"
+                       class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+            </div>
+
+            <!-- BODY -->
+            <div class="flex-1 flex flex-col space-y-2">
+                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                    Bulletin Body
+                </label>
+
+                <textarea name="body"
+                          id="body"
+                          rows="12"
+                          required
+                          placeholder="Enter the full content of the bulletin..."
+                          class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white"><%= bulletin ? bulletin.body : '' %></textarea>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SUBMIT BUTTON (UNCHANGED STYLE PURPOSE, JUST ALIGNED RIGHT) -->
+    <div class="pt-6 border-t border-gray-50 dark:border-slate-700 flex justify-end">
+        <button type="submit"
+                class="bg-pnp-blue text-white font-bold py-4 px-12 rounded-xl shadow-lg transition duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs">
+            <%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %>
+        </button>
+    </div>
+
+</form>
+
+<!-- IMAGE VIEW MODAL -->
+<div id="imageModal"
+     class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+
+    <div class="relative max-w-4xl w-full p-4">
+
+        <!-- CLOSE BUTTON -->
+        <button onclick="closeImageModal()"
+                class="absolute top-2 right-2 text-white text-2xl font-bold">
+            &times;
+        </button>
+
+        <!-- IMAGE -->
+        <img id="modalImage"
+             class="w-full max-h-[80vh] object-contain rounded-xl shadow-lg bg-black">
+    </div>
+
+</div>
+
+    </div>
+</div>
+
+<script>
+    function toggleCustomCategory(value) {
+        const container = document.getElementById('customCategoryContainer');
+        const input = document.getElementById('custom_category');
+        if (value === 'Other') {
+            container.classList.remove('hidden');
+            input.required = true;
+        } else {
+            container.classList.add('hidden');
+            input.required = false;
+        }
+    }
+
+    function confirmSubmit() {
+        const isEdit = <%= bulletin ? 'true' : 'false' %>;
+        const action = isEdit ? 'update' : 'create';
+        return confirm(`Are you sure you want to ${action} this bulletin?`);
+    }
+
+    const fileInput = document.getElementById('photo');
+    const previewImage = document.getElementById('previewImage');
+    const placeholderIcon = document.getElementById('placeholderIcon');
+    const dropZone = document.getElementById('dropZone');
+
+    // FILE SELECT PREVIEW
+    fileInput.addEventListener('change', function () {
+        handleFile(this.files[0]);
+    });
+
+    // DRAG OVER
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('ring-2', 'ring-pnp-blue');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('ring-2', 'ring-pnp-blue');
+    });
+
+    // DROP FILE
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('ring-2', 'ring-pnp-blue');
+
+        const file = e.dataTransfer.files[0];
+        fileInput.files = e.dataTransfer.files; // sync input
+        handleFile(file);
+    });
+
+    // HANDLE PREVIEW UPDATE
+    function handleFile(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            previewImage.src = e.target.result;
+            previewImage.classList.remove('hidden');
+
+            if (placeholderIcon) {
+                placeholderIcon.style.display = 'none';
+            }
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+
+    function openImageModal(src) {
+        if (!src) return;
+
+        modalImage.src = src;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeImageModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // close when clicking outside image
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeImageModal();
+        }
+    });
+
+    // ESC key support
+    document.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            closeImageModal();
+        }
+    });
+    
+    function syncPanels() {
+    const rightPanel = document.getElementById('rightPanel');
+    const leftPanel = document.getElementById('leftPanel');
+    const dropZone = document.getElementById('dropZone');
+
+    // Wait for DOM update
+    setTimeout(() => {
+        const rightHeight = rightPanel.offsetHeight;
+
+        // Force left side to match right side height
+        leftPanel.style.height = rightHeight + "px";
+
+        // Make image zone stretch inside
+        dropZone.style.height = "100%";
+    }, 50);
+}
+</script>

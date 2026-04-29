@@ -1,0 +1,22 @@
+<div class="max-w-2xl mx-auto px-4 py-20 text-center">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-12 border-t-8 border-pnp-gold">
+        <div class="w-24 h-24 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full flex items-center justify-center mx-auto mb-8">
+            <i class="fas fa-user-secret text-4xl"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-pnp-blue dark:text-pnp-gold mb-4">Tip Submitted Anonymously</h1>
+        <p class="text-gray-600 dark:text-gray-400 mb-8">Your tip has been received and will be reviewed by our investigators. Thank you for helping keep Sta. Cruz safe.</p>
+        
+        <div class="bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl p-8 mb-8">
+            <p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold mb-2">Your Tip ID</p>
+            <p class="text-4xl md:text-5xl font-mono font-bold text-pnp-blue dark:text-pnp-gold tracking-tighter"><%= tip_id %></p>
+        </div>
+        
+        <div class="space-y-4">
+            <p class="text-sm text-gray-500 dark:text-gray-400 italic">"Keep this ID for your own reference. No personal information has been stored."</p>
+            <div class="flex flex-wrap justify-center gap-4 pt-4">
+                <a href="/" class="bg-pnp-blue hover:bg-blue-900 text-white font-bold py-3 px-8 rounded-xl transition duration-300">Back to Home</a>
+                <a href="/tip" class="bg-gray-200 dark:bg-slate-700 hover:bg-gray-300 dark:hover:bg-slate-600 text-gray-800 dark:text-gray-200 font-bold py-3 px-8 rounded-xl transition duration-300">Submit Another Tip</a>
+            </div>
+        </div>
+    </div>
+</div>

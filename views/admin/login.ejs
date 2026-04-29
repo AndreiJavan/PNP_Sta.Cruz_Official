@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - CPICRS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pnp: {
+                            blue: '#1A3A5C',
+                            gold: '#C8A415',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        // Check for saved theme preference or use system preference
+        if (localStorage.getItem('darkMode') === 'true' || 
+            (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-pnp-blue dark:bg-slate-950 min-h-screen flex items-start justify-center p-4 py-12 relative overflow-y-auto transition-colors duration-500">
+    <!-- Background Decoration -->
+    <div class="absolute top-0 left-0 w-full h-full opacity-10">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border-[50px] border-white dark:border-pnp-gold rounded-full"></div>
+    </div>
+
+    <div class="max-w-md w-full relative z-10">
+        <!-- Theme Toggle -->
+        <div class="flex justify-end mb-4">
+            <button onclick="toggleTheme()" class="w-10 h-10 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition-all duration-300">
+                <i id="themeIcon" class="fas fa-moon"></i>
+            </button>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden border border-white/20 dark:border-slate-800">
+            <div class="p-12 text-center bg-gray-50 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800">
+                <div class="w-20 h-20 bg-pnp-blue dark:bg-slate-900 text-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl border border-white/10">
+                    <i class="fas fa-shield-halved text-3xl text-pnp-gold"></i>
+                </div>
+                <h1 class="text-3xl font-black text-pnp-blue dark:text-pnp-gold tracking-tighter uppercase mb-2">Admin Portal</h1>
+                <p class="text-[10px] text-gray-400 dark:text-gray-500 font-black uppercase tracking-widest">Authorized Personnel Only</p>
+            </div>
+
+            <div class="p-12">
+                <% if (typeof error_msg !== 'undefined' && error_msg) { %>
+                    <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-red-100 dark:border-red-900/30 flex items-center space-x-3">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span><%= error_msg %></span>
+                    </div>
+                <% } %>
+
+                <form action="/admin/login" method="POST" class="space-y-8">
+                    <div class="space-y-2">
+                        <label for="username" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Username</label>
+                        <div class="relative">
+                            <input type="text" name="username" id="username" required placeholder="Enter username" class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 dark:focus:ring-pnp-gold/10 focus:border-pnp-blue dark:focus:border-pnp-gold outline-none transition font-bold text-sm text-pnp-blue dark:text-white">
+                            <i class="fas fa-user absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="password" class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Password</label>
+                        <div class="relative">
+                            <input type="password" name="password" id="password" required placeholder="••••••••" class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 dark:focus:ring-pnp-gold/10 focus:border-pnp-blue dark:focus:border-pnp-gold outline-none transition font-bold text-sm text-pnp-blue dark:text-white">
+                            <i class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-pnp-blue dark:bg-pnp-gold hover:bg-blue-900 dark:hover:bg-yellow-600 text-white dark:text-pnp-blue font-black py-5 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-3 uppercase tracking-widest text-xs">
+                        <span>Secure Login</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </button>
+                </form>
+
+                <div class="mt-12 text-center">
+                    <a href="/" class="text-[10px] font-black text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest transition">
+                        <i class="fas fa-arrow-left mr-2"></i> Return to Public Site
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <p class="text-center text-[10px] text-white/30 font-black uppercase tracking-widest mt-8">
+            &copy; 2026 PNP Sta. Cruz Municipal Police Station
+        </p>
+    </div>
+
+    <script>
+        function updateIcon() {
+            const icon = document.getElementById('themeIcon');
+            if (document.documentElement.classList.contains('dark')) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            updateIcon();
+        }
+
+        // Initial icon state
+        updateIcon();
+    </script>
+</body>
+</html>

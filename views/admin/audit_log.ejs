@@ -1,0 +1,36 @@
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+    <!-- Header -->
+    <div class="p-6 border-b border-gray-50 dark:border-slate-700">
+        <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">System Audit Logs</h3>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[10px] font-bold tracking-widest">
+                <tr>
+                    <th class="px-6 py-4">Timestamp</th>
+                    <th class="px-6 py-4">Admin User</th>
+                    <th class="px-6 py-4">Action</th>
+                    <th class="px-6 py-4">Details</th>
+                    <th class="px-6 py-4">IP Address</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
+                <% logs.forEach(log => { %>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition">
+                        <td class="px-6 py-4 text-gray-400 dark:text-gray-500 text-xs font-mono"><%= new Date(log.created_at).toLocaleString() %></td>
+                        <td class="px-6 py-4 font-bold text-pnp-blue dark:text-pnp-gold"><%= log.username %></td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
+                                <%= log.action %>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-gray-500 dark:text-gray-400 max-w-md truncate"><%= log.details %></td>
+                        <td class="px-6 py-4 text-gray-400 dark:text-gray-500 text-xs font-mono"><%= log.ip_address %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>

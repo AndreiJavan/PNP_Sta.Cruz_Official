@@ -1,0 +1,96 @@
+<div class="bg-red-600 dark:bg-red-700 py-24 text-center relative overflow-hidden">
+    <div class="container mx-auto px-4 relative z-10">
+        <h1 class="text-xs font-black text-white/50 uppercase tracking-[0.3em] mb-4">Emergency Directory</h1>
+        <h2 class="text-5xl font-black text-white tracking-tighter mb-8">Sta. Cruz Hotlines</h2>
+        <div class="w-20 h-1.5 bg-white/20 mx-auto rounded-full"></div>
+    </div>
+    <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+</div>
+
+<div class="container mx-auto px-4 py-20">
+    <!-- Quick Access Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 -mt-32 relative z-20">
+        <div class="bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition duration-500">
+                <i class="fas fa-phone-volume text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-2 group-hover:text-white transition">Police Emergency</h3>
+            <p class="text-3xl font-black text-red-600 dark:text-red-500 mb-4 group-hover:text-pnp-gold transition tracking-tighter">911</p>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest group-hover:text-blue-200 transition leading-relaxed">Available 24/7 for immediate police response</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500">
+            <div class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition duration-500">
+                <i class="fas fa-fire-extinguisher text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-2 group-hover:text-white transition">Fire Department</h3>
+            <p class="text-3xl font-black text-orange-600 dark:text-orange-500 mb-4 group-hover:text-pnp-gold transition tracking-tighter">(049) 501-1234</p>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest group-hover:text-blue-200 transition leading-relaxed">BFP Sta. Cruz Municipal Fire Station</p>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500">
+            <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition duration-500">
+                <i class="fas fa-ambulance text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-2 group-hover:text-white transition">Medical / Rescue</h3>
+            <p class="text-3xl font-black text-blue-600 dark:text-blue-500 mb-4 group-hover:text-pnp-gold transition tracking-tighter">(049) 501-5678</p>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest group-hover:text-blue-200 transition leading-relaxed">Sta. Cruz Municipal Health & Rescue</p>
+        </div>
+    </div>
+
+    <!-- Full Directory -->
+    <div class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
+        <div class="p-10 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tighter uppercase">Full Emergency Directory</h3>
+            <div class="hidden md:flex items-center space-x-2 text-gray-400 dark:text-gray-500">
+                <i class="fas fa-info-circle text-pnp-gold"></i>
+                <span class="text-[10px] font-bold uppercase tracking-widest">Updated March 2026</span>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[10px] font-black tracking-[0.2em]">
+                    <tr>
+                        <th class="px-10 py-6">Agency / Office</th>
+                        <th class="px-10 py-6">Contact Number</th>
+                        <th class="px-10 py-6">Category</th>
+                        <th class="px-10 py-6">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
+                    <% hotlines.forEach(h => { %>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition group">
+                            <td class="px-10 py-8">
+                                <p class="text-lg font-black text-pnp-blue dark:text-pnp-gold group-hover:text-pnp-gold dark:group-hover:text-white transition"><%= h.agency_name %></p>
+                                <p class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-1">Sta. Cruz, Laguna</p>
+                            </td>
+                            <td class="px-10 py-8">
+                                <p class="text-xl font-black text-gray-700 dark:text-gray-300 font-mono tracking-tighter"><%= h.contact_number %></p>
+                            </td>
+                            <td class="px-10 py-8">
+                                <% 
+                                    const catColors = {
+                                        'Police': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
+                                        'Fire': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+                                        'Medical': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                                        'Disaster': 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+                                        'Utility': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                                    };
+                                %>
+                                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= catColors[h.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
+                                    <%= h.category %>
+                                </span>
+                            </td>
+                            <td class="px-10 py-8">
+                                <a href="tel:<%= h.contact_number ? h.contact_number.replace(/[^0-9]/g, '') : '' %>" class="inline-flex items-center justify-center w-12 h-12 bg-pnp-blue text-white rounded-2xl hover:bg-pnp-gold transition duration-300 shadow-lg">
+                                    <i class="fas fa-phone"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,242 @@
+<% 
+const colors = {
+    'Theft': '#dc2626',
+    'Vandalism': '#f97316',
+    'Assault': '#7f1d1d',
+    'Suspicious Activity': '#eab308',
+    'Robbery': '#9333ea',
+    'Other': '#6b7280'
+};
+%>
+<div class="relative w-full h-[calc(100vh-80px)] overflow-hidden">
+    <!-- Map Area (Full Coverage) -->
+    <div id="leafletMap" class="absolute inset-0 z-0"></div>
+    
+    <!-- Floating Add Crime Form (Top Left) -->
+    <div class="absolute top-6 left-6 z-[1000] w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-3xl shadow-2xl border border-white/20 dark:border-slate-700/50 overflow-hidden transform transition-all duration-500 hover:scale-[1.02]">
+        <div class="p-5 border-b border-gray-100/50 dark:border-slate-700/50 bg-gray-50/30 dark:bg-slate-900/10 flex justify-between items-center">
+            <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.25em] text-[10px]">Crime Registry</h3>
+            <i class="fas fa-plus-circle text-pnp-gold text-xs"></i>
+        </div>
+        
+        <form action="/admin/map/add" method="POST" class="p-5 space-y-4" id="addCrimeForm" onsubmit="return confirm('Secure Record: Proceed with logging this observation?')">
+            <div class="space-y-1">
+                <label for="barangay" class="text-[9px] text-gray-400 uppercase tracking-widest font-black">Barangay Sector</label>
+                <select name="barangay" id="barangay" onchange="applyFilters()" required class="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold dark:text-white appearance-none">
+                    <option value="">Select Sector</option>
+                    <% ["Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"].forEach(brgy => { %>
+                        <option value="<%= brgy %>"><%= brgy %></option>
+                    <% }) %>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label for="incident_type" class="text-[9px] text-gray-400 uppercase tracking-widest font-black">Type</label>
+                    <select name="incident_type" id="incident_type" required class="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold dark:text-white appearance-none">
+                        <option value="Theft">Theft</option>
+                        <option value="Robbery">Robbery</option>
+                        <option value="Assault">Assault</option>
+                        <option value="Vandalism">Vandalism</option>
+                        <option value="Suspicious">Activity</option>
+                        <option value="Murder">Murder</option>
+                        <option value="Homicide">Homicide</option>
+                        <option value="Rape">Rape</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="incident_date" class="text-[9px] text-gray-400 uppercase tracking-widest font-black">Date</label>
+                    <input type="date" name="incident_date" id="incident_date" required class="w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-[10px] font-bold dark:text-white">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label for="description" class="text-[9px] text-gray-400 uppercase tracking-widest font-black">Details</label>
+                <textarea name="description" id="description" rows="2" class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-medium dark:text-white" placeholder="Intelligence brief..."></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-pnp-blue hover:bg-pnp-blue/90 text-white font-black py-4 rounded-2xl shadow-xl transition-all duration-300 uppercase tracking-[0.25em] text-[10px] transform active:scale-95 flex items-center justify-center space-x-3 group">
+                <i class="fas fa-shield-check text-[10px]"></i>
+                <span>Deploy Record</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Floating Filters (Top Right) -->
+    <div class="absolute top-6 right-6 z-[1000] flex flex-col space-y-4">
+        <div class="bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700/50 p-4 w-64">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-[9px] text-gray-400 font-black uppercase tracking-widest">Tactical Filter</span>
+                <i class="fas fa-layer-group text-pnp-gold text-[10px]"></i>
+            </div>
+            <select id="filterIncidentType" onchange="applyFilters()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl px-4 py-3 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase outline-none focus:ring-1 focus:ring-pnp-gold">
+                <option value="">Global Overview</option>
+                <option value="Theft">Theft</option>
+                <option value="Robbery">Robbery</option>
+                <option value="Assault">Assault</option>
+                <option value="Vandalism">Vandalism</option>
+                <option value="Murder">Murder</option>
+                <option value="Homicide">Homicide</option>
+                <option value="Other">Other</option>
+            </select>
+            <div class="flex items-center justify-between mt-4">
+                <span class="text-[8px] text-slate-400 font-bold uppercase">Sector Scope</span>
+                <div id="barangayFilterLabel" class="text-[8px] font-black text-pnp-gold bg-pnp-blue dark:bg-slate-900 px-3 py-1 rounded-full border border-pnp-gold/20 uppercase tracking-widest">All</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let map;
+    let santaCruzGeoJSON;
+    let pinLayer = L.layerGroup();
+    let incidentLayer = L.layerGroup();
+    let choroplethLayer = L.layerGroup();
+    
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
+    const colors = <%- JSON.stringify(colors) %>;
+    const pointsData = <%- JSON.stringify(points) %>;
+
+    window.manualPins = [
+        { name: 'Alipit', lat: 14.223931, lng: 121.405213 },
+        { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
+        { name: 'Duhat', lat: 14.2525, lng: 121.3825 },
+        { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
+        { name: 'Calios', lat: 14.2750, lng: 121.4050 },
+        { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
+        { name: 'Jasaan', lat: 14.223577, lng: 121.394827 },
+        { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
+        { name: 'Malinao', lat: 14.232833, lng: 121.396823 },
+        { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
+        { name: 'Pagsawitan', lat: 14.265754, lng: 121.426545 },
+        { name: 'Palasan', lat: 14.257498, lng: 121.418992 },
+        { name: 'Patimbao', lat: 14.270081, lng: 121.418366 },
+        { name: 'Poblacion I (Barangay I)', lat: 14.277068, lng: 121.418881 },
+        { name: 'Poblacion II (Barangay II)', lat: 14.279647, lng: 121.416006 },
+        { name: 'Poblacion III (Barangay III)', lat: 14.282028, lng: 121.415159 },
+        { name: 'Poblacion IV (Barangay IV)', lat: 14.283790, lng: 121.414016 },
+        { name: 'Poblacion V (Barangay V)', lat: 14.285282, lng: 121.412476 },
+        { name: 'San Jose', lat: 14.237118, lng: 121.403754 },
+        { name: 'San Juan', lat: 14.243815, lng: 121.406972 },
+        { name: 'San Pablo Norte', lat: 14.290210, lng: 121.413023 },
+        { name: 'San Pablo Sur', lat: 14.282211, lng: 121.422261 },
+        { name: 'Santisima Cruz', lat: 14.290647, lng: 121.409140 },
+        { name: 'Santo Angel Central', lat: 14.285137, lng: 121.408947 },
+        { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 },
+        { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
+    ];
+
+    const crimeCounts = pointsData.reduce((acc, p) => {
+        acc[p.barangay] = (acc[p.barangay] || 0) + 1;
+        return acc;
+    }, {});
+
+    function getDensityColor(d) {
+        return d > 10 ? '#7f1d1d' : d > 7 ? '#b91c1c' : d > 4 ? '#ea580c' : d > 2 ? '#ca8a04' : d > 0 ? '#C8A415' : 'rgba(30, 41, 59, 0.5)';
+    }
+
+    function addIncidentPins(filterBrgy = '', filterType = '') {
+        incidentLayer.clearLayers();
+        pointsData.forEach(point => {
+            if (filterBrgy && point.barangay !== filterBrgy) return;
+            if (filterType && point.incident_type !== filterType) return;
+            const brgyRef = manualPins.find(p => p.name === point.barangay);
+            if (!brgyRef) return;
+            const lat = brgyRef.lat + (Math.random() - 0.5) * 0.002;
+            const lng = brgyRef.lng + (Math.random() - 0.5) * 0.002;
+            L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'incident-pin-container',
+                    html: `<div class="w-4 h-4 rounded-full border-2 border-white shadow-lg" style="background-color: ${colors[point.incident_type] || '#ccc'}"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                })
+            }).addTo(incidentLayer).bindPopup(`<div class="p-2 text-xs font-bold uppercase"><b>${point.incident_type}</b><br>Brgy. ${point.barangay}<br>${new Date(point.incident_date).toLocaleDateString()}</div>`);
+        });
+    }
+
+    function addManualPins() {
+        manualPins.forEach(pin => {
+            L.marker([pin.lat, pin.lng], {
+                icon: L.divIcon({
+                    className: 'manual-pin-container',
+                    html: `<div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center border-2 border-white text-white dark:text-pnp-blue shadow-xl">
+                            <i class="fas fa-location-dot text-xs"></i>
+                           </div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32]
+                })
+            }).addTo(pinLayer).bindPopup(`<div class="p-2 text-xs font-black uppercase">${pin.name} Sector</div>`);
+        });
+    }
+
+    function applyFilters() {
+        const brgy = document.getElementById('barangay').value;
+        const type = document.getElementById('filterIncidentType').value;
+        document.getElementById('barangayFilterLabel').textContent = brgy || 'All';
+        addIncidentPins(brgy, type);
+        if (brgy && !type) {
+            const pin = manualPins.find(p => p.name === brgy);
+            if (pin) map.flyTo([pin.lat, pin.lng], 16);
+        } else if (!brgy) {
+            map.flyToBounds([[14.2100, 121.3400], [14.3100, 121.4850]]);
+        }
+    }
+
+    function initMap() {
+        map = L.map('leafletMap', { zoomControl: true }).fitBounds([[14.2100, 121.3400], [14.3100, 121.4850]]);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        pinLayer.addTo(map);
+        incidentLayer.addTo(map);
+        choroplethLayer.addTo(map);
+        addManualPins();
+        addIncidentPins();
+        fetch(barangayGeoJsonUrl).then(r => r.json()).then(data => {
+            santaCruzGeoJSON = data;
+            L.geoJSON(data, {
+                style: f => ({ color: '#111827', weight: 1, fillOpacity: 0.5, fillColor: getDensityColor(crimeCounts[f.properties.NAME_3] || 0) }),
+                onEachFeature: (f, l) => l.bindPopup(`<div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
+                                    <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+                                        <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px]">Brgy. ${f.properties.NAME_3}</h3>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-[9px] font-black uppercase text-white/70">Incidents</span>
+                                        <span class="text-lg font-black text-pnp-gold">${crimeCounts[f.properties.NAME_3] || 0}</span>
+                                    </div>
+                                </div>`, { className: 'intelligence-popup' })
+            }).addTo(choroplethLayer);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+        document.getElementById('incident_date').valueAsDate = new Date();
+    });
+</script>
+
+<style>
+    .intelligence-popup .leaflet-popup-content-wrapper {
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    .intelligence-popup .leaflet-popup-tip {
+        background: #0f172a !important;
+    }
+    .leaflet-container {
+        font-family: inherit;
+    }
+    .incident-pin-container {
+        pointer-events: auto !important;
+    }
+    .incident-pin-container > div {
+        cursor: pointer;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .incident-pin-container > div:hover {
+        transform: scale(1.4);
+        z-index: 1000;
+    }
+</style>

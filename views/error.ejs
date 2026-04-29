@@ -1,0 +1,39 @@
+<div class="max-w-2xl mx-auto px-4 py-20 text-center">
+    <div class="bg-white rounded-[3rem] shadow-2xl p-12 md:p-20 border-t-[12px] border-red-600 relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-pnp-blue/5 translate-y-1/2 -translate-x-1/2 rounded-full"></div>
+
+        <div class="relative z-10">
+            <div class="w-24 h-24 bg-red-100 text-red-600 rounded-3xl flex items-center justify-center mx-auto mb-10 shadow-lg">
+                <i class="fas fa-exclamation-triangle text-4xl"></i>
+            </div>
+            
+            <h1 class="text-4xl font-black text-pnp-blue mb-4 tracking-tighter">System Error Encountered</h1>
+            <p class="text-gray-500 mb-12 text-lg leading-relaxed">We apologize for the inconvenience. An unexpected error has occurred while processing your request.</p>
+            
+            <div class="bg-gray-50 rounded-2xl p-6 mb-12 text-left overflow-auto max-h-64 border border-gray-100">
+                <p class="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-2">Error Details</p>
+                <code class="text-xs text-red-500 font-mono break-words">
+                    <%= typeof error !== 'undefined' ? error.message : 'Unknown Error' %>
+                </code>
+                <% if (process.env.NODE_ENV !== 'production' && typeof error !== 'undefined' && error.stack) { %>
+                    <pre class="mt-4 text-[10px] text-gray-400 font-mono whitespace-pre-wrap"><%= error.stack %></pre>
+                <% } %>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <a href="/" class="bg-pnp-blue hover:bg-blue-900 text-white font-black py-5 px-8 rounded-2xl shadow-xl transition duration-300 uppercase tracking-widest text-xs">
+                    Return to Home
+                </a>
+                <button onclick="window.history.back()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-black py-5 px-8 rounded-2xl transition duration-300 uppercase tracking-widest text-xs">
+                    Go Back
+                </button>
+            </div>
+            
+            <p class="mt-12 text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed">
+                If this problem persists, please contact the system administrator.
+            </p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="mb-8">
+        <a href="/bulletins" class="text-pnp-blue dark:text-pnp-gold font-bold hover:text-pnp-gold dark:hover:text-white flex items-center space-x-2 group">
+            <i class="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition"></i>
+            <span>Back to Bulletins</span>
+        </a>
+    </div>
+
+    <article class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
+        <% if (bulletin.photo_path) { %>
+            <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-96 object-cover">
+        <% } %>
+        
+        <div class="p-8 md:p-12">
+            <div class="flex flex-wrap items-center gap-4 mb-8">
+                <% 
+                    const badgeColors = {
+                        'Wanted Person': 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
+                        'Missing Person': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+                        'Crime Advisory': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
+                        'Recovered Property': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
+                        'General Announcement': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    };
+                %>
+                <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest <%= badgeColors[bulletin.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
+                    <%= bulletin.category %>
+                </span>
+                <span class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest flex items-center">
+                    <i class="far fa-calendar-alt mr-2"></i>
+                    <%= new Date(bulletin.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }) %>
+                </span>
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl font-extrabold text-pnp-blue dark:text-pnp-gold mb-8 leading-tight"><%= bulletin.title %></h1>
+            
+            <div class="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-6">
+                <% bulletin.body.split('\n').forEach(para => { %>
+                    <p><%= para %></p>
+                <% }) %>
+            </div>
+            
+            <div class="mt-12 pt-12 border-t border-gray-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-pnp-blue text-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Posted By</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-gray-200">PNP Sta. Cruz Admin</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.print()" class="text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold transition">
+                        <i class="fas fa-print text-xl"></i>
+                    </button>
+                    <button class="text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold transition">
+                        <i class="fas fa-share-nodes text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>
