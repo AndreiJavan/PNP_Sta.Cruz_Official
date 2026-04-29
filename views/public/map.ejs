@@ -697,30 +697,16 @@
         pointer-events: auto;
     }
 
-    /* Custom Scrollbar for Sidebar */
+    /* Hide scrollbar for Sidebar */
+    #filterSidebar {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
     #filterSidebar::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    #filterSidebar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    #filterSidebar::-webkit-scrollbar-thumb {
-        background: rgba(26, 58, 92, 0.1);
-        border-radius: 10px;
-        transition: all 0.3s;
-    }
-
-    #filterSidebar:hover::-webkit-scrollbar-thumb {
-        background: rgba(26, 58, 92, 0.3);
-    }
-
-    .dark #filterSidebar::-webkit-scrollbar-thumb {
-        background: rgba(200, 164, 21, 0.1);
-    }
-
-    .dark #filterSidebar:hover::-webkit-scrollbar-thumb {
-        background: rgba(200, 164, 21, 0.3);
+        display: none;
+        /* Chrome, Safari and Opera */
     }
 </style>
