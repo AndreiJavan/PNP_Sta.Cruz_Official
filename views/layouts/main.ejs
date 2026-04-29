@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +16,37 @@
                 extend: {
                     colors: {
                         pnp: {
+<<<<<<< HEAD
                             blue: '#1A3A5C',
                             gold: '#C8A415',
+=======
+                            blue: {
+                                50: '#EBF1F7',
+                                100: '#D1DEEB',
+                                200: '#A3BDD7',
+                                300: '#759CC3',
+                                400: '#477BAF',
+                                500: '#1A3A5C',
+                                600: '#152E4A',
+                                700: '#102237',
+                                800: '#0A1725',
+                                900: '#050B12',
+                                DEFAULT: '#1A3A5C',
+                            },
+                            gold: {
+                                50: '#FAF7E8',
+                                100: '#F5F0D1',
+                                200: '#EBE1A3',
+                                300: '#E1D275',
+                                400: '#D7C347',
+                                500: '#C8A415',
+                                600: '#A08311',
+                                700: '#78620D',
+                                800: '#504109',
+                                900: '#282104',
+                                DEFAULT: '#C8A415',
+                            }
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
                         }
                     }
                 }
@@ -34,6 +66,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+<<<<<<< HEAD
 
         body {
             font-family: 'Inter', sans-serif;
@@ -95,11 +128,31 @@
         .dark .border-gray-200 {
             border-color: #475569;
         }
+=======
+        body { font-family: 'Inter', sans-serif; }
+        .bg-pnp-blue { background-color: #1A3A5C; }
+        .text-pnp-blue { color: #1A3A5C; }
+        .bg-pnp-gold { background-color: #C8A415; }
+        .text-pnp-gold { color: #C8A415; }
+        .border-pnp-gold { border-color: #C8A415; }
+        
+        /* Dark mode overrides for custom classes if needed */
+        .dark .bg-gray-50 { background-color: #0f172a; }
+        .dark .bg-white { background-color: #1e293b; }
+        .dark .text-gray-800 { color: #f1f5f9; }
+        .dark .text-gray-700 { color: #e2e8f0; }
+        .dark .text-gray-600 { color: #cbd5e1; }
+        .dark .text-gray-500 { color: #94a3b8; }
+        .dark .text-gray-400 { color: #64748b; }
+        .dark .border-gray-100 { border-color: #334155; }
+        .dark .border-gray-200 { border-color: #475569; }
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 
         /* Leaflet Dark Mode Support */
         .dark .leaflet-tile {
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
         }
+<<<<<<< HEAD
 
         .dark .leaflet-container {
             background: #0f172a;
@@ -115,11 +168,24 @@
         .corner-coord-container,
         .grid-intersection-label,
         .manual-pin-container {
+=======
+        .dark .leaflet-container {
+            background: #0f172a;
+        }
+        .dark .leaflet-popup-content-wrapper, .dark .leaflet-popup-tip {
+            background-color: #1e293b;
+            color: #f8fafc;
+        }
+        .grid-label, .corner-coord-container, .grid-intersection-label, .manual-pin-container {
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         .barangay-label-tooltip {
             background: rgba(26, 58, 92, 0.9) !important;
             border: 1px solid #C8A415 !important;
@@ -132,11 +198,18 @@
             border-radius: 4px !important;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
         }
+<<<<<<< HEAD
 
         .barangay-label-tooltip::before {
             border-top-color: rgba(26, 58, 92, 0.9) !important;
         }
 
+=======
+        .barangay-label-tooltip::before {
+            border-top-color: rgba(26, 58, 92, 0.9) !important;
+        }
+        
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         /* Custom PNP Popup Styling */
         .custom-pnp-popup .leaflet-popup-content-wrapper {
             padding: 0;
@@ -144,18 +217,27 @@
             border-radius: 1.5rem;
             border: 2px solid #C8A415;
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         .custom-pnp-popup .leaflet-popup-content {
             margin: 0;
             width: auto !important;
         }
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         .custom-pnp-popup .leaflet-popup-tip {
             background: #C8A415;
         }
     </style>
 </head>
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 <body class="bg-gray-50 dark:bg-slate-900 flex flex-col min-h-screen transition-colors duration-300">
     <!-- Header -->
     <header class="bg-pnp-blue text-white sticky top-0 z-50 shadow-2xl border-b-4 border-pnp-gold">
@@ -163,6 +245,7 @@
             <div class="flex items-center justify-between h-20 md:h-24">
                 <!-- Logo -->
                 <a href="/" class="flex items-center space-x-4 group">
+<<<<<<< HEAD
                     <div
                         class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300">
                         <i class="fas fa-shield-halved text-pnp-blue text-2xl md:text-3xl"></i>
@@ -172,11 +255,20 @@
                                 class="text-pnp-gold">STA. CRUZ</span></h1>
                         <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-bold mt-1">
                             Incident Visualization System</p>
+=======
+                    <div class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300 overflow-hidden">
+                        <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 md:w-14 md:h-14 object-contain">
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg md:text-xl font-black tracking-tighter leading-none">CRIME MAP <span class="text-pnp-gold">STA. CRUZ</span></h1>
+                        <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-bold mt-1">Incident Visualization System</p>
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
                     </div>
                 </a>
 
                 <!-- Desktop Nav -->
                 <nav class="hidden lg:flex items-center space-x-1">
+<<<<<<< HEAD
                     <a href="/"
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
                     <a href="/map"
@@ -191,10 +283,19 @@
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
                     <a href="/about"
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
+=======
+                    <a href="/" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
+                    <a href="/map" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Crime Map</a>
+                    <a href="/bulletins" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Bulletins</a>
+                    <a href="/tip" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Submit Tip</a>
+                    <a href="/hotlines" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
+                    <a href="/about" class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
                 </nav>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
+<<<<<<< HEAD
                     <% if (locals.user && locals.user.role==='public' ) { %>
                         <a href="/logout"
                             class="hidden md:flex items-center space-x-2 bg-red-500/20 hover:bg-red-500/30 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition duration-300 border border-red-500/30">
@@ -214,6 +315,23 @@
                                     class="lg:hidden w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-xl">
                                     <i class="fas fa-bars"></i>
                                 </button>
+=======
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white transition duration-300">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:block text-pnp-gold"></i>
+                    </button>
+
+                    <a href="/admin/login" class="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition duration-300 border border-white/20">
+                        <i class="fas fa-lock text-[10px]"></i>
+                        <span>Admin</span>
+                    </a>
+                    
+                    <!-- Mobile Menu Toggle -->
+                    <button id="mobileMenuBtn" class="lg:hidden w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
                 </div>
             </div>
         </div>
@@ -223,6 +341,7 @@
     <div id="mobileMenu" class="fixed inset-0 bg-pnp-blue z-[100] hidden flex flex-col p-8 animate-fade-in">
         <div class="flex justify-between items-center mb-12">
             <div class="flex items-center space-x-4">
+<<<<<<< HEAD
                 <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center">
                     <i class="fas fa-shield-halved text-pnp-blue text-2xl"></i>
                 </div>
@@ -230,6 +349,14 @@
             </div>
             <button id="closeMenuBtn"
                 class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white text-xl">
+=======
+                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center overflow-hidden">
+                    <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain">
+                </div>
+                <h1 class="text-white text-xl font-black tracking-tighter">CPICRS</h1>
+            </div>
+            <button id="closeMenuBtn" class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white text-xl">
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -240,6 +367,10 @@
             <a href="/tip" class="text-2xl font-black text-white hover:text-pnp-gold transition">Submit Tip</a>
             <a href="/hotlines" class="text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
             <a href="/about" class="text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
+<<<<<<< HEAD
+=======
+            <a href="/admin/login" class="text-2xl font-black text-pnp-gold pt-8">Admin Portal</a>
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         </nav>
     </div>
 
@@ -248,6 +379,7 @@
         <%- body %>
     </main>
 
+<<<<<<< HEAD
     <footer class="bg-gray-900 border-t-4 border-pnp-gold py-12 pb-6 mt-auto">
         <div class="container mx-auto px-4 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -331,6 +463,8 @@
         <i class="fas fa-sun hidden dark:block"></i>
     </button>
 
+=======
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
     <script>
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const closeMenuBtn = document.getElementById('closeMenuBtn');
@@ -352,7 +486,28 @@
             mobileMenu.classList.add('hidden');
             document.body.style.overflow = 'auto';
         });
+<<<<<<< HEAD
     </script>
 </body>
 
 </html>
+=======
+
+        // Hide Header on Scroll logic
+        let lastScrollTop = 0;
+        const mainHeader = document.querySelector('header');
+        window.addEventListener('scroll', () => {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > lastScrollTop && scrollTop > 80) {
+                mainHeader.style.transform = 'translateY(-100%)';
+                mainHeader.style.transition = 'transform 0.3s ease-in-out';
+            } else {
+                mainHeader.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }, false);
+    </script>
+    <%- include('../partials/notifications') %>
+</body>
+</html>
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5

@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+import dotenv from "dotenv";
+dotenv.config();
+
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 import app from './app.js';
 import http from 'http';
 

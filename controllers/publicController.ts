@@ -57,7 +57,18 @@ export const getMapPoints = async (req: Request, res: Response) => {
 
   try {
     const snap = await query.get();
+<<<<<<< HEAD
     const points = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+=======
+    let points = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    
+    // Filter for 8-Focus Crimes only for public view
+    const focusTypes = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping'];
+    points = points.filter((p: any) => 
+      focusTypes.some(f => (p.incident_type || '').toLowerCase().includes(f.toLowerCase()))
+    );
+
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
     res.json(points);
   } catch (err) {
     console.error(err);

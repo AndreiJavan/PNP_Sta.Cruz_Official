@@ -29,8 +29,13 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors());
+<<<<<<< HEAD
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+=======
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // Session

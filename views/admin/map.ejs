@@ -1,4 +1,8 @@
 <% 
+<<<<<<< HEAD
+=======
+const safePoints = (typeof points !== 'undefined' && points) ? points : [];
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 const colors = {
     'Theft': '#dc2626',
     'Vandalism': '#f97316',
@@ -8,6 +12,7 @@ const colors = {
     'Other': '#6b7280'
 };
 %>
+<<<<<<< HEAD
 <div class="relative w-full h-[calc(100vh-80px)] overflow-hidden">
     <!-- Map Area (Full Coverage) -->
     <div id="leafletMap" class="absolute inset-0 z-0"></div>
@@ -85,6 +90,75 @@ const colors = {
                 <div id="barangayFilterLabel" class="text-[8px] font-black text-pnp-gold bg-pnp-blue dark:bg-slate-900 px-3 py-1 rounded-full border border-pnp-gold/20 uppercase tracking-widest">All</div>
             </div>
         </div>
+=======
+<div class="relative w-full h-full min-h-[calc(100vh-80px)] overflow-hidden">
+    <!-- Map Area (Full Coverage) -->
+    <div id="leafletMap" class="absolute inset-0 z-0"></div>
+
+    <!-- Map Loading Layer -->
+    <div id="mapLoading" class="absolute inset-0 bg-slate-900 z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <div class="w-16 h-16 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p class="text-[8px] font-black uppercase tracking-[0.3em] animate-pulse">Synchronizing Tactical Intelligence...</p>
+    </div>
+
+    <!-- Floating Add Crime Form (Top Right) -->
+    <div id="registryPanel" class="absolute top-6 right-6 z-[1000] w-84 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/20 dark:border-slate-700/50 overflow-hidden transform transition-all duration-500 hover:scale-[1.01]">
+        <div class="p-6 border-b border-gray-100/50 dark:border-slate-800/50 bg-gradient-to-r from-pnp-blue/10 to-transparent flex justify-between items-center cursor-pointer" onclick="toggleRegistry()">
+            <div class="flex items-center space-x-4">
+                <div class="w-10 h-10 bg-pnp-blue rounded-2xl flex items-center justify-center text-pnp-gold shadow-lg shadow-pnp-blue/20 border border-pnp-gold/20">
+                    <i class="fas fa-microchip animate-pulse"></i>
+                </div>
+                <div>
+                    <h2 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.25em] text-[11px] leading-tight">Municipal Grid</h2>
+                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">S-SPS Intelligence Unit</p>
+                </div>
+            </div>
+            <i id="registryToggleIcon" class="fas fa-chevron-down text-pnp-blue/30 transition-transform duration-500 text-[10px]"></i>
+        </div>
+        
+        <div id="registryContent" class="p-6 transition-all duration-500 overflow-y-auto max-h-[calc(100vh-180px)] custom-scrollbar">
+            <div class="space-y-6">
+                <!-- Barangay Selector -->
+                <div class="space-y-2">
+                    <label class="text-[9px] text-gray-400 uppercase tracking-widest font-black block">Monitor Sector (Barangay)</label>
+                    <div class="relative">
+                        <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-pnp-blue dark:text-pnp-gold text-[10px]"></i>
+                        <select id="sectorSelector" onchange="monitorSector(this.value)" class="w-full pl-9 pr-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-black dark:text-white appearance-none uppercase tracking-widest">
+                            <option value="">Full Municipal Grid</option>
+                            <% ["Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"].forEach(brgy => { %>
+                                <option value="<%= brgy %>">BRGY. <%= brgy %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Incident List Container -->
+                <div id="sectorIncidentContainer" class="space-y-3">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em]">Regional Intel</span>
+                        <span id="incidentCount" class="text-[9px] font-black text-slate-400 uppercase">0 Records</span>
+                    </div>
+                    
+                    <div id="incidentList" class="space-y-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
+                        <!-- Polished Incident Items will be injected here -->
+                        <div class="py-12 text-center">
+                            <i class="fas fa-radar text-3xl text-gray-100 dark:text-slate-800 mb-3 block"></i>
+                            <p class="text-[9px] text-gray-300 font-bold uppercase tracking-widest italic">Select a sector to view localized intelligence</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="pt-4 border-t border-gray-50 dark:border-slate-800">
+                    <a href="/admin/reports" class="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-pnp-blue hover:text-white text-pnp-blue dark:text-pnp-gold rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 border border-gray-200 dark:border-slate-700 shadow-sm">
+                        <i class="fas fa-file-invoice"></i>
+                        <span>Manual Entry</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        </div>
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
     </div>
 </div>
 
@@ -94,10 +168,195 @@ const colors = {
     let pinLayer = L.layerGroup();
     let incidentLayer = L.layerGroup();
     let choroplethLayer = L.layerGroup();
+<<<<<<< HEAD
     
     const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
     const colors = <%- JSON.stringify(colors) %>;
     const pointsData = <%- JSON.stringify(points) %>;
+=======
+    let boundaryLayer;
+    let glowLayer;
+
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
+    const colors = <%- JSON.stringify(colors) %>;
+    const safePoints = (typeof points !== 'undefined' && points) ? points : [];
+    const pointsData = safePoints;
+
+    // Map Toggle Logic
+    window.toggleRegistry = function() {
+        const icon = document.getElementById('registryToggleIcon');
+        const content = document.getElementById('registryContent');
+        
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(0deg)';
+        } else {
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(180deg)';
+        }
+    };
+
+    window.monitorSector = function(barangay) {
+        if (!barangay) {
+            renderIncidentList(pointsData);
+            map.flyToBounds(L.latLngBounds(L.latLng(14.18, 121.32), L.latLng(14.33, 121.49)), { duration: 1.5 });
+            return;
+        }
+        
+        const filtered = pointsData.filter(p => p.barangay === barangay);
+        renderIncidentList(filtered, barangay);
+        
+        const pin = manualPins.find(p => p.name === barangay);
+        if (pin) {
+            map.flyTo([pin.lat, pin.lng], 16, { duration: 1.5 });
+        }
+    };
+
+    function getCategoryForType(type) {
+        const focusTypes = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping'];
+        const psiTypes = ['Search Warrant', 'Warrant of Arrest', 'Checkpoint', 'Buy-Bust', 'Oplan Bakal', 'Oplan Galugad', 'Checkpoint'];
+        
+        if (focusTypes.some(f => type.toLowerCase().includes(f.toLowerCase()))) return '8-Focus';
+        if (psiTypes.some(p => type.toLowerCase().includes(p.toLowerCase()))) return 'PSI';
+        return 'Non-Index';
+    }
+
+    function renderIncidentList(data, sectorName = 'Regional Grid') {
+        const list = document.getElementById('incidentList');
+        const count = document.getElementById('incidentCount');
+        
+        count.textContent = `${data.length} Records`;
+        
+        if (data.length === 0) {
+            list.innerHTML = `
+                <div class="py-12 text-center">
+                    <i class="fas fa-satellite-dish text-3xl text-gray-100 dark:text-slate-800 mb-3 block"></i>
+                    <p class="text-[9px] text-gray-300 font-bold uppercase tracking-widest italic">Negative Contact: No intelligence for this sector</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Sort by date descending
+        const sorted = [...data].sort((a,b) => new Date(b.incident_date).getTime() - new Date(a.incident_date).getTime());
+
+        list.innerHTML = sorted.map(item => {
+            const cat = getCategoryForType(item.incident_type || 'Other');
+            const stripeColor = cat === '8-Focus' ? 'border-red-500' : (cat === 'PSI' ? 'border-pnp-gold' : 'border-pnp-blue');
+            const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500' : (cat === 'PSI' ? 'bg-pnp-gold/10 text-pnp-gold' : 'bg-pnp-blue/10 text-pnp-blue dark:text-blue-300');
+            
+            return `
+                <div class="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border-l-4 ${stripeColor} hover:bg-white dark:hover:bg-slate-700 transition-all cursor-pointer group shadow-sm flex justify-between items-center">
+                    <div onclick="focusPoint('${item.barangay}', '${item.incident_type}')" class="flex-grow">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-black text-slate-800 dark:text-white uppercase leading-tight group-hover:text-pnp-blue transition">${item.incident_type}</span>
+                            <span class="text-[8px] font-bold text-slate-400 uppercase tabular-nums">${new Date(item.incident_date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest ${badgeClass}">${cat}</span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase">Brgy. ${item.barangay}</span>
+                        </div>
+                    </div>
+                    <button onclick="deletePoint('${item.id}', event)" class="ml-3 w-8 h-8 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                        <i class="fas fa-trash-alt text-[10px]"></i>
+                    </button>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.deletePoint = async function(id, event) {
+        if (event) event.stopPropagation();
+        
+        if (confirm('Are you sure you want to delete this tactical data point?')) {
+            try {
+                const res = await fetch(`/admin/map/${id}/delete`, { 
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const result = await res.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert('Command Failure: ' + (result.message || 'Operation failed'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Connection error: Protocol sequence interrupted');
+            }
+        }
+    };
+
+    window.focusBarangay = function(barangay) {
+        if (!barangay) return;
+        const pin = manualPins.find(p => p.name === barangay);
+        if (pin) {
+            map.flyTo([pin.lat, pin.lng], 17, { duration: 1.5 });
+        }
+    };
+
+    window.focusPoint = function(barangay, type) {
+        const pin = manualPins.find(p => p.name === barangay);
+        if (pin) {
+            map.flyTo([pin.lat, pin.lng], 17);
+            incidentLayer.eachLayer(layer => {
+                const popup = layer.getPopup();
+                if (popup && popup.getContent().includes(`Brgy. ${barangay}`) && popup.getContent().includes(type)) {
+                    layer.openPopup();
+                }
+            });
+        }
+    };
+
+    async function loadMunicipalBoundary() {
+        try {
+            const response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=Santa+Cruz,+Laguna,+Philippines&polygon_geojson=1&limit=5');
+            const data = await response.json();
+            const boundary = data.find(item => item.osm_type === 'relation' && item.geojson);
+
+            if (boundary && boundary.geojson) {
+                const updateStyles = () => {
+                    const zoom = map.getZoom();
+                    const baseWeight = zoom < 14 ? 10 : (zoom < 16 ? 18 : 30);
+                    const glowWeight = baseWeight * 1.8;
+
+                    if (glowLayer) glowLayer.setStyle({ weight: glowWeight });
+                    if (boundaryLayer) boundaryLayer.setStyle({ weight: baseWeight });
+                };
+
+                glowLayer = L.geoJSON(boundary.geojson, {
+                    style: {
+                        color: "#000000",
+                        weight: 25,
+                        opacity: 0.2,
+                        fillColor: "transparent",
+                        interactive: false
+                    }
+                }).addTo(map);
+
+                boundaryLayer = L.geoJSON(boundary.geojson, {
+                    style: {
+                        color: "#000000",
+                        weight: 12,
+                        opacity: 0.9,
+                        fillColor: "rgba(0,0,0,0.05)",
+                        fillOpacity: 0.1,
+                        interactive: false
+                    }
+                }).addTo(map);
+
+                map.on('zoomend', updateStyles);
+                updateStyles();
+            }
+        } catch (err) {
+            console.error("Error loading municipal boundary:", err);
+        }
+    }
+
+    function calculateTopIncidents() {
+        // Simplified for Admin Map integration
+    }
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
 
     window.manualPins = [
         { name: 'Alipit', lat: 14.223931, lng: 121.405213 },
@@ -146,6 +405,7 @@ const colors = {
             if (!brgyRef) return;
             const lat = brgyRef.lat + (Math.random() - 0.5) * 0.002;
             const lng = brgyRef.lng + (Math.random() - 0.5) * 0.002;
+<<<<<<< HEAD
             L.marker([lat, lng], {
                 icon: L.divIcon({
                     className: 'incident-pin-container',
@@ -154,11 +414,35 @@ const colors = {
                     iconAnchor: [8, 8]
                 })
             }).addTo(incidentLayer).bindPopup(`<div class="p-2 text-xs font-bold uppercase"><b>${point.incident_type}</b><br>Brgy. ${point.barangay}<br>${new Date(point.incident_date).toLocaleDateString()}</div>`);
+=======
+            const marker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'incident-pin-container',
+                    html: `<div class="w-4 h-4 rounded-full border-2 border-white shadow-lg animate-pulse" style="background-color: ${colors[point.incident_type] || '#ccc'}"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                })
+            }).addTo(incidentLayer).bindPopup(`
+                <div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest" style="background-color: ${colors[point.incident_type] || '#ccc'}">${point.incident_type}</span>
+                        <span class="text-[7px] text-white/40 font-bold">${new Date(point.incident_date).toLocaleDateString()}</span>
+                    </div>
+                    <h3 class="text-[10px] font-black uppercase tracking-tighter mb-1">Brgy. ${point.barangay}</h3>
+                    <p class="text-[8px] text-white/60 leading-tight">${point.description || 'No additional intelligence'}</p>
+                </div>
+            `, { className: 'intelligence-popup' });
+            
+            marker.on('click', () => {
+                map.flyTo([lat, lng], 18);
+            });
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         });
     }
 
     function addManualPins() {
         manualPins.forEach(pin => {
+<<<<<<< HEAD
             L.marker([pin.lat, pin.lng], {
                 icon: L.divIcon({
                     className: 'manual-pin-container',
@@ -169,6 +453,49 @@ const colors = {
                     iconAnchor: [16, 32]
                 })
             }).addTo(pinLayer).bindPopup(`<div class="p-2 text-xs font-black uppercase">${pin.name} Sector</div>`);
+=======
+            const marker = L.marker([pin.lat, pin.lng], {
+                icon: L.divIcon({
+                    className: 'manual-pin-container',
+                    html: `
+                        <div class="relative group flex flex-col items-center">
+                            <!-- Pulse Effect -->
+                            <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
+                            <!-- Main Pin -->
+                            <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
+                                <i class="fas fa-tower-observation text-white dark:text-pnp-blue text-xs"></i>
+                            </div>
+                            <!-- Pointer -->
+                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                        </div>
+                    `,
+                    iconSize: [40, 48],
+                    iconAnchor: [20, 48]
+                })
+            }).addTo(pinLayer).bindPopup(`
+                <div class="p-4 min-w-[200px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
+                    <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-white/10">
+                        <div class="w-8 h-8 bg-pnp-gold rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shield-halved text-pnp-blue text-xs"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px] leading-none">${pin.name} Sector</h3>
+                            <p class="text-[7px] text-white/50 font-bold uppercase mt-1">Intelligence Division</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-[8px] font-black uppercase text-white/70">
+                            <span>Sector Ref</span>
+                            <span class="text-pnp-gold">SCT-${pin.name.slice(0, 3).toUpperCase()}</span>
+                        </div>
+                    </div>
+                </div>
+            `, { className: 'intelligence-popup' });
+
+            marker.on('click', () => {
+                map.flyTo([pin.lat, pin.lng], 16);
+            });
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         });
     }
 
@@ -186,13 +513,38 @@ const colors = {
     }
 
     function initMap() {
+<<<<<<< HEAD
         map = L.map('leafletMap', { zoomControl: true }).fitBounds([[14.2100, 121.3400], [14.3100, 121.4850]]);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+=======
+        // Sta. Cruz Laguna Bounds
+        const corner1 = L.latLng(14.18, 121.32);
+        const corner2 = L.latLng(14.33, 121.49);
+        const bounds = L.latLngBounds(corner1, corner2);
+
+        map = L.map('leafletMap', { 
+            zoomControl: true,
+            maxBounds: bounds,
+            maxBoundsViscosity: 1.0,
+            minZoom: 13
+        }).fitBounds(bounds);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19
+        }).addTo(map);
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         pinLayer.addTo(map);
         incidentLayer.addTo(map);
         choroplethLayer.addTo(map);
         addManualPins();
         addIncidentPins();
+<<<<<<< HEAD
+=======
+        renderIncidentList(pointsData);
+        calculateTopIncidents();
+        loadMunicipalBoundary();
+
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
         fetch(barangayGeoJsonUrl).then(r => r.json()).then(data => {
             santaCruzGeoJSON = data;
             L.geoJSON(data, {
@@ -207,7 +559,21 @@ const colors = {
                                     </div>
                                 </div>`, { className: 'intelligence-popup' })
             }).addTo(choroplethLayer);
+<<<<<<< HEAD
         });
+=======
+            
+            // Default: Choropleth off
+            map.removeLayer(choroplethLayer);
+        });
+
+        // Hide Loading
+        const loading = document.getElementById('mapLoading');
+        if (loading) {
+            loading.classList.add('opacity-0');
+            setTimeout(() => loading.classList.add('hidden'), 500);
+        }
+>>>>>>> a7738a224d24ec3d09bed887c49f960150f89ea5
     }
 
     document.addEventListener('DOMContentLoaded', () => {
