@@ -42,32 +42,32 @@ export const mockUsers = [
 ];
 
 export const mockTips = [
-  { 
-    id: 'tip1', 
+  {
+    id: 'tip1',
     tip_id: 'TIP-8492',
     concern_type: 'Suspicious Activity',
     location_text: 'Public Market Area',
-    description: 'Noticeable group of individuals loitering around the warehouse entrance during curfew hours.', 
+    description: 'Noticeable group of individuals loitering around the warehouse entrance during curfew hours.',
     is_flagged: true,
     admin_notes: 'Patrol dispatched. Area under surveillance.',
     created_at: new Date(Date.now() - 3600000).toISOString()
   },
-  { 
-    id: 'tip2', 
+  {
+    id: 'tip2',
     tip_id: 'TIP-2041',
     concern_type: 'Illegal Gambling',
     location_text: 'Brgy. Bagumbayan',
-    description: 'Reports of nightly tupada sessions behind the old mill.', 
+    description: 'Reports of nightly tupada sessions behind the old mill.',
     is_flagged: false,
     admin_notes: '',
     created_at: new Date(Date.now() - 86400000).toISOString()
   },
-  { 
-    id: 'tip3', 
+  {
+    id: 'tip3',
     tip_id: 'TIP-9932',
     concern_type: 'Drug Related',
     location_text: 'Poblacion IV',
-    description: 'Frequent short-term visitors to a house near the chapel at odd hours.', 
+    description: 'Frequent short-term visitors to a house near the chapel at odd hours.',
     is_flagged: true,
     admin_notes: 'Forwarded to PDEA/Investigation unit.',
     created_at: new Date(Date.now() - 172800000).toISOString()
@@ -75,13 +75,13 @@ export const mockTips = [
 ];
 
 export const mockAuditLogs = [
-  { 
-    id: 'log1', 
-    admin_id: 'superadmin', 
+  {
+    id: 'log1',
+    admin_id: 'superadmin',
     username: 'superadmin',
-    action: 'Logged in', 
+    action: 'Logged in',
     details: 'Admin logged into the system',
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString()
   }
 ];
 
@@ -160,5 +160,22 @@ export const mockIntelligenceScans = [
       { barangay: 'Bubukal', incident_date: '2026-01-15', offense: 'Vehicular Accident', category: 'PSI', description: 'Intel extracted' },
       { barangay: 'Labuin', incident_date: '2026-01-20', offense: 'Illegal Gambling', category: 'Non-Index', description: 'Intel extracted' }
     ]
+  }
+];
+
+export const mockAdminNotifications = [
+  {
+    id: 'notif1',
+    message: 'New tip received from Public Market Area.',
+    type: 'tip',
+    is_read: false,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'notif2',
+    message: 'System audit logs generated successfully.',
+    type: 'system',
+    is_read: true,
+    created_at: new Date(Date.now() - 86400000).toISOString()
   }
 ];

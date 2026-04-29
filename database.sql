@@ -88,6 +88,26 @@ CREATE TABLE audit_logs (
   FOREIGN KEY (admin_id) REFERENCES users(id)
 );
 
+-- Table: intelligence_scans
+CREATE TABLE intelligence_scans (
+  id VARCHAR(50) PRIMARY KEY,
+  admin_id VARCHAR(50) NOT NULL,
+  admin_name VARCHAR(100) NOT NULL,
+  total_records INT NOT NULL,
+  category_stats JSON,
+  raw_data JSON,
+  timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Table: admin_notifications
+CREATE TABLE admin_notifications (
+  id VARCHAR(50) PRIMARY KEY,
+  message TEXT NOT NULL,
+  type ENUM('tip', 'system', 'alert') DEFAULT 'system',
+  is_read TINYINT(1) DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Seed Data
 INSERT INTO users (username, full_name, password_hash, role) VALUES 
 ('superadmin', 'Super Administrator', '$2a$10$7v6E8Z9R9R9R9R9R9R9R9O', 'superadmin'),
