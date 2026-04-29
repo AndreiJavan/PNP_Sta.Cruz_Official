@@ -22,7 +22,7 @@ function getSupabase() {
 
 // Mapper to support Firestore-like API for existing controllers
 class Collection {
-  constructor(private name: string) {}
+  constructor(private name: string) { }
 
   where(field: string, op: string, value: any) {
     return new Query(this.name).where(field, op, value);
@@ -96,7 +96,7 @@ class Query {
     try {
       const sb = getSupabase();
       let q: any;
-      
+
       if (this.isCount) {
         q = sb.from(this.table).select('*', { count: 'exact', head: true });
       } else {
@@ -209,7 +209,7 @@ class Query {
 }
 
 class Doc {
-  constructor(private table: string, public id: string) {}
+  constructor(private table: string, public id: string) { }
 
   async get() {
     try {
@@ -310,10 +310,10 @@ export const db: any = {
             contentType: mimetype,
             upsert: true
           });
-          
+
           if (error) {
-             console.warn(`[STORAGE WARNING] Upload to bucket "${bucket}" failed: ${error.message}. Ensure bucket exists and is public.`);
-             // Do not throw, allow fallback to placeholder
+            console.warn(`[STORAGE WARNING] Upload to bucket "${bucket}" failed: ${error.message}. Ensure bucket exists and is public.`);
+            // Do not throw, allow fallback to placeholder
           } else {
             const { data: publicUrlData } = sb.storage.from(bucket).getPublicUrl(path);
             return publicUrlData.publicUrl;
@@ -322,10 +322,20 @@ export const db: any = {
       } catch (err) {
         console.error(`[STORAGE ERROR] ${bucket}/${path}:`, err);
       }
-      
-      // Fallback to placeholder if Supabase fails or credentials missing
-      console.log(`[STORAGE] Using placeholder for ${path} in ${bucket}`);
-      return `https://placehold.co/600x400?text=${encodeURIComponent(path)}`;
+
+      // Fallback to local FS if Supabase fails or credentials missing
+      console.log(`[STORAGE] Supabase unavailable. Falling back to local disk for ${path} in ${bucket}`);
+      const fs = await import('fs');
+      const pathModule = await import('path');
+      const fileName = path.split('/').pop() || 'unknown.png';
+
+      const uploadDir = pathModule.join(process.cwd(), 'public', bucket);
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      fs.writeFileSync(pathModule.join(uploadDir, fileName), buffer);
+      return `/${bucket}/${fileName}`;
     }
   }
 };
