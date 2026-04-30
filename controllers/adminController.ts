@@ -545,7 +545,8 @@ export const getDashboard = async (req: Request, res: Response) => {
         else if (count > 5) risk = 'Medium';
         return { name, count, risk };
       })
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
 
     // Monthly Trends (Last 12 Months from Reference)
     const monthlyTrends: any[] = [];
