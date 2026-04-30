@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -57,13 +58,31 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .bg-pnp-blue { background-color: #1A3A5C; }
-        .text-pnp-blue { color: #1A3A5C; }
-        .bg-pnp-gold { background-color: #C8A415; }
-        .text-pnp-gold { color: #C8A415; }
-        .border-pnp-gold { border-color: #C8A415; }
-        
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .bg-pnp-blue {
+            background-color: #1A3A5C;
+        }
+
+        .text-pnp-blue {
+            color: #1A3A5C;
+        }
+
+        .bg-pnp-gold {
+            background-color: #C8A415;
+        }
+
+        .text-pnp-gold {
+            color: #C8A415;
+        }
+
+        .border-pnp-gold {
+            border-color: #C8A415;
+        }
+
         .pnp-gradient-blue {
             background: linear-gradient(135deg, #1A3A5C 0%, #0A1725 100%);
         }
@@ -75,7 +94,7 @@
         .pnp-card:hover {
             @apply shadow-xl border-pnp-blue/20 transform -translate-y-1;
         }
-        
+
         .pnp-glass {
             background: rgba(255, 255, 255, 0.01);
             backdrop-filter: blur(12px);
@@ -93,7 +112,7 @@
         }
 
         .sidebar-item-active {
-            @apply bg-white/10 border-l-4 border-pnp-gold/80 shadow-[inset_-10px_0_20px_rgba(0,0,0,0.1)];
+            @apply bg-white/10 border-l-4 border-pnp-gold/80 shadow-[inset_-10px_0_20px_rgba(0, 0, 0, 0.1)];
         }
 
         /* Global scrollbar hiding */
@@ -101,6 +120,7 @@
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
         }
+
         *::-webkit-scrollbar {
             display: none !important;
         }
@@ -109,28 +129,34 @@
         .sidebar-hidden {
             transform: translateX(-100%);
         }
+
         .main-content-expanded {
             margin-left: 0 !important;
             width: 100% !important;
         }
 
         @media (min-width: 1024px) {
-            #sidebar:not(.sidebar-hidden) + #mainContent {
-                margin-left: 18rem; /* w-72 matches aside width */
+            #sidebar:not(.sidebar-hidden)+#mainContent {
+                margin-left: 18rem;
+                /* w-72 matches aside width */
             }
         }
-        
-        #layoutHeader, #layoutFooter {
+
+        #layoutHeader,
+        #layoutFooter {
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
     </style>
 </head>
+
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-72 pnp-gradient-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto">
+    <aside id="sidebar"
+        class="w-72 pnp-gradient-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto">
         <div class="p-8 border-b border-white/10 flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg" onerror="this.onerror=null; this.src='/favicon.ico';">
+                <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg"
+                    onerror="this.onerror=null; this.src='/favicon.ico';">
                 <div>
                     <h1 class="text-lg font-black tracking-tighter leading-none">CPICRS</h1>
                     <p class="text-[10px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">Records</p>
@@ -142,67 +168,74 @@
         </div>
 
         <nav class="flex-grow p-4 space-y-1.5">
-            <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mb-4 px-4 opacity-50">Operational Hub</p>
-            
-            <a href="/admin/dashboard" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Admin Command Center' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mb-4 px-4 opacity-50">Operational
+                Hub</p>
+
+            <a href="/admin/dashboard"
+                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Admin Command Center' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div
+                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i class="fas fa-chart-line text-xs"></i>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest">Command Center</span>
             </a>
 
-            <a href="/admin/bulletins" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Bulletins' || title === 'Manage Bulletins' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <a href="/admin/bulletins"
+                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Bulletins' || title === 'Manage Bulletins' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div
+                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i class="fas fa-bullhorn text-xs"></i>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest">Directives</span>
             </a>
 
-            <a href="/admin/reports" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Records' || title === 'Intelligence Reports' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <a href="/admin/reports"
+                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Records' || title === 'Intelligence Reports' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div
+                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i class="fas fa-file-invoice text-xs"></i>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest">Records</span>
             </a>
 
-            <a href="/admin/tips" class="flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Anonymous Tips' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+            <a href="/admin/tips"
+                class="flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Anonymous Tips' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
                 <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <div
+                        class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <i class="fas fa-user-secret text-xs"></i>
                     </div>
                     <span class="text-[10px] font-black uppercase tracking-widest">Informant Tips</span>
                 </div>
-                <div id="tipsNotificationDot" class="hidden w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
+                <div id="tipsNotificationDot"
+                    class="hidden w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]">
+                </div>
             </a>
 
-            <a href="/admin/map" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Map Data' || title === 'Map Management' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <a href="/admin/map"
+                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Map Data' || title === 'Map Management' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div
+                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i class="fas fa-map-marked-alt text-xs"></i>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest">Tactical Map</span>
             </a>
 
-            <a href="/admin/hotlines" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Hotlines' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <a href="/admin/hotlines"
+                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Hotlines' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div
+                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <i class="fas fa-phone-volume text-xs"></i>
                 </div>
                 <span class="text-[10px] font-black uppercase tracking-widest">Hotlines</span>
             </a>
 
-            <% if (user && user.role === 'superadmin') { %>
-                <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mt-10 mb-4 px-4 opacity-50">System Custodian</p>
-                
-                <a href="/admin/users" class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'User Management' || title === 'Personnel & Operational Logs' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                    <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <i class="fas fa-users-cog text-xs"></i>
-                    </div>
-                    <span class="text-[10px] font-black uppercase tracking-widest">Personnel</span>
-                </a>
-            <% } %>
+
         </nav>
 
         <div class="p-6 border-t border-white/10">
-            <a href="/admin/logout" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-600/10 text-red-400 hover:bg-red-600 hover:text-white transition duration-300 group">
+            <a href="/admin/logout"
+                class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-600/10 text-red-400 hover:bg-red-600 hover:text-white transition duration-300 group">
                 <i class="fas fa-sign-out-alt text-[10px] group-hover:scale-110 transition"></i>
                 <span class="text-[10px] font-bold uppercase tracking-widest">Logout</span>
             </a>
@@ -212,19 +245,25 @@
     <!-- Main Content Area -->
     <div id="mainContent" class="flex-grow ml-72 flex flex-col min-h-screen transition-all duration-300">
         <!-- Top Header -->
-        <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md h-20 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between px-6 md:px-10 fixed top-0 right-0 z-40 transition-all duration-300" style="left: 18rem;" id="layoutHeader">
+        <header
+            class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md h-20 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between px-6 md:px-10 fixed top-0 right-0 z-40 transition-all duration-300"
+            style="left: 18rem;" id="layoutHeader">
             <div class="flex items-center space-x-4">
-                <button id="sidebarToggle" class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition border border-gray-100 dark:border-slate-600">
+                <button id="sidebarToggle"
+                    class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition border border-gray-100 dark:border-slate-600">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="hidden sm:flex items-center space-x-4">
-                    <h2 class="text-xl font-black text-pnp-blue dark:text-white tracking-tighter uppercase"><%= title %></h2>
+                    <h2 class="text-xl font-black text-pnp-blue dark:text-white tracking-tighter uppercase">
+                        <%= title %>
+                    </h2>
                 </div>
             </div>
 
             <div class="flex items-center space-x-8">
                 <!-- Dark Mode Toggle -->
-                <button id="darkModeToggle" class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition duration-300 border border-gray-100 dark:border-slate-600">
+                <button id="darkModeToggle"
+                    class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition duration-300 border border-gray-100 dark:border-slate-600">
                     <i class="fas fa-moon dark:hidden"></i>
                     <i class="fas fa-sun hidden dark:block text-pnp-gold"></i>
                 </button>
@@ -234,30 +273,38 @@
         <!-- Page Body -->
         <main class="flex-grow <%= title === 'Map Management' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
             <!-- Flash Messages -->
-            <% if (typeof success_msg !== 'undefined' && success_msg) { %>
-                <div class="bg-green-50 text-green-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-green-100 flex items-center space-x-4 shadow-sm mx-10">
+            <% if (typeof success_msg !=='undefined' && success_msg) { %>
+                <div
+                    class="bg-green-50 text-green-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-green-100 flex items-center space-x-4 shadow-sm mx-10">
                     <i class="fas fa-check-circle text-lg"></i>
-                    <span><%= success_msg %></span>
+                    <span>
+                        <%= success_msg %>
+                    </span>
                 </div>
-            <% } %>
-            <% if (typeof error_msg !== 'undefined' && error_msg) { %>
-                <div class="bg-red-50 text-red-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-red-100 flex items-center space-x-4 shadow-sm mx-10">
-                    <i class="fas fa-exclamation-circle text-lg"></i>
-                    <span><%= error_msg %></span>
-                </div>
-            <% } %>
+                <% } %>
+                    <% if (typeof error_msg !=='undefined' && error_msg) { %>
+                        <div
+                            class="bg-red-50 text-red-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-red-100 flex items-center space-x-4 shadow-sm mx-10">
+                            <i class="fas fa-exclamation-circle text-lg"></i>
+                            <span>
+                                <%= error_msg %>
+                            </span>
+                        </div>
+                        <% } %>
 
-            <%- body %>
+                            <%- body %>
         </main>
 
         <!-- Footer -->
-        <% if (title !== 'Map Management') { %>
-        <footer class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md py-6 px-10 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center fixed bottom-0 right-0 z-40 transition-all duration-300" style="left: 18rem;" id="layoutFooter">
-            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                &copy; 2026 PNP Sta. Cruz Municipal Police Station - CPICRS Admin
-            </p>
-        </footer>
-        <% } %>
+        <% if (title !=='Map Management' ) { %>
+            <footer
+                class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md py-6 px-10 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center fixed bottom-0 right-0 z-40 transition-all duration-300"
+                style="left: 18rem;" id="layoutFooter">
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    &copy; 2026 PNP Sta. Cruz Municipal Police Station - CPICRS Admin
+                </p>
+            </footer>
+            <% } %>
     </div>
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -277,7 +324,7 @@
         const toggleSidebar = () => {
             sidebar.classList.toggle('sidebar-hidden');
             mainContent.classList.toggle('main-content-expanded');
-            
+
             const isHidden = sidebar.classList.contains('sidebar-hidden');
             if (isHidden) {
                 layoutHeader.style.left = '0';
@@ -286,7 +333,7 @@
                 layoutHeader.style.left = '18rem';
                 if (layoutFooter) layoutFooter.style.left = '18rem';
             }
-            
+
             localStorage.setItem('sidebarHidden', isHidden);
         };
 
@@ -315,19 +362,19 @@
         // Hide Header and only show Footer at the bottom
         let lastScrollTop = 0;
         const footer = document.getElementById('layoutFooter');
-        
+
         window.addEventListener('scroll', () => {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             let windowHeight = window.innerHeight;
             let documentHeight = document.documentElement.scrollHeight;
-            
+
             // Header logic: hide on scroll down, show on scroll up
             if (scrollTop > lastScrollTop && scrollTop > 50) {
                 layoutHeader.style.transform = 'translateY(-100%)';
             } else {
                 layoutHeader.style.transform = 'translateY(0)';
             }
-            
+
             // Footer logic: only show when near the bottom
             if (footer) {
                 if ((windowHeight + scrollTop) >= (documentHeight - 100)) {
@@ -338,7 +385,7 @@
                     footer.style.opacity = '0';
                 }
             }
-            
+
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         }, { passive: true });
 
@@ -382,4 +429,5 @@
     </script>
     <%- include('../partials/notifications') %>
 </body>
+
 </html>
