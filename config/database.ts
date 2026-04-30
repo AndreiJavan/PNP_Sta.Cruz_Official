@@ -328,7 +328,8 @@ export const db: any = {
         return `/${bucket}/${fileName}`;
       } catch (err: any) {
         console.error(`[STORAGE ERROR] ${bucket}/${path}:`, err);
-        return `https://placehold.co/600x400?text=Upload+Error`;
+        const errMsg = encodeURIComponent(err.message || 'Unknown Error');
+        return `https://placehold.co/600x400?text=Upload+Error:+${errMsg}`;
       }
     }
   }
