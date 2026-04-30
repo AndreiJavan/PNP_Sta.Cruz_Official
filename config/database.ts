@@ -307,35 +307,29 @@ export const db: any = {
       try {
         const sb = getSupabase();
         if (supabaseUrl && supabaseKey) {
-          // Attempt actual Supabase upload
           const { data, error } = await sb.storage.from(bucket).upload(path, buffer, {
             contentType: mimetype,
             upsert: true
           });
-
-          if (error) {
-            console.warn(`[STORAGE WARNING] Upload to bucket "${bucket}" failed: ${error.message}. Ensure bucket exists and is public.`);
-            // Do not throw, allow fallback to placeholder
-          } else {
+          if (!error) {
             const { data: publicUrlData } = sb.storage.from(bucket).getPublicUrl(path);
             return publicUrlData.publicUrl;
           }
+          console.warn(`[STORAGE WARNING] Supabase: ${error.message}`);
         }
-      } catch (err) {
+
+        const fileName = path.split('/').pop() || `${Date.now()}.png`;
+        const uploadDir = pathModule.join(process.cwd(), 'public', bucket);
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        fs.writeFileSync(pathModule.join(uploadDir, fileName), buffer);
+        console.log(`[STORAGE] Local fallback: /${bucket}/${fileName}`);
+        return `/${bucket}/${fileName}`;
+      } catch (err: any) {
         console.error(`[STORAGE ERROR] ${bucket}/${path}:`, err);
+        return `https://placehold.co/600x400?text=Upload+Error`;
       }
-
-      // Fallback to local FS if Supabase fails or credentials missing
-      console.log(`[STORAGE] Supabase unavailable. Falling back to local disk for ${path} in ${bucket}`);
-      const fileName = path.split('/').pop() || 'unknown.png';
-
-      const uploadDir = pathModule.join(process.cwd(), 'public', bucket);
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-
-      fs.writeFileSync(pathModule.join(uploadDir, fileName), buffer);
-      return `/${bucket}/${fileName}`;
     }
   }
 };

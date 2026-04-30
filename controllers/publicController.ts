@@ -10,7 +10,7 @@ export const getHome = async (req: Request, res: Response) => {
     const hotlines = hotlinesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     const activeBulletinsSnap = await db.collection('bulletins')
-      .where('is_archived', '==', false)
+      .where('is_archived', '!=', true)
       .count().get();
 
     const tipsReceivedSnap = await db.collection('anonymous_tips')
@@ -73,7 +73,7 @@ export const getBulletins = async (req: Request, res: Response) => {
   // For simplicity, we'll just fetch with limit.
 
   try {
-    let query: any = db.collection('bulletins').where('is_archived', '==', false);
+    let query: any = db.collection('bulletins').where('is_archived', '!=', true);
 
     if (category && category !== 'All') {
       query = query.where('category', '==', category);
