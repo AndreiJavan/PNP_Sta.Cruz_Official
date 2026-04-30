@@ -935,15 +935,15 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 export const postUser = async (req: Request, res: Response) => {
-  const { username, full_name, password, role } = req.body;
+  const { username, full_name, password } = req.body;
   const hash = bcrypt.hashSync(password, 10);
   try {
-    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: ${role || 'staff'})`);
+    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: staff)`);
     await db.collection('users').add({
       username,
       full_name,
       password_hash: hash,
-      role: role || 'staff',
+      role: 'staff',
       created_at: new Date().toISOString()
     });
     res.redirect('/admin/users');
