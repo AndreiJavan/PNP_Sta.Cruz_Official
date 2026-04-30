@@ -319,16 +319,18 @@ export const db: any = {
         }
 
         const fileName = path.split('/').pop() || `${Date.now()}.png`;
-        const uploadDir = pathModule.join(process.cwd(), 'public', bucket);
+        const uploadDir = pathModule.resolve(process.cwd(), 'public', bucket);
         if (!fs.existsSync(uploadDir)) {
+          console.log(`[STORAGE] Creating directory: ${uploadDir}`);
           fs.mkdirSync(uploadDir, { recursive: true });
         }
         fs.writeFileSync(pathModule.join(uploadDir, fileName), buffer);
         console.log(`[STORAGE] Local fallback: /${bucket}/${fileName}`);
         return `/${bucket}/${fileName}`;
       } catch (err: any) {
-        console.error(`[STORAGE ERROR] ${bucket}/${path}:`, err);
-        const errMsg = encodeURIComponent(err.message || 'Unknown Error');
+        const cwd = process.cwd();
+        console.error(`[STORAGE ERROR] CWD: ${cwd} | Err:`, err);
+        const errMsg = encodeURIComponent(`${err.message} (CWD: ${cwd})`);
         return `https://placehold.co/600x400?text=Upload+Error:+${errMsg}`;
       }
     }
