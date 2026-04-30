@@ -8,11 +8,11 @@ import { createRequire } from 'module';
 
 // Shared Tactical Assets
 const VALID_BARANGAYS = [
-    "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", 
-    "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", 
-    "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", 
-    "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", 
-    "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
+  "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
+  "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
+  "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)",
+  "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur",
+  "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
 ];
 
 // Audit Strategy
@@ -21,7 +21,7 @@ async function logAction(req: Request, action: string, details: string) {
     const adminId = req.session?.user?.id || 'system';
     const adminUsername = req.session?.user?.username || 'system';
     const ip = req.ip || '0.0.0.0';
-    
+
     await db.collection('audit_logs').add({
       admin_id: adminId,
       username: adminUsername,
@@ -36,19 +36,19 @@ async function logAction(req: Request, action: string, details: string) {
 }
 
 const MANUAL_PINS = [
-    { name: 'Alipit', lat: 14.223931, lng: 121.405213 }, { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
-    { name: 'Duhat', lat: 14.2525, lng: 121.3825 }, { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
-    { name: 'Calios', lat: 14.2750, lng: 121.4050 }, { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
-    { name: 'Jasaan', lat: 14.223577, lng: 121.394827 }, { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
-    { name: 'Malinao', lat: 14.232833, lng: 121.396823 }, { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
-    { name: 'Pagsawitan', lat: 14.265754, lng: 121.426545 }, { name: 'Palasan', lat: 14.257498, lng: 121.418992 },
-    { name: 'Patimbao', lat: 14.270081, lng: 121.418366 }, { name: 'Poblacion I (Barangay I)', lat: 14.277068, lng: 121.418881 },
-    { name: 'Poblacion II (Barangay II)', lat: 14.279647, lng: 121.416006 }, { name: 'Poblacion III (Barangay III)', lat: 14.282028, lng: 121.415159 },
-    { name: 'Poblacion IV (Barangay IV)', lat: 14.283790, lng: 121.414016 }, { name: 'Poblacion V (Barangay V)', lat: 14.285282, lng: 121.412476 },
-    { name: 'San Jose', lat: 14.237118, lng: 121.403754 }, { name: 'San Juan', lat: 14.243815, lng: 121.406972 },
-    { name: 'San Pablo Norte', lat: 14.290210, lng: 121.413023 }, { name: 'San Pablo Sur', lat: 14.282211, lng: 121.422261 },
-    { name: 'Santisima Cruz', lat: 14.290647, lng: 121.409140 }, { name: 'Santo Angel Central', lat: 14.285137, lng: 121.408947 },
-    { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 }, { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
+  { name: 'Alipit', lat: 14.223931, lng: 121.405213 }, { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
+  { name: 'Duhat', lat: 14.2525, lng: 121.3825 }, { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
+  { name: 'Calios', lat: 14.2750, lng: 121.4050 }, { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
+  { name: 'Jasaan', lat: 14.223577, lng: 121.394827 }, { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
+  { name: 'Malinao', lat: 14.232833, lng: 121.396823 }, { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
+  { name: 'Pagsawitan', lat: 14.265754, lng: 121.426545 }, { name: 'Palasan', lat: 14.257498, lng: 121.418992 },
+  { name: 'Patimbao', lat: 14.270081, lng: 121.418366 }, { name: 'Poblacion I (Barangay I)', lat: 14.277068, lng: 121.418881 },
+  { name: 'Poblacion II (Barangay II)', lat: 14.279647, lng: 121.416006 }, { name: 'Poblacion III (Barangay III)', lat: 14.282028, lng: 121.415159 },
+  { name: 'Poblacion IV (Barangay IV)', lat: 14.283790, lng: 121.414016 }, { name: 'Poblacion V (Barangay V)', lat: 14.285282, lng: 121.412476 },
+  { name: 'San Jose', lat: 14.237118, lng: 121.403754 }, { name: 'San Juan', lat: 14.243815, lng: 121.406972 },
+  { name: 'San Pablo Norte', lat: 14.290210, lng: 121.413023 }, { name: 'San Pablo Sur', lat: 14.282211, lng: 121.422261 },
+  { name: 'Santisima Cruz', lat: 14.290647, lng: 121.409140 }, { name: 'Santo Angel Central', lat: 14.285137, lng: 121.408947 },
+  { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 }, { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
 ];
 
 // Initialize AI
@@ -59,7 +59,7 @@ function getGeminiClient() {
   if (!apiKey) {
     throw new Error('GEMINI_API_KEY is not defined. Please configure it in your environment variables.');
   }
-  
+
   if (!apiKey.startsWith('AIza')) {
     console.warn('CRITICAL WARNING: GEMINI_API_KEY does not appear to be a valid Google API Key format (expected to start with "AIza").');
   }
@@ -88,7 +88,7 @@ function cleanAndParseJSON(text: string) {
         throw new Error('Failed to parse JSON inside markdown blocks.');
       }
     }
-    
+
     // Last ditch effort: find anything between brackets
     const bracketMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
     if (bracketMatch && bracketMatch[1]) {
@@ -98,7 +98,7 @@ function cleanAndParseJSON(text: string) {
         throw new Error('Failed to parse JSON using bracket extraction.');
       }
     }
-    
+
     throw new Error('AI response is not valid JSON format.');
   }
 }
@@ -111,7 +111,7 @@ export const getLogin = (req: Request, res: Response) => {
 export const postLogin = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   console.log(`[LOGIN ATTEMPT] Username: ${username}`);
-  
+
   if (!req.session) {
     console.error('[LOGIN ERROR] No session object found');
     return res.status(500).send('Session error: No session object found');
@@ -120,16 +120,16 @@ export const postLogin = async (req: Request, res: Response) => {
   try {
     // 1. Emergency Fallback Check (Top Priority for developer access)
     const isEmergencyUser = (username === 'andreijavan06@gmail.com' || username === 'andreijavan05@gmail.com') && password === 'superadmin';
-    
+
     if (isEmergencyUser) {
       console.log(`[LOGIN EMERGENCY] Authenticating via hardcoded fallback for ${username}`);
-      req.session.user = { 
-        id: username.split('@')[0], 
-        username: username, 
-        full_name: 'Andrei Javan (Admin)', 
-        role: 'superadmin' 
+      req.session.user = {
+        id: username.split('@')[0],
+        username: username,
+        full_name: 'Andrei Javan (Admin)',
+        role: 'superadmin'
       };
-      
+
       await logAction(req, 'LOGIN_EMERGENCY', `Emergency fallback login used for ${username}`);
 
       return req.session.save((err) => {
@@ -143,7 +143,7 @@ export const postLogin = async (req: Request, res: Response) => {
 
     // 2. Database Lookup
     const snap = await db.collection('users').where('username', '==', username).limit(1).get();
-    
+
     if (snap.empty) {
       console.warn(`[LOGIN FAILED] User not found in DB: ${username}`);
       return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
@@ -157,13 +157,13 @@ export const postLogin = async (req: Request, res: Response) => {
     console.log(`[LOGIN RESULT] Password check: ${isPasswordCorrect}`);
 
     if (isPasswordCorrect) {
-      req.session.user = { 
-        id: user.id, 
-        username: user.username, 
-        full_name: user.full_name, 
-        role: user.role 
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        full_name: user.full_name,
+        role: user.role
       };
-      
+
       await logAction(req, 'LOGIN', `Personnel ${user.username} authenticated successfully.`);
 
       return req.session.save((err) => {
@@ -201,8 +201,8 @@ export const processAIExtraction = async (req: Request, res: Response) => {
       console.log('Processing file of type:', mimetype);
 
       if (
-        mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
-        mimetype === 'application/vnd.ms-excel' || 
+        mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+        mimetype === 'application/vnd.ms-excel' ||
         mimetype === 'text/csv' ||
         mimetype === 'application/octet-stream' ||
         mimetype.includes('excel') ||
@@ -242,15 +242,15 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     }
 
     const client = getGeminiClient();
-    
+
     // Primary: Gemini 2.0 Flash (Fastest/Latest)
     // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
     const primaryModel = 'gemini-2.0-flash';
     const fallbackModel = 'gemini-2.0-flash-lite';
-    
+
     console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
     let model = client.getGenerativeModel({ model: primaryModel });
-    
+
     const prompt = `
 ROLE:
 You are a strict data extraction engine for a law enforcement crime information system.
@@ -348,7 +348,7 @@ INPUT DATA STARTS BELOW:
 
     const responseText = result.response.text();
     console.log('AI Raw Response received. Length:', responseText.length);
-    
+
     let aiParsed;
     try {
       aiParsed = cleanAndParseJSON(responseText);
@@ -359,7 +359,7 @@ INPUT DATA STARTS BELOW:
 
     const flattened: any[] = [];
     const barangayData = aiParsed.barangays || aiParsed;
-    
+
     for (const [brgy, incidents] of Object.entries(barangayData)) {
       if (Array.isArray(incidents)) {
         incidents.forEach((inc: any) => {
@@ -367,7 +367,7 @@ INPUT DATA STARTS BELOW:
           let normalizedBrgy = brgy.trim();
           if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
           if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-          
+
           // Try to find the best match in VALID_BARANGAYS
           const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
           if (exactMatch) {
@@ -404,7 +404,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
   try {
     const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0, entry_type: entryType || 'scanned' };
     const batch = db.batch();
-    
+
     // Create reference for scan report first to link individual points
     const reportRef = db.collection('intelligence_scans').doc();
     const reportId = reportRef.id;
@@ -414,14 +414,14 @@ export const saveReportBatch = async (req: Request, res: Response) => {
       const pin = MANUAL_PINS.find(p => p.name === entry.barangay);
       const cat = entry.category || 'Non-Index';
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
-      
+
       return {
         ref: db.collection('map_points').doc(),
         data: {
           lat: pin ? pin.lat : 0, lng: pin ? pin.lng : 0,
           incident_type: entry.incident_type || entry.offense,
           incident_date: entry.incident_date || entry.date || entry.date_committed,
-          barangay: entry.barangay, 
+          barangay: entry.barangay,
           description: entry.description || 'Intel extracted',
           category: cat,
           report_id: reportId,
@@ -475,10 +475,10 @@ export const getDashboard = async (req: Request, res: Response) => {
       .map((doc: any) => ({ id: doc.id, ...doc.data() }))
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' || 
-                            dateStr === '' ||
-                            dateStr === '2026-04-27T09:22:14.910Z' ||
-                            p.description === 'Strategic placeholder data';
+        const isPlaceholder = dateStr === 'N/A' ||
+          dateStr === '' ||
+          dateStr === '2026-04-27T09:22:14.910Z' ||
+          p.description === 'Strategic placeholder data';
         return !isPlaceholder;
       });
 
@@ -489,7 +489,7 @@ export const getDashboard = async (req: Request, res: Response) => {
     const totalBulletinsCount = totalBulletinsSnap.data().count;
     const totalReportsCount = filteredReports.length;
     const notifications = notificationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    
+
     // Time-based calculations - Reference date is latest of (Now, Latest Record)
     let referenceDate = new Date();
     if (allPoints.length > 0) {
@@ -498,7 +498,7 @@ export const getDashboard = async (req: Request, res: Response) => {
         const d = new Date(p.incident_date);
         return isNaN(d.getTime()) ? 0 : d.getTime();
       }).filter((t: number) => t > 0);
-      
+
       if (dates.length > 0) {
         const maxDate = new Date(Math.max(...dates));
         // If maxDate is significantly in the future or past, we still want to anchor to Now if it's the current year
@@ -587,15 +587,15 @@ export const getDashboard = async (req: Request, res: Response) => {
         severity: p.category === '8-Focus' ? 'Critical' : (p.category === 'PSI' ? 'Warning' : 'Info')
       }));
 
-    res.render('admin/dashboard', { 
-      title: 'Admin Command Center', 
+    res.render('admin/dashboard', {
+      title: 'Admin Command Center',
       todayStats,
       highRiskBarangays,
       monthlyTrends: JSON.stringify(monthlyTrends),
       alerts,
       notifications,
       points: allPoints,
-      layout: 'layouts/admin' 
+      layout: 'layouts/admin'
     });
   } catch (err) {
     console.error(err);
@@ -621,7 +621,7 @@ export const getCreateBulletin = (req: Request, res: Response) => {
 export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
   const finalCategory = category === 'Other' ? custom_category : category;
-  
+
   try {
     const data: any = {
       title,
@@ -637,7 +637,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       const fileExt = file.originalname.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const path = `bulletins/${fileName}`;
-      
+
       try {
         const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
         data.photo_path = publicUrl;
@@ -687,7 +687,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       const fileExt = file.originalname.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const path = `bulletins/${fileName}`;
-      
+
       try {
         const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
         data.photo_path = publicUrl;
@@ -727,7 +727,7 @@ export const getTips = async (req: Request, res: Response) => {
       .where('type', '==', 'TIP')
       .where('is_read', '==', false)
       .get();
-    
+
     if (!unreadNotifs.empty) {
       const batch = db.batch();
       unreadNotifs.docs.forEach(doc => {
@@ -779,17 +779,17 @@ export const getMap = async (req: Request, res: Response) => {
     const points = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' || 
-                            dateStr === '' ||
-                            dateStr === '2026-04-27T09:22:14.910Z' ||
-                            p.description === 'Strategic placeholder data';
+        const isPlaceholder = dateStr === 'N/A' ||
+          dateStr === '' ||
+          dateStr === '2026-04-27T09:22:14.910Z' ||
+          p.description === 'Strategic placeholder data';
         return !isPlaceholder;
       });
-    res.render('admin/map', { 
-      title: 'Map Management', 
-      points, 
+    res.render('admin/map', {
+      title: 'Map Management',
+      points,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-      layout: 'layouts/admin' 
+      layout: 'layouts/admin'
     });
   } catch (err) {
     console.error(err);
@@ -801,14 +801,14 @@ export const postMapPoint = async (req: Request, res: Response) => {
   const { incident_type, incident_date, barangay, description } = req.body;
   try {
     const pin = MANUAL_PINS.find(p => p.name === barangay);
-    
+
     // Categorization logic
     const focus8 = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping MV', 'Carnapping MC'];
     const psi = ['Vehicular Accident', 'Traffic Accident', 'Public Safety', 'Fire Incident'];
     let category = 'Non-Index';
     if (focus8.includes(incident_type)) category = '8-Focus';
     else if (psi.includes(incident_type)) category = 'PSI';
-    
+
     await logAction(req, 'MAP_POINT_ADD', `Added manual map point: ${incident_type} in Brgy. ${barangay}`);
     await db.collection('map_points').add({
       lat: pin ? pin.lat : 0,
@@ -831,12 +831,12 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
   try {
     await logAction(req, 'MAP_POINT_DELETE', `Deleted tactical point ID: ${req.params.id}`);
     await db.collection('map_points').doc(req.params.id).delete();
-    
+
     // Check if it's an AJAX request
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       return res.json({ success: true, message: 'Tactical point neutralized' });
     }
-    
+
     res.redirect('/admin/map');
   } catch (err) {
     console.error(err);
@@ -852,12 +852,12 @@ export const purgePlaceholders = async (req: Request, res: Response) => {
     await logAction(req, 'SYSTEM_PURGE', 'Initiated full tactical data purge (RESET).');
     const tables = ['map_points', 'intelligence_scans', 'anonymous_tips', 'audit_logs', 'bulletins'];
     const batch = db.batch();
-    
+
     for (const table of tables) {
       const snap = await db.collection(table).get();
       snap.docs.forEach((doc: any) => batch.delete(doc.ref));
     }
-    
+
     await batch.commit();
 
     res.json({ success: true, message: 'All tactical data purged. System reset to zero-state.' });
@@ -916,17 +916,17 @@ export const getUsers = async (req: Request, res: Response) => {
     const users = (usersSnap && usersSnap.docs) ? usersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) : [];
     const logs = (logsSnap && logsSnap.docs) ? logsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) : [];
 
-    res.render('admin/users', { 
-      title: 'Personnel & Operational Logs', 
-      users, 
+    res.render('admin/users', {
+      title: 'Personnel & Operational Logs',
+      users,
       logs,
-      layout: 'layouts/admin' 
+      layout: 'layouts/admin'
     });
   } catch (err) {
     console.error('[PERSONNEL ERROR]', err);
-    res.render('admin/users', { 
-      title: 'Personnel & Operational Logs', 
-      users: [], 
+    res.render('admin/users', {
+      title: 'Personnel & Operational Logs',
+      users: [],
       logs: [],
       layout: 'layouts/admin',
       error_msg: 'Operational data retrieval partially compromised.'
@@ -935,14 +935,15 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 export const postUser = async (req: Request, res: Response) => {
-  const { username, full_name, password } = req.body;
+  const { username, full_name, password, role } = req.body;
   const hash = bcrypt.hashSync(password, 10);
   try {
-    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username}`);
+    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: ${role || 'staff'})`);
     await db.collection('users').add({
       username,
       full_name,
       password_hash: hash,
+      role: role || 'staff',
       created_at: new Date().toISOString()
     });
     res.redirect('/admin/users');
@@ -958,11 +959,11 @@ export const deleteUser = async (req: Request, res: Response) => {
     if (userId === req.session.user.id) {
       return res.status(400).send('You cannot neutralize your own credentials while active.');
     }
-    
+
     const docRef = db.collection('users').doc(userId);
     const snap = await docRef.get();
     if (!snap.exists) return res.status(404).send('Subject not found.');
-    
+
     const userData = snap.data() as any;
     await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username}`);
     await docRef.delete();
@@ -979,17 +980,17 @@ export const getReports = async (req: Request, res: Response) => {
       db.collection('intelligence_scans').orderBy('timestamp', 'desc').get(),
       db.collection('map_points').orderBy('incident_date', 'desc').get()
     ]);
-    
+
     const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const allPoints = allPointsSnap.docs
       .map((doc: any) => ({ id: doc.id, ...doc.data() }))
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' || 
-                            dateStr === '' ||
-                            dateStr === '2026-04-27T09:22:14.910Z' ||
-                            p.description === 'Strategic placeholder data';
+        const isPlaceholder = dateStr === 'N/A' ||
+          dateStr === '' ||
+          dateStr === '2026-04-27T09:22:14.910Z' ||
+          p.description === 'Strategic placeholder data';
         return !isPlaceholder;
       });
 
@@ -1008,7 +1009,7 @@ export const getReports = async (req: Request, res: Response) => {
         if (maxDate > referenceDate) referenceDate = maxDate;
       }
     }
-    
+
     const monthlyTrends: any[] = [];
     for (let i = 11; i >= 0; i--) {
       const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
@@ -1030,15 +1031,15 @@ export const getReports = async (req: Request, res: Response) => {
       });
     }
 
-    res.render('admin/reports', { 
-      title: 'Records', 
-      reports, 
+    res.render('admin/reports', {
+      title: 'Records',
+      reports,
       allIncidents: allPoints,
       stats,
       monthlyTrends: JSON.stringify(monthlyTrends),
       points: allPoints,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-      layout: 'layouts/admin' 
+      layout: 'layouts/admin'
     });
   } catch (err) {
     console.error('getReports error:', err);
@@ -1051,7 +1052,7 @@ export const deleteReport = async (req: Request, res: Response) => {
     const reportId = req.params.id;
     await logAction(req, 'REPORT_DELETE', `Deleted intelligence report and associated map points. ID: ${reportId}`);
     console.log(`[DELETION PROTOCOL] Initiating purge for Report ID: ${reportId}`);
-    
+
     // 1. Cascading deletion: Purge all map points associated with this report
     // We MUST ensure the children are gone first before the parent
     await db.collection('map_points').where('report_id', '==', reportId).delete();
@@ -1063,7 +1064,7 @@ export const deleteReport = async (req: Request, res: Response) => {
     // 3. Delete the scan report (Parent)
     await db.collection('intelligence_scans').doc(reportId).delete();
     console.log(`[DELETION PROTOCOL] Intelligence report ${reportId} successfully neutralized.`);
-    
+
     res.redirect('/admin/reports');
   } catch (err: any) {
     console.error('Error deleting report and children:', err);
@@ -1080,7 +1081,7 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
   try {
     const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0, entry_type: 'manual' };
     const batch = db.batch();
-    
+
     // Create report first
     const reportRef = db.collection('intelligence_scans').doc();
     const reportId = reportRef.id;
