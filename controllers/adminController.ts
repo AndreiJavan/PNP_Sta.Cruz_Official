@@ -938,6 +938,12 @@ export const postUser = async (req: Request, res: Response) => {
   const { username, full_name, password } = req.body;
   const hash = bcrypt.hashSync(password, 10);
   try {
+    // 🛡️ Backend Enforcement: Only superadmins can deploy new personnel
+    if (req.session.user.role !== 'superadmin') {
+      console.warn(`[SECURITY BREACH ATTEMPT] Non-admin ${req.session.user.username} tried to create personnel.`);
+      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+    }
+
     await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: staff)`);
     await db.collection('users').add({
       username,
@@ -955,6 +961,11 @@ export const postUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
+    // 🛡️ Backend Enforcement: Only superadmins can neutralize credentials
+    if (req.session.user.role !== 'superadmin') {
+      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+    }
+
     const userId = req.params.id;
     if (userId === req.session.user.id) {
       return res.status(400).send('You cannot neutralize your own credentials while active.');
