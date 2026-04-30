@@ -19,7 +19,7 @@ let supabaseInstance: any = null;
 function getSupabase() {
   if (!supabaseInstance) {
     if (!supabaseUrl || !supabaseKey) {
-      console.warn('Supabase credentials missing. Please check your .env file.');
+      console.warn('Supabase credentials missing. Please check your system/Vercel environment variables.');
     }
     supabaseInstance = createClient(supabaseUrl, supabaseKey);
   }
@@ -284,8 +284,6 @@ export const db: any = {
       update: (ref: Doc, data: any) => operations.push(() => ref.update(data)),
       delete: (ref: Doc) => operations.push(() => ref.delete()),
       commit: async () => {
-        // Supabase doesn't have a direct batch API like Firestore, 
-        // we'll run them sequentially for now or use rpc/transactions if needed.
         for (const op of operations) {
           await op();
         }
@@ -293,7 +291,6 @@ export const db: any = {
     };
   },
   runTransaction: async (callback: (transaction: any) => Promise<void>) => {
-    // Mock transaction using sequential execution
     const operations: (() => Promise<void>)[] = [];
     const transaction = {
       set: (ref: Doc, data: any) => operations.push(() => ref.set(data)),
@@ -310,37 +307,32 @@ export const db: any = {
     upload: async (bucket: string, path: string, buffer: Buffer, mimetype: string) => {
       try {
         const sb = getSupabase();
+
+        // Vercel Strategy: Primary use Supabase. No local disk fallback.
         if (supabaseUrl && supabaseKey) {
           const { data, error } = await sb.storage.from(bucket).upload(path, buffer, {
             contentType: mimetype,
             upsert: true
           });
+
           if (!error) {
             const { data: publicUrlData } = sb.storage.from(bucket).getPublicUrl(path);
             return publicUrlData.publicUrl;
           }
-          console.warn(`[STORAGE WARNING] Supabase: ${error.message}`);
+
+          console.error(`[STORAGE ERROR] Supabase upload failed: ${error.message}`);
+          return `https://placehold.co/600x400?text=Upload+Error:+${encodeURIComponent(error.message)}`;
         }
 
-        const fileName = path.split('/').pop() || `${Date.now()}.png`;
-        const uploadDir = pathModule.join(__dirname, '..', 'public', bucket);
-        if (!fs.existsSync(uploadDir)) {
-          console.log(`[STORAGE] Creating directory: ${uploadDir}`);
-          fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        fs.writeFileSync(pathModule.join(uploadDir, fileName), buffer);
-        console.log(`[STORAGE] Local fallback: /${bucket}/${fileName}`);
-        return `/${bucket}/${fileName}`;
+        return `https://placehold.co/600x400?text=Supabase+Not+Configured`;
       } catch (err: any) {
-        const cwd = process.cwd();
-        console.error(`[STORAGE ERROR] CWD: ${cwd} | __dirname: ${__dirname} | Err:`, err);
-        const errMsg = encodeURIComponent(`${err.message} (CWD: ${cwd}, DIR: ${__dirname})`);
-        return `https://placehold.co/600x400?text=Upload+Error:+${errMsg}`;
+        console.error(`[STORAGE FATAL ERROR]`, err);
+        return `https://placehold.co/600x400?text=Fatal+Upload+Error`;
       }
     }
   }
 };
 
 export const auth: any = {
-  currentUser: null // Supabase Auth integration would go here
+  currentUser: null
 };

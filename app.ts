@@ -44,30 +44,16 @@ app.use(session({
   rolling: true,
   name: 'cpicrs_sid',
   proxy: true,
-  cookie: { 
+  cookie: {
     secure: false,
     sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, 
+    maxAge: 30 * 24 * 60 * 60 * 1000,
   }
 }));
 
-// Debug route for session verification
-app.get('/admin/session-check', (req, res) => {
-  res.json({
-    sessionID: req.sessionID,
-    user: req.session.user || 'None',
-    cookie: req.session.cookie
-  });
-});
 
-// Better Session Logging
-app.use((req, res, next) => {
-  const sessionAny = req.session as any;
-  if (req.url.startsWith('/admin')) {
-    console.log(`[AUTH] ${req.method} ${req.url} | ID: ${req.sessionID} | User in Session: ${sessionAny.user ? 'YES' : 'NO'}`);
-  }
-  next();
-});
+
+
 
 // View Engine
 app.set('view engine', 'ejs');
@@ -80,9 +66,9 @@ app.use((req, res, next) => {
   res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
   res.header('Expires', '-1');
   res.header('Pragma', 'no-cache');
-  
+
   res.locals.sessionId = req.sessionID;
-  
+
   if (req.session) {
     res.locals.user = req.session.user || null;
     res.locals.success_msg = req.session.success_msg || null;
@@ -108,7 +94,7 @@ app.use('/admin', adminRoutes);
 
 // 404 Handler
 app.use((req, res, next) => {
-  res.status(404).render('error', { 
+  res.status(404).render('error', {
     error: new Error('The page you are looking for does not exist.')
   });
 });
@@ -117,9 +103,9 @@ app.use((req, res, next) => {
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server Error:', err);
   const status = err.status || 500;
-  
+
   try {
-    res.status(status).render('error', { 
+    res.status(status).render('error', {
       error: {
         message: err.message || 'An unexpected error occurred.',
         stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
