@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs';
+import pathModule from 'path';
 
 dotenv.config();
 
@@ -325,8 +327,6 @@ export const db: any = {
 
       // Fallback to local FS if Supabase fails or credentials missing
       console.log(`[STORAGE] Supabase unavailable. Falling back to local disk for ${path} in ${bucket}`);
-      const fs = await import('fs');
-      const pathModule = await import('path');
       const fileName = path.split('/').pop() || 'unknown.png';
 
       const uploadDir = pathModule.join(process.cwd(), 'public', bucket);
