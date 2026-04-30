@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import pathModule from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = pathModule.dirname(__filename);
 
 dotenv.config();
 
@@ -319,7 +323,7 @@ export const db: any = {
         }
 
         const fileName = path.split('/').pop() || `${Date.now()}.png`;
-        const uploadDir = pathModule.resolve(process.cwd(), 'public', bucket);
+        const uploadDir = pathModule.join(__dirname, '..', 'public', bucket);
         if (!fs.existsSync(uploadDir)) {
           console.log(`[STORAGE] Creating directory: ${uploadDir}`);
           fs.mkdirSync(uploadDir, { recursive: true });
@@ -329,8 +333,8 @@ export const db: any = {
         return `/${bucket}/${fileName}`;
       } catch (err: any) {
         const cwd = process.cwd();
-        console.error(`[STORAGE ERROR] CWD: ${cwd} | Err:`, err);
-        const errMsg = encodeURIComponent(`${err.message} (CWD: ${cwd})`);
+        console.error(`[STORAGE ERROR] CWD: ${cwd} | __dirname: ${__dirname} | Err:`, err);
+        const errMsg = encodeURIComponent(`${err.message} (CWD: ${cwd}, DIR: ${__dirname})`);
         return `https://placehold.co/600x400?text=Upload+Error:+${errMsg}`;
       }
     }
