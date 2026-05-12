@@ -17,7 +17,7 @@
                 <span class="text-xs font-bold uppercase tracking-widest">Official Public Safety Portal</span>
             </div>
 
-            <h1 class="text-5xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
                 Protecting <span class="text-pnp-gold italic">Sta. Cruz</span>, <br>
                 Serving with <span class="underline decoration-pnp-gold underline-offset-8">Integrity</span>.
             </h1>
@@ -27,14 +27,9 @@
                 about public safety and submit anonymous tips in our municipality.
             </p>
 
-            <div class="flex flex-wrap gap-4">
-                <a href="/tip"
-                    class="bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-black py-5 px-10 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center space-x-3">
-                    <i class="fas fa-user-secret text-xl"></i>
-                    <span class="uppercase tracking-widest text-sm">Submit Anonymous Tip</span>
-                </a>
+            <div class="flex flex-col sm:flex-row gap-4">
                 <a href="/bulletins"
-                    class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold py-5 px-10 rounded-2xl border border-white/30 transition duration-300 flex items-center space-x-3">
+                    class="bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-black py-5 px-10 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-3 w-full sm:w-auto">
                     <i class="fas fa-bullhorn text-xl"></i>
                     <span class="uppercase tracking-widest text-sm">View Bulletins</span>
                 </a>
@@ -63,14 +58,15 @@
 <!-- Features Section -->
 <section class="py-24 bg-white dark:bg-slate-950">
     <div class="container mx-auto px-4">
-        <div class="text-center mb-20">
+        <div class="text-center mb-10 md:mb-20">
             <h2 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-4">Our Services</h2>
-            <h3 class="text-4xl font-black text-pnp-blue dark:text-white tracking-tight">Community Safety at Your
+            <h3 class="text-3xl md:text-4xl font-black text-pnp-blue dark:text-white tracking-tight">Community Safety at
+                Your
                 Fingertips</h3>
             <div class="w-20 h-1.5 bg-pnp-gold mx-auto mt-8 rounded-full"></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <!-- Feature 1 -->
             <div
                 class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
@@ -107,42 +103,12 @@
                 </a>
             </div>
 
-            <!-- Feature 3 -->
-            <div
-                class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
-                <div
-                    class="w-16 h-16 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition duration-500">
-                    <i class="fas fa-user-secret text-2xl"></i>
-                </div>
-                <h4 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-4 group-hover:text-white transition">
-                    Anonymous Tips</h4>
-                <p
-                    class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed group-hover:text-blue-100 transition">
-                    Provide critical information to the police without revealing your identity. Secure and private.</p>
-                <a href="/tip"
-                    class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
-                    Submit a Tip <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
-                </a>
-            </div>
-
-            <!-- Feature 4 -->
-            <div
-                class="group bg-gray-50 dark:bg-slate-900 p-10 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 shadow-sm hover:shadow-2xl">
-                <div
-                    class="w-16 h-16 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition duration-500">
-                    <i class="fas fa-phone-volume text-2xl"></i>
-                </div>
-                <h4 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-4 group-hover:text-white transition">
-                    Hotlines</h4>
-                <p
-                    class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed group-hover:text-blue-100 transition">
-                    Quick access to all emergency services, fire departments, and medical facilities in Sta. Cruz.</p>
-                <a href="/hotlines"
-                    class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
-                    Call Directory <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
-                </a>
-            </div>
+            <a href="/hotlines"
+                class="mt-8 inline-flex items-center text-pnp-gold font-bold text-xs uppercase tracking-widest group-hover:text-white transition">
+                Call Directory <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
+            </a>
         </div>
+    </div>
     </div>
 </section>
 
@@ -155,24 +121,28 @@
     </div>
 
     <div class="container mx-auto px-4 relative z-10">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center">
             <div>
-                <p class="text-5xl font-black text-pnp-gold mb-2">100%</p>
-                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Confidentiality
+                <p class="text-4xl md:text-5xl font-black text-pnp-gold mb-2">100%</p>
+                <p class="text-[10px] md:text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">
+                    Confidentiality
                 </p>
             </div>
             <div>
-                <p class="text-5xl font-black text-white mb-2">24/7</p>
-                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Monitoring</p>
+                <p class="text-4xl md:text-5xl font-black text-white mb-2">24/7</p>
+                <p class="text-[10px] md:text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">
+                    Monitoring</p>
             </div>
             <div>
-                <p class="text-5xl font-black text-pnp-gold mb-2">26</p>
-                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Barangays Served
+                <p class="text-4xl md:text-5xl font-black text-pnp-gold mb-2">26</p>
+                <p class="text-[10px] md:text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">
+                    Barangays Served
                 </p>
             </div>
             <div>
-                <p class="text-5xl font-black text-white mb-2">0</p>
-                <p class="text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">Compromise</p>
+                <p class="text-4xl md:text-5xl font-black text-white mb-2">0</p>
+                <p class="text-[10px] md:text-xs font-bold text-blue-200 dark:text-blue-300 uppercase tracking-widest">
+                    Compromise</p>
             </div>
         </div>
     </div>
