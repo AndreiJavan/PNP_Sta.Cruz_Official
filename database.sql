@@ -73,21 +73,7 @@ CREATE TABLE public.bulletins (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- =====================================================
--- ANONYMOUS TIPS
--- =====================================================
-CREATE TABLE public.anonymous_tips (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  tip_id TEXT UNIQUE NOT NULL,
-  concern_type TEXT NOT NULL,
-  location_text TEXT NOT NULL,
-  description TEXT NOT NULL,
-  photo_path TEXT,
-  is_flagged BOOLEAN DEFAULT FALSE,
-  admin_notes TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+
 
 -- =====================================================
 -- MAP POINTS

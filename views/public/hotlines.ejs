@@ -1,7 +1,8 @@
 <div class="bg-red-600 dark:bg-red-700 py-24 text-center relative overflow-hidden">
     <div class="container mx-auto px-4 relative z-10">
-        <h1 class="text-xs font-black text-white/50 uppercase tracking-[0.3em] mb-4">Emergency Directory</h1>
-        <h2 class="text-5xl font-black text-white tracking-tighter mb-8">Sta. Cruz Hotlines</h2>
+        <h1 class="text-[10px] md:text-xs font-black text-white/50 uppercase tracking-[0.3em] mb-4">Emergency Directory
+        </h1>
+        <h2 class="text-4xl md:text-5xl font-black text-white tracking-tighter mb-8">Sta. Cruz Hotlines</h2>
         <div class="w-20 h-1.5 bg-white/20 mx-auto rounded-full"></div>
     </div>
     <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
@@ -76,31 +77,31 @@
                 <thead
                     class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[10px] font-black tracking-[0.2em]">
                     <tr>
-                        <th class="px-10 py-6">Agency / Office</th>
-                        <th class="px-10 py-6">Contact Number</th>
-                        <th class="px-10 py-6">Category</th>
-                        <th class="px-10 py-6">Action</th>
+                        <th class="px-4 py-3 md:px-10 md:py-6">Agency / Office</th>
+                        <th class="px-4 py-3 md:px-10 md:py-6">Contact Number</th>
+                        <th class="px-4 py-3 md:px-10 md:py-6 hidden sm:table-cell">Category</th>
+                        <th class="px-4 py-3 md:px-10 md:py-6 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
                     <% hotlines.forEach(h=> { %>
                         <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition group">
-                            <td class="px-10 py-8">
+                            <td class="px-4 py-4 md:px-10 md:py-8">
                                 <p
-                                    class="text-lg font-black text-pnp-blue dark:text-pnp-gold group-hover:text-pnp-gold dark:group-hover:text-white transition">
+                                    class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold group-hover:text-pnp-gold dark:group-hover:text-white transition">
                                     <%= h.agency_name %>
                                 </p>
                                 <p
-                                    class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-1">
+                                    class="text-[8px] md:text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-1">
                                     Sta. Cruz, Laguna</p>
                             </td>
-                            <td class="px-10 py-8">
+                            <td class="px-4 py-4 md:px-10 md:py-8">
                                 <p
-                                    class="text-xl font-black text-gray-700 dark:text-gray-300 font-mono tracking-tighter">
+                                    class="text-sm border sm:text-xl font-black text-gray-700 dark:text-gray-300 font-mono tracking-tighter">
                                     <%= h.contact_number %>
                                 </p>
                             </td>
-                            <td class="px-10 py-8">
+                            <td class="px-4 py-4 md:px-10 md:py-8 hidden sm:table-cell">
                                 <% const catColors={ 'Police'
                                     : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' , 'Fire'
                                     : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
@@ -109,14 +110,14 @@
                                     , 'Utility'
                                     : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' }; %>
                                     <span
-                                        class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= catColors[h.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
+                                        class="px-2 py-1 md:px-3 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest <%= catColors[h.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
                                         <%= h.category %>
                                     </span>
                             </td>
-                            <td class="px-10 py-8">
+                            <td class="px-4 py-4 md:px-10 md:py-8 text-right border">
                                 <a href="tel:<%= h.contact_number ? h.contact_number.replace(/[^0-9]/g, '') : '' %>"
-                                    class="inline-flex items-center justify-center w-12 h-12 bg-pnp-blue text-white rounded-2xl hover:bg-pnp-gold transition duration-300 shadow-lg">
-                                    <i class="fas fa-phone"></i>
+                                    class="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-pnp-blue text-white rounded-xl md:rounded-2xl hover:bg-pnp-gold transition duration-300 shadow-lg">
+                                    <i class="fas fa-phone text-sm"></i>
                                 </a>
                             </td>
                         </tr>

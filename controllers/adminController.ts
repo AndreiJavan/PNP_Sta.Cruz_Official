@@ -460,15 +460,17 @@ export const getDashboard = async (req: Request, res: Response) => {
 
     const [
       allMapPointsSnap,
-      anonymousTipsSnap,
-      totalTipsSnap,
       notificationsSnap,
       totalBulletinsSnap,
       allReportsSnap
     ] = await Promise.all([
+<<<<<<< HEAD
       db.collection('map_points').where('incident_date', '>=', oneYearAgoStr).get(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
       db.collection('anonymous_tips').count().get(),
+=======
+      db.collection('map_points').get(),
+>>>>>>> 19443849b7cca3a3129e011b0e24392690114265
       db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
       db.collection('bulletins').count().get(),
       db.collection('intelligence_scans').get()
@@ -488,7 +490,7 @@ export const getDashboard = async (req: Request, res: Response) => {
     const filteredReports = allReportsSnap.docs
       .map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
-    const totalTipsCount = totalTipsSnap.data().count;
+
     const totalBulletinsCount = totalBulletinsSnap.data().count;
     const totalReportsCount = filteredReports.length;
     const notifications = notificationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -524,7 +526,6 @@ export const getDashboard = async (req: Request, res: Response) => {
       nonIndex: allPoints.filter((p: any) => p.category === 'Non-Index').length,
       psi: allPoints.filter((p: any) => p.category === 'PSI').length,
       comparison: 0,
-      totalTips: totalTipsCount,
       totalBulletins: totalBulletinsCount,
       totalReports: totalReportsCount
     };
@@ -729,6 +730,7 @@ export const deleteBulletin = async (req: Request, res: Response) => {
   }
 };
 
+<<<<<<< HEAD
 export const getTips = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -792,6 +794,9 @@ export const updateTip = async (req: Request, res: Response) => {
     res.status(500).send('Error updating tip');
   }
 };
+=======
+
+>>>>>>> 19443849b7cca3a3129e011b0e24392690114265
 
 export const getMap = async (req: Request, res: Response) => {
   try {
@@ -870,7 +875,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
 export const purgePlaceholders = async (req: Request, res: Response) => {
   try {
     await logAction(req, 'SYSTEM_PURGE', 'Initiated full tactical data purge (RESET).');
-    const tables = ['map_points', 'intelligence_scans', 'anonymous_tips', 'audit_logs', 'bulletins'];
+    const tables = ['map_points', 'intelligence_scans', 'audit_logs', 'bulletins'];
     const batch = db.batch();
 
     for (const table of tables) {

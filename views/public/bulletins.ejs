@@ -1,7 +1,8 @@
 <div class="bg-pnp-blue py-24 text-center relative overflow-hidden">
     <div class="container mx-auto px-4 relative z-10">
-        <h1 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-4">Official Advisories</h1>
-        <h2 class="text-5xl font-black text-white tracking-tighter mb-8">Community Bulletin Board</h2>
+        <h1 class="text-[10px] md:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-4">Official Advisories
+        </h1>
+        <h2 class="text-4xl md:text-5xl font-black text-white tracking-tighter mb-8">Community Bulletin Board</h2>
         <div class="w-20 h-1.5 bg-pnp-gold mx-auto rounded-full"></div>
     </div>
     <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
@@ -60,8 +61,8 @@
                         </div>
                         <% } %>
 
-                            <div class="p-10 flex-grow flex flex-col">
-                                <div class="flex justify-between items-center mb-6">
+                            <div class="p-6 md:p-10 flex-grow flex flex-col">
+                                <div class="flex flex-wrap justify-between items-center gap-2 mb-6">
                                     <% const badgeColors={ 'Wanted Person'
                                         : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                                         , 'Missing Person'
