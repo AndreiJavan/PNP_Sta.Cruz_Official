@@ -47,7 +47,7 @@ const colors = {
                 <div id="content-records" class="space-y-6">
                     <!-- Barangay Selector -->
                     <div class="space-y-2">
-                        <label for="sectorSelector" class="text-[9px] text-gray-400 uppercase tracking-widest font-black block">Monitor Sector (Barangay)</label>
+                        <label for="sectorSelector" class="text-[11px] text-gray-400 dark:text-gray-300 uppercase tracking-widest font-black block">Monitor Sector (Barangay)</label>
                         <div class="relative">
                             <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-pnp-blue dark:text-pnp-gold text-[10px]"></i>
                             <select id="sectorSelector" onchange="monitorSector(this.value)" class="w-full pl-9 pr-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-black dark:text-white appearance-none uppercase tracking-widest">
@@ -62,8 +62,8 @@ const colors = {
                     <!-- Incident List Container -->
                     <div id="sectorIncidentContainer" class="space-y-3">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em]">Regional Intel</span>
-                            <span id="incidentCount" class="text-[9px] font-black text-slate-400 uppercase">0 Records</span>
+                            <span class="text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em]">Regional Intel</span>
+                            <span id="incidentCount" class="text-[11px] font-black text-slate-400 uppercase tracking-widest">0 Records</span>
                         </div>
                         
                         <div id="incidentList" class="space-y-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
@@ -76,7 +76,7 @@ const colors = {
 
                     <!-- Action Button -->
                     <div class="pt-4 border-t border-gray-50 dark:border-slate-800">
-                        <a href="/admin/reports" class="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-pnp-blue hover:text-white text-pnp-blue dark:text-pnp-gold rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 border border-gray-200 dark:border-slate-700 shadow-sm">
+                        <a href="/admin/reports" class="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-pnp-blue hover:text-white text-pnp-blue dark:text-pnp-gold rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 border border-gray-200 dark:border-slate-700 shadow-sm">
                             <i class="fas fa-file-invoice"></i>
                             <span>Manual Entry</span>
                         </a>
@@ -87,19 +87,19 @@ const colors = {
                 <div id="content-legend" class="hidden space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                     <!-- Legend Image -->
                     <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-[2rem] border border-gray-100 dark:border-slate-700 shadow-inner">
-                        <h3 class="text-[9px] text-gray-400 uppercase tracking-widest font-black block mb-4 px-2">Authoritative Legend</h3>
+                        <h3 class="text-[12px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest block mb-4 px-2">Authoritative Legend</h3>
                         <img src="/images/legend.jpg" alt="Crime Legend" class="w-full h-auto rounded-2xl shadow-2xl">
                     </div>
 
                     <!-- Sector Statistics Table -->
                     <div class="space-y-3">
-                        <h3 class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest block px-1">Highly Usual Crime per Sector</h3>
+                        <h3 class="text-[12px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest block px-1">Highly Usual Crime per Sector</h3>
                         <div class="overflow-hidden rounded-[2rem] border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50">
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-gray-100 dark:bg-slate-800">
                                     <tr>
-                                        <th class="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Sector (Barangay)</th>
-                                        <th class="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Highest Frequency</th>
+                                        <th class="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">Sector (Barangay)</th>
+                                        <th class="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">Highest Frequency</th>
                                     </tr>
                                 </thead>
                                 <tbody id="sectorStatsTable" class="text-[10px] font-bold dark:text-white">
@@ -346,12 +346,12 @@ const normalizeCrimeName = (type) => {
                 <div class="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border-l-4 ${stripeColor} hover:bg-white dark:hover:bg-slate-700 transition-all cursor-pointer group shadow-sm flex justify-between items-center">
                     <div onclick="focusPoint('${item.barangay}', '${item.incident_type}')" class="flex-grow">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-black text-slate-800 dark:text-white uppercase leading-tight group-hover:text-pnp-blue transition">${item.incident_type}</span>
-                            <span class="text-[8px] font-bold text-slate-400 uppercase tabular-nums">${new Date(item.incident_date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                            <span class="text-[12px] font-black text-slate-800 dark:text-white uppercase leading-tight group-hover:text-pnp-blue transition">${item.incident_type}</span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tabular-nums">${new Date(item.incident_date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest ${badgeClass}">${cat}</span>
-                            <span class="text-[8px] font-black text-slate-400 uppercase">Brgy. ${item.barangay}</span>
+                            <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${badgeClass}">${cat}</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase">Brgy. ${item.barangay}</span>
                         </div>
                     </div>
                     <button onclick="deletePoint('${item.id}', event)" class="ml-3 w-8 h-8 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -425,11 +425,11 @@ const normalizeCrimeName = (type) => {
 
             return `
                 <tr class="border-b border-gray-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition">
-                    <td class="px-4 py-2 uppercase text-[7px] font-black">${brgy}</td>
+                    <td class="px-4 py-2 uppercase text-[10px] font-black">${brgy}</td>
                     <td class="px-4 py-2">
                         <div class="flex items-center space-x-2">
-                            <div class="w-2 h-2 rounded-full" style="background-color: ${color}"></div>
-                            <span class="uppercase text-[7px] font-black tracking-tighter">${crimeType}</span>
+                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${color}"></div>
+                            <span class="uppercase text-[10px] font-black tracking-tighter">${crimeType}</span>
                         </div>
                     </td>
                 </tr>
@@ -545,11 +545,11 @@ const normalizeCrimeName = (type) => {
             }).addTo(incidentLayer).bindPopup(`
                 <div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest" style="background-color: ${colors[normalizedType] || '#ccc'}">${normalizedType}</span>
-                        <span class="text-[7px] text-white/40 font-bold">${new Date(point.incident_date).toLocaleDateString()}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest" style="background-color: ${colors[normalizedType] || '#ccc'}">${normalizedType}</span>
+                        <span class="text-[9px] text-white/40 font-bold">${new Date(point.incident_date).toLocaleDateString()}</span>
                     </div>
-                    <h3 class="text-[10px] font-black uppercase tracking-tighter mb-1">Brgy. ${point.barangay}</h3>
-                    <p class="text-[8px] text-white/60 leading-tight">${point.description || 'No additional intelligence'}</p>
+                    <h3 class="text-[12px] font-black uppercase tracking-tighter mb-1">Brgy. ${point.barangay}</h3>
+                    <p class="text-[10px] text-white/60 leading-tight">${point.description || 'No additional intelligence'}</p>
                 </div>
             `, { className: 'intelligence-popup' });
             
