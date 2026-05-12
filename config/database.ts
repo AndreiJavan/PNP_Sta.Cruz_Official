@@ -42,6 +42,10 @@ class Collection {
     return new Query(this.name).limit(n);
   }
 
+  offset(n: number) {
+    return new Query(this.name).offset(n);
+  }
+
   doc(id?: string) {
     return new Doc(this.name, id || uuidv4());
   }
@@ -72,6 +76,7 @@ class Query {
   private filters: any[] = [];
   private orderParams: { field: string, ascending: boolean } | null = null;
   private limitN: number | null = null;
+  private offsetN: number | null = null;
   private isCount: boolean = false;
 
   constructor(table: string) {
@@ -90,6 +95,11 @@ class Query {
 
   limit(n: number) {
     this.limitN = n;
+    return this;
+  }
+
+  offset(n: number) {
+    this.offsetN = n;
     return this;
   }
 
@@ -145,9 +155,17 @@ class Query {
         q = q.order(this.orderParams.field, { ascending: this.orderParams.ascending });
       }
 
-      // Apply limit
-      if (this.limitN) {
-        q = q.limit(this.limitN);
+      // Apply limit and offset
+      if (this.limitN !== null) {
+        if (this.offsetN !== null) {
+          q = q.range(this.offsetN, this.offsetN + this.limitN - 1);
+        } else {
+          q = q.limit(this.limitN);
+        }
+      } else if (this.offsetN !== null) {
+        // Just offset, no limit (Supabase requires range)
+        // We'll use a very large number for the upper bound
+        q = q.range(this.offsetN, 999999);
       }
 
       const { data, count, error } = await q;

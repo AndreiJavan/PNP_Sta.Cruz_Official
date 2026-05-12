@@ -51,6 +51,18 @@
             </tbody>
         </table>
     </div>
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+    <div class="p-6 border-t border-gray-50 dark:border-slate-700 flex justify-center items-center space-x-2">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" class="px-4 py-2 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-pnp-blue hover:text-white transition">Previous</a>
+        <% } %>
+        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 mx-4">Page <%= currentPage %> of <%= totalPages %></span>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>" class="px-4 py-2 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-bold hover:bg-pnp-blue hover:text-white transition">Next</a>
+        <% } %>
+    </div>
+    <% } %>
 </div>
 
 <!-- Tip Detail Modal -->

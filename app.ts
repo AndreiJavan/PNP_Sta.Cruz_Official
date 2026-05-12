@@ -7,6 +7,8 @@ import morgan from 'morgan';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 // Routes
 import publicRoutes from './routes/public.js';
@@ -26,6 +28,19 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.set('trust proxy', 1);
 
 // Middleware
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled to prevent blocking external CDNs like Leaflet/Mapbox/Supabase
+  crossOriginEmbedderPolicy: false
+}));
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // Limit each IP to 200 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(limiter);
+
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(cors({
@@ -73,6 +88,8 @@ app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.success_msg = req.session.success_msg || null;
     res.locals.error_msg = req.session.error_msg || null;
+    res.locals.hideSidebar = (req.session as any).hideSidebar || false;
+
     // Safely delete session messages
     const sessionAny = req.session as any;
     delete sessionAny.success_msg;

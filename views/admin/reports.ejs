@@ -7,20 +7,20 @@
 <div class="space-y-8 animate-fade-in px-4 lg:px-0">
     <!-- Header Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div class="pnp-card pnp-glass-dark border-red-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group">
-            <span class="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Focus Crimes</span>
+        <div onclick="openStatsSpreadsheet('8-Focus')" class="pnp-card pnp-glass-dark border-red-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
+            <span class="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">8-Focus</span>
             <div class="text-4xl font-black text-red-500 leading-none count-up-glow count-up" data-target="<%= displayStats['8-Focus'] || 0 %>" data-stat="8-Focus">0</div>
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Critical Strategic Targets Identified</p>
         </div>
 
-        <div class="pnp-card pnp-glass-dark border-slate-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group">
-            <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Miscellaneous</span>
+        <div onclick="openStatsSpreadsheet('Non-Index')" class="pnp-card pnp-glass-dark border-slate-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
+            <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Non-Index</span>
             <div class="text-4xl font-black text-slate-200 leading-none count-up-glow count-up" data-target="<%= displayStats['Non-Index'] || 0 %>" data-stat="Non-Index">0</div>
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Non-Index Incident Stream Data</p>
         </div>
 
-        <div class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group">
-            <span class="text-[10px] text-pnp-blue-300 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Safety Index</span>
+        <div onclick="openStatsSpreadsheet('PSI')" class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
+            <span class="text-[10px] text-pnp-blue-300 font-black uppercase tracking-[0.2em] mb-2 opacity-70">PSI</span>
             <div class="text-4xl font-black text-pnp-blue-300 leading-none count-up-glow count-up" data-target="<%= displayStats['PSI'] || 0 %>" data-stat="PSI">0</div>
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Public Safety Operations Log</p>
         </div>
@@ -42,7 +42,7 @@
                     <i class="fas fa-microchip"></i>
                 </span>
             </div>
-            <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Unit Periodic Report</div>
+            <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
             <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI Extraction Neural Link</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
@@ -720,7 +720,121 @@
         });
     }
 
+    function openStatsSpreadsheet(category) {
+        window.isGlobalStats = true;
+        window.currentStatsCategory = category;
+        document.getElementById('reportDetailsTitle').textContent = `Global Intelligence Repository | ${category}`;
+        renderGlobalStatsModalContent();
+    }
+
+    function renderGlobalStatsModalContent() {
+        const category = window.currentStatsCategory;
+        const filteredData = allIncidents.filter(item => item.category === category);
+        const content = document.getElementById('reportDetailsContent');
+        
+        // Stats for the header
+        const stats = {
+            '8-Focus': allIncidents.filter(item => item.category === '8-Focus').length,
+            'Non-Index': allIncidents.filter(item => item.category === 'Non-Index').length,
+            'PSI': allIncidents.filter(item => item.category === 'PSI').length
+        };
+
+        content.innerHTML = `
+            <!-- Global Intelligence Header -->
+            <div class="bg-slate-900 border-b border-white/5 p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative overflow-hidden">
+                <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+                
+                <div class="lg:col-span-4 space-y-2 relative z-10">
+                    <span class="text-[10px] font-black text-pnp-gold uppercase tracking-[0.3em] block">Data Source: Master Ledger</span>
+                    <div class="flex flex-col">
+                        <p class="text-xl font-black text-white uppercase leading-none tracking-tighter">Consolidated Analytics</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-2 tracking-widest">Real-time Historical Data Stream</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 flex items-center justify-center relative z-10">
+                    <div class="grid grid-cols-3 gap-6 w-full">
+                        <button onclick="openStatsSpreadsheet('8-Focus')" class="p-3 rounded-2xl border transition-all flex flex-col items-center ${category === '8-Focus' ? 'bg-red-500 border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}">
+                            <span class="text-[8px] font-black uppercase tracking-widest mb-1 ${category === '8-Focus' ? 'text-white' : 'text-red-500/50'}">8-Focus</span>
+                            <span class="text-xl font-black tabular-nums leading-none ${category === '8-Focus' ? 'text-white' : 'text-red-500'}">${stats['8-Focus']}</span>
+                        </button>
+                        <button onclick="openStatsSpreadsheet('Non-Index')" class="p-3 rounded-2xl border transition-all flex flex-col items-center ${category === 'Non-Index' ? 'bg-slate-500 border-slate-400 shadow-[0_0_20px_rgba(100,116,139,0.3)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}">
+                            <span class="text-[8px] font-black uppercase tracking-widest mb-1 ${category === 'Non-Index' ? 'text-white' : 'text-slate-500/50'}">Non-Index</span>
+                            <span class="text-xl font-black tabular-nums leading-none ${category === 'Non-Index' ? 'text-white' : 'text-slate-200'}">${stats['Non-Index']}</span>
+                        </button>
+                        <button onclick="openStatsSpreadsheet('PSI')" class="p-3 rounded-2xl border transition-all flex flex-col items-center ${category === 'PSI' ? 'bg-pnp-blue border-pnp-blue-400 shadow-[0_0_20px_rgba(0,31,63,0.3)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}">
+                            <span class="text-[8px] font-black uppercase tracking-widest mb-1 ${category === 'PSI' ? 'text-white' : 'text-pnp-blue-300/50'}">PSI</span>
+                            <span class="text-xl font-black tabular-nums leading-none ${category === 'PSI' ? 'text-white' : 'text-pnp-blue-300'}">${stats['PSI']}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 flex flex-col items-end justify-center relative z-10">
+                    <div class="text-right">
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block leading-none italic">Total Filtered Intensity</span>
+                        <p class="text-4xl font-black text-pnp-gold leading-none mt-2 tabular-nums">${filteredData.length}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Table Container -->
+            <div class="p-8">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden">
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead class="sticky top-0 z-10">
+                            <tr class="bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
+                                <th class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-16 text-center bg-gray-50 dark:bg-slate-900">#</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Timeline</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Tactical Offense</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Sector (Barangay)</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Risk Pillar</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
+                            ${filteredData.length === 0 ? `
+                                <tr>
+                                    <td colspan="5" class="px-8 py-24 text-center">
+                                        <div class="flex flex-col items-center space-y-4 opacity-40">
+                                            <i class="fas fa-satellite-dish text-4xl text-pnp-blue"></i>
+                                            <span class="text-xs font-black uppercase tracking-[0.3em] italic">Intelligence Grid Empty: No records match filter</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ` : filteredData.map((item, idx) => {
+                                const cat = item.category || 'Non-Index';
+                                const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (cat === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20');
+                                const dateStr = item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : (item.date || 'N/A');
+                                return `
+                                    <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 transition-colors group animate-fade-in-up" style="animation-delay: ${idx * 15}ms">
+                                        <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-50 dark:border-slate-800 text-center tabular-nums">${idx + 1}</td>
+                                        <td class="px-8 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono border-r border-gray-50 dark:border-slate-800 tracking-tighter">${dateStr}</td>
+                                        <td class="px-8 py-4 text-xs font-black text-pnp-blue dark:text-white uppercase border-r border-gray-50 dark:border-slate-800 truncate" title="${item.incident_type || item.offense || 'Unknown'}">${item.incident_type || item.offense || 'Unknown'}</td>
+                                        <td class="px-8 py-4 text-xs font-black text-slate-600 dark:text-slate-300 uppercase border-r border-gray-50 dark:border-slate-800">BRGY. ${item.barangay || 'UNKNOWN'}</td>
+                                        <td class="px-8 py-4 text-center">
+                                            <div class="flex items-center justify-center">
+                                                <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${badgeClass}">
+                                                    ${cat}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        const modal = document.getElementById('reportDetailsModal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
     function viewReportDetails(reportId) {
+        window.isGlobalStats = false;
         const report = reports.find(r => r.id === reportId);
         if (!report) return;
         
@@ -731,6 +845,11 @@
     }
 
     function renderReportDetailsModalContent(filter) {
+        if (window.isGlobalStats) {
+            window.currentStatsCategory = filter === 'All' ? '8-Focus' : filter; // Default to focus if 'All' clicked in global mode
+            renderGlobalStatsModalContent();
+            return;
+        }
         const report = window.currentViewingReport;
         const rawData = report.raw_data || [];
         const filteredData = filter === 'All' ? rawData : rawData.filter(item => item.category === filter);

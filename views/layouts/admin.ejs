@@ -152,7 +152,7 @@
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="w-72 pnp-gradient-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto">
+        class="w-72 pnp-gradient-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'sidebar-hidden' : '' %>">
         <div class="p-8 border-b border-white/10 flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg"
@@ -242,6 +242,15 @@
                     </div>
                     <span class="text-[10px] font-black uppercase tracking-widest">Personnel</span>
                 </a>
+
+                <a href="/admin/audit-logs"
+                    class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'System Audit Logs' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                    <div
+                        class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <i class="fas fa-shield-alt text-xs"></i>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Audit Logs</span>
+                </a>
                 <% } %>
         </nav>
 
@@ -255,16 +264,18 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div id="mainContent" class="flex-grow ml-72 flex flex-col min-h-screen transition-all duration-300">
+    <div id="mainContent"
+        class="flex-grow ml-72 <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'main-content-expanded' : '' %> flex flex-col min-h-screen transition-all duration-300">
         <!-- Top Header -->
         <header
             class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md h-20 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between px-6 md:px-10 fixed top-0 right-0 z-40 transition-all duration-300"
-            style="left: 18rem;" id="layoutHeader">
+            style="left: <%= typeof hideSidebar !== 'undefined' && hideSidebar ? '0' : '18rem' %>;" id="layoutHeader">
             <div class="flex items-center space-x-4">
                 <button id="sidebarToggle"
                     class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition border border-gray-100 dark:border-slate-600">
                     <i class="fas fa-bars"></i>
                 </button>
+
                 <div class="hidden sm:flex items-center space-x-4">
                     <h2 class="text-xl font-black text-pnp-blue dark:text-white tracking-tighter uppercase">
                         <%= title %>
@@ -272,18 +283,25 @@
                 </div>
             </div>
 
-            <div class="flex items-center space-x-8">
-                <!-- Dark Mode Toggle -->
+            <div class="flex items-center space-x-4">
+                <!-- Back Button -->
+                <button onclick="history.back()" 
+                    title="Go Back"
+                    class="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center text-pnp-blue dark:text-white transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
+                    <i class="fas fa-arrow-left text-sm"></i>
+                </button>
+
+                <!-- Dark Mode Toggle (Synced with Public Design) -->
                 <button id="darkModeToggle"
-                    class="w-10 h-10 bg-gray-50 dark:bg-slate-700 hover:bg-gray-100 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center text-pnp-blue dark:text-white transition duration-300 border border-gray-100 dark:border-slate-600">
-                    <i class="fas fa-moon dark:hidden"></i>
-                    <i class="fas fa-sun hidden dark:block text-pnp-gold"></i>
+                    class="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
+                    <i class="fas fa-moon text-sm dark:hidden"></i>
+                    <i class="fas fa-sun text-sm hidden dark:block"></i>
                 </button>
             </div>
         </header>
 
         <!-- Page Body -->
-        <main class="flex-grow <%= title === 'Map Management' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
+        <main class="flex-grow animate-fade-in <%= title === 'Map Management' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div
@@ -311,7 +329,7 @@
         <% if (title !=='Map Management' ) { %>
             <footer
                 class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md py-6 px-10 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center fixed bottom-0 right-0 z-40 transition-all duration-300"
-                style="left: 18rem;" id="layoutFooter">
+                style="left: <%= typeof hideSidebar !== 'undefined' && hideSidebar ? '0' : '18rem' %>;" id="layoutFooter">
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                     &copy; 2026 PNP Sta. Cruz Municipal Police Station - CPICRS Admin
                 </p>
@@ -347,6 +365,13 @@
             }
 
             localStorage.setItem('sidebarHidden', isHidden);
+            
+            // Notify server to persist state across refreshes
+            fetch('/admin/api/toggle-sidebar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hideSidebar: isHidden })
+            }).catch(err => console.error('Failed to sync sidebar state'));
         };
 
         sidebarToggle.addEventListener('click', toggleSidebar);
@@ -402,16 +427,17 @@
         }, { passive: true });
 
         // Responsive Sidebar Initial State
-        if (window.innerWidth < 1024) {
+        const savedState = localStorage.getItem('sidebarHidden');
+        const forceHide = <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'true' : 'false' %>;
+
+        if (forceHide || window.innerWidth < 1024 || savedState === 'true') {
             sidebar.classList.add('sidebar-hidden');
             mainContent.classList.add('main-content-expanded');
             layoutHeader.style.left = '0';
             if (layoutFooter) layoutFooter.style.left = '0';
-        } else if (localStorage.getItem('sidebarHidden') === 'true') {
-            sidebar.classList.add('sidebar-hidden');
-            mainContent.classList.add('main-content-expanded');
-            layoutHeader.style.left = '0';
-            if (layoutFooter) layoutFooter.style.left = '0';
+            
+            // If it was forced, save it to local storage for consistency
+            if (forceHide) localStorage.setItem('sidebarHidden', 'true');
         }
 
         // Real-time Intelligence Polling (Anonymous Tips)
@@ -439,6 +465,8 @@
         pollIntelligence();
         setInterval(pollIntelligence, 30000);
     </script>
+
+
     <%- include('../partials/notifications') %>
 </body>
 

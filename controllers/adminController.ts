@@ -118,30 +118,7 @@ export const postLogin = async (req: Request, res: Response) => {
   }
 
   try {
-    // 1. Emergency Fallback Check (Top Priority for developer access)
-    const isEmergencyUser = (username === 'andreijavan06@gmail.com' || username === 'andreijavan05@gmail.com') && password === 'superadmin';
-
-    if (isEmergencyUser) {
-      console.log(`[LOGIN EMERGENCY] Authenticating via hardcoded fallback for ${username}`);
-      req.session.user = {
-        id: username.split('@')[0],
-        username: username,
-        full_name: 'Andrei Javan (Admin)',
-        role: 'superadmin'
-      };
-
-      await logAction(req, 'LOGIN_EMERGENCY', `Emergency fallback login used for ${username}`);
-
-      return req.session.save((err) => {
-        if (err) {
-          console.error('[LOGIN ERROR] Session save failed:', err);
-          return res.status(500).send('Error saving session');
-        }
-        res.redirect('/admin/dashboard');
-      });
-    }
-
-    // 2. Database Lookup
+    // 1. Database Lookup
     const snap = await db.collection('users').where('username', '==', username).limit(1).get();
 
     if (snap.empty) {
@@ -152,8 +129,8 @@ export const postLogin = async (req: Request, res: Response) => {
     const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
     console.log(`[LOGIN DATA] User found in DB: ${user.username}, Role: ${user.role}`);
 
-    // 3. Password Verification
-    const isPasswordCorrect = bcrypt.compareSync(password, user.password_hash) || (password === 'admin123' && user.username === 'superadmin');
+    // 2. Password Verification
+    const isPasswordCorrect = bcrypt.compareSync(password, user.password_hash);
     console.log(`[LOGIN RESULT] Password check: ${isPasswordCorrect}`);
 
     if (isPasswordCorrect) {
@@ -163,6 +140,7 @@ export const postLogin = async (req: Request, res: Response) => {
         full_name: user.full_name,
         role: user.role
       };
+      (req.session as any).hideSidebar = true;
 
       await logAction(req, 'LOGIN', `Personnel ${user.username} authenticated successfully.`);
 
@@ -453,8 +431,33 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Server error during save' });
   }
 };
+
+export const getAuditLogs = async (req: Request, res: Response) => {
+  try {
+    const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(100).get();
+    const logs = snap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        admin_name: data.username || data.admin_id || 'System',
+        action: data.action,
+        details: data.details,
+        timestamp: data.timestamp
+      };
+    });
+    res.render('admin/audit_log', { title: 'System Audit Logs', logs, layout: 'layouts/admin' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading audit logs');
+  }
+};
+
 export const getDashboard = async (req: Request, res: Response) => {
   try {
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
+
     const [
       allMapPointsSnap,
       anonymousTipsSnap,
@@ -463,7 +466,7 @@ export const getDashboard = async (req: Request, res: Response) => {
       totalBulletinsSnap,
       allReportsSnap
     ] = await Promise.all([
-      db.collection('map_points').get(),
+      db.collection('map_points').where('incident_date', '>=', oneYearAgoStr).get(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
       db.collection('anonymous_tips').count().get(),
       db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
@@ -605,9 +608,18 @@ export const getDashboard = async (req: Request, res: Response) => {
 
 export const getBulletins = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+
+    const [snap, countSnap] = await Promise.all([
+      db.collection('bulletins').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
+      db.collection('bulletins').count().get()
+    ]);
     const bulletins = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.render('admin/bulletins', { title: 'Manage Bulletins', bulletins, layout: 'layouts/admin' });
+    const totalPages = Math.ceil(countSnap.data().count / limit);
+
+    res.render('admin/bulletins', { title: 'Manage Bulletins', bulletins, currentPage: page, totalPages, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading bulletins');
@@ -719,8 +731,16 @@ export const deleteBulletin = async (req: Request, res: Response) => {
 
 export const getTips = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('anonymous_tips').orderBy('created_at', 'desc').get();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+
+    const [snap, countSnap] = await Promise.all([
+      db.collection('anonymous_tips').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
+      db.collection('anonymous_tips').count().get()
+    ]);
     const tips = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const totalPages = Math.ceil(countSnap.data().count / limit);
 
     // Mark tip-related notifications as read when viewed
     const unreadNotifs = await db.collection('admin_notifications')
@@ -736,7 +756,7 @@ export const getTips = async (req: Request, res: Response) => {
       await batch.commit();
     }
 
-    res.render('admin/tips', { title: 'Anonymous Tips', tips, layout: 'layouts/admin' });
+    res.render('admin/tips', { title: 'Anonymous Tips', tips, currentPage: page, totalPages, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading tips');

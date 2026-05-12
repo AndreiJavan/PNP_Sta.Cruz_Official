@@ -113,7 +113,7 @@
     let map;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
-    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangay/philippines-barangay-043424000.json';
+    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangays/medres/barangays-municity-ph043426000.0.01.json';
 
     const colors = {
         'Theft': '#dc2626',
@@ -561,7 +561,12 @@
                             };
                         },
                         onEachFeature: function (feature, layer) {
-                            const name = feature.properties.NAME_3;
+                            let name = feature.properties.ADM4_EN;
+                            // Helper to normalize Poblacion names to match manualPins
+                            const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+                            if (match) {
+                                name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
+                            }
 
                             layer.on({
                                 mouseover: function (e) {

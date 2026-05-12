@@ -4,24 +4,40 @@ import {
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getTips, getUnreadTipsCount,
   updateTip, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
-  postHotline, deleteHotline, getUsers, postUser, deleteUser
+  postHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs
 } from '../controllers/adminController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
 import multer from 'multer';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
 const memoryUpload = multer({ storage: multer.memoryStorage() });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login requests per window
+  message: 'Too many login attempts, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Public Admin Routes
 router.get('/login', getLogin);
-router.post('/login', postLogin);
+router.post('/login', loginLimiter, postLogin);
 router.get('/logout', getLogout);
 
 // Protected Admin Routes
 router.use(isAuthenticated);
 
 router.get('/dashboard', getDashboard);
+router.get('/audit-logs', getAuditLogs);
+router.post('/api/toggle-sidebar', (req: any, res) => {
+  if (req.session) {
+    req.session.hideSidebar = req.body.hideSidebar;
+  }
+  res.json({ success: true });
+});
 
 // Bulletins
 router.get('/bulletins', getBulletins);

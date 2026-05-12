@@ -109,6 +109,18 @@
             </table>
         </div>
     </div>
+    <!-- Pagination -->
+    <% if (totalPages > 1) { %>
+    <div class="p-6 border-t border-gray-50 dark:border-slate-800 flex justify-center items-center space-x-2">
+        <% if (currentPage > 1) { %>
+            <a href="?page=<%= currentPage - 1 %>" class="px-4 py-2 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-pnp-blue hover:text-white transition">Previous</a>
+        <% } %>
+        <span class="text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mx-4">Page <%= currentPage %> of <%= totalPages %></span>
+        <% if (currentPage < totalPages) { %>
+            <a href="?page=<%= currentPage + 1 %>" class="px-4 py-2 bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-pnp-blue hover:text-white transition">Next</a>
+        <% } %>
+    </div>
+    <% } %>
 </div>
 
 <script>
