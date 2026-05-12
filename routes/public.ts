@@ -9,8 +9,6 @@ router.get('/api/map-points', publicController.getMapPoints);
 router.get('/bulletins', publicController.getBulletins);
 router.get('/bulletins/:id', publicController.getBulletinDetail);
 
-router.get('/tip', publicController.getTip);
-router.post('/tip', publicController.postTip);
 router.get('/about', publicController.getAbout);
 router.get('/hotlines', publicController.getHotlines);
 

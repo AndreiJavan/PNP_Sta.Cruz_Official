@@ -198,19 +198,7 @@
                 <span class="text-[10px] font-black uppercase tracking-widest">Records</span>
             </a>
 
-            <a href="/admin/tips"
-                class="flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Anonymous Tips' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div class="flex items-center space-x-3">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <i class="fas fa-user-secret text-xs"></i>
-                    </div>
-                    <span class="text-[10px] font-black uppercase tracking-widest">Informant Tips</span>
-                </div>
-                <div id="tipsNotificationDot"
-                    class="hidden w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]">
-                </div>
-            </a>
+
 
             <a href="/admin/map"
                 class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Map Data' || title === 'Map Management' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
@@ -414,30 +402,7 @@
             if (layoutFooter) layoutFooter.style.left = '0';
         }
 
-        // Real-time Intelligence Polling (Anonymous Tips)
-        const pollIntelligence = async () => {
-            try {
-                const response = await fetch('/admin/api/unread-tips');
-                if (response.ok) {
-                    const data = await response.json();
-                    const dot = document.getElementById('tipsNotificationDot');
-                    const dashDot = document.getElementById('tipsNotificationDotDashboard');
-                    if (data.unreadCount > 0) {
-                        if (dot) dot.classList.remove('hidden');
-                        if (dashDot) dashDot.classList.remove('hidden');
-                    } else {
-                        if (dot) dot.classList.add('hidden');
-                        if (dashDot) dashDot.classList.add('hidden');
-                    }
-                }
-            } catch (err) {
-                console.error('Neural grid connection interrupted');
-            }
-        };
 
-        // Check immediately and then every 30 seconds
-        pollIntelligence();
-        setInterval(pollIntelligence, 30000);
     </script>
     <%- include('../partials/notifications') %>
 </body>

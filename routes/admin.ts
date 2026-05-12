@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import {
   getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
-  postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getTips, getUnreadTipsCount,
-  updateTip, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
+  postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
   postHotline, deleteHotline, getUsers, postUser, deleteUser
 } from '../controllers/adminController.js';
@@ -31,10 +30,6 @@ router.get('/bulletins/:id/edit', getEditBulletin);
 router.post('/bulletins/:id/edit', memoryUpload.single('photo'), postEditBulletin);
 router.post('/bulletins/:id/delete', deleteBulletin);
 
-// Tips
-router.get('/tips', getTips);
-router.get('/api/unread-tips', getUnreadTipsCount);
-router.post('/tips/:id/update', updateTip);
 
 // Map
 router.get('/map', getMap);

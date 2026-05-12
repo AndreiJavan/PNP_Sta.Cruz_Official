@@ -12,13 +12,8 @@ export const getHome = async (req: Request, res: Response) => {
     const activeBulletinsSnap = await db.collection('bulletins')
       .where('is_archived', '!=', true)
       .count().get();
-
-    const tipsReceivedSnap = await db.collection('anonymous_tips')
-      .count().get();
-
     const stats = {
-      activeBulletins: activeBulletinsSnap.data().count,
-      tipsReceived: tipsReceivedSnap.data().count
+      activeBulletins: activeBulletinsSnap.data().count
     };
 
     res.render('public/home', { title: 'Home', hotlines, stats });
@@ -116,39 +111,6 @@ export const getBulletinDetail = async (req: Request, res: Response) => {
   }
 };
 
-export const getTip = (req: Request, res: Response) => {
-  res.render('public/tip', { title: 'Submit Anonymous Tip' });
-};
-
-export const postTip = async (req: Request, res: Response) => {
-  const { concern_type, location_text, description } = req.body;
-  const tip_id = `TIP-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-
-  try {
-    await db.collection('anonymous_tips').add({
-      tip_id,
-      concern_type,
-      location_text,
-      description,
-      is_flagged: false,
-      public_user_name: 'Anonymous',
-      created_at: new Date().toISOString()
-    });
-
-    await db.collection('admin_notifications').add({
-      type: 'TIP',
-      message: `New Anonymous Tip received: ${concern_type}`,
-      reference_id: tip_id,
-      is_read: false,
-      created_at: new Date().toISOString()
-    });
-
-    res.render('public/tip_success', { title: 'Success', tip_id });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error submitting tip');
-  }
-};
 
 export const getAbout = (req: Request, res: Response) => {
   res.render('public/about', { title: 'About' });

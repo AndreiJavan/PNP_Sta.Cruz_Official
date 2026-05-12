@@ -457,15 +457,11 @@ export const getDashboard = async (req: Request, res: Response) => {
   try {
     const [
       allMapPointsSnap,
-      anonymousTipsSnap,
-      totalTipsSnap,
       notificationsSnap,
       totalBulletinsSnap,
       allReportsSnap
     ] = await Promise.all([
       db.collection('map_points').get(),
-      db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
-      db.collection('anonymous_tips').count().get(),
       db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
       db.collection('bulletins').count().get(),
       db.collection('intelligence_scans').get()
@@ -485,7 +481,7 @@ export const getDashboard = async (req: Request, res: Response) => {
     const filteredReports = allReportsSnap.docs
       .map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
-    const totalTipsCount = totalTipsSnap.data().count;
+
     const totalBulletinsCount = totalBulletinsSnap.data().count;
     const totalReportsCount = filteredReports.length;
     const notifications = notificationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
@@ -521,7 +517,6 @@ export const getDashboard = async (req: Request, res: Response) => {
       nonIndex: allPoints.filter((p: any) => p.category === 'Non-Index').length,
       psi: allPoints.filter((p: any) => p.category === 'PSI').length,
       comparison: 0,
-      totalTips: totalTipsCount,
       totalBulletins: totalBulletinsCount,
       totalReports: totalReportsCount
     };
@@ -717,61 +712,7 @@ export const deleteBulletin = async (req: Request, res: Response) => {
   }
 };
 
-export const getTips = async (req: Request, res: Response) => {
-  try {
-    const snap = await db.collection('anonymous_tips').orderBy('created_at', 'desc').get();
-    const tips = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    // Mark tip-related notifications as read when viewed
-    const unreadNotifs = await db.collection('admin_notifications')
-      .where('type', '==', 'TIP')
-      .where('is_read', '==', false)
-      .get();
-
-    if (!unreadNotifs.empty) {
-      const batch = db.batch();
-      unreadNotifs.docs.forEach(doc => {
-        batch.update(doc.ref, { is_read: true, updated_at: new Date().toISOString() });
-      });
-      await batch.commit();
-    }
-
-    res.render('admin/tips', { title: 'Anonymous Tips', tips, layout: 'layouts/admin' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading tips');
-  }
-};
-
-export const getUnreadTipsCount = async (req: Request, res: Response) => {
-  try {
-    const snap = await db.collection('admin_notifications')
-      .where('type', '==', 'TIP')
-      .where('is_read', '==', false)
-      .count()
-      .get();
-    res.json({ unreadCount: snap.data().count });
-  } catch (err) {
-    console.error('Error fetching unread tips count:', err);
-    res.status(500).json({ unreadCount: 0 });
-  }
-};
-
-export const updateTip = async (req: Request, res: Response) => {
-  const { is_flagged, admin_notes } = req.body;
-  try {
-    await logAction(req, 'TIP_UPDATE', `Updated anonymous tip ID: ${req.params.id}`);
-    await db.collection('anonymous_tips').doc(req.params.id).update({
-      is_flagged: is_flagged === 'on' || is_flagged === true,
-      admin_notes,
-      updated_at: new Date().toISOString()
-    });
-    res.redirect('/admin/tips');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error updating tip');
-  }
-};
 
 export const getMap = async (req: Request, res: Response) => {
   try {
@@ -850,7 +791,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
 export const purgePlaceholders = async (req: Request, res: Response) => {
   try {
     await logAction(req, 'SYSTEM_PURGE', 'Initiated full tactical data purge (RESET).');
-    const tables = ['map_points', 'intelligence_scans', 'anonymous_tips', 'audit_logs', 'bulletins'];
+    const tables = ['map_points', 'intelligence_scans', 'audit_logs', 'bulletins'];
     const batch = db.batch();
 
     for (const table of tables) {
