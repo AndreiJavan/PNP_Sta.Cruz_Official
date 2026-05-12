@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <% 
     // Ensure all critical variables have defaults to prevent EJS crashes
     const displayReports = (typeof reports !== 'undefined' && reports) ? reports : [];
@@ -30,520 +29,364 @@
             <div class="absolute -right-4 -top-4 w-12 h-12 bg-pnp-gold/5 rounded-full blur-xl group-hover:bg-pnp-gold/10 transition-all"></div>
             <div class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-pnp-gold mb-4 group-hover:scale-110 transition-all border border-white/10">
                 <i class="fas fa-keyboard"></i>
-=======
-<% // Ensure all critical variables have defaults to prevent EJS crashes const displayReports=(typeof reports
-    !=='undefined' && reports) ? reports : []; const displayStats=(typeof stats !=='undefined' && stats) ? stats :
-    { '8-Focus' : 0, 'PSI' : 0, 'Non-Index' : 0 }; const displayIncidents=(typeof allIncidents !=='undefined' &&
-    allIncidents) ? allIncidents : []; %>
-    <div class="space-y-8 animate-fade-in px-4 lg:px-0">
-        <!-- Header Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-            <div
-                class="pnp-card pnp-glass-dark border-red-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group">
-                <span class="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Focus
-                    Crimes</span>
-                <div class="text-4xl font-black text-red-500 leading-none count-up-glow count-up"
-                    data-target="<%= displayStats['8-Focus'] || 0 %>" data-stat="8-Focus">0</div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Critical
-                    Strategic Targets Identified</p>
->>>>>>> 19443849b7cca3a3129e011b0e24392690114265
             </div>
+            <div class="text-lg font-black text-white leading-none uppercase tracking-widest">Manual Input</div>
+            <p class="text-[10px] text-white/30 font-bold uppercase mt-3 tracking-widest">Secure Data Entry Portal</p>
+        </button>
 
-            <div
-                class="pnp-card pnp-glass-dark border-slate-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group">
-                <span
-                    class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Miscellaneous</span>
-                <div class="text-4xl font-black text-slate-200 leading-none count-up-glow count-up"
-                    data-target="<%= displayStats['Non-Index'] || 0 %>" data-stat="Non-Index">0</div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Non-Index
-                    Incident Stream Data</p>
+        <button onclick="document.getElementById('fileConverterInput').click()" class="pnp-card pnp-gradient-blue p-6 rounded-[2rem] shadow-2xl flex flex-col justify-center border-2 border-white/10 text-left group hover:-translate-y-2 relative overflow-hidden">
+            <div class="absolute inset-0 bg-pnp-gold/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+            <div class="flex justify-between items-start w-full relative z-10">
+                <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Active Scanner</span>
+                <span onclick="event.stopPropagation(); purgeTacticalData()" title="Purge System Placeholders" class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
+                    <i class="fas fa-microchip"></i>
+                </span>
             </div>
-<<<<<<< HEAD
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
             <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI Extraction Neural Link</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
     </div>
-=======
-
-            <div
-                class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group">
-                <span class="text-[10px] text-pnp-blue-300 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Safety
-                    Index</span>
-                <div class="text-4xl font-black text-pnp-blue-300 leading-none count-up-glow count-up"
-                    data-target="<%= displayStats['PSI'] || 0 %>" data-stat="PSI">0</div>
-                <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Public
-                    Safety Operations Log</p>
-            </div>
-
-            <button onclick="openManualEntry()"
-                class="pnp-card bg-slate-900 border-2 border-dashed border-white/5 p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:border-pnp-gold transition-all relative overflow-hidden">
-                <div
-                    class="absolute -right-4 -top-4 w-12 h-12 bg-pnp-gold/5 rounded-full blur-xl group-hover:bg-pnp-gold/10 transition-all">
-                </div>
-                <div
-                    class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-pnp-gold mb-4 group-hover:scale-110 transition-all border border-white/10">
-                    <i class="fas fa-keyboard"></i>
-                </div>
-                <div class="text-lg font-black text-white leading-none uppercase tracking-widest">Manual Input</div>
-                <p class="text-[10px] text-white/30 font-bold uppercase mt-3 tracking-widest">Secure Data Entry Portal
-                </p>
-            </button>
-
-            <button onclick="document.getElementById('fileConverterInput').click()"
-                class="pnp-card pnp-gradient-blue p-6 rounded-[2rem] shadow-2xl flex flex-col justify-center border-2 border-white/10 text-left group hover:-translate-y-2 relative overflow-hidden">
-                <div
-                    class="absolute inset-0 bg-pnp-gold/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                </div>
-                <div class="flex justify-between items-start w-full relative z-10">
-                    <span
-                        class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Active
-                        Scanner</span>
-                    <span onclick="event.stopPropagation(); purgeTacticalData()" title="Purge System Placeholders"
-                        class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
-                        <i class="fas fa-microchip"></i>
-                    </span>
-                </div>
-                <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Unit
-                    Periodic Report</div>
-                <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI
-                    Extraction Neural Link</p>
-                <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden"
-                    onchange="handleIntelConvert(this)">
-            </button>
-        </div>
->>>>>>> 19443849b7cca3a3129e011b0e24392690114265
 
         <!-- Extraction Batches View -->
-        <div
-            class="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
-            <div
-                class="p-8 border-b border-gray-50 dark:border-slate-800 bg-gray-50/10 dark:bg-slate-900/50 flex justify-between items-center">
+        <div class="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div class="p-8 border-b border-gray-50 dark:border-slate-800 bg-gray-50/10 dark:bg-slate-900/50 flex justify-between items-center">
                 <div>
-                    <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em] text-sm">Mission
-                        Records Archive</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest italic">Historical
-                        Tactical Batch History</p>
+                    <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em] text-sm">Mission Records Archive</h3>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest italic">Historical Tactical Batch History</p>
                 </div>
                 <div class="flex items-center space-x-3">
                     <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Link
-                        Active</span>
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Link Active</span>
                 </div>
             </div>
-
+    
             <div class="overflow-x-auto custom-scrollbar">
                 <table class="w-full text-left border-collapse min-w-[1000px] table-fixed">
                     <thead class="bg-gray-50/50 dark:bg-slate-950/50">
                         <tr>
-                            <th
-                                class="w-44 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">
-                                Operational Log</th>
-                            <th
-                                class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">
-                                Mission Intelligence</th>
-                            <th
-                                class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">
-                                Volume</th>
-                            <th
-                                class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">
-                                8-Focus</th>
-                            <th
-                                class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">
-                                Non-Index</th>
-                            <th
-                                class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">
-                                Safety</th>
-                            <th
-                                class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">
-                                Signal</th>
-                            <th
-                                class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">
-                                Actions</th>
+                            <th class="w-44 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">Operational Log</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">Mission Intelligence</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Volume</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">8-Focus</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Non-Index</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Safety</th>
+                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
+                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-800">
-                        <% if (displayReports.length===0) { %>
+                        <% if (displayReports.length === 0) { %>
                             <tr>
-                                <td colspan="8"
-                                    class="px-8 py-40 text-center text-gray-300 dark:text-slate-700 font-black uppercase tracking-[0.5em] italic">
+                                <td colspan="8" class="px-8 py-40 text-center text-gray-300 dark:text-slate-700 font-black uppercase tracking-[0.5em] italic">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fas fa-barcode text-6xl mb-6 opacity-20"></i>
                                         <span>No tactical data signals found</span>
                                     </div>
                                 </td>
                             </tr>
-                            <% } else { %>
-                                <% displayReports.sort((a,b)=> new Date(b.timestamp).getTime() - new
-                                    Date(a.timestamp).getTime()).forEach(report => { %>
-                                    <tr
-                                        class="hover:bg-pnp-blue/5 dark:hover:bg-slate-800/40 transition-all group relative overflow-hidden">
-                                        <td class="px-8 py-6">
-                                            <div class="flex flex-col">
-                                                <span
-                                                    class="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-tighter">
-                                                    <%= new Date(report.timestamp).toLocaleDateString(undefined, {
-                                                        month: 'short' , day: 'numeric' , year: 'numeric' }) %>
-                                                </span>
+                        <% } else { %>
+                            <% displayReports.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).forEach(report => { %>
+                                <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-800/40 transition-all group relative overflow-hidden">
+                                    <td class="px-8 py-6">
+                                        <div class="flex flex-col">
+                                            <span class="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-tighter">
+                                                <%= new Date(report.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) %>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-gray-200 dark:border-slate-700 group-hover:scale-110 transition-all shadow-sm group-hover:rotate-3">
+                                                <i class="fas fa-microchip text-xs"></i>
                                             </div>
-                                        </td>
-                                        <td class="px-8 py-6">
-                                            <div class="flex items-center space-x-4">
-                                                <div
-                                                    class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-gray-200 dark:border-slate-700 group-hover:scale-110 transition-all shadow-sm group-hover:rotate-3">
-                                                    <i class="fas fa-microchip text-xs"></i>
-                                                </div>
-                                                <div class="flex flex-col truncate max-w-[200px]">
-                                                    <span
-                                                        class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-300">
-                                                        <%= report.filename || 'Manual Transmission' %>
-                                                    </span>
-                                                    <div class="flex items-center space-x-2 mt-1">
-                                                        <span
-                                                            class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70">
-                                                            <%= report.admin_name || 'Sys Admin' %>
-                                                        </span>
-                                                    </div>
+                                            <div class="flex flex-col truncate max-w-[200px]">
+                                                <span class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-300"><%= report.filename || 'Manual Transmission' %></span>
+                                                <div class="flex items-center space-x-2 mt-1">
+                                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70"><%= report.admin_name || 'Sys Admin' %></span>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td class="w-24 px-2 py-6 text-center">
-                                            <span
-                                                class="text-sm font-black text-pnp-blue dark:text-pnp-gold tabular-nums tracking-tighter">
-                                                <%= report.total_records || 0 %>
-                                            </span>
-                                        </td>
-                                        <td class="w-24 px-2 py-6 text-center">
-                                            <span
-                                                class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['8-Focus']) > 0 ? 'bg-red-500/10 text-red-600 border border-red-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
-                                                <%= (report.category_stats && report.category_stats['8-Focus']) || 0 %>
-                                            </span>
-                                        </td>
-                                        <td class="w-24 px-2 py-6 text-center">
-                                            <span
-                                                class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['Non-Index']) > 0 ? 'bg-slate-500/10 text-slate-600 border border-slate-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
-                                                <%= (report.category_stats && report.category_stats['Non-Index']) || 0
-                                                    %>
-                                            </span>
-                                        </td>
-                                        <td class="w-24 px-2 py-6 text-center">
-                                            <span
-                                                class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['PSI']) > 0 ? 'bg-pnp-blue/10 text-pnp-blue-300 border border-pnp-blue/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
-                                                <%= (report.category_stats && report.category_stats['PSI']) || 0 %>
-                                            </span>
-                                        </td>
-                                        <td class="px-8 py-6 text-center">
-                                            <% if (report.category_stats?.entry_type==='manual' ||
-                                                report.filename?.includes('Manual')) { %>
-                                                <span
-                                                    class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10">MANUAL</span>
-                                                <% } else { %>
-                                                    <span
-                                                        class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10">SCANNED</span>
-                                                    <% } %>
-                                        </td>
-                                        <td class="px-8 py-6 text-right">
-                                            <div class="flex items-center justify-end space-x-3">
-                                                <button type="button" onclick="viewReportDetails('<%= report.id %>')"
-                                                    class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-transparent hover:border-pnp-gold/20 shadow-sm">
-                                                    <i class="fas fa-eye text-xs"></i>
-                                                </button>
-                                                <form id="deleteReportForm_<%= report.id %>"
-                                                    action="/admin/reports/<%= report.id %>/delete" method="POST"
-                                                    onsubmit="return confirmDeleteReport(event, '<%= report.id %>')">
-                                                    <button type="submit"
-                                                        class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-transparent hover:border-red-500/20 shadow-sm">
-                                                        <i class="fas fa-trash-alt text-xs"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
+                                        </div>
+                                    </td>
+                                    <td class="w-24 px-2 py-6 text-center">
+                                        <span class="text-sm font-black text-pnp-blue dark:text-pnp-gold tabular-nums tracking-tighter"><%= report.total_records || 0 %></span>
+                                    </td>
+                                    <td class="w-24 px-2 py-6 text-center">
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['8-Focus']) > 0 ? 'bg-red-500/10 text-red-600 border border-red-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
+                                            <%= (report.category_stats && report.category_stats['8-Focus']) || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="w-24 px-2 py-6 text-center">
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['Non-Index']) > 0 ? 'bg-slate-500/10 text-slate-600 border border-slate-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
+                                            <%= (report.category_stats && report.category_stats['Non-Index']) || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="w-24 px-2 py-6 text-center">
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['PSI']) > 0 ? 'bg-pnp-blue/10 text-pnp-blue-300 border border-pnp-blue/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
+                                            <%= (report.category_stats && report.category_stats['PSI']) || 0 %>
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <% if (report.category_stats?.entry_type === 'manual' || report.filename?.includes('Manual')) { %>
+                                            <span class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10">MANUAL</span>
+                                        <% } else { %>
+                                            <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10">SCANNED</span>
                                         <% } %>
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex items-center justify-end space-x-3">
+                                            <button type="button" onclick="viewReportDetails('<%= report.id %>')" class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-transparent hover:border-pnp-gold/20 shadow-sm">
+                                                <i class="fas fa-eye text-xs"></i>
+                                            </button>
+                                            <form id="deleteReportForm_<%= report.id %>" action="/admin/reports/<%= report.id %>/delete" method="POST" onsubmit="return confirmDeleteReport(event, '<%= report.id %>')">
+                                                <button type="submit" class="w-10 h-10 rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-transparent hover:border-red-500/20 shadow-sm">
+                                                    <i class="fas fa-trash-alt text-xs"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
+</div>
 
-    <!-- Modal for raw data view (Polished Spreadsheet Style) -->
-    <div id="reportDetailsModal"
-        class="fixed inset-0 z-[1500] hidden items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
-        <div
-            class="bg-white dark:bg-slate-800 w-full max-w-5xl rounded-[3rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-fade-in-up">
-            <div
-                class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50 relative overflow-hidden">
-                <!-- Decorative Accent -->
-                <div class="absolute top-0 left-0 w-2 h-full bg-pnp-blue dark:bg-pnp-gold"></div>
-
-                <div class="flex items-center space-x-6 pl-2">
-                    <div
-                        class="w-14 h-14 bg-pnp-blue rounded-2xl flex items-center justify-center text-pnp-gold shadow-lg rotate-3 border-2 border-white/20">
-                        <i class="fas fa-file-invoice text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 id="reportDetailsTitle"
-                            class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em] text-lg">
-                            Recorded Intelligence</h3>
-                    </div>
+<!-- Modal for raw data view (Polished Spreadsheet Style) -->
+<div id="reportDetailsModal" class="fixed inset-0 z-[1500] hidden items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-5xl rounded-[3rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh] animate-fade-in-up">
+        <div class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50 relative overflow-hidden">
+            <!-- Decorative Accent -->
+            <div class="absolute top-0 left-0 w-2 h-full bg-pnp-blue dark:bg-pnp-gold"></div>
+            
+            <div class="flex items-center space-x-6 pl-2">
+                <div class="w-14 h-14 bg-pnp-blue rounded-2xl flex items-center justify-center text-pnp-gold shadow-lg rotate-3 border-2 border-white/20">
+                    <i class="fas fa-file-invoice text-2xl"></i>
                 </div>
-                <button onclick="closeReportDetails()"
-                    class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 text-gray-500 hover:bg-red-500 hover:text-white transition-all transform hover:rotate-90 flex items-center justify-center shadow-sm">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div>
+                    <h3 id="reportDetailsTitle" class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em] text-lg">Recorded Intelligence</h3>
+                </div>
             </div>
-            <div id="reportDetailsContent"
-                class="p-0 overflow-y-auto custom-scrollbar flex-grow bg-gray-50/30 dark:bg-slate-900/10"></div>
+            <button onclick="closeReportDetails()" class="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-slate-700 text-gray-500 hover:bg-red-500 hover:text-white transition-all transform hover:rotate-90 flex items-center justify-center shadow-sm">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
+        <div id="reportDetailsContent" class="p-0 overflow-y-auto custom-scrollbar flex-grow bg-gray-50/30 dark:bg-slate-900/10"></div>
     </div>
+</div>
 
-    <!-- Intelligence Review Modal (Polished Grid Spreadsheet Style) -->
-    <div id="intelReviewModal"
-        class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-900/95 backdrop-blur-xl p-4">
-        <div
-            class="bg-white dark:bg-slate-800 w-full max-w-6xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
-            <div
-                class="p-8 border-b border-gray-100 dark:border-slate-700 bg-pnp-blue/5 dark:bg-slate-900/50 flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
-                <div class="flex items-center space-x-5">
-                    <div
-                        class="w-14 h-14 bg-pnp-blue dark:bg-pnp-gold rounded-2xl flex items-center justify-center text-white dark:text-pnp-blue shadow-2xl rotate-3 border-2 border-white/20">
-                        <i class="fas fa-file-excel text-2xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] text-sm">
-                            Manual Input</h3>
-                        <p id="reviewRowCount" class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">
-                            Staging Area: Validating Confirm...</p>
-                    </div>
+<!-- Intelligence Review Modal (Polished Grid Spreadsheet Style) -->
+<div id="intelReviewModal" class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-900/95 backdrop-blur-xl p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-6xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+        <div class="p-8 border-b border-gray-100 dark:border-slate-700 bg-pnp-blue/5 dark:bg-slate-900/50 flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
+            <div class="flex items-center space-x-5">
+                <div class="w-14 h-14 bg-pnp-blue dark:bg-pnp-gold rounded-2xl flex items-center justify-center text-white dark:text-pnp-blue shadow-2xl rotate-3 border-2 border-white/20">
+                    <i class="fas fa-file-excel text-2xl"></i>
                 </div>
-
-                <div
-                    class="flex items-center space-x-4 bg-white dark:bg-slate-700 p-2 rounded-2xl border border-gray-100 dark:border-slate-600 shadow-inner">
-                    <select id="reviewCategoryFilter" onchange="renderReviewTable()"
-                        class="bg-transparent border-none text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase px-6 py-2 outline-none">
-                        <option value="All">All</option>
-                        <option value="8-Focus">8-Focus Target</option>
-                        <option value="Non-Index">Non-Index</option>
-                        <option value="PSI">PSI Sector</option>
-                    </select>
-                    <div class="w-px h-6 bg-gray-100 dark:bg-slate-600"></div>
-                    <div class="flex items-center space-x-5 px-6 py-2">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></div><span
-                                id="count8Focus" class="text-sm font-black text-pnp-blue dark:text-white">0</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2.5 h-2.5 rounded-full bg-slate-500 shadow-sm shadow-slate-500/50"></div><span
-                                id="countNonIndex" class="text-sm font-black text-pnp-blue dark:text-white">0</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div><span
-                                id="countPSI" class="text-sm font-black text-pnp-blue dark:text-white">0</span>
-                        </div>
-                    </div>
+                <div>
+                    <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] text-sm">Manual Input</h3>
+                    <p id="reviewRowCount" class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Staging Area: Validating Confirm...</p>
                 </div>
             </div>
 
-            <div class="flex-grow overflow-auto p-6 bg-gray-50/50 dark:bg-slate-900/30 custom-scrollbar">
-                <div
-                    class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-xl overflow-hidden">
-                    <table class="w-full text-left border-collapse table-fixed min-w-[800px]">
-                        <thead class="sticky top-0 z-20 shadow-sm">
-                            <tr class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-20 bg-gray-100 dark:bg-slate-900">
-                                    # Row</th>
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/4 bg-gray-100 dark:bg-slate-900">
-                                    Source Intelligence</th>
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/4 bg-gray-100 dark:bg-slate-900">
-                                    Sector (Barangay)</th>
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/5 bg-gray-100 dark:bg-slate-900">
-                                    Timeline</th>
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/4 bg-gray-100 dark:bg-slate-900">
-                                    Classification</th>
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-32 bg-gray-100 dark:bg-slate-900">
-                                    Pillar</th>
-                                <th
-                                    class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest w-20 text-center bg-gray-100 dark:bg-slate-900">
-                                    X</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reviewTableBody" class="divide-y divide-gray-100 dark:divide-slate-700/50"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div
-                class="p-8 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center relative z-10">
-                <button onclick="addNewReviewRow()"
-                    class="px-8 py-4 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-2xl text-xs font-black text-pnp-blue dark:text-white uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-slate-600 transition shadow-sm group">
-                    <i class="fas fa-plus mr-2 group-hover:scale-125 transition"></i> Add
-                </button>
-                <div class="flex items-center space-x-4">
-                    <button onclick="closeIntelReview()"
-                        class="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:text-red-500 transition-all">Cancel</button>
-                    <button onclick="confirmIntelReview()"
-                        class="px-12 py-5 bg-pnp-blue hover:bg-black text-white rounded-2xl text-xs font-black uppercase tracking-[0.3em] shadow-2xl shadow-pnp-blue/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center space-x-3">
-                        <i class="fas fa-shield-check"></i>
-                        <span>Confirm</span>
-                    </button>
+            <div class="flex items-center space-x-4 bg-white dark:bg-slate-700 p-2 rounded-2xl border border-gray-100 dark:border-slate-600 shadow-inner">
+                <select id="reviewCategoryFilter" onchange="renderReviewTable()" class="bg-transparent border-none text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase px-6 py-2 outline-none">
+                    <option value="All">All</option>
+                    <option value="8-Focus">8-Focus Target</option>
+                    <option value="Non-Index">Non-Index</option>
+                    <option value="PSI">PSI Sector</option>
+                </select>
+                <div class="w-px h-6 bg-gray-100 dark:bg-slate-600"></div>
+                <div class="flex items-center space-x-5 px-6 py-2">
+                    <div class="flex items-center space-x-2"><div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></div><span id="count8Focus" class="text-sm font-black text-pnp-blue dark:text-white">0</span></div>
+                    <div class="flex items-center space-x-2"><div class="w-2.5 h-2.5 rounded-full bg-slate-500 shadow-sm shadow-slate-500/50"></div><span id="countNonIndex" class="text-sm font-black text-pnp-blue dark:text-white">0</span></div>
+                    <div class="flex items-center space-x-2"><div class="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></div><span id="countPSI" class="text-sm font-black text-pnp-blue dark:text-white">0</span></div>
                 </div>
             </div>
         </div>
+
+        <div class="flex-grow overflow-auto p-6 bg-gray-50/50 dark:bg-slate-900/30 custom-scrollbar">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-xl overflow-hidden">
+                <table class="w-full text-left border-collapse table-fixed">
+                    <thead class="sticky top-0 z-20 shadow-sm">
+                        <tr class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-20 bg-gray-100 dark:bg-slate-900"># Row</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/4 bg-gray-100 dark:bg-slate-900">Source Intelligence</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/4 bg-gray-100 dark:bg-slate-900">Sector (Barangay)</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/5 bg-gray-100 dark:bg-slate-900">Timeline</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-1/4 bg-gray-100 dark:bg-slate-900">Classification</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-32 bg-gray-100 dark:bg-slate-900">Pillar</th>
+                            <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest w-20 text-center bg-gray-100 dark:bg-slate-900">X</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewTableBody" class="divide-y divide-gray-100 dark:divide-slate-700/50"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="p-8 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center relative z-10">
+            <button onclick="addNewReviewRow()" class="px-8 py-4 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-2xl text-xs font-black text-pnp-blue dark:text-white uppercase tracking-widest hover:bg-gray-100 dark:hover:bg-slate-600 transition shadow-sm group">
+                <i class="fas fa-plus mr-2 group-hover:scale-125 transition"></i> Add
+            </button>
+            <div class="flex items-center space-x-4">
+                <button onclick="closeIntelReview()" class="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:text-red-500 transition-all">Cancel</button>
+                <button onclick="confirmIntelReview()" class="px-12 py-5 bg-pnp-blue hover:bg-black text-white rounded-2xl text-xs font-black uppercase tracking-[0.3em] shadow-2xl shadow-pnp-blue/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center space-x-3">
+                    <i class="fas fa-shield-check"></i>
+                    <span>Confirm</span>
+                </button>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script type="module">
+<script type="module">
 
-        const VALID_BARANGAYS = [
-            "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
-            "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
-            "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)",
-            "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur",
-            "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
-        ];
+    const VALID_BARANGAYS = [
+        "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", 
+        "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", 
+        "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", 
+        "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", 
+        "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
+    ];
 
-        window.handleIntelConvert = async function (input) {
-            if (!input.files || !input.files[0]) return;
+     window.handleIntelConvert = async function(input) {
+        if (!input.files || !input.files[0]) return;
 
-            const file = input.files[0];
+        const file = input.files[0];
+        
+        // Verification Protocol: Check for existing intelligence batches
+        if (window.reports && window.reports.some(r => r.filename === file.name)) {
+            window.strategicAlert({
+                title: "Duplicate Signal Detected",
+                message: `The intelligence batch [${file.name}] is already archived in the CPICRS database. Re-scanning duplicate datasets is restricted to preserve structural integrity.`,
+                type: "warning"
+            });
+            input.value = '';
+            return;
+        }
 
-            // Verification Protocol: Check for existing intelligence batches
-            if (window.reports && window.reports.some(r => r.filename === file.name)) {
+        const loadingOverlay = document.getElementById('intelLoadingOverlay');
+        const statusText = document.getElementById('intelLoadingText');
+
+        loadingOverlay.classList.remove('hidden');
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            statusText.textContent = `Scanned File: ${file.name} - Extracting Intelligence...`;
+
+            // ✅ Targeted route for AI processing
+            const res = await fetch('/admin/process-ai', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText);
+            }
+
+            const result = await res.json();
+
+            if (!result.success) {
+                throw new Error(result.error || "AI processing failed");
+            }
+
+            const flattened = result.data;
+
+            if (flattened.length === 0) {
                 window.strategicAlert({
-                    title: "Duplicate Signal Detected",
-                    message: `The intelligence batch [${file.name}] is already archived in the CPICRS database. Re-scanning duplicate datasets is restricted to preserve structural integrity.`,
+                    title: "Neural Scan Negative",
+                    message: "No incident records detected in this document. Please verify source data.",
                     type: "warning"
                 });
-                input.value = '';
                 return;
             }
 
-            const loadingOverlay = document.getElementById('intelLoadingOverlay');
-            const statusText = document.getElementById('intelLoadingText');
+            lastProcessedFile = { name: file.name, size: file.size };
+            showIntelReview(flattened, file.name);
 
-            loadingOverlay.classList.remove('hidden');
+        } catch (error) {
+            console.error("AI Error:", error);
+            window.strategicAlert({
+                title: "Extraction Failure",
+                message: error.message,
+                type: "danger"
+            });
+        } finally {
+            loadingOverlay.classList.add('hidden');
+            input.value = '';
+        }
+    };
+     let reviewData = [];
+     let currentFilename = "";
+     let currentEntryType = "scanned";
+     let lastProcessedFile = { name: "", size: 0 };
 
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
+     window.openManualEntry = function() {
+         reviewData = [{ 
+             barangay: VALID_BARANGAYS[0], 
+             date_committed: new Date().toISOString().split('T')[0], 
+             offense: '', 
+             category: 'Non-Index', 
+             description: '' 
+         }];
+         currentFilename = "Manual Entry Session";
+         currentEntryType = "manual";
+         
+         const modal = document.getElementById('intelReviewModal');
+         const title = modal.querySelector('h3');
+         const subtitle = document.getElementById('reviewRowCount');
+         
+         title.textContent = "Manual Input";
+         subtitle.textContent = "Secure Spreadsheet Protocol: Direct Data Entry";
+         
+         renderReviewTable();
+         modal.classList.remove('hidden');
+         modal.classList.add('flex');
+     };
 
-                statusText.textContent = `Scanned File: ${file.name} - Extracting Intelligence...`;
+     window.showIntelReview = function(data, filename = "") {
+         reviewData = data;
+         currentFilename = filename;
+         currentEntryType = "scanned";
+         
+         const modal = document.getElementById('intelReviewModal');
+         const title = modal.querySelector('h3');
+         const subtitle = document.getElementById('reviewRowCount');
+         
+         title.textContent = "Manual Input";
+         subtitle.textContent = `${reviewData.length} records detected in periodic report`;
+         
+         renderReviewTable();
+         modal.classList.remove('hidden');
+         modal.classList.add('flex');
+     };
+  
+     window.renderReviewTable = function() {
+         const tbody = document.getElementById('reviewTableBody');
+         const filter = document.getElementById('reviewCategoryFilter').value;
+         tbody.innerHTML = '';
+         let stats = { '8-Focus': 0, 'Non-Index': 0, 'PSI': 0 };
+         let displayIndex = 1;
 
-                // ✅ Targeted route for AI processing
-                const res = await fetch('/admin/process-ai', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(errText);
-                }
-
-                const result = await res.json();
-
-                if (!result.success) {
-                    throw new Error(result.error || "AI processing failed");
-                }
-
-                const flattened = result.data;
-
-                if (flattened.length === 0) {
-                    window.strategicAlert({
-                        title: "Neural Scan Negative",
-                        message: "No incident records detected in this document. Please verify source data.",
-                        type: "warning"
-                    });
-                    return;
-                }
-
-                lastProcessedFile = { name: file.name, size: file.size };
-                showIntelReview(flattened, file.name);
-
-            } catch (error) {
-                console.error("AI Error:", error);
-                window.strategicAlert({
-                    title: "Extraction Failure",
-                    message: error.message,
-                    type: "danger"
-                });
-            } finally {
-                loadingOverlay.classList.add('hidden');
-                input.value = '';
-            }
-        };
-        let reviewData = [];
-        let currentFilename = "";
-        let currentEntryType = "scanned";
-        let lastProcessedFile = { name: "", size: 0 };
-
-        window.openManualEntry = function () {
-            reviewData = [{
-                barangay: VALID_BARANGAYS[0],
-                date_committed: new Date().toISOString().split('T')[0],
-                offense: '',
-                category: 'Non-Index',
-                description: ''
-            }];
-            currentFilename = "Manual Entry Session";
-            currentEntryType = "manual";
-
-            const modal = document.getElementById('intelReviewModal');
-            const title = modal.querySelector('h3');
-            const subtitle = document.getElementById('reviewRowCount');
-
-            title.textContent = "Manual Input";
-            subtitle.textContent = "Secure Spreadsheet Protocol: Direct Data Entry";
-
-            renderReviewTable();
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        window.showIntelReview = function (data, filename = "") {
-            reviewData = data;
-            currentFilename = filename;
-            currentEntryType = "scanned";
-
-            const modal = document.getElementById('intelReviewModal');
-            const title = modal.querySelector('h3');
-            const subtitle = document.getElementById('reviewRowCount');
-
-            title.textContent = "Manual Input";
-            subtitle.textContent = `${reviewData.length} records detected in periodic report`;
-
-            renderReviewTable();
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-        };
-
-        window.renderReviewTable = function () {
-            const tbody = document.getElementById('reviewTableBody');
-            const filter = document.getElementById('reviewCategoryFilter').value;
-            tbody.innerHTML = '';
-            let stats = { '8-Focus': 0, 'Non-Index': 0, 'PSI': 0 };
-            let displayIndex = 1;
-
-            reviewData.forEach((item, index) => {
-                const cat = item.category || 'Non-Index';
-                stats[cat]++;
-                if (filter !== 'All' && cat !== filter) return;
-
-                const tr = document.createElement('tr');
-                tr.className = 'bg-white dark:bg-slate-900 transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 animate-fade-in-up group border-b border-gray-100 dark:border-slate-800';
-                tr.style.animationDelay = `${index * 20}ms`;
-
-                const isFocus = cat === '8-Focus';
-                const isPSI = cat === 'PSI';
-                const badgeClass = isFocus ? 'bg-red-500/10 text-red-500' : isPSI ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500';
-
-                tr.innerHTML = `
+         reviewData.forEach((item, index) => {
+             const cat = item.category || 'Non-Index';
+             stats[cat]++;
+             if (filter !== 'All' && cat !== filter) return;
+   
+             const tr = document.createElement('tr');
+             tr.className = 'bg-white dark:bg-slate-900 transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 animate-fade-in-up group border-b border-gray-100 dark:border-slate-800';
+             tr.style.animationDelay = `${index * 20}ms`;
+             
+             const isFocus = cat === '8-Focus';
+             const isPSI = cat === 'PSI';
+             const badgeClass = isFocus ? 'bg-red-500/10 text-red-500' : isPSI ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500';
+             
+             tr.innerHTML = `
                  <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-100 dark:border-slate-800 w-16 text-center tabular-nums">${displayIndex++}</td>
                  <td class="px-6 py-4 text-[10px] font-bold text-slate-400 border-r border-gray-100 dark:border-slate-800 truncate max-w-[120px]" title="${currentFilename}">
                     ${currentFilename || 'Buffer'}
@@ -574,120 +417,120 @@
                      </button>
                  </td>
              `;
-                tbody.appendChild(tr);
-            });
+             tbody.appendChild(tr);
+         });
+   
+         const reviewRowCount = document.getElementById('reviewRowCount');
+         if (reviewRowCount && currentEntryType === 'scanned') {
+             reviewRowCount.textContent = `${reviewData.length} records detected in periodic report`;
+         }
+         
+         const count8Focus = document.getElementById('count8Focus');
+         if (count8Focus) count8Focus.textContent = stats['8-Focus'];
+         
+         const countNonIndex = document.getElementById('countNonIndex');
+         if (countNonIndex) countNonIndex.textContent = stats['Non-Index'];
+         
+         const countPSI = document.getElementById('countPSI');
+         if (countPSI) countPSI.textContent = stats['PSI'];
+     };
 
-            const reviewRowCount = document.getElementById('reviewRowCount');
-            if (reviewRowCount && currentEntryType === 'scanned') {
-                reviewRowCount.textContent = `${reviewData.length} records detected in periodic report`;
-            }
+     window.updateReviewItem = function(index, field, value) {
+         reviewData[index][field] = value;
+         // No need to re-render everything on every keystroke for text inputs
+         if (field === 'category') renderReviewTable();
+     };
+  
+     window.editReviewRow = function(index) {
+         // Replaced by inline spreadsheet editing
+     };
+  
+     window.deleteReviewRow = function(index) {
+         reviewData.splice(index, 1);
+         renderReviewTable();
+     };
+  
+     window.addNewReviewRow = function() {
+         reviewData.push({ 
+             barangay: VALID_BARANGAYS[0], 
+             date_committed: new Date().toISOString().split('T')[0], 
+             offense: '', 
+             category: 'Non-Index', 
+             description: '' 
+         });
+         renderReviewTable();
+         
+         // Scroll to bottom
+         const tbody = document.getElementById('reviewTableBody');
+         const container = tbody.closest('.overflow-auto');
+         if (container) container.scrollTop = container.scrollHeight;
+     };
 
-            const count8Focus = document.getElementById('count8Focus');
-            if (count8Focus) count8Focus.textContent = stats['8-Focus'];
+     window.closeIntelReview = function() {
+         document.getElementById('intelReviewModal').classList.add('hidden');
+     };
 
-            const countNonIndex = document.getElementById('countNonIndex');
-            if (countNonIndex) countNonIndex.textContent = stats['Non-Index'];
+     window.confirmIntelReview = async function() {
+         const syncBtn = document.querySelector('button[onclick="confirmIntelReview()"]');
+         if (syncBtn.disabled) return;
 
-            const countPSI = document.getElementById('countPSI');
-            if (countPSI) countPSI.textContent = stats['PSI'];
-        };
+         const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
+             title: "Tactical Confirmation",
+             message: `Commit ${reviewData.length} records to the CPICRS Central Database?`,
+             confirmText: "Sync Now",
+             type: "info"
+         });
+         if (!confirmed) return;
+         
+         const originalContent = syncBtn.innerHTML;
+         syncBtn.disabled = true;
+         syncBtn.classList.add('opacity-50', 'cursor-not-allowed');
+         syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
 
-        window.updateReviewItem = function (index, field, value) {
-            reviewData[index][field] = value;
-            // No need to re-render everything on every keystroke for text inputs
-            if (field === 'category') renderReviewTable();
-        };
+         try {
+             const response = await fetch('/admin/reports/save', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify({ 
+                    entries: reviewData, 
+                    filename: currentFilename,
+                    entryType: currentEntryType 
+                 })
+             });
+             const result = await response.json();
 
-        window.editReviewRow = function (index) {
-            // Replaced by inline spreadsheet editing
-        };
-
-        window.deleteReviewRow = function (index) {
-            reviewData.splice(index, 1);
-            renderReviewTable();
-        };
-
-        window.addNewReviewRow = function () {
-            reviewData.push({
-                barangay: VALID_BARANGAYS[0],
-                date_committed: new Date().toISOString().split('T')[0],
-                offense: '',
-                category: 'Non-Index',
-                description: ''
-            });
-            renderReviewTable();
-
-            // Scroll to bottom
-            const tbody = document.getElementById('reviewTableBody');
-            const container = tbody.closest('.overflow-auto');
-            if (container) container.scrollTop = container.scrollHeight;
-        };
-
-        window.closeIntelReview = function () {
-            document.getElementById('intelReviewModal').classList.add('hidden');
-        };
-
-        window.confirmIntelReview = async function () {
-            const syncBtn = document.querySelector('button[onclick="confirmIntelReview()"]');
-            if (syncBtn.disabled) return;
-
-            const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
-                title: "Tactical Confirmation",
-                message: `Commit ${reviewData.length} records to the CPICRS Central Database?`,
-                confirmText: "Sync Now",
-                type: "info"
-            });
-            if (!confirmed) return;
-
-            const originalContent = syncBtn.innerHTML;
-            syncBtn.disabled = true;
-            syncBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
-
-            try {
-                const response = await fetch('/admin/reports/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        entries: reviewData,
-                        filename: currentFilename,
-                        entryType: currentEntryType
-                    })
-                });
-                const result = await response.json();
-
-                if (result.success) {
+             if (result.success) {
                     await window.strategicAlert({
                         title: "Sync Successful",
                         message: `Archive Updated: ${result.count} tactical records committed.`,
                         type: "success"
                     });
                     location.reload();
-                } else {
-                    throw new Error(result.message || "Disk Sync Failed");
-                }
-            } catch (error) {
-                window.strategicAlert({
-                    title: "Synchronization Error",
-                    message: error.message,
-                    type: "danger"
-                });
-                syncBtn.disabled = false;
-                syncBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                syncBtn.innerHTML = originalContent;
-            }
-        };
+             } else {
+                 throw new Error(result.message || "Disk Sync Failed");
+             }
+         } catch (error) { 
+             window.strategicAlert({
+                 title: "Synchronization Error",
+                 message: error.message,
+                 type: "danger"
+             });
+             syncBtn.disabled = false;
+             syncBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+             syncBtn.innerHTML = originalContent;
+         }
+     };
 
-        function renderReportsTable() {
-            const tbody = document.querySelector('tbody.divide-y');
-            if (!tbody) return;
-
-            if (reports.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-20 text-center"><i class="fas fa-search text-gray-200 text-4xl mb-4 block"></i><span class="text-sm text-gray-400 font-bold uppercase tracking-widest">No intelligence scans captured yet</span></td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = reports.map((report, index) => `
+     function renderReportsTable() {
+         const tbody = document.querySelector('tbody.divide-y');
+         if (!tbody) return;
+ 
+         if (reports.length === 0) {
+             tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-20 text-center"><i class="fas fa-search text-gray-200 text-4xl mb-4 block"></i><span class="text-sm text-gray-400 font-bold uppercase tracking-widest">No intelligence scans captured yet</span></td></tr>`;
+             return;
+         }
+ 
+         tbody.innerHTML = reports.map((report, index) => `
              <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors group animate-fade-in-up" style="animation-delay: ${index * 30}ms">
                  <td class="px-8 py-6">
                      <div class="flex flex-col">
@@ -752,103 +595,131 @@
                  </td>
              </tr>
          `).join('');
-        }
+     }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            animateStats();
+     document.addEventListener('DOMContentLoaded', () => {
+         animateStats();
+     });
+
+     function animateStats() {
+         document.querySelectorAll('.count-up').forEach(el => {
+             const target = parseInt(el.dataset.target || el.textContent || '0');
+             let count = 0;
+             const duration = 1500;
+             const startTime = performance.now();
+             
+             const updateCount = (currentTime) => {
+                 const elapsed = currentTime - startTime;
+                 const progress = Math.min(elapsed / duration, 1);
+                 // Easing function: outQuad
+                 const easedProgress = progress * (2 - progress);
+                 const currentCount = Math.floor(easedProgress * target);
+                 el.textContent = currentCount;
+                 
+                 if (progress < 1) {
+                     requestAnimationFrame(updateCount);
+                 } else {
+                     el.textContent = target;
+                 }
+             };
+             requestAnimationFrame(updateCount);
+         });
+     }
+
+    function updateDashboardStats() {
+         // Sum up from the live reports list
+         let total8FocusAll = reports.reduce((sum, r) => sum + ((r.category_stats?.['8-Focus']) || 0), 0);
+         let totalPSIAll = reports.reduce((sum, r) => sum + ((r.category_stats?.['PSI']) || 0), 0);
+         let totalNonIndexAll = reports.reduce((sum, r) => sum + ((r.category_stats?.['Non-Index']) || 0), 0);
+ 
+         const el8 = document.querySelector('[data-stat="8-Focus"]');
+         const elPSI = document.querySelector('[data-stat="PSI"]');
+         const elNon = document.querySelector('[data-stat="Non-Index"]');
+
+         if (el8) { el8.dataset.target = total8FocusAll; el8.textContent = total8FocusAll; }
+         if (elPSI) { elPSI.dataset.target = totalPSIAll; elPSI.textContent = totalPSIAll; }
+         if (elNon) { elNon.dataset.target = totalNonIndexAll; elNon.textContent = totalNonIndexAll; }
+
+         animateStats();
+     }
+
+     window.purgeTacticalData = async function() {
+        const btn = document.querySelector('span[onclick*="purgeTacticalData"]');
+        if (btn && btn.dataset.isPurging === 'true') return;
+
+        const confirmed = await (window.strategicConfirm || (async () => confirm("This will purge all system placeholders and test intelligence batches. Dashboard counts will be reset. Proceed?")))({
+            title: "Tactical Data Purge",
+            message: "This will purge all system placeholders and test intelligence batches. Dashboard counts will be reset. Proceed?",
+            confirmText: "Execute Purge",
+            type: "danger"
+        });
+        if (!confirmed) return;
+
+        if (btn) btn.dataset.isPurging = 'true';
+
+        try {
+            const res = await fetch('/admin/map/purge-placeholders', { method: 'POST' });
+            const result = await res.json();
+            if (result.success) {
+                await window.strategicAlert({
+                    title: "Purge Executed",
+                    message: `${result.count} pins and ${result.reportsPurged} records have been identified and neutralized.`,
+                    type: "info"
+                });
+                location.reload();
+            }
+        } catch (error) {
+            window.strategicAlert({
+                title: "Command Failure",
+                message: "Intelligence link lost. Purge sequence interrupted.",
+                type: "danger"
+            });
+            if (btn) btn.dataset.isPurging = 'false';
+        }
+     }
+
+    window.confirmDeleteReport = async function(event, reportId) {
+        if (event) event.preventDefault();
+        
+        const btn = document.querySelector(`#deleteReportForm_${reportId} button`);
+        if (btn && btn.disabled) return false;
+
+        const confirmed = await window.strategicConfirm({
+            title: "Purge Confirmation",
+            message: "Secure Warning: Purging this intelligence record is irreversible. Are you sure you want to proceed?",
+            confirmText: "Delete Permanently",
+            type: "danger"
         });
 
-        function animateStats() {
-            document.querySelectorAll('.count-up').forEach(el => {
-                const target = parseInt(el.dataset.target || el.textContent || '0');
-                let count = 0;
-                const duration = 1500;
-                const startTime = performance.now();
-
-                const updateCount = (currentTime) => {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    // Easing function: outQuad
-                    const easedProgress = progress * (2 - progress);
-                    const currentCount = Math.floor(easedProgress * target);
-                    el.textContent = currentCount;
-
-                    if (progress < 1) {
-                        requestAnimationFrame(updateCount);
-                    } else {
-                        el.textContent = target;
-                    }
-                };
-                requestAnimationFrame(updateCount);
-            });
-        }
-
-        function updateDashboardStats() {
-            // Sum up from the live reports list
-            let total8FocusAll = reports.reduce((sum, r) => sum + ((r.category_stats?.['8-Focus']) || 0), 0);
-            let totalPSIAll = reports.reduce((sum, r) => sum + ((r.category_stats?.['PSI']) || 0), 0);
-            let totalNonIndexAll = reports.reduce((sum, r) => sum + ((r.category_stats?.['Non-Index']) || 0), 0);
-
-            const el8 = document.querySelector('[data-stat="8-Focus"]');
-            const elPSI = document.querySelector('[data-stat="PSI"]');
-            const elNon = document.querySelector('[data-stat="Non-Index"]');
-
-            if (el8) { el8.dataset.target = total8FocusAll; el8.textContent = total8FocusAll; }
-            if (elPSI) { elPSI.dataset.target = totalPSIAll; elPSI.textContent = totalPSIAll; }
-            if (elNon) { elNon.dataset.target = totalNonIndexAll; elNon.textContent = totalNonIndexAll; }
-
-            animateStats();
-        }
-
-        window.purgeTacticalData = async function () {
-            const btn = document.querySelector('span[onclick*="purgeTacticalData"]');
-            if (btn && btn.dataset.isPurging === 'true') return;
-
-            const confirmed = await (window.strategicConfirm || (async () => confirm("This will purge all system placeholders and test intelligence batches. Dashboard counts will be reset. Proceed?")))({
-                title: "Tactical Data Purge",
-                message: "This will purge all system placeholders and test intelligence batches. Dashboard counts will be reset. Proceed?",
-                confirmText: "Execute Purge",
-                type: "danger"
-            });
-            if (!confirmed) return;
-
-            if (btn) btn.dataset.isPurging = 'true';
-
-            try {
-                const res = await fetch('/admin/map/purge-placeholders', { method: 'POST' });
-                const result = await res.json();
-                if (result.success) {
-                    await window.strategicAlert({
-                        title: "Purge Executed",
-                        message: `${result.count} pins and ${result.reportsPurged} records have been identified and neutralized.`,
-                        type: "info"
-                    });
-                    location.reload();
-                }
-            } catch (error) {
-                window.strategicAlert({
-                    title: "Command Failure",
-                    message: "Intelligence link lost. Purge sequence interrupted.",
-                    type: "danger"
-                });
-                if (btn) btn.dataset.isPurging = 'false';
+        if (confirmed) {
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             }
+            const form = document.getElementById(`deleteReportForm_${reportId}`);
+            if (form) form.submit();
         }
+        return false;
+    }
+</script>
 
-        window.confirmDeleteReport = async function (event, reportId) {
-            if (event) event.preventDefault();
+<script>
+    window.reports = <%- JSON.stringify(displayReports) %>;
+    const allIncidents = <%- JSON.stringify(displayIncidents) %>;
 
-            const btn = document.querySelector(`#deleteReportForm_${reportId} button`);
-            if (btn && btn.disabled) return false;
+    window.filterDataset = function(category) {
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.remove('bg-pnp-blue', 'text-white', 'shadow-lg');
+            tab.classList.add('text-gray-400', 'hover:text-pnp-blue');
+        });
+        const activeTab = document.getElementById(`tab-${category}`);
+        if (activeTab) activeTab.classList.add('bg-pnp-blue', 'text-white', 'shadow-lg');
 
-            const confirmed = await window.strategicConfirm({
-                title: "Purge Confirmation",
-                message: "Secure Warning: Purging this intelligence record is irreversible. Are you sure you want to proceed?",
-                confirmText: "Delete Permanently",
-                type: "danger"
-            });
+        document.querySelectorAll('.incident-row').forEach(row => {
+            row.style.display = (category === 'all' || row.dataset.category === category) ? '' : 'none';
+        });
+    }
 
-<<<<<<< HEAD
     function openStatsSpreadsheet(category) {
         window.isGlobalStats = true;
         window.currentStatsCategory = category;
@@ -989,60 +860,8 @@
             month: 'short', day: 'numeric', year: 'numeric', 
             hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
-=======
-            if (confirmed) {
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                }
-                const form = document.getElementById(`deleteReportForm_${reportId}`);
-                if (form) form.submit();
-            }
-            return false;
-        }
-    </script>
 
-    <script>
-        window.reports = <% - JSON.stringify(displayReports) %>;
-        const allIncidents = <% - JSON.stringify(displayIncidents) %>;
->>>>>>> 19443849b7cca3a3129e011b0e24392690114265
-
-        window.filterDataset = function (category) {
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.classList.remove('bg-pnp-blue', 'text-white', 'shadow-lg');
-                tab.classList.add('text-gray-400', 'hover:text-pnp-blue');
-            });
-            const activeTab = document.getElementById(`tab-${category}`);
-            if (activeTab) activeTab.classList.add('bg-pnp-blue', 'text-white', 'shadow-lg');
-
-            document.querySelectorAll('.incident-row').forEach(row => {
-                row.style.display = (category === 'all' || row.dataset.category === category) ? '' : 'none';
-            });
-        }
-
-        function viewReportDetails(reportId) {
-            const report = reports.find(r => r.id === reportId);
-            if (!report) return;
-
-            document.getElementById('reportDetailsTitle').textContent = 'Recorded Crime | Incident';
-
-            window.currentViewingReport = report;
-            renderReportDetailsModalContent('All');
-        }
-
-        function renderReportDetailsModalContent(filter) {
-            const report = window.currentViewingReport;
-            const rawData = report.raw_data || [];
-            const filteredData = filter === 'All' ? rawData : rawData.filter(item => item.category === filter);
-
-            const content = document.getElementById('reportDetailsContent');
-            const batchId = `#${report.id.slice(-8).toUpperCase()}`;
-            const timestamp = new Date(report.timestamp).toLocaleString(undefined, {
-                month: 'short', day: 'numeric', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-            });
-
-            content.innerHTML = `
+        content.innerHTML = `
             <!-- Enhanced Batch Info Header -->
             <div class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="space-y-2">
@@ -1088,7 +907,7 @@
             <!-- Table Container -->
             <div class="p-8">
                 <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-800 shadow-xl overflow-hidden">
-                    <table class="w-full text-left border-collapse table-fixed min-w-[800px]">
+                    <table class="w-full text-left border-collapse table-fixed">
                         <thead class="sticky top-0 z-10">
                             <tr class="bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
                                 <th class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-16 text-center bg-gray-50 dark:bg-slate-900">#</th>
@@ -1109,9 +928,9 @@
                                     </td>
                                 </tr>
                             ` : filteredData.map((item, idx) => {
-                const cat = item.category || 'Non-Index';
-                const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (cat === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20');
-                return `
+                                const cat = item.category || 'Non-Index';
+                                const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (cat === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20');
+                                return `
                                     <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 transition-colors group animate-fade-in-up" style="animation-delay: ${idx * 15}ms">
                                         <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-50 dark:border-slate-800 text-center tabular-nums">${idx + 1}</td>
                                         <td class="px-8 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono border-r border-gray-50 dark:border-slate-800 tracking-tighter">${item.date || item.date_committed || 'N/A'}</td>
@@ -1126,137 +945,95 @@
                                         </td>
                                     </tr>
                                 `;
-            }).join('')}
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
             </div>
         `;
 
-            const modal = document.getElementById('reportDetailsModal');
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
+        const modal = document.getElementById('reportDetailsModal');
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
+    }
 
-        function closeReportDetails() {
-            document.getElementById('reportDetailsModal').classList.add('hidden');
-        }
-    </script>
+    function closeReportDetails() {
+        document.getElementById('reportDetailsModal').classList.add('hidden');
+    }
+</script>
 
-    <!-- Fullscreen Neural Grid Scanner Overlay (Moved for maximum coverage) -->
-    <div id="intelLoadingOverlay"
-        class="hidden fixed inset-0 w-screen h-screen bg-slate-950/98 backdrop-blur-3xl z-[99999] flex flex-col items-center justify-center overflow-hidden">
-        <!-- Passive Background Grid -->
-        <div class="absolute inset-0 opacity-[0.05] pointer-events-none"
-            style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 30px 30px;">
-        </div>
-
-        <div class="relative flex flex-col items-center justify-center scale-110">
-            <!-- Single Dominant Circling Core -->
-            <div class="relative w-72 h-72 flex items-center justify-center">
-                <!-- Outer Spinning Guard -->
-                <div class="absolute inset-0 border-2 border-white/[0.03] rounded-full"></div>
-
-                <!-- Circular Scanning Ring (Circling only on the middle) -->
-                <div
-                    class="absolute inset-6 border-t-2 border-pnp-gold rounded-full animate-spin-tactical shadow-[0_0_40px_rgba(255,184,0,0.3)]">
+<!-- Fullscreen Neural Grid Scanner Overlay (Moved for maximum coverage) -->
+<div id="intelLoadingOverlay" class="hidden fixed inset-0 w-screen h-screen bg-slate-950/98 backdrop-blur-3xl z-[99999] flex flex-col items-center justify-center overflow-hidden">
+    <!-- Passive Background Grid -->
+    <div class="absolute inset-0 opacity-[0.05] pointer-events-none" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 30px 30px;"></div>
+    
+    <div class="relative flex flex-col items-center justify-center scale-110">
+        <!-- Single Dominant Circling Core -->
+        <div class="relative w-72 h-72 flex items-center justify-center">
+            <!-- Outer Spinning Guard -->
+            <div class="absolute inset-0 border-2 border-white/[0.03] rounded-full"></div>
+            
+            <!-- Circular Scanning Ring (Circling only on the middle) -->
+            <div class="absolute inset-6 border-t-2 border-pnp-gold rounded-full animate-spin-tactical shadow-[0_0_40px_rgba(255,184,0,0.3)]"></div>
+            
+            <!-- Central Icon Hub -->
+            <div class="w-36 h-36 bg-slate-900 rounded-full border border-pnp-gold/30 flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.5)] z-10">
+                <div class="relative">
+                    <i class="fas fa-radar text-pnp-gold text-5xl animate-radar-ping"></i>
                 </div>
-
-                <!-- Central Icon Hub -->
-                <div
-                    class="w-36 h-36 bg-slate-900 rounded-full border border-pnp-gold/30 flex items-center justify-center shadow-[0_0_60px_rgba(0,0,0,0.5)] z-10">
-                    <div class="relative">
-                        <i class="fas fa-radar text-pnp-gold text-5xl animate-radar-ping"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dynamic Intelligence Text -->
-            <div class="mt-20 text-center">
-                <h4
-                    class="text-3xl font-black text-pnp-gold uppercase tracking-[0.8em] flex items-center justify-center pl-[0.8em]">
-                    <span>Scanning</span>
-                    <span class="loading-dots-tactical text-left w-16"></span>
-                </h4>
-                <div class="h-px w-64 bg-gradient-to-r from-transparent via-pnp-gold/20 to-transparent mx-auto mt-6">
-                </div>
-                <p id="intelLoadingText"
-                    class="mt-6 text-[10px] text-white/30 uppercase font-black tracking-[0.4em] animate-pulse max-w-xs leading-relaxed italic mx-auto">
-                    Analyzing tactical datasets...
-                </p>
             </div>
         </div>
 
-        <style>
-            @keyframes radar-ping {
-                0% {
-                    transform: scale(0.85);
-                    opacity: 0.5;
-                }
-
-                50% {
-                    transform: scale(1.1);
-                    opacity: 1;
-                }
-
-                100% {
-                    transform: scale(0.85);
-                    opacity: 0.5;
-                }
-            }
-
-            @keyframes spin-tactical {
-                from {
-                    transform: rotate(0deg);
-                }
-
-                to {
-                    transform: rotate(360deg);
-                }
-            }
-
-            @keyframes dots-tactical {
-                0% {
-                    content: '';
-                }
-
-                25% {
-                    content: '.';
-                }
-
-                50% {
-                    content: '..';
-                }
-
-                75% {
-                    content: '...';
-                }
-            }
-
-            .animate-radar-ping {
-                animation: radar-ping 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            }
-
-            .animate-spin-tactical {
-                animation: spin-tactical 1.2s linear infinite;
-            }
-
-            .loading-dots-tactical::after {
-                content: '';
-                animation: dots-tactical 2s steps(4, end) infinite;
-            }
-
-            /* Absolute Override for Full Coverage */
-            #intelLoadingOverlay {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100vw !important;
-                height: 100vh !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-        </style>
+        <!-- Dynamic Intelligence Text -->
+        <div class="mt-20 text-center">
+            <h4 class="text-3xl font-black text-pnp-gold uppercase tracking-[0.8em] flex items-center justify-center pl-[0.8em]">
+                <span>Scanning</span>
+                <span class="loading-dots-tactical text-left w-16"></span>
+            </h4>
+            <div class="h-px w-64 bg-gradient-to-r from-transparent via-pnp-gold/20 to-transparent mx-auto mt-6"></div>
+            <p id="intelLoadingText" class="mt-6 text-[10px] text-white/30 uppercase font-black tracking-[0.4em] animate-pulse max-w-xs leading-relaxed italic mx-auto">
+                Analyzing tactical datasets...
+            </p>
+        </div>
     </div>
+
+    <style>
+        @keyframes radar-ping {
+            0% { transform: scale(0.85); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.85); opacity: 0.5; }
+        }
+        @keyframes spin-tactical {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes dots-tactical {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+        .animate-radar-ping {
+            animation: radar-ping 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .animate-spin-tactical {
+            animation: spin-tactical 1.2s linear infinite;
+        }
+        .loading-dots-tactical::after {
+            content: '';
+            animation: dots-tactical 2s steps(4, end) infinite;
+        }
+        /* Absolute Override for Full Coverage */
+        #intelLoadingOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    </style>
+</div>
