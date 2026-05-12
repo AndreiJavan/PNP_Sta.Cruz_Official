@@ -112,7 +112,7 @@
     let map;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
-    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangays/medres/barangays-municity-ph043426000.0.01.json';
+    const barangayGeoJsonUrl = '/data/barangays.json';
 
     const colors = {
         'Theft': '#dc2626',
@@ -525,8 +525,8 @@
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
             loadMapPoints();
-            addManualPins();
-            loadMunicipalBoundary();
+            // addManualPins(); // Manually placed pins hidden as requested
+            // loadMunicipalBoundary(); // Removed municipal border as requested
 
             // Track mouse movement for live coordinates
             /* 
@@ -595,6 +595,29 @@
                                     opacity: 1,
                                     fillOpacity: 1
                                 }).addTo(map);
+
+                                marker.on('click', () => {
+                                    // Enable interaction when a marker is clicked
+                                    map.dragging.enable();
+                                    map.touchZoom.enable();
+                                    map.doubleClickZoom.enable();
+                                    map.scrollWheelZoom.enable();
+                                    map.boxZoom.enable();
+                                    map.keyboard.enable();
+
+                                    const barangaySelect = document.getElementById('filterBarangay');
+                                    if (barangaySelect) {
+                                        barangaySelect.value = name;
+                                        // Trigger loadMapPoints to update sidebar stats, but don't re-locate
+                                        loadMapPoints(false);
+
+                                        // Ensure sidebar is visible to show the stats
+                                        const sidebar = document.getElementById('filterSidebar');
+                                        if (sidebar && sidebar.classList.contains('sidebar-hidden')) {
+                                            toggleSidebar();
+                                        }
+                                    }
+                                });
 
                                 marker.bindPopup(`
                                     <div class="p-2 min-w-[150px]">

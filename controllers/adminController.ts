@@ -18,7 +18,7 @@ const VALID_BARANGAYS = [
 // Audit Strategy
 async function logAction(req: Request, action: string, details: string) {
   try {
-    const adminId = req.session?.user?.id || 'system';
+    const adminId = req.session?.user?.id || null;    // null avoids UUID FK violation when no session
     const adminUsername = req.session?.user?.username || 'system';
     const ip = req.ip || '0.0.0.0';
 
