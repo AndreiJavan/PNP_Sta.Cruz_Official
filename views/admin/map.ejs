@@ -47,7 +47,7 @@ const colors = {
                 <div id="content-records" class="space-y-6">
                     <!-- Barangay Selector -->
                     <div class="space-y-2">
-                        <label for="sectorSelector" class="text-[11px] text-gray-400 dark:text-gray-300 uppercase tracking-widest font-black block">Monitor Sector (Barangay)</label>
+                        <label for="sectorSelector" class="text-[9px] text-gray-400 uppercase tracking-widest font-black block">Monitor Sector (Barangay)</label>
                         <div class="relative">
                             <i class="fas fa-map-marker-alt absolute left-3 top-1/2 -translate-y-1/2 text-pnp-blue dark:text-pnp-gold text-[10px]"></i>
                             <select id="sectorSelector" onchange="monitorSector(this.value)" class="w-full pl-9 pr-4 py-3 bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-black dark:text-white appearance-none uppercase tracking-widest">
@@ -62,8 +62,8 @@ const colors = {
                     <!-- Incident List Container -->
                     <div id="sectorIncidentContainer" class="space-y-3">
                         <div class="flex items-center justify-between px-1">
-                            <span class="text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em]">Regional Intel</span>
-                            <span id="incidentCount" class="text-[11px] font-black text-slate-400 uppercase tracking-widest">0 Records</span>
+                            <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em]">Regional Intel</span>
+                            <span id="incidentCount" class="text-[9px] font-black text-slate-400 uppercase">0 Records</span>
                         </div>
                         
                         <div id="incidentList" class="space-y-2 max-h-[400px] overflow-y-auto pr-1 custom-scrollbar">
@@ -76,7 +76,7 @@ const colors = {
 
                     <!-- Action Button -->
                     <div class="pt-4 border-t border-gray-50 dark:border-slate-800">
-                        <a href="/admin/reports" class="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-pnp-blue hover:text-white text-pnp-blue dark:text-pnp-gold rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 border border-gray-200 dark:border-slate-700 shadow-sm">
+                        <a href="/admin/reports" class="w-full py-4 bg-slate-100 dark:bg-slate-800 hover:bg-pnp-blue hover:text-white text-pnp-blue dark:text-pnp-gold rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 border border-gray-200 dark:border-slate-700 shadow-sm">
                             <i class="fas fa-file-invoice"></i>
                             <span>Manual Entry</span>
                         </a>
@@ -87,19 +87,19 @@ const colors = {
                 <div id="content-legend" class="hidden space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                     <!-- Legend Image -->
                     <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-[2rem] border border-gray-100 dark:border-slate-700 shadow-inner">
-                        <h3 class="text-[12px] font-black text-gray-400 dark:text-gray-300 uppercase tracking-widest block mb-4 px-2">Authoritative Legend</h3>
+                        <h3 class="text-[9px] text-gray-400 uppercase tracking-widest font-black block mb-4 px-2">Authoritative Legend</h3>
                         <img src="/images/legend.jpg" alt="Crime Legend" class="w-full h-auto rounded-2xl shadow-2xl">
                     </div>
 
                     <!-- Sector Statistics Table -->
                     <div class="space-y-3">
-                        <h3 class="text-[12px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest block px-1">Highly Usual Crime per Sector</h3>
+                        <h3 class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest block px-1">Highly Usual Crime per Sector</h3>
                         <div class="overflow-hidden rounded-[2rem] border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50">
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-gray-100 dark:bg-slate-800">
                                     <tr>
-                                        <th class="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">Sector (Barangay)</th>
-                                        <th class="px-6 py-4 text-[11px] font-black text-slate-500 uppercase tracking-widest">Highest Frequency</th>
+                                        <th class="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Sector (Barangay)</th>
+                                        <th class="px-6 py-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">Highest Frequency</th>
                                     </tr>
                                 </thead>
                                 <tbody id="sectorStatsTable" class="text-[10px] font-bold dark:text-white">
@@ -113,7 +113,7 @@ const colors = {
         </div>
 
         <!-- 2. Interactive Map (Right) -->
-        <div id="mapWrapper" class="lg:w-1/2 h-64 lg:h-full relative group rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50 transition-all duration-500">
+        <div id="mapWrapper" class="lg:w-1/2 h-64 lg:h-full relative group rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 transition-all duration-500">
             <div id="leafletMap" class="w-full h-full z-0 cursor-pointer"></div>
             
             <!-- Map Overlay Controls -->
@@ -146,13 +146,13 @@ const colors = {
     let barangayLayer; // Direct reference for thematic updates
     let boundaryLayer;
     let glowLayer;
+    let activeTacticalTab = 'records'; // Track active tab for interaction logic
 
     // Use correct PSGC for Santa Cruz Laguna: 043426000
     const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangays/medres/barangays-municity-ph043426000.0.01.json';
     const colors = <%- JSON.stringify(colors) %>;
     // Fix: Using EJS to stringify the points data for client-side use
     const pointsData = <%- JSON.stringify(safePoints) %>;
-    let activeTab = 'records'; // Global state for map interactions
 
 const normalizeCrimeName = (type) => {
         if (!type) return 'Other';
@@ -165,7 +165,7 @@ const normalizeCrimeName = (type) => {
 
     // Tab Switching Logic
     window.switchTab = function(tab) {
-        activeTab = tab; // Update state
+        activeTacticalTab = tab; // Update state
         const records = document.getElementById('content-records');
         const legend = document.getElementById('content-legend');
         const tabRecords = document.getElementById('tab-records');
@@ -346,12 +346,12 @@ const normalizeCrimeName = (type) => {
                 <div class="p-4 bg-gray-50 dark:bg-slate-800/50 rounded-2xl border-l-4 ${stripeColor} hover:bg-white dark:hover:bg-slate-700 transition-all cursor-pointer group shadow-sm flex justify-between items-center">
                     <div onclick="focusPoint('${item.barangay}', '${item.incident_type}')" class="flex-grow">
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-[12px] font-black text-slate-800 dark:text-white uppercase leading-tight group-hover:text-pnp-blue transition">${item.incident_type}</span>
-                            <span class="text-[10px] font-bold text-slate-400 uppercase tabular-nums">${new Date(item.incident_date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
+                            <span class="text-[10px] font-black text-slate-800 dark:text-white uppercase leading-tight group-hover:text-pnp-blue transition">${item.incident_type}</span>
+                            <span class="text-[8px] font-bold text-slate-400 uppercase tabular-nums">${new Date(item.incident_date).toLocaleDateString(undefined, {month:'short', day:'numeric'})}</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest ${badgeClass}">${cat}</span>
-                            <span class="text-[10px] font-black text-slate-400 uppercase">Brgy. ${item.barangay}</span>
+                            <span class="px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest ${badgeClass}">${cat}</span>
+                            <span class="text-[8px] font-black text-slate-400 uppercase">Brgy. ${item.barangay}</span>
                         </div>
                     </div>
                     <button onclick="deletePoint('${item.id}', event)" class="ml-3 w-8 h-8 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -425,11 +425,11 @@ const normalizeCrimeName = (type) => {
 
             return `
                 <tr class="border-b border-gray-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition">
-                    <td class="px-4 py-2 uppercase text-[10px] font-black">${brgy}</td>
+                    <td class="px-4 py-2 uppercase text-[7px] font-black">${brgy}</td>
                     <td class="px-4 py-2">
                         <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 rounded-full shadow-sm" style="background-color: ${color}"></div>
-                            <span class="uppercase text-[10px] font-black tracking-tighter">${crimeType}</span>
+                            <div class="w-2 h-2 rounded-full" style="background-color: ${color}"></div>
+                            <span class="uppercase text-[7px] font-black tracking-tighter">${crimeType}</span>
                         </div>
                     </td>
                 </tr>
@@ -455,7 +455,28 @@ const normalizeCrimeName = (type) => {
                     if (boundaryLayer) boundaryLayer.setStyle({ weight: baseWeight });
                 };
 
-                // Boundary layers removed by user request
+                glowLayer = L.geoJSON(boundary.geojson, {
+                    style: {
+                        color: "#000000",
+                        weight: 25,
+                        opacity: 0.2,
+                        fillColor: "transparent",
+                        interactive: false
+                    }
+                }).addTo(map);
+
+                boundaryLayer = L.geoJSON(boundary.geojson, {
+                    style: {
+                        color: "#000000",
+                        weight: 12,
+                        opacity: 0.9,
+                        fillColor: "rgba(0,0,0,0.05)",
+                        fillOpacity: 0.1,
+                        interactive: false
+                    }
+                }).addTo(map);
+
+                map.on('zoomend', updateStyles);
                 updateStyles();
             }
         } catch (err) {
@@ -524,11 +545,11 @@ const normalizeCrimeName = (type) => {
             }).addTo(incidentLayer).bindPopup(`
                 <div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest" style="background-color: ${colors[normalizedType] || '#ccc'}">${normalizedType}</span>
-                        <span class="text-[9px] text-white/40 font-bold">${new Date(point.incident_date).toLocaleDateString()}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[7px] font-black uppercase tracking-widest" style="background-color: ${colors[normalizedType] || '#ccc'}">${normalizedType}</span>
+                        <span class="text-[7px] text-white/40 font-bold">${new Date(point.incident_date).toLocaleDateString()}</span>
                     </div>
-                    <h3 class="text-[12px] font-black uppercase tracking-tighter mb-1">Brgy. ${point.barangay}</h3>
-                    <p class="text-[10px] text-white/60 leading-tight">${point.description || 'No additional intelligence'}</p>
+                    <h3 class="text-[10px] font-black uppercase tracking-tighter mb-1">Brgy. ${point.barangay}</h3>
+                    <p class="text-[8px] text-white/60 leading-tight">${point.description || 'No additional intelligence'}</p>
                 </div>
             `, { className: 'intelligence-popup' });
             
@@ -603,6 +624,7 @@ const normalizeCrimeName = (type) => {
         pinLayer.addTo(map);
         incidentLayer.addTo(map);
         boundaryLinesLayer.addTo(map);
+        addManualPins();
         addIncidentPins();
         loadMunicipalBoundary();
 
@@ -635,102 +657,51 @@ const normalizeCrimeName = (type) => {
                         l.on({
                             mouseover: (e) => {
                                 const layer = e.target;
-                                // In both modes, provide a visual focus on hover
-                                layer.setStyle({ 
-                                    weight: activeTab === 'records' ? 4 : 6, 
-                                    fillOpacity: activeTab === 'records' ? 0.2 : 0.7,
-                                    color: '#FFFFFF', 
-                                    dashArray: ''
-                                });
+                                if (activeTacticalTab === 'legend') {
+                                    layer.setStyle({ 
+                                        weight: 6, 
+                                        fillOpacity: 0.8,
+                                        color: '#FFFFFF', 
+                                        dashArray: ''
+                                    });
+                                } else {
+                                    // Subtle border highlight for Live Grid mode
+                                    layer.setStyle({ 
+                                        weight: 4, 
+                                        color: '#FFFFFF',
+                                        fillOpacity: 0.1
+                                    });
+                                }
                                 layer.bringToFront();
                             },
                             mouseout: (e) => {
                                 const layer = e.target;
-                                if (activeTab === 'records') {
-                                    // Reset to clear state for Live Grid
+                                if (activeTacticalTab === 'legend') {
+                                    const style = getThematicStyleForFeature(layer.feature);
+                                    layer.setStyle(style);
+                                } else {
+                                    // Return to clean Live Grid state
                                     layer.setStyle({ 
                                         fillOpacity: 0, 
                                         weight: 1, 
                                         color: '#C8A415',
                                         dashArray: ''
                                     });
-                                } else {
-                                    // Reset to thematic state for Intel Legend
-                                    const style = getThematicStyleForFeature(layer.feature);
-                                    layer.setStyle(style);
                                 }
                             }
                         });
 
-                                // Get accurate centroid for the pin placement
-                                const centroid = l.getBounds().getCenter();
-                                brgyName = normalizeBrgyName(f.properties.ADM4_EN);
-                                
-                                // Update manualPins dynamic reference for search/locate
-                                const pinIndex = manualPins.findIndex(p => p.name === brgyName);
-                                if (pinIndex !== -1) {
-                                    manualPins[pinIndex].lat = centroid.lat;
-                                    manualPins[pinIndex].lng = centroid.lng;
-                                }
-
-                                // Add the decorative circle marker
-                                const circle = L.circleMarker(centroid, {
-                                    radius: 6,
-                                    fillColor: '#C8A415',
-                                    color: '#1A3A5C',
-                                    weight: 2,
-                                    opacity: 0.8,
-                                    fillOpacity: 1
-                                }).addTo(map);
-
-                                // Add the Tactical Tower Pin exactly on top of the circle
-                                const towerMarker = L.marker(centroid, {
-                                    icon: L.divIcon({
-                                        className: 'manual-pin-container',
-                                        html: `
-                                            <div class="relative group flex flex-col items-center">
-                                                <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
-                                                <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
-                                                    <i class="fas fa-tower-observation text-white dark:text-pnp-blue text-xs"></i>
-                                                </div>
-                                                <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
-                                            </div>
-                                        `,
-                                        iconSize: [40, 48],
-                                        iconAnchor: [20, 48]
-                                    })
-                                }).addTo(pinLayer);
-
-                                // Shared Popup logic
-                                const popupContent = `<div class="p-4 min-w-[200px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
-                                                        <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-white/10">
-                                                            <div class="w-8 h-8 bg-pnp-gold rounded-lg flex items-center justify-center">
-                                                                <i class="fas fa-shield-halved text-pnp-blue text-xs"></i>
-                                                            </div>
-                                                            <div>
-                                                                <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px] leading-none">${brgyName} Sector</h3>
-                                                                <p class="text-[7px] text-white/50 font-bold uppercase mt-1">Intelligence Division</p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="space-y-2">
-                                                            <div class="flex justify-between items-center text-[8px] font-black uppercase text-white/70">
-                                                                <span>Incidents</span>
-                                                                <span class="text-pnp-gold">${crimeCounts[brgyName] || 0}</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>`;
-                                
-                                towerMarker.bindPopup(popupContent, { className: 'intelligence-popup' });
-                                circle.bindPopup(popupContent, { className: 'intelligence-popup' });
-
-                                towerMarker.on('click', () => {
-                                    map.flyTo(centroid, 16);
-                                });
-                            }
-                        }).addTo(boundaryLinesLayer);
-
-                        // Remove legacy manual pin call since we handle it dynamically now
-                        // addManualPins(); 
+                        l.bindPopup(`<div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
+                                        <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+                                            <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px]">Brgy. ${brgyName}</h3>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-[9px] font-black uppercase text-white/70">Incidents</span>
+                                            <span class="text-lg font-black text-pnp-gold">${crimeCounts[brgyName] || 0}</span>
+                                        </div>
+                                    </div>`, { className: 'intelligence-popup' });
+                    }
+                }).addTo(boundaryLinesLayer);
             })
             .catch(err => {
                 console.error("Geospatial Intelligence Acquisition Failure:", err);
