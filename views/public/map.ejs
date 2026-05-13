@@ -157,38 +157,8 @@
                     const baseWeight = zoom < 14 ? 10 : (zoom < 16 ? 18 : 30);
                     const glowWeight = baseWeight * 1.8;
 
-                    if (glowLayer) glowLayer.setStyle({ weight: glowWeight });
-                    if (boundaryLayer) boundaryLayer.setStyle({ weight: baseWeight });
+                    // Boundary layers removed by user request
                 };
-
-                // 1. Add an outer glow/shadow for contrast
-                glowLayer = L.geoJSON(boundary.geojson, {
-                    style: {
-                        color: "#000000",
-                        weight: 25,
-                        opacity: 0.25,
-                        fillColor: "transparent",
-                        interactive: false
-                    }
-                }).addTo(map);
-
-                // 2. The main prominent "Pitch Black" border
-                boundaryLayer = L.geoJSON(boundary.geojson, {
-                    style: {
-                        color: "#000000",
-                        weight: 12,
-                        opacity: 1,
-                        fillColor: "rgba(0, 0, 0, 0.05)",
-                        fillOpacity: 0.1,
-                        lineCap: 'round',
-                        lineJoin: 'round',
-                        interactive: false
-                    }
-                }).addTo(map);
-
-                // Update on zoom
-                map.on('zoomend', updateStyles);
-                updateStyles();
 
                 console.log("Municipal boundary successfully rendered (Responsive):", boundary.display_name);
             } else {
@@ -524,8 +494,9 @@
 
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
+            // Initial markers are now handled dynamically by GeoJSON load to ensure precision
+            // addManualPins();
             loadMapPoints();
-            addManualPins();
             loadMunicipalBoundary();
 
             // Track mouse movement for live coordinates
@@ -584,30 +555,73 @@
                                 }
                             });
 
-                            // Add marker for each barangay
+                            // Add marker for each barangay at true geographic center
                             try {
                                 const centroid = layer.getBounds().getCenter();
-                                const marker = L.circleMarker(centroid, {
+                                
+                                // Update dynamic reference for search/locate system
+                                const pinIndex = manualPins.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+                                if (pinIndex !== -1) {
+                                    manualPins[pinIndex].lat = centroid.lat;
+                                    manualPins[pinIndex].lng = centroid.lng;
+                                }
+
+                                // 1. Add the central circle indicator
+                                L.circleMarker(centroid, {
                                     radius: 6,
                                     fillColor: '#C8A415',
                                     color: '#1A3A5C',
                                     weight: 2,
                                     opacity: 1,
                                     fillOpacity: 1
-                                }).addTo(map);
-
-                                marker.bindPopup(`
-                                    <div class="p-2 min-w-[150px]">
-                                        <h3 class="text-pnp-blue font-black uppercase tracking-widest text-xs mb-1">Brgy. ${name}</h3>
-                                        <p class="text-[9px] text-gray-500 font-bold uppercase mb-2">Sta. Cruz, Laguna</p>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[8px] text-gray-400 font-bold uppercase">Status</span>
-                                            <span class="px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-[7px] font-black uppercase">Secure</span>
+                                }).addTo(map).bindPopup(`
+                                    <div class="p-4 min-w-[200px] bg-white dark:bg-slate-800 rounded-xl">
+                                        <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-gray-100 dark:border-slate-700">
+                                            <div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-shield-halved text-white dark:text-pnp-blue text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest text-xs leading-none">${name}</h3>
+                                                <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">Sta. Cruz, Laguna</p>
+                                            </div>
                                         </div>
                                     </div>
                                 `);
+
+                                // 2. Add the Tactical Pin precisely on top
+                                L.marker(centroid, {
+                                    icon: L.divIcon({
+                                        className: 'manual-pin-container',
+                                        html: `
+                                            <div class="relative group flex flex-col items-center">
+                                                <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
+                                                <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
+                                                    <i class="fas fa-location-dot text-white dark:text-pnp-blue text-lg"></i>
+                                                </div>
+                                                <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                                            </div>
+                                        `,
+                                        iconSize: [40, 48],
+                                        iconAnchor: [20, 48]
+                                    })
+                                }).addTo(map).on('click', () => {
+                                    map.flyTo(centroid, 16);
+                                }).bindPopup(`
+                                    <div class="p-4 min-w-[200px] bg-white dark:bg-slate-800 rounded-xl">
+                                        <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-gray-100 dark:border-slate-700">
+                                            <div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-shield-halved text-white dark:text-pnp-blue text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest text-xs leading-none">${name}</h3>
+                                                <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">S-SPS Sector Location</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `);
+
                             } catch (err) {
-                                console.error('Error adding marker for barangay:', name, err);
+                                console.error('Error adding accurate marker for barangay:', name, err);
                             }
                         }
                     }).addTo(map);

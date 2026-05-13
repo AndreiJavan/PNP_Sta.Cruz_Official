@@ -128,6 +128,8 @@
         </p>
     </div>
 
+    <%- include('../partials/notifications') %>
+
     <script>
         function updateIcon() {
             const icon = document.getElementById('themeIcon');
@@ -149,6 +151,15 @@
 
         // Initial icon state
         updateIcon();
+
+        // Trigger Cooldown Modal if Throttled
+        <% if (locals.isThrottled) { %>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.strategicCooldownAlert) {
+                    window.strategicCooldownAlert(<%= locals.cooldownSeconds || 900 %>);
+                }
+            });
+        <% } %>
     </script>
 </body>
 

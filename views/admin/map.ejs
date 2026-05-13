@@ -113,7 +113,7 @@ const colors = {
         </div>
 
         <!-- 2. Interactive Map (Right) -->
-        <div id="mapWrapper" class="lg:w-1/2 h-64 lg:h-full relative group rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 transition-all duration-500">
+        <div id="mapWrapper" class="lg:w-1/2 h-64 lg:h-full relative group rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50 transition-all duration-500">
             <div id="leafletMap" class="w-full h-full z-0 cursor-pointer"></div>
             
             <!-- Map Overlay Controls -->
@@ -455,28 +455,7 @@ const normalizeCrimeName = (type) => {
                     if (boundaryLayer) boundaryLayer.setStyle({ weight: baseWeight });
                 };
 
-                glowLayer = L.geoJSON(boundary.geojson, {
-                    style: {
-                        color: "#000000",
-                        weight: 25,
-                        opacity: 0.2,
-                        fillColor: "transparent",
-                        interactive: false
-                    }
-                }).addTo(map);
-
-                boundaryLayer = L.geoJSON(boundary.geojson, {
-                    style: {
-                        color: "#000000",
-                        weight: 12,
-                        opacity: 0.9,
-                        fillColor: "rgba(0,0,0,0.05)",
-                        fillOpacity: 0.1,
-                        interactive: false
-                    }
-                }).addTo(map);
-
-                map.on('zoomend', updateStyles);
+                // Boundary layers removed by user request
                 updateStyles();
             }
         } catch (err) {
@@ -624,7 +603,6 @@ const normalizeCrimeName = (type) => {
         pinLayer.addTo(map);
         incidentLayer.addTo(map);
         boundaryLinesLayer.addTo(map);
-        addManualPins();
         addIncidentPins();
         loadMunicipalBoundary();
 
@@ -684,17 +662,75 @@ const normalizeCrimeName = (type) => {
                             }
                         });
 
-                        l.bindPopup(`<div class="p-3 min-w-[180px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
-                                        <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
-                                            <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px]">Brgy. ${brgyName}</h3>
-                                        </div>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[9px] font-black uppercase text-white/70">Incidents</span>
-                                            <span class="text-lg font-black text-pnp-gold">${crimeCounts[brgyName] || 0}</span>
-                                        </div>
-                                    </div>`, { className: 'intelligence-popup' });
-                    }
-                }).addTo(boundaryLinesLayer);
+                                // Get accurate centroid for the pin placement
+                                const centroid = l.getBounds().getCenter();
+                                brgyName = normalizeBrgyName(f.properties.ADM4_EN);
+                                
+                                // Update manualPins dynamic reference for search/locate
+                                const pinIndex = manualPins.findIndex(p => p.name === brgyName);
+                                if (pinIndex !== -1) {
+                                    manualPins[pinIndex].lat = centroid.lat;
+                                    manualPins[pinIndex].lng = centroid.lng;
+                                }
+
+                                // Add the decorative circle marker
+                                const circle = L.circleMarker(centroid, {
+                                    radius: 6,
+                                    fillColor: '#C8A415',
+                                    color: '#1A3A5C',
+                                    weight: 2,
+                                    opacity: 0.8,
+                                    fillOpacity: 1
+                                }).addTo(map);
+
+                                // Add the Tactical Tower Pin exactly on top of the circle
+                                const towerMarker = L.marker(centroid, {
+                                    icon: L.divIcon({
+                                        className: 'manual-pin-container',
+                                        html: `
+                                            <div class="relative group flex flex-col items-center">
+                                                <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
+                                                <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
+                                                    <i class="fas fa-tower-observation text-white dark:text-pnp-blue text-xs"></i>
+                                                </div>
+                                                <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                                            </div>
+                                        `,
+                                        iconSize: [40, 48],
+                                        iconAnchor: [20, 48]
+                                    })
+                                }).addTo(pinLayer);
+
+                                // Shared Popup logic
+                                const popupContent = `<div class="p-4 min-w-[200px] bg-slate-900 text-white rounded-2xl shadow-2xl border border-white/10">
+                                                        <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-white/10">
+                                                            <div class="w-8 h-8 bg-pnp-gold rounded-lg flex items-center justify-center">
+                                                                <i class="fas fa-shield-halved text-pnp-blue text-xs"></i>
+                                                            </div>
+                                                            <div>
+                                                                <h3 class="text-pnp-gold font-black uppercase tracking-widest text-[10px] leading-none">${brgyName} Sector</h3>
+                                                                <p class="text-[7px] text-white/50 font-bold uppercase mt-1">Intelligence Division</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="space-y-2">
+                                                            <div class="flex justify-between items-center text-[8px] font-black uppercase text-white/70">
+                                                                <span>Incidents</span>
+                                                                <span class="text-pnp-gold">${crimeCounts[brgyName] || 0}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>`;
+                                
+                                towerMarker.bindPopup(popupContent, { className: 'intelligence-popup' });
+                                circle.bindPopup(popupContent, { className: 'intelligence-popup' });
+
+                                towerMarker.on('click', () => {
+                                    map.flyTo(centroid, 16);
+                                });
+                            }
+                        }).addTo(boundaryLinesLayer);
+
+                        // Remove legacy manual pin call since we handle it dynamically now
+                        // addManualPins(); 
             })
             .catch(err => {
                 console.error("Geospatial Intelligence Acquisition Failure:", err);
