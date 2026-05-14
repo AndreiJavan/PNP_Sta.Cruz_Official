@@ -46,6 +46,13 @@
             <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI Extraction Neural Link</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
+
+        <!-- Test Cooldown Trigger (Added for Preview) -->
+        <button onclick="window.strategicCooldownAlert(300)" class="pnp-card pnp-glass-dark border-pnp-gold/20 p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:bg-pnp-gold/5 transition-all">
+            <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.2em] mb-2 opacity-70">Stress Test</span>
+            <div class="text-2xl font-black text-pnp-gold leading-none uppercase tracking-tighter">Cooldown UI</div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Verify rate-limit protocol</p>
+        </button>
     </div>
 
         <!-- Extraction Batches View -->
@@ -311,11 +318,18 @@
 
         } catch (error) {
             console.error("AI Error:", error);
-            window.strategicAlert({
-                title: "Extraction Failure",
-                message: error.message,
-                type: "danger"
-            });
+            
+            // Check for rate limit / demand errors
+            const errMsg = error.message.toLowerCase();
+            if (errMsg.includes('limit') || errMsg.includes('demand') || errMsg.includes('throttled') || errMsg.includes('429')) {
+                window.strategicCooldownAlert(300); // 5 minutes
+            } else {
+                window.strategicAlert({
+                    title: "Extraction Failure",
+                    message: error.message,
+                    type: "danger"
+                });
+            }
         } finally {
             loadingOverlay.classList.add('hidden');
             input.value = '';

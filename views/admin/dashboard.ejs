@@ -9,35 +9,7 @@
     const uniqueBarangaysCount = uniqueBarangays.size;
 %>
 <!-- Top Row: Records KPIs -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <a href="/admin/tips" class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2.5rem] relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pnp-blue/10 rounded-full blur-3xl group-hover:bg-pnp-blue/20 transition-all"></div>
-        <div class="relative z-10 text-white">
-            <div class="flex justify-between items-start mb-6">
-                <div class="flex flex-col">
-                    <span class="text-[9px] text-pnp-blue-300 font-black uppercase tracking-[0.2em] opacity-80">Tips Intelligence</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Informant Tips</h3>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div id="tipsNotificationDotDashboard" class="hidden w-2 h-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
-                    <div class="w-10 h-10 rounded-2xl bg-pnp-blue/30 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
-                        <i class="fas fa-user-secret"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-5xl font-black tabular-nums tracking-tighter"><%= safeStats.totalTips %></h2>
-                <div class="flex flex-col mb-1">
-                    <span class="text-[8px] font-black text-pnp-gold uppercase tracking-[0.1em]">Verified</span>
-                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Acquired</span>
-                </div>
-            </div>
-            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                <span class="text-[8px] text-white/30 font-bold uppercase tracking-widest">Global Feed Active</span>
-                <i class="fas fa-chevron-right text-[8px] text-white/20 group-hover:translate-x-1 transition-transform"></i>
-            </div>
-        </div>
-    </a>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
     <!-- Bulletins Card -->
     <a href="/admin/bulletins" class="pnp-card pnp-glass-dark border-pnp-gold/10 p-6 rounded-[2.5rem] relative overflow-hidden group">

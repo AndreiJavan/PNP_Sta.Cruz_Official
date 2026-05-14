@@ -591,7 +591,7 @@ export const getDashboard = async (req: Request, res: Response) => {
       }));
 
     res.render('admin/dashboard', {
-      title: 'Admin Command Center',
+      title: 'Dashboard',
       todayStats,
       highRiskBarangays,
       monthlyTrends: JSON.stringify(monthlyTrends),
@@ -619,7 +619,7 @@ export const getBulletins = async (req: Request, res: Response) => {
     const bulletins = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     const totalPages = Math.ceil(countSnap.data().count / limit);
 
-    res.render('admin/bulletins', { title: 'Manage Bulletins', bulletins, currentPage: page, totalPages, layout: 'layouts/admin' });
+    res.render('admin/bulletins', { title: 'Bulletins', bulletins, currentPage: page, totalPages, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading bulletins');
@@ -806,7 +806,7 @@ export const getMap = async (req: Request, res: Response) => {
         return !isPlaceholder;
       });
     res.render('admin/map', {
-      title: 'Map Management',
+      title: 'Map',
       points,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
       layout: 'layouts/admin'
@@ -891,7 +891,7 @@ export const getHotlines = async (req: Request, res: Response) => {
   try {
     const snap = await db.collection('hotlines').orderBy('category').get();
     const hotlines = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.render('admin/hotlines', { title: 'Manage Hotlines', hotlines, layout: 'layouts/admin' });
+    res.render('admin/hotlines', { title: 'Hotlines', hotlines, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading hotlines');
@@ -937,7 +937,7 @@ export const getUsers = async (req: Request, res: Response) => {
     const logs = (logsSnap && logsSnap.docs) ? logsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) : [];
 
     res.render('admin/users', {
-      title: 'Personnel & Operational Logs',
+      title: 'Users',
       users,
       logs,
       layout: 'layouts/admin'
@@ -1063,7 +1063,7 @@ export const getReports = async (req: Request, res: Response) => {
     }
 
     res.render('admin/reports', {
-      title: 'Records',
+      title: 'Crime Reports',
       reports,
       allIncidents: allPoints,
       stats,

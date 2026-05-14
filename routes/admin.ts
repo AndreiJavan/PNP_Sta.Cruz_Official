@@ -16,7 +16,15 @@ const memoryUpload = multer({ storage: multer.memoryStorage() });
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Limit each IP to 5 login requests per window
-  message: 'Too many login attempts, please try again after 15 minutes',
+  handler: (req, res) => {
+    res.render('admin/login', {
+      title: 'Admin Login',
+      layout: false,
+      error_msg: 'Maximum login attempts reached. Forensic security protocols active.',
+      isThrottled: true,
+      cooldownSeconds: 900 // 15 minutes
+    });
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
