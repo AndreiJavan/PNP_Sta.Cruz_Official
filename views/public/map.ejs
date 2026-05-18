@@ -27,7 +27,7 @@
             </button>
         </div>
 
-        <div class="flex-grow overflow-y-auto custom-scrollbar-thin">
+        <div class="flex-grow overflow-y-auto sidebar-scroll">
             <div class="p-5 space-y-5">
                 <div class="space-y-3">
                     <label
@@ -97,7 +97,8 @@
     let map;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
-    const barangayGeoJsonUrl = '/data/barangays.json';
+    let selectedPinsLayer = L.layerGroup();
+    const barangayGeoJsonUrl = '/data/santa_cruz_boundaries.json';
 
     const colors = {
         'Theft': '#dc2626',
@@ -156,6 +157,10 @@
 
     function locateBarangay(shouldMinimize = true) {
         const selectedName = document.getElementById('filterBarangay').value;
+        
+        // Always clear any currently drawn selected pins first!
+        selectedPinsLayer.clearLayers();
+
         if (!selectedName) {
             // Reset to default view if "All Barangays" is selected
             const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
@@ -182,6 +187,7 @@
             map.scrollWheelZoom.enable();
             map.boxZoom.enable();
             map.keyboard.enable();
+            
             // Minimize sidebar to view the whole map if requested
             const sidebar = document.getElementById('filterSidebar');
             if (shouldMinimize && sidebar && sidebar.classList.contains('sidebar-visible')) {
@@ -193,22 +199,47 @@
                 duration: 1.5
             });
 
+            // Create and show the beautiful gold Tactical Pin for the selected barangay!
+            const tacticalPin = L.marker([pin.lat, pin.lng], {
+                icon: L.divIcon({
+                    className: 'manual-pin-container',
+                    html: `
+                        <div class="relative group flex flex-col items-center">
+                            <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
+                            <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
+                                <i class="fas fa-location-dot text-white dark:text-pnp-blue text-lg"></i>
+                            </div>
+                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                        </div>
+                    `,
+                    iconSize: [40, 48],
+                    iconAnchor: [20, 48]
+                })
+            }).addTo(selectedPinsLayer);
+
+            tacticalPin.bindPopup(`
+                <div class="p-4 min-w-[200px] bg-white dark:bg-slate-800 rounded-xl">
+                    <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-gray-100 dark:border-slate-700">
+                        <div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shield-halved text-white dark:text-pnp-blue text-xs"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest text-xs leading-none">${pin.name}</h3>
+                            <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">S-SPS Sector Location</p>
+                        </div>
+                    </div>
+                </div>
+            `);
+
             // Open popup after a short delay to allow flyTo to finish
             setTimeout(() => {
-                map.eachLayer((layer) => {
-                    if (layer instanceof L.Marker) {
-                        const latlng = layer.getLatLng();
-                        if (latlng.lat === pin.lat && latlng.lng === pin.lng) {
-                            layer.openPopup();
-                        }
-                    }
-                });
+                tacticalPin.openPopup();
 
                 // Re-open sidebar to show stats after zoom is complete if it was minimized
                 if (shouldMinimize && sidebar && sidebar.classList.contains('sidebar-hidden')) {
                     toggleSidebar();
                 }
-            }, 1600);
+            }, 1500);
         }
     }
 
@@ -479,11 +510,11 @@
 
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
+            selectedPinsLayer.addTo(map);
             // Initial markers are now handled dynamically by GeoJSON load to ensure precision
             // addManualPins();
             loadMapPoints();
-            // addManualPins(); // Manually placed pins hidden as requested
-            // loadMunicipalBoundary(); // Removed municipal border as requested
+            loadMunicipalBoundary();
 
             // Track mouse movement for live coordinates
             /* 
@@ -551,82 +582,6 @@
                                     manualPins[pinIndex].lat = centroid.lat;
                                     manualPins[pinIndex].lng = centroid.lng;
                                 }
-
-                                // 1. Add the central circle indicator
-                                L.circleMarker(centroid, {
-                                    radius: 6,
-                                    fillColor: '#C8A415',
-                                    color: '#1A3A5C',
-                                    weight: 2,
-                                    opacity: 1,
-                                    fillOpacity: 1
-                                }).addTo(map).bindPopup(`
-                                    <div class="p-4 min-w-[200px] bg-white dark:bg-slate-800 rounded-xl">
-                                        <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-gray-100 dark:border-slate-700">
-                                            <div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-lg flex items-center justify-center">
-                                                <i class="fas fa-shield-halved text-white dark:text-pnp-blue text-xs"></i>
-                                            </div>
-                                            <div>
-                                                <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest text-xs leading-none">${name}</h3>
-                                                <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">Sta. Cruz, Laguna</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).on('click', () => {
-                                    // Enable interaction when a marker is clicked
-                                    map.dragging.enable();
-                                    map.touchZoom.enable();
-                                    map.doubleClickZoom.enable();
-                                    map.scrollWheelZoom.enable();
-                                    map.boxZoom.enable();
-                                    map.keyboard.enable();
-
-                                    const barangaySelect = document.getElementById('filterBarangay');
-                                    if (barangaySelect) {
-                                        barangaySelect.value = name;
-                                        // Trigger loadMapPoints to update sidebar stats, but don't re-locate
-                                        loadMapPoints(false);
-
-                                        // Ensure sidebar is visible to show the stats
-                                        const sidebar = document.getElementById('filterSidebar');
-                                        if (sidebar && sidebar.classList.contains('sidebar-hidden')) {
-                                            toggleSidebar();
-                                        }
-                                    }
-                                });
-
-                                // 2. Add the Tactical Pin precisely on top
-                                L.marker(centroid, {
-                                    icon: L.divIcon({
-                                        className: 'manual-pin-container',
-                                        html: `
-                                            <div class="relative group flex flex-col items-center">
-                                                <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
-                                                <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
-                                                    <i class="fas fa-location-dot text-white dark:text-pnp-blue text-lg"></i>
-                                                </div>
-                                                <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
-                                            </div>
-                                        `,
-                                        iconSize: [40, 48],
-                                        iconAnchor: [20, 48]
-                                    })
-                                }).addTo(map).on('click', () => {
-                                    map.flyTo(centroid, 16);
-                                }).bindPopup(`
-                                    <div class="p-4 min-w-[200px] bg-white dark:bg-slate-800 rounded-xl">
-                                        <div class="flex items-center space-x-3 mb-3 pb-3 border-b border-gray-100 dark:border-slate-700">
-                                            <div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-lg flex items-center justify-center">
-                                                <i class="fas fa-shield-halved text-white dark:text-pnp-blue text-xs"></i>
-                                            </div>
-                                            <div>
-                                                <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest text-xs leading-none">${name}</h3>
-                                                <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">S-SPS Sector Location</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `);
-
                             } catch (err) {
                                 console.error('Error adding accurate marker for barangay:', name, err);
                             }
@@ -688,6 +643,15 @@
     #filterSidebar::-webkit-scrollbar {
         display: none;
         /* Chrome, Safari and Opera */
+    }
+
+    .sidebar-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        display: none;
     }
 
     .custom-scrollbar-thin::-webkit-scrollbar {
