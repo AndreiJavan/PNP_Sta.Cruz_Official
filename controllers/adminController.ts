@@ -6,7 +6,7 @@ import mammoth from 'mammoth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createRequire } from 'module';
 
-// Shared Tactical Assets
+// Shared Assets
 const VALID_BARANGAYS = [
   "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
   "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
@@ -226,7 +226,7 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     const primaryModel = 'gemini-2.0-flash';
     const fallbackModel = 'gemini-2.0-flash-lite';
 
-    console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
+    console.log(`[DOCUMENT SCAN] Initiating data extraction via ${primaryModel}...`);
     let model = client.getGenerativeModel({ model: primaryModel });
 
     const prompt = `
@@ -849,19 +849,19 @@ export const postMapPoint = async (req: Request, res: Response) => {
 
 export const deleteMapPoint = async (req: Request, res: Response) => {
   try {
-    await logAction(req, 'MAP_POINT_DELETE', `Deleted tactical point ID: ${req.params.id}`);
+    await logAction(req, 'MAP_POINT_DELETE', `Deleted map point ID: ${req.params.id}`);
     await db.collection('map_points').doc(req.params.id).delete();
 
     // Check if it's an AJAX request
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      return res.json({ success: true, message: 'Tactical point neutralized' });
+      return res.json({ success: true, message: 'Map point deleted' });
     }
 
     res.redirect('/admin/map');
   } catch (err) {
     console.error(err);
     if (req.xhr || req.headers.accept?.includes('application/json')) {
-      return res.status(500).json({ success: false, message: 'Neutralization sequence failed' });
+      return res.status(500).json({ success: false, message: 'Delete process failed' });
     }
     res.status(500).send('Error deleting map point');
   }
@@ -869,7 +869,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
 
 export const purgePlaceholders = async (req: Request, res: Response) => {
   try {
-    await logAction(req, 'SYSTEM_PURGE', 'Initiated full tactical data purge (RESET).');
+    await logAction(req, 'SYSTEM_PURGE', 'Initiated full data clear (RESET).');
     const tables = ['map_points', 'intelligence_scans', 'anonymous_tips', 'audit_logs', 'bulletins'];
     const batch = db.batch();
 
@@ -880,7 +880,7 @@ export const purgePlaceholders = async (req: Request, res: Response) => {
 
     await batch.commit();
 
-    res.json({ success: true, message: 'All tactical data purged. System reset to zero-state.' });
+    res.json({ success: true, message: 'All data cleared. System reset to zero-state.' });
   } catch (err) {
     console.error('Purge error:', err);
     res.status(500).json({ success: false, error: 'Purge failed' });
@@ -901,7 +901,7 @@ export const getHotlines = async (req: Request, res: Response) => {
 export const postHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
   try {
-    await logAction(req, 'HOTLINE_ADD', `Added tactical hotline: ${name}`);
+    await logAction(req, 'HOTLINE_ADD', `Added hotline: ${name}`);
     await db.collection('hotlines').add({
       name,
       number,
@@ -960,11 +960,11 @@ export const postUser = async (req: Request, res: Response) => {
   try {
     // 🛡️ Backend Enforcement: Only superadmins can deploy new personnel
     if (req.session.user.role !== 'superadmin') {
-      console.warn(`[SECURITY BREACH ATTEMPT] Non-admin ${req.session.user.username} tried to create personnel.`);
-      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+      console.warn(`[SECURITY BREACH ATTEMPT] Non-admin ${req.session.user.username} tried to create user account.`);
+      return res.status(403).send('Forbidden: Insufficient clearance.');
     }
 
-    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: staff)`);
+    await logAction(req, 'USER_CREATE', `Created administrative user: ${username} (Role: staff)`);
     await db.collection('users').add({
       username,
       full_name,
@@ -975,7 +975,7 @@ export const postUser = async (req: Request, res: Response) => {
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error creating personnel account');
+    res.status(500).send('Error creating user account');
   }
 };
 
@@ -983,25 +983,25 @@ export const deleteUser = async (req: Request, res: Response) => {
   try {
     // 🛡️ Backend Enforcement: Only superadmins can neutralize credentials
     if (req.session.user.role !== 'superadmin') {
-      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+      return res.status(403).send('Forbidden: Insufficient clearance.');
     }
 
     const userId = req.params.id;
     if (userId === req.session.user.id) {
-      return res.status(400).send('You cannot neutralize your own credentials while active.');
+      return res.status(400).send('You cannot delete your own account while active.');
     }
 
     const docRef = db.collection('users').doc(userId);
     const snap = await docRef.get();
-    if (!snap.exists) return res.status(404).send('Subject not found.');
+    if (!snap.exists) return res.status(404).send('User not found.');
 
     const userData = snap.data() as any;
-    await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username}`);
+    await logAction(req, 'USER_DELETE', `Deleted administrative user account: ${userData.username}`);
     await docRef.delete();
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
-    res.status(500).send('Operational failure during user neutralization');
+    res.status(500).send('Failed to delete user account');
   }
 };
 
@@ -1144,11 +1144,11 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
       total_records: entries.length,
       category_stats: categoryStats,
       raw_data: entries,
-      filename: 'Manual Intelligence Session'
+      filename: 'Manual Session'
     });
 
     await batch.commit();
-    await logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`);
+    await logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records.`);
     res.json({ success: true, count: entries.length });
   } catch (err) {
     console.error('Bulk add error:', err);

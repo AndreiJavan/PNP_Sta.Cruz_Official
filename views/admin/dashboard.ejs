@@ -18,7 +18,7 @@
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
                     <span class="text-[9px] text-pnp-gold-300 font-black uppercase tracking-[0.2em] opacity-80">PNP Bulletins</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Directives</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Bulletins</h3>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-pnp-gold/20 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-bullhorn"></i>
@@ -72,17 +72,17 @@
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
                     <span class="text-[9px] text-white/60 font-black uppercase tracking-[0.2em] opacity-80">Map Locations</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Tactical Map</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Incident Map</h3>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-map-location-dot"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-5xl font-black tabular-nums tracking-tighter"><%= uniqueBarangaysCount %></h2>
+                <h2 class="text-5xl font-black tabular-nums tracking-tighter">26</h2>
                 <div class="flex flex-col mb-1">
-                    <span class="text-[8px] font-black text-white/50 uppercase tracking-[0.1em]">Barangays</span>
-                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Covered</span>
+                    <span class="text-[8px] font-black text-white/50 uppercase tracking-[0.1em]">Barangay</span>
+                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Sectors</span>
                 </div>
             </div>
             <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
@@ -215,7 +215,7 @@
 
             return `
             <div ondblclick="window.location.href='/admin/map?id=${p.id}'" 
-                 title="Double-click to view on Tactical Map"
+                 title="Double-click to view on Map"
                  class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-blue hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm flex flex-col justify-center cursor-pointer select-none group">
                 <div class="mb-2">
                     <span class="text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight">${p.incident_type}</span>
@@ -238,7 +238,7 @@
     window.deletePoint = async function(id, event) {
         if (event) event.stopPropagation();
         
-        if (confirm('Are you sure you want to neutralize (delete) this tactical record?')) {
+        if (confirm('Are you sure you want to delete this incident record?')) {
             try {
                 const res = await fetch(`/admin/map/${id}/delete`, { 
                     method: 'POST',
@@ -248,11 +248,11 @@
                 if (result.success) {
                     location.reload();
                 } else {
-                    alert('Command Failure: ' + (result.message || 'Operation failed'));
+                    alert('Deletion Failure: ' + (result.message || 'Operation failed'));
                 }
             } catch (err) {
                 console.error(err);
-                alert('Connection error: Protocol sequence interrupted');
+                alert('Connection error: Process interrupted');
             }
         }
     };
@@ -279,13 +279,15 @@
 
         const labels = sortedSectors.map(s => `Brgy. ${s[0]}`);
         const data = sortedSectors.map(s => s[1]);
-        const tacticalColors = ['#ef4444', '#1A3A5C', '#D4AF37'];
+        const incidentColors = ['#ef4444', '#1A3A5C', '#D4AF37'];
 
         // Inject List
         listContainer.innerHTML = sortedSectors.map((s, idx) => `
-            <div class="flex items-center justify-between group">
+            <div ondblclick="window.location.href='/admin/map?barangay=${encodeURIComponent(s[0])}'"
+                 title="Double-click to view on Map"
+                 class="flex items-center justify-between group cursor-pointer select-none hover:bg-gray-50 dark:hover:bg-slate-800/50 p-2 rounded-2xl transition-all">
                 <div class="flex items-center space-x-3">
-                    <div class="w-2 h-6 rounded-full" style="background-color: ${tacticalColors[idx]}"></div>
+                    <div class="w-2 h-6 rounded-full" style="background-color: ${incidentColors[idx]}"></div>
                     <span class="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">${s[0]}</span>
                 </div>
                 <div class="flex flex-col items-end">
@@ -293,7 +295,7 @@
                     <span class="text-[7px] text-gray-400 font-bold uppercase">Total Records</span>
                 </div>
             </div>
-        `).join('') || '<p class="text-[8px] text-center text-gray-400 font-bold uppercase italic py-4">No tactical data acquired</p>';
+        `).join('') || '<p class="text-[8px] text-center text-gray-400 font-bold uppercase italic py-4">No incident data found</p>';
 
         if (distChart) distChart.destroy();
 
@@ -303,7 +305,7 @@
                 labels: labels,
                 datasets: [{
                     data: data,
-                    backgroundColor: tacticalColors,
+                    backgroundColor: incidentColors,
                     borderWidth: 0,
                     hoverOffset: 25
                 }]

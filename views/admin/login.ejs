@@ -114,7 +114,7 @@
 
                             <button type="submit"
                                 class="w-full bg-pnp-blue dark:bg-pnp-gold hover:bg-blue-900 dark:hover:bg-yellow-600 text-white dark:text-pnp-blue font-black py-5 rounded-2xl shadow-2xl transition duration-300 transform hover:-translate-y-1 flex items-center justify-center space-x-3 uppercase tracking-widest text-xs">
-                                <span>Secure Login</span>
+                                <span>Login</span>
                                 <i class="fas fa-arrow-right text-[10px]"></i>
                             </button>
                         </form>
@@ -174,8 +174,8 @@
         // Trigger Cooldown Modal if Throttled
         <% if (locals.isThrottled) { %>
             document.addEventListener('DOMContentLoaded', () => {
-                if (window.strategicCooldownAlert) {
-                    window.strategicCooldownAlert(<%= locals.cooldownSeconds || 900 %>);
+                if (window.systemCooldownAlert) {
+                    window.systemCooldownAlert(<%= locals.cooldownSeconds || 900 %>);
                 }
             });
         <% } %>

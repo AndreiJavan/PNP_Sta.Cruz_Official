@@ -10,13 +10,13 @@
         <div onclick="openStatsSpreadsheet('8-Focus')" class="pnp-card pnp-glass-dark border-red-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
             <span class="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">8-Focus</span>
             <div class="text-4xl font-black text-red-500 leading-none count-up-glow count-up" data-target="<%= displayStats['8-Focus'] || 0 %>" data-stat="8-Focus">0</div>
-            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Critical Strategic Targets Identified</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Critical Incidents Identified</p>
         </div>
 
         <div onclick="openStatsSpreadsheet('Non-Index')" class="pnp-card pnp-glass-dark border-slate-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
             <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Non-Index</span>
             <div class="text-4xl font-black text-slate-200 leading-none count-up-glow count-up" data-target="<%= displayStats['Non-Index'] || 0 %>" data-stat="Non-Index">0</div>
-            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Non-Index Incident Stream Data</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Non-Index Incident Data</p>
         </div>
 
         <div onclick="openStatsSpreadsheet('PSI')" class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
@@ -38,21 +38,15 @@
             <div class="absolute inset-0 bg-pnp-gold/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
             <div class="flex justify-between items-start w-full relative z-10">
                 <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Active Scanner</span>
-                <span onclick="event.stopPropagation(); purgeTacticalData()" title="Purge System Placeholders" class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
+                <span onclick="event.stopPropagation(); purgeTacticalData()" title="Clear System Placeholders" class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
                     <i class="fas fa-microchip"></i>
                 </span>
             </div>
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
-            <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI Extraction Neural Link</p>
+            <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">Document Extraction Link</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
 
-        <!-- Test Cooldown Trigger (Added for Preview) -->
-        <button onclick="window.strategicCooldownAlert(300)" class="pnp-card pnp-glass-dark border-pnp-gold/20 p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:bg-pnp-gold/5 transition-all">
-            <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.2em] mb-2 opacity-70">Stress Test</span>
-            <div class="text-2xl font-black text-pnp-gold leading-none uppercase tracking-tighter">Cooldown UI</div>
-            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Verify rate-limit protocol</p>
-        </button>
     </div>
 
         <!-- Extraction Batches View -->
@@ -60,7 +54,7 @@
             <div class="p-8 border-b border-gray-50 dark:border-slate-800 bg-gray-50/10 dark:bg-slate-900/50 flex justify-between items-center">
                 <div>
                     <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em] text-sm">Mission Records Archive</h3>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest italic">Historical Tactical Batch History</p>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest italic">Historical Batch History</p>
                 </div>
                 <div class="flex items-center space-x-3">
                     <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -72,13 +66,13 @@
                 <table class="w-full text-left border-collapse min-w-[1000px] table-fixed">
                     <thead class="bg-gray-50/50 dark:bg-slate-950/50">
                         <tr>
-                            <th class="w-44 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">Operational Log</th>
-                            <th class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">Mission Intelligence</th>
+                            <th class="w-44 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">Date Logged</th>
+                            <th class="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800">File Details</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Volume</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">8-Focus</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Non-Index</th>
-                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Safety</th>
-                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">PSI</th>
+                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Entry Source</th>
                             <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -88,7 +82,7 @@
                                 <td colspan="8" class="px-8 py-40 text-center text-gray-300 dark:text-slate-700 font-black uppercase tracking-[0.5em] italic">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fas fa-barcode text-6xl mb-6 opacity-20"></i>
-                                        <span>No tactical data signals found</span>
+                                        <span>No reports found</span>
                                     </div>
                                 </td>
                             </tr>
@@ -258,6 +252,22 @@
         "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
     ];
 
+    const CRIME_EXAMPLES = {
+        '8-Focus': [
+            'Murder', 'Homicide', 'Physical Injury', 'Rape', 
+            'Robbery', 'Theft', 'Carnapping MC', 'Carnapping MV'
+        ],
+        'Non-Index': [
+            'Illegal Drugs', 'Illegal Gambling', 
+            'Illegal Firearms', 'Cybercrime', 'Illegal Recruitment',
+            'Ordinance Violations', 'Grave Threats', 'Alarm and Scandal'
+        ],
+        'PSI': [
+            'Vehicular Accident', 'Road Accident / Traffic Incident', 'Fire Incident', 'Flood Incident', 
+            'Earthquake Incident', 'Landslide Incident', 'Missing Person Report', 'Rescue Operation Cases', 'Public Disturbance Incident', 'Emergency Response Incident'
+        ]
+    };
+
      window.handleIntelConvert = async function(input) {
         if (!input.files || !input.files[0]) return;
 
@@ -267,7 +277,7 @@
         if (window.reports && window.reports.some(r => r.filename === file.name)) {
             window.strategicAlert({
                 title: "Duplicate Signal Detected",
-                message: `The intelligence batch [${file.name}] is already archived in the CPICRS database. Re-scanning duplicate datasets is restricted to preserve structural integrity.`,
+                message: `The file [${file.name}] is already archived.`,
                 type: "warning"
             });
             input.value = '';
@@ -283,7 +293,7 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            statusText.textContent = `Scanned File: ${file.name} - Extracting Intelligence...`;
+            statusText.textContent = `Processing File: ${file.name}...`;
 
             // ✅ Targeted route for AI processing
             const res = await fetch('/admin/process-ai', {
@@ -299,15 +309,15 @@
             const result = await res.json();
 
             if (!result.success) {
-                throw new Error(result.error || "AI processing failed");
+                throw new Error(result.error || "Processing failed");
             }
 
             const flattened = result.data;
 
             if (flattened.length === 0) {
                 window.strategicAlert({
-                    title: "Neural Scan Negative",
-                    message: "No incident records detected in this document. Please verify source data.",
+                    title: "Scan Empty",
+                    message: "No incidents detected in this document.",
                     type: "warning"
                 });
                 return;
@@ -317,7 +327,7 @@
             showIntelReview(flattened, file.name);
 
         } catch (error) {
-            console.error("AI Error:", error);
+            console.error("Error:", error);
             
             // Check for rate limit / demand errors
             const errMsg = error.message.toLowerCase();
@@ -325,7 +335,7 @@
                 window.strategicCooldownAlert(300); // 5 minutes
             } else {
                 window.strategicAlert({
-                    title: "Extraction Failure",
+                    title: "Processing Failure",
                     message: error.message,
                     type: "danger"
                 });
@@ -356,7 +366,7 @@
          const subtitle = document.getElementById('reviewRowCount');
          
          title.textContent = "Manual Input";
-         subtitle.textContent = "Secure Spreadsheet Protocol: Direct Data Entry";
+         subtitle.textContent = "Secure Data Entry Protocol";
          
          renderReviewTable();
          modal.classList.remove('hidden');
@@ -372,8 +382,8 @@
          const title = modal.querySelector('h3');
          const subtitle = document.getElementById('reviewRowCount');
          
-         title.textContent = "Manual Input";
-         subtitle.textContent = `${reviewData.length} records detected in periodic report`;
+         title.textContent = "Data Review";
+         subtitle.textContent = `${reviewData.length} records detected`;
          
          renderReviewTable();
          modal.classList.remove('hidden');
@@ -415,8 +425,13 @@
                         class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-500 dark:text-slate-300 focus:ring-0 p-4 outline-none">
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors">
-                    <input type="text" value="${item.offense || item.incident_type || ''}" placeholder="Type offense..." oninput="updateReviewItem(${index}, 'offense', this.value)" 
+                    <input type="text" list="crimesList-${index}" value="${item.offense || item.incident_type || ''}" placeholder="Type or select offense..." oninput="updateReviewItem(${index}, 'offense', this.value)" 
                         class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none placeholder:text-gray-300">
+                    <datalist id="crimesList-${index}">
+                        ${(CRIME_EXAMPLES[cat] || []).map(crime => `
+                            <option value="${crime}"></option>
+                        `).join('')}
+                    </datalist>
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors">
                     <select onchange="updateReviewItem(${index}, 'category', this.value)" class="w-full h-full bg-transparent border-none text-[10px] font-black uppercase tracking-widest ${badgeClass} outline-none focus:ring-0 p-4 cursor-pointer">
@@ -436,7 +451,7 @@
    
          const reviewRowCount = document.getElementById('reviewRowCount');
          if (reviewRowCount && currentEntryType === 'scanned') {
-             reviewRowCount.textContent = `${reviewData.length} records detected in periodic report`;
+             reviewRowCount.textContent = `${reviewData.length} records detected`;
          }
          
          const count8Focus = document.getElementById('count8Focus');
@@ -452,7 +467,11 @@
      window.updateReviewItem = function(index, field, value) {
          reviewData[index][field] = value;
          // No need to re-render everything on every keystroke for text inputs
-         if (field === 'category') renderReviewTable();
+         if (field === 'category') {
+             reviewData[index]['offense'] = '';
+             reviewData[index]['incident_type'] = '';
+             renderReviewTable();
+         }
      };
   
      window.editReviewRow = function(index) {
@@ -488,9 +507,9 @@
          const syncBtn = document.querySelector('button[onclick="confirmIntelReview()"]');
          if (syncBtn.disabled) return;
 
-         const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
-             title: "Tactical Confirmation",
-             message: `Commit ${reviewData.length} records to the CPICRS Central Database?`,
+         const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the Database?`)))({
+             title: "Confirmation",
+             message: `Commit ${reviewData.length} records to the Database?`,
              confirmText: "Sync Now",
              type: "info"
          });
@@ -516,12 +535,12 @@
              if (result.success) {
                     await window.strategicAlert({
                         title: "Sync Successful",
-                        message: `Archive Updated: ${result.count} tactical records committed.`,
+                        message: `Archive Updated: ${result.count} records committed.`,
                         type: "success"
                     });
                     location.reload();
              } else {
-                 throw new Error(result.message || "Disk Sync Failed");
+                 throw new Error(result.message || "Sync Failed");
              }
          } catch (error) { 
              window.strategicAlert({

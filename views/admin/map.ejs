@@ -16,7 +16,7 @@
 
     <div class="relative w-full h-[calc(100vh-80px)] overflow-hidden bg-slate-50 dark:bg-slate-950 p-6">
         <div class="flex flex-col lg:flex-row h-full gap-6">
-            <!-- Unified Tactical Hub (Left) -->
+            <!-- Unified Incident Hub (Left) -->
             <div id="registryPanel"
                 class="lg:w-[450px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-slate-700/50 overflow-hidden flex flex-col transition-all duration-500">
                 <!-- Panel Header -->
@@ -30,10 +30,10 @@
                         <div>
                             <h2
                                 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.25em] text-sm leading-tight">
-                                Tactical Command</h2>
+                                Incident Map Hub</h2>
                             <p
                                 class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
-                                S-SPS Unified Intelligence</p>
+                                Incident Overview</p>
                         </div>
                     </div>
 
@@ -41,7 +41,7 @@
                     <div class="space-y-4">
                         <div class="space-y-2">
                             <label class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black px-1">Primary
-                                Intelligence Category</label>
+                                Crime Category</label>
                             <div class="relative group">
                                 <i
                                     class="fas fa-filter absolute left-4 top-1/2 -translate-y-1/2 text-pnp-blue dark:text-pnp-gold z-10"></i>
@@ -52,35 +52,30 @@
                                     <option value="PSI">PSI (Public Safety)</option>
                                 </select>
                             </div>
+                            <!-- Toggle Show Markers -->
+                            <div class="flex items-center space-x-2 px-1 pt-2">
+                                <input type="checkbox" id="showMarkersToggle" onchange="toggleMarkersVisibility()" class="w-4 h-4 rounded text-pnp-blue focus:ring-pnp-blue border-gray-300">
+                                <label for="showMarkersToggle" class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest cursor-pointer select-none">Show Incident Pins</label>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="registryContent" class="p-4 flex-grow overflow-y-auto custom-scrollbar">
-                    <!-- Intelligence Legend -->
+                    <!-- Incident Legend -->
                     <div class="mb-4">
-                        <div id="dynamicLegend"
-                            class="grid grid-cols-2 gap-2 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-inner">
+                        <div id="dynamicLegend" class="grid grid-cols-2 gap-2">
                             <!-- Legend items -->
                         </div>
                     </div>
 
-                    <div id="registryContent" class="p-4 flex-grow overflow-y-auto custom-scrollbar">
-                        <!-- Intelligence Legend -->
-                        <div class="mb-4">
-                            <div id="dynamicLegend"
-                                class="grid grid-cols-2 gap-2 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-inner">
-                                <!-- Legend items -->
-                            </div>
-                        </div>
-
-                        <!-- Unified Tactical Command Stream -->
+                    <!-- Incident Stream -->
                         <div class="space-y-4">
                             <div class="flex items-center justify-between px-2">
                                 <h3
                                     class="text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] flex items-center">
                                     <i class="fas fa-tower-broadcast mr-2 text-[10px] animate-pulse"></i>
-                                    <span>Tactical Command Stream</span>
+                                    <span>Incident Stream</span>
                                 </h3>
                                 <span id="incidentCount"
                                     class="text-[9px] font-black text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">REAL-TIME
@@ -88,9 +83,8 @@
                             </div>
 
                             <div id="unifiedRegistryBody" class="space-y-2">
-                                <!-- Dynamic Intelligence Cards -->
+                                <!-- Dynamic Incident Cards -->
                             </div>
-                        </div>
                     </div>
                 </div>
 
@@ -146,14 +140,14 @@
                     <i class="fas fa-shield-halved text-xl text-pnp-gold animate-pulse"></i>
                 </div>
             </div>
-            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-pnp-gold animate-pulse">Initializing
-                Command Center Grid</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-pnp-gold animate-pulse">Loading Interactive Map</p>
         </div>
     </div>
 
     <script>
         let map;
         let incidentLayer = L.layerGroup();
+        let selectedPinLayer = L.layerGroup();
         let barangayLayer;
         let masterBorderLayer;
         let activeCategory = '8-Focus';
@@ -187,7 +181,7 @@
         }
 
         // --- HELPERS ---
-        function getTacticalColor(name) {
+        function getIncidentColor(name) {
             if (!name) return '#ccc';
             const searchName = name.trim().toUpperCase();
 
@@ -205,6 +199,10 @@
             return '#ccc';
         }
 
+        window.toggleMarkersVisibility = function() {
+            updateVisualization();
+        };
+
         function updateVisualization() {
             // 1. Update Legend
             const legend = document.getElementById('dynamicLegend');
@@ -220,27 +218,67 @@
             incidentLayer.clearLayers();
             const filteredPoints = pointsData.filter(p => p.category === activeCategory);
 
-            // 3. Update Markers
-            filteredPoints.forEach(p => {
-                const pin = manualPins.find(m => m.name === p.barangay);
-                if (!pin) return;
-                const lat = pin.lat + (Math.random() - 0.5) * 0.003;
-                const lng = pin.lng + (Math.random() - 0.5) * 0.003;
-                const color = getTacticalColor(p.incident_type);
+            // 3. Update Markers (Single dynamic pin per active barangay, matching public layout)
+            const showMarkers = document.getElementById('showMarkersToggle')?.checked;
+            if (showMarkers) {
+                const barangayGroups = {};
+                filteredPoints.forEach(p => {
+                    if (!barangayGroups[p.barangay]) {
+                        barangayGroups[p.barangay] = [];
+                    }
+                    barangayGroups[p.barangay].push(p);
+                });
 
-                L.circleMarker([lat, lng], {
-                    radius: 6, fillColor: color, color: '#fff', weight: 1.5, opacity: 1, fillOpacity: 0.9
-                }).addTo(incidentLayer).bindPopup(`
-                <div class="p-3 bg-slate-950 text-white rounded-2xl border border-white/10 min-w-[200px]">
-                    <div class="flex items-center space-x-2 mb-2 pb-2 border-b border-white/5">
-                         <div class="w-2 h-2 rounded-full" style="background-color: ${color}"></div>
-                         <span class="text-[9px] font-black uppercase tracking-widest">${p.incident_type}</span>
-                    </div>
-                    <p class="text-[10px] font-bold mb-2">BRGY. ${p.barangay}</p>
-                    <p class="text-[8px] text-white/50 italic">"${p.description || 'Verified tactical point'}"</p>
-                </div>
-            `, { className: 'intelligence-popup' });
-            });
+                Object.entries(barangayGroups).forEach(([brgy, list]) => {
+                    const pin = manualPins.find(m => m.name === brgy);
+                    if (!pin) return;
+
+                    const stats = {};
+                    list.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+                    const dominantType = Object.entries(stats).sort((a, b) => b[1] - a[1])[0][0];
+                    const color = getIncidentColor(dominantType);
+
+                    const listHtml = list.slice(0, 3).map(p => `
+                        <div class="flex items-center justify-between text-[8px] border-t border-white/5 py-1 text-white/80">
+                            <span class="font-black truncate max-w-[120px]">${p.incident_type}</span>
+                            <span class="text-[7px] text-white/50">${new Date(p.incident_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                    `).join('');
+
+                    L.marker([pin.lat, pin.lng], {
+                        icon: L.divIcon({
+                            className: 'incident-pin-container',
+                            html: `
+                                <div class="relative group flex flex-col items-center">
+                                    <div class="absolute w-8 h-8 rounded-full animate-ping" style="background-color: ${color}40"></div>
+                                    <div class="relative w-10 h-10 rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300" style="background-color: ${color}">
+                                        <span class="text-white text-[10px] font-black">${list.length}</span>
+                                    </div>
+                                    <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] -mt-1" style="border-t-color: ${color}"></div>
+                                </div>
+                            `,
+                            iconSize: [40, 48],
+                            iconAnchor: [20, 48]
+                        })
+                    }).addTo(incidentLayer).bindPopup(`
+                        <div class="p-4 bg-slate-950 text-white rounded-3xl border border-white/10 min-w-[220px]">
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+                                 <div>
+                                     <h3 class="text-[11px] font-black uppercase tracking-wider text-pnp-gold">${brgy}</h3>
+                                     <p class="text-[7px] text-white/40 uppercase tracking-widest mt-0.5">${dominantType}</p>
+                                 </div>
+                                 <div class="px-2 py-1 rounded-xl text-[9px] font-black" style="background-color: ${color}20; color: ${color}">
+                                     ${list.length} Cases
+                                 </div>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-[7px] text-white/30 uppercase tracking-[0.2em] font-black block mb-1">Recent Activities</span>
+                                ${listHtml}
+                            </div>
+                        </div>
+                    `, { className: 'incident-popup' });
+                });
+            }
 
             // 4. Render Unified Registry
             renderUnifiedRegistry(filteredPoints);
@@ -283,7 +321,7 @@
                     brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
                     const top = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
                     registry[brgy].dominant = top[0];
-                    registry[brgy].color = getTacticalColor(top[0]);
+                    registry[brgy].color = getIncidentColor(top[0]);
                 }
             });
 
@@ -294,8 +332,8 @@
                     const hasActivity = data.count > 0;
 
                     return `
-                    <div onclick="map.flyTo([${pin.lat}, ${pin.lng}], 17)" 
-                         class="group p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-[2rem] hover:bg-pnp-blue/5 dark:hover:bg-slate-800/80 transition-all cursor-pointer shadow-sm hover:shadow-md">
+                    <div onclick="window.highlightBarangayOnMap('${brgy}')" 
+                          class="group p-4 bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-[2rem] hover:bg-pnp-blue/5 dark:hover:bg-slate-800/80 transition-all cursor-pointer shadow-sm hover:shadow-md">
                         
                         <div class="flex justify-between items-start mb-3">
                             <div>
@@ -315,7 +353,7 @@
                         ${hasActivity ? `
                         <div class="pt-3 border-t border-gray-50 dark:border-slate-800 flex items-center justify-between">
                             <div class="flex flex-col">
-                                <span class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Live Intelligence Pulse</span>
+                                <span class="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Latest Incident Pulse</span>
                                 <span class="text-[9px] font-black text-slate-600 dark:text-slate-300 uppercase truncate max-w-[150px]">
                                     ${data.latest}
                                 </span>
@@ -353,7 +391,7 @@
                 const stats = {};
                 brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
                 const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
-                fillColor = getTacticalColor(topCrime[0]);
+                fillColor = getIncidentColor(topCrime[0]);
                 fillOpacity = 0.6;
                 weight = 2;
             } else {
@@ -364,6 +402,79 @@
             return { color: '#C8A415', weight: weight, fillOpacity: fillOpacity, fillColor: fillColor };
         }
 
+        window.highlightBarangayOnMap = function(brgyName) {
+            selectedPinLayer.clearLayers();
+            const pin = manualPins.find(m => m.name.toLowerCase() === brgyName.toLowerCase());
+            if (pin) {
+                map.flyTo([pin.lat, pin.lng], 17, { animate: true, duration: 1.5 });
+                
+                // Get active incidents for this barangay in the current category
+                const brgyPoints = pointsData.filter(p => p.barangay === pin.name && p.category === activeCategory);
+                let popupHtml = '';
+                let pinColor = '#C8A415'; // Default golden highlight
+                let pinContent = '<i class="fas fa-location-dot text-white text-lg"></i>';
+
+                if (brgyPoints.length > 0) {
+                    const stats = {};
+                    brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+                    const dominantType = Object.entries(stats).sort((a, b) => b[1] - a[1])[0][0];
+                    pinColor = getIncidentColor(dominantType);
+                    pinContent = `<span class="text-white text-[10px] font-black">${brgyPoints.length}</span>`;
+
+                    const listHtml = brgyPoints.slice(0, 3).map(p => `
+                        <div class="flex items-center justify-between text-[8px] border-t border-white/5 py-1 text-white/80">
+                            <span class="font-black truncate max-w-[120px]">${p.incident_type}</span>
+                            <span class="text-[7px] text-white/50">${new Date(p.incident_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        </div>
+                    `).join('');
+
+                    popupHtml = `
+                        <div class="p-4 bg-slate-950 text-white rounded-3xl border border-white/10 min-w-[220px]">
+                            <div class="flex items-center justify-between mb-3 pb-2 border-b border-white/10">
+                                 <div>
+                                     <h3 class="text-[11px] font-black uppercase tracking-wider text-pnp-gold">${pin.name}</h3>
+                                     <p class="text-[7px] text-white/40 uppercase tracking-widest mt-0.5">${dominantType}</p>
+                                 </div>
+                                 <div class="px-2 py-1 rounded-xl text-[9px] font-black" style="background-color: ${pinColor}20; color: ${pinColor}">
+                                     ${brgyPoints.length} Cases
+                                 </div>
+                            </div>
+                            <div class="space-y-1">
+                                <span class="text-[7px] text-white/30 uppercase tracking-[0.2em] font-black block mb-1">Recent Activities</span>
+                                ${listHtml}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    popupHtml = `
+                        <div class="p-4 min-w-[200px] bg-slate-950 text-white rounded-2xl shadow-2xl border border-white/10">
+                            <h3 class="text-pnp-gold font-black uppercase tracking-widest text-xs leading-none mb-2">${pin.name}</h3>
+                            <p class="text-[8px] text-white/50 font-bold uppercase mt-1">Sector Clear</p>
+                            <p class="text-[7px] text-slate-400 mt-1 uppercase tracking-tight">Zero Active Reports in this Category</p>
+                        </div>
+                    `;
+                }
+
+                setTimeout(() => {
+                    L.marker([pin.lat, pin.lng], {
+                        icon: L.divIcon({
+                            className: 'manual-pin-container',
+                            html: `
+                                <div class="relative group flex flex-col items-center">
+                                    <div class="absolute w-8 h-8 rounded-full animate-ping" style="background-color: ${pinColor}40"></div>
+                                    <div class="relative w-10 h-10 rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300" style="background-color: ${pinColor}">
+                                        ${pinContent}
+                                    </div>
+                                    <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] -mt-1" style="border-t-color: ${pinColor}"></div>
+                                </div>
+                            `,
+                            iconSize: [40, 48],
+                            iconAnchor: [20, 48]
+                        })
+                    }).addTo(selectedPinLayer).bindPopup(popupHtml, { className: 'incident-popup' }).openPopup();
+                }, 500);
+            }
+        };
 
         function initMap() {
             const bounds = L.latLngBounds(L.latLng(14.18, 121.30), L.latLng(14.33, 121.47));
@@ -371,6 +482,7 @@
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
             incidentLayer.addTo(map);
+            selectedPinLayer.addTo(map);
 
             fetch(barangayGeoJsonUrl)
                 .then(r => r.json())
@@ -380,9 +492,45 @@
                         onEachFeature: (f, l) => {
                             l.on('mouseover', (e) => { e.target.setStyle({ weight: 4, color: '#FFFFFF' }); e.target.bringToFront(); });
                             l.on('mouseout', (e) => { e.target.setStyle(getThematicStyleForFeature(f)); });
+                            l.on('click', () => {
+                                const normalizeBrgyName = (name) => {
+                                    const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+                                    if (match) return `Poblacion ${match[1]} (Barangay ${match[1]})`;
+                                    return name;
+                                };
+                                window.highlightBarangayOnMap(normalizeBrgyName(f.properties.ADM4_EN));
+                            });
                         }
                     }).addTo(map);
                     updateVisualization();
+
+                    // Check for URL query params to auto-locate barangay or incident on load
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const brgyParam = urlParams.get('barangay');
+                    const idParam = urlParams.get('id');
+
+                    if (brgyParam) {
+                        window.highlightBarangayOnMap(brgyParam);
+                    } else if (idParam) {
+                        const incident = pointsData.find(p => p.id === idParam);
+                        if (incident) {
+                            const pin = manualPins.find(m => m.name === incident.barangay);
+                            if (pin) {
+                                activeCategory = incident.category;
+                                const categorySelector = document.getElementById('categorySelector');
+                                if (categorySelector) categorySelector.value = activeCategory;
+
+                                const showToggle = document.getElementById('showMarkersToggle');
+                                if (showToggle) showToggle.checked = true;
+
+                                updateVisualization();
+
+                                setTimeout(() => {
+                                    map.flyTo([pin.lat, pin.lng], 17, { animate: true, duration: 1.5 });
+                                }, 500);
+                            }
+                        }
+                    }
                 });
 
             document.getElementById('mapLoading').classList.add('opacity-0');
@@ -402,13 +550,13 @@
     </script>
 
     <style>
-        .intelligence-popup .leaflet-popup-content-wrapper {
+        .incident-popup .leaflet-popup-content-wrapper {
             background: transparent !important;
             box-shadow: none !important;
             padding: 0 !important;
         }
 
-        .intelligence-popup .leaflet-popup-tip {
+        .incident-popup .leaflet-popup-tip {
             background: #0f172a !important;
         }
 
