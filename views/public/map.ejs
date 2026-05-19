@@ -138,6 +138,7 @@
         line-height: 1.2;
         padding: 5px 8px !important;
         z-index: 1000 !important;
+        transition: opacity 0.3s ease-in-out !important;
     }
 
     .barangay-label-tooltip::before,
@@ -491,6 +492,41 @@
         return { color: '#C8A415', weight: weight, fillOpacity: fillOpacity, fillColor: fillColor };
     }
 
+    function manageTooltipVisibility() {
+        if (!map) return;
+        // Sorting tooltips to ensure consistent behavior
+        const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
+        const boxes = [];
+
+        tooltips.forEach(t => {
+            const rect = t.getBoundingClientRect();
+            // Skip unrendered elements
+            if (rect.width === 0 && rect.height === 0) return;
+
+            let isColliding = false;
+            const pad = 2; // Extra padding
+
+            for (let i = 0; i < boxes.length; i++) {
+                const b = boxes[i];
+                if (!(rect.right + pad < b.left ||
+                    rect.left - pad > b.right ||
+                    rect.bottom + pad < b.top ||
+                    rect.top - pad > b.bottom)) {
+                    isColliding = true;
+                    break;
+                }
+            }
+
+            if (isColliding) {
+                t.style.opacity = '0';
+                t.style.pointerEvents = 'none';
+            } else {
+                t.style.opacity = '1';
+                boxes.push(rect);
+            }
+        });
+    }
+
     function clearMapDisplay() {
         const modeSelect = document.getElementById('mapDisplayMode');
         if (modeSelect) {
@@ -810,10 +846,14 @@
                             }
                         }
                     }).addTo(map);
+                    setTimeout(manageTooltipVisibility, 100);
                 })
                 .catch(err => {
                     console.error('Error loading GeoJSON:', err);
                 });
+
+            map.on('zoomend', () => setTimeout(manageTooltipVisibility, 50));
+            map.on('resize', () => setTimeout(manageTooltipVisibility, 50));
         } catch (err) {
             console.error('Error initializing map:', err);
             hideLoading();
