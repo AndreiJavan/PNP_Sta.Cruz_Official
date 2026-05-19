@@ -219,6 +219,20 @@
             { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 }, { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
         ];
 
+        function getBarangayLabel(name, zoom) {
+            const pobMatch = name.match(/Poblacion (I{1,3}|IV|V)/);
+            if (pobMatch) {
+                const romanToNum = { 'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5' };
+                const num = romanToNum[pobMatch[1]];
+                if (zoom < 16) {
+                    return `POB. ${num}`;
+                } else {
+                    return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+                }
+            }
+            return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+        }
+
         // --- LOGIC FUNCTIONS ---
 
         function switchCategory(cat) {
@@ -504,6 +518,22 @@
             });
         }
 
+
+
+        function updateBarangayLabels() {
+            if (!barangayLayer || !map) return;
+            const currentZoom = map.getZoom();
+            barangayLayer.eachLayer(layer => {
+                const feature = layer.feature;
+                let name = feature.properties.ADM4_EN;
+                const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+                if (match) name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
+
+                const newLabel = getBarangayLabel(name, currentZoom);
+                layer.setTooltipContent(newLabel);
+            });
+        }
+
         function initMap() {
             const bounds = L.latLngBounds(L.latLng(14.18, 121.30), L.latLng(14.33, 121.47));
             map = L.map('leafletMap', { zoomControl: false, maxBounds: bounds, minZoom: 13 }).fitBounds(bounds);
@@ -520,7 +550,7 @@
                             let name = f.properties.ADM4_EN;
                             const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
                             if (match) name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
-                            const displayName = name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+                            const displayName = getBarangayLabel(name, map.getZoom());
 
                             l.bindTooltip(displayName, {
                                 permanent: true,
@@ -550,7 +580,10 @@
                     setTimeout(manageTooltipVisibility, 100);
                 });
 
-            map.on('zoomend', () => setTimeout(manageTooltipVisibility, 50));
+            map.on('zoomend', () => {
+                updateBarangayLabels();
+                setTimeout(manageTooltipVisibility, 50);
+            });
             map.on('resize', () => setTimeout(manageTooltipVisibility, 50));
 
             document.getElementById('mapLoading').classList.add('opacity-0');

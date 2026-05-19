@@ -172,6 +172,20 @@
         'Emergency Response Incident': '#0891B2', 'Missing Person Report': '#0D9488', 'Rescue Operation Cases': '#059669'
     };
 
+    function getBarangayLabel(name, zoom) {
+        const pobMatch = name.match(/Poblacion (I{1,3}|IV|V)/);
+        if (pobMatch) {
+            const romanToNum = { 'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5' };
+            const num = romanToNum[pobMatch[1]];
+            if (zoom < 16) {
+                return `POB. ${num}`;
+            } else {
+                return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+            }
+        }
+        return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+    }
+
     function getTacticalColor(name) {
         if (!name) return '#ccc';
         const searchName = name.trim().toUpperCase();
@@ -492,6 +506,21 @@
         return { color: '#C8A415', weight: weight, fillOpacity: fillOpacity, fillColor: fillColor };
     }
 
+    function updateBarangayLabels() {
+        if (!boundaryLayerGroup || !map) return;
+        const currentZoom = map.getZoom();
+        boundaryLayerGroup.eachLayer(layer => {
+            const feature = layer.feature;
+            if (!feature) return;
+            let name = feature.properties.ADM4_EN;
+            const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+            if (match) name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
+
+            const newLabel = getBarangayLabel(name, currentZoom);
+            layer.setTooltipContent(newLabel);
+        });
+    }
+
     function manageTooltipVisibility() {
         if (!map) return;
         // Sorting tooltips to ensure consistent behavior
@@ -790,7 +819,7 @@
                                 name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
                             }
 
-                            const displayName = name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+                            const displayName = getBarangayLabel(name, map.getZoom());
 
                             layer.bindTooltip(displayName, {
                                 permanent: true,
@@ -852,7 +881,10 @@
                     console.error('Error loading GeoJSON:', err);
                 });
 
-            map.on('zoomend', () => setTimeout(manageTooltipVisibility, 50));
+            map.on('zoomend', () => {
+                updateBarangayLabels();
+                setTimeout(manageTooltipVisibility, 50);
+            });
             map.on('resize', () => setTimeout(manageTooltipVisibility, 50));
         } catch (err) {
             console.error('Error initializing map:', err);
