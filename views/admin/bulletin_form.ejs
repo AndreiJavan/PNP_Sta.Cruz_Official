@@ -189,13 +189,13 @@
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
         
-        const confirmFn = window.strategicConfirm || (async (args) => {
-            return confirm(args?.message || `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`);
+        const confirmFn = window.systemConfirm || (async (args) => {
+            return confirm(args?.message || `Confirm ${action} of this bulletin. This will be visible to all users.`);
         });
         
         const confirmed = await confirmFn({
             title: isEdit ? 'Update Confirmation' : 'Post Confirmation',
-            message: `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`,
+            message: `Confirm ${action} of this bulletin. This will be visible to all users.`,
             confirmText: isEdit ? 'Update Now' : 'Post Now',
             type: 'info'
         });
