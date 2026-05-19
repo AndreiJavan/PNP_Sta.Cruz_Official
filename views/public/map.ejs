@@ -157,7 +157,7 @@
 
     function locateBarangay(shouldMinimize = true) {
         const selectedName = document.getElementById('filterBarangay').value;
-        
+
         // Always clear any currently drawn selected pins first!
         selectedPinsLayer.clearLayers();
 
@@ -187,7 +187,7 @@
             map.scrollWheelZoom.enable();
             map.boxZoom.enable();
             map.keyboard.enable();
-            
+
             // Minimize sidebar to view the whole map if requested
             const sidebar = document.getElementById('filterSidebar');
             if (shouldMinimize && sidebar && sidebar.classList.contains('sidebar-visible')) {
@@ -569,6 +569,22 @@
                                         fillOpacity: 0.1,
                                         weight: 2
                                     });
+                                },
+                                click: function (e) {
+                                    if (map) {
+                                        map.dragging.enable();
+                                        map.touchZoom.enable();
+                                        map.doubleClickZoom.enable();
+                                        map.scrollWheelZoom.enable();
+                                        map.boxZoom.enable();
+                                        map.keyboard.enable();
+                                    }
+                                    const barangaySelect = document.getElementById('filterBarangay');
+                                    if (barangaySelect) {
+                                        barangaySelect.value = name;
+                                        loadMapPoints(false); // Update stats without relocating yet
+                                        locateBarangay(); // Now do the fancy locate animation
+                                    }
                                 }
                             });
 

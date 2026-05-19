@@ -158,9 +158,9 @@
         let masterBorderLayer;
         let activeCategory = '8-Focus';
 
-        const pointsData = <%- JSON.stringify(safePoints) %>;
-        const palettes = <%- JSON.stringify(palettes) %>;
-        const allColors = <%- JSON.stringify(allColors) %>;
+        const pointsData = <% - JSON.stringify(safePoints) %>;
+        const palettes = <% - JSON.stringify(palettes) %>;
+        const allColors = <% - JSON.stringify(allColors) %>;
         const barangayGeoJsonUrl = '/data/santa_cruz_boundaries.json';
 
         const manualPins = [
@@ -380,6 +380,18 @@
                         onEachFeature: (f, l) => {
                             l.on('mouseover', (e) => { e.target.setStyle({ weight: 4, color: '#FFFFFF' }); e.target.bringToFront(); });
                             l.on('mouseout', (e) => { e.target.setStyle(getThematicStyleForFeature(f)); });
+                            l.on('click', (e) => {
+                                const normalizeBrgyName = (name) => {
+                                    const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+                                    if (match) return `Poblacion ${match[1]} (Barangay ${match[1]})`;
+                                    return name;
+                                };
+                                const brgyName = normalizeBrgyName(f.properties.ADM4_EN);
+                                const pin = manualPins.find(m => m.name === brgyName);
+                                if (pin) {
+                                    map.flyTo([pin.lat, pin.lng], 17);
+                                }
+                            });
                         }
                     }).addTo(map);
                     updateVisualization();
