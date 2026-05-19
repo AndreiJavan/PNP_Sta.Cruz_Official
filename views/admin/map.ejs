@@ -164,6 +164,27 @@
         </div>
     </div>
 
+    <style>
+        .barangay-label-tooltip {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: white !important;
+            font-weight: 900 !important;
+            font-size: 9px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 1), -1px -1px 3px rgba(0, 0, 0, 1), 1px -1px 3px rgba(0, 0, 0, 1), -1px 1px 3px rgba(0, 0, 0, 1) !important;
+            text-align: center;
+            white-space: pre-wrap;
+            line-height: 1.2;
+        }
+
+        .barangay-label-tooltip::before,
+        .barangay-label-tooltip::after {
+            display: none !important;
+        }
+    </style>
     <script>
         let map;
         let incidentLayer = L.layerGroup();
@@ -456,6 +477,19 @@
                     barangayLayer = L.geoJSON(data, {
                         style: { fillOpacity: 0, weight: 1, color: '#C8A415' },
                         onEachFeature: (f, l) => {
+                            let name = f.properties.ADM4_EN;
+                            const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+                            if (match) name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
+                            const displayName = name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+
+                            l.bindTooltip(displayName, {
+                                permanent: true,
+                                direction: 'center',
+                                className: 'barangay-label-tooltip',
+                                opacity: 1,
+                                interactive: false
+                            });
+
                             l.on('mouseover', (e) => { e.target.setStyle({ weight: 4, color: '#FFFFFF' }); e.target.bringToFront(); });
                             l.on('mouseout', (e) => { e.target.setStyle(getThematicStyleForFeature(f)); });
                             l.on('click', (e) => {
