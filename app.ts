@@ -29,7 +29,16 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet({
-  contentSecurityPolicy: false, // Disabled to prevent blocking external CDNs like Leaflet/Mapbox/Supabase
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      "script-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://cdn.tailwindcss.com"],
+      "style-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://unpkg.com", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com", "https://cdn.tailwindcss.com"],
+      "font-src": ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+      "img-src": ["'self'", "data:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.supabase.co", "https://a.tile.openstreetmap.org", "https://b.tile.openstreetmap.org", "https://c.tile.openstreetmap.org"],
+      "connect-src": ["'self'", "https://*.supabase.co"]
+    },
+  },
   crossOriginEmbedderPolicy: false
 }));
 
@@ -54,13 +63,13 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Session
 app.use(session({
   secret: process.env.SESSION_SECRET || 'cpicrs-local-development-secret-key-2026',
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   rolling: true,
   name: 'cpicrs_sid',
   proxy: true,
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 30 * 24 * 60 * 60 * 1000,
   }

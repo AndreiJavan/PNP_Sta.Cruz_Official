@@ -3,105 +3,12 @@ import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import mammoth from 'mammoth';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { VALID_BARANGAYS, MANUAL_PINS } from '../constants/tactical_assets.js';
+import { extractTacticalData } from '../services/aiService.js';
+import { logAction } from '../services/auditService.js';
 import { createRequire } from 'module';
 
-// Shared Tactical Assets
-const VALID_BARANGAYS = [
-  "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
-  "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
-  "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)",
-  "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur",
-  "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
-];
 
-// Audit Strategy
-async function logAction(req: Request, action: string, details: string) {
-  try {
-    const adminId = req.session?.user?.id || null;    // null avoids UUID FK violation when no session
-    const adminUsername = req.session?.user?.username || 'system';
-    const ip = req.ip || '0.0.0.0';
-
-    await db.collection('audit_logs').add({
-      admin_id: adminId,
-      username: adminUsername,
-      action,
-      details,
-      timestamp: new Date().toISOString(),
-      created_at: new Date().toISOString()
-    });
-  } catch (err) {
-    console.error('[AUDIT FAIL]', err);
-  }
-}
-
-const MANUAL_PINS = [
-  { name: 'Alipit', lat: 14.223931, lng: 121.405213 }, { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
-  { name: 'Duhat', lat: 14.2525, lng: 121.3825 }, { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
-  { name: 'Calios', lat: 14.2750, lng: 121.4050 }, { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
-  { name: 'Jasaan', lat: 14.223577, lng: 121.394827 }, { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
-  { name: 'Malinao', lat: 14.232833, lng: 121.396823 }, { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
-  { name: 'Pagsawitan', lat: 14.265754, lng: 121.426545 }, { name: 'Palasan', lat: 14.257498, lng: 121.418992 },
-  { name: 'Patimbao', lat: 14.270081, lng: 121.418366 }, { name: 'Poblacion I (Barangay I)', lat: 14.277068, lng: 121.418881 },
-  { name: 'Poblacion II (Barangay II)', lat: 14.279647, lng: 121.416006 }, { name: 'Poblacion III (Barangay III)', lat: 14.282028, lng: 121.415159 },
-  { name: 'Poblacion IV (Barangay IV)', lat: 14.283790, lng: 121.414016 }, { name: 'Poblacion V (Barangay V)', lat: 14.285282, lng: 121.412476 },
-  { name: 'San Jose', lat: 14.237118, lng: 121.403754 }, { name: 'San Juan', lat: 14.243815, lng: 121.406972 },
-  { name: 'San Pablo Norte', lat: 14.290210, lng: 121.413023 }, { name: 'San Pablo Sur', lat: 14.282211, lng: 121.422261 },
-  { name: 'Santisima Cruz', lat: 14.290647, lng: 121.409140 }, { name: 'Santo Angel Central', lat: 14.285137, lng: 121.408947 },
-  { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 }, { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
-];
-
-// Initialize AI
-let genAI: GoogleGenerativeAI | null = null;
-
-function getGeminiClient() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not defined. Please configure it in your environment variables.');
-  }
-
-  if (!apiKey.startsWith('AIza')) {
-    console.warn('CRITICAL WARNING: GEMINI_API_KEY does not appear to be a valid Google API Key format (expected to start with "AIza").');
-  }
-
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(apiKey);
-  }
-  return genAI;
-}
-
-/**
- * Robust JSON extraction from AI response.
- * Handles cases where the model wraps JSON in markdown blocks.
- */
-function cleanAndParseJSON(text: string) {
-  try {
-    // Try direct parse first
-    return JSON.parse(text);
-  } catch (e) {
-    // Attempt to extract JSON from markdown blocks
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (jsonMatch && jsonMatch[1]) {
-      try {
-        return JSON.parse(jsonMatch[1]);
-      } catch (innerError) {
-        throw new Error('Failed to parse JSON inside markdown blocks.');
-      }
-    }
-
-    // Last ditch effort: find anything between brackets
-    const bracketMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-    if (bracketMatch && bracketMatch[1]) {
-      try {
-        return JSON.parse(bracketMatch[1]);
-      } catch (innerError) {
-        throw new Error('Failed to parse JSON using bracket extraction.');
-      }
-    }
-
-    throw new Error('AI response is not valid JSON format.');
-  }
-}
 
 export const getLogin = (req: Request, res: Response) => {
   if (req.session.user) return res.redirect('/admin/dashboard');
@@ -171,201 +78,33 @@ export const getLogout = (req: Request, res: Response) => {
 export const processAIExtraction = async (req: Request, res: Response) => {
   try {
     let textContent = '';
-    console.log('AI Extraction Request received. File present:', !!(req as any).file);
+    const file = (req as any).file;
 
-    if ((req as any).file) {
-      const buffer = (req as any).file.buffer;
-      const mimetype = (req as any).file.mimetype;
-      console.log('Processing file of type:', mimetype);
+    if (file) {
+      const buffer = file.buffer;
+      const mimetype = file.mimetype;
 
-      if (
-        mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        mimetype === 'application/vnd.ms-excel' ||
-        mimetype === 'text/csv' ||
-        mimetype === 'application/octet-stream' ||
-        mimetype.includes('excel') ||
-        mimetype.includes('spreadsheet')
-      ) {
-        console.log('Processing Excel/CSV data');
+      if (mimetype.includes('excel') || mimetype.includes('spreadsheet') || mimetype === 'text/csv') {
         const workbook = XLSX.read(buffer, { type: 'buffer' });
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName];
           textContent += `[Sheet: ${sheetName}]\n` + XLSX.utils.sheet_to_csv(sheet) + '\n';
         });
-        console.log('Excel text extracted. Length:', textContent.length);
-      } else if (
-        mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-        mimetype === 'application/msword'
-      ) {
-        console.log('Processing Word document');
+      } else if (mimetype.includes('word') || mimetype === 'application/msword') {
         const result = await mammoth.extractRawText({ buffer });
         textContent = result.value;
-        console.log('Word text extracted. Length:', textContent.length);
       } else {
-        console.warn('Blocked unsupported mimetype:', mimetype);
-        return res.status(400).json({ success: false, error: `Unsupported file type (${mimetype}). Please use Excel or DOCX.` });
+        return res.status(400).json({ success: false, error: `Unsupported file type (${mimetype}).` });
       }
     } else if (req.body.data) {
       textContent = req.body.data;
     }
 
-    if (!textContent || textContent.trim().length === 0) {
-      console.warn('Extraction failed: No text content found.');
-      return res.status(400).json({ success: false, error: 'Target document contains no readable text data.' });
+    if (!textContent?.trim()) {
+      return res.status(400).json({ success: false, error: 'No readable text content found.' });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
-      console.error('CRITICAL: GEMINI_API_KEY is missing from environment.');
-      return res.status(500).json({ success: false, error: 'Neural Engine Error: API Key not configured. Please add GEMINI_API_KEY to your environment.' });
-    }
-
-    const client = getGeminiClient();
-
-    // Primary: Gemini 2.0 Flash (Fastest/Latest)
-    // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
-    const primaryModel = 'gemini-2.0-flash';
-    const fallbackModel = 'gemini-2.0-flash-lite';
-
-    console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
-    let model = client.getGenerativeModel({ model: primaryModel });
-
-    const prompt = `
-ROLE:
-You are a strict data extraction engine for a law enforcement crime information system.
-
-You ONLY extract structured crime incident data from the provided text.
-You DO NOT explain. You DO NOT add comments. You DO NOT hallucinate.
-
----
-
-LOCATION CONTEXT:
-Santa Cruz, Laguna, Philippines
-
----
-
-VALID BARANGAYS (STRICT MATCH ONLY):
-Alipit, Bagumbayan, Bubukal, Calios, Duhat, Gatid, Jasaan, Labuin, Malinao, Oogong, Pagsawitan, Palasan, Patimbao, Poblacion I (Barangay I), Poblacion II (Barangay II), Poblacion III (Barangay III), Poblacion IV (Barangay IV), Poblacion V (Barangay V), San Jose, San Juan, San Pablo Norte, San Pablo Sur, Santisima Cruz, Santo Angel Central, Santo Angel Norte, Santo Angel Sur
-
----
-
-CLASSIFICATION RULES:
-
-1. 8-Focus Crimes:
-Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping (Motor Vehicle or Motorcycle)
-
-2. PSI (Public Safety Index):
-Vehicular Accident, Traffic Incident, Fire Incident
-
-3. Non-Index:
-All other incidents
-
----
-
-EXTRACTION RULES:
-
-- Extract ONLY real incidents explicitly stated in the text
-- DO NOT create or assume missing data
-- If date is missing, use null
-- Normalize date format to: YYYY-MM-DD
-- Barangay MUST match EXACTLY from the valid list
-- If barangay is unclear or not in list, SKIP the record
-- Categorize strictly based on rules above
-- If unsure, use "Non-Index"
-- Remove duplicate incidents
-- Keep descriptions short but meaningful
-
----
-
-CRITICAL OUTPUT RULES:
-
-- Output MUST be valid JSON
-- NO markdown (no \`\`\` blocks)
-- NO explanations
-- NO extra text
-- NO comments
-- NO trailing commas
-
----
-
-OUTPUT FORMAT (STRICT):
-
-{
-  "barangays": {
-    "BarangayName": [
-      {
-        "date": "YYYY-MM-DD",
-        "offense": "string",
-        "category": "8-Focus | PSI | Non-Index",
-        "description": "string"
-      }
-    ]
-  }
-}
-
----
-
-INPUT DATA STARTS BELOW:
-    `;
-
-    let result;
-    try {
-      result = await model.generateContent([prompt, textContent]);
-    } catch (apiErr: any) {
-      console.warn(`[RECOVERY] Primary model ${primaryModel} failed. Attempting fallback to ${fallbackModel}...`);
-      try {
-        model = client.getGenerativeModel({ model: fallbackModel });
-        result = await model.generateContent([prompt, textContent]);
-      } catch (fallbackErr: any) {
-        console.error('Gemini API Fallback Error:', fallbackErr);
-        if (apiErr.message?.includes('unregistered callers') || fallbackErr.message?.includes('unregistered callers')) {
-          throw new Error('API Key is rejected. Ensure your GEMINI_API_KEY is properly configured in settings.');
-        }
-        throw new Error('The scanning engine is currently under high demand. Please attempt extraction again in a few moments.');
-      }
-    }
-
-    const responseText = result.response.text();
-    console.log('AI Raw Response received. Length:', responseText.length);
-
-    let aiParsed;
-    try {
-      aiParsed = cleanAndParseJSON(responseText);
-    } catch (parseError: any) {
-      console.error('JSON Parse Error from AI:', responseText);
-      throw new Error(`Failed to extract structured data: ${parseError.message}`);
-    }
-
-    const flattened: any[] = [];
-    const barangayData = aiParsed.barangays || aiParsed;
-
-    for (const [brgy, incidents] of Object.entries(barangayData)) {
-      if (Array.isArray(incidents)) {
-        incidents.forEach((inc: any) => {
-          // Normalize barangay name
-          let normalizedBrgy = brgy.trim();
-          if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-          if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-
-          // Try to find the best match in VALID_BARANGAYS
-          const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-          if (exactMatch) {
-            normalizedBrgy = exactMatch;
-          } else {
-            const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-            if (partialMatch) normalizedBrgy = partialMatch;
-          }
-
-          flattened.push({
-            barangay: normalizedBrgy,
-            date_committed: inc.date || inc.date_committed || new Date().toISOString().split('T')[0],
-            offense: inc.offense || inc.incident_type || "Unknown Incident",
-            category: inc.category || (inc.offense && ['Theft', 'Robbery', 'Murder', 'Homicide', 'Physical Injury', 'Rape', 'Carnapping'].some(t => String(inc.offense).includes(t)) ? '8-Focus' : 'Non-Index'),
-            description: inc.description || ""
-          });
-        });
-      }
-    }
-
+    const flattened = await extractTacticalData(textContent);
     return res.json({ success: true, data: flattened });
   } catch (err: any) {
     console.error('AI Processing Error:', err);
@@ -720,11 +459,19 @@ export const postEditBulletin = async (req: Request, res: Response) => {
 
 export const deleteBulletin = async (req: Request, res: Response) => {
   try {
-    await logAction(req, 'BULLETIN_DELETE', `Deleted bulletin ID: ${req.params.id}`);
-    await db.collection('bulletins').doc(req.params.id).delete();
+    const { id } = req.params;
+    await logAction(req, 'BULLETIN_DELETE', `Deleted bulletin ID: ${id}`);
+    await db.collection('bulletins').doc(id).delete();
+
+    if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+      return res.json({ success: true, message: 'Directive purged successfully' });
+    }
     res.redirect('/admin/bulletins');
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+    if (req.xhr || req.headers.accept?.indexOf('json') !== -1) {
+      return res.status(500).json({ success: false, message: err.message });
+    }
     res.status(500).send('Error deleting bulletin');
   }
 };

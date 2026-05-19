@@ -135,7 +135,7 @@
                             <% } else { %>
                                 <% displayReports.sort((a,b)=> new Date(b.timestamp).getTime() - new
                                     Date(a.timestamp).getTime()).forEach(report => { %>
-                                    <tr
+                                    <tr id="report-<%= report.id %>"
                                         class="hover:bg-pnp-blue/5 dark:hover:bg-slate-800/40 transition-all group relative overflow-hidden">
                                         <td class="px-8 py-6">
                                             <div class="flex flex-col">
@@ -800,6 +800,7 @@
         window.confirmDeleteReport = async function (event, reportId) {
             if (event) event.preventDefault();
 
+            const row = document.getElementById(`report-${reportId}`);
             const btn = document.querySelector(`#deleteReportForm_${reportId} button`);
             if (btn && btn.disabled) return false;
 
@@ -815,8 +816,44 @@
                     btn.disabled = true;
                     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 }
-                const form = document.getElementById(`deleteReportForm_${reportId}`);
-                if (form) form.submit();
+                if (row) row.style.opacity = '0.5';
+
+                try {
+                    const res = await fetch(`/admin/reports/${reportId}/delete`, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        if (row) {
+                            row.style.transform = 'translateX(30px)';
+                            row.style.opacity = '0';
+                            setTimeout(() => {
+                                row.remove();
+                                // Check if no rows left
+                                const tbody = document.querySelector('tbody.divide-y');
+                                if (tbody && tbody.children.length === 0) {
+                                    location.reload(); // Show the 'no signals found' message
+                                }
+                            }, 400);
+                        }
+                    } else {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-trash-alt text-xs"></i>';
+                        }
+                        if (row) row.style.opacity = '1';
+                        alert('Disk Sync Failure: ' + (result.message || 'Operation failed'));
+                    }
+                } catch (err) {
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-trash-alt text-xs"></i>';
+                    }
+                    if (row) row.style.opacity = '1';
+                    console.error(err);
+                    alert('Connection error: Neural link unstable');
+                }
             }
             return false;
         }

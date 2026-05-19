@@ -45,7 +45,7 @@ export const getMapPoints = async (req: Request, res: Response) => {
     let dateLimit;
     if (range === '7days') dateLimit = new Date(now.setDate(now.getDate() - 7));
     else if (range === '30days') dateLimit = new Date(now.setDate(now.getDate() - 30));
-    else if (range === '6months') dateLimit = new Date(now.setMonth(now.getMonth() - 6));
+    else if (range === '3months') dateLimit = new Date(now.setMonth(now.getMonth() - 3));
 
     if (dateLimit) {
       query = query.where('incident_date', '>=', dateLimit.toISOString());
