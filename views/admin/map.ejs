@@ -40,6 +40,18 @@
                     <!-- Category Filtering System -->
                     <div class="space-y-4">
                         <div class="space-y-2">
+                            <label class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black px-1">Map
+                                Display Mode</label>
+                            <div class="relative group">
+                                <select id="mapDisplayMode" onchange="updateVisualization()"
+                                    class="w-full px-4 py-3 bg-gray-100 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-[11px] font-black dark:text-white appearance-none uppercase tracking-[0.15em] cursor-pointer hover:bg-gray-200 dark:hover:bg-slate-750 transition-all">
+                                    <option value="density">Incident Density (Heatmap: Green to Red)</option>
+                                    <option value="dominant">Dominant Crime Type</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
                             <label class="text-[10px] text-gray-400 uppercase tracking-[0.2em] font-black px-1">Primary
                                 Intelligence Category</label>
                             <div class="relative group">
@@ -60,95 +72,86 @@
                     <!-- Intelligence Legend -->
                     <div class="mb-4">
                         <div id="dynamicLegend"
-                            class="grid grid-cols-2 gap-2 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-inner">
+                            class="grid grid-cols-1 md:grid-cols-2 gap-2 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-inner">
                             <!-- Legend items -->
                         </div>
                     </div>
 
-                    <div id="registryContent" class="p-4 flex-grow overflow-y-auto custom-scrollbar">
-                        <!-- Intelligence Legend -->
-                        <div class="mb-4">
-                            <div id="dynamicLegend"
-                                class="grid grid-cols-2 gap-2 bg-gray-50 dark:bg-slate-800/50 p-4 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-inner">
-                                <!-- Legend items -->
-                            </div>
+                    <!-- Unified Tactical Command Stream -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between px-2">
+                            <h3
+                                class="text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] flex items-center">
+                                <i class="fas fa-tower-broadcast mr-2 text-[10px] animate-pulse"></i>
+                                <span>Tactical Command Stream</span>
+                            </h3>
+                            <span id="incidentCount"
+                                class="text-[9px] font-black text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">REAL-TIME
+                                MONITORING</span>
                         </div>
 
-                        <!-- Unified Tactical Command Stream -->
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between px-2">
-                                <h3
-                                    class="text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] flex items-center">
-                                    <i class="fas fa-tower-broadcast mr-2 text-[10px] animate-pulse"></i>
-                                    <span>Tactical Command Stream</span>
-                                </h3>
-                                <span id="incidentCount"
-                                    class="text-[9px] font-black text-slate-500 bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">REAL-TIME
-                                    MONITORING</span>
-                            </div>
-
-                            <div id="unifiedRegistryBody" class="space-y-2">
-                                <!-- Dynamic Intelligence Cards -->
-                            </div>
+                        <div id="unifiedRegistryBody" class="space-y-2">
+                            <!-- Dynamic Intelligence Cards -->
                         </div>
                     </div>
                 </div>
-
-                <!-- Quick Actions Footer -->
-                <div
-                    class="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex space-x-3">
-                    <a href="/admin/reports"
-                        class="flex-grow py-4 bg-pnp-blue text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 shadow-lg shadow-pnp-blue/20 hover:scale-[1.02] active:scale-95">
-                        <i class="fas fa-plus"></i>
-                        <span>Add Incident</span>
-                    </a>
-                    <button onclick="toggleMapExpansion()"
-                        class="w-14 h-14 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm hover:bg-gray-100 transition-all">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                </div>
             </div>
 
-            <!-- Interactive Map (Right) -->
-            <div id="mapWrapper"
-                class="flex-grow h-full relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 transition-all duration-500 z-10">
-                <div id="leafletMap" class="w-full h-full z-0 cursor-default"></div>
-
-                <!-- Minimize Button -->
-                <button id="minimizeMap" onclick="toggleMapExpansion(event)"
-                    class="absolute top-6 right-6 z-[10001] w-12 h-12 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold hover:scale-110 transition-all hidden">
-                    <i class="fas fa-compress-alt"></i>
+            <!-- Quick Actions Footer -->
+            <div
+                class="p-6 border-t border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 flex space-x-3">
+                <a href="/admin/reports"
+                    class="flex-grow py-4 bg-pnp-blue text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center space-x-3 shadow-lg shadow-pnp-blue/20 hover:scale-[1.02] active:scale-95">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Incident</span>
+                </a>
+                <button onclick="toggleMapExpansion()"
+                    class="w-14 h-14 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm hover:bg-gray-100 transition-all">
+                    <i class="fas fa-expand"></i>
                 </button>
-
-                <!-- Map Floating Controls -->
-                <div class="absolute bottom-6 right-6 z-[1000] flex flex-col space-y-2">
-                    <div
-                        class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700 flex flex-col space-y-1">
-                        <button onclick="map.zoomIn()"
-                            class="w-10 h-10 rounded-xl hover:bg-pnp-blue hover:text-white transition-all text-pnp-blue dark:text-pnp-gold"><i
-                                class="fas fa-plus"></i></button>
-                        <button onclick="map.zoomOut()"
-                            class="w-10 h-10 rounded-xl hover:bg-pnp-blue hover:text-white transition-all text-pnp-blue dark:text-pnp-gold"><i
-                                class="fas fa-minus"></i></button>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Map Loading Layer -->
-        <div id="mapLoading"
-            class="absolute inset-0 bg-slate-950 z-[12000] flex flex-col items-center justify-center text-white transition-opacity duration-700 pointer-events-none">
-            <div class="relative w-24 h-24 mb-6">
-                <div class="absolute inset-0 border-4 border-pnp-gold/20 rounded-full"></div>
-                <div class="absolute inset-0 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin">
-                </div>
-                <div class="absolute inset-4 bg-pnp-blue rounded-full flex items-center justify-center">
-                    <i class="fas fa-shield-halved text-xl text-pnp-gold animate-pulse"></i>
+        <!-- Interactive Map (Right) -->
+        <div id="mapWrapper"
+            class="flex-grow h-full relative rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 transition-all duration-500 z-10">
+            <div id="leafletMap" class="w-full h-full z-0 cursor-default"></div>
+
+            <!-- Minimize Button -->
+            <button id="minimizeMap" onclick="toggleMapExpansion(event)"
+                class="absolute top-6 right-6 z-[10001] w-12 h-12 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl shadow-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold hover:scale-110 transition-all hidden">
+                <i class="fas fa-compress-alt"></i>
+            </button>
+
+            <!-- Map Floating Controls -->
+            <div class="absolute bottom-6 right-6 z-[1000] flex flex-col space-y-2">
+                <div
+                    class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-white/20 dark:border-slate-700 flex flex-col space-y-1">
+                    <button onclick="map.zoomIn()"
+                        class="w-10 h-10 rounded-xl hover:bg-pnp-blue hover:text-white transition-all text-pnp-blue dark:text-pnp-gold"><i
+                            class="fas fa-plus"></i></button>
+                    <button onclick="map.zoomOut()"
+                        class="w-10 h-10 rounded-xl hover:bg-pnp-blue hover:text-white transition-all text-pnp-blue dark:text-pnp-gold"><i
+                            class="fas fa-minus"></i></button>
                 </div>
             </div>
-            <p class="text-[10px] font-black uppercase tracking-[0.4em] text-pnp-gold animate-pulse">Initializing
-                Command Center Grid</p>
         </div>
+    </div>
+
+    <!-- Map Loading Layer -->
+    <div id="mapLoading"
+        class="absolute inset-0 bg-slate-950 z-[12000] flex flex-col items-center justify-center text-white transition-opacity duration-700 pointer-events-none">
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 border-4 border-pnp-gold/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin">
+            </div>
+            <div class="absolute inset-4 bg-pnp-blue rounded-full flex items-center justify-center">
+                <i class="fas fa-shield-halved text-xl text-pnp-gold animate-pulse"></i>
+            </div>
+        </div>
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-pnp-gold animate-pulse">Initializing
+            Command Center Grid</p>
+    </div>
     </div>
 
     <script>
@@ -206,15 +209,32 @@
         }
 
         function updateVisualization() {
+            const mode = document.getElementById('mapDisplayMode').value;
             // 1. Update Legend
             const legend = document.getElementById('dynamicLegend');
             const currentPalette = palettes[activeCategory];
-            legend.innerHTML = Object.entries(currentPalette).map(([name, color]) => `
-            <div class="flex items-center space-x-3 px-1">
-                <div class="w-3 h-3 rounded-full shadow-md shrink-0" style="background-color: ${color}"></div>
-                <span class="text-[9px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200 truncate">${name}</span>
-            </div>
-        `).join('');
+            if (mode === 'density') {
+                legend.innerHTML = `
+                <div class="flex items-center space-x-2 px-1">
+                    <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#EF4444]"></div><span class="text-[9px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">High</span>
+                </div>
+                <div class="flex items-center space-x-2 px-1">
+                    <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#F97316]"></div><span class="text-[9px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Moderate</span>
+                </div>
+                <div class="flex items-center space-x-2 px-1">
+                    <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#FBBF24]"></div><span class="text-[9px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Low</span>
+                </div>
+                <div class="flex items-center space-x-2 px-1">
+                    <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#10B981]"></div><span class="text-[9px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Minimal</span>
+                </div>`;
+            } else {
+                legend.innerHTML = Object.entries(currentPalette).map(([name, color]) => `
+                <div class="flex items-center space-x-3 px-1 py-1">
+                    <div class="w-2.5 h-2.5 rounded-full shadow-md shrink-0" style="background-color: ${color}"></div>
+                    <span class="text-[9px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200 truncate" title="${name}">${name}</span>
+                </div>
+                `).join('');
+            }
 
             // 2. Update Map Layers
             incidentLayer.clearLayers();
@@ -345,21 +365,45 @@
             const brgyName = normalizeBrgyName(feature.properties.ADM4_EN);
             const brgyPoints = pointsData.filter(p => p.barangay === brgyName && p.category === activeCategory);
 
+            const mode = document.getElementById('mapDisplayMode').value;
             let fillColor = 'transparent';
             let weight = 1;
             let fillOpacity = 0;
+            const totalIncidents = brgyPoints.length;
 
-            if (brgyPoints.length > 0) {
-                const stats = {};
-                brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
-                const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
-                fillColor = getTacticalColor(topCrime[0]);
-                fillOpacity = 0.6;
-                weight = 2;
+            if (mode === 'density') {
+                const allPointsInCategory = pointsData.filter(p => p.category === activeCategory);
+                const allCounts = Object.values(allPointsInCategory.reduce((acc, curr) => {
+                    acc[curr.barangay] = (acc[curr.barangay] || 0) + 1;
+                    return acc;
+                }, {}));
+                const max = Math.max(...allCounts, 1);
+
+                if (totalIncidents === 0) {
+                    weight = 1; fillOpacity = 0.05; fillColor = 'rgba(15, 23, 42, 0.5)';
+                } else {
+                    const ratio = totalIncidents / max;
+                    if (ratio >= 0.75) fillColor = '#EF4444';
+                    else if (ratio >= 0.40) fillColor = '#F97316';
+                    else if (ratio >= 0.15) fillColor = '#FBBF24';
+                    else fillColor = '#10B981';
+
+                    fillOpacity = 0.6;
+                    weight = 2;
+                }
             } else {
-                weight = 1;
-                fillOpacity = 0.05;
-                fillColor = 'rgba(15, 23, 42, 0.5)';
+                if (totalIncidents > 0) {
+                    const stats = {};
+                    brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+                    const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
+                    fillColor = getTacticalColor(topCrime[0]);
+                    fillOpacity = 0.6;
+                    weight = 2;
+                } else {
+                    weight = 1;
+                    fillOpacity = 0.05;
+                    fillColor = 'rgba(15, 23, 42, 0.5)';
+                }
             }
             return { color: '#C8A415', weight: weight, fillOpacity: fillOpacity, fillColor: fillColor };
         }
