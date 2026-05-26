@@ -27,73 +27,84 @@
             </button>
         </div>
 
-        <div class="p-5 space-y-5">
-            <div class="space-y-3">
-                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter
-                    Incidents</label>
-                <div class="space-y-2">
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase">Barangay</label>
-                        <div class="flex space-x-2">
-                            <select id="filterBarangay" onchange="loadMapPoints()"
-                                class="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
-                                <option value="">All Barangays</option>
-                                <option value="Alipit">Alipit</option>
-                                <option value="Bagumbayan">Bagumbayan</option>
-                                <option value="Bubukal">Bubukal</option>
-                                <option value="Calios">Calios</option>
-                                <option value="Duhat">Duhat</option>
-                                <option value="Gatid">Gatid</option>
-                                <option value="Jasaan">Jasaan</option>
-                                <option value="Labuin">Labuin</option>
-                                <option value="Malinao">Malinao</option>
-                                <option value="Oogong">Oogong</option>
-                                <option value="Pagsawitan">Pagsawitan</option>
-                                <option value="Palasan">Palasan</option>
-                                <option value="Patimbao">Patimbao</option>
-                                <option value="Poblacion I (Barangay I)">Poblacion I (Barangay I)</option>
-                                <option value="Poblacion II (Barangay II)">Poblacion II (Barangay II)</option>
-                                <option value="Poblacion III (Barangay III)">Poblacion III (Barangay III)</option>
-                                <option value="Poblacion IV (Barangay IV)">Poblacion IV (Barangay IV)</option>
-                                <option value="Poblacion V (Barangay V)">Poblacion V (Barangay V)</option>
-                                <option value="San Jose">San Jose</option>
-                                <option value="San Juan">San Juan</option>
-                                <option value="San Pablo Norte">San Pablo Norte</option>
-                                <option value="San Pablo Sur">San Pablo Sur</option>
-                                <option value="Santisima Cruz">Santisima Cruz</option>
-                                <option value="Santo Angel Central">Santo Angel Central</option>
-                                <option value="Santo Angel Norte">Santo Angel Norte</option>
-                                <option value="Santo Angel Sur">Santo Angel Sur</option>
+        <div class="flex-grow overflow-y-auto sidebar-scroll">
+            <div class="p-5 space-y-5">
+                <div class="space-y-3">
+                    <label
+                        class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter
+                        Incidents</label>
+                    <div class="space-y-2">
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-gray-400 uppercase">Barangay</label>
+                            <div class="flex space-x-2">
+                                <select id="filterBarangay"
+                                    class="flex-1 px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none">
+                                    <option value="">All Barangays</option>
+                                    <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
+                                        , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
+                                        , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
+                                        , "Poblacion III (Barangay III)" , "Poblacion IV (Barangay IV)"
+                                        , "Poblacion V (Barangay V)" , "San Jose" , "San Juan" , "San Pablo Norte"
+                                        , "San Pablo Sur" , "Santisima Cruz" , "Santo Angel Central"
+                                        , "Santo Angel Norte" , "Santo Angel Sur" ].forEach(brgy=> { %>
+                                        <option value="<%= brgy %>">
+                                            <%= brgy %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                                <button onclick="locateBarangay()"
+                                    class="px-4 py-2 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center"
+                                    title="Locate on Map">
+                                    <i class="fas fa-crosshairs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold text-gray-400 uppercase">Date Range</label>
+                            <select id="filterRange"
+                                class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none">
+                                <option value="">All Time</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="30days">Last 30 Days</option>
+                                <option value="3months">Last 3 Months</option>
                             </select>
-                            <button onclick="locateBarangay()"
-                                class="px-4 py-2 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center"
-                                title="Locate on Map">
-                                <i class="fas fa-crosshairs"></i>
-                            </button>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold text-gray-400 uppercase">Date Range</label>
-                        <select id="filterRange" onchange="loadMapPoints()"
-                            class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
-                            <option value="">All Time</option>
-                            <option value="7days">Last 7 Days</option>
-                            <option value="30days">Last 30 Days</option>
-                            <option value="6months">Last 6 Months</option>
-                        </select>
+                </div>
+
+                <div class="space-y-3 pt-5 border-t border-gray-100 dark:border-slate-700">
+                    <div class="flex items-center justify-between pointer-events-auto mb-2">
+                        <label
+                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
+                            <i class="fas fa-layer-group mr-2 text-pnp-blue dark:text-pnp-gold"></i> Map Display &
+                            Legend
+                        </label>
+                        <button onclick="clearMapDisplay()"
+                            class="text-[9px] font-black text-gray-500 hover:text-red-500 uppercase transition-colors bg-gray-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1 rounded-lg cursor-pointer">
+                            Clear
+                        </button>
+                    </div>
+
+                    <select id="mapDisplayMode"
+                        class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none cursor-pointer mb-2">
+                        <option value="density">Incident Density (Heatmap: Green to Red)</option>
+                        <option value="dominant">Dominant Crime Type</option>
+                        <option value="clear" class="hidden" disabled>Clear (No Overlay)</option>
+                    </select>
+
+                    <div id="dynamicLegend"
+                        class="grid grid-cols-1 gap-1 bg-gray-50 dark:bg-slate-900/80 p-3 rounded-2xl border border-gray-100 dark:border-slate-700 max-h-32 overflow-y-auto sidebar-scroll">
+                        <p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Loading data...</p>
                     </div>
                 </div>
-            </div>
 
-
-
-
-            <div id="topIncidentsSection" class="space-y-3 pt-5 border-t border-gray-100 dark:border-slate-700">
-                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Top 3
-                    Incidents</label>
-                <p id="topIncidentsRange" class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest"></p>
-                <div id="topIncidentsList" class="space-y-2">
-                    <!-- Top incidents will be injected here -->
+                <div id="topIncidentsSection" class="space-y-3 pt-5 border-t border-gray-100 dark:border-slate-700">
+                    <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Top
+                        3 Incidents</label>
+                    <p id="topIncidentsRange" class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest"></p>
+                    <div id="topIncidentsList" class="space-y-2">
+                        <!-- Top incidents will be injected here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -108,20 +119,169 @@
     </div>
 </div>
 
+<style>
+    .barangay-label-tooltip {
+        background: rgba(15, 23, 42, 0.75) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        font-size: 9px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8) !important;
+        text-align: center;
+        white-space: pre-wrap;
+        line-height: 1.2;
+        padding: 5px 8px !important;
+        z-index: 1000 !important;
+        transition: opacity 0.3s ease-in-out !important;
+    }
+
+    .barangay-label-tooltip::before,
+    .barangay-label-tooltip::after {
+        display: none !important;
+    }
+</style>
+
 <script>
     let map;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
-    const barangayGeoJsonUrl = 'https://raw.githubusercontent.com/faeldon/philippines-json-maps/master/2019/geojson/barangays/medres/barangays-municity-ph043426000.0.01.json';
+    let selectedPinsLayer = L.layerGroup();
+    let policeStationsLayer = L.layerGroup();
+    let boundaryLayerGroup;
+    let currentPoints = [];
+    const barangayGeoJsonUrl = '/data/santa_cruz_boundaries.json';
 
-    const colors = {
-        'Theft': '#dc2626',
-        'Vandalism': '#f97316',
-        'Assault': '#7f1d1d',
-        'Suspicious Activity': '#eab308',
-        'Robbery': '#9333ea',
-        'Other': '#6b7280'
+    const policeStations = [
+        {
+            name: "Sta. Cruz Municipal Police Station (Main HQ)",
+            lat: 14.2785,
+            lng: 121.4136,
+            type: "headquarters",
+            address: "1153 A. Mabini St., Poblacion, Sta. Cruz, Laguna",
+            contact: "(049) 501-5971 / 0928-465-3828"
+        },
+        {
+            name: "Laguna Police Provincial Office (LPPO)",
+            lat: 14.2719,
+            lng: 121.4011,
+            type: "provincial_hq",
+            address: "Camp BGen. Paciano Rizal, Brgy. Bagumbayan, Sta. Cruz, Laguna",
+            contact: "+63 955 452 6392"
+        },
+        {
+            name: "PNP Police Outpost - Pagsawitan Junction",
+            lat: 14.2657,
+            lng: 121.4265,
+            type: "outpost",
+            address: "Manila East Road, Brgy. Pagsawitan, Sta. Cruz, Laguna",
+            contact: "PNP Hotlines Available"
+        },
+        {
+            name: "PNP Police Outpost - Bubukal Rotunda",
+            lat: 14.2565,
+            lng: 121.3992,
+            type: "outpost",
+            address: "Bubukal Junction, Brgy. Bubukal, Sta. Cruz, Laguna",
+            contact: "PNP Hotlines Available"
+        },
+        {
+            name: "PNP Police Outpost - Gatid Highway",
+            lat: 14.2600,
+            lng: 121.3830,
+            type: "outpost",
+            address: "National Highway, Brgy. Gatid, Sta. Cruz, Laguna",
+            contact: "PNP Hotlines Available"
+        }
+    ];
+
+    function addPoliceStations() {
+        policeStationsLayer.clearLayers();
+        policeStations.forEach(station => {
+            const iconHtml = `
+                <div class="relative group flex flex-col items-center">
+                    <div class="absolute w-7 h-7 bg-blue-500/20 rounded-full animate-ping"></div>
+                    <div class="relative w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center shadow-xl border-2 border-white dark:border-slate-900 transform hover:scale-110 transition-all duration-300">
+                        <i class="fas fa-building-shield text-white text-xs"></i>
+                    </div>
+                </div>
+            `;
+            L.marker([station.lat, station.lng], {
+                icon: L.divIcon({
+                    className: 'police-station-marker',
+                    html: iconHtml,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                })
+            }).addTo(policeStationsLayer).bindPopup(`
+                <div class="p-4 min-w-[220px] bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-xl space-y-2.5">
+                    <div class="flex items-center space-x-2.5 pb-2.5 border-b border-gray-100 dark:border-slate-700">
+                        <div class="w-7 h-7 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center shadow-sm">
+                            <i class="fas fa-building-shield text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-wider leading-none">${station.name}</h4>
+                            <span class="text-[7px] font-black uppercase text-blue-500 dark:text-blue-400 tracking-widest mt-1 inline-block">${station.type.replace('_', ' ')}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-[9px]">
+                        <p class="text-slate-500 dark:text-slate-400 leading-relaxed"><strong class="text-slate-750 dark:text-slate-300 font-bold uppercase tracking-wider text-[8px]">Location:</strong><br>${station.address}</p>
+                        <p class="text-slate-500 dark:text-slate-400"><strong class="text-slate-750 dark:text-slate-300 font-bold uppercase tracking-wider text-[8px]">Emergency Hotline:</strong><br>${station.contact}</p>
+                    </div>
+                </div>
+            `, {
+                className: 'police-popup',
+                maxWidth: 260
+            });
+        });
+    }
+
+    const allColors = {
+        'Theft': '#FFE135', 'Robbery': '#D97706', 'Murder': '#FF0000', 'Homicide': '#EF4444',
+        'Physical Injuries': '#10B981', 'Rape': '#A855F7', 'Carnapping (Motorcycle)': '#F59E0B',
+        'Carnapping (Motor Vehicle)': '#F97316', 'Violence Against Women and Children (VAWC)': '#E11D48',
+        'Cybercrime': '#3B82F6', 'Estafa': '#0891B2', 'Swindling / Fraud': '#06B6D4',
+        'Drug Possession': '#059669', 'Drug Sale': '#10B981', 'Drug Use': '#34D399',
+        'Illegal Gambling': '#7C3AED', 'Illegal Possession of Firearms': '#475569',
+        'Human Trafficking': '#DB2777', 'Child Abuse (RA 7610)': '#F43F5E', 'Damage to Property': '#B45309',
+        'Malicious Mischief': '#D97706', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': '#2563EB',
+        'Illegal Recruitment': '#9333EA', 'Ordinance Violations': '#94A3B8', 'Grave Threats': '#64748B',
+        'Alarm and Scandal': '#CBD5E1', 'Vehicular Accident': '#2563EB', 'Road Accident / Traffic Incident': '#1D4ED8',
+        'Fire Incident': '#EA580C', 'Flood Incident': '#3B82F6', 'Earthquake Incident': '#78350F',
+        'Landslide Incident': '#451A03', 'Disaster Incident Reports': '#4B5563', 'Public Disturbance Incident': '#4338CA',
+        'Emergency Response Incident': '#0891B2', 'Missing Person Report': '#0D9488', 'Rescue Operation Cases': '#059669'
     };
+
+    function getBarangayLabel(name, zoom) {
+        const pobMatch = name.match(/Poblacion (I{1,3}|IV|V)/);
+        if (pobMatch) {
+            const romanToNum = { 'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5' };
+            const num = romanToNum[pobMatch[1]];
+            if (zoom < 16) {
+                return `POB. ${num}`;
+            } else {
+                return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+            }
+        }
+        return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+    }
+
+    function getTacticalColor(name) {
+        if (!name) return '#ccc';
+        const searchName = name.trim().toUpperCase();
+        for (const [key, color] of Object.entries(allColors)) {
+            if (key.toUpperCase() === searchName) return color;
+        }
+        for (const [key, color] of Object.entries(allColors)) {
+            if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return color;
+        }
+        return '#ccc';
+    }
 
     function hideLoading() {
         const loading = document.getElementById('mapLoading');
@@ -157,38 +317,8 @@
                     const baseWeight = zoom < 14 ? 10 : (zoom < 16 ? 18 : 30);
                     const glowWeight = baseWeight * 1.8;
 
-                    if (glowLayer) glowLayer.setStyle({ weight: glowWeight });
-                    if (boundaryLayer) boundaryLayer.setStyle({ weight: baseWeight });
+                    // Boundary layers removed by user request
                 };
-
-                // 1. Add an outer glow/shadow for contrast
-                glowLayer = L.geoJSON(boundary.geojson, {
-                    style: {
-                        color: "#000000",
-                        weight: 25,
-                        opacity: 0.25,
-                        fillColor: "transparent",
-                        interactive: false
-                    }
-                }).addTo(map);
-
-                // 2. The main prominent "Pitch Black" border
-                boundaryLayer = L.geoJSON(boundary.geojson, {
-                    style: {
-                        color: "#000000",
-                        weight: 12,
-                        opacity: 1,
-                        fillColor: "rgba(0, 0, 0, 0.05)",
-                        fillOpacity: 0.1,
-                        lineCap: 'round',
-                        lineJoin: 'round',
-                        interactive: false
-                    }
-                }).addTo(map);
-
-                // Update on zoom
-                map.on('zoomend', updateStyles);
-                updateStyles();
 
                 console.log("Municipal boundary successfully rendered (Responsive):", boundary.display_name);
             } else {
@@ -201,6 +331,10 @@
 
     function locateBarangay(shouldMinimize = true) {
         const selectedName = document.getElementById('filterBarangay').value;
+
+        // Always clear any currently drawn selected pins first!
+        selectedPinsLayer.clearLayers();
+
         if (!selectedName) {
             // Reset to default view if "All Barangays" is selected
             const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
@@ -227,6 +361,7 @@
             map.scrollWheelZoom.enable();
             map.boxZoom.enable();
             map.keyboard.enable();
+
             // Minimize sidebar to view the whole map if requested
             const sidebar = document.getElementById('filterSidebar');
             if (shouldMinimize && sidebar && sidebar.classList.contains('sidebar-visible')) {
@@ -238,22 +373,110 @@
                 duration: 1.5
             });
 
+            // Create and show the beautiful gold Tactical Pin for the selected barangay!
+            const tacticalPin = L.marker([pin.lat, pin.lng], {
+                icon: L.divIcon({
+                    className: 'manual-pin-container',
+                    html: `
+                        <div class="relative group flex flex-col items-center">
+                            <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
+                            <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
+                                <i class="fas fa-location-dot text-white dark:text-pnp-blue text-lg"></i>
+                            </div>
+                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                        </div>
+                    `,
+                    iconSize: [40, 48],
+                    iconAnchor: [20, 48]
+                })
+            }).addTo(selectedPinsLayer);
+
+            // Calculate sector stats
+            const brgyPoints = currentPoints.filter(p => p.barangay === pin.name);
+            const totalIncidents = brgyPoints.length;
+
+            const allCounts = Object.values(currentPoints.reduce((acc, curr) => {
+                acc[curr.barangay] = (acc[curr.barangay] || 0) + 1;
+                return acc;
+            }, {}));
+            const max = Math.max(...allCounts, 1);
+
+            let classification = "Minimal Density";
+            let classificationBg = "bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-500 dark:text-emerald-400";
+            if (totalIncidents > 0) {
+                const ratio = totalIncidents / max;
+                if (ratio >= 0.75) {
+                    classification = "High Density";
+                    classificationBg = "bg-rose-500/10 dark:bg-rose-400/10 text-rose-500 dark:text-rose-400";
+                } else if (ratio >= 0.40) {
+                    classification = "Medium-High Density";
+                    classificationBg = "bg-orange-500/10 dark:bg-orange-400/10 text-orange-500 dark:text-orange-400";
+                } else if (ratio >= 0.15) {
+                    classification = "Medium-Low Density";
+                    classificationBg = "bg-amber-500/10 dark:bg-amber-400/10 text-amber-500 dark:text-amber-400";
+                } else {
+                    classification = "Low Density";
+                    classificationBg = "bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-500 dark:text-emerald-400";
+                }
+            } else {
+                classification = "Sector Clear";
+                classificationBg = "bg-slate-500/10 dark:bg-slate-400/10 text-slate-500 dark:text-slate-400";
+            }
+
+            let dominantCrime = "None";
+            let dominantColor = "#94A3B8";
+            let dominantCount = 0;
+            if (totalIncidents > 0) {
+                const stats = {};
+                brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+                const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
+                dominantCrime = topCrime[0];
+                dominantColor = getTacticalColor(topCrime[0]);
+                dominantCount = topCrime[1];
+            }
+
+            tacticalPin.bindPopup(`
+                <div class="p-4 min-w-[220px] bg-white dark:bg-slate-800 rounded-xl space-y-3">
+                    <div class="flex items-center space-x-3 mb-2 pb-2 border-b border-gray-150 dark:border-slate-700">
+                        <div class="w-8 h-8 bg-pnp-blue dark:bg-pnp-gold rounded-lg flex items-center justify-center shadow-md">
+                            <i class="fas fa-shield-halved text-white dark:text-pnp-blue text-xs"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest text-xs leading-none">${pin.name}</h3>
+                            <p class="text-[8px] text-gray-400 font-bold uppercase mt-1">S-SPS Tactical Summary</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="text-gray-500 dark:text-gray-400 font-bold">Total Cases:</span>
+                            <span class="font-black text-slate-850 dark:text-slate-200">${totalIncidents}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="text-gray-500 dark:text-gray-400 font-bold">Density Class:</span>
+                            <span class="px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider ${classificationBg}">
+                                ${classification}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px]">
+                            <span class="text-gray-500 dark:text-gray-400 font-bold">Dominant Incident:</span>
+                            <div class="flex items-center space-x-1">
+                                <span class="w-2 h-2 rounded-full" style="background-color: ${dominantColor}"></span>
+                                <span class="font-black text-slate-800 dark:text-slate-200 uppercase">${dominantCrime}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `);
+
             // Open popup after a short delay to allow flyTo to finish
             setTimeout(() => {
-                map.eachLayer((layer) => {
-                    if (layer instanceof L.Marker) {
-                        const latlng = layer.getLatLng();
-                        if (latlng.lat === pin.lat && latlng.lng === pin.lng) {
-                            layer.openPopup();
-                        }
-                    }
-                });
+                tacticalPin.openPopup();
 
                 // Re-open sidebar to show stats after zoom is complete if it was minimized
                 if (shouldMinimize && sidebar && sidebar.classList.contains('sidebar-hidden')) {
                     toggleSidebar();
                 }
-            }, 1600);
+            }, 1500);
         }
     }
 
@@ -279,22 +502,30 @@
             '': 'All Time',
             '7days': 'Last 7 Days',
             '30days': 'Last 30 Days',
-            '6months': 'Last 6 Months'
+            '3months': 'Last 3 Months'
         };
         if (topIncidentsRange) topIncidentsRange.textContent = rangeText[range] || 'All Time';
 
         try {
-            const url = `/api/map-points?range=${encodeURIComponent(range)}&barangay=${encodeURIComponent(barangay)}`;
+            // Fetch ALL points for the selected range to ensure correct density/heatmap calculations relative to global peak density!
+            const url = `/api/map-points?range=${encodeURIComponent(range)}`;
             const response = await fetch(url);
             const points = await response.json();
 
+            currentPoints = Array.isArray(points) ? points : [];
+            updateHeatmap();
+            updateLegend();
 
             incidentMarkers.clearLayers();
 
-            // Calculate Top 3 Incidents
+            // Calculate Top 3 Incidents based on the selected barangay if one is selected!
+            const statsPoints = barangay
+                ? currentPoints.filter(p => p.barangay.toLowerCase() === barangay.toLowerCase())
+                : currentPoints;
+
             const incidentCounts = {};
-            if (points && Array.isArray(points)) {
-                points.forEach(point => {
+            if (statsPoints.length > 0) {
+                statsPoints.forEach(point => {
                     incidentCounts[point.incident_type] = (incidentCounts[point.incident_type] || 0) + 1;
                 });
             }
@@ -309,7 +540,7 @@
                     ? sortedIncidents.map(([type, count]) => `
                         <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700">
                             <div class="flex items-center space-x-3">
-                                <span class="w-2 h-2 rounded-full" style="background-color: ${colors[type] || '#6b7280'}"></span>
+                                <span class="w-2 h-2 rounded-full" style="background-color: ${getTacticalColor(type)}"></span>
                                 <span class="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest">${type}</span>
                             </div>
                             <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold">${count}</span>
@@ -317,35 +548,6 @@
                     `).join('')
                     : `<p class="text-[10px] text-gray-400 font-bold uppercase text-center py-4">No incidents recorded</p>`;
             }
-
-            // Crime dots are no longer added to the map per user request.
-            // All crimes are visible through the sidebar summary.
-            /*
-            points.forEach(point => {
-                const marker = L.circleMarker([point.lat, point.lng], {
-                    radius: 8,
-                    fillColor: colors[point.incident_type] || '#6b7280',
-                    color: '#FFFFFF',
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                });
-
-                marker.bindPopup(`
-                    <div class="p-2 min-w-[150px]">
-                        <h3 class="text-pnp-blue font-black uppercase tracking-widest text-xs mb-1">${point.incident_type}</h3>
-                        <p class="text-[9px] text-gray-500 font-bold uppercase mb-2">${new Date(point.incident_date).toLocaleDateString()}</p>
-                        <p class="text-[10px] text-gray-700 dark:text-gray-300 font-medium leading-relaxed">
-                            ${point.description || 'No additional details provided.'}
-                        </p>
-                    </div>
-                `);
-
-                incidentMarkers.addLayer(marker);
-            });
-
-            incidentMarkers.addTo(map);
-            */
         } catch (err) {
             console.error('Error loading map points:', err);
         }
@@ -386,6 +588,315 @@
             }
         }
         return isInside;
+    }
+
+    function getThematicStyleForFeature(feature) {
+        const normalizeBrgyName = (name) => {
+            const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+            if (match) return `Poblacion ${match[1]} (Barangay ${match[1]})`;
+            return name;
+        };
+        const brgyName = normalizeBrgyName(feature.properties.ADM4_EN);
+        const brgyPoints = currentPoints.filter(p => p.barangay === brgyName);
+        const modeSelect = document.getElementById('mapDisplayMode');
+        const mode = modeSelect ? modeSelect.value : 'density';
+
+        let fillColor = 'transparent';
+        let weight = 1;
+        let fillOpacity = 0;
+        const totalIncidents = brgyPoints.length;
+
+        if (mode === 'density') {
+            // Find max incidents across all barangays
+            const allCounts = Object.values(currentPoints.reduce((acc, curr) => {
+                acc[curr.barangay] = (acc[curr.barangay] || 0) + 1;
+                return acc;
+            }, {}));
+            const max = Math.max(...allCounts, 1);
+
+            if (totalIncidents === 0) {
+                fillColor = '#10B981'; // Minimal density is Green
+                fillOpacity = 0.7;
+                weight = 2;
+            } else {
+                const ratio = totalIncidents / max; // from >0 to 1
+                if (ratio >= 0.75) fillColor = '#EF4444'; // Red (High Crime)
+                else if (ratio >= 0.40) fillColor = '#F97316'; // Orange (Medium-High)
+                else if (ratio >= 0.15) fillColor = '#FBBF24'; // Yellow (Medium-Low)
+                else fillColor = '#10B981'; // Green (Low)
+
+                fillOpacity = 0.7;
+                weight = 2;
+            }
+        } else if (mode === 'dominant') {
+            // Dominant Crime Type
+            if (totalIncidents > 0) {
+                const stats = {};
+                brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+                const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
+                fillColor = getTacticalColor(topCrime[0]);
+                fillOpacity = 0.6;
+                weight = 2;
+            } else {
+                fillColor = '#94A3B8'; // Slate/Grey for zero incidents
+                fillOpacity = 0.2;
+                weight = 1;
+            }
+        } else {
+            // Clear / No overlay
+            weight = 1;
+            fillOpacity = 0.1;
+            fillColor = '#1A3A5C';
+        }
+
+        const selected = document.getElementById('filterBarangay').value;
+        if (selected && selected !== brgyName) {
+            fillOpacity = 0.05;
+            weight = 1;
+            fillColor = 'rgba(15, 23, 42, 0.5)';
+        }
+
+        return { color: '#C8A415', weight: weight, fillOpacity: fillOpacity, fillColor: fillColor };
+    }
+
+    function updateBarangayLabels() {
+        if (!boundaryLayerGroup || !map) return;
+        const currentZoom = map.getZoom();
+        boundaryLayerGroup.eachLayer(layer => {
+            const feature = layer.feature;
+            if (!feature) return;
+            let name = feature.properties.ADM4_EN;
+            const match = name.match(/Barangay (I{1,3}|IV|V) \(Pob\.\)/);
+            if (match) name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
+
+            const newLabel = getBarangayLabel(name, currentZoom);
+            layer.setTooltipContent(newLabel);
+        });
+    }
+
+    function manageTooltipVisibility() {
+        if (!map) return;
+        // Sorting tooltips to ensure consistent behavior
+        const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
+        const boxes = [];
+
+        tooltips.forEach(t => {
+            const rect = t.getBoundingClientRect();
+            // Skip unrendered elements
+            if (rect.width === 0 && rect.height === 0) return;
+
+            let isColliding = false;
+            const pad = 2; // Extra padding
+
+            for (let i = 0; i < boxes.length; i++) {
+                const b = boxes[i];
+                if (!(rect.right + pad < b.left ||
+                    rect.left - pad > b.right ||
+                    rect.bottom + pad < b.top ||
+                    rect.top - pad > b.bottom)) {
+                    isColliding = true;
+                    break;
+                }
+            }
+
+            if (isColliding) {
+                t.style.opacity = '0';
+                t.style.pointerEvents = 'none';
+            } else {
+                t.style.opacity = '1';
+                boxes.push(rect);
+            }
+        });
+    }
+
+    function clearMapDisplay() {
+        const modeSelect = document.getElementById('mapDisplayMode');
+        if (modeSelect) {
+            // Temporarily enable 'clear' option so we can select it, though it's hidden
+            const clearOpt = modeSelect.querySelector('option[value="clear"]');
+            if (clearOpt) clearOpt.disabled = false;
+            modeSelect.value = 'clear';
+            updateHeatmap();
+            updateLegend();
+        }
+    }
+
+    function updateHeatmap() {
+        if (boundaryLayerGroup) {
+            boundaryLayerGroup.eachLayer(layer => {
+                if (layer.feature) {
+                    layer.setStyle(getThematicStyleForFeature(layer.feature));
+                }
+            });
+        }
+    }
+
+    function updateLegend() {
+        const legendContainer = document.getElementById('dynamicLegend');
+        if (!legendContainer) return;
+
+        const modeSelect = document.getElementById('mapDisplayMode');
+        const mode = modeSelect ? modeSelect.value : 'density';
+        const selectedBarangay = document.getElementById('filterBarangay')?.value || '';
+
+        if (selectedBarangay) {
+            // Detailed sector-specific view!
+            const brgyPoints = currentPoints.filter(p => p.barangay === selectedBarangay);
+            const totalIncidents = brgyPoints.length;
+
+            const allCounts = Object.values(currentPoints.reduce((acc, curr) => {
+                acc[curr.barangay] = (acc[curr.barangay] || 0) + 1;
+                return acc;
+            }, {}));
+            const max = Math.max(...allCounts, 1);
+
+            let classification = "Minimal Density";
+            let classificationBg = "bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-500 dark:text-emerald-400";
+            if (totalIncidents > 0) {
+                const ratio = totalIncidents / max;
+                if (ratio >= 0.75) {
+                    classification = "High Density";
+                    classificationBg = "bg-rose-500/10 dark:bg-rose-400/10 text-rose-500 dark:text-rose-400";
+                } else if (ratio >= 0.40) {
+                    classification = "Medium-High Density";
+                    classificationBg = "bg-orange-500/10 dark:bg-orange-400/10 text-orange-500 dark:text-orange-400";
+                } else if (ratio >= 0.15) {
+                    classification = "Medium-Low Density";
+                    classificationBg = "bg-amber-500/10 dark:bg-amber-400/10 text-amber-500 dark:text-amber-400";
+                } else {
+                    classification = "Low Density";
+                    classificationBg = "bg-emerald-500/10 dark:bg-emerald-400/10 text-emerald-500 dark:text-emerald-400";
+                }
+            } else {
+                classification = "Sector Clear";
+                classificationBg = "bg-slate-500/10 dark:bg-slate-400/10 text-slate-500 dark:text-slate-400";
+            }
+
+            let dominantCrime = "None";
+            let dominantColor = "#94A3B8";
+            let dominantCount = 0;
+            if (totalIncidents > 0) {
+                const stats = {};
+                brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+                const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
+                dominantCrime = topCrime[0];
+                dominantColor = getTacticalColor(topCrime[0]);
+                dominantCount = topCrime[1];
+            }
+
+            const stats = {};
+            currentPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+            const sortedTypes = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+
+            legendContainer.innerHTML = `
+                <div class="space-y-3 w-full p-1">
+                    <!-- Sector Intel Card -->
+                    <div class="p-3 bg-white/85 dark:bg-slate-800/85 rounded-2xl border border-gray-150 dark:border-slate-700/60 shadow-sm space-y-2">
+                        <div class="flex items-center justify-between pb-1.5 border-b border-gray-100 dark:border-slate-700">
+                            <h5 class="text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest flex items-center">
+                                <i class="fas fa-shield-halved mr-1 animate-pulse"></i>
+                                <span>Sector Summary</span>
+                            </h5>
+                            <span class="text-[8px] font-bold text-slate-500">${totalIncidents} Case${totalIncidents === 1 ? '' : 's'}</span>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between items-center text-[9px]">
+                                <span class="font-bold text-slate-500 dark:text-slate-400">Density:</span>
+                                <span class="px-2 py-0.5 rounded-full font-black uppercase text-[7px] ${classificationBg}">
+                                    ${classification}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center text-[9px]">
+                                <span class="font-bold text-slate-500 dark:text-slate-400">Dominant Type:</span>
+                                <div class="flex items-center space-x-1">
+                                    <span class="w-2 h-2 rounded-full border border-white/20" style="background-color: ${dominantColor}"></span>
+                                    <span class="font-black text-slate-750 dark:text-slate-200 uppercase truncate max-w-[100px]" title="${dominantCrime}">${dominantCrime}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend Reference -->
+                    <div class="pt-2 border-t border-gray-100 dark:border-slate-800">
+                        <div class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Color Legend</div>
+                        <div class="grid grid-cols-2 gap-1">
+                            ${mode === 'density' ? `
+                                <div class="flex items-center space-x-1 px-1.5 py-0.5 bg-gray-50 dark:bg-slate-900 rounded"><span class="w-1.5 h-1.5 rounded-full bg-[#EF4444]"></span><span class="text-[8px] font-bold text-slate-500">High</span></div>
+                                <div class="flex items-center space-x-1 px-1.5 py-0.5 bg-gray-50 dark:bg-slate-900 rounded"><span class="w-1.5 h-1.5 rounded-full bg-[#F97316]"></span><span class="text-[8px] font-bold text-slate-500">Medium-High</span></div>
+                                <div class="flex items-center space-x-1 px-1.5 py-0.5 bg-gray-50 dark:bg-slate-900 rounded"><span class="w-1.5 h-1.5 rounded-full bg-[#FBBF24]"></span><span class="text-[8px] font-bold text-slate-500">Medium-Low</span></div>
+                                <div class="flex items-center space-x-1 px-1.5 py-0.5 bg-gray-50 dark:bg-slate-900 rounded"><span class="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span><span class="text-[8px] font-bold text-slate-500">Low</span></div>
+                            ` : `
+                                ${sortedTypes.slice(0, 4).map(type => `
+                                    <div class="flex items-center space-x-1 px-1.5 py-0.5 bg-gray-50 dark:bg-slate-900 rounded truncate">
+                                        <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background-color: ${getTacticalColor(type)}"></span>
+                                        <span class="text-[8px] font-bold text-slate-500 truncate" title="${type}">${type}</span>
+                                    </div>
+                                `).join('')}
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        if (mode === 'density') {
+            if (currentPoints.length === 0) {
+                legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">No incidents recorded</p>';
+                return;
+            }
+            // Density Legend
+            legendContainer.innerHTML = `
+                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
+                    <div class="flex items-center space-x-2"><div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#EF4444]"></div><span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">High Density (Red)</span></div>
+                </div>
+                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
+                    <div class="flex items-center space-x-2"><div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#F97316]"></div><span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Medium-High (Orange)</span></div>
+                </div>
+                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
+                    <div class="flex items-center space-x-2"><div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#FBBF24]"></div><span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Medium-Low (Yellow)</span></div>
+                </div>
+                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
+                    <div class="flex items-center space-x-2"><div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#10B981]"></div><span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Low Density (Green)</span></div>
+                </div>
+            `;
+        } else if (mode === 'dominant') {
+            // Dominant Crime Legend
+            const stats = {};
+            currentPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
+            const sortedTypes = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(e => e[0]);
+
+            if (sortedTypes.length === 0) {
+                legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">No incidents recorded</p>';
+                return;
+            }
+
+            let legendHTML = sortedTypes.slice(0, 10).map(type => `
+                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
+                    <div class="flex items-center space-x-2 truncate">
+                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0" style="background-color: ${getTacticalColor(type)}"></div>
+                        <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200 truncate" title="${type}">${type}</span>
+                    </div>
+                    <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold bg-pnp-blue/5 dark:bg-pnp-gold/10 px-2 py-0.5 rounded-md">${stats[type]}</span>
+                </div>
+            `).join('');
+
+            // Zero incident tag
+            legendHTML += `
+                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50 opacity-70">
+                    <div class="flex items-center space-x-2 truncate">
+                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#94A3B8]"></div>
+                        <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200 truncate">Zero Reports</span>
+                    </div>
+                    <span class="text-[10px] font-black text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">0</span>
+                </div>
+            `;
+            legendContainer.innerHTML = legendHTML;
+        } else {
+            // Clear legend
+            legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Map overlay cleared</p>';
+        }
     }
 
     const manualPins = [
@@ -524,9 +1035,13 @@
 
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
+            selectedPinsLayer.addTo(map);
+            policeStationsLayer.addTo(map);
+            // Initial markers are now handled dynamically by GeoJSON load to ensure precision
+            // addManualPins();
             loadMapPoints();
-            addManualPins();
             loadMunicipalBoundary();
+            addPoliceStations();
 
             // Track mouse movement for live coordinates
             /* 
@@ -550,14 +1065,9 @@
                 })
                 .then(data => {
                     santaCruzGeoJSON = data;
-                    L.geoJSON(data, {
+                    boundaryLayerGroup = L.geoJSON(data, {
                         style: function (feature) {
-                            return {
-                                fillColor: '#1A3A5C',
-                                fillOpacity: 0.1,
-                                weight: 2,
-                                color: '#C8A415'
-                            };
+                            return getThematicStyleForFeature(feature);
                         },
                         onEachFeature: function (feature, layer) {
                             let name = feature.properties.ADM4_EN;
@@ -567,54 +1077,73 @@
                                 name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
                             }
 
+                            const displayName = getBarangayLabel(name, map.getZoom());
+
+                            layer.bindTooltip(displayName, {
+                                permanent: true,
+                                direction: 'center',
+                                className: 'barangay-label-tooltip',
+                                opacity: 1,
+                                interactive: false
+                            });
+
                             layer.on({
                                 mouseover: function (e) {
                                     const layer = e.target;
                                     layer.setStyle({
-                                        fillOpacity: 0.3,
-                                        weight: 3
+                                        fillOpacity: 0.8,
+                                        weight: 3,
+                                        color: '#FFFFFF'
                                     });
                                 },
                                 mouseout: function (e) {
                                     const layer = e.target;
-                                    layer.setStyle({
-                                        fillOpacity: 0.1,
-                                        weight: 2
-                                    });
+                                    layer.setStyle(getThematicStyleForFeature(feature));
+                                },
+                                click: function (e) {
+                                    if (map) {
+                                        map.dragging.enable();
+                                        map.touchZoom.enable();
+                                        map.doubleClickZoom.enable();
+                                        map.scrollWheelZoom.enable();
+                                        map.boxZoom.enable();
+                                        map.keyboard.enable();
+                                    }
+                                    const barangaySelect = document.getElementById('filterBarangay');
+                                    if (barangaySelect) {
+                                        barangaySelect.value = name;
+                                        loadMapPoints(false); // Update stats without relocating yet
+                                        locateBarangay(); // Now do the fancy locate animation
+                                    }
                                 }
                             });
 
-                            // Add marker for each barangay
+                            // Add marker for each barangay at true geographic center
                             try {
                                 const centroid = layer.getBounds().getCenter();
-                                const marker = L.circleMarker(centroid, {
-                                    radius: 6,
-                                    fillColor: '#C8A415',
-                                    color: '#1A3A5C',
-                                    weight: 2,
-                                    opacity: 1,
-                                    fillOpacity: 1
-                                }).addTo(map);
 
-                                marker.bindPopup(`
-                                    <div class="p-2 min-w-[150px]">
-                                        <h3 class="text-pnp-blue font-black uppercase tracking-widest text-xs mb-1">Brgy. ${name}</h3>
-                                        <p class="text-[9px] text-gray-500 font-bold uppercase mb-2">Sta. Cruz, Laguna</p>
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-[8px] text-gray-400 font-bold uppercase">Status</span>
-                                            <span class="px-2 py-0.5 bg-green-100 text-green-600 rounded-full text-[7px] font-black uppercase">Secure</span>
-                                        </div>
-                                    </div>
-                                `);
+                                // Update dynamic reference for search/locate system
+                                const pinIndex = manualPins.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
+                                if (pinIndex !== -1) {
+                                    manualPins[pinIndex].lat = centroid.lat;
+                                    manualPins[pinIndex].lng = centroid.lng;
+                                }
                             } catch (err) {
-                                console.error('Error adding marker for barangay:', name, err);
+                                console.error('Error adding accurate marker for barangay:', name, err);
                             }
                         }
                     }).addTo(map);
+                    setTimeout(manageTooltipVisibility, 100);
                 })
                 .catch(err => {
                     console.error('Error loading GeoJSON:', err);
                 });
+
+            map.on('zoomend', () => {
+                updateBarangayLabels();
+                setTimeout(manageTooltipVisibility, 50);
+            });
+            map.on('resize', () => setTimeout(manageTooltipVisibility, 50));
         } catch (err) {
             console.error('Error initializing map:', err);
             hideLoading();
@@ -640,7 +1169,26 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', initMap);
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+
+        // Robust event listeners for all map filters
+        const setupListener = (id, callback) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('change', callback);
+                el.addEventListener('input', callback); // Catch changes faster in some browsers
+            }
+        };
+
+        setupListener('mapDisplayMode', () => {
+            updateHeatmap();
+            updateLegend();
+        });
+
+        setupListener('filterBarangay', () => loadMapPoints());
+        setupListener('filterRange', () => loadMapPoints());
+    });
 </script>
 
 <style>
@@ -667,5 +1215,31 @@
     #filterSidebar::-webkit-scrollbar {
         display: none;
         /* Chrome, Safari and Opera */
+    }
+
+    .sidebar-scroll {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .sidebar-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .custom-scrollbar-thin::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar-thin::-webkit-scrollbar-thumb {
+        background: rgba(200, 164, 21, 0.2);
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
+        background: rgba(200, 164, 21, 0.4);
     }
 </style>
