@@ -168,7 +168,8 @@
         </div>
 
         <nav class="flex-grow p-4 space-y-1.5">
-            <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mb-4 px-4 opacity-50">Main Menu</p>
+            <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mb-4 px-4 opacity-50">Main Menu
+            </p>
 
             <a href="/admin/dashboard"
                 class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Dashboard' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
@@ -264,8 +265,7 @@
 
             <div class="flex items-center space-x-4">
                 <!-- Public Site Button -->
-                <a href="/" 
-                    title="View Public Site"
+                <a href="/" title="View Public Site"
                     class="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center text-pnp-blue dark:text-white transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
                     <i class="fas fa-globe text-sm"></i>
                 </a>
@@ -303,17 +303,6 @@
 
                             <%- body %>
         </main>
-
-        <!-- Footer -->
-        <% if (title !=='Map Management' ) { %>
-            <footer
-                class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md py-6 px-10 border-t border-gray-100 dark:border-slate-700 flex justify-between items-center fixed bottom-0 right-0 z-40 transition-all duration-300"
-                style="left: <%= typeof hideSidebar !== 'undefined' && hideSidebar ? '0' : '18rem' %>;" id="layoutFooter">
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    &copy; 2026 PNP Sta. Cruz Municipal Police Station - CPICRS Admin
-                </p>
-            </footer>
-            <% } %>
     </div>
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -344,7 +333,7 @@
             }
 
             localStorage.setItem('sidebarHidden', isHidden);
-            
+
             // Notify server to persist state across refreshes
             fetch('/admin/api/toggle-sidebar', {
                 method: 'POST',
@@ -414,7 +403,7 @@
             mainContent.classList.add('main-content-expanded');
             layoutHeader.style.left = '0';
             if (layoutFooter) layoutFooter.style.left = '0';
-            
+
             // If it was forced, save it to local storage for consistency
             if (forceHide) localStorage.setItem('sidebarHidden', 'true');
         }

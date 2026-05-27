@@ -223,8 +223,8 @@ export const processAIExtraction = async (req: Request, res: Response) => {
 
     // Primary: Gemini 2.0 Flash (Fastest/Latest)
     // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
-    const primaryModel = 'gemini-2.0-flash';
-    const fallbackModel = 'gemini-2.0-flash-lite';
+    const primaryModel = 'gemini-2.5-flash';
+    const fallbackModel = 'gemini-2.5-flash-lite';
 
     console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
     let model = client.getGenerativeModel({ model: primaryModel });
