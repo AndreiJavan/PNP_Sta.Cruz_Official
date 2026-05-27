@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
@@ -223,8 +223,8 @@ export const processAIExtraction = async (req: Request, res: Response) => {
 
     // Primary: Gemini 2.0 Flash (Fastest/Latest)
     // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
-    const primaryModel = 'gemini-2.0-flash';
-    const fallbackModel = 'gemini-2.0-flash-lite';
+    const primaryModel = 'gemini-2.5-flash';
+    const fallbackModel = 'gemini-2.5-flash-lite';
 
     console.log(`[NEURAL SCAN] Initiating tactical extraction via ${primaryModel}...`);
     let model = client.getGenerativeModel({ model: primaryModel });
@@ -958,7 +958,7 @@ export const postUser = async (req: Request, res: Response) => {
   const { username, full_name, password } = req.body;
   const hash = bcrypt.hashSync(password, 10);
   try {
-    // 🛡️ Backend Enforcement: Only superadmins can deploy new personnel
+    // ≡ƒ¢í∩╕Å Backend Enforcement: Only superadmins can deploy new personnel
     if (req.session.user.role !== 'superadmin') {
       console.warn(`[SECURITY BREACH ATTEMPT] Non-admin ${req.session.user.username} tried to create personnel.`);
       return res.status(403).send('Forbidden: Insufficient tactical clearance.');
@@ -981,7 +981,7 @@ export const postUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
   try {
-    // 🛡️ Backend Enforcement: Only superadmins can neutralize credentials
+    // ≡ƒ¢í∩╕Å Backend Enforcement: Only superadmins can neutralize credentials
     if (req.session.user.role !== 'superadmin') {
       return res.status(403).send('Forbidden: Insufficient tactical clearance.');
     }
