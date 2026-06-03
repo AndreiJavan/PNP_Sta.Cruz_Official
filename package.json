@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "tsx server.ts",
-    "dev": "tsx server.ts",
+    "dev": "tsx watch server.ts",
     "build": "echo 'No build step required'",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"

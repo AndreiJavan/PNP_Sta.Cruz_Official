@@ -280,7 +280,7 @@
         </header>
 
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= title === 'Map Management' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
+        <main class="flex-grow animate-fade-in <%= title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div

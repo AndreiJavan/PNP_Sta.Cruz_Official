@@ -7,8 +7,73 @@
     </div>
 
     <article class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
-        <% if (bulletin.photo_path) { %>
-            <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-96 object-cover">
+        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+            <div class="relative w-full h-64 md:h-96 overflow-hidden group bg-slate-100 dark:bg-slate-900" id="bulletinCarousel">
+                <% bulletin.photo_paths.forEach(function(path, index) { %>
+                    <img src="<%= path %>" alt="<%= bulletin.title %> - Image <%= index + 1 %>" class="absolute inset-0 w-full h-full object-contain md:object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' %>" data-index="<%= index %>">
+                <% }); %>
+                
+                <% if (bulletin.photo_paths.length > 1) { %>
+                    <!-- Carousel Controls -->
+                    <button onclick="moveCarousel(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-pnp-blue text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button onclick="moveCarousel(1)" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-pnp-blue text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <!-- Indicators -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full">
+                        <% bulletin.photo_paths.forEach(function(_, index) { %>
+                            <button onclick="goToSlide(<%= index %>)" class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none <%= index === 0 ? 'bg-white' : 'bg-white/40 hover:bg-white/80' %>" data-indicator="<%= index %>"></button>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+            
+            <% if (bulletin.photo_paths.length > 1) { %>
+            <script>
+                let currentSlide = 0;
+                const totalSlides = <%= bulletin.photo_paths.length %>;
+                
+                function updateCarousel() {
+                    const slides = document.querySelectorAll('#bulletinCarousel img');
+                    const indicators = document.querySelectorAll('#bulletinCarousel [data-indicator]');
+                    
+                    slides.forEach((slide, idx) => {
+                        if (idx === currentSlide) {
+                            slide.classList.replace('opacity-0', 'opacity-100');
+                            slide.classList.replace('z-0', 'z-10');
+                        } else {
+                            slide.classList.replace('opacity-100', 'opacity-0');
+                            slide.classList.replace('z-10', 'z-0');
+                        }
+                    });
+                    
+                    indicators.forEach((ind, idx) => {
+                        if (idx === currentSlide) {
+                            ind.classList.add('bg-white');
+                            ind.classList.remove('bg-white/40', 'hover:bg-white/80');
+                        } else {
+                            ind.classList.remove('bg-white');
+                            ind.classList.add('bg-white/40', 'hover:bg-white/80');
+                        }
+                    });
+                }
+                
+                function moveCarousel(direction) {
+                    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+                    updateCarousel();
+                }
+                
+                function goToSlide(index) {
+                    currentSlide = index;
+                    updateCarousel();
+                }
+            </script>
+            <% } %>
+            
+        <% } else if (bulletin.photo_path) { %>
+            <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-64 md:h-96 object-cover">
         <% } %>
         
         <div class="p-8 md:p-12">

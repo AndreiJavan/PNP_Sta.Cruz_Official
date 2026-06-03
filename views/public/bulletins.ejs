@@ -12,15 +12,15 @@
     <!-- Search & Filter -->
     <div
         class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16">
-        <form action="/bulletins" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="relative">
-                <input type="text" name="search" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
                     placeholder="Search bulletins..."
                     class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
                 <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
             </div>
             <div class="relative">
-                <select name="category"
+                <select id="publicCategorySelect" onchange="filterPublicBulletins()"
                     class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-900 dark:text-white appearance-none">
                     <option value="" <%=(!locals.category || category==='' ) ? 'selected' : '' %>>All Categories
                     </option>
@@ -38,11 +38,7 @@
                 <i
                     class="fas fa-layer-group absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
             </div>
-            <button type="submit"
-                class="bg-pnp-blue hover:bg-blue-900 text-white font-black py-4 rounded-2xl shadow-xl transition duration-300 uppercase tracking-widest text-xs">
-                Filter Results
-            </button>
-        </form>
+        </div>
     </div>
 
     <!-- Bulletin Grid -->
@@ -50,16 +46,27 @@
         <% bulletins.forEach(bulletin=> { %>
             <div
                 class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col">
-                <% if (bulletin.photo_path) { %>
+                <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                    <div class="h-64 overflow-hidden relative">
+                        <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
+                            class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <% if (bulletin.photo_paths.length > 1) { %>
+                            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest flex items-center space-x-2">
+                                <i class="fas fa-images"></i>
+                                <span>+<%= bulletin.photo_paths.length - 1 %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else if (bulletin.photo_path) { %>
                     <div class="h-64 overflow-hidden">
                         <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>"
                             class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                     </div>
-                    <% } else { %>
-                        <div class="h-64 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center">
-                            <i class="fas fa-image text-4xl text-gray-200 dark:text-slate-700"></i>
-                        </div>
-                        <% } %>
+                <% } else { %>
+                    <div class="h-64 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center">
+                        <i class="fas fa-bullhorn text-4xl text-gray-200 dark:text-slate-700 group-hover:text-pnp-blue transition-colors"></i>
+                    </div>
+                <% } %>
 
                             <div class="p-6 md:p-10 flex-grow flex flex-col">
                                 <div class="flex flex-wrap justify-between items-center gap-2 mb-6">
@@ -102,15 +109,43 @@
             <% }) %>
     </div>
 
-    <% if (bulletins.length===0) { %>
-        <div class="text-center py-20">
-            <div
-                class="w-20 h-20 bg-gray-50 dark:bg-slate-900/50 text-gray-200 dark:text-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fas fa-search text-3xl"></i>
-            </div>
-            <h3 class="text-xl font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">No bulletins found
-            </h3>
-            <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your search or filter criteria.</p>
+    <div id="noResultsDiv" class="text-center py-20" style="<%= bulletins.length === 0 ? 'display: block;' : 'display: none;' %>">
+        <div class="w-20 h-20 bg-gray-50 dark:bg-slate-900/50 text-gray-200 dark:text-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-search text-3xl"></i>
         </div>
-        <% } %>
+        <h3 class="text-xl font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">No bulletins found
+        </h3>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your search or filter criteria.</p>
+    </div>
 </div>
+
+<script>
+    function filterPublicBulletins() {
+        const searchInput = document.getElementById('publicSearchInput').value.toLowerCase();
+        const categoryInput = document.getElementById('publicCategorySelect').value.toLowerCase();
+        const cards = document.querySelectorAll('.grid > .group.bg-white');
+        
+        let anyVisible = false;
+        
+        cards.forEach(card => {
+            const title = card.querySelector('h3').textContent.toLowerCase();
+            const body = card.querySelector('p').textContent.toLowerCase();
+            const categoryBadge = card.querySelector('.rounded-full.uppercase').textContent.toLowerCase();
+            
+            const matchesSearch = title.includes(searchInput) || body.includes(searchInput);
+            const matchesCategory = categoryInput === '' || categoryBadge.includes(categoryInput);
+            
+            if (matchesSearch && matchesCategory) {
+                card.style.display = '';
+                anyVisible = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        const noResultsDiv = document.getElementById('noResultsDiv');
+        if (noResultsDiv) {
+            noResultsDiv.style.display = anyVisible ? 'none' : 'block';
+        }
+    }
+</script>

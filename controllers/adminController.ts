@@ -606,6 +606,15 @@ export const getDashboard = async (req: Request, res: Response) => {
   }
 };
 
+const parsePhotos = (path: string | undefined): string[] => {
+  if (!path) return [];
+  try {
+    const parsed = JSON.parse(path);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) {}
+  return [path];
+};
+
 export const getBulletins = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -616,7 +625,10 @@ export const getBulletins = async (req: Request, res: Response) => {
       db.collection('bulletins').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
       db.collection('bulletins').count().get()
     ]);
-    const bulletins = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const bulletins = snap.docs.map(doc => {
+      const d = doc.data();
+      return { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+    });
     const totalPages = Math.ceil(countSnap.data().count / limit);
 
     res.render('admin/bulletins', { title: 'Bulletins', bulletins, currentPage: page, totalPages, layout: 'layouts/admin' });
@@ -644,20 +656,26 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       created_at: new Date().toISOString()
     };
 
-    if ((req as any).file) {
-      const file = (req as any).file;
-      const fileExt = file.originalname.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const path = `bulletins/${fileName}`;
+    if ((req as any).files && (req as any).files.length > 0) {
+      const files = (req as any).files;
+      const uploadedPaths: string[] = [];
+      
+      for (const file of files) {
+        const fileExt = file.originalname.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const path = `bulletins/${fileName}`;
 
-      try {
-        const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
-        data.photo_path = publicUrl;
-        console.log(`[BULLETIN] Image uploaded successfully: ${publicUrl}`);
-      } catch (storageErr) {
-        console.error('[BULLETIN] Supabase Storage Error:', storageErr);
-        // data.photo_path remains undefined or we could set a placeholder here explicitly if we want
-        // But the db.storage.upload already returns a placeholder on failure
+        try {
+          const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+          uploadedPaths.push(publicUrl);
+          console.log(`[BULLETIN] Image uploaded successfully: ${publicUrl}`);
+        } catch (storageErr) {
+          console.error('[BULLETIN] Supabase Storage Error:', storageErr);
+        }
+      }
+      
+      if (uploadedPaths.length > 0) {
+        data.photo_path = JSON.stringify(uploadedPaths);
       }
     }
 
@@ -673,7 +691,8 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
 export const getEditBulletin = async (req: Request, res: Response) => {
   try {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
-    const bulletin = { id: doc.id, ...doc.data() };
+    const d = doc.data();
+    const bulletin = { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
     res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -694,18 +713,26 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       updated_at: new Date().toISOString()
     };
 
-    if ((req as any).file) {
-      const file = (req as any).file;
-      const fileExt = file.originalname.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const path = `bulletins/${fileName}`;
+    if ((req as any).files && (req as any).files.length > 0) {
+      const files = (req as any).files;
+      const uploadedPaths: string[] = [];
+      
+      for (const file of files) {
+        const fileExt = file.originalname.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const path = `bulletins/${fileName}`;
 
-      try {
-        const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
-        data.photo_path = publicUrl;
-        console.log(`[BULLETIN EDIT] Image updated: ${publicUrl}`);
-      } catch (storageErr) {
-        console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
+        try {
+          const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+          uploadedPaths.push(publicUrl);
+          console.log(`[BULLETIN EDIT] Image updated: ${publicUrl}`);
+        } catch (storageErr) {
+          console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
+        }
+      }
+      
+      if (uploadedPaths.length > 0) {
+        data.photo_path = JSON.stringify(uploadedPaths);
       }
     }
 

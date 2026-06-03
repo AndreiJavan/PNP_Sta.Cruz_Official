@@ -18,7 +18,7 @@
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
                     <span class="text-[9px] text-pnp-gold-300 font-black uppercase tracking-[0.2em] opacity-80">PNP Bulletins</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Directives</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Bulletins</h3>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-pnp-gold/20 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-bullhorn"></i>
@@ -72,14 +72,14 @@
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
                     <span class="text-[9px] text-white/60 font-black uppercase tracking-[0.2em] opacity-80">Map Locations</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Tactical Map</h3>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Map</h3>
                 </div>
                 <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-map-location-dot"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-5xl font-black tabular-nums tracking-tighter"><%= uniqueBarangaysCount %></h2>
+                <h2 class="text-5xl font-black tabular-nums tracking-tighter">26</h2>
                 <div class="flex flex-col mb-1">
                     <span class="text-[8px] font-black text-white/50 uppercase tracking-[0.1em]">Barangays</span>
                     <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Covered</span>
@@ -214,8 +214,8 @@
             });
 
             return `
-            <div ondblclick="window.location.href='/admin/map?id=${p.id}'" 
-                 title="Double-click to view on Tactical Map"
+            <div ondblclick="window.location.href='/admin/map?barangay=${encodeURIComponent(p.barangay)}'" 
+                 title="Double-click to view on Map"
                  class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-blue hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm flex flex-col justify-center cursor-pointer select-none group">
                 <div class="mb-2">
                     <span class="text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight">${p.incident_type}</span>

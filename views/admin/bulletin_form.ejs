@@ -1,5 +1,5 @@
-<div class="max-w-4xl mx-auto">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+<div class="max-w-7xl mx-auto w-full px-4">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden w-full">
         <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
             <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs"><%= bulletin ? 'Edit Bulletin' : 'Create New Bulletin' %></h3>
             <a href="/admin/bulletins" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
@@ -26,40 +26,58 @@
             <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
 
                 <div id="dropZone"
-                    onclick="document.getElementById('photo').click()"
-                    class="w-full min-h-[300px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue">
+                    onclick="document.getElementById('photos').click()"
+                    class="w-full min-h-[300px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue p-2 relative">
 
                     <!-- Existing image OR preview -->
-                    <% if (bulletin && bulletin.photo_path) { %>
-                        <img id="previewImage"
-                            src="<%= bulletin.photo_path %>"
-                            onerror="this.style.display='none'; document.getElementById('placeholderIcon').style.display='block';"
-                            class="w-full h-full object-cover">
-                        <i id="placeholderIcon" class="fas fa-image text-gray-400 text-4xl" style="display: none;"></i>
-                    <% } else { %>
-                        <img id="previewImage"
-                            class="w-full h-full object-cover hidden">
-                        <i id="placeholderIcon" class="fas fa-image text-gray-400 text-4xl"></i>
-                    <% } %>
-
+                    <div id="previewCarousel" class="relative w-full h-full min-h-[300px] flex items-center justify-center bg-gray-100 dark:bg-slate-800 group overflow-hidden rounded-md">
+                        <% if (bulletin && bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                            <% bulletin.photo_paths.forEach(function(path, index) { %>
+                                <img src="<%= path %>" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' %> preview-slide" data-index="<%= index %>" onerror="this.style.display='none';">
+                            <% }); %>
+                            <% if (bulletin.photo_paths.length > 1) { %>
+                                <!-- Controls -->
+                                <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                                    <i class="fas fa-chevron-left text-xs"></i>
+                                </button>
+                                <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                                    <i class="fas fa-chevron-right text-xs"></i>
+                                </button>
+                                <!-- Indicators -->
+                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
+                                    <% bulletin.photo_paths.forEach(function(_, index) { %>
+                                        <div class="w-1.5 h-1.5 rounded-full transition-colors <%= index === 0 ? 'bg-white' : 'bg-white/40' %>" data-indicator="<%= index %>"></div>
+                                    <% }); %>
+                                </div>
+                            <% } %>
+                        <% } else if (bulletin && bulletin.photo_path) { %>
+                            <img src="<%= bulletin.photo_path %>" class="absolute inset-0 w-full h-full object-cover opacity-100 z-10 preview-slide" data-index="0" onerror="this.style.display='none';">
+                        <% } else { %>
+                            <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10">
+                                <i class="fas fa-images text-gray-400 text-5xl mb-4"></i>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images</span>
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
 
                 <!-- FILE INPUT -->
                 <div class="mt-4">
                     <input type="file"
-                        name="photo"
-                        id="photo"
+                        name="photos"
+                        id="photos"
                         accept="image/*"
+                        multiple
                         class="hidden">
 
                     <button type="button"
-                            onclick="document.getElementById('photo').click()"
+                            onclick="document.getElementById('photos').click()"
                             class="w-full bg-pnp-blue text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition">
-                        Choose / Replace Image
+                        Choose / Replace Images (Max 5)
                     </button>
 
-                    <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase">
-                        PNG, JPG, JPEG or WEBP up to 5MB
+                    <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
+                        PNG, JPG, JPEG or WEBP (Leave empty for imageless)
                     </p>
                 </div>
 
@@ -205,14 +223,46 @@
         }
     }
 
-    const fileInput = document.getElementById('photo');
-    const previewImage = document.getElementById('previewImage');
-    const placeholderIcon = document.getElementById('placeholderIcon');
+    const fileInput = document.getElementById('photos');
     const dropZone = document.getElementById('dropZone');
+    
+    let currentPreviewSlide = 0;
+    let previewTotalSlides = <%= bulletin && bulletin.photo_paths ? bulletin.photo_paths.length : (bulletin && bulletin.photo_path ? 1 : 0) %>;
+    
+    function movePreview(direction) {
+        if (previewTotalSlides <= 1) return;
+        currentPreviewSlide = (currentPreviewSlide + direction + previewTotalSlides) % previewTotalSlides;
+        updatePreviewCarousel();
+    }
+    
+    function updatePreviewCarousel() {
+        const slides = document.querySelectorAll('.preview-slide');
+        const indicators = document.querySelectorAll('.preview-indicators div');
+        
+        slides.forEach((slide, idx) => {
+            if (idx === currentPreviewSlide) {
+                slide.classList.replace('opacity-0', 'opacity-100');
+                slide.classList.replace('z-0', 'z-10');
+            } else {
+                slide.classList.replace('opacity-100', 'opacity-0');
+                slide.classList.replace('z-10', 'z-0');
+            }
+        });
+        
+        indicators.forEach((ind, idx) => {
+            if (idx === currentPreviewSlide) {
+                ind.classList.add('bg-white');
+                ind.classList.remove('bg-white/40');
+            } else {
+                ind.classList.remove('bg-white');
+                ind.classList.add('bg-white/40');
+            }
+        });
+    }
 
     if (fileInput) {
         fileInput.addEventListener('change', function () {
-            handleFile(this.files[0]);
+            handleFiles(this.files);
         });
     }
 
@@ -230,35 +280,65 @@
             e.preventDefault();
             dropZone.classList.remove('ring-2', 'ring-pnp-blue');
 
-            const file = e.dataTransfer.files[0];
-            fileInput.files = e.dataTransfer.files; // sync input
-            handleFile(file);
+            const dt = e.dataTransfer;
+            if (dt.files && dt.files.length > 5) {
+                alert('You can only upload a maximum of 5 images.');
+                return;
+            }
+            
+            fileInput.files = dt.files;
+            handleFiles(dt.files);
         });
     }
 
-    function handleFile(file) {
-        if (!file) return;
+    function handleFiles(files) {
+        if (!files || files.length === 0) return;
+        
+        if (files.length > 5) {
+            alert('You can only upload a maximum of 5 images.');
+            fileInput.value = ''; // Clear input
+            return;
+        }
 
-        const reader = new FileReader();
-        const previewImage = document.getElementById('previewImage');
-        const placeholderIcon = document.getElementById('placeholderIcon');
+        const previewCarousel = document.getElementById('previewCarousel');
+        previewCarousel.innerHTML = '';
+        currentPreviewSlide = 0;
+        previewTotalSlides = files.length;
 
-        reader.onload = function (e) {
-            if (previewImage) {
-                previewImage.src = e.target.result;
-                previewImage.classList.remove('hidden');
-                previewImage.style.display = 'block';
-            }
+        let loadedCount = 0;
 
-            if (placeholderIcon) {
-                placeholderIcon.style.display = 'none';
-            }
-            
-            // Sync height again after image might have changed layout
-            syncPanels();
-        };
-
-        reader.readAsDataURL(file);
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = `absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out preview-slide ${index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`;
+                img.dataset.index = index;
+                previewCarousel.appendChild(img);
+                
+                loadedCount++;
+                
+                // Add controls once all are loaded
+                if (loadedCount === files.length && files.length > 1) {
+                    let controls = `
+                        <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                            <i class="fas fa-chevron-left text-xs"></i>
+                        </button>
+                        <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                            <i class="fas fa-chevron-right text-xs"></i>
+                        </button>
+                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
+                    `;
+                    for(let i = 0; i < files.length; i++) {
+                        controls += `<div class="w-1.5 h-1.5 rounded-full transition-colors ${i === 0 ? 'bg-white' : 'bg-white/40'}" data-indicator="${i}"></div>`;
+                    }
+                    controls += `</div>`;
+                    previewCarousel.insertAdjacentHTML('beforeend', controls);
+                }
+                syncPanels();
+            };
+            reader.readAsDataURL(file);
+        });
     }
 
     const modal = document.getElementById('imageModal');

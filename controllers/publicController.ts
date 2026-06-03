@@ -62,6 +62,15 @@ export const getMapPoints = async (req: Request, res: Response) => {
   }
 };
 
+const parsePhotos = (path: string | undefined): string[] => {
+  if (!path) return [];
+  try {
+    const parsed = JSON.parse(path);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) {}
+  return [path];
+};
+
 export const getBulletins = async (req: Request, res: Response) => {
   const { category, search, page = 1 } = req.query;
   const limit = 10;
@@ -78,7 +87,10 @@ export const getBulletins = async (req: Request, res: Response) => {
     // Given the small scale, we'll fetch and filter.
 
     const snap = await query.orderBy('created_at', 'desc').get();
-    let bulletins = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    let bulletins = snap.docs.map((doc: any) => {
+      const d = doc.data();
+      return { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+    });
 
     if (search) {
       const s = String(search).toLowerCase();
@@ -103,7 +115,8 @@ export const getBulletinDetail = async (req: Request, res: Response) => {
   try {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).send('Bulletin not found');
-    const bulletin = { id: doc.id, ...doc.data() };
+    const d = doc.data();
+    const bulletin = { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
     res.render('public/bulletin_detail', { title: bulletin.title, bulletin });
   } catch (err) {
     console.error(err);
