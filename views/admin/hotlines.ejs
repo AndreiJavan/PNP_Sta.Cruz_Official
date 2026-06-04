@@ -59,7 +59,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <form action="/admin/hotlines/<%= h.id %>/delete" method="POST" onsubmit="confirmOperationalAction(event, { title: 'Delete Hotline', message: 'Are you sure you want to remove this emergency contact?', confirmText: 'Remove', type: 'danger' })">
+                                    <form action="/admin/hotlines/<%= h.id %>/delete" method="POST" onsubmit="confirmOperationalAction(event, { title: 'Delete Hotline', message: 'Are you sure you want to remove this emergency contact?', confirmText: 'Remove', type: 'danger' }); return false;">
                                         <button type="submit" class="text-red-600 hover:text-red-800 font-bold text-xs uppercase tracking-widest">Delete</button>
                                     </form>
                                 </td>

@@ -42,6 +42,16 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="space-y-1 mt-2">
+                            <label class="text-[9px] font-bold text-gray-400 uppercase">Crime Date</label>
+                            <select id="filterRange"
+                                class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none">
+                                <option value="">All Time</option>
+                                <option value="1month">Last 1 Month</option>
+                                <option value="2months">Last 2 Months</option>
+                                <option value="3months">Last 3 Months</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -418,6 +428,8 @@
 
     async function loadMapPoints(shouldLocate = true) {
         const barangay = document.getElementById('filterBarangay').value;
+        const filterRangeEl = document.getElementById('filterRange');
+        const range = filterRangeEl ? filterRangeEl.value : '';
 
         // Automatically locate when barangay is selected
         if (barangay && shouldLocate) {
@@ -433,7 +445,7 @@
 
         try {
             // Fetch ALL points to ensure correct density/heatmap calculations relative to global peak density!
-            const url = `/api/map-points`;
+            const url = range ? `/api/map-points?range=${encodeURIComponent(range)}` : `/api/map-points`;
             const response = await fetch(url);
             const points = await response.json();
 
@@ -1105,6 +1117,7 @@
         });
 
         setupListener('filterBarangay', () => loadMapPoints());
+        setupListener('filterRange', () => loadMapPoints(false));
     });
 </script>
 

@@ -347,6 +347,7 @@
 
         // Global Double-Click and Repetitive Action Prevention
         document.addEventListener('submit', (e) => {
+            if (e.defaultPrevented) return;
             const form = e.target;
             const submitButtons = form.querySelectorAll('button[type="submit"]');
             submitButtons.forEach(btn => {
