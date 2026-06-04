@@ -135,6 +135,38 @@
 </style>
 
 <script>
+    function cycleBarangay(direction) {
+        const select = document.getElementById('filterBarangay');
+        if (!select) return;
+        
+        let newIndex = select.selectedIndex + direction;
+        if (newIndex < 0) newIndex = select.options.length - 1;
+        if (newIndex >= select.options.length) newIndex = 0;
+        
+        select.selectedIndex = newIndex;
+        
+        const event = new Event('change');
+        select.dispatchEvent(event);
+        
+        if (typeof locateBarangay === 'function' && select.value !== "") {
+            locateBarangay();
+        } else if (select.value === "" && map) {
+            map.setView([14.2800, 121.4150], 13);
+        }
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+        
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            cycleBarangay(-1);
+        } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            cycleBarangay(1);
+        }
+    });
+
     let map;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();

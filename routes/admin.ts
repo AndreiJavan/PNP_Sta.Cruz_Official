@@ -16,9 +16,15 @@ const memoryUpload = multer({ storage: multer.memoryStorage() });
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // Limit each IP to 5 login requests per window
-  message: 'Too many login attempts, please try again after 15 minutes',
   standardHeaders: true,
   legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).render('admin/login', { 
+      title: 'Admin Login', 
+      layout: false, 
+      error_msg: 'Too many login attempts. Please try again after 15 minutes.' 
+    });
+  }
 });
 
 // Public Admin Routes
