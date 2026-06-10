@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - CPICRS</title>
+    <title>Admin Dashboard - Sta. Cruz Crime Mapping</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -158,7 +158,7 @@
                 <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg"
                     onerror="this.onerror=null; this.src='/favicon.ico';">
                 <div>
-                    <h1 class="text-lg font-black tracking-tighter leading-none">CPICRS</h1>
+                    <h1 class="text-lg font-black tracking-tighter leading-none italic">STA. CRUZ CRIME MAPPING</h1>
                     <p class="text-[10px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">Records</p>
                 </div>
             </div>
@@ -280,7 +280,8 @@
         </header>
 
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
+        <main
+            class="flex-grow animate-fade-in <%= title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div

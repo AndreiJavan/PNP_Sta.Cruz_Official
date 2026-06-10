@@ -1,4 +1,4 @@
-# Sta. Cruz Crime Mapping & Reporting System (CPICRS)
+# Sta. Cruz Crime Mapping & Reporting System
 
 This is a specialized crime visualization and incident reporting platform for PNP Sta. Cruz, Laguna.
 

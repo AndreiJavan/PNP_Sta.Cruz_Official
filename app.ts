@@ -53,11 +53,11 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Session
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'cpicrs-local-development-secret-key-2026',
+  secret: process.env.SESSION_SECRET || 'stacruz-mapping-secure-session-key',
   resave: true,
   saveUninitialized: true,
   rolling: true,
-  name: 'cpicrs_sid',
+  name: 'stacruz_sid',
   proxy: true,
   cookie: {
     secure: false,

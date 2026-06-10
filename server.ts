@@ -7,7 +7,7 @@ async function startServer() {
   const server = http.createServer(app);
 
   server.listen(PORT, '0.0.0.0', () => {
-    console.log(`CPICRS Server running on http://localhost:${PORT}`);
+    console.log(`Sta. Cruz Crime Mapping & Reporting System running on http://localhost:${PORT}`);
   });
 }
 

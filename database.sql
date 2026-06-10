@@ -1,5 +1,5 @@
 -- =====================================================
--- CPICRS SUPABASE DATABASE SCHEMA (CLEAN VERSION)
+-- STA. CRUZ CRIME MAPPING DATABASE SCHEMA (CLEAN VERSION)
 -- =====================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
