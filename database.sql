@@ -13,6 +13,7 @@ CREATE TABLE public.users (
   full_name TEXT NOT NULL,
   password_hash TEXT NOT NULL,
   role TEXT CHECK (role IN ('superadmin', 'staff')) NOT NULL,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'pending', 'rejected')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -75,6 +75,7 @@
                             <tr>
                                 <th class="px-8 py-5">Designation</th>
                                 <th class="px-8 py-5">Full Name</th>
+                                <th class="px-8 py-5">Status</th>
                                 <th class="px-8 py-5">Date Created</th>
                                 <th class="px-8 py-5 text-right">Actions</th>
                             </tr>
@@ -87,6 +88,15 @@
                                     </td>
                                     <td class="px-8 py-5 text-gray-600 dark:text-gray-300 font-bold uppercase">
                                         <%= u.full_name %>
+                                    </td>
+                                    <td class="px-8 py-5">
+                                        <% if (u.status === 'active') { %>
+                                            <span class="px-3 py-1 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-green-200 dark:border-green-800">Active</span>
+                                        <% } else if (u.status === 'rejected') { %>
+                                            <span class="px-3 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-red-200 dark:border-red-800">Rejected</span>
+                                        <% } else { %>
+                                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-lg text-[9px] font-black uppercase tracking-widest border border-yellow-200 dark:border-yellow-800">Pending</span>
+                                        <% } %>
                                     </td>
                                     <td class="px-8 py-5 text-gray-400 font-mono">
                                         <%= new Date(u.created_at).toLocaleDateString(undefined, {month:'short',

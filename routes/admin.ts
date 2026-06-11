@@ -3,7 +3,7 @@ import {
   getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
-  postHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs
+  postHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser
 } from '../controllers/adminController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -31,6 +31,8 @@ const loginLimiter = rateLimit({
 router.get('/login', getLogin);
 router.post('/login', loginLimiter, postLogin);
 router.get('/logout', getLogout);
+router.get('/users/:id/approve', approveUser);
+router.get('/users/:id/reject', rejectUser);
 
 // Protected Admin Routes
 router.use(isAuthenticated);

@@ -5,6 +5,15 @@ import * as XLSX from 'xlsx';
 import mammoth from 'mammoth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createRequire } from 'module';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'andreijavan05@gmail.com',
+    pass: 'mwcb ioze huql sxgd'
+  }
+});
 
 // Shared Tactical Assets
 const VALID_BARANGAYS = [
@@ -134,6 +143,13 @@ export const postLogin = async (req: Request, res: Response) => {
     console.log(`[LOGIN RESULT] Password check: ${isPasswordCorrect}`);
 
     if (isPasswordCorrect) {
+      if (user.status === 'pending') {
+        return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Your account is pending approval by the Police Chief.' });
+      }
+      if (user.status === 'rejected') {
+        return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Your account request was rejected.' });
+      }
+
       req.session.user = {
         id: user.id,
         username: user.username,
@@ -611,7 +627,7 @@ const parsePhotos = (path: string | undefined): string[] => {
   try {
     const parsed = JSON.parse(path);
     if (Array.isArray(parsed)) return parsed;
-  } catch (e) {}
+  } catch (e) { }
   return [path];
 };
 
@@ -659,7 +675,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     if ((req as any).files && (req as any).files.length > 0) {
       const files = (req as any).files;
       const uploadedPaths: string[] = [];
-      
+
       for (const file of files) {
         const fileExt = file.originalname.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -673,7 +689,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
           console.error('[BULLETIN] Supabase Storage Error:', storageErr);
         }
       }
-      
+
       if (uploadedPaths.length > 0) {
         data.photo_path = JSON.stringify(uploadedPaths);
       }
@@ -716,7 +732,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     if ((req as any).files && (req as any).files.length > 0) {
       const files = (req as any).files;
       const uploadedPaths: string[] = [];
-      
+
       for (const file of files) {
         const fileExt = file.originalname.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -730,7 +746,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
           console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
         }
       }
-      
+
       if (uploadedPaths.length > 0) {
         data.photo_path = JSON.stringify(uploadedPaths);
       }
@@ -991,14 +1007,59 @@ export const postUser = async (req: Request, res: Response) => {
       return res.status(403).send('Forbidden: Insufficient tactical clearance.');
     }
 
-    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: staff)`);
-    await db.collection('users').add({
+    await logAction(req, 'USER_CREATE_PENDING', `Requested creation of administrative personnel: ${username} (Role: staff)`);
+
+    const docRef = await db.collection('users').add({
       username,
       full_name,
       password_hash: hash,
       role: 'staff',
+      status: 'pending',
       created_at: new Date().toISOString()
     });
+
+    // Auto-detect environment: Use local if testing, otherwise force Vercel HTTPS
+    const isLocal = req.get('host')?.includes('localhost') || req.get('host')?.includes('192.168');
+    const baseUrl = process.env.BASE_URL || (isLocal ? req.protocol + '://' + req.get('host') : 'https://pnp-sta-cruz-official.vercel.app');
+    
+    const approveUrl = `${baseUrl}/admin/users/${docRef.id}/approve`;
+    const rejectUrl = `${baseUrl}/admin/users/${docRef.id}/reject`;
+
+    const mailOptions = {
+      from: 'CPICRS System <andreijavan06@gmail.com>',
+      to: 'andreijavan05@gmail.com',
+      subject: `Action Required: New Admin Account Approval - ${full_name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <h2 style="color: #1a56db;">New Account Creation Request</h2>
+          <p>Dear Police Chief,</p>
+          <p>Please be informed that an administrative personnel, <strong>${req.session.user.full_name} (${req.session.user.username})</strong>, has submitted a request to create a new personnel account in the CPICRS system.</p>
+          <p>For security purposes, new accounts remain in a "Pending" state and cannot access the system until they receive your explicit approval.</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <h3 style="margin-bottom: 10px;">Pending Account Details:</h3>
+          <ul style="list-style-type: none; padding: 0;">
+            <li style="margin-bottom: 5px;"><strong>Full Name:</strong> ${full_name}</li>
+            <li style="margin-bottom: 5px;"><strong>Username:</strong> ${username}</li>
+            <li style="margin-bottom: 5px;"><strong>Role:</strong> Staff</li>
+          </ul>
+          <p style="margin-top: 20px;">Please review the details above and choose whether to approve or reject this request by clicking one of the buttons below:</p>
+          <br>
+          <div style="display: flex; gap: 15px;">
+            <a href="${approveUrl}" style="padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Approve Account</a>
+            <a href="${rejectUrl}" style="padding: 12px 24px; background-color: #dc2626; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin-left: 10px;">Reject Account</a>
+          </div>
+        </div>
+      `
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending approval email:', error);
+      } else {
+        console.log('Approval email sent:', info.response);
+      }
+    });
+
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
@@ -1180,5 +1241,85 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Bulk add error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const approveUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const docRef = db.collection('users').doc(userId);
+    const snap = await docRef.get();
+    
+    const thankYouHtml = (title: string, message: string, color: string) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+      </head>
+      <body style="margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="background: white; padding: 40px 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center; max-width: 90%; width: 400px;">
+          <div style="background-color: ${color}; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">✓</div>
+          <h1 style="color: #111827; font-size: 24px; margin: 0 0 10px 0;">Thank You!</h1>
+          <p style="color: #4b5563; font-size: 16px; line-height: 1.5; margin: 0;">${message}</p>
+          <p style="color: #9ca3af; font-size: 14px; margin-top: 30px;">You may now close this window.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    if (!snap.exists) return res.status(404).send(thankYouHtml('Account Not Found', 'This account request could not be found.', '#6b7280'));
+    
+    const userData = snap.data() as any;
+    if (userData.status === 'active') {
+      return res.send(thankYouHtml('Already Approved', 'This account has already been approved.', '#059669'));
+    }
+
+    await docRef.update({ status: 'active' });
+    await logAction(req, 'USER_APPROVE', `Approved administrative credentials for: ${userData.username}`);
+    res.send(thankYouHtml('Approved Successfully', `You have approved the account for ${userData.full_name}.`, '#059669'));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error approving account.');
+  }
+};
+
+export const rejectUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const docRef = db.collection('users').doc(userId);
+    const snap = await docRef.get();
+
+    const thankYouHtml = (title: string, message: string, color: string) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+      </head>
+      <body style="margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="background: white; padding: 40px 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center; max-width: 90%; width: 400px;">
+          <div style="background-color: ${color}; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">✓</div>
+          <h1 style="color: #111827; font-size: 24px; margin: 0 0 10px 0;">Thank You!</h1>
+          <p style="color: #4b5563; font-size: 16px; line-height: 1.5; margin: 0;">${message}</p>
+          <p style="color: #9ca3af; font-size: 14px; margin-top: 30px;">You may now close this window.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    if (!snap.exists) return res.status(404).send(thankYouHtml('Account Not Found', 'This account request could not be found.', '#6b7280'));
+    
+    const userData = snap.data() as any;
+    if (userData.status === 'rejected') {
+      return res.send(thankYouHtml('Already Rejected', 'This account has already been rejected.', '#dc2626'));
+    }
+
+    await docRef.update({ status: 'rejected' });
+    await logAction(req, 'USER_REJECT', `Rejected administrative credentials for: ${userData.username}`);
+    res.send(thankYouHtml('Rejected Successfully', `You have rejected the account request for ${userData.full_name}.`, '#dc2626'));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error rejecting account.');
   }
 };
