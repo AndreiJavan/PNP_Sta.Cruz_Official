@@ -185,10 +185,10 @@
         <div class="p-8 border-b border-gray-100 dark:border-slate-700 bg-pnp-blue/5 dark:bg-slate-900/50 flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0">
             <div class="flex items-center space-x-5">
                 <div class="w-14 h-14 bg-pnp-blue dark:bg-pnp-gold rounded-2xl flex items-center justify-center text-white dark:text-pnp-blue shadow-2xl rotate-3 border-2 border-white/20">
-                    <i class="fas fa-file-excel text-2xl"></i>
+                    <i id="reviewModalIcon" class="fas fa-file-excel text-2xl"></i>
                 </div>
                 <div>
-                    <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] text-sm">Manual Input</h3>
+                    <h3 id="reviewModalTitle" class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] text-sm">Manual Input</h3>
                     <p id="reviewRowCount" class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Staging Area: Validating Confirm...</p>
                 </div>
             </div>
@@ -341,11 +341,13 @@
          currentEntryType = "manual";
          
          const modal = document.getElementById('intelReviewModal');
-         const title = modal.querySelector('h3');
+         const title = document.getElementById('reviewModalTitle') || modal.querySelector('h3');
          const subtitle = document.getElementById('reviewRowCount');
+         const icon = document.getElementById('reviewModalIcon');
          
-         title.textContent = "Manual Input";
-         subtitle.textContent = "Direct Data Entry";
+         if (title) title.textContent = "Manual Input";
+         if (subtitle) subtitle.textContent = "Direct Data Entry";
+         if (icon) icon.className = "fas fa-keyboard text-2xl";
          
          renderReviewTable();
          modal.classList.remove('hidden');
@@ -358,11 +360,13 @@
          currentEntryType = "scanned";
          
          const modal = document.getElementById('intelReviewModal');
-         const title = modal.querySelector('h3');
+         const title = document.getElementById('reviewModalTitle') || modal.querySelector('h3');
          const subtitle = document.getElementById('reviewRowCount');
+         const icon = document.getElementById('reviewModalIcon');
          
-         title.textContent = "Manual Input";
-         subtitle.textContent = `${reviewData.length} records detected in periodic report`;
+         if (title) title.textContent = "Scanned Document";
+         if (subtitle) subtitle.textContent = `${reviewData.length} records detected in periodic report`;
+         if (icon) icon.className = "fas fa-microchip text-2xl";
          
          renderReviewTable();
          modal.classList.remove('hidden');

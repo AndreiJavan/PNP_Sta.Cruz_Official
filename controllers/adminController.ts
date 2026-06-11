@@ -129,7 +129,7 @@ export const postLogin = async (req: Request, res: Response) => {
   try {
     // 1. Database Lookup - Check username first
     let snap = await db.collection('users').where('username', '==', username).limit(1).get();
-    
+
     // If not found by username, try looking up by email
     if (snap.empty) {
       snap = await db.collection('users').where('email', '==', username).limit(1).get();
@@ -241,9 +241,6 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     }
 
     const client = getGeminiClient();
-
-    // Primary: Gemini 2.0 Flash (Fastest/Latest)
-    // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
     const primaryModel = 'gemini-2.5-flash';
     const fallbackModel = 'gemini-2.5-flash-lite';
 
@@ -1004,7 +1001,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const postUser = async (req: Request, res: Response) => {
   const { full_name, email, password } = req.body;
-  
+
   // Generate a guaranteed unique username to prevent duplicate constraint errors
   const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 8);
   const hash = bcrypt.hashSync(password, 10);
@@ -1029,7 +1026,7 @@ export const postUser = async (req: Request, res: Response) => {
 
     // Force the email link to always point to the live Vercel server
     const baseUrl = 'https://pnp-sta-cruz-official.vercel.app';
-    
+
     const approveUrl = `${baseUrl}/admin/users/${docRef.id}/approve`;
     const rejectUrl = `${baseUrl}/admin/users/${docRef.id}/reject`;
 
@@ -1256,7 +1253,7 @@ export const approveUser = async (req: Request, res: Response) => {
     const userId = req.params.id;
     const docRef = db.collection('users').doc(userId);
     const snap = await docRef.get();
-    
+
     const thankYouHtml = (title: string, message: string, color: string) => `
       <!DOCTYPE html>
       <html>
@@ -1276,7 +1273,7 @@ export const approveUser = async (req: Request, res: Response) => {
     `;
 
     if (!snap.exists) return res.status(404).send(thankYouHtml('Account Not Found', 'This account request could not be found.', '#6b7280'));
-    
+
     const userData = snap.data() as any;
     if (userData.status === 'active') {
       return res.send(thankYouHtml('Already Approved', 'This account has already been approved.', '#059669'));
@@ -1284,7 +1281,7 @@ export const approveUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'active' });
     await logAction(req, 'USER_APPROVE', `Approved administrative credentials for: ${userData.username}`);
-    
+
     // Send approval email to the new user
     if (userData.email) {
       const userMailOptions = {
@@ -1342,7 +1339,7 @@ export const rejectUser = async (req: Request, res: Response) => {
     `;
 
     if (!snap.exists) return res.status(404).send(thankYouHtml('Account Not Found', 'This account request could not be found.', '#6b7280'));
-    
+
     const userData = snap.data() as any;
     if (userData.status === 'rejected') {
       return res.send(thankYouHtml('Already Rejected', 'This account has already been rejected.', '#dc2626'));
