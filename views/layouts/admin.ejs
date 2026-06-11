@@ -264,6 +264,12 @@
             </div>
 
             <div class="flex items-center space-x-4">
+                <!-- Help / Manual Button -->
+                <button onclick="toggleHelpModal()" title="View Instruction Manual"
+                    class="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
+                    <i class="fas fa-question text-sm"></i>
+                </button>
+
                 <!-- Public Site Button -->
                 <a href="/" title="View Public Site"
                     class="w-10 h-10 bg-white dark:bg-slate-800 shadow-sm rounded-full flex items-center justify-center text-pnp-blue dark:text-white transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
@@ -399,6 +405,7 @@
         const savedState = localStorage.getItem('sidebarHidden');
         const forceHide = <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'true' : 'false' %>;
 
+
         if (forceHide || window.innerWidth < 1024 || savedState === 'true') {
             sidebar.classList.add('sidebar-hidden');
             mainContent.classList.add('main-content-expanded');
@@ -409,11 +416,37 @@
             if (forceHide) localStorage.setItem('sidebarHidden', 'true');
         }
 
+        // Global Keyboard Shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+            // CTRL + / -> Toggle Help Modal
+            if (e.ctrlKey && e.key === '/') {
+                e.preventDefault();
+                if (typeof toggleHelpModal === 'function') toggleHelpModal();
+            }
+
+            // CTRL + B -> Toggle Sidebar
+            if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+                e.preventDefault();
+                toggleSidebar();
+            }
+
+            // ESC -> Close Help Modal
+            if (e.key === 'Escape') {
+                const helpModal = document.getElementById('helpModal');
+                if (helpModal && !helpModal.classList.contains('hidden') && typeof toggleHelpModal === 'function') {
+                    toggleHelpModal();
+                }
+            }
+        });
 
     </script>
 
 
     <%- include('../partials/notifications') %>
+    <%- include('../partials/help_modal') %>
 </body>
 
 </html>

@@ -127,8 +127,13 @@ export const postLogin = async (req: Request, res: Response) => {
   }
 
   try {
-    // 1. Database Lookup
-    const snap = await db.collection('users').where('username', '==', username).limit(1).get();
+    // 1. Database Lookup - Check username first
+    let snap = await db.collection('users').where('username', '==', username).limit(1).get();
+    
+    // If not found by username, try looking up by email
+    if (snap.empty) {
+      snap = await db.collection('users').where('email', '==', username).limit(1).get();
+    }
 
     if (snap.empty) {
       console.warn(`[LOGIN FAILED] User not found in DB: ${username}`);
@@ -998,7 +1003,10 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 export const postUser = async (req: Request, res: Response) => {
-  const { username, full_name, password } = req.body;
+  const { full_name, email, password } = req.body;
+  
+  // Generate a guaranteed unique username to prevent duplicate constraint errors
+  const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 8);
   const hash = bcrypt.hashSync(password, 10);
   try {
     // 🛡️ Backend Enforcement: Only superadmins can deploy new personnel
@@ -1012,15 +1020,15 @@ export const postUser = async (req: Request, res: Response) => {
     const docRef = await db.collection('users').add({
       username,
       full_name,
+      email: email || '',
       password_hash: hash,
       role: 'staff',
       status: 'pending',
       created_at: new Date().toISOString()
     });
 
-    // Auto-detect environment: Use local if testing, otherwise force Vercel HTTPS
-    const isLocal = req.get('host')?.includes('localhost') || req.get('host')?.includes('192.168');
-    const baseUrl = process.env.BASE_URL || (isLocal ? req.protocol + '://' + req.get('host') : 'https://pnp-sta-cruz-official.vercel.app');
+    // Force the email link to always point to the live Vercel server
+    const baseUrl = 'https://pnp-sta-cruz-official.vercel.app';
     
     const approveUrl = `${baseUrl}/admin/users/${docRef.id}/approve`;
     const rejectUrl = `${baseUrl}/admin/users/${docRef.id}/reject`;
@@ -1039,7 +1047,7 @@ export const postUser = async (req: Request, res: Response) => {
           <h3 style="margin-bottom: 10px;">Pending Account Details:</h3>
           <ul style="list-style-type: none; padding: 0;">
             <li style="margin-bottom: 5px;"><strong>Full Name:</strong> ${full_name}</li>
-            <li style="margin-bottom: 5px;"><strong>Username:</strong> ${username}</li>
+            <li style="margin-bottom: 5px;"><strong>Email:</strong> ${email || 'N/A'}</li>
             <li style="margin-bottom: 5px;"><strong>Role:</strong> Staff</li>
           </ul>
           <p style="margin-top: 20px;">Please review the details above and choose whether to approve or reject this request by clicking one of the buttons below:</p>
@@ -1277,6 +1285,29 @@ export const approveUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'active' });
     await logAction(req, 'USER_APPROVE', `Approved administrative credentials for: ${userData.username}`);
+    
+    // Send approval email to the new user
+    if (userData.email) {
+      const userMailOptions = {
+        from: 'CPICRS System <andreijavan05@gmail.com>',
+        to: userData.email,
+        subject: 'Your CPICRS Account is Approved',
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #059669;">Account Approved!</h2>
+            <p>Dear ${userData.full_name},</p>
+            <p>Your CPICRS personnel account has been <strong>approved</strong> by the Police Chief.</p>
+            <p>You may now log in to the system using your email address: <strong>${userData.email}</strong></p>
+            <br>
+            <a href="https://pnp-sta-cruz-official.vercel.app/admin/login" style="padding: 12px 24px; background-color: #1a56db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Login</a>
+          </div>
+        `
+      };
+      transporter.sendMail(userMailOptions, (err) => {
+        if (err) console.error('Error sending welcome email to user:', err);
+      });
+    }
+
     res.send(thankYouHtml('Approved Successfully', `You have approved the account for ${userData.full_name}.`, '#059669'));
   } catch (err) {
     console.error(err);
@@ -1317,6 +1348,27 @@ export const rejectUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'rejected' });
     await logAction(req, 'USER_REJECT', `Rejected administrative credentials for: ${userData.username}`);
+
+    // Send rejection email to the new user
+    if (userData.email) {
+      const userMailOptions = {
+        from: 'CPICRS System <andreijavan05@gmail.com>',
+        to: userData.email,
+        subject: 'CPICRS Account Request Update',
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #dc2626;">Account Not Approved</h2>
+            <p>Dear ${userData.full_name},</p>
+            <p>Your request for a CPICRS personnel account has been <strong>rejected</strong> by the Police Chief.</p>
+            <p>If you believe this is a mistake, please contact your commanding officer.</p>
+          </div>
+        `
+      };
+      transporter.sendMail(userMailOptions, (err) => {
+        if (err) console.error('Error sending rejection email to user:', err);
+      });
+    }
+
     res.send(thankYouHtml('Rejected Successfully', `You have rejected the account request for ${userData.full_name}.`, '#dc2626'));
   } catch (err) {
     console.error(err);

@@ -11,6 +11,7 @@ CREATE TABLE public.users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   username TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
+  email TEXT,
   password_hash TEXT NOT NULL,
   role TEXT CHECK (role IN ('superadmin', 'staff')) NOT NULL,
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'pending', 'rejected')),
