@@ -1060,13 +1060,12 @@ export const postUser = async (req: Request, res: Response) => {
       `
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending approval email:', error);
-      } else {
-        console.log('Approval email sent:', info.response);
-      }
-    });
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Approval email successfully sent to Police Chief');
+    } catch (error) {
+      console.error('Error sending approval email:', error);
+    }
 
     res.redirect('/admin/users');
   } catch (err) {
@@ -1303,9 +1302,12 @@ export const approveUser = async (req: Request, res: Response) => {
           </div>
         `
       };
-      transporter.sendMail(userMailOptions, (err) => {
-        if (err) console.error('Error sending welcome email to user:', err);
-      });
+      try {
+        await transporter.sendMail(userMailOptions);
+        console.log('Welcome email successfully sent to new user');
+      } catch (err) {
+        console.error('Error sending welcome email to user:', err);
+      }
     }
 
     res.send(thankYouHtml('Approved Successfully', `You have approved the account for ${userData.full_name}.`, '#059669'));
@@ -1364,9 +1366,12 @@ export const rejectUser = async (req: Request, res: Response) => {
           </div>
         `
       };
-      transporter.sendMail(userMailOptions, (err) => {
-        if (err) console.error('Error sending rejection email to user:', err);
-      });
+      try {
+        await transporter.sendMail(userMailOptions);
+        console.log('Rejection email successfully sent to user');
+      } catch (err) {
+        console.error('Error sending rejection email to user:', err);
+      }
     }
 
     res.send(thankYouHtml('Rejected Successfully', `You have rejected the account request for ${userData.full_name}.`, '#dc2626'));
