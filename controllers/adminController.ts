@@ -44,6 +44,30 @@ async function logAction(req: Request, action: string, details: string) {
   }
 }
 
+// Workaround for Supabase 'bulletins_category_check' constraint
+const STANDARD_CATEGORIES = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
+
+const encodeCustomCategory = (category: string, body: string) => {
+    if (!STANDARD_CATEGORIES.includes(category)) {
+        return {
+            category: 'General Announcement',
+            body: body + `\n<!--CUSTOM_CATEGORY:${category}-->`
+        };
+    }
+    return { category, body };
+};
+
+export const decodeCustomCategory = (item: any) => {
+    if (item && item.body && item.body.includes('<!--CUSTOM_CATEGORY:')) {
+        const match = item.body.match(/<!--CUSTOM_CATEGORY:(.*?)-->/);
+        if (match) {
+            item.category = match[1];
+            item.body = item.body.replace(/\n?<!--CUSTOM_CATEGORY:.*?-->/g, '');
+        }
+    }
+    return item;
+};
+
 const MANUAL_PINS = [
   { name: 'Alipit', lat: 14.223931, lng: 121.405213 }, { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
   { name: 'Duhat', lat: 14.2525, lng: 121.3825 }, { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
@@ -645,7 +669,7 @@ export const getBulletins = async (req: Request, res: Response) => {
     ]);
     const bulletins = snap.docs.map(doc => {
       const d = doc.data();
-      return { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     });
     const totalPages = Math.ceil(countSnap.data().count / limit);
 
@@ -662,13 +686,15 @@ export const getCreateBulletin = (req: Request, res: Response) => {
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
-  const finalCategory = category === 'Other' ? custom_category : category;
+  const rawCategory = category === 'Other' ? custom_category : category;
+  
+  const encoded = encodeCustomCategory(rawCategory, body);
 
   try {
     const data: any = {
       title,
-      category: finalCategory,
-      body,
+      category: encoded.category,
+      body: encoded.body,
       posted_by: req.session.user.id,
       is_archived: false,
       created_at: new Date().toISOString()
@@ -700,8 +726,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     await logAction(req, 'BULLETIN_CREATE', `Created informational bulletin: ${title}`);
     await db.collection('bulletins').add(data);
     res.redirect('/admin/bulletins');
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+    if (err.message && err.message.includes('bulletins_category_check')) {
+      return res.status(500).send('Database Error: Custom categories are blocked by the current Supabase schema. Please run the SQL command in database.sql to drop the "bulletins_category_check" constraint.');
+    }
     res.status(500).send('Error creating bulletin');
   }
 };
@@ -710,7 +739,7 @@ export const getEditBulletin = async (req: Request, res: Response) => {
   try {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
     const d = doc.data();
-    const bulletin = { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -720,13 +749,15 @@ export const getEditBulletin = async (req: Request, res: Response) => {
 
 export const postEditBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, is_archived } = req.body;
-  const finalCategory = category === 'Other' ? custom_category : category;
+  const rawCategory = category === 'Other' ? custom_category : category;
+  
+  const encoded = encodeCustomCategory(rawCategory, body);
 
   try {
     const data: any = {
       title,
-      category: finalCategory,
-      body,
+      category: encoded.category,
+      body: encoded.body,
       is_archived: is_archived === 'on' || is_archived === true,
       updated_at: new Date().toISOString()
     };
@@ -757,8 +788,11 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);
     res.redirect('/admin/bulletins');
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+    if (err.message && err.message.includes('bulletins_category_check')) {
+      return res.status(500).send('Database Error: Custom categories are blocked by the current Supabase schema. Please run the SQL command in database.sql to drop the "bulletins_category_check" constraint.');
+    }
     res.status(500).send('Error updating bulletin');
   }
 };
@@ -1079,6 +1113,13 @@ export const deleteUser = async (req: Request, res: Response) => {
     }
 
     const userId = req.params.id;
+    const { delete_reason, custom_reason } = req.body;
+    
+    // Determine the final reason
+    const finalReason = delete_reason === 'Other' ? custom_reason : delete_reason;
+    const fallbackReason = 'Administrative Decision';
+    const reasonText = finalReason || fallbackReason;
+
     if (userId === req.session.user.id) {
       return res.status(400).send('You cannot neutralize your own credentials while active.');
     }
@@ -1088,7 +1129,40 @@ export const deleteUser = async (req: Request, res: Response) => {
     if (!snap.exists) return res.status(404).send('Subject not found.');
 
     const userData = snap.data() as any;
-    await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username}`);
+    
+    // Send email notification if user has an email
+    if (userData.email) {
+      const mailOptions = {
+        from: 'CPICRS System <andreijavan06@gmail.com>',
+        to: userData.email,
+        subject: `Account Notice: Your CPICRS Access Has Been Revoked`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h2 style="color: #dc2626; margin: 0; padding: 0;">Account Access Revoked</h2>
+            </div>
+            <p>Dear ${userData.full_name},</p>
+            <p>This is an official notice that your administrative account (<strong>${userData.username}</strong>) in the CPICRS system has been permanently neutralized and deleted by the system administrator.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="margin-bottom: 10px;"><strong>Reason for Neutralization:</strong></p>
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #991b1b; font-weight: bold;">${reasonText}</p>
+            </div>
+            <p>You can no longer log into the CPICRS system. If you believe this is an error or require further clarification, please contact the Police Chief or your immediate superior.</p>
+            <p style="font-size: 12px; color: #666; margin-top: 30px; text-align: center;">This is an automated operational message from the CPICRS Database System.</p>
+          </div>
+        `
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Deletion notice email successfully sent to ${userData.email}`);
+      } catch (emailErr) {
+        console.error('Failed to send deletion notice email:', emailErr);
+      }
+    }
+
+    await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username} | Reason: ${reasonText}`);
     await docRef.delete();
     res.redirect('/admin/users');
   } catch (err) {

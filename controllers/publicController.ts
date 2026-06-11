@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { db } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
-
+import { decodeCustomCategory } from './adminController.js';
 
 export const getHome = async (req: Request, res: Response) => {
   try {
@@ -92,7 +92,7 @@ export const getBulletins = async (req: Request, res: Response) => {
     const snap = await query.orderBy('created_at', 'desc').get();
     let bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
-      return { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     });
 
     if (search) {
@@ -119,7 +119,7 @@ export const getBulletinDetail = async (req: Request, res: Response) => {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).send('Bulletin not found');
     const d = doc.data();
-    const bulletin = { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     res.render('public/bulletin_detail', { title: bulletin.title, bulletin });
   } catch (err) {
     console.error(err);

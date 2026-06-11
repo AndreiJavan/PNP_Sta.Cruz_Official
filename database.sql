@@ -174,3 +174,10 @@ ON CONFLICT DO NOTHING;
 -- REFRESH SCHEMA CACHE
 -- =====================================================
 NOTIFY pgrst, 'reload schema';
+
+-- =====================================================
+-- FIX FOR BULLETINS CATEGORY CONSTRAINT
+-- Run this block in your Supabase SQL Editor to fix the 
+-- "violates check constraint 'bulletins_category_check'" error.
+-- =====================================================
+ALTER TABLE public.bulletins DROP CONSTRAINT IF EXISTS bulletins_category_check;

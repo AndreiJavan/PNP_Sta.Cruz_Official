@@ -105,14 +105,10 @@
                                     </td>
                                     <td class="px-8 py-5 text-right">
                                         <% if (user && user.role==='superadmin' ) { %>
-                                            <form action="/admin/users/<%= u.id %>/delete" method="POST"
-                                                onsubmit="confirmOperationalAction(event, { title: 'Delete Personnel', message: 'Are you sure you want to permanently delete this user account?', type: 'danger', confirmText: 'Delete' })"
-                                                class="inline">
-                                                <button type="submit"
-                                                    class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto shadow-sm">
-                                                    <i class="fas fa-trash-alt text-[11px]"></i>
-                                                </button>
-                                            </form>
+                                            <button type="button" onclick="openDeleteUserModal('<%= u.id %>', '<%= u.full_name %>')"
+                                                class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto shadow-sm">
+                                                <i class="fas fa-trash-alt text-[11px]"></i>
+                                            </button>
                                             <% } else { %>
                                                 <span
                                                     class="text-[8px] font-black text-slate-300 uppercase italic">Locked</span>
@@ -269,6 +265,77 @@
     </div>
 </div>
 
+<!-- Delete User Modal -->
+<div id="deleteUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
+        
+        <form id="deleteUserForm" method="POST" action="">
+            <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-red-50 dark:bg-red-900/10">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/10">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Neutralize Account</h3>
+                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-[0.2em] mt-1">Permanent action for <span id="deleteUserTargetName"></span></p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDeleteUserModal()" class="w-10 h-10 bg-white dark:bg-slate-800 text-gray-400 hover:text-red-500 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-8 space-y-6">
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-widest leading-relaxed">
+                    Please select the reason for neutralizing this personnel's credentials. An email will be sent to their registered address detailing the reason.
+                </p>
+
+                <div class="space-y-3">
+                    <label class="flex items-center space-x-3 p-3 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition">
+                        <input type="radio" name="delete_reason" value="Security Breach / Compromised Credentials" class="w-4 h-4 text-pnp-blue focus:ring-pnp-blue border-gray-300" required onchange="toggleCustomReason()">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Security Breach / Compromised Credentials</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition">
+                        <input type="radio" name="delete_reason" value="Violation of Operational Protocols" class="w-4 h-4 text-pnp-blue focus:ring-pnp-blue border-gray-300" onchange="toggleCustomReason()">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Violation of Operational Protocols</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition">
+                        <input type="radio" name="delete_reason" value="Reassignment / Transfer of Duties" class="w-4 h-4 text-pnp-blue focus:ring-pnp-blue border-gray-300" onchange="toggleCustomReason()">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Reassignment / Transfer of Duties</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition">
+                        <input type="radio" name="delete_reason" value="Inactive / Dormant Account" class="w-4 h-4 text-pnp-blue focus:ring-pnp-blue border-gray-300" onchange="toggleCustomReason()">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Inactive / Dormant Account</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition">
+                        <input type="radio" name="delete_reason" value="Request from Higher Command" class="w-4 h-4 text-pnp-blue focus:ring-pnp-blue border-gray-300" onchange="toggleCustomReason()">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Request from Higher Command</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-xl border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer transition">
+                        <input type="radio" name="delete_reason" value="Other" class="w-4 h-4 text-pnp-blue focus:ring-pnp-blue border-gray-300" onchange="toggleCustomReason()">
+                        <span class="text-xs font-bold text-gray-700 dark:text-gray-300">Other (Custom Reason)</span>
+                    </label>
+                </div>
+
+                <div id="customReasonContainer" class="hidden mt-4 space-y-2">
+                    <label class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Specify Reason</label>
+                    <input type="text" name="custom_reason" id="custom_reason" placeholder="Enter custom deletion reason..."
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end space-x-4">
+                <button type="button" onclick="closeDeleteUserModal()" class="px-6 py-3 rounded-xl text-xs font-black text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-700 transition uppercase tracking-widest">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-red-500 text-white text-xs font-black uppercase tracking-widest hover:bg-red-600 transition shadow-lg shadow-red-500/20 flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Confirm Delete
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function openUsersLogModal() {
         const modal = document.getElementById('usersLogModal');
@@ -291,5 +358,49 @@
             modal.classList.remove('flex');
             document.body.style.overflow = '';
         }, 300);
+    }
+
+    function openDeleteUserModal(userId, userName) {
+        document.getElementById('deleteUserForm').action = `/admin/users/${userId}/delete`;
+        document.getElementById('deleteUserTargetName').textContent = userName;
+        
+        // Reset form
+        document.getElementById('deleteUserForm').reset();
+        toggleCustomReason();
+
+        const modal = document.getElementById('deleteUserModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        void modal.offsetWidth;
+        modal.classList.remove('opacity-0');
+        modal.children[0].classList.remove('scale-95');
+        modal.children[0].classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeleteUserModal() {
+        const modal = document.getElementById('deleteUserModal');
+        modal.classList.add('opacity-0');
+        modal.children[0].classList.remove('scale-100');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function toggleCustomReason() {
+        const customContainer = document.getElementById('customReasonContainer');
+        const customInput = document.getElementById('custom_reason');
+        const otherRadio = document.querySelector('input[name="delete_reason"][value="Other"]');
+        
+        if (otherRadio && otherRadio.checked) {
+            customContainer.classList.remove('hidden');
+            customInput.required = true;
+        } else {
+            customContainer.classList.add('hidden');
+            customInput.required = false;
+        }
     }
 </script>
