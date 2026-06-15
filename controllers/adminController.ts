@@ -5,6 +5,15 @@ import * as XLSX from 'xlsx';
 import mammoth from 'mammoth';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createRequire } from 'module';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'andreijavan05@gmail.com',
+    pass: 'mwcb ioze huql sxgd'
+  }
+});
 
 // Shared Tactical Assets
 const VALID_BARANGAYS = [
@@ -34,6 +43,30 @@ async function logAction(req: Request, action: string, details: string) {
     console.error('[AUDIT FAIL]', err);
   }
 }
+
+// Workaround for Supabase 'bulletins_category_check' constraint
+const STANDARD_CATEGORIES = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
+
+const encodeCustomCategory = (category: string, body: string) => {
+    if (!STANDARD_CATEGORIES.includes(category)) {
+        return {
+            category: 'General Announcement',
+            body: body + `\n<!--CUSTOM_CATEGORY:${category}-->`
+        };
+    }
+    return { category, body };
+};
+
+export const decodeCustomCategory = (item: any) => {
+    if (item && item.body && item.body.includes('<!--CUSTOM_CATEGORY:')) {
+        const match = item.body.match(/<!--CUSTOM_CATEGORY:(.*?)-->/);
+        if (match) {
+            item.category = match[1];
+            item.body = item.body.replace(/\n?<!--CUSTOM_CATEGORY:.*?-->/g, '');
+        }
+    }
+    return item;
+};
 
 const MANUAL_PINS = [
   { name: 'Alipit', lat: 14.223931, lng: 121.405213 }, { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
@@ -118,8 +151,13 @@ export const postLogin = async (req: Request, res: Response) => {
   }
 
   try {
-    // 1. Database Lookup
-    const snap = await db.collection('users').where('username', '==', username).limit(1).get();
+    // 1. Database Lookup - Check username first
+    let snap = await db.collection('users').where('username', '==', username).limit(1).get();
+
+    // If not found by username, try looking up by email
+    if (snap.empty) {
+      snap = await db.collection('users').where('email', '==', username).limit(1).get();
+    }
 
     if (snap.empty) {
       console.warn(`[LOGIN FAILED] User not found in DB: ${username}`);
@@ -134,6 +172,13 @@ export const postLogin = async (req: Request, res: Response) => {
     console.log(`[LOGIN RESULT] Password check: ${isPasswordCorrect}`);
 
     if (isPasswordCorrect) {
+      if (user.status === 'pending') {
+        return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Your account is pending approval by the Police Chief.' });
+      }
+      if (user.status === 'rejected') {
+        return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Your account request was rejected.' });
+      }
+
       req.session.user = {
         id: user.id,
         username: user.username,
@@ -220,9 +265,6 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     }
 
     const client = getGeminiClient();
-
-    // Primary: Gemini 2.0 Flash (Fastest/Latest)
-    // Fallback: Gemini 2.0 Flash Lite (Reliable in high demand)
     const primaryModel = 'gemini-2.5-flash';
     const fallbackModel = 'gemini-2.5-flash-lite';
 
@@ -611,7 +653,7 @@ const parsePhotos = (path: string | undefined): string[] => {
   try {
     const parsed = JSON.parse(path);
     if (Array.isArray(parsed)) return parsed;
-  } catch (e) {}
+  } catch (e) { }
   return [path];
 };
 
@@ -627,7 +669,7 @@ export const getBulletins = async (req: Request, res: Response) => {
     ]);
     const bulletins = snap.docs.map(doc => {
       const d = doc.data();
-      return { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     });
     const totalPages = Math.ceil(countSnap.data().count / limit);
 
@@ -644,13 +686,15 @@ export const getCreateBulletin = (req: Request, res: Response) => {
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
-  const finalCategory = category === 'Other' ? custom_category : category;
+  const rawCategory = category === 'Other' ? custom_category : category;
+  
+  const encoded = encodeCustomCategory(rawCategory, body);
 
   try {
     const data: any = {
       title,
-      category: finalCategory,
-      body,
+      category: encoded.category,
+      body: encoded.body,
       posted_by: req.session.user.id,
       is_archived: false,
       created_at: new Date().toISOString()
@@ -659,7 +703,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     if ((req as any).files && (req as any).files.length > 0) {
       const files = (req as any).files;
       const uploadedPaths: string[] = [];
-      
+
       for (const file of files) {
         const fileExt = file.originalname.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -673,7 +717,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
           console.error('[BULLETIN] Supabase Storage Error:', storageErr);
         }
       }
-      
+
       if (uploadedPaths.length > 0) {
         data.photo_path = JSON.stringify(uploadedPaths);
       }
@@ -682,8 +726,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     await logAction(req, 'BULLETIN_CREATE', `Created informational bulletin: ${title}`);
     await db.collection('bulletins').add(data);
     res.redirect('/admin/bulletins');
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+    if (err.message && err.message.includes('bulletins_category_check')) {
+      return res.status(500).send('Database Error: Custom categories are blocked by the current Supabase schema. Please run the SQL command in database.sql to drop the "bulletins_category_check" constraint.');
+    }
     res.status(500).send('Error creating bulletin');
   }
 };
@@ -692,7 +739,7 @@ export const getEditBulletin = async (req: Request, res: Response) => {
   try {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
     const d = doc.data();
-    const bulletin = { id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) };
+    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -702,13 +749,15 @@ export const getEditBulletin = async (req: Request, res: Response) => {
 
 export const postEditBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, is_archived } = req.body;
-  const finalCategory = category === 'Other' ? custom_category : category;
+  const rawCategory = category === 'Other' ? custom_category : category;
+  
+  const encoded = encodeCustomCategory(rawCategory, body);
 
   try {
     const data: any = {
       title,
-      category: finalCategory,
-      body,
+      category: encoded.category,
+      body: encoded.body,
       is_archived: is_archived === 'on' || is_archived === true,
       updated_at: new Date().toISOString()
     };
@@ -716,7 +765,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     if ((req as any).files && (req as any).files.length > 0) {
       const files = (req as any).files;
       const uploadedPaths: string[] = [];
-      
+
       for (const file of files) {
         const fileExt = file.originalname.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
@@ -730,7 +779,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
           console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
         }
       }
-      
+
       if (uploadedPaths.length > 0) {
         data.photo_path = JSON.stringify(uploadedPaths);
       }
@@ -739,8 +788,11 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);
     res.redirect('/admin/bulletins');
-  } catch (err) {
+  } catch (err: any) {
     console.error(err);
+    if (err.message && err.message.includes('bulletins_category_check')) {
+      return res.status(500).send('Database Error: Custom categories are blocked by the current Supabase schema. Please run the SQL command in database.sql to drop the "bulletins_category_check" constraint.');
+    }
     res.status(500).send('Error updating bulletin');
   }
 };
@@ -982,7 +1034,10 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 export const postUser = async (req: Request, res: Response) => {
-  const { username, full_name, password } = req.body;
+  const { full_name, email, password } = req.body;
+
+  // Generate a guaranteed unique username to prevent duplicate constraint errors
+  const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 8);
   const hash = bcrypt.hashSync(password, 10);
   try {
     // 🛡️ Backend Enforcement: Only superadmins can deploy new personnel
@@ -991,14 +1046,58 @@ export const postUser = async (req: Request, res: Response) => {
       return res.status(403).send('Forbidden: Insufficient tactical clearance.');
     }
 
-    await logAction(req, 'USER_CREATE', `Created administrative personnel: ${username} (Role: staff)`);
-    await db.collection('users').add({
+    await logAction(req, 'USER_CREATE_PENDING', `Requested creation of administrative personnel: ${username} (Role: staff)`);
+
+    const docRef = await db.collection('users').add({
       username,
       full_name,
+      email: email || '',
       password_hash: hash,
       role: 'staff',
+      status: 'pending',
       created_at: new Date().toISOString()
     });
+
+    // Force the email link to always point to the live Vercel server
+    const baseUrl = 'https://pnp-sta-cruz-official.vercel.app';
+
+    const approveUrl = `${baseUrl}/admin/users/${docRef.id}/approve`;
+    const rejectUrl = `${baseUrl}/admin/users/${docRef.id}/reject`;
+
+    const mailOptions = {
+      from: 'CPICRS System <andreijavan06@gmail.com>',
+      to: 'andreijavan05@gmail.com',
+      subject: `Action Required: New Admin Account Approval - ${full_name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+          <h2 style="color: #1a56db;">New Account Creation Request</h2>
+          <p>Dear Police Chief,</p>
+          <p>Please be informed that an administrative personnel, <strong>${req.session.user.full_name} (${req.session.user.username})</strong>, has submitted a request to create a new personnel account in the CPICRS system.</p>
+          <p>For security purposes, new accounts remain in a "Pending" state and cannot access the system until they receive your explicit approval.</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <h3 style="margin-bottom: 10px;">Pending Account Details:</h3>
+          <ul style="list-style-type: none; padding: 0;">
+            <li style="margin-bottom: 5px;"><strong>Full Name:</strong> ${full_name}</li>
+            <li style="margin-bottom: 5px;"><strong>Email:</strong> ${email || 'N/A'}</li>
+            <li style="margin-bottom: 5px;"><strong>Role:</strong> Staff</li>
+          </ul>
+          <p style="margin-top: 20px;">Please review the details above and choose whether to approve or reject this request by clicking one of the buttons below:</p>
+          <br>
+          <div style="display: flex; gap: 15px;">
+            <a href="${approveUrl}" style="padding: 12px 24px; background-color: #059669; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Approve Account</a>
+            <a href="${rejectUrl}" style="padding: 12px 24px; background-color: #dc2626; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; margin-left: 10px;">Reject Account</a>
+          </div>
+        </div>
+      `
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Approval email successfully sent to Police Chief');
+    } catch (error) {
+      console.error('Error sending approval email:', error);
+    }
+
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
@@ -1014,6 +1113,13 @@ export const deleteUser = async (req: Request, res: Response) => {
     }
 
     const userId = req.params.id;
+    const { delete_reason, custom_reason } = req.body;
+    
+    // Determine the final reason
+    const finalReason = delete_reason === 'Other' ? custom_reason : delete_reason;
+    const fallbackReason = 'Administrative Decision';
+    const reasonText = finalReason || fallbackReason;
+
     if (userId === req.session.user.id) {
       return res.status(400).send('You cannot neutralize your own credentials while active.');
     }
@@ -1023,7 +1129,40 @@ export const deleteUser = async (req: Request, res: Response) => {
     if (!snap.exists) return res.status(404).send('Subject not found.');
 
     const userData = snap.data() as any;
-    await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username}`);
+    
+    // Send email notification if user has an email
+    if (userData.email) {
+      const mailOptions = {
+        from: 'CPICRS System <andreijavan06@gmail.com>',
+        to: userData.email,
+        subject: `Account Notice: Your CPICRS Access Has Been Revoked`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h2 style="color: #dc2626; margin: 0; padding: 0;">Account Access Revoked</h2>
+            </div>
+            <p>Dear ${userData.full_name},</p>
+            <p>This is an official notice that your administrative account (<strong>${userData.username}</strong>) in the CPICRS system has been permanently neutralized and deleted by the system administrator.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="margin-bottom: 10px;"><strong>Reason for Neutralization:</strong></p>
+            <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+              <p style="margin: 0; color: #991b1b; font-weight: bold;">${reasonText}</p>
+            </div>
+            <p>You can no longer log into the CPICRS system. If you believe this is an error or require further clarification, please contact the Police Chief or your immediate superior.</p>
+            <p style="font-size: 12px; color: #666; margin-top: 30px; text-align: center;">This is an automated operational message from the CPICRS Database System.</p>
+          </div>
+        `
+      };
+
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Deletion notice email successfully sent to ${userData.email}`);
+      } catch (emailErr) {
+        console.error('Failed to send deletion notice email:', emailErr);
+      }
+    }
+
+    await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username} | Reason: ${reasonText}`);
     await docRef.delete();
     res.redirect('/admin/users');
   } catch (err) {
@@ -1180,5 +1319,135 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Bulk add error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const approveUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const docRef = db.collection('users').doc(userId);
+    const snap = await docRef.get();
+
+    const thankYouHtml = (title: string, message: string, color: string) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+      </head>
+      <body style="margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="background: white; padding: 40px 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center; max-width: 90%; width: 400px;">
+          <div style="background-color: ${color}; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">✓</div>
+          <h1 style="color: #111827; font-size: 24px; margin: 0 0 10px 0;">Thank You!</h1>
+          <p style="color: #4b5563; font-size: 16px; line-height: 1.5; margin: 0;">${message}</p>
+          <p style="color: #9ca3af; font-size: 14px; margin-top: 30px;">You may now close this window.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    if (!snap.exists) return res.status(404).send(thankYouHtml('Account Not Found', 'This account request could not be found.', '#6b7280'));
+
+    const userData = snap.data() as any;
+    if (userData.status === 'active') {
+      return res.send(thankYouHtml('Already Approved', 'This account has already been approved.', '#059669'));
+    }
+
+    await docRef.update({ status: 'active' });
+    await logAction(req, 'USER_APPROVE', `Approved administrative credentials for: ${userData.username}`);
+
+    // Send approval email to the new user
+    if (userData.email) {
+      const userMailOptions = {
+        from: 'CPICRS System <andreijavan05@gmail.com>',
+        to: userData.email,
+        subject: 'Your CPICRS Account is Approved',
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #059669;">Account Approved!</h2>
+            <p>Dear ${userData.full_name},</p>
+            <p>Your CPICRS personnel account has been <strong>approved</strong> by the Police Chief.</p>
+            <p>You may now log in to the system using your email address: <strong>${userData.email}</strong></p>
+            <br>
+            <a href="https://pnp-sta-cruz-official.vercel.app/admin/login" style="padding: 12px 24px; background-color: #1a56db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Login</a>
+          </div>
+        `
+      };
+      try {
+        await transporter.sendMail(userMailOptions);
+        console.log('Welcome email successfully sent to new user');
+      } catch (err) {
+        console.error('Error sending welcome email to user:', err);
+      }
+    }
+
+    res.send(thankYouHtml('Approved Successfully', `You have approved the account for ${userData.full_name}.`, '#059669'));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error approving account.');
+  }
+};
+
+export const rejectUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.params.id;
+    const docRef = db.collection('users').doc(userId);
+    const snap = await docRef.get();
+
+    const thankYouHtml = (title: string, message: string, color: string) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${title}</title>
+      </head>
+      <body style="margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div style="background: white; padding: 40px 20px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); text-align: center; max-width: 90%; width: 400px;">
+          <div style="background-color: ${color}; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto;">✓</div>
+          <h1 style="color: #111827; font-size: 24px; margin: 0 0 10px 0;">Thank You!</h1>
+          <p style="color: #4b5563; font-size: 16px; line-height: 1.5; margin: 0;">${message}</p>
+          <p style="color: #9ca3af; font-size: 14px; margin-top: 30px;">You may now close this window.</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    if (!snap.exists) return res.status(404).send(thankYouHtml('Account Not Found', 'This account request could not be found.', '#6b7280'));
+
+    const userData = snap.data() as any;
+    if (userData.status === 'rejected') {
+      return res.send(thankYouHtml('Already Rejected', 'This account has already been rejected.', '#dc2626'));
+    }
+
+    await docRef.update({ status: 'rejected' });
+    await logAction(req, 'USER_REJECT', `Rejected administrative credentials for: ${userData.username}`);
+
+    // Send rejection email to the new user
+    if (userData.email) {
+      const userMailOptions = {
+        from: 'CPICRS System <andreijavan05@gmail.com>',
+        to: userData.email,
+        subject: 'CPICRS Account Request Update',
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #dc2626;">Account Not Approved</h2>
+            <p>Dear ${userData.full_name},</p>
+            <p>Your request for a CPICRS personnel account has been <strong>rejected</strong> by the Police Chief.</p>
+            <p>If you believe this is a mistake, please contact your commanding officer.</p>
+          </div>
+        `
+      };
+      try {
+        await transporter.sendMail(userMailOptions);
+        console.log('Rejection email successfully sent to user');
+      } catch (err) {
+        console.error('Error sending rejection email to user:', err);
+      }
+    }
+
+    res.send(thankYouHtml('Rejected Successfully', `You have rejected the account request for ${userData.full_name}.`, '#dc2626'));
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error rejecting account.');
   }
 };

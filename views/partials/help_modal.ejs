@@ -1,0 +1,172 @@
+<!-- Beginner's Instruction Guide Modal -->
+<div id="helpModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 sm:p-6 animate-fade-in">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="toggleHelpModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative bg-white dark:bg-slate-800 w-full max-w-4xl h-[85vh] rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden flex flex-col transform transition-all scale-95 opacity-0 duration-300" id="helpModalContainer">
+        <!-- Decoration -->
+        <div class="absolute top-0 left-0 w-full h-1.5 bg-pnp-blue dark:bg-pnp-gold"></div>
+        
+        <!-- Header -->
+        <div class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50 flex-shrink-0">
+            <div class="flex items-center space-x-4">
+                <div class="w-14 h-14 bg-pnp-blue/10 dark:bg-pnp-gold/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold">
+                    <i class="fas fa-book text-2xl"></i>
+                </div>
+                <div>
+                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm lg:text-lg">Admin Operations Manual</h3>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">Beginner's Guide to CPICRS Features</p>
+                </div>
+            </div>
+            <button onclick="toggleHelpModal()" class="w-10 h-10 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 transition-all border border-gray-200 dark:border-slate-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Scrollable Content -->
+        <div class="flex-grow overflow-y-auto p-8 space-y-8 sidebar-scroll bg-white dark:bg-slate-800">
+            
+            <!-- Introduction -->
+            <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-3xl p-6">
+                <h4 class="text-blue-800 dark:text-blue-400 font-black tracking-widest uppercase text-xs mb-2">Welcome to CPICRS</h4>
+                <p class="text-sm text-blue-900/80 dark:text-blue-300/80 leading-relaxed">
+                    This system manages the tactical data, public bulletins, and administrative operations for the Santa Cruz Police Station. 
+                    Below is a quick-start guide explaining what each module does and how to use it.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Dashboard -->
+                <div class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:border-pnp-gold/50 transition-colors">
+                    <div class="w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-xl flex items-center justify-center text-white dark:text-pnp-blue mb-4 shadow-lg shadow-pnp-blue/20">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 dark:text-white uppercase tracking-widest text-[11px] mb-2">1. Dashboard</h4>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Your command center. It provides a quick overview of total crimes, active bulletins, and recent system activity. Use this to get a bird's-eye view of the station's daily operations.
+                    </p>
+                </div>
+
+                <!-- Bulletins -->
+                <div class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:border-pnp-gold/50 transition-colors">
+                    <div class="w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-xl flex items-center justify-center text-white dark:text-pnp-blue mb-4 shadow-lg shadow-pnp-blue/20">
+                        <i class="fas fa-bullhorn"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 dark:text-white uppercase tracking-widest text-[11px] mb-2">2. Bulletins</h4>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Use this to post news, wanted persons, or community announcements to the public website. 
+                        <strong>Pro Tip:</strong> You can upload up to 5 images per bulletin, which will display as an interactive slider on the main site.
+                    </p>
+                </div>
+
+                <!-- Crime Reports -->
+                <div class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:border-pnp-gold/50 transition-colors">
+                    <div class="w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-xl flex items-center justify-center text-white dark:text-pnp-blue mb-4 shadow-lg shadow-pnp-blue/20">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 dark:text-white uppercase tracking-widest text-[11px] mb-2">3. Crime Reports</h4>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Where you manage bulk crime data. You can upload scanned tables of incidents, and the AI will automatically extract and plot them. This page also shows the analytics graphs for 8-Focus vs Non-Index crimes.
+                    </p>
+                </div>
+
+                <!-- Map -->
+                <div class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:border-pnp-gold/50 transition-colors">
+                    <div class="w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-xl flex items-center justify-center text-white dark:text-pnp-blue mb-4 shadow-lg shadow-pnp-blue/20">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 dark:text-white uppercase tracking-widest text-[11px] mb-2">4. Tactical Map</h4>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        The live geospatial grid. It shows all recorded crimes plotted in Sta. Cruz. 
+                        <strong>How to use:</strong> You can manually add a single incident here by filling out the form, and it will immediately appear as a pin on the map.
+                    </p>
+                </div>
+
+                <!-- Hotlines -->
+                <div class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:border-pnp-gold/50 transition-colors">
+                    <div class="w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-xl flex items-center justify-center text-white dark:text-pnp-blue mb-4 shadow-lg shadow-pnp-blue/20">
+                        <i class="fas fa-phone-volume"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 dark:text-white uppercase tracking-widest text-[11px] mb-2">5. Hotlines</h4>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Manage the emergency numbers that citizens see on the public website. Categorize them (e.g., Police, Medical, Fire) so citizens can find the right help instantly.
+                    </p>
+                </div>
+
+                <!-- Users -->
+                <div class="bg-gray-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-gray-100 dark:border-slate-700/50 hover:border-pnp-gold/50 transition-colors">
+                    <div class="w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-xl flex items-center justify-center text-white dark:text-pnp-blue mb-4 shadow-lg shadow-pnp-blue/20">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h4 class="font-black text-gray-800 dark:text-white uppercase tracking-widest text-[11px] mb-2">6. Users & Audit</h4>
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+                        <em>(Superadmin Only)</em> Create and remove access for other staff members. When you create an account, it is set to "Pending" and sends an email to the Police Chief for approval. Also displays the master system logs.
+                    </p>
+                </div>
+
+                <!-- Pro Tips & System Controls -->
+                <div class="bg-gradient-to-r from-gray-900 to-slate-800 p-6 rounded-3xl border border-pnp-gold/30 hover:border-pnp-gold transition-colors md:col-span-2 shadow-2xl">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-8 h-8 bg-pnp-gold/20 rounded-lg flex items-center justify-center text-pnp-gold">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <h4 class="font-black text-pnp-gold uppercase tracking-widest text-[11px]">Pro Tips & System Controls</h4>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Double Click Protection -->
+                        <div class="bg-white/5 rounded-2xl p-4">
+                            <h5 class="text-[10px] font-black text-white uppercase tracking-widest mb-1 flex items-center"><i class="fas fa-mouse mr-2 text-pnp-gold"></i> Form Protection</h5>
+                            <p class="text-[10px] text-gray-400 leading-relaxed">
+                                <strong>Double-Click Prevention:</strong> The system automatically locks buttons after you click "Submit" or "Create". This prevents accidental duplicate entries. You only ever need to click once!
+                            </p>
+                        </div>
+
+                        <!-- Keyboard Shortcuts -->
+                        <div class="bg-white/5 rounded-2xl p-4">
+                            <h5 class="text-[10px] font-black text-white uppercase tracking-widest mb-1 flex items-center"><i class="fas fa-keyboard mr-2 text-pnp-gold"></i> Keyboard Shortcuts</h5>
+                            <ul class="text-[10px] text-gray-400 leading-relaxed space-y-1 mt-2">
+                                <li><kbd class="bg-black/50 px-1.5 py-0.5 rounded text-pnp-gold border border-white/10">ESC</kbd> - Close this manual or any open modal</li>
+                                <li><kbd class="bg-black/50 px-1.5 py-0.5 rounded text-pnp-gold border border-white/10">CTRL</kbd> + <kbd class="bg-black/50 px-1.5 py-0.5 rounded text-pnp-gold border border-white/10">/</kbd> - Open/Close this manual quickly</li>
+                                <li><kbd class="bg-black/50 px-1.5 py-0.5 rounded text-pnp-gold border border-white/10">CTRL</kbd> + <kbd class="bg-black/50 px-1.5 py-0.5 rounded text-pnp-gold border border-white/10">B</kbd> - Expand/Collapse the left sidebar</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div class="pt-6 border-t border-gray-100 dark:border-slate-700 text-center">
+                <button onclick="toggleHelpModal()" class="px-8 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95">
+                    Understood
+                </button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleHelpModal() {
+        const modal = document.getElementById('helpModal');
+        const container = document.getElementById('helpModalContainer');
+        
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                container.classList.remove('scale-95', 'opacity-0');
+                container.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        } else {
+            container.classList.remove('scale-100', 'opacity-100');
+            container.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+    }
+</script>
