@@ -1366,7 +1366,7 @@ export const approveUser = async (req: Request, res: Response) => {
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
             <h2 style="color: #059669;">Account Approved!</h2>
             <p>Dear ${userData.full_name},</p>
-            <p>Your CPICRS personnel account has been <strong>approved</strong> by the Police Chief.</p>
+            <p>Your Sta. Cruz Crime Mapping account has been <strong>approved</strong> by the Police Chief.</p>
             <p>You may now log in to the system using your email address: <strong>${userData.email}</strong></p>
             <br>
             <a href="https://pnp-sta-cruz-official.vercel.app/admin/login" style="padding: 12px 24px; background-color: #1a56db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Login</a>
@@ -1432,7 +1432,7 @@ export const rejectUser = async (req: Request, res: Response) => {
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
             <h2 style="color: #dc2626;">Account Not Approved</h2>
             <p>Dear ${userData.full_name},</p>
-            <p>Your request for a CPICRS personnel account has been <strong>rejected</strong> by the Police Chief.</p>
+            <p>Your request for a Sta. Cruz Crime Mapping account has been <strong>rejected</strong> by the Police Chief.</p>
             <p>If you believe this is a mistake, please contact your commanding officer.</p>
           </div>
         `
