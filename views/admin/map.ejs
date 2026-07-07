@@ -2,7 +2,8 @@
     <!-- Sidebar -->
     <div id="filterSidebar"
         class="absolute md:relative z-[1000] md:z-10 w-full md:w-[400px] h-full bg-white/95 dark:bg-slate-800/95 flex flex-col border-r border-gray-200 dark:border-slate-700/50 shadow-2xl transition-transform duration-300 flex-shrink-0 sidebar-visible md:!transform-none md:!translate-x-0">
-        <div class="bg-gray-100/50 dark:bg-slate-800 p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center md:hidden">
+        <div
+            class="bg-gray-100/50 dark:bg-slate-800 p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center md:hidden">
             <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Filters</h3>
             <button onclick="toggleMapSidebar()" class="text-slate-500 hover:text-pnp-blue transition">
                 <i class="fas fa-times text-xl"></i>
@@ -13,15 +14,25 @@
             <div class="p-5 space-y-5">
                 <div class="space-y-3">
                     <div class="space-y-1 mb-2">
-                        <h3 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em]">Location Overview</h3>
-                        <h4 class="text-xl font-black tracking-tighter text-slate-800 dark:text-white">Sta. Cruz Map</h4>
-                        
-                        <div class="mt-3 p-3 bg-pnp-blue/5 dark:bg-pnp-gold/5 rounded-xl border border-pnp-blue/10 dark:border-pnp-gold/10">
-                            <p class="text-[9px] text-slate-500 dark:text-gray-400 font-bold uppercase leading-relaxed tracking-widest">
-                                <i class="fas fa-info-circle text-pnp-blue dark:text-pnp-gold mr-1"></i> <strong class="text-slate-700 dark:text-slate-300">Map Controls:</strong><br>
-                                <span class="opacity-80 block mt-1.5"><i class="fas fa-keyboard mr-1 w-3 text-center"></i> Left/Right Arrow Keys to navigate</span>
-                                <span class="opacity-80 block mt-1"><i class="fas fa-mouse-pointer mr-1 w-3 text-center"></i> Select a Barangay to isolate data</span>
-                                <span class="opacity-80 block mt-1"><i class="fas fa-mouse mr-1 w-3 text-center"></i> Double-click an incident below for reports</span>
+                        <h3 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em]">
+                            Location Overview</h3>
+                        <h4 class="text-xl font-black tracking-tighter text-slate-800 dark:text-white">Sta. Cruz Map
+                        </h4>
+
+                        <div
+                            class="mt-3 p-3 bg-pnp-blue/5 dark:bg-pnp-gold/5 rounded-xl border border-pnp-blue/10 dark:border-pnp-gold/10">
+                            <p
+                                class="text-[9px] text-slate-500 dark:text-gray-400 font-bold uppercase leading-relaxed tracking-widest">
+                                <i class="fas fa-info-circle text-pnp-blue dark:text-pnp-gold mr-1"></i> <strong
+                                    class="text-slate-700 dark:text-slate-300">Map Controls:</strong><br>
+                                <span class="opacity-80 block mt-1.5"><i
+                                        class="fas fa-keyboard mr-1 w-3 text-center"></i> Left/Right Arrow Keys to
+                                    navigate</span>
+                                <span class="opacity-80 block mt-1"><i
+                                        class="fas fa-mouse-pointer mr-1 w-3 text-center"></i> Select a Barangay to
+                                    isolate data</span>
+                                <span class="opacity-80 block mt-1"><i class="fas fa-mouse mr-1 w-3 text-center"></i>
+                                    Double-click an incident below for reports</span>
                             </p>
                         </div>
                     </div>
@@ -65,7 +76,8 @@
                 </div>
 
                 <div id="topIncidentsSection" class="space-y-3 pt-5 border-t border-gray-100 dark:border-slate-700">
-                    <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">All Crime</label>
+                    <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">All
+                        Crime</label>
                     <div id="topIncidentsList" class="space-y-2">
                         <!-- All incidents will be injected here -->
                     </div>
@@ -77,30 +89,38 @@
     <!-- Map Container -->
     <div class="flex-grow relative z-0 h-full w-full">
         <!-- Floating Legend & Overview -->
-        <div class="absolute top-4 right-4 z-[1000] bg-white/95 dark:bg-slate-800/95 p-5 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700/50 w-64 md:w-80 backdrop-blur-md">
+        <div
+            class="absolute top-4 right-4 z-[1000] bg-white/95 dark:bg-slate-800/95 p-5 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700/50 w-64 md:w-80 backdrop-blur-md">
             <div class="flex items-center justify-between mb-2">
-                <label class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
+                <label
+                    class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
                     <i class="fas fa-layer-group mr-2 text-pnp-blue dark:text-pnp-gold"></i> Legend
                 </label>
-                <button onclick="clearMapDisplay()" class="text-[9px] font-black text-gray-500 hover:text-red-500 uppercase transition-colors bg-gray-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1 rounded-lg cursor-pointer">
+                <button onclick="clearMapDisplay()"
+                    class="text-[9px] font-black text-gray-500 hover:text-red-500 uppercase transition-colors bg-gray-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1 rounded-lg cursor-pointer">
                     Clear
                 </button>
             </div>
-            
-            <select id="mapDisplayMode" class="w-full px-3 py-2 mb-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none cursor-pointer">
-                <option value="density">Incident Density (Heatmap: Green to Red)</option>
-                <option value="dominant">Dominant Crime Type</option>
+
+            <select id="mapDisplayMode"
+                class="w-full px-3 py-2 mb-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none cursor-pointer">
+                <option value="density">Incident Density (All Crimes)</option>
+                <option value="density_focus">8-Focus Density</option>
+                <option value="density_nonindex">Non-Index Density</option>
+                <option value="density_psi">PSI Density</option>
                 <option value="clear" class="hidden" disabled>Clear (No Overlay)</option>
             </select>
 
-            <div id="dynamicLegend" class="grid grid-cols-1 gap-1 bg-gray-50 dark:bg-slate-900/80 p-3 rounded-xl border border-gray-100 dark:border-slate-700 max-h-40 overflow-y-auto sidebar-scroll">
+            <div id="dynamicLegend"
+                class="grid grid-cols-1 gap-1 bg-gray-50 dark:bg-slate-900/80 p-3 rounded-xl border border-gray-100 dark:border-slate-700 max-h-40 overflow-y-auto sidebar-scroll">
                 <p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Loading data...</p>
             </div>
         </div>
 
         <!-- Floating Mobile Toggle Button -->
         <div class="absolute bottom-8 right-8 z-[1000] md:hidden">
-            <button id="mapSidebarToggle" onclick="toggleMapSidebar()" class="w-14 h-14 bg-pnp-blue text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition-opacity">
+            <button id="mapSidebarToggle" onclick="toggleMapSidebar()"
+                class="w-14 h-14 bg-pnp-blue text-white rounded-full shadow-2xl flex items-center justify-center text-xl transition-opacity">
                 <i class="fas fa-filter"></i>
             </button>
         </div>
@@ -141,22 +161,27 @@
     .barangay-label-tooltip::after {
         display: none !important;
     }
+
+    .map-outside-mask {
+        backdrop-filter: blur(8px) saturate(80%);
+        -webkit-backdrop-filter: blur(8px) saturate(80%);
+    }
 </style>
 
 <script>
     function cycleBarangay(direction) {
         const select = document.getElementById('filterBarangay');
         if (!select) return;
-        
+
         let newIndex = select.selectedIndex + direction;
         if (newIndex < 0) newIndex = select.options.length - 1;
         if (newIndex >= select.options.length) newIndex = 0;
-        
+
         select.selectedIndex = newIndex;
-        
+
         const event = new Event('change');
         select.dispatchEvent(event);
-        
+
         if (typeof locateBarangay === 'function' && select.value !== "") {
             locateBarangay();
         } else if (select.value === "" && map) {
@@ -164,9 +189,9 @@
         }
     }
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-        
+
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
             cycleBarangay(-1);
@@ -339,6 +364,44 @@
             ) || (data[0] && data[0].geojson ? data[0] : null);
 
             if (boundary && boundary.geojson) {
+                // Create an inverted polygon to blur the outside of the municipality
+                const worldRing = [
+                    [180, 90],
+                    [180, -90],
+                    [-180, -90],
+                    [-180, 90],
+                    [180, 90]
+                ];
+
+                let maskCoordinates = [];
+                if (boundary.geojson.type === 'Polygon') {
+                    maskCoordinates = [worldRing, ...boundary.geojson.coordinates];
+                } else if (boundary.geojson.type === 'MultiPolygon') {
+                    maskCoordinates = [worldRing];
+                    boundary.geojson.coordinates.forEach(polygon => {
+                        maskCoordinates.push(polygon[0]);
+                    });
+                }
+
+                if (maskCoordinates.length > 0) {
+                    L.geoJSON({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Polygon',
+                            coordinates: maskCoordinates
+                        }
+                    }, {
+                        style: {
+                            fillColor: '#0f172a',
+                            fillOpacity: 0.55,
+                            color: 'transparent',
+                            weight: 0,
+                            className: 'map-outside-mask'
+                        },
+                        interactive: false
+                    }).addTo(map);
+                }
+
                 const updateStyles = () => {
                     const zoom = map.getZoom();
                     // Dynamic weight based on zoom level: make it much thicker as we zoom in
@@ -583,20 +646,33 @@
         let fillOpacity = 0;
         const totalIncidents = brgyPoints.length;
 
-        if (mode === 'density') {
-            // Find max incidents across all barangays
-            const allCounts = Object.values(currentPoints.reduce((acc, curr) => {
+        if (mode.startsWith('density')) {
+            let targetCategory = null;
+            if (mode === 'density_focus') targetCategory = '8-Focus';
+            else if (mode === 'density_nonindex') targetCategory = 'Non-Index';
+            else if (mode === 'density_psi') targetCategory = 'PSI';
+
+            let globalPoints = currentPoints;
+            let localBrgyPoints = brgyPoints;
+
+            if (targetCategory) {
+                globalPoints = currentPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
+                localBrgyPoints = brgyPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
+            }
+
+            const allCounts = Object.values(globalPoints.reduce((acc, curr) => {
                 acc[curr.barangay] = (acc[curr.barangay] || 0) + 1;
                 return acc;
             }, {}));
             const max = Math.max(...allCounts, 1);
+            const totalIncidentsLocal = localBrgyPoints.length;
 
-            if (totalIncidents === 0) {
+            if (totalIncidentsLocal === 0) {
                 fillColor = '#10B981'; // Minimal density is Green
                 fillOpacity = 0.7;
                 weight = 2;
             } else {
-                const ratio = totalIncidents / max; // from >0 to 1
+                const ratio = totalIncidentsLocal / max; // from >0 to 1
                 if (ratio >= 0.75) fillColor = '#EF4444'; // Red (High Crime)
                 else if (ratio >= 0.40) fillColor = '#F97316'; // Orange (Medium-High)
                 else if (ratio >= 0.15) fillColor = '#FBBF24'; // Yellow (Medium-Low)
@@ -604,20 +680,6 @@
 
                 fillOpacity = 0.7;
                 weight = 2;
-            }
-        } else if (mode === 'dominant') {
-            // Dominant Crime Type
-            if (totalIncidents > 0) {
-                const stats = {};
-                brgyPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
-                const topCrime = Object.entries(stats).sort((a, b) => b[1] - a[1])[0];
-                fillColor = getTacticalColor(topCrime[0]);
-                fillOpacity = 0.6;
-                weight = 2;
-            } else {
-                fillColor = '#94A3B8'; // Slate/Grey for zero incidents
-                fillOpacity = 0.2;
-                weight = 1;
             }
         } else {
             // Clear / No overlay
@@ -718,10 +780,22 @@
 
         if (selectedBarangay) {
             // Detailed sector-specific view!
-            const brgyPoints = currentPoints.filter(p => p.barangay === selectedBarangay);
+            let brgyPoints = currentPoints.filter(p => p.barangay === selectedBarangay);
+            let globalPoints = currentPoints;
+
+            let targetCategory = null;
+            if (mode === 'density_focus') targetCategory = '8-Focus';
+            else if (mode === 'density_nonindex') targetCategory = 'Non-Index';
+            else if (mode === 'density_psi') targetCategory = 'PSI';
+
+            if (targetCategory) {
+                brgyPoints = brgyPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
+                globalPoints = globalPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
+            }
+
             const totalIncidents = brgyPoints.length;
 
-            const allCounts = Object.values(currentPoints.reduce((acc, curr) => {
+            const allCounts = Object.values(globalPoints.reduce((acc, curr) => {
                 acc[curr.barangay] = (acc[curr.barangay] || 0) + 1;
                 return acc;
             }, {}));
@@ -799,13 +873,26 @@
             return;
         }
 
-        if (mode === 'density') {
-            if (currentPoints.length === 0) {
-                legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">No incidents recorded</p>';
+        if (mode.startsWith('density')) {
+            let targetCategory = null;
+            if (mode === 'density_focus') targetCategory = '8-Focus';
+            else if (mode === 'density_nonindex') targetCategory = 'Non-Index';
+            else if (mode === 'density_psi') targetCategory = 'PSI';
+
+            let globalPoints = currentPoints;
+            if (targetCategory) {
+                globalPoints = currentPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
+            }
+
+            if (globalPoints.length === 0) {
+                legendContainer.innerHTML = `<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">No ${targetCategory ? targetCategory + ' ' : ''}incidents recorded</p>`;
                 return;
             }
             // Density Legend
+            let legendTitle = targetCategory ? `${targetCategory} Density` : 'Incident Density';
+
             legendContainer.innerHTML = `
+                <div class="mb-2 px-2"><span class="text-[9px] font-black uppercase text-pnp-blue dark:text-pnp-gold">${legendTitle}</span></div>
                 <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
                     <div class="flex items-center space-x-2"><div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#EF4444]"></div><span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">High Density (Red)</span></div>
                 </div>
@@ -819,38 +906,6 @@
                     <div class="flex items-center space-x-2"><div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#10B981]"></div><span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Low Density (Green)</span></div>
                 </div>
             `;
-        } else if (mode === 'dominant') {
-            // Dominant Crime Legend
-            const stats = {};
-            currentPoints.forEach(p => { stats[p.incident_type] = (stats[p.incident_type] || 0) + 1; });
-            const sortedTypes = Object.entries(stats).sort((a, b) => b[1] - a[1]).map(e => e[0]);
-
-            if (sortedTypes.length === 0) {
-                legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">No incidents recorded</p>';
-                return;
-            }
-
-            let legendHTML = sortedTypes.slice(0, 10).map(type => `
-                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50">
-                    <div class="flex items-center space-x-2 truncate">
-                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0" style="background-color: ${getTacticalColor(type)}"></div>
-                        <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200 truncate" title="${type}">${type}</span>
-                    </div>
-                    <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold bg-pnp-blue/5 dark:bg-pnp-gold/10 px-2 py-0.5 rounded-md">${stats[type]}</span>
-                </div>
-            `).join('');
-
-            // Zero incident tag
-            legendHTML += `
-                <div class="flex items-center justify-between px-3 py-2 bg-white/50 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-colors border border-gray-100/50 dark:border-slate-700/50 opacity-70">
-                    <div class="flex items-center space-x-2 truncate">
-                        <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#94A3B8]"></div>
-                        <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200 truncate">Zero Reports</span>
-                    </div>
-                    <span class="text-[10px] font-black text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md">0</span>
-                </div>
-            `;
-            legendContainer.innerHTML = legendHTML;
         } else {
             // Clear legend
             legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Map overlay cleared</p>';

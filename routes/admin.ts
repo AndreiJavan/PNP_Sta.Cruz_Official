@@ -3,7 +3,8 @@ import {
   getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
-  postHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser
+  postHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
+  getAITrendsAnalysis
 } from '../controllers/adminController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -19,10 +20,10 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
-    res.status(429).render('admin/login', { 
-      title: 'Admin Login', 
-      layout: false, 
-      error_msg: 'Too many login attempts. Please try again after 15 minutes.' 
+    res.status(429).render('admin/login', {
+      title: 'Admin Login',
+      layout: false,
+      error_msg: 'Too many login attempts. Please try again after 15 minutes.'
     });
   }
 });
@@ -38,6 +39,7 @@ router.get('/users/:id/reject', rejectUser);
 router.use(isAuthenticated);
 
 router.get('/dashboard', getDashboard);
+router.get('/api/ai-trends', getAITrendsAnalysis);
 router.get('/audit-logs', getAuditLogs);
 router.post('/api/toggle-sidebar', (req: any, res) => {
   if (req.session) {

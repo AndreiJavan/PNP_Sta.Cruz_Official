@@ -43,7 +43,7 @@
                 </span>
             </div>
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
-            <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">AI Scanner</p>
+            <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">GPT-OSS 120B Scanner</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
     </div>
@@ -279,7 +279,7 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            statusText.textContent = `Scanned File: ${file.name} - Extracting Intelligence...`;
+            statusText.textContent = `Scanned File: ${file.name} - Extracting via GPT-OSS 120B...`;
 
             // ✅ Targeted route for AI processing
             const res = await fetch('/admin/process-ai', {
@@ -295,7 +295,7 @@
             const result = await res.json();
 
             if (!result.success) {
-                throw new Error(result.error || "AI processing failed");
+                throw new Error(result.error || "GPT-OSS 120B processing failed");
             }
 
             const flattened = result.data;
@@ -313,7 +313,7 @@
             showIntelReview(flattened, file.name);
 
         } catch (error) {
-            console.error("AI Error:", error);
+            console.error("GPT-OSS 120B Error:", error);
             window.strategicAlert({
                 title: "Extraction Failure",
                 message: error.message,
@@ -1068,7 +1068,7 @@
             </h4>
             <div class="h-px w-64 bg-gradient-to-r from-transparent via-pnp-gold/20 to-transparent mx-auto mt-6"></div>
             <p id="intelLoadingText" class="mt-6 text-[10px] text-white/30 uppercase font-black tracking-[0.4em] animate-pulse max-w-xs leading-relaxed italic mx-auto">
-                Analyzing tactical datasets...
+                Analyzing tactical datasets via GPT-OSS 120B...
             </p>
         </div>
     </div>

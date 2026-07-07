@@ -234,9 +234,11 @@
             <a href="/hotlines" class="text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
             <a href="/about" class="text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
 
-
-
-            <a href="/admin/login" class="text-2xl font-black text-pnp-gold pt-8">Admin Portal</a>
+            <% if (locals.user) { %>
+                <a href="/admin/dashboard" class="text-2xl font-black text-pnp-gold pt-8">Admin Dashboard</a>
+            <% } else { %>
+                <a href="/admin/login" class="text-2xl font-black text-pnp-gold pt-8">Admin Portal</a>
+            <% } %>
         </nav>
     </div>
 
@@ -305,10 +307,17 @@
                                     class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 About
                             </a>
+                            <% if (locals.user) { %>
+                            <a href="/admin/dashboard"
+                                class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
+                                <i class="fas fa-shield-halved text-[8px] mr-2 transition"></i> Admin Dashboard
+                            </a>
+                            <% } else { %>
                             <a href="/admin/login"
                                 class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
                                 <i class="fas fa-lock text-[8px] mr-2 transition"></i> Admin Portal
                             </a>
+                            <% } %>
                         </div>
                     </div>
 
@@ -369,6 +378,14 @@
                 <i class="fas fa-moon text-lg dark:hidden"></i>
                 <i class="fas fa-sun text-lg hidden dark:block"></i>
             </button>
+
+            <% if (locals.user) { %>
+            <!-- Floating Admin Dashboard Button -->
+            <a href="/admin/dashboard" title="Admin Dashboard"
+                class="fixed bottom-6 right-20 z-50 w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full flex items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 border border-pnp-blue dark:border-pnp-gold">
+                <i class="fas fa-shield-halved text-lg"></i>
+            </a>
+            <% } %>
 
             <script>
                 const mobileMenuBtn = document.getElementById('mobileMenuBtn');

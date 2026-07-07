@@ -1,8 +1,27 @@
 <% 
     // Safety defaults
-    const safeStats = (typeof todayStats !== 'undefined' && todayStats) ? todayStats : { total: 0, focus: 0, nonIndex: 0, psi: 0, totalTips: 0, totalBulletins: 0, totalReports: 0 };
-    const safeTrends = (typeof monthlyTrends !== 'undefined' && monthlyTrends) ? monthlyTrends : JSON.stringify([]);
-    const safePoints = (typeof points !== 'undefined' && points) ? points : [];
+    let safeStats = {};
+    safeStats.total = 0;
+    safeStats.focus = 0;
+    safeStats.nonIndex = 0;
+    safeStats.psi = 0;
+    safeStats.totalTips = 0;
+    safeStats.totalBulletins = 0;
+    safeStats.totalReports = 0;
+
+    if (typeof todayStats !== 'undefined' && todayStats) {
+        safeStats = todayStats;
+    }
+
+    let safeTrends = '[]';
+    if (typeof monthlyTrends !== 'undefined' && monthlyTrends) {
+        safeTrends = monthlyTrends;
+    }
+
+    let safePoints = [];
+    if (typeof points !== 'undefined' && points) {
+        safePoints = points;
+    }
     
     // Calculate unique barangays covered
     const uniqueBarangays = new Set(safePoints.map(p => p.barangay).filter(b => b));
@@ -93,51 +112,152 @@
     </a>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-    <!-- Monthly Crime Trend Graph (Bento Main) -->
-    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[550px] transition-all hover:shadow-xl relative group">
-        <div class="flex justify-between items-center mb-8">
+<!-- Deep Dive Analytics Row -->
+<div class="grid grid-cols-1 gap-8 mb-8">
+    <!-- Most Frequent Incidents (Text Summary) -->
+    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-auto transition-all hover:shadow-xl relative group">
+        <div class="mb-6 flex justify-between items-center">
             <div>
-                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Monthly Crime Trends</h3>
-                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Crime count over the last 12 months</p>
+                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Municipal Incident Analysis</h3>
+                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Most Frequent Incidents in Sta. Cruz</p>
             </div>
-            <div class="flex items-center space-x-4 bg-gray-50 dark:bg-slate-900 p-2 rounded-2xl border border-gray-100 dark:border-slate-700">
-                <div class="flex items-center space-x-2 px-2">
-                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                    <span class="text-[8px] font-black text-slate-500 uppercase">Focus</span>
-                </div>
-                <div class="flex items-center space-x-2 px-2">
-                    <div class="w-2 h-2 rounded-full bg-pnp-blue"></div>
-                    <span class="text-[8px] font-black text-slate-500 uppercase">Non-Index</span>
-                </div>
-                <div class="flex items-center space-x-2 px-2">
-                    <div class="w-2 h-2 rounded-full bg-pnp-gold"></div>
-                    <span class="text-[8px] font-black text-slate-500 uppercase">PSI</span>
+            <div class="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500">
+                <i class="fas fa-file-alt"></i>
+            </div>
+        </div>
+        
+        <div id="municipalTextAnalysis" class="flex flex-col justify-center space-y-6">
+            <!-- Overall summary -->
+            <div class="bg-indigo-50 dark:bg-indigo-900/20 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-800 shadow-inner">
+                <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                    The most common incident in Sta. Cruz, Laguna is currently <span id="overallTopCrime" class="font-black text-indigo-600 dark:text-indigo-400 uppercase px-1">...</span> with <span id="overallTopCount" class="font-black text-indigo-600 dark:text-indigo-400">...</span> recorded occurrences.
+                </p>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div>
+                <h4 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.1em] mb-3">Highest Incident by Category</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- 8-Focus -->
+                    <div onclick="toggleTrendChartDataset(0)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-red-500 shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
+                        <div class="flex flex-col overflow-hidden mr-2">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-[9px] font-bold text-red-500 uppercase tracking-widest">8-Focus</span>
+                                <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-red-500 transition-colors hidden md:block"></i>
+                            </div>
+                            <span id="top8Focus" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span id="count8Focus" class="text-lg font-black text-slate-700 dark:text-white leading-none">...</span>
+                            <span class="text-[8px] text-gray-400 font-bold uppercase block mt-1">Records</span>
+                        </div>
+                    </div>
+
+                    <!-- Non-Index -->
+                    <div onclick="toggleTrendChartDataset(1)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-blue shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
+                        <div class="flex flex-col overflow-hidden mr-2">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-[9px] font-bold text-pnp-blue uppercase tracking-widest">Non-Index</span>
+                                <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-pnp-blue transition-colors hidden md:block"></i>
+                            </div>
+                            <span id="topNonIndex" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span id="countNonIndex" class="text-lg font-black text-slate-700 dark:text-white leading-none">...</span>
+                            <span class="text-[8px] text-gray-400 font-bold uppercase block mt-1">Records</span>
+                        </div>
+                    </div>
+
+                    <!-- PSI -->
+                    <div onclick="toggleTrendChartDataset(2)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-gold shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
+                        <div class="flex flex-col overflow-hidden mr-2">
+                            <div class="flex items-center space-x-2 mb-1">
+                                <span class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest">PSI</span>
+                                <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-pnp-gold transition-colors hidden md:block"></i>
+                            </div>
+                            <span id="topPSI" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span id="countPSI" class="text-lg font-black text-slate-700 dark:text-white leading-none">...</span>
+                            <span class="text-[8px] text-gray-400 font-bold uppercase block mt-1">Records</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="flex-1 relative">
-            <canvas id="crimeTrendChart"></canvas>
+    </div>
+</div>
+
+<!-- Monthly Crime Trend Graph (Bento Main) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-auto lg:h-[720px] transition-all hover:shadow-xl relative group justify-between">
+        <div>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div>
+                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Monthly Crime Trends</h3>
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Crime count over the last 12 months</p>
+                </div>
+                <!-- Barangay Filter Dropdown -->
+                <div class="relative w-full sm:w-56 shrink-0">
+                    <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends(this.value)" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
+                        <option value="ALL">ALL BARANGAYS</option>
+                        <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
+                            , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
+                            , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
+                            , "Poblacion III (Barangay III)" , "Poblacion IV (Barangay IV)"
+                            , "Poblacion V (Barangay V)" , "San Jose" , "San Juan" , "San Pablo Norte"
+                            , "San Pablo Sur" , "Santisima Cruz" , "Santo Angel Central"
+                            , "Santo Angel Norte" , "Santo Angel Sur" ].forEach(brgy=> { %>
+                            <option value="<%= brgy %>">
+                                <%= brgy.toUpperCase() %>
+                            </option>
+                        <% }) %>
+                    </select>
+                </div>
+            </div>
+            <div class="relative h-[390px] w-full">
+                <canvas id="crimeTrendChart"></canvas>
+            </div>
+        </div>
+
+        <!-- AI Trend Insights callout below the canvas -->
+        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700/60 flex flex-col gap-2 shrink-0">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.15em] flex items-center">
+                    Trend and Pattern Analysis
+                </span>
+                <button onclick="generateAITrends()" id="aiGenerateBtn" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center justify-center w-6 h-6 shrink-0" title="Refresh Analysis">
+                    <i class="fas fa-sync-alt text-[11px]"></i>
+                </button>
+            </div>
+            <div id="aiAnalysisResult" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-medium max-h-[110px] overflow-y-auto custom-scrollbar pr-1 text-left">
+                <div class="flex items-center gap-2 py-1">
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-pnp-blue dark:border-pnp-gold border-t-transparent animate-spin shrink-0"></div>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Generating analysis...</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Right Column: Dual View (Distribution or Detailed Feed) -->
-    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-[550px] transition-all hover:shadow-xl relative overflow-hidden group">
+    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-8 flex flex-col h-auto lg:h-[720px] transition-all hover:shadow-xl relative overflow-hidden group">
         <!-- View 1: Recorded Crime Distribution -->
-        <div id="distributionView" class="relative z-10 flex flex-col h-full animate-fade-in">
+        <div id="distributionView" class="relative z-10 flex flex-col h-full animate-fade-in justify-between">
             <div class="absolute -right-12 -top-12 w-32 h-32 bg-pnp-blue/5 rounded-full blur-3xl"></div>
-            <div class="mb-8 pb-4 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
-                <div>
-                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Top Barangays</h3>
-                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Crime Distribution</p>
+            <div>
+                <div class="mb-4 pb-4 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Top 3 Barangays</h3>
+                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Top 3 Crime Distribution</p>
+                    </div>
+                </div>
+                
+                <div class="relative h-[280px] w-full">
+                    <canvas id="crimeDistributionChart"></canvas>
                 </div>
             </div>
-            
-            <div class="flex-grow relative min-h-[250px]">
-                <canvas id="crimeDistributionChart"></canvas>
-            </div>
 
-            <div id="topSectorsList" class="mt-8 space-y-4 pt-6 border-t border-gray-50 dark:border-slate-700">
+            <div id="topSectorsList" class="mt-4 space-y-3 pt-6 border-t border-gray-50 dark:border-slate-700 max-h-[220px] overflow-y-auto custom-scrollbar pr-2">
                 <!-- Injected via Script -->
             </div>
         </div>
@@ -165,6 +285,7 @@
     </div>
 </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     let distChart;
@@ -187,9 +308,13 @@
         
         title.textContent = `${categoryLabel}: ${monthLabel}`;
         
-        // Filter points by month and category with more robust month matching
+        // Filter points by month and category, and respect the selected barangay filter
+        const filterEl = document.getElementById('monthlyTrendBarangayFilter');
+        const selectedBrgy = filterEl ? filterEl.value : 'ALL';
+        
         const filtered = points.filter(p => {
             if (!p.incident_date) return false;
+            if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
             const d = new Date(p.incident_date);
             const m = d.toLocaleString('en-US', { month: 'short' });
             return m === monthLabel && p.category === categoryLabel;
@@ -213,18 +338,28 @@
                 year: 'numeric' 
             });
 
+            let borderColor = 'border-pnp-blue';
+            let textColor = 'text-pnp-blue dark:text-blue-400';
+            if (p.category === '8-Focus') {
+                borderColor = 'border-red-500';
+                textColor = 'text-red-600 dark:text-red-400';
+            } else if (p.category === 'PSI') {
+                borderColor = 'border-pnp-gold';
+                textColor = 'text-pnp-gold dark:text-yellow-400';
+            }
+
             return `
             <div ondblclick="window.location.href='/admin/map?barangay=${encodeURIComponent(p.barangay)}'" 
                  title="Double-click to view on Map"
-                 class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-blue hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm flex flex-col justify-center cursor-pointer select-none group">
+                 class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 ${borderColor} hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm flex flex-col justify-center cursor-pointer select-none group">
                 <div class="mb-2">
-                    <span class="text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight">${p.incident_type}</span>
+                    <span class="text-xs font-black ${textColor} uppercase tracking-tight">${p.incident_type}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="flex items-center space-x-1.5">
-                            <i class="fas fa-location-dot text-[9px] text-pnp-gold"></i>
-                            <span class="text-[10px] font-black text-pnp-gold uppercase">Brgy. ${p.barangay}</span>
+                            <i class="fas fa-location-dot text-[9px] text-slate-400 dark:text-slate-300"></i>
+                            <span class="text-[10px] font-black text-slate-600 dark:text-white uppercase">Brgy. ${p.barangay}</span>
                         </div>
                         <div class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
                         <span class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">${dateStr}</span>
@@ -272,38 +407,44 @@
             counts[sector] = (counts[sector] || 0) + 1;
         });
 
-        // Top 3 sectors
+        // Sorted sectors - Top 3 only
         const sortedSectors = Object.entries(counts)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 3);
 
-        const labels = sortedSectors.map(s => `Brgy. ${s[0]}`);
-        const data = sortedSectors.map(s => s[1]);
-        const tacticalColors = ['#ef4444', '#1A3A5C', '#D4AF37'];
+        // Rich tactical color palette (Top 3)
+        const tacticalColorsPalette = ['#ef4444', '#3b82f6', '#D4AF37'];
 
-        // Inject List
-        listContainer.innerHTML = sortedSectors.map((s, idx) => `
-            <div class="flex items-center justify-between group">
-                <div class="flex items-center space-x-3">
-                    <div class="w-2 h-6 rounded-full" style="background-color: ${tacticalColors[idx]}"></div>
-                    <span class="text-[10px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">${s[0]}</span>
+        const pieLabels = sortedSectors.map(s => `Brgy. ${s[0]}`);
+        const pieData = sortedSectors.map(s => s[1]);
+        const pieColors = sortedSectors.map((_, idx) => tacticalColorsPalette[idx % tacticalColorsPalette.length]);
+
+        // Inject scrollable list with matching tactical colors
+        listContainer.innerHTML = sortedSectors.map((s, idx) => {
+            const color = tacticalColorsPalette[idx % tacticalColorsPalette.length];
+            return `
+                <div class="flex items-center justify-between group py-1.5 border-b border-gray-50 dark:border-slate-700/40 last:border-0 animate-fade-in">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-2.5 h-6 rounded-full shrink-0 animate-pulse" style="background-color: ${color}"></div>
+                        <span class="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Brgy. ${s[0]}</span>
+                    </div>
+                    <div class="flex flex-col items-end shrink-0">
+                        <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold tabular-nums">${s[1]}</span>
+                        <span class="text-[7px] text-gray-400 font-bold uppercase">Total Records</span>
+                    </div>
                 </div>
-                <div class="flex flex-col items-end">
-                    <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold tabular-nums">${s[1]}</span>
-                    <span class="text-[7px] text-gray-400 font-bold uppercase">Total Records</span>
-                </div>
-            </div>
-        `).join('') || '<p class="text-[8px] text-center text-gray-400 font-bold uppercase italic py-4">No tactical data acquired</p>';
+            `;
+        }).join('') || '<p class="text-[8px] text-center text-gray-400 font-bold uppercase italic py-4">No tactical data acquired</p>';
 
         if (distChart) distChart.destroy();
 
         distChart = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: labels,
+                labels: pieLabels,
                 datasets: [{
-                    data: data,
-                    backgroundColor: tacticalColors,
+                    data: pieData,
+                    backgroundColor: pieColors,
                     borderWidth: 0,
                     hoverOffset: 25
                 }]
@@ -318,13 +459,44 @@
         });
     }
 
+    window.toggleTrendChartDataset = function(index) {
+        if (window.trendChart) {
+            const meta = window.trendChart.getDatasetMeta(index);
+            meta.hidden = meta.hidden === null ? !window.trendChart.data.datasets[index].hidden : null;
+            window.trendChart.update();
+        }
+    };
+
     document.addEventListener('DOMContentLoaded', () => {
         // Trend Chart
         const trendCtx = document.getElementById('crimeTrendChart').getContext('2d');
         const trendsData = JSON.parse('<%- safeTrends %>');
         
-        new Chart(trendCtx, {
+        window.trendChart = new Chart(trendCtx, {
             type: 'bar',
+            plugins: [{
+                id: 'barValueLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    ctx.save();
+                    chart.data.datasets.forEach((dataset, i) => {
+                        const meta = chart.getDatasetMeta(i);
+                        if (!meta.hidden) {
+                            meta.data.forEach((bar, index) => {
+                                const val = dataset.data[index];
+                                if (val > 0) {
+                                    ctx.fillStyle = document.documentElement.classList.contains('dark') ? '#e2e8f0' : '#1e293b';
+                                    ctx.font = 'bold 11px sans-serif';
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.fillText(val, bar.x, bar.y - 4);
+                                }
+                            });
+                        }
+                    });
+                    ctx.restore();
+                }
+            }],
             data: {
                 labels: trendsData.map(d => d.month),
                 datasets: [
@@ -332,22 +504,19 @@
                         label: '8-Focus',
                         data: trendsData.map(d => d.focus),
                         backgroundColor: '#ef4444',
-                        borderRadius: 8,
-                        barThickness: 16
+                        borderRadius: 8
                     },
                     {
                         label: 'Non-Index',
                         data: trendsData.map(d => d.nonIndex),
-                        backgroundColor: '#1A3A5C',
-                        borderRadius: 8,
-                        barThickness: 16
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 8
                     },
                     {
                         label: 'PSI',
                         data: trendsData.map(d => d.psi),
                         backgroundColor: '#D4AF37',
-                        borderRadius: 8,
-                        barThickness: 16
+                        borderRadius: 8
                     }
                 ]
             },
@@ -369,12 +538,19 @@
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 9, weight: 'bold' }, color: '#94a3b8' }
+                        ticks: { 
+                            font: { size: 11, weight: 'bold' }, 
+                            color: () => document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#334155' 
+                        }
                     },
                     y: {
                         beginAtZero: true,
                         grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
-                        ticks: { font: { size: 9, weight: 'bold' }, color: '#94a3b8' }
+                        ticks: { 
+                            font: { size: 11, weight: 'bold' }, 
+                            color: () => document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#334155',
+                            precision: 0
+                        }
                     }
                 }
             }
@@ -382,7 +558,244 @@
 
         // Initialize Distribution Chart
         updateDistributionChart();
+
+        // Define bento details update function
+        window.updateBentoDetails = function(selectedBrgy) {
+            const overallCounts = {};
+            const categoryCounts = {
+                '8-Focus': {},
+                'Non-Index': {},
+                'PSI': {}
+            };
+
+            const filteredPoints = points.filter(p => {
+                if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
+                return true;
+            });
+
+            filteredPoints.forEach(p => {
+                const type = String(p.incident_type || p.offense || 'Unknown').trim().toUpperCase();
+                if (type && type !== 'UNKNOWN') {
+                    // Overall
+                    overallCounts[type] = (overallCounts[type] || 0) + 1;
+                    
+                    // By Category
+                    const cat = p.category || 'Non-Index';
+                    if (categoryCounts[cat]) {
+                        categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
+                    } else {
+                        categoryCounts['Non-Index'][type] = (categoryCounts['Non-Index'][type] || 0) + 1;
+                    }
+                }
+            });
+
+            // Helper to get top item from a counts object
+            function getTop(countsObj) {
+                let topName = 'NONE';
+                let topCount = 0;
+                for (const [name, count] of Object.entries(countsObj)) {
+                    if (count > topCount) {
+                        topCount = count;
+                        topName = name;
+                    }
+                }
+                return { name: topName, count: topCount };
+            }
+
+            const overallTop = getTop(overallCounts);
+            const top8Focus = getTop(categoryCounts['8-Focus']);
+            const topNonIndex = getTop(categoryCounts['Non-Index']);
+            const topPSI = getTop(categoryCounts['PSI']);
+
+            // Update DOM safely
+            const setDomSafe = (id, value) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = value;
+                    if(el.hasAttribute('title')) el.setAttribute('title', value);
+                }
+            };
+
+            const textAnalysisContainer = document.querySelector('#municipalTextAnalysis p');
+            if (textAnalysisContainer) {
+                const targetLoc = selectedBrgy === 'ALL' ? 'Sta. Cruz, Laguna' : selectedBrgy.toUpperCase();
+                if (overallTop.count > 0) {
+                    textAnalysisContainer.innerHTML = `The most common incident in <span class="font-extrabold text-pnp-blue dark:text-pnp-gold">${targetLoc}</span> is currently <span id="overallTopCrime" class="font-black text-indigo-600 dark:text-indigo-400 uppercase px-1">${overallTop.name}</span> with <span id="overallTopCount" class="font-black text-indigo-600 dark:text-indigo-400">${overallTop.count}</span> recorded occurrences.`;
+                } else {
+                    textAnalysisContainer.innerHTML = `There are no active or recorded incidents currently registered in <span class="font-extrabold text-pnp-blue dark:text-pnp-gold">${targetLoc}</span>.`;
+                }
+            } else {
+                setDomSafe('overallTopCrime', overallTop.name);
+                setDomSafe('overallTopCount', overallTop.count);
+            }
+
+            setDomSafe('top8Focus', top8Focus.name);
+            setDomSafe('count8Focus', top8Focus.count);
+
+            setDomSafe('topNonIndex', topNonIndex.name);
+            setDomSafe('countNonIndex', topNonIndex.count);
+
+            setDomSafe('topPSI', topPSI.name);
+            setDomSafe('countPSI', topPSI.count);
+        };
+
+        // Initialize bento details with overall (ALL) data
+        window.updateBentoDetails('ALL');
+
+        // --- Monthly Trend Barangay Filter Initialization ---
+        // (Pre-rendered on server-side using EJS to match map.ejs dropdown)
+
+        // Instantly invoke AI Trend diagnostics on load
+        if (typeof window.generateAITrends === 'function') {
+            window.generateAITrends('ALL');
+        }
     });
+
+    // --- Monthly Crime Trends Filtering Logic ---
+    window.filterMonthlyTrends = function(selectedBrgy) {
+        // Update AI Trend Insights dynamically based on selected barangay
+        if (typeof window.generateAITrends === 'function') {
+            window.generateAITrends(selectedBrgy);
+        }
+
+        // Update bento details dynamically
+        if (typeof window.updateBentoDetails === 'function') {
+            window.updateBentoDetails(selectedBrgy);
+        }
+
+        // Determine referenceDate from points (matches server-side logic)
+        let referenceDate = new Date();
+        if (points.length > 0) {
+            let maxDate = new Date(0);
+            points.forEach(p => {
+                if (p.incident_date) {
+                    const d = new Date(p.incident_date);
+                    if (!isNaN(d.getTime()) && d > maxDate) {
+                        maxDate = d;
+                    }
+                }
+            });
+            if (maxDate > referenceDate) {
+                referenceDate = maxDate;
+            }
+        }
+
+        // Generate the 12 month buckets
+        const monthlyTrends = [];
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
+            const monthLabel = d.toLocaleString('en-US', { month: 'short' });
+            const month = d.getMonth();
+            const year = d.getFullYear();
+
+            const mPoints = points.filter(p => {
+                if (!p.incident_date) return false;
+                // Filter by barangay if not ALL
+                if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
+                
+                const pd = new Date(p.incident_date);
+                return pd.getMonth() === month && pd.getFullYear() === year;
+            });
+
+            monthlyTrends.push({
+                month: monthLabel,
+                focus: mPoints.filter(p => p.category === '8-Focus').length,
+                nonIndex: mPoints.filter(p => p.category === 'Non-Index').length,
+                psi: mPoints.filter(p => p.category === 'PSI').length
+            });
+        }
+
+        if (window.trendChart) {
+            window.trendChart.data.labels = monthlyTrends.map(d => d.month);
+            window.trendChart.data.datasets[0].data = monthlyTrends.map(d => d.focus);
+            window.trendChart.data.datasets[1].data = monthlyTrends.map(d => d.nonIndex);
+            window.trendChart.data.datasets[2].data = monthlyTrends.map(d => d.psi);
+            window.trendChart.update();
+        }
+    };
+
+    window.generateAITrends = async function(selectedBrgy) {
+        const resultDiv = document.getElementById('aiAnalysisResult');
+        const generateBtn = document.getElementById('aiGenerateBtn');
+        if (!resultDiv || !generateBtn) return;
+
+        // If not passed, find the active value in the dropdown
+        if (!selectedBrgy) {
+            const dropdown = document.getElementById('monthlyTrendBarangayFilter');
+            selectedBrgy = dropdown ? dropdown.value : 'ALL';
+        }
+
+        generateBtn.disabled = true;
+        generateBtn.innerHTML = '<i class="fas fa-spinner animate-spin text-[11px]"></i>';
+        
+        const displayName = selectedBrgy === 'ALL' ? 'ALL BARANGAYS' : selectedBrgy.toUpperCase();
+
+        resultDiv.innerHTML = `
+            <div class="flex items-center gap-3 py-2">
+                <div class="w-4 h-4 rounded-full border-2 border-pnp-blue dark:border-pnp-gold border-t-transparent animate-spin shrink-0"></div>
+                <div class="flex flex-col items-start">
+                    <p class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest animate-pulse">Analyzing ${displayName}...</p>
+                    <p class="text-[8px] text-slate-400 dark:text-slate-500 font-mono tracking-tighter">CORRELATING BAR GRAPH TRENDS</p>
+                </div>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}`);
+            const result = await response.json();
+
+            if (result.success) {
+                const rawMarkdown = result.analysis;
+                let parsedHtml = formatMarkdown(rawMarkdown);
+                resultDiv.innerHTML = `<div class="text-slate-700 dark:text-slate-300 font-sans text-xs leading-relaxed text-left">${parsedHtml}</div>`;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="flex items-center gap-2 py-1 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-sm"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-wide">Analysis Aborted: ${result.error || 'Failed to scan trends.'}</span>
+                    </div>
+                `;
+            }
+        } catch (err) {
+            console.error('AI Trends Fetch Error:', err);
+            resultDiv.innerHTML = `
+                <div class="flex items-center gap-2 py-1 text-red-500">
+                    <i class="fas fa-wifi text-sm"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-wide">Failed to connect to analytical server.</span>
+                </div>
+            `;
+        } finally {
+            generateBtn.disabled = false;
+            generateBtn.innerHTML = '<i class="fas fa-sync-alt text-[11px]"></i>';
+        }
+    };
+
+    function formatMarkdown(text) {
+        if (!text) return '';
+        let html = text;
+
+        // Strip backticks if returned wrapped
+        html = html.replace(/```markdown|```/g, '');
+
+        // Match headers and style
+        html = html.replace(/^(?:###|##|#)\\s+(.*?)$/gm, '<h4 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider mt-3 mb-1.5 border-b border-gray-100 dark:border-slate-700 pb-1 flex items-center gap-1.5"><i class="fas fa-shield-halved text-[10px]"></i> $1</h4>');
+
+        // Strong/bold
+        html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong class="font-bold text-pnp-blue dark:text-pnp-gold">$1</strong>');
+
+        // Lists
+        html = html.replace(/^\\d+\\.\\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
+        html = html.replace(/^[-*]\\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
+
+        // Convert standard line breaks to paragraph styles where appropriate
+        const blocks = html.split(/\\n\\n+/);
+        html = blocks.map(b => {
+            if (b.trim().startsWith('<div') || b.trim().startsWith('<h4')) return b;
+            return `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 mb-1.5">${b.replace(/\\n/g, '<br>')}</p>`;
+        }).join('');
+
+        return html;
+    }
 </script>
 
 <style>
