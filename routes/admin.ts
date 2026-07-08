@@ -3,7 +3,7 @@ import {
   getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
-  postHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
+  postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis
 } from '../controllers/adminController.js';
 import { isAuthenticated } from '../middleware/auth.js';
@@ -74,6 +74,7 @@ router.post('/reports/:id/delete', deleteReport);
 // Hotlines
 router.get('/hotlines', getHotlines);
 router.post('/hotlines/add', postHotline);
+router.post('/hotlines/:id/edit', postEditHotline);
 router.post('/hotlines/:id/delete', deleteHotline);
 
 // Personnel Management

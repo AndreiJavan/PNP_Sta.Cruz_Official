@@ -22,7 +22,7 @@
         <div onclick="openStatsSpreadsheet('PSI')" class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
             <span class="text-[10px] text-pnp-blue-300 font-black uppercase tracking-[0.2em] mb-2 opacity-70">PSI</span>
             <div class="text-4xl font-black text-pnp-blue-300 leading-none count-up-glow" data-target="<%= displayStats['PSI'] || 0 %>" data-stat="PSI"><%= displayStats['PSI'] || 0 %></div>
-            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Safety Operations</p>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">PSI Operations</p>
         </div>
 
         <button onclick="openManualEntry()" class="pnp-card bg-slate-900 border-2 border-dashed border-white/5 p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:border-pnp-gold transition-all relative overflow-hidden">
@@ -63,7 +63,7 @@
                 </div>
             </div>
     
-            <div class="overflow-x-auto custom-scrollbar">
+            <div class="overflow-x-auto overflow-y-auto max-h-[380px] custom-scrollbar">
                 <table class="w-full text-left border-collapse min-w-[1000px] table-fixed">
                     <thead class="bg-gray-50/50 dark:bg-slate-950/50">
                         <tr>
@@ -72,7 +72,7 @@
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Volume</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">8-Focus</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Non-Index</th>
-                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Safety</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">PSI</th>
                             <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
                             <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">Actions</th>
                         </tr>
@@ -861,7 +861,7 @@
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Timeline</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Tactical Offense</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Sector (Barangay)</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Risk Pillar</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Category</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
@@ -939,7 +939,7 @@
             <!-- Enhanced Batch Info Header -->
             <div class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="space-y-2">
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Neural Scanning Source</span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Scanning Source</span>
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-full bg-pnp-blue flex items-center justify-center text-[10px] font-black text-pnp-gold border border-pnp-gold/20">
                             ${(report.admin_name || 'A').charAt(0)}
@@ -959,17 +959,13 @@
                 </div>
                 <div class="md:col-span-2 flex flex-col items-end justify-center space-y-4">
                     <div class="flex items-center space-x-2 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
-                        <button onclick="renderReportDetailsModalContent('All')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'All' ? 'bg-pnp-blue text-white shadow-lg' : 'text-slate-400 hover:text-pnp-blue'}">All Intel</button>
+                        <button onclick="renderReportDetailsModalContent('All')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'All' ? 'bg-pnp-blue text-white shadow-lg' : 'text-slate-400 hover:text-pnp-blue'}">All</button>
                         <button onclick="renderReportDetailsModalContent('8-Focus')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === '8-Focus' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-400 hover:text-red-500'}">8-Focus</button>
                         <button onclick="renderReportDetailsModalContent('Non-Index')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'Non-Index' ? 'bg-slate-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-500'}">Non-Index</button>
                         <button onclick="renderReportDetailsModalContent('PSI')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'PSI' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-400 hover:text-blue-500'}">PSI</button>
                     </div>
                     <div class="flex items-center space-x-3 text-right">
-                        <div>
-                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none">Tactical GUID</span>
-                            <p class="text-xs font-mono font-black text-pnp-gold tracking-widest mt-1">${batchId}</p>
-                        </div>
-                        <div class="w-px h-8 bg-gray-200 dark:bg-slate-700"></div>
+                        <!-- Tactical GUID removed -->
                         <div class="text-right">
                             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none">Total Staged</span>
                             <p class="text-lg font-black text-pnp-blue dark:text-white leading-none mt-1">${filteredData.length}</p>
@@ -988,7 +984,7 @@
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Timeline</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Tactical Offense</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Sector (Barangay)</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Risk Pillar</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Category</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-800">

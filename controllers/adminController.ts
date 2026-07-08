@@ -1136,6 +1136,21 @@ export const postHotline = async (req: Request, res: Response) => {
   }
 };
 
+export const postEditHotline = async (req: Request, res: Response) => {
+  const { number } = req.body;
+  try {
+    await logAction(req, 'HOTLINE_EDIT', `Edited tactical hotline number ID: ${req.params.id}`);
+    await db.collection('hotlines').doc(req.params.id).update({
+      number,
+      updated_at: new Date().toISOString()
+    });
+    res.redirect('/admin/hotlines');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error updating hotline');
+  }
+};
+
 export const deleteHotline = async (req: Request, res: Response) => {
   try {
     await logAction(req, 'HOTLINE_DELETE', `Deleted hotline ID: ${req.params.id}`);
