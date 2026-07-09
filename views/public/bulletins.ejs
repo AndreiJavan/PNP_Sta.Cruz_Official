@@ -1,12 +1,40 @@
-<div class="bg-pnp-blue py-24 text-center relative overflow-hidden">
-    <div class="container mx-auto px-4 relative z-10">
-        <h1 class="text-[10px] md:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-4">Official Advisories
-        </h1>
-        <h2 class="text-4xl md:text-5xl font-black text-white tracking-tighter mb-8">Community Bulletin Board</h2>
-        <div class="w-20 h-1.5 bg-pnp-gold mx-auto rounded-full"></div>
+<div class="relative min-h-[60vh] flex items-center overflow-hidden">
+    <!-- Hero Background with Overlay -->
+    <div class="absolute inset-0 z-0">
+        <img src="https://picsum.photos/seed/police/1920/1080?blur=4" alt="Sta. Cruz Laguna"
+            class="w-full h-full object-cover">
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-pnp-blue via-pnp-blue/90 to-transparent dark:from-slate-950 dark:via-slate-900/95 dark:to-transparent">
+        </div>
     </div>
-    <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+
+    <!-- Hero Content -->
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-3xl">
+            <div
+                class="inline-flex items-center space-x-2 bg-pnp-gold/20 text-pnp-gold px-4 py-2 rounded-full mb-8 border border-pnp-gold/30 animate-fade-in">
+                <i class="fas fa-shield-halved text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-widest">Official Public Safety Portal</span>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
+                <span class="text-pnp-gold"><%= title %></span>
+            </h1>
+
+            <p class="text-xl text-blue-100 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl">
+                Stay updated with the latest alerts and activities in Sta. Cruz.
+            </p>
+        </div>
+    </div>
 </div>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+</style>
 
 <div class="container mx-auto px-4 py-20">
     <!-- Search & Filter -->

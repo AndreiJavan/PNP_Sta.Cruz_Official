@@ -802,20 +802,34 @@ const parsePhotos = (path: string | undefined): string[] => {
 export const getBulletins = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
+    const category = req.query.category as string;
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    const [snap, countSnap] = await Promise.all([
-      db.collection('bulletins').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
-      db.collection('bulletins').count().get()
-    ]);
-    const bulletins = snap.docs.map(doc => {
+    let query: any = db.collection('bulletins');
+    if (category) {
+      query = query.where('category', '==', category);
+    }
+    
+    // In Firestore, if you have equality filter and orderBy, you might need a composite index.
+    // Assuming simple fetch for now if it works. If it fails, fallback.
+    const snap = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).get();
+    
+    // For counting with filter:
+    let countQuery: any = db.collection('bulletins');
+    if (category) countQuery = countQuery.where('category', '==', category);
+    const countSnap = await countQuery.count().get();
+
+    const bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     });
     const totalPages = Math.ceil(countSnap.data().count / limit);
 
-    res.render('admin/bulletins', { title: 'Bulletins', bulletins, currentPage: page, totalPages, layout: 'layouts/admin' });
+    const title = category === 'Wanted Person' ? 'Wanted Persons' : 
+                  category === 'Missing Person' ? 'Missing Persons' : 'Bulletins';
+
+    res.render('admin/bulletins', { title, bulletins, currentPage: page, totalPages, category, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading bulletins');
@@ -823,7 +837,8 @@ export const getBulletins = async (req: Request, res: Response) => {
 };
 
 export const getCreateBulletin = (req: Request, res: Response) => {
-  res.render('admin/bulletin_form', { title: 'New Bulletin', bulletin: null, layout: 'layouts/admin' });
+  const category = req.query.category as string || '';
+  res.render('admin/bulletin_form', { title: 'New Bulletin', bulletin: null, defaultCategory: category, layout: 'layouts/admin' });
 };
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
@@ -1121,6 +1136,9 @@ export const getHotlines = async (req: Request, res: Response) => {
 
 export const postHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
+  if (!/^\d{1,11}$/.test(number)) {
+    return res.status(400).send('Invalid hotline number. Must be up to 11 digits only, no characters or spaces.');
+  }
   try {
     await logAction(req, 'HOTLINE_ADD', `Added tactical hotline: ${name}`);
     await db.collection('hotlines').add({
@@ -1137,11 +1155,16 @@ export const postHotline = async (req: Request, res: Response) => {
 };
 
 export const postEditHotline = async (req: Request, res: Response) => {
-  const { number } = req.body;
+  const { name, number, category } = req.body;
+  if (!/^\d{1,11}$/.test(number)) {
+    return res.status(400).send('Invalid hotline number. Must be up to 11 digits only, no characters or spaces.');
+  }
   try {
     await logAction(req, 'HOTLINE_EDIT', `Edited tactical hotline number ID: ${req.params.id}`);
     await db.collection('hotlines').doc(req.params.id).update({
+      name,
       number,
+      category,
       updated_at: new Date().toISOString()
     });
     res.redirect('/admin/hotlines');
