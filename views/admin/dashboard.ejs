@@ -117,7 +117,7 @@
     <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 transition-all hover:shadow-xl relative group">
         <div class="mb-4 flex justify-between items-center">
             <div>
-                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Highest Incident by Category</h3>
+                <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Highest Incident </h3>
                 <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Click category card to toggle graph visibility</p>
             </div>
             <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500">
@@ -127,10 +127,10 @@
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- 8-Focus -->
-            <div onclick="toggleTrendChartDataset(0)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-red-500 shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
+            <div id="card8Focus" onclick="toggleTrendChartDataset(0)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-red-500 shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
                 <div class="flex flex-col overflow-hidden mr-2">
                     <div class="flex items-center space-x-2 mb-1">
-                        <span class="text-[9px] font-bold text-red-500 uppercase tracking-widest">8-Focus</span>
+                        <span id="label8Focus" class="text-[9px] font-bold text-red-500 uppercase tracking-widest">8-Focus</span>
                         <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-red-500 transition-colors hidden md:block"></i>
                     </div>
                     <span id="top8Focus" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
@@ -142,10 +142,10 @@
             </div>
 
             <!-- Non-Index -->
-            <div onclick="toggleTrendChartDataset(1)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-blue shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
+            <div id="cardNonIndex" onclick="toggleTrendChartDataset(1)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-blue shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
                 <div class="flex flex-col overflow-hidden mr-2">
                     <div class="flex items-center space-x-2 mb-1">
-                        <span class="text-[9px] font-bold text-pnp-blue uppercase tracking-widest">Non-Index</span>
+                        <span id="labelNonIndex" class="text-[9px] font-bold text-pnp-blue uppercase tracking-widest">Non-Index</span>
                         <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-pnp-blue transition-colors hidden md:block"></i>
                     </div>
                     <span id="topNonIndex" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
@@ -157,10 +157,10 @@
             </div>
 
             <!-- PSI -->
-            <div onclick="toggleTrendChartDataset(2)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-gold shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
+            <div id="cardPSI" onclick="toggleTrendChartDataset(2)" class="cursor-pointer flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 border-pnp-gold shadow-sm hover:bg-white dark:hover:bg-slate-700 hover:shadow-md transition-all group/legend">
                 <div class="flex flex-col overflow-hidden mr-2">
                     <div class="flex items-center space-x-2 mb-1">
-                        <span class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest">PSI</span>
+                        <span id="labelPSI" class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest">PSI</span>
                         <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-pnp-gold transition-colors hidden md:block"></i>
                     </div>
                     <span id="topPSI" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
@@ -279,6 +279,33 @@
     let distChart;
     const points = <%- JSON.stringify(safePoints) %>;
 
+    const allColors = {
+        'Murder': '#EF4444', 'Homicide': '#F87171', 'Physical Injuries': '#10B981', 'Rape': '#A855F7', 'Carnapping (Motorcycle)': '#F59E0B',
+        'Carnapping (Motor Vehicle)': '#F97316', 'Violence Against Women and Children (VAWC)': '#E11D48',
+        'Cybercrime': '#3B82F6', 'Estafa': '#0891B2', 'Swindling / Fraud': '#06B6D4',
+        'Drug Possession': '#059669', 'Drug Sale': '#10B981', 'Drug Use': '#34D399',
+        'Illegal Gambling': '#7C3AED', 'Illegal Possession of Firearms': '#475569',
+        'Human Trafficking': '#DB2777', 'Child Abuse (RA 7610)': '#F43F5E', 'Damage to Property': '#B45309',
+        'Malicious Mischief': '#D97706', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': '#2563EB',
+        'Illegal Recruitment': '#9333EA', 'Ordinance Violations': '#94A3B8', 'Grave Threats': '#64748B',
+        'Alarm and Scandal': '#CBD5E1', 'Vehicular Accident': '#2563EB', 'Road Accident / Traffic Incident': '#1D4ED8',
+        'Fire Incident': '#EA580C', 'Flood Incident': '#3B82F6', 'Earthquake Incident': '#78350F',
+        'Landslide Incident': '#451A03', 'Disaster Incident Reports': '#4B5563', 'Public Disturbance Incident': '#4338CA',
+        'Emergency Response Incident': '#0891B2', 'Missing Person Report': '#0D9488', 'Rescue Operation Cases': '#059669'
+    };
+
+    function getTacticalColor(name) {
+        if (!name) return '#94A3B8';
+        const searchName = name.trim().toUpperCase();
+        for (const [key, color] of Object.entries(allColors)) {
+            if (key.toUpperCase() === searchName) return color;
+        }
+        for (const [key, color] of Object.entries(allColors)) {
+            if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return color;
+        }
+        return '#94A3B8';
+    }
+
     function closeBentoFeed() {
         document.getElementById('bentoDetailFeed').classList.add('hidden');
         document.getElementById('distributionView').classList.remove('hidden');
@@ -326,22 +353,15 @@
                 year: 'numeric' 
             });
 
-            let borderColor = 'border-pnp-blue';
-            let textColor = 'text-pnp-blue dark:text-blue-400';
-            if (p.category === '8-Focus') {
-                borderColor = 'border-red-500';
-                textColor = 'text-red-600 dark:text-red-400';
-            } else if (p.category === 'PSI') {
-                borderColor = 'border-pnp-gold';
-                textColor = 'text-pnp-gold dark:text-yellow-400';
-            }
+            const dynamicColor = p.category === '8-Focus' ? '#EF4444' : (p.category === 'PSI' ? '#F59E0B' : '#3B82F6');
 
             return `
             <div ondblclick="window.location.href='/admin/map?barangay=${encodeURIComponent(p.barangay)}'" 
                  title="Double-click to view on Map"
-                 class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 ${borderColor} hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm flex flex-col justify-center cursor-pointer select-none group">
+                 class="p-4 bg-gray-50 dark:bg-slate-900/50 rounded-2xl border-l-4 hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm flex flex-col justify-center cursor-pointer select-none group"
+                 style="border-left-color: ${dynamicColor}">
                 <div class="mb-2">
-                    <span class="text-xs font-black ${textColor} uppercase tracking-tight">${p.incident_type}</span>
+                    <span class="text-xs font-black uppercase tracking-tight" style="color: ${dynamicColor}">${p.incident_type}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-3">
@@ -606,6 +626,11 @@
             const topNonIndex = getTop(categoryCounts['Non-Index']);
             const topPSI = getTop(categoryCounts['PSI']);
 
+            // Use standard trend incident colors: Red, Blue, and Gold!
+            const color8Focus = '#EF4444'; // Red
+            const colorNonIndex = '#3B82F6'; // Blue
+            const colorPSI = '#F59E0B'; // Gold
+
             // Update DOM safely
             const setDomSafe = (id, value) => {
                 const el = document.getElementById(id);
@@ -636,6 +661,30 @@
 
             setDomSafe('topPSI', topPSI.name);
             setDomSafe('countPSI', topPSI.count);
+
+            // Dynamically update Trend Cards Left Borders
+            const card8 = document.getElementById('card8Focus');
+            if (card8) card8.style.borderLeftColor = color8Focus;
+            const cardNon = document.getElementById('cardNonIndex');
+            if (cardNon) cardNon.style.borderLeftColor = colorNonIndex;
+            const cardPSI = document.getElementById('cardPSI');
+            if (cardPSI) cardPSI.style.borderLeftColor = colorPSI;
+
+            // Dynamically update card category title text colors to match
+            const label8 = document.getElementById('label8Focus');
+            if (label8) label8.style.color = color8Focus;
+            const labelNon = document.getElementById('labelNonIndex');
+            if (labelNon) labelNon.style.color = colorNonIndex;
+            const labelPSI = document.getElementById('labelPSI');
+            if (labelPSI) labelPSI.style.color = colorPSI;
+
+            // Dynamically update Monthly Trend Chart bar colors based on highest incident colors!
+            if (window.trendChart) {
+                window.trendChart.data.datasets[0].backgroundColor = color8Focus;
+                window.trendChart.data.datasets[1].backgroundColor = colorNonIndex;
+                window.trendChart.data.datasets[2].backgroundColor = colorPSI;
+                window.trendChart.update();
+            }
         };
 
         // Initialize bento details with overall (ALL) data
@@ -777,20 +826,23 @@
         html = html.replace(/```markdown|```/g, '');
 
         // Match headers and style
-        html = html.replace(/^(?:###|##|#)\\s+(.*?)$/gm, '<h4 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider mt-3 mb-1.5 border-b border-gray-100 dark:border-slate-700 pb-1 flex items-center gap-1.5"><i class="fas fa-shield-halved text-[10px]"></i> $1</h4>');
+        html = html.replace(/^(?:###|##|#)\s+(.*?)$/gm, '<h4 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider mt-3 mb-1.5 border-b border-gray-100 dark:border-slate-700 pb-1 flex items-center gap-1.5"><i class="fas fa-shield-halved text-[10px]"></i> $1</h4>');
 
         // Strong/bold
-        html = html.replace(/\\*\\*(.*?)\\*\\*/g, '<strong class="font-bold text-pnp-blue dark:text-pnp-gold">$1</strong>');
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-pnp-blue dark:text-pnp-gold">$1</strong>');
 
         // Lists
-        html = html.replace(/^\\d+\\.\\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
-        html = html.replace(/^[-*]\\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
+        html = html.replace(/^\d+\.\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
+        html = html.replace(/^[-*]\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
+
+        // Standardize literal '\n' strings into real newlines
+        html = html.replace(/\\n/g, '\n');
 
         // Convert standard line breaks to paragraph styles where appropriate
-        const blocks = html.split(/\\n\\n+/);
+        const blocks = html.split(/\n\n+/);
         html = blocks.map(b => {
             if (b.trim().startsWith('<div') || b.trim().startsWith('<h4')) return b;
-            return `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 mb-1.5">${b.replace(/\\n/g, '<br>')}</p>`;
+            return `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 mb-4 last:mb-0">${b.replace(/\n/g, '<br>')}</p>`;
         }).join('');
 
         return html;

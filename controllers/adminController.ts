@@ -621,9 +621,9 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
     const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
 
     if (totalCount === 0) {
-      analysisText = `Crime incidents across ${barangayName} remain exceptionally stable with zero recorded incidents, indicating a highly secure and peaceful environment.`;
+      analysisText = `The trend over the last 12 months shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment with no visible criminal activity.`;
     } else {
-      analysisText = `Crime incidents in ${barangayName} are currently ${trend}, with a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}. ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
+      analysisText = `The trend over the last 12 months shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
     }
 
     res.json({

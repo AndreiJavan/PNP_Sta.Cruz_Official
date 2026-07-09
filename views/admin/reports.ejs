@@ -7,22 +7,22 @@
 <div class="space-y-8 animate-fade-in px-4 lg:px-0">
     <!-- Header Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div onclick="openStatsSpreadsheet('8-Focus')" class="pnp-card pnp-glass-dark border-red-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
-            <span class="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">8-Focus</span>
-            <div class="text-4xl font-black text-red-500 leading-none count-up-glow" data-target="<%= displayStats['8-Focus'] || 0 %>" data-stat="8-Focus"><%= displayStats['8-Focus'] || 0 %></div>
+        <div id="statsCard_8Focus" onclick="openStatsSpreadsheet('8-Focus')" class="pnp-card pnp-glass-dark border-red-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
+            <span id="statsLabel_8Focus" class="text-[10px] text-red-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">8-Focus</span>
+            <div id="statsCount_8Focus" class="text-4xl font-black text-red-500 leading-none count-up-glow" data-target="<%= displayStats['8-Focus'] || 0 %>" data-stat="8-Focus"><%= displayStats['8-Focus'] || 0 %></div>
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Critical Targets</p>
         </div>
 
-        <div onclick="openStatsSpreadsheet('Non-Index')" class="pnp-card pnp-glass-dark border-slate-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
-            <span class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Non-Index</span>
-            <div class="text-4xl font-black text-slate-200 leading-none count-up-glow" data-target="<%= displayStats['Non-Index'] || 0 %>" data-stat="Non-Index"><%= displayStats['Non-Index'] || 0 %></div>
+        <div id="statsCard_NonIndex" onclick="openStatsSpreadsheet('Non-Index')" class="pnp-card pnp-glass-dark border-blue-500/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
+            <span id="statsLabel_NonIndex" class="text-[10px] text-blue-400 font-black uppercase tracking-[0.2em] mb-2 opacity-70">Non-Index</span>
+            <div id="statsCount_NonIndex" class="text-4xl font-black text-blue-500 leading-none count-up-glow" data-target="<%= displayStats['Non-Index'] || 0 %>" data-stat="Non-Index"><%= displayStats['Non-Index'] || 0 %></div>
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Incident Data</p>
         </div>
 
-        <div onclick="openStatsSpreadsheet('PSI')" class="pnp-card pnp-glass-dark border-pnp-blue/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
-            <span class="text-[10px] text-pnp-blue-300 font-black uppercase tracking-[0.2em] mb-2 opacity-70">PSI</span>
-            <div class="text-4xl font-black text-pnp-blue-300 leading-none count-up-glow" data-target="<%= displayStats['PSI'] || 0 %>" data-stat="PSI"><%= displayStats['PSI'] || 0 %></div>
-            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">PSI Operations</p>
+        <div id="statsCard_PSI" onclick="openStatsSpreadsheet('PSI')" class="pnp-card pnp-glass-dark border-pnp-gold/10 p-6 rounded-[2rem] flex flex-col justify-center text-left group cursor-pointer hover:scale-105 transition-all">
+            <span id="statsLabel_PSI" class="text-[10px] text-pnp-gold-300 font-black uppercase tracking-[0.2em] mb-2 opacity-70">PSI</span>
+            <div id="statsCount_PSI" class="text-4xl font-black text-pnp-gold leading-none count-up-glow" data-target="<%= displayStats['PSI'] || 0 %>" data-stat="PSI"><%= displayStats['PSI'] || 0 %></div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Safety Operations</p>
         </div>
 
         <button onclick="openManualEntry()" class="pnp-card bg-slate-900 border-2 border-dashed border-white/5 p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:border-pnp-gold transition-all relative overflow-hidden">
@@ -63,7 +63,7 @@
                 </div>
             </div>
     
-            <div class="overflow-x-auto overflow-y-auto max-h-[380px] custom-scrollbar">
+            <div class="overflow-x-auto custom-scrollbar">
                 <table class="w-full text-left border-collapse min-w-[1000px] table-fixed">
                     <thead class="bg-gray-50/50 dark:bg-slate-950/50">
                         <tr>
@@ -72,7 +72,7 @@
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Volume</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">8-Focus</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Non-Index</th>
-                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">PSI</th>
+                            <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Safety</th>
                             <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
                             <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">Actions</th>
                         </tr>
@@ -253,6 +253,26 @@
         "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
     ];
     window.VALID_BARANGAYS = VALID_BARANGAYS;
+    
+    const CRIMES_BY_PILLAR = {
+        '8-Focus': ['Murder', 'Homicide', 'Physical Injuries', 'Rape', 'Robbery', 'Theft', 'Carnapping (Motorcycle)', 'Carnapping (Motor Vehicle)'],
+        'Non-Index': ['Violence Against Women and Children (VAWC)', 'Cybercrime', 'Estafa', 'Swindling / Fraud', 'Drug Possession', 'Drug Sale', 'Drug Use', 'Illegal Gambling', 'Illegal Possession of Firearms', 'Human Trafficking', 'Child Abuse (RA 7610)', 'Damage to Property', 'Malicious Mischief', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)', 'Illegal Recruitment', 'Ordinance Violations', 'Grave Threats', 'Alarm and Scandal'],
+        'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Fire Incident', 'Flood Incident', 'Earthquake Incident', 'Landslide Incident', 'Disaster Incident Reports', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report', 'Rescue Operation Cases']
+    };
+    window.CRIMES_BY_PILLAR = CRIMES_BY_PILLAR;
+
+    window.getCategoryExamples = function(cat) {
+        if (cat === '8-Focus') {
+            return "Murder, Homicide, Physical Injuries, Rape, Robbery, Theft, Carnapping (Motorcycle), Carnapping (Motor Vehicle)";
+        } else if (cat === 'Non-Index') {
+            return "VAWC, Cybercrime, Estafa, Swindling, Drug Offenses, Illegal Gambling, Ordinance Violations, etc.";
+        } else if (cat === 'PSI') {
+            return "Vehicular Accident, Road Accident, Fire Incident, Flood Incident, Earthquake Incident, Landslide Incident, etc.";
+        } else if (cat === 'All') {
+            return "All Classifications: 8-Focus (Murder, Theft, etc.), Non-Index (VAWC, Cybercrime, etc.), PSI (Accidents, Fire, etc.)";
+        }
+        return "";
+    };
 
      window.handleIntelConvert = async function(input) {
         if (!input.files || !input.files[0]) return;
@@ -417,11 +437,14 @@
                         class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-500 dark:text-slate-300 focus:ring-0 p-4 outline-none cursor-pointer">
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative">
-                    <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select offense..." oninput="updateReviewItem(${index}, 'offense', this.value)" 
-                        class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none placeholder:text-gray-300">
-                    <datalist id="crimesList_${index}">
-                        ${crimeOptions.map(o => `<option value="${o}">`).join('')}
-                    </datalist>
+                    <select onchange="updateReviewItem(${index}, 'offense', this.value)" class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none cursor-pointer">
+                        <option value="" disabled ${!offenseValue ? 'selected' : ''} class="dark:bg-slate-900">Select Offense...</option>
+                        ${crimeOptions.map(o => `<option value="${o}" ${o.toUpperCase() === offenseValue.toUpperCase() ? 'selected' : ''} class="dark:bg-slate-900">${o}</option>`).join('')}
+                        ${(offenseValue && !crimeOptions.some(o => o.toUpperCase() === offenseValue.toUpperCase())) ? `<option value="${offenseValue}" selected class="dark:bg-slate-900">${offenseValue}</option>` : ''}
+                    </select>
+                    <!-- <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select offense..." oninput="updateReviewItem(${index}, 'offense', this.value)" -->
+
+
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors">
                     <select onchange="updateReviewItem(${index}, 'category', this.value)" class="w-full h-full bg-transparent border-none text-[10px] font-black uppercase tracking-widest ${badgeClass} outline-none focus:ring-0 p-4 cursor-pointer">
@@ -774,6 +797,123 @@
     window.reports = <%- JSON.stringify(displayReports) %>;
     const allIncidents = <%- JSON.stringify(displayIncidents) %>;
 
+    const allColors = {
+        'Murder': '#EF4444', 'Homicide': '#F87171', 'Physical Injuries': '#10B981', 'Rape': '#A855F7', 'Carnapping (Motorcycle)': '#F59E0B',
+        'Carnapping (Motor Vehicle)': '#F97316', 'Violence Against Women and Children (VAWC)': '#E11D48',
+        'Cybercrime': '#3B82F6', 'Estafa': '#0891B2', 'Swindling / Fraud': '#06B6D4',
+        'Drug Possession': '#059669', 'Drug Sale': '#10B981', 'Drug Use': '#34D399',
+        'Illegal Gambling': '#7C3AED', 'Illegal Possession of Firearms': '#475569',
+        'Human Trafficking': '#DB2777', 'Child Abuse (RA 7610)': '#F43F5E', 'Damage to Property': '#B45309',
+        'Malicious Mischief': '#D97706', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': '#2563EB',
+        'Illegal Recruitment': '#9333EA', 'Ordinance Violations': '#94A3B8', 'Grave Threats': '#64748B',
+        'Alarm and Scandal': '#CBD5E1', 'Vehicular Accident': '#2563EB', 'Road Accident / Traffic Incident': '#1D4ED8',
+        'Fire Incident': '#EA580C', 'Flood Incident': '#3B82F6', 'Earthquake Incident': '#78350F',
+        'Landslide Incident': '#451A03', 'Disaster Incident Reports': '#4B5563', 'Public Disturbance Incident': '#4338CA',
+        'Emergency Response Incident': '#0891B2', 'Missing Person Report': '#0D9488', 'Rescue Operation Cases': '#059669'
+    };
+
+    function getTacticalColor(name) {
+        if (!name) return '#94A3B8';
+        const searchName = name.trim().toUpperCase();
+        for (const [key, color] of Object.entries(allColors)) {
+            if (key.toUpperCase() === searchName) return color;
+        }
+        for (const [key, color] of Object.entries(allColors)) {
+            if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return color;
+        }
+        return '#94A3B8';
+    }
+
+    function updateReportColors() {
+        // Find the highest incident in each category from allIncidents
+        const categoryCounts = {
+            '8-Focus': {},
+            'Non-Index': {},
+            'PSI': {}
+        };
+        
+        allIncidents.forEach(item => {
+            const cat = item.category || 'Non-Index';
+            const type = String(item.incident_type || item.offense || 'Unknown').trim().toUpperCase();
+            if (type && type !== 'UNKNOWN') {
+                if (categoryCounts[cat]) {
+                    categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
+                }
+            }
+        });
+
+        function getTop(countsObj) {
+            let topName = 'NONE';
+            let topCount = 0;
+            for (const [name, count] of Object.entries(countsObj)) {
+                if (count > topCount) {
+                    topCount = count;
+                    topName = name;
+                }
+            }
+            return { name: topName, count: topCount };
+        }
+
+        const top8Focus = getTop(categoryCounts['8-Focus']);
+        const topNonIndex = getTop(categoryCounts['Non-Index']);
+        const topPSI = getTop(categoryCounts['PSI']);
+
+        const color8Focus = '#EF4444'; // Red
+        const colorNonIndex = '#3B82F6'; // Blue
+        const colorPSI = '#F59E0B'; // Gold
+
+        // Save in window for global access
+        window.categoryHighestColors = {
+            '8-Focus': color8Focus,
+            'Non-Index': colorNonIndex,
+            'PSI': colorPSI
+        };
+
+        // Update top cards dynamic borders and text colors
+        const card8 = document.getElementById('statsCard_8Focus');
+        const label8 = document.getElementById('statsLabel_8Focus');
+        const count8 = document.getElementById('statsCount_8Focus');
+        if (card8) card8.style.borderColor = `${color8Focus}40`;
+        if (label8) label8.style.color = color8Focus;
+        if (count8) {
+            count8.style.color = color8Focus;
+            count8.style.textShadow = `0 0 10px ${color8Focus}30`;
+        }
+
+        const cardNon = document.getElementById('statsCard_NonIndex');
+        const labelNon = document.getElementById('statsLabel_NonIndex');
+        const countNon = document.getElementById('statsCount_NonIndex');
+        if (cardNon) cardNon.style.borderColor = `${colorNonIndex}40`;
+        if (labelNon) labelNon.style.color = colorNonIndex;
+        if (countNon) {
+            countNon.style.color = colorNonIndex;
+            countNon.style.textShadow = `0 0 10px ${colorNonIndex}30`;
+        }
+
+        const cardPSI = document.getElementById('statsCard_PSI');
+        const labelPSI = document.getElementById('statsLabel_PSI');
+        const countPSI = document.getElementById('statsCount_PSI');
+        if (cardPSI) cardPSI.style.borderColor = `${colorPSI}40`;
+        if (labelPSI) labelPSI.style.color = colorPSI;
+        if (countPSI) {
+            countPSI.style.color = colorPSI;
+            countPSI.style.textShadow = `0 0 10px ${colorPSI}30`;
+        }
+
+        // Also style Intelligence Review category counts dots if they exist
+        const dot8 = document.getElementById('reviewDot_8Focus');
+        if (dot8) { dot8.style.backgroundColor = color8Focus; dot8.style.boxShadow = `0 0 8px ${color8Focus}`; }
+        const dotNon = document.getElementById('reviewDot_NonIndex');
+        if (dotNon) { dotNon.style.backgroundColor = colorNonIndex; dotNon.style.boxShadow = `0 0 8px ${colorNonIndex}`; }
+        const dotPSI = document.getElementById('reviewDot_PSI');
+        if (dotPSI) { dotPSI.style.backgroundColor = colorPSI; dotPSI.style.boxShadow = `0 0 8px ${colorPSI}`; }
+    }
+
+    // Call updateReportColors on load
+    document.addEventListener('DOMContentLoaded', () => {
+        updateReportColors();
+    });
+
     window.filterDataset = function(category) {
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.classList.remove('bg-pnp-blue', 'text-white', 'shadow-lg');
@@ -790,18 +930,44 @@
     function openStatsSpreadsheet(category) {
         window.isGlobalStats = true;
         window.currentStatsCategory = category;
+        window.currentStatsClassification = 'All'; // Reset classification filter on tab change
         document.getElementById('reportDetailsTitle').textContent = `Crime Records | ${category}`;
         renderGlobalStatsModalContent();
     }
 
     function renderGlobalStatsModalContent() {
         if (!window.currentStatsBarangay) window.currentStatsBarangay = 'All Barangays';
+        if (!window.currentStatsClassification) window.currentStatsClassification = 'All';
         const category = window.currentStatsCategory;
         
         let baseData = window.currentStatsBarangay === 'All Barangays' ? allIncidents : allIncidents.filter(item => item.barangay === window.currentStatsBarangay);
         
         let filteredData = category === 'All' ? baseData : baseData.filter(item => item.category === category);
         
+        // Dynamic Classification Filter Options base on the current category & sector data
+        const existingOffenses = new Set();
+        filteredData.forEach(item => {
+            const off = item.incident_type || item.offense;
+            if (off) {
+                existingOffenses.add(off);
+            }
+        });
+        const combinedOffenses = Array.from(existingOffenses).sort();
+
+        // Check if previously selected classification is still valid, if not default to 'All'
+        if (window.currentStatsClassification !== 'All' && !existingOffenses.has(window.currentStatsClassification)) {
+            window.currentStatsClassification = 'All';
+        }
+
+        // Apply classification filtering
+        let displayData = filteredData;
+        if (window.currentStatsClassification !== 'All') {
+            displayData = filteredData.filter(item => {
+                const off = item.incident_type || item.offense || '';
+                return off.toUpperCase() === window.currentStatsClassification.toUpperCase();
+            });
+        }
+
         const content = document.getElementById('reportDetailsContent');
         
         // Stats for the header
@@ -816,37 +982,48 @@
             <div class="bg-slate-900 border-b border-white/5 p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative overflow-hidden">
                 <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
                 
-                <div class="lg:col-span-4 space-y-2 relative z-10">
+                <div class="lg:col-span-3 space-y-2 relative z-10">
                     <span class="text-[10px] font-black text-pnp-gold uppercase tracking-[0.3em] block">Sector Filter</span>
                     <div class="flex flex-col mt-2">
-                        <select onchange="window.currentStatsBarangay = this.value; renderGlobalStatsModalContent()" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-black text-white focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 appearance-none cursor-pointer">
+                        <select onchange="window.currentStatsBarangay = this.value; window.currentStatsClassification = 'All'; renderGlobalStatsModalContent()" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-black text-white focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 appearance-none cursor-pointer">
                             ${["All Barangays", ...window.VALID_BARANGAYS].map(b => `<option value="${b}" ${b === window.currentStatsBarangay ? 'selected' : ''} class="bg-slate-800 text-white">${b}</option>`).join('')}
                         </select>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-2 tracking-widest">Select specific barangay to view records</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-2 tracking-widest">Select specific barangay</p>
                     </div>
                 </div>
 
-                <div class="lg:col-span-5 flex items-center justify-center relative z-10">
-                    <div class="grid grid-cols-3 gap-6 w-full">
-                        <button onclick="openStatsSpreadsheet('8-Focus')" class="p-3 rounded-2xl border transition-all flex flex-col items-center ${category === '8-Focus' ? 'bg-red-500 border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.3)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}">
-                            <span class="text-[8px] font-black uppercase tracking-widest mb-1 ${category === '8-Focus' ? 'text-white' : 'text-red-500/50'}">8-Focus</span>
-                            <span class="text-xl font-black tabular-nums leading-none ${category === '8-Focus' ? 'text-white' : 'text-red-500'}">${stats['8-Focus']}</span>
+                <div class="lg:col-span-3 space-y-2 relative z-10">
+                    <span class="text-[10px] font-black text-pnp-gold uppercase tracking-[0.3em] block">Classification Filter</span>
+                    <div class="flex flex-col mt-2">
+                        <select onchange="window.currentStatsClassification = this.value; renderGlobalStatsModalContent()" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-black text-white focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 appearance-none cursor-pointer">
+                            <option value="All" ${window.currentStatsClassification === 'All' ? 'selected' : ''} class="bg-slate-800 text-white">All Classifications</option>
+                            ${combinedOffenses.map(off => `<option value="${off}" ${off === window.currentStatsClassification ? 'selected' : ''} class="bg-slate-800 text-white">${off}</option>`).join('')}
+                        </select>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-2 tracking-widest">Dynamic classification filter</p>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 flex items-center justify-center relative z-10">
+                    <div class="grid grid-cols-3 gap-4 w-full">
+                        <button onclick="openStatsSpreadsheet('8-Focus')" class="p-3 rounded-2xl border transition-all flex flex-col items-center" style="${category === '8-Focus' ? `background-color: ${window.categoryHighestColors?.['8-Focus'] || '#ef4444'}; border-color: ${window.categoryHighestColors?.['8-Focus'] || '#ef4444'}; box-shadow: 0 0 20px ${(window.categoryHighestColors?.['8-Focus'] || '#ef4444')}4c; color: #fff;` : `background-color: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);`}">
+                            <span class="text-[8px] font-black uppercase tracking-widest mb-1" style="color: ${category === '8-Focus' ? '#fff' : `${window.categoryHighestColors?.['8-Focus'] || '#ef4444'}80`}">8-Focus</span>
+                            <span class="text-xl font-black tabular-nums leading-none" style="color: ${category === '8-Focus' ? '#fff' : (window.categoryHighestColors?.['8-Focus'] || '#ef4444')}">${stats['8-Focus']}</span>
                         </button>
-                        <button onclick="openStatsSpreadsheet('Non-Index')" class="p-3 rounded-2xl border transition-all flex flex-col items-center ${category === 'Non-Index' ? 'bg-slate-500 border-slate-400 shadow-[0_0_20px_rgba(100,116,139,0.3)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}">
-                            <span class="text-[8px] font-black uppercase tracking-widest mb-1 ${category === 'Non-Index' ? 'text-white' : 'text-slate-500/50'}">Non-Index</span>
-                            <span class="text-xl font-black tabular-nums leading-none ${category === 'Non-Index' ? 'text-white' : 'text-slate-200'}">${stats['Non-Index']}</span>
+                        <button onclick="openStatsSpreadsheet('Non-Index')" class="p-3 rounded-2xl border transition-all flex flex-col items-center" style="${category === 'Non-Index' ? `background-color: ${window.categoryHighestColors?.['Non-Index'] || '#64748b'}; border-color: ${window.categoryHighestColors?.['Non-Index'] || '#64748b'}; box-shadow: 0 0 20px ${(window.categoryHighestColors?.['Non-Index'] || '#64748b')}4c; color: #fff;` : `background-color: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);`}">
+                            <span class="text-[8px] font-black uppercase tracking-widest mb-1" style="color: ${category === 'Non-Index' ? '#fff' : `${window.categoryHighestColors?.['Non-Index'] || '#64748b'}80`}">Non-Index</span>
+                            <span class="text-xl font-black tabular-nums leading-none" style="color: ${category === 'Non-Index' ? '#fff' : (window.categoryHighestColors?.['Non-Index'] || '#64748b')}">${stats['Non-Index']}</span>
                         </button>
-                        <button onclick="openStatsSpreadsheet('PSI')" class="p-3 rounded-2xl border transition-all flex flex-col items-center ${category === 'PSI' ? 'bg-pnp-blue border-pnp-blue-400 shadow-[0_0_20px_rgba(0,31,63,0.3)]' : 'bg-white/5 border-white/10 hover:bg-white/10'}">
-                            <span class="text-[8px] font-black uppercase tracking-widest mb-1 ${category === 'PSI' ? 'text-white' : 'text-pnp-blue-300/50'}">PSI</span>
-                            <span class="text-xl font-black tabular-nums leading-none ${category === 'PSI' ? 'text-white' : 'text-pnp-blue-300'}">${stats['PSI']}</span>
+                        <button onclick="openStatsSpreadsheet('PSI')" class="p-3 rounded-2xl border transition-all flex flex-col items-center" style="${category === 'PSI' ? `background-color: ${window.categoryHighestColors?.['PSI'] || '#3b82f6'}; border-color: ${window.categoryHighestColors?.['PSI'] || '#3b82f6'}; box-shadow: 0 0 20px ${(window.categoryHighestColors?.['PSI'] || '#3b82f6')}4c; color: #fff;` : `background-color: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);`}">
+                            <span class="text-[8px] font-black uppercase tracking-widest mb-1" style="color: ${category === 'PSI' ? '#fff' : `${window.categoryHighestColors?.['PSI'] || '#3b82f6'}80`}">PSI</span>
+                            <span class="text-xl font-black tabular-nums leading-none" style="color: ${category === 'PSI' ? '#fff' : (window.categoryHighestColors?.['PSI'] || '#3b82f6')}">${stats['PSI']}</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="lg:col-span-3 flex flex-col items-end justify-center relative z-10">
+                <div class="lg:col-span-2 flex flex-col items-end justify-center relative z-10">
                     <div class="text-right">
-                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block leading-none italic">Total Filtered Intensity</span>
-                        <p class="text-4xl font-black text-pnp-gold leading-none mt-2 tabular-nums">${filteredData.length}</p>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest block leading-none italic">Filtered Cases</span>
+                        <p class="text-4xl font-black text-pnp-gold leading-none mt-2 tabular-nums">${displayData.length}</p>
                     </div>
                 </div>
             </div>
@@ -859,13 +1036,13 @@
                             <tr class="bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
                                 <th class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-16 text-center bg-gray-50 dark:bg-slate-900">#</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Timeline</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Tactical Offense</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Classification</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Sector (Barangay)</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Category</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Risk Pillar</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
-                            ${filteredData.length === 0 ? `
+                            ${displayData.length === 0 ? `
                                 <tr>
                                     <td colspan="5" class="px-8 py-24 text-center">
                                         <div class="flex flex-col items-center space-y-4 opacity-40">
@@ -874,9 +1051,10 @@
                                         </div>
                                     </td>
                                 </tr>
-                            ` : filteredData.map((item, idx) => {
+                            ` : displayData.map((item, idx) => {
                                 const cat = item.category || 'Non-Index';
-                                const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (cat === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20');
+                                const rowColor = window.categoryHighestColors?.[cat] || (cat === '8-Focus' ? '#ef4444' : (cat === 'PSI' ? '#3b82f6' : '#94A3B8'));
+                                const badgeStyle = `background-color: ${rowColor}15; color: ${rowColor}; border-color: ${rowColor}20;`;
                                 const dateStr = item.incident_date ? new Date(item.incident_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : (item.date || 'N/A');
                                 return `
                                     <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 transition-colors group animate-fade-in-up ${item.report_id ? 'cursor-pointer' : ''}" style="animation-delay: ${idx * 15}ms" ${item.report_id ? `ondblclick="viewReportDetails('${item.report_id}')"` : ''}>
@@ -886,7 +1064,7 @@
                                         <td class="px-8 py-4 text-xs font-black text-slate-600 dark:text-slate-300 uppercase border-r border-gray-50 dark:border-slate-800">BRGY. ${item.barangay || 'UNKNOWN'}</td>
                                         <td class="px-8 py-4 text-center">
                                             <div class="flex items-center justify-center">
-                                                <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${badgeClass}">
+                                                <span class="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border" style="${badgeStyle}">
                                                     ${cat}
                                                 </span>
                                             </div>
@@ -918,7 +1096,7 @@
         renderReportDetailsModalContent('All');
     }
 
-    function renderReportDetailsModalContent(filter) {
+    function renderReportDetailsModalContent(filter, selectedOffense = 'All') {
         if (window.isGlobalStats) {
             window.currentStatsCategory = filter === 'All' ? '8-Focus' : filter; // Default to focus if 'All' clicked in global mode
             renderGlobalStatsModalContent();
@@ -926,7 +1104,17 @@
         }
         const report = window.currentViewingReport;
         const rawData = report.raw_data || [];
-        const filteredData = filter === 'All' ? rawData : rawData.filter(item => item.category === filter);
+        
+        // Filter by category first
+        let filteredData = filter === 'All' ? rawData : rawData.filter(item => item.category === filter);
+        
+        // Filter by selected offense / classification
+        if (selectedOffense && selectedOffense !== 'All') {
+            filteredData = filteredData.filter(item => {
+                const itemOffense = (item.offense || item.incident_type || '').toUpperCase();
+                return itemOffense === selectedOffense.toUpperCase();
+            });
+        }
         
         const content = document.getElementById('reportDetailsContent');
         const batchId = `#${report.id.slice(-8).toUpperCase()}`;
@@ -935,11 +1123,22 @@
             hour: '2-digit', minute: '2-digit', second: '2-digit'
         });
 
+        // Collect classifications that are actually present in the given data for the selected category filter
+        const existingOffenses = new Set();
+        rawData.forEach(item => {
+            const off = item.offense || item.incident_type;
+            if (off && (filter === 'All' || item.category === filter)) {
+                existingOffenses.add(off);
+            }
+        });
+
+        const combinedOffenses = Array.from(existingOffenses).sort();
+
         content.innerHTML = `
             <!-- Enhanced Batch Info Header -->
             <div class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="space-y-2">
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Scanning Source</span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Neural Scanning Source</span>
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-full bg-pnp-blue flex items-center justify-center text-[10px] font-black text-pnp-gold border border-pnp-gold/20">
                             ${(report.admin_name || 'A').charAt(0)}
@@ -959,13 +1158,20 @@
                 </div>
                 <div class="md:col-span-2 flex flex-col items-end justify-center space-y-4">
                     <div class="flex items-center space-x-2 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
-                        <button onclick="renderReportDetailsModalContent('All')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'All' ? 'bg-pnp-blue text-white shadow-lg' : 'text-slate-400 hover:text-pnp-blue'}">All</button>
+                        <button onclick="renderReportDetailsModalContent('All')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'All' ? 'bg-pnp-blue text-white shadow-lg' : 'text-slate-400 hover:text-pnp-blue'}">All Intel</button>
                         <button onclick="renderReportDetailsModalContent('8-Focus')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === '8-Focus' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-400 hover:text-red-500'}">8-Focus</button>
                         <button onclick="renderReportDetailsModalContent('Non-Index')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'Non-Index' ? 'bg-slate-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-500'}">Non-Index</button>
                         <button onclick="renderReportDetailsModalContent('PSI')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'PSI' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-400 hover:text-blue-500'}">PSI</button>
                     </div>
                     <div class="flex items-center space-x-3 text-right">
-                        <!-- Tactical GUID removed -->
+                        <div class="text-left flex flex-col space-y-1">
+                            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Classification</span>
+                            <select id="modalClassificationDropdown" onchange="renderReportDetailsModalContent('${filter}', this.value)" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-1 focus:ring-pnp-blue outline-none cursor-pointer max-w-[220px] truncate">
+                                <option value="All" ${selectedOffense === 'All' ? 'selected' : ''} class="dark:bg-slate-900">All Classifications</option>
+                                ${combinedOffenses.map(o => `<option value="${o}" ${o.toUpperCase() === selectedOffense.toUpperCase() ? 'selected' : ''} class="dark:bg-slate-900">${o}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="w-px h-8 bg-gray-200 dark:bg-slate-700"></div>
                         <div class="text-right">
                             <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none">Total Staged</span>
                             <p class="text-lg font-black text-pnp-blue dark:text-white leading-none mt-1">${filteredData.length}</p>
@@ -982,9 +1188,9 @@
                             <tr class="bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
                                 <th class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-16 text-center bg-gray-50 dark:bg-slate-900">#</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Timeline</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Tactical Offense</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Classification</th>
                                 <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Sector (Barangay)</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Category</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Risk Pillar</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
