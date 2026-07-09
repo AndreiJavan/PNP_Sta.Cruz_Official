@@ -69,7 +69,8 @@
                                     <%= h.name %>
                                 </td>
                                 <td class="px-6 py-4 font-mono text-gray-700 dark:text-gray-300" id="num_<%= h.id %>">
-                                    <%= h.number && h.number.length === 11 ? h.number.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3') : h.number %>
+                                    <% let numStr = h.number ? String(h.number) : ''; %>
+                                    <%= numStr && numStr.length === 11 ? numStr.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3') : numStr %>
                                 </td>
                                 <td class="px-6 py-4" id="cat_<%= h.id %>" data-category="<%= h.category %>">
                                     <span
