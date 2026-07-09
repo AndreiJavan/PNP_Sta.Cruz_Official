@@ -1,147 +1,138 @@
 <!-- Hero Section -->
-<section class="bg-pnp-blue text-white py-20 relative overflow-hidden">
-    <div class="absolute inset-0 bg-cover bg-center mix-blend-soft-light opacity-50"
-        style="background-image: url('/images/home-hero.jpg');"></div>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-        <h1 class="text-4xl md:text-6xl font-extrabold text-pnp-gold mb-4 tracking-tight">STA. CRUZ CRIME MAPPING SYSTEM
+<section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-slate-900">
+    <div class="absolute inset-0 z-0">
+        <img src="/images/home-hero.jpg" alt="Sta. Cruz Laguna" class="w-full h-full object-cover opacity-40 mix-blend-overlay scale-105 animate-[pulse_10s_ease-in-out_infinite_alternate]" onerror="this.src='https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?q=80&w=1920&auto=format&fit=crop'">
+        <div class="absolute inset-0 bg-gradient-to-b from-pnp-blue/80 via-pnp-blue/60 to-slate-900 dark:from-slate-950/90 dark:via-slate-900/80 dark:to-slate-950"></div>
+    </div>
+
+    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center mt-10">
+        <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-5 py-2 rounded-full mb-8 border border-white/20 animate-fade-in-up">
+            <i class="fas fa-shield-halved text-sm"></i>
+            <span class="text-xs font-bold uppercase tracking-widest">Official Portal &bull; PNP Sta. Cruz</span>
+        </div>
+        
+        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight tracking-tight drop-shadow-lg animate-fade-in-up" style="animation-delay: 0.1s;">
+            Welcome to the <span class="text-transparent bg-clip-text bg-gradient-to-r from-pnp-gold to-yellow-300">Public Bulletin</span>
         </h1>
-        <p class="text-xl md:text-2xl font-light max-w-3xl mx-auto">Interactive incident visualization and
-            community-based reporting for a safer Sta. Cruz, Laguna.</p>
+        
+        <p class="text-lg md:text-xl text-blue-100 font-light max-w-3xl mx-auto mb-6 leading-relaxed drop-shadow-md animate-fade-in-up" style="animation-delay: 0.2s;">
+            Stay informed with the latest updates, advisories, missing persons, and wanted persons alerts from the Sta. Cruz Municipal Police Station.
+        </p>
     </div>
 </section>
 
-<!-- Key Personnel / Leadership -->
-<section class="py-20 bg-white dark:bg-slate-800 transition-colors duration-300">
+<!-- Bulletins Section -->
+<section class="py-16 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[50vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-3">Leadership & Command</h2>
-            <h3 class="text-4xl font-black text-pnp-blue dark:text-white tracking-tighter">KEY PERSONNEL</h3>
-            <div class="w-20 h-1.5 bg-pnp-gold mx-auto mt-6 rounded-full"></div>
-        </div>
-
-        <div class="flex flex-col lg:flex-row gap-12 items-center">
-            <!-- Directory Placeholder Image -->
-            <div class="w-full lg:w-1/3">
-                <div class="relative mb-6 lg:mb-0">
-                    <div
-                        class="aspect-[3/4] rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-700 relative z-10 hover:-translate-y-2 transition duration-500">
-                        <img src="/images/directory-pnp.jpg" alt="Directory Placeholder"
-                            class="w-full h-full object-cover transition duration-500" referrerPolicy="no-referrer">
-                    </div>
-                    <div
-                        class="absolute -bottom-4 -right-4 w-24 h-24 bg-pnp-gold rounded-[2rem] -z-0 opacity-20 hover:scale-110 transition duration-500">
-                    </div>
-                </div>
+        <% if (locals.bulletins && bulletins.length > 0) { %>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <% bulletins.forEach(bulletin => { %>
+                    <a href="/bulletins/<%= bulletin.id %>" class="group flex flex-col bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-slate-800 overflow-hidden transform hover:-translate-y-2 h-full">
+                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                            <div class="h-48 overflow-hidden relative shrink-0">
+                                <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </div>
+                        <% } else { %>
+                            <div class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center shrink-0">
+                                <i class="fas fa-file-alt text-4xl text-slate-300 dark:text-slate-600"></i>
+                            </div>
+                        <% } %>
+                        <div class="p-8 flex flex-col flex-grow">
+                            <% const badgeColors = { 
+                                'Wanted Person': 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20',
+                                'Missing Person': 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20',
+                                'Crime Advisory': 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
+                                'Recovered Property': 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20',
+                                'General Announcement': 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' 
+                            }; %>
+                            <div class="mb-4">
+                                <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= badgeColors[bulletin.category] || 'text-slate-600 bg-slate-100 dark:text-slate-400 dark:bg-slate-800' %>">
+                                    <%= bulletin.category %>
+                                </span>
+                            </div>
+                            <h4 class="text-xl font-bold text-slate-900 dark:text-white leading-tight mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors line-clamp-2"><%= bulletin.title %></h4>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-6 leading-relaxed flex-grow"><%= bulletin.body %></p>
+                            <div class="pt-4 border-t border-gray-50 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500 font-bold flex justify-between items-center mt-auto">
+                                <span><i class="far fa-calendar-alt mr-1"></i> <%= new Date(bulletin.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+                                <span class="text-pnp-blue dark:text-pnp-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0"><i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                <% }) %>
             </div>
-
-            <!-- Directory List -->
-            <div class="w-full lg:w-2/3">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PGEN
-                            JOSE MELENCIO C NARTATEZ JR</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            CHIEF PNP</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PBGEN
-                            HANSEL M MARANTAN</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            ACTING REGIONAL DIRECTOR</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PCOL
-                            SANDRO JAY DC TAFALLA</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            ACTING PROVINCIAL DIRECTOR, LAGUNA PPO</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PLT
-                            COL JOJO I SABENIANO</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            CHIEF OF POLICE</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PCPT
-                            GADY R MABANTO</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            Deputy Chief of Police</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PCPT
-                            ANDY O MESANA</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            CHIEF OPERATION PCO</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PLT
-                            ARIEL T GENTOLEO</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            C, ADMIN AND INTELLIGENCE SECTION</p>
-                    </div>
-
-                    <div
-                        class="bg-gray-50 dark:bg-slate-700/50 p-5 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-pnp-gold/50 transition-colors">
-                        <h4 class="text-lg md:text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight">PEMS
-                            MANOLITO M BINALAY</h4>
-                        <p
-                            class="text-[10px] md:text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">
-                            MESPO</p>
-                    </div>
+        <% } else { %>
+            <div class="text-center py-20 bg-white dark:bg-slate-900 rounded-[2rem] border border-dashed border-gray-200 dark:border-slate-800 max-w-3xl mx-auto">
+                <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400 shadow-inner">
+                    <i class="fas fa-inbox text-3xl"></i>
                 </div>
+                <h3 class="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2">No Active Bulletins</h3>
+                <p class="text-slate-500 dark:text-slate-400 font-medium">There are currently no public announcements or updates to display.</p>
             </div>
-        </div>
+        <% } %>
     </div>
 </section>
 
-<!-- Mission & Vision -->
-<section class="py-16 bg-white dark:bg-slate-800 transition-colors duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-                <img src="/images/home-pnp.jpg" alt="Sta. Cruz" class="rounded-2xl shadow-2xl dark:opacity-80">
-            </div>
-            <div class="space-y-8">
-                <div>
-                    <h2
-                        class="text-2xl font-bold text-pnp-blue dark:text-white border-l-4 border-pnp-gold pl-4 mb-4 uppercase tracking-wider">
-                        Our Mission</h2>
-                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">The PNP shall enforce the law, prevent
-                        and control crimes, maintain peace and order, and ensure public safety and internal security
-                        with the active support of the community.
-
-                    </p>
-                </div>
-                <div>
-                    <h2
-                        class="text-2xl font-bold text-pnp-blue dark:text-white border-l-4 border-pnp-gold pl-4 mb-4 uppercase tracking-wider">
-                        Our Vision</h2>
-                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">Imploring the aid of the Almighty, by
-                        2030, PNP Sta. Cruz shall be a highly capable, effective and credible police service working in
-                        partnership with a responsive community towards the attainment of a safer place to live, work
-                        and do business.</p>
-                </div>
-            </div>
+<!-- Jurisdiction Disclaimer Modal -->
+<div id="jurisdiction-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
+    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" id="modal-backdrop"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-11/12 max-w-lg rounded-[2rem] p-8 md:p-10 shadow-2xl border border-gray-100 dark:border-slate-800 transform scale-95 transition-transform duration-500" id="modal-content">
+        <div class="flex items-center justify-center w-16 h-16 bg-pnp-blue text-white rounded-full mb-6 mx-auto shadow-lg">
+            <i class="fas fa-info-circle text-2xl"></i>
         </div>
+        <h3 class="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">Important Notice</h3>
+        <div class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed text-center space-y-4 mb-8">
+            <p>Welcome to the Sta. Cruz Municipal Police Station Portal.</p>
+            <p>Please be advised that this platform <strong>exclusively provides data and bulletins managed by the Sta. Cruz Laguna PNP</strong>.</p>
+            <p>We do not provide or handle data outside of our station's jurisdiction, such as fire incidents, which are covered by the Bureau of Fire Protection (BFP) and local fire stations.</p>
+        </div>
+        <button id="accept-disclaimer" class="w-full bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-bold py-4 rounded-xl transition-colors duration-300 uppercase tracking-widest text-sm shadow-md">
+            I Understand
+        </button>
     </div>
-</section>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const modal = document.getElementById('jurisdiction-modal');
+        const content = document.getElementById('modal-content');
+        const acceptBtn = document.getElementById('accept-disclaimer');
+        
+        if (!localStorage.getItem('staCruzDisclaimerAccepted')) {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 100);
+        }
+        
+        acceptBtn.addEventListener('click', () => {
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 500);
+            localStorage.setItem('staCruzDisclaimerAccepted', 'true');
+        });
+    });
+</script>
+
+<!-- Additional Styles for Micro-animations -->
+<style>
+    @keyframes fade-in-up {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+</style>

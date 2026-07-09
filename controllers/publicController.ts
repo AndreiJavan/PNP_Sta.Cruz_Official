@@ -11,12 +11,15 @@ export const getHome = async (req: Request, res: Response) => {
 
     const activeBulletinsSnap = await db.collection('bulletins')
       .where('is_archived', '!=', true)
-      .count().get();
-    const stats = {
-      activeBulletins: activeBulletinsSnap.data().count
-    };
+      .orderBy('created_at', 'desc')
+      .get();
+      
+    const bulletins = activeBulletinsSnap.docs.map(doc => {
+      const d = doc.data();
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
+    });
 
-    res.render('public/home', { title: 'Home', hotlines, stats });
+    res.render('public/home', { title: 'Home', hotlines, bulletins });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading home page');
@@ -74,43 +77,49 @@ const parsePhotos = (path: string | undefined): string[] => {
   return [path];
 };
 
-export const getBulletins = async (req: Request, res: Response) => {
-  const { category, search, page = 1 } = req.query;
+export const getWantedPersons = async (req: Request, res: Response) => {
+  const { search, page = 1 } = req.query;
   const limit = 10;
-  // For simplicity, we'll just fetch with limit.
-
   try {
-    let query: any = db.collection('bulletins').where('is_archived', '!=', true);
-
-    if (category && category !== 'All') {
-      query = query.where('category', '==', category);
-    }
-
-    // We'll fetch and filter in memory if search is present.
-    // Given the small scale, we'll fetch and filter.
-
+    let query: any = db.collection('bulletins').where('is_archived', '!=', true).where('category', '==', 'Wanted Person');
     const snap = await query.orderBy('created_at', 'desc').get();
     let bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     });
-
     if (search) {
       const s = String(search).toLowerCase();
-      bulletins = bulletins.filter((b: any) =>
-        b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s)
-      );
+      bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
     }
-
-    // Manual pagination
-    const total = bulletins.length;
     const offset = (Number(page) - 1) * limit;
     bulletins = bulletins.slice(offset, offset + limit);
-
-    res.render('public/bulletins', { title: 'Bulletins', bulletins, category, search, page: Number(page) });
+    res.render('public/bulletins', { title: 'Wanted Persons', pageTitle: 'Wanted Persons', bulletins, category: 'Wanted Person', search, page: Number(page) });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error loading bulletins');
+    res.status(500).send('Error loading Wanted Persons');
+  }
+};
+
+export const getMissingPersons = async (req: Request, res: Response) => {
+  const { search, page = 1 } = req.query;
+  const limit = 10;
+  try {
+    let query: any = db.collection('bulletins').where('is_archived', '!=', true).where('category', '==', 'Missing Person');
+    const snap = await query.orderBy('created_at', 'desc').get();
+    let bulletins = snap.docs.map((doc: any) => {
+      const d = doc.data();
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
+    });
+    if (search) {
+      const s = String(search).toLowerCase();
+      bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
+    }
+    const offset = (Number(page) - 1) * limit;
+    bulletins = bulletins.slice(offset, offset + limit);
+    res.render('public/bulletins', { title: 'Missing Persons', pageTitle: 'Missing Persons', bulletins, category: 'Missing Person', search, page: Number(page) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading Missing Persons');
   }
 };
 
