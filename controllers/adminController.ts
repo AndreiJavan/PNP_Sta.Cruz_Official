@@ -1136,6 +1136,9 @@ export const getHotlines = async (req: Request, res: Response) => {
 
 export const postHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
+  if (!/^\d{1,11}$/.test(number)) {
+    return res.status(400).send('Invalid hotline number. Must be up to 11 digits only, no characters or spaces.');
+  }
   try {
     await logAction(req, 'HOTLINE_ADD', `Added tactical hotline: ${name}`);
     await db.collection('hotlines').add({
@@ -1153,6 +1156,9 @@ export const postHotline = async (req: Request, res: Response) => {
 
 export const postEditHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
+  if (!/^\d{1,11}$/.test(number)) {
+    return res.status(400).send('Invalid hotline number. Must be up to 11 digits only, no characters or spaces.');
+  }
   try {
     await logAction(req, 'HOTLINE_EDIT', `Edited tactical hotline number ID: ${req.params.id}`);
     await db.collection('hotlines').doc(req.params.id).update({
