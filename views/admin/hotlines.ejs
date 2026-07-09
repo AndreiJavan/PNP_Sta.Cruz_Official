@@ -65,13 +65,13 @@
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
                         <% hotlines.forEach(h=> { %>
                             <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition">
-                                <td class="px-6 py-4 font-bold text-pnp-blue dark:text-pnp-gold">
+                                <td class="px-6 py-4 font-bold text-pnp-blue dark:text-pnp-gold" id="name_<%= h.id %>">
                                     <%= h.name %>
                                 </td>
                                 <td class="px-6 py-4 font-mono text-gray-700 dark:text-gray-300" id="num_<%= h.id %>">
                                     <%= h.number %>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4" id="cat_<%= h.id %>" data-category="<%= h.category %>">
                                     <span
                                         class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400">
                                         <%= h.category %>
@@ -96,15 +96,39 @@
 
 <script>
     function toggleEditHotline(id) {
+        const nameTd = document.getElementById('name_' + id);
         const numTd = document.getElementById('num_' + id);
+        const catTd = document.getElementById('cat_' + id);
         const editBtn = document.getElementById('editBtn_' + id);
         
         if (numTd.querySelector('input')) {
             const form = document.getElementById('editForm_' + id);
+            
+            // Collect the values from name and category inputs before submitting
+            const nameInput = nameTd.querySelector('input');
+            const catSelect = catTd.querySelector('select');
+            
+            if (nameInput) form.appendChild(nameInput);
+            if (catSelect) form.appendChild(catSelect);
+            
             form.submit();
         } else {
+            const currentName = nameTd.innerText.trim();
             const currentNum = numTd.innerText.trim();
-            numTd.innerHTML = \`<form id="editForm_\${id}" action="/admin/hotlines/\${id}/edit" method="POST"><input type="text" name="number" value="\${currentNum}" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>\`;
+            const currentCat = catTd.getAttribute('data-category');
+            
+            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
+            
+            numTd.innerHTML = `<form id="editForm_${id}" action="/admin/hotlines/${id}/edit" method="POST"><input type="text" name="number" value="${currentNum}" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>`;
+            
+            const categories = ['Police', 'Fire', 'Medical', 'Disaster', 'Utility', 'Other'];
+            let options = '';
+            categories.forEach(c => {
+                options += `<option value="${c}" ${c === currentCat ? 'selected' : ''}>${c}</option>`;
+            });
+            
+            catTd.innerHTML = `<select name="category" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">${options}</select>`;
+
             editBtn.innerText = 'Save';
             editBtn.classList.remove('text-pnp-blue', 'hover:text-blue-800');
             editBtn.classList.add('text-green-600', 'hover:text-green-800');
