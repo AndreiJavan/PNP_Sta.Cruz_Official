@@ -17,7 +17,7 @@ export const getHome = async (req: Request, res: Response) => {
     const bulletins = activeBulletinsSnap.docs.map(doc => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    });
+    }).filter(b => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
     res.render('public/home', { title: 'Home', hotlines, bulletins });
   } catch (err) {
@@ -75,6 +75,36 @@ const parsePhotos = (path: string | undefined): string[] => {
     if (Array.isArray(parsed)) return parsed;
   } catch (e) {}
   return [path];
+};
+
+export const getBulletins = async (req: Request, res: Response) => {
+  const { category, search, page = 1 } = req.query;
+  const limit = 10;
+  try {
+    let query: any = db.collection('bulletins').where('is_archived', '!=', true);
+    const snap = await query.orderBy('created_at', 'desc').get();
+    
+    let bulletins = snap.docs.map((doc: any) => {
+      const d = doc.data();
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
+    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
+
+    if (category && category !== 'All') {
+      bulletins = bulletins.filter((b: any) => b.category === category);
+    }
+
+    if (search) {
+      const s = String(search).toLowerCase();
+      bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
+    }
+
+    const offset = (Number(page) - 1) * limit;
+    bulletins = bulletins.slice(offset, offset + limit);
+    res.render('public/bulletins', { title: 'Bulletins', pageTitle: 'Public Bulletins', bulletins, category, search, page: Number(page) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading Bulletins');
+  }
 };
 
 export const getWantedPersons = async (req: Request, res: Response) => {

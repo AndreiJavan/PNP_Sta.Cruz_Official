@@ -180,6 +180,15 @@
                 <span class="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
             </a>
 
+            <a href="/admin/bulletins"
+                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Bulletins' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
+                <div
+                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="fas fa-bullhorn text-xs"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase tracking-widest">Bulletins</span>
+            </a>
+
             <a href="/admin/bulletins?category=Wanted%20Person"
                 class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Wanted Persons' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
                 <div

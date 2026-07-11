@@ -12,5 +12,6 @@ router.get('/bulletins/:id', publicController.getBulletinDetail);
 
 router.get('/about', publicController.getAbout);
 router.get('/hotlines', publicController.getHotlines);
+router.get('/bulletins', publicController.getBulletins);
 
 export default router;

@@ -809,15 +809,18 @@ export const getBulletins = async (req: Request, res: Response) => {
     let query: any = db.collection('bulletins');
     if (category) {
       query = query.where('category', '==', category);
+    } else {
+      query = query.where('category', '!=', 'Wanted Person').where('category', '!=', 'Missing Person');
     }
     
-    // In Firestore, if you have equality filter and orderBy, you might need a composite index.
-    // Assuming simple fetch for now if it works. If it fails, fallback.
     const snap = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).get();
     
-    // For counting with filter:
     let countQuery: any = db.collection('bulletins');
-    if (category) countQuery = countQuery.where('category', '==', category);
+    if (category) {
+      countQuery = countQuery.where('category', '==', category);
+    } else {
+      countQuery = countQuery.where('category', '!=', 'Wanted Person').where('category', '!=', 'Missing Person');
+    }
     const countSnap = await countQuery.count().get();
 
     const bulletins = snap.docs.map((doc: any) => {
@@ -882,7 +885,13 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_CREATE', `Created informational bulletin: ${title}`);
     await db.collection('bulletins').add(data);
-    res.redirect('/admin/bulletins');
+    if (encoded.category === 'Wanted Person') {
+      res.redirect('/admin/bulletins?category=Wanted%20Person');
+    } else if (encoded.category === 'Missing Person') {
+      res.redirect('/admin/bulletins?category=Missing%20Person');
+    } else {
+      res.redirect('/admin/bulletins');
+    }
   } catch (err: any) {
     console.error(err);
     if (err.message && err.message.includes('bulletins_category_check')) {
@@ -944,7 +953,13 @@ export const postEditBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);
-    res.redirect('/admin/bulletins');
+    if (encoded.category === 'Wanted Person') {
+      res.redirect('/admin/bulletins?category=Wanted%20Person');
+    } else if (encoded.category === 'Missing Person') {
+      res.redirect('/admin/bulletins?category=Missing%20Person');
+    } else {
+      res.redirect('/admin/bulletins');
+    }
   } catch (err: any) {
     console.error(err);
     if (err.message && err.message.includes('bulletins_category_check')) {
@@ -956,9 +971,20 @@ export const postEditBulletin = async (req: Request, res: Response) => {
 
 export const deleteBulletin = async (req: Request, res: Response) => {
   try {
+    const docRef = db.collection('bulletins').doc(req.params.id);
+    const docSnap = await docRef.get();
+    let redirectUrl = '/admin/bulletins';
+    if (docSnap.exists) {
+      const data = docSnap.data();
+      if (data && data.category === 'Wanted Person') {
+        redirectUrl = '/admin/bulletins?category=Wanted%20Person';
+      } else if (data && data.category === 'Missing Person') {
+        redirectUrl = '/admin/bulletins?category=Missing%20Person';
+      }
+    }
     await logAction(req, 'BULLETIN_DELETE', `Deleted bulletin ID: ${req.params.id}`);
-    await db.collection('bulletins').doc(req.params.id).delete();
-    res.redirect('/admin/bulletins');
+    await docRef.delete();
+    res.redirect(redirectUrl);
   } catch (err) {
     console.error(err);
     res.status(500).send('Error deleting bulletin');
