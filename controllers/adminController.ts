@@ -809,8 +809,6 @@ export const getBulletins = async (req: Request, res: Response) => {
     let query: any = db.collection('bulletins');
     if (category) {
       query = query.where('category', '==', category);
-    } else {
-      query = query.where('category', '!=', 'Wanted Person').where('category', '!=', 'Missing Person');
     }
     
     const snap = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).get();
@@ -818,8 +816,6 @@ export const getBulletins = async (req: Request, res: Response) => {
     let countQuery: any = db.collection('bulletins');
     if (category) {
       countQuery = countQuery.where('category', '==', category);
-    } else {
-      countQuery = countQuery.where('category', '!=', 'Wanted Person').where('category', '!=', 'Missing Person');
     }
     const countSnap = await countQuery.count().get();
 
