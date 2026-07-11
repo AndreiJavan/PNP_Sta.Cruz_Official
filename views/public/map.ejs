@@ -365,80 +365,6 @@
         }
     }
 
-    let boundaryLayer;
-    let glowLayer;
-
-    async function loadMunicipalBoundary() {
-        try {
-            console.log("Fetching municipal boundary for Sta. Cruz, Laguna...");
-            // Use a more specific query including Philippines to avoid ambiguity
-            const response = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=Santa+Cruz,+Laguna,+Philippines&polygon_geojson=1&limit=5');
-            const data = await response.json();
-
-            // Find the administrative boundary relation (usually the most accurate for municipalities)
-            const boundary = data.find(item =>
-                item.osm_type === 'relation' &&
-                item.geojson &&
-                (item.addresstype === 'municipality' || item.type === 'administrative')
-            ) || (data[0] && data[0].geojson ? data[0] : null);
-
-            if (boundary && boundary.geojson) {
-                // Create an inverted polygon to blur the outside of the municipality
-                const worldRing = [
-                    [180, 90],
-                    [180, -90],
-                    [-180, -90],
-                    [-180, 90],
-                    [180, 90]
-                ];
-                
-                let maskCoordinates = [];
-                if (boundary.geojson.type === 'Polygon') {
-                    maskCoordinates = [worldRing, ...boundary.geojson.coordinates];
-                } else if (boundary.geojson.type === 'MultiPolygon') {
-                    maskCoordinates = [worldRing];
-                    boundary.geojson.coordinates.forEach(polygon => {
-                        maskCoordinates.push(polygon[0]);
-                    });
-                }
-                
-                if (maskCoordinates.length > 0) {
-                    L.geoJSON({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Polygon',
-                            coordinates: maskCoordinates
-                        }
-                    }, {
-                        style: {
-                            fillColor: '#0f172a',
-                            fillOpacity: 0.35,
-                            color: 'transparent',
-                            weight: 0,
-                            className: 'map-outside-mask'
-                        },
-                        interactive: false
-                    }).addTo(map);
-                }
-
-                const updateStyles = () => {
-                    const zoom = map.getZoom();
-                    // Dynamic weight based on zoom level: make it much thicker as we zoom in
-                    const baseWeight = zoom < 14 ? 10 : (zoom < 16 ? 18 : 30);
-                    const glowWeight = baseWeight * 1.8;
-
-                    // Boundary layers removed by user request
-                };
-
-                console.log("Municipal boundary successfully rendered (Responsive):", boundary.display_name);
-            } else {
-                console.warn("Could not find a valid boundary polygon for Santa Cruz, Laguna.");
-            }
-        } catch (err) {
-            console.error("Error loading municipal boundary:", err);
-        }
-    }
-
     function locateBarangay(shouldMinimize = true) {
         const selectedName = document.getElementById('filterBarangay').value;
 
@@ -1265,7 +1191,6 @@
             // Initial markers are now handled dynamically by GeoJSON load to ensure precision
             // addManualPins();
             loadMapPoints();
-            loadMunicipalBoundary();
             addPoliceStations();
 
             // Track mouse movement for live coordinates
@@ -1290,6 +1215,36 @@
                 })
                 .then(data => {
                     santaCruzGeoJSON = data;
+
+                    // --- APPLY INVERTED MASK TO HIDE OUTSIDE MUNICIPALITIES ---
+                    const worldRing = [[180, 90], [180, -90], [-180, -90], [-180, 90], [180, 90]];
+                    let maskCoords = [worldRing];
+                    data.features.forEach(f => {
+                        if (f.geometry && f.geometry.type === 'Polygon') {
+                            maskCoords.push(f.geometry.coordinates[0]);
+                        } else if (f.geometry && f.geometry.type === 'MultiPolygon') {
+                            f.geometry.coordinates.forEach(poly => maskCoords.push(poly[0]));
+                        }
+                    });
+                    
+                    const isDark = document.documentElement.classList.contains('dark');
+                    L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
+                        style: {
+                            fillColor: isDark ? '#0f172a' : '#f8fafc',
+                            fillOpacity: 1, // Completely opaque!
+                            color: 'transparent',
+                            weight: 0,
+                            className: 'map-outside-mask-solid'
+                        }, interactive: false
+                    }).addTo(map);
+
+                    const observer = new MutationObserver(() => {
+                        const dark = document.documentElement.classList.contains('dark');
+                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
+                    });
+                    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                    // ---------------------------------------------------------
+
                     boundaryLayerGroup = L.geoJSON(data, {
                         style: function (feature) {
                             return getThematicStyleForFeature(feature);
