@@ -40,28 +40,11 @@
     <!-- Search & Filter -->
     <div
         class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="relative">
-                <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
-                    placeholder="Search bulletins..."
-                    class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
-            </div>
-            <div class="relative">
-                <select id="publicCategorySelect" onchange="filterPublicBulletins()"
-                    class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-900 dark:text-white appearance-none">
-                    <option value="" <%=(!locals.category || category==='' ) ? 'selected' : '' %>>All Categories
-                    </option>
-                    <option value="Crime Advisory" <%=(locals.category==='Crime Advisory' ) ? 'selected' : '' %>>Crime
-                        Advisory</option>
-                    <option value="Recovered Property" <%=(locals.category==='Recovered Property' ) ? 'selected' : '' %>
-                        >Recovered Property</option>
-                    <option value="General Announcement" <%=(locals.category==='General Announcement' ) ? 'selected'
-                        : '' %>>General Announcement</option>
-                </select>
-                <i
-                    class="fas fa-layer-group absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
-            </div>
+        <div class="relative">
+            <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                placeholder="Search <%= title.toLowerCase() %>..."
+                class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
+            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
         </div>
     </div>
 
@@ -146,20 +129,20 @@
 <script>
     function filterPublicBulletins() {
         const searchInput = document.getElementById('publicSearchInput').value.toLowerCase();
-        const categoryInput = document.getElementById('publicCategorySelect').value.toLowerCase();
-        const cards = document.querySelectorAll('.grid > .group.bg-white');
+        const cards = document.querySelectorAll('.grid > .group');
         
         let anyVisible = false;
         
         cards.forEach(card => {
-            const title = card.querySelector('h3').textContent.toLowerCase();
-            const body = card.querySelector('p').textContent.toLowerCase();
-            const categoryBadge = card.querySelector('.rounded-full.uppercase').textContent.toLowerCase();
+            const h3 = card.querySelector('h3');
+            const p = card.querySelector('p');
+            if (!h3 || !p) return;
+            const title = h3.textContent.toLowerCase();
+            const body = p.textContent.toLowerCase();
             
             const matchesSearch = title.includes(searchInput) || body.includes(searchInput);
-            const matchesCategory = categoryInput === '' || categoryBadge.includes(categoryInput);
             
-            if (matchesSearch && matchesCategory) {
+            if (matchesSearch) {
                 card.style.display = '';
                 anyVisible = true;
             } else {
