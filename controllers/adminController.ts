@@ -283,7 +283,7 @@ export const processAIExtraction = async (req: Request, res: Response) => {
 
     const client = getGptOssClient();
     const primaryModel = 'gemini-2.5-flash';
-    const fallbackModel = 'gemini-2.5-flash-lite';
+    const fallbackModel = 'gemini-3.1-flash-lite';
 
     console.log(`[NEURAL SCAN] Initiating tactical extraction via GPT-OSS 120B (utilizing ${primaryModel})...`);
     let model = client.getGenerativeModel({ 
@@ -294,79 +294,390 @@ export const processAIExtraction = async (req: Request, res: Response) => {
       }
     });
 
-    const prompt = `
-ROLE:
-You are a strict data extraction engine for a law enforcement crime information system.
+    const prompt = `You are an expert in analyzing Philippine National Police (PNP) police records.
 
-You ONLY extract structured crime incident data from the provided text.
-You DO NOT explain. You DO NOT add comments. You DO NOT hallucinate.
+Your task is to analyze an uploaded Microsoft Excel workbook and extract police records accurately.
 
----
+=================================================
+OBJECTIVE
+=================================================
 
-LOCATION CONTEXT:
-Santa Cruz, Laguna, Philippines
+The uploaded workbook contains police records, not full incident reports.
 
----
+Each record usually contains only:
 
-VALID BARANGAYS (STRICT MATCH ONLY):
+• Offense
+• Date
+• Location
+
+Your responsibilities are to:
+
+1. Identify the correct worksheet(s).
+2. Extract every police record accurately.
+3. Normalize duplicate offense names.
+4. Assign the correct category based on the worksheet name.
+5. Verify the extracted data before returning the final output.
+6. Return only valid JSON.
+
+=================================================
+STEP 1 - IDENTIFY VALID WORKSHEETS
+=================================================
+
+First, examine every worksheet in the workbook.
+
+Only process worksheets whose names closely match one of the following:
+
+• 8 Focus
+• 8-Focus
+• 8 Focus Crimes
+• 8FOCUS
+
+• Non-Index
+• NON INDEX
+• NON-INDEX
+
+• RIR
+• PSI
+• RIR/PSI
+• RIR - PSI
+• RIR_PSI
+
+Ignore every other worksheet.
+
+Examples of worksheets to ignore:
+
+• Summary
+• Dashboard
+• Charts
+• Graphs
+• Statistics
+• Pivot
+• Pivot Table
+• Legend
+• Read Me
+• Instructions
+• Notes
+• Totals
+
+=================================================
+STEP 2 - PROCESS WORKSHEETS
+=================================================
+
+Process worksheets in the following order:
+
+1. 8-Focus
+2. Non-Index
+3. RIR / PSI
+
+Process one worksheet completely before moving to the next.
+
+Do not mix records between worksheets.
+
+=================================================
+STEP 3 - CATEGORY MAPPING
+=================================================
+
+Determine the category ONLY from the worksheet name.
+
+Apply the following mapping:
+
+Worksheet Name                Category
+
+8 Focus                       8-Focus Crime
+8-Focus                       8-Focus Crime
+8 Focus Crimes                8-Focus Crime
+8FOCUS                        8-Focus Crime
+
+Non-Index                     Non-Index Crime
+NON INDEX                     Non-Index Crime
+NON-INDEX                     Non-Index Crime
+
+RIR                           PSI
+PSI                           PSI
+RIR/PSI                       PSI
+RIR - PSI                     PSI
+RIR_PSI                       PSI
+
+Do NOT determine the category from the offense.
+
+Always use the worksheet name.
+
+=================================================
+STEP 4 - DATA EXTRACTION
+=================================================
+
+Extract only actual police records.
+
+Extract ONLY the following fields:
+
+• Offense
+• Date
+• Location
+
+Do NOT create or infer any additional fields.
+
+Do NOT generate fields such as:
+
+• Time Committed
+• Victim
+• Suspect
+• Narrative
+• Case Number
+• Reporting Officer
+• Coordinates
+• Barangay Code
+• Evidence
+• Remarks
+
+Ignore:
+
+• Empty rows
+• Blank rows
+• Worksheet titles
+• Merged cells
+• Totals
+• Grand Totals
+• Subtotals
+• Summary rows
+• Footer text
+• Repeated headers
+• Charts
+• Graphs
+• Notes
+
+=================================================
+STEP 5 - OFFENSE NORMALIZATION
+=================================================
+
+Normalize offenses that refer to the same crime.
+
+Examples:
+
+THEFT
+Theft
+THEFT - RPC Art. 308
+
+↓
+
+Theft
+
+--------------------------------
+
+ROBBERY
+Robbery
+ROBBERY - RPC Art. 293
+
+↓
+
+Robbery
+
+--------------------------------
+
+HOMICIDE
+Homicide
+HOMICIDE - RPC Art. 249
+
+↓
+
+Homicide
+
+--------------------------------
+
+MURDER
+Murder
+MURDER - RPC Art. 248
+
+↓
+
+Murder
+
+--------------------------------
+
+COMPREHENSIVE DANGEROUS DRUGS ACT OF 2002
+COMPREHENSIVE DANGEROUS DRUGS ACT OF 2002 - RA 9165
+Dangerous Drugs Act Violation
+Comprehensive Dangerous Drugs Act
+
+↓
+
+Comprehensive Dangerous Drugs Act (RA 9165)
+
+--------------------------------
+
+SPECIAL PROTECTION OF CHILDREN AGAINST CHILD ABUSE...
+RA 7610
+Child Abuse
+Anti-Child Abuse Law
+
+↓
+
+Child Abuse (RA 7610)
+
+--------------------------------
+
+ANTI-VIOLENCE AGAINST WOMEN AND THEIR CHILDREN ACT OF 2004
+RA 9262
+Anti-VAWC Act Violation
+
+↓
+
+Anti-VAWC (RA 9262)
+
+--------------------------------
+
+SAFE SPACES ACT
+RA 11313
+Gender Based Sexual Harassment
+
+↓
+
+Safe Spaces Act (RA 11313)
+
+Normalize by removing:
+
+• RPC article references
+• RA numbers
+• PD numbers
+• BP numbers
+• MC numbers
+• Extra punctuation
+• Duplicate wording
+• Capitalization differences
+• Extra spaces
+
+Do NOT merge legally different offenses.
+
+Keep these separate:
+
+• Theft
+• Qualified Theft
+
+• Robbery
+• Highway Robbery
+
+• Homicide
+• Reckless Imprudence Resulting to Homicide
+
+• Physical Injury
+• Less Serious Physical Injuries
+
+• Carnapping
+• Carnapping (Motorcycle)
+
+=================================================
+STEP 6 - LOCATION NORMALIZATION
+=================================================
+
+Normalize locations only for formatting.
+
+Example:
+
+brgy bubukal
+
+↓
+
+Brgy. Bubukal
+
+Do not change the actual location.
+
+Do not overwrite or invent missing locations.
+
+When extracting Location/Barangay, refer to this valid list for Santa Cruz, Laguna, Philippines:
 Alipit, Bagumbayan, Bubukal, Calios, Duhat, Gatid, Jasaan, Labuin, Malinao, Oogong, Pagsawitan, Palasan, Patimbao, Poblacion I (Barangay I), Poblacion II (Barangay II), Poblacion III (Barangay III), Poblacion IV (Barangay IV), Poblacion V (Barangay V), San Jose, San Juan, San Pablo Norte, San Pablo Sur, Santisima Cruz, Santo Angel Central, Santo Angel Norte, Santo Angel Sur
 
----
+=================================================
+STEP 7 - DATE EXTRACTION
+=================================================
 
-CLASSIFICATION RULES:
+Extract the date exactly as it appears.
 
-1. 8-Focus Crimes:
-Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping (Motor Vehicle or Motorcycle)
+Convert Excel serial dates into standard date format if necessary.
 
-2. PSI (Public Safety Index):
-Vehicular Accident, Traffic Incident, Fire Incident
+If no valid date exists, return null.
 
-3. Non-Index:
-All other incidents
+Do not guess missing dates.
 
----
+=================================================
+STEP 8 - FINAL DATA VERIFICATION
+=================================================
 
-EXTRACTION RULES:
+After processing all valid worksheets, verify the extracted data.
 
-- Extract ONLY real incidents explicitly stated in the text
-- DO NOT create or assume missing data
-- If date is missing, use null
-- Normalize date format to: YYYY-MM-DD
-- Barangay MUST match EXACTLY from the valid list
-- If barangay is unclear or not in list, SKIP the record
-- Categorize strictly based on rules above
-- If unsure, use "Non-Index"
-- Remove duplicate incidents
-- Keep descriptions short but meaningful
+Ensure that:
 
----
+• Every extracted record comes directly from the worksheet.
+• Offense, Date, and Location belong to the same row.
+• No records were invented.
+• No rows were skipped unintentionally.
+• No duplicate records exist with the exact same Offense, Date, and Location.
+• Only records from valid worksheets are included.
+• Every record is assigned to the correct category based on the worksheet name.
+• Missing Date or Location should be returned as null.
+• Records without an Offense should be ignored.
+• Preserve the original row order whenever possible.
 
-CRITICAL OUTPUT RULES:
+Perform one final consistency check before returning the response.
 
-- Output MUST be valid JSON
-- NO markdown (no \`\`\` blocks)
-- NO explanations
-- NO extra text
-- NO comments
-- NO trailing commas
+=================================================
+OUTPUT FORMAT
+=================================================
 
----
-
-OUTPUT FORMAT (STRICT):
+Return ONLY valid JSON.
 
 {
-  "incidents": [
+  "worksheets": [
     {
-      "barangay": "string (must match exactly from list)",
-      "date": "YYYY-MM-DD",
-      "offense": "string",
-      "category": "8-Focus | PSI | Non-Index",
-      "description": "string"
+      "worksheet": "8 Focus",
+      "category": "8-Focus Crime",
+      "records": [
+        {
+          "offense": "Theft",
+          "date": "2026-01-15",
+          "location": "Brgy. Bubukal"
+        }
+      ]
+    },
+    {
+      "worksheet": "Non-Index",
+      "category": "Non-Index Crime",
+      "records": [
+        {
+          "offense": "Child Abuse (RA 7610)",
+          "date": "2026-02-03",
+          "location": "Brgy. San Jose"
+        }
+      ]
+    },
+    {
+      "worksheet": "RIR",
+      "category": "PSI",
+      "records": [
+        {
+          "offense": "Vehicular Accident",
+          "date": "2026-03-08",
+          "location": "Brgy. Labuin"
+        }
+      ]
     }
   ]
 }
 
----
+=================================================
+IMPORTANT RULES
+=================================================
+
+• Process only the valid worksheets.
+• Ignore all unrelated worksheets.
+• Always determine the category from the worksheet name.
+• Convert every RIR worksheet to the category "PSI".
+• Extract only Offense, Date, and Location.
+• Do not invent missing information.
+• Do not create fields that do not exist in the worksheet.
+• Normalize duplicate offense names.
+• Preserve legally distinct offenses.
+• Verify all extracted records before returning the output.
+• Return ONLY valid JSON.
+• Do not include explanations, comments, Markdown, or additional text outside the JSON response.
 
 INPUT DATA STARTS BELOW:
     `;
@@ -401,7 +712,8 @@ INPUT DATA STARTS BELOW:
           result = await model.generateContent([prompt, chunks[i]]);
           success = true;
         } catch (apiErr: any) {
-          console.warn(`[RECOVERY] Primary model ${primaryModel} failed on chunk ${i + 1}, attempt ${attempt}. Attempting fallback to ${fallbackModel}...`);
+          console.warn(`[RECOVERY] Primary model ${primaryModel} failed on chunk ${i + 1}, attempt ${attempt}. Error detail:`, apiErr.message || apiErr);
+          console.warn(`Attempting fallback to ${fallbackModel}...`);
           try {
             const fallbackModelInstance = client.getGenerativeModel({ 
               model: fallbackModel,
@@ -439,26 +751,140 @@ INPUT DATA STARTS BELOW:
         continue;
       }
 
-      if (aiParsed.incidents && Array.isArray(aiParsed.incidents)) {
-        aiParsed.incidents.forEach((inc: any) => {
-          if (!inc.barangay) return;
-          let normalizedBrgy = String(inc.barangay).trim();
-          if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-          if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-
-          const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-          if (exactMatch) {
-            normalizedBrgy = exactMatch;
-          } else {
-            const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-            if (partialMatch) normalizedBrgy = partialMatch;
+      if (aiParsed.worksheets && Array.isArray(aiParsed.worksheets)) {
+        aiParsed.worksheets.forEach((ws: any) => {
+          const wsCategory = ws.category;
+          let mappedCategory = 'Non-Index';
+          if (wsCategory === '8-Focus Crime' || wsCategory === '8-Focus' || wsCategory === '8-Focus Crimes' || wsCategory === '8 Focus') {
+            mappedCategory = '8-Focus';
+          } else if (wsCategory === 'PSI') {
+            mappedCategory = 'PSI';
+          } else if (wsCategory === 'Non-Index Crime' || wsCategory === 'Non-Index') {
+            mappedCategory = 'Non-Index';
           }
+
+          if (ws.records && Array.isArray(ws.records)) {
+            ws.records.forEach((rec: any) => {
+              let rawOffense = rec.Offense || rec.offense || rec.incident_type || null;
+              if (!rawOffense || String(rawOffense).trim() === '') {
+                // Rule 9: If a record has a missing Offense, ignore the record
+                return;
+              }
+              rawOffense = String(rawOffense).trim();
+
+              const rawLoc = rec.Location || rec.location || rec.barangay || rec.Barangay || null;
+              let normalizedBrgy: string | null = null;
+              if (rawLoc && String(rawLoc).trim() !== '') {
+                normalizedBrgy = String(rawLoc).trim();
+                if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+                if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+
+                const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+                if (exactMatch) {
+                  normalizedBrgy = exactMatch;
+                } else {
+                  const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+                  if (partialMatch) normalizedBrgy = partialMatch;
+                }
+              }
+
+              let rawCategory = mappedCategory;
+
+              if (typeof rawOffense === 'string') {
+                const trimOff = rawOffense.trim().toLowerCase();
+                if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+                  rawOffense = 'Estafa';
+                  rawCategory = 'Non-Index';
+                } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+                  rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+                  rawCategory = 'Non-Index';
+                }
+              }
+
+              let finalCategory = rawCategory;
+              const lowerOffense = String(rawOffense).toLowerCase();
+              if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+                finalCategory = 'PSI';
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+                finalCategory = '8-Focus';
+              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+                finalCategory = 'PSI';
+              }
+
+              const rawDate = rec.Date || rec.date || rec.dateCommitted || rec.date_committed || null;
+              const cleanD = rawDate ? String(rawDate).split('T')[0].split(' ')[0] : null;
+              const rawTime = rec.Time || rec.time || rec.timeCommitted || rec.time_committed || null;
+
+              flattened.push({
+                barangay: normalizedBrgy,
+                date_committed: cleanD,
+                time_committed: rawTime,
+                offense: rawOffense,
+                category: finalCategory,
+                description: rec.description || rec.Description || ""
+              });
+            });
+          }
+        });
+      } else if (aiParsed.incidents && Array.isArray(aiParsed.incidents)) {
+        aiParsed.incidents.forEach((inc: any) => {
+          let rawOffense = inc.offense || inc.incident_type || inc.Offense || null;
+          if (!rawOffense || String(rawOffense).trim() === '') {
+            // Rule 9: If a record has a missing Offense, ignore the record
+            return;
+          }
+          rawOffense = String(rawOffense).trim();
+
+          const rawLoc = inc.barangay || inc.Location || inc.location || inc.Barangay || null;
+          let normalizedBrgy: string | null = null;
+          if (rawLoc && String(rawLoc).trim() !== '') {
+            normalizedBrgy = String(rawLoc).trim();
+            if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+            if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+
+            const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+            if (exactMatch) {
+              normalizedBrgy = exactMatch;
+            } else {
+              const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+              if (partialMatch) normalizedBrgy = partialMatch;
+            }
+          }
+
+          let rawCategory = inc.category;
+
+          if (typeof rawOffense === 'string') {
+            const trimOff = rawOffense.trim().toLowerCase();
+            if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+              rawOffense = 'Estafa';
+              rawCategory = 'Non-Index';
+            } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+              rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+              rawCategory = 'Non-Index';
+            }
+          }
+
+          let finalCategory = 'Non-Index';
+          const lowerOffense = String(rawOffense).toLowerCase();
+          if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+            finalCategory = 'PSI';
+          } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+            finalCategory = '8-Focus';
+          } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+            finalCategory = 'PSI';
+          } else if (rawCategory === '8-Focus' || rawCategory === 'PSI' || rawCategory === 'Non-Index') {
+            finalCategory = rawCategory;
+          }
+
+          const rawDate = inc.dateCommitted || inc.date_committed || inc.date || inc.Date || null;
+          const cleanD = rawDate ? String(rawDate).split('T')[0].split(' ')[0] : null;
 
           flattened.push({
             barangay: normalizedBrgy,
-            date_committed: inc.date || inc.date_committed || new Date().toISOString().split('T')[0],
-            offense: inc.offense || inc.incident_type || "Unknown Incident",
-            category: inc.category || (inc.offense && ['Theft', 'Robbery', 'Murder', 'Homicide', 'Physical Injury', 'Rape', 'Carnapping'].some(t => String(inc.offense).includes(t)) ? '8-Focus' : 'Non-Index'),
+            date_committed: cleanD,
+            time_committed: inc.timeCommitted || inc.time_committed || inc.time || null,
+            offense: rawOffense,
+            category: finalCategory,
             description: inc.description || ""
           });
         });
@@ -467,23 +893,63 @@ INPUT DATA STARTS BELOW:
         for (const [brgy, incidents] of Object.entries(barangayData)) {
           if (Array.isArray(incidents)) {
             incidents.forEach((inc: any) => {
-              let normalizedBrgy = brgy.trim();
-              if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-              if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-  
-              const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-              if (exactMatch) {
-                normalizedBrgy = exactMatch;
-              } else {
-                const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-                if (partialMatch) normalizedBrgy = partialMatch;
+              let rawOffense = inc.offense || inc.incident_type || inc.Offense || null;
+              if (!rawOffense || String(rawOffense).trim() === '') {
+                // Rule 9: If a record has a missing Offense, ignore the record
+                return;
               }
-  
+              rawOffense = String(rawOffense).trim();
+
+              const rawLoc = brgy || inc.Location || inc.location || inc.barangay || inc.Barangay || null;
+              let normalizedBrgy: string | null = null;
+              if (rawLoc && String(rawLoc).trim() !== '') {
+                normalizedBrgy = String(rawLoc).trim();
+                if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+                if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+
+                const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+                if (exactMatch) {
+                  normalizedBrgy = exactMatch;
+                } else {
+                  const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+                  if (partialMatch) normalizedBrgy = partialMatch;
+                }
+              }
+
+              let rawCategory = inc.category;
+
+              if (typeof rawOffense === 'string') {
+                const trimOff = rawOffense.trim().toLowerCase();
+                if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+                  rawOffense = 'Estafa';
+                  rawCategory = 'Non-Index';
+                } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+                  rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+                  rawCategory = 'Non-Index';
+                }
+              }
+
+              let finalCategory = 'Non-Index';
+              const lowerOffense = String(rawOffense).toLowerCase();
+              if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+                finalCategory = 'PSI';
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+                finalCategory = '8-Focus';
+              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+                finalCategory = 'PSI';
+              } else if (rawCategory === '8-Focus' || rawCategory === 'PSI' || rawCategory === 'Non-Index') {
+                finalCategory = rawCategory;
+              }
+
+              const rawDate = inc.dateCommitted || inc.date_committed || inc.date || inc.Date || null;
+              const cleanD = rawDate ? String(rawDate).split('T')[0].split(' ')[0] : null;
+
               flattened.push({
                 barangay: normalizedBrgy,
-                date_committed: inc.date || inc.date_committed || new Date().toISOString().split('T')[0],
-                offense: inc.offense || inc.incident_type || "Unknown Incident",
-                category: inc.category || (inc.offense && ['Theft', 'Robbery', 'Murder', 'Homicide', 'Physical Injury', 'Rape', 'Carnapping'].some(t => String(inc.offense).includes(t)) ? '8-Focus' : 'Non-Index'),
+                date_committed: cleanD,
+                time_committed: inc.timeCommitted || inc.time_committed || inc.time || null,
+                offense: rawOffense,
+                category: finalCategory,
                 description: inc.description || ""
               });
             });
@@ -492,7 +958,24 @@ INPUT DATA STARTS BELOW:
       }
     }
 
-    return res.json({ success: true, data: flattened });
+    // Server-side strict deduplication to avoid any repetition
+    const seen = new Set<string>();
+    const uniqueFlattened = flattened.filter((item: any) => {
+      const brgyKey = String(item.barangay).trim().toLowerCase();
+      const dateKey = String(item.date_committed).trim();
+      const timeKey = item.time_committed ? String(item.time_committed).trim() : '';
+      const offenseKey = String(item.offense).trim().toLowerCase();
+      const compositeKey = `${brgyKey}|${dateKey}|${timeKey}|${offenseKey}`;
+      
+      if (seen.has(compositeKey)) {
+        console.log(`[DEDUPLICATOR] Filtered out duplicate incident: ${compositeKey}`);
+        return false;
+      }
+      seen.add(compositeKey);
+      return true;
+    });
+
+    return res.json({ success: true, data: uniqueFlattened });
   } catch (err: any) {
     console.error('AI Processing Error:', err);
     return res.status(500).json({ success: false, error: `Neural Unit Error: ${err.message}` });
@@ -519,6 +1002,10 @@ export const saveReportBatch = async (req: Request, res: Response) => {
       const cat = entry.category || 'Non-Index';
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
 
+      const rawTime = entry.time_committed || entry.time || null;
+      const baseDesc = entry.description || 'Intel extracted';
+      const finalDesc = rawTime ? `[Time: ${rawTime}] ${baseDesc}` : baseDesc;
+
       return {
         ref: db.collection('map_points').doc(),
         data: {
@@ -526,7 +1013,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
           incident_type: entry.incident_type || entry.offense,
           incident_date: entry.incident_date || entry.date || entry.date_committed,
           barangay: entry.barangay,
-          description: entry.description || 'Intel extracted',
+          description: finalDesc,
           category: cat,
           report_id: reportId,
           created_at: new Date().toISOString()
@@ -688,6 +1175,102 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   }
 };
 
+export const getReportAnalysis = async (req: Request, res: Response) => {
+  try {
+    const reportId = req.params.id;
+    const doc = await db.collection('intelligence_scans').doc(reportId).get();
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, error: 'Report not found' });
+    }
+    const report = doc.data();
+    const rawData = report?.raw_data || [];
+
+    if (rawData.length === 0) {
+      return res.json({ success: true, analysis: 'No record items to analyze.' });
+    }
+
+    // Attempt AI analysis if API key is defined and valid
+    const apiKey = process.env.GPT_OSS_120B_API_KEY || process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      try {
+        const client = getGptOssClient();
+        const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+        // Prepare serialized data safely, omitting/hiding time because it's optional
+        const serializedData = rawData.map((item: any, idx: number) => {
+          const cleanD = String(item.date_committed || item.date || 'N/A').split('T')[0].split(' ')[0];
+          return `${idx + 1}. Barangay: ${item.barangay || 'N/A'}, Offense: ${item.offense || item.incident_type || 'N/A'}, Category: ${item.category || 'N/A'}, Date: ${cleanD}${item.time_committed ? `, Time: ${item.time_committed}` : ''}, Description: ${item.description || 'N/A'}`;
+        }).slice(0, 100).join('\n');
+
+        const prompt = `You are a high-level Crime Pattern and Security Intelligence Analyst. Analyze the following batch of intelligence scan data and generate a clear, highly polished, professional summary of crime patterns and security trends. Focus on:
+1. Incident distribution across Barangays.
+2. The breakdown between key risk pillars: "8-Focus", "PSI" (Public Safety Index, covering accidents/fires/disasters), and "Non-Index". Do not refer to RIR/PSI - refer to it strictly as PSI.
+3. Notable hotspots, trends, and specific areas requiring immediate law enforcement attention or public safety resources.
+
+Format your response in professional Markdown with bullet points, bold key terms, and clear sections.
+
+Intelligence Data:
+${serializedData}`;
+
+        const response = await model.generateContent(prompt);
+        const text = response.response.text();
+        if (text && text.trim().length > 0) {
+          return res.json({ success: true, analysis: text });
+        }
+      } catch (aiErr) {
+        console.warn('AI analysis failed, falling back to local analysis:', aiErr);
+      }
+    }
+
+    const analysisText = generateLocalReportAnalysis(rawData);
+    res.json({ success: true, analysis: analysisText });
+  } catch (err: any) {
+    console.error('Error in getReportAnalysis:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+function generateLocalReportAnalysis(rawData: any[]): string {
+  const counts = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0 };
+  const brgyCounts: { [key: string]: number } = {};
+  const crimeCounts: { [key: string]: number } = {};
+
+  rawData.forEach((item: any) => {
+    let cat = item.category || 'Non-Index';
+    if (cat === 'RIR/PSI') cat = 'PSI';
+    if (cat in counts) {
+      counts[cat as '8-Focus' | 'PSI' | 'Non-Index']++;
+    } else {
+      counts['Non-Index']++;
+    }
+
+    const brgy = item.barangay || 'Unknown';
+    brgyCounts[brgy] = (brgyCounts[brgy] || 0) + 1;
+
+    const offense = item.offense || item.incident_type || 'Unknown';
+    crimeCounts[offense] = (crimeCounts[offense] || 0) + 1;
+  });
+
+  const sortedBrgy = Object.entries(brgyCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const sortedCrimes = Object.entries(crimeCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  const topBrgyText = sortedBrgy.map(([name, count]) => `**Brgy. ${name}** (${count} record${count === 1 ? '' : 's'})`).join(', ');
+  const topCrimeText = sortedCrimes.map(([name, count]) => `**${name}** (${count} occurrenc${count === 1 ? 'e' : 'es'})`).join(', ');
+
+  return `### **CPICRS Security Intelligence Summary**
+
+This report summarizes **${rawData.length} crime and public safety records** scanned from recent tactical signals.
+
+#### **I. Pillar Breakdown**
+- **8-Focus**: **${counts['8-Focus']} cases** — Highlights major street level indexes (Theft, Robbery, Homicide, Homicide, Rape).
+- **PSI (Public Safety Index)**: **${counts['PSI']} cases** — Captures road accidents, physical hazards, traffic events, and disaster/rescue compliance.
+- **Non-Index**: **${counts['Non-Index']} cases** — Covers local municipal ordinances, special laws, drug possession, cybercrime, and minor security threats.
+
+#### **II. Pattern Analysis**
+- **Sectors of Concern**: The primary hotspots identified in this dataset are ${topBrgyText || 'N/A'}. These sectors account for the highest density of reported incidents and should be prioritized for patrol routing.
+- **Frequent Offenses**: The most recurrent security signals detected are ${topCrimeText || 'N/A'}. Highly concentrated incident types require dedicated community resources or traffic/patrol checkpoints to actively discourage ongoing patterns.`;
+}
+
 export const getDashboard = async (req: Request, res: Response) => {
   try {
     const currentYear = new Date().getFullYear();
@@ -709,8 +1292,26 @@ export const getDashboard = async (req: Request, res: Response) => {
       db.collection('intelligence_scans').get()
     ]);
 
+    const scansMap: { [key: string]: string } = {};
+    allReportsSnap.docs.forEach((doc: any) => {
+      const data = doc.data();
+      const stats = data.category_stats || {};
+      scansMap[doc.id] = stats.entry_type || 'scanned';
+    });
+
     const allPoints = allMapPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .map((doc: any) => {
+        const data = doc.data();
+        let entryType = data.entry_type;
+        if (!entryType) {
+          if (data.report_id) {
+            entryType = scansMap[data.report_id] || 'scanned';
+          } else {
+            entryType = 'manual';
+          }
+        }
+        return { id: doc.id, ...data, entry_type: entryType };
+      })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
         const isPlaceholder = dateStr === 'N/A' ||
@@ -806,9 +1407,12 @@ export const getDashboard = async (req: Request, res: Response) => {
 
       monthlyTrends.push({
         month: monthLabel,
-        focus: mPoints.filter((p: any) => p.category === '8-Focus').length,
-        nonIndex: mPoints.filter((p: any) => p.category === 'Non-Index').length,
-        psi: mPoints.filter((p: any) => p.category === 'PSI').length
+        focusManual: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'manual').length,
+        focusScanned: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'scanned').length,
+        nonIndexManual: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'manual').length,
+        nonIndexScanned: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
+        psiManual: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'manual').length,
+        psiScanned: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'scanned').length
       });
     }
 
@@ -1138,18 +1742,34 @@ export const postMapPoint = async (req: Request, res: Response) => {
   try {
     const pin = MANUAL_PINS.find(p => p.name === barangay);
 
-    // Categorization logic
-    const focus8 = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping MV', 'Carnapping MC'];
-    const psi = ['Vehicular Accident', 'Traffic Accident', 'Public Safety', 'Fire Incident'];
+    let finalOffense = incident_type || '';
     let category = 'Non-Index';
-    if (focus8.includes(incident_type)) category = '8-Focus';
-    else if (psi.includes(incident_type)) category = 'PSI';
+    
+    if (typeof finalOffense === 'string') {
+      const trimOff = finalOffense.trim().toLowerCase();
+      if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+        finalOffense = 'Estafa';
+        category = 'Non-Index';
+      } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+        finalOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+        category = 'Non-Index';
+      }
+    }
 
-    await logAction(req, 'MAP_POINT_ADD', `Added manual map point: ${incident_type} in Brgy. ${barangay}`);
+    const lowerOffense = String(finalOffense).toLowerCase();
+    if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+      category = 'PSI';
+    } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'physical injuries', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+      category = '8-Focus';
+    } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident', 'accident', 'safety'].some(t => lowerOffense.includes(t))) {
+      category = 'PSI';
+    }
+
+    await logAction(req, 'MAP_POINT_ADD', `Added manual map point: ${finalOffense} in Brgy. ${barangay}`);
     await db.collection('map_points').add({
       lat: pin ? pin.lat : 0,
       lng: pin ? pin.lng : 0,
-      incident_type,
+      incident_type: finalOffense,
       incident_date,
       barangay,
       description: description || '',
@@ -1443,8 +2063,26 @@ export const getReports = async (req: Request, res: Response) => {
 
     const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
+    const scansMap: { [key: string]: string } = {};
+    reportsSnap.docs.forEach((doc: any) => {
+      const data = doc.data();
+      const stats = data.category_stats || {};
+      scansMap[doc.id] = stats.entry_type || 'scanned';
+    });
+
     const allPoints = allPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .map((doc: any) => {
+        const data = doc.data();
+        let entryType = data.entry_type;
+        if (!entryType) {
+          if (data.report_id) {
+            entryType = scansMap[data.report_id] || 'scanned';
+          } else {
+            entryType = 'manual';
+          }
+        }
+        return { id: doc.id, ...data, entry_type: entryType };
+      })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
         const isPlaceholder = dateStr === 'N/A' ||
@@ -1485,9 +2123,12 @@ export const getReports = async (req: Request, res: Response) => {
 
       monthlyTrends.push({
         month: monthLabel,
-        focus: mPoints.filter((p: any) => p.category === '8-Focus').length,
-        nonIndex: mPoints.filter((p: any) => p.category === 'Non-Index').length,
-        psi: mPoints.filter((p: any) => p.category === 'PSI').length
+        focusManual: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'manual').length,
+        focusScanned: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'scanned').length,
+        nonIndexManual: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'manual').length,
+        nonIndexScanned: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
+        psiManual: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'manual').length,
+        psiScanned: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'scanned').length
       });
     }
 

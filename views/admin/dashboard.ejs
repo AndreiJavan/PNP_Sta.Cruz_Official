@@ -491,10 +491,19 @@
         });
     }
 
-    window.toggleTrendChartDataset = function(index) {
+    window.toggleTrendChartDataset = function(categoryIndex) {
         if (window.trendChart) {
-            const meta = window.trendChart.getDatasetMeta(index);
-            meta.hidden = meta.hidden === null ? !window.trendChart.data.datasets[index].hidden : null;
+            const index1 = categoryIndex * 2;
+            const index2 = categoryIndex * 2 + 1;
+            
+            const meta1 = window.trendChart.getDatasetMeta(index1);
+            const meta2 = window.trendChart.getDatasetMeta(index2);
+            
+            const isHidden = meta1.hidden === null ? !window.trendChart.data.datasets[index1].hidden : meta1.hidden;
+            
+            meta1.hidden = !isHidden ? true : null;
+            meta2.hidden = !isHidden ? true : null;
+            
             window.trendChart.update();
         }
     };
@@ -533,22 +542,46 @@
                 labels: trendsData.map(d => d.month),
                 datasets: [
                     {
-                        label: '8-Focus',
-                        data: trendsData.map(d => d.focus),
+                        label: '8-Focus (Manual)',
+                        data: trendsData.map(d => d.focusManual || 0),
                         backgroundColor: '#ef4444',
-                        borderRadius: 8
+                        stack: '8-Focus',
+                        borderRadius: 6
                     },
                     {
-                        label: 'Non-Index',
-                        data: trendsData.map(d => d.nonIndex),
+                        label: '8-Focus (Scanned)',
+                        data: trendsData.map(d => d.focusScanned || 0),
+                        backgroundColor: '#ef444480',
+                        stack: '8-Focus',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Non-Index (Manual)',
+                        data: trendsData.map(d => d.nonIndexManual || 0),
                         backgroundColor: '#3b82f6',
-                        borderRadius: 8
+                        stack: 'Non-Index',
+                        borderRadius: 6
                     },
                     {
-                        label: 'PSI',
-                        data: trendsData.map(d => d.psi),
+                        label: 'Non-Index (Scanned)',
+                        data: trendsData.map(d => d.nonIndexScanned || 0),
+                        backgroundColor: '#3b82f680',
+                        stack: 'Non-Index',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'PSI (Manual)',
+                        data: trendsData.map(d => d.psiManual || 0),
                         backgroundColor: '#D4AF37',
-                        borderRadius: 8
+                        stack: 'PSI',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'PSI (Scanned)',
+                        data: trendsData.map(d => d.psiScanned || 0),
+                        backgroundColor: '#D4AF3780',
+                        stack: 'PSI',
+                        borderRadius: 6
                     }
                 ]
             },
@@ -557,7 +590,7 @@
                 maintainAspectRatio: false,
                 layout: {
                     padding: {
-                        top: 15,
+                        top: 20,
                         bottom: 0,
                         left: 0,
                         right: 0
@@ -568,7 +601,8 @@
                         const elementIndex = elements[0].index;
                         const datasetIndex = elements[0].datasetIndex;
                         const monthLabel = trendsData[elementIndex].month;
-                        const categoryLabel = datasetIndex === 0 ? '8-Focus' : (datasetIndex === 1 ? 'Non-Index' : 'PSI');
+                        const categoryLabel = (datasetIndex === 0 || datasetIndex === 1) ? '8-Focus' :
+                                              ((datasetIndex === 2 || datasetIndex === 3) ? 'Non-Index' : 'PSI');
                         showFeed(monthLabel, categoryLabel);
                     }
                 },
@@ -577,6 +611,7 @@
                 },
                 scales: {
                     x: {
+                        stacked: true,
                         grid: { display: false },
                         ticks: { 
                             font: { size: 11, weight: 'bold' }, 
@@ -584,6 +619,7 @@
                         }
                     },
                     y: {
+                        stacked: true,
                         beginAtZero: true,
                         grid: { color: 'rgba(0, 0, 0, 0.05)', drawBorder: false },
                         ticks: { 
@@ -705,8 +741,11 @@
             // Dynamically update Monthly Trend Chart bar colors based on highest incident colors!
             if (window.trendChart) {
                 window.trendChart.data.datasets[0].backgroundColor = color8Focus;
-                window.trendChart.data.datasets[1].backgroundColor = colorNonIndex;
-                window.trendChart.data.datasets[2].backgroundColor = colorPSI;
+                window.trendChart.data.datasets[1].backgroundColor = color8Focus + '80';
+                window.trendChart.data.datasets[2].backgroundColor = colorNonIndex;
+                window.trendChart.data.datasets[3].backgroundColor = colorNonIndex + '80';
+                window.trendChart.data.datasets[4].backgroundColor = colorPSI;
+                window.trendChart.data.datasets[5].backgroundColor = colorPSI + '80';
                 window.trendChart.update();
             }
         };
@@ -757,17 +796,23 @@
 
             monthlyTrends.push({
                 month: monthLabel,
-                focus: mPoints.filter(p => p.category === '8-Focus').length,
-                nonIndex: mPoints.filter(p => p.category === 'Non-Index').length,
-                psi: mPoints.filter(p => p.category === 'PSI').length
+                focusManual: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'manual').length,
+                focusScanned: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'scanned').length,
+                nonIndexManual: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'manual').length,
+                nonIndexScanned: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
+                psiManual: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'manual').length,
+                psiScanned: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'scanned').length
             });
         }
 
         if (window.trendChart) {
             window.trendChart.data.labels = monthlyTrends.map(d => d.month);
-            window.trendChart.data.datasets[0].data = monthlyTrends.map(d => d.focus);
-            window.trendChart.data.datasets[1].data = monthlyTrends.map(d => d.nonIndex);
-            window.trendChart.data.datasets[2].data = monthlyTrends.map(d => d.psi);
+            window.trendChart.data.datasets[0].data = monthlyTrends.map(d => d.focusManual);
+            window.trendChart.data.datasets[1].data = monthlyTrends.map(d => d.focusScanned);
+            window.trendChart.data.datasets[2].data = monthlyTrends.map(d => d.nonIndexManual);
+            window.trendChart.data.datasets[3].data = monthlyTrends.map(d => d.nonIndexScanned);
+            window.trendChart.data.datasets[4].data = monthlyTrends.map(d => d.psiManual);
+            window.trendChart.data.datasets[5].data = monthlyTrends.map(d => d.psiScanned);
             window.trendChart.update();
         }
     };
