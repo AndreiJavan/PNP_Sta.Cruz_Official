@@ -286,7 +286,13 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     const fallbackModel = 'gemini-2.5-flash-lite';
 
     console.log(`[NEURAL SCAN] Initiating tactical extraction via GPT-OSS 120B (utilizing ${primaryModel})...`);
-    let model = client.getGenerativeModel({ model: primaryModel });
+    let model = client.getGenerativeModel({ 
+      model: primaryModel,
+      generationConfig: { 
+        responseMimeType: 'application/json',
+        maxOutputTokens: 8192
+      }
+    });
 
     const prompt = `
 ROLE:
@@ -349,16 +355,15 @@ CRITICAL OUTPUT RULES:
 OUTPUT FORMAT (STRICT):
 
 {
-  "barangays": {
-    "BarangayName": [
-      {
-        "date": "YYYY-MM-DD",
-        "offense": "string",
-        "category": "8-Focus | PSI | Non-Index",
-        "description": "string"
-      }
-    ]
-  }
+  "incidents": [
+    {
+      "barangay": "string (must match exactly from list)",
+      "date": "YYYY-MM-DD",
+      "offense": "string",
+      "category": "8-Focus | PSI | Non-Index",
+      "description": "string"
+    }
+  ]
 }
 
 ---
@@ -366,46 +371,81 @@ OUTPUT FORMAT (STRICT):
 INPUT DATA STARTS BELOW:
     `;
 
-    let result;
-    try {
-      result = await model.generateContent([prompt, textContent]);
-    } catch (apiErr: any) {
-      console.warn(`[RECOVERY] Primary model ${primaryModel} failed. Attempting fallback to ${fallbackModel}...`);
-      try {
-        model = client.getGenerativeModel({ model: fallbackModel });
-        result = await model.generateContent([prompt, textContent]);
-      } catch (fallbackErr: any) {
-        console.error('GPT-OSS 120B Fallback Error:', fallbackErr);
-        if (apiErr.message?.includes('unregistered callers') || fallbackErr.message?.includes('unregistered callers')) {
-          throw new Error('API Key is rejected. Ensure your GPT_OSS_120B_API_KEY is properly configured in settings.');
-        }
-        throw new Error('The scanning engine is currently under high demand. Please attempt extraction again in a few moments.');
+    const MAX_CHUNK_SIZE = 8000;
+    const chunks: string[] = [];
+    let currentChunk = '';
+    const lines = textContent.split('\n');
+    for (const line of lines) {
+      if (currentChunk.length + line.length > MAX_CHUNK_SIZE) {
+        chunks.push(currentChunk);
+        currentChunk = line + '\n';
+      } else {
+        currentChunk += line + '\n';
       }
     }
-
-    const responseText = result.response.text();
-    console.log('AI Raw Response received. Length:', responseText.length);
-
-    let aiParsed;
-    try {
-      aiParsed = cleanAndParseJSON(responseText);
-    } catch (parseError: any) {
-      console.error('JSON Parse Error from AI:', responseText);
-      throw new Error(`Failed to extract structured data: ${parseError.message}`);
-    }
+    if (currentChunk.trim()) chunks.push(currentChunk);
 
     const flattened: any[] = [];
-    const barangayData = aiParsed.barangays || aiParsed;
+    console.log(`[NEURAL SCAN] Splitting data into ${chunks.length} chunks for processing...`);
 
-    for (const [brgy, incidents] of Object.entries(barangayData)) {
-      if (Array.isArray(incidents)) {
-        incidents.forEach((inc: any) => {
-          // Normalize barangay name
-          let normalizedBrgy = brgy.trim();
+    for (let i = 0; i < chunks.length; i++) {
+      console.log(`[NEURAL SCAN] Processing chunk ${i + 1}/${chunks.length}...`);
+      let result;
+      let attempt = 0;
+      const maxAttempts = 3;
+      let success = false;
+
+      while (attempt < maxAttempts && !success) {
+        attempt++;
+        try {
+          result = await model.generateContent([prompt, chunks[i]]);
+          success = true;
+        } catch (apiErr: any) {
+          console.warn(`[RECOVERY] Primary model ${primaryModel} failed on chunk ${i + 1}, attempt ${attempt}. Attempting fallback to ${fallbackModel}...`);
+          try {
+            const fallbackModelInstance = client.getGenerativeModel({ 
+              model: fallbackModel,
+              generationConfig: { 
+                responseMimeType: 'application/json',
+                maxOutputTokens: 8192
+              }
+            });
+            result = await fallbackModelInstance.generateContent([prompt, chunks[i]]);
+            success = true;
+          } catch (fallbackErr: any) {
+            console.error(`GPT-OSS 120B Fallback Error on chunk ${i + 1}, attempt ${attempt}:`, fallbackErr);
+            if (apiErr.message?.includes('unregistered callers') || fallbackErr.message?.includes('unregistered callers')) {
+              throw new Error('API Key is rejected. Ensure your GPT_OSS_120B_API_KEY is properly configured in settings.');
+            }
+            if (attempt === maxAttempts) {
+              throw new Error(`The scanning engine failed on part ${i + 1} of the document after ${maxAttempts} attempts. Please attempt extraction again in a few moments.`);
+            } else {
+              console.warn(`[RETRY] Retrying chunk ${i + 1} in 3 seconds...`);
+              await new Promise(res => setTimeout(res, 3000));
+            }
+          }
+        }
+      }
+
+      const responseText = result.response.text();
+      console.log(`Chunk ${i + 1} AI Raw Response received. Length:`, responseText.length);
+
+      let aiParsed;
+      try {
+        aiParsed = cleanAndParseJSON(responseText);
+      } catch (parseError: any) {
+        console.warn(`[WARNING] JSON Parse Error from AI on chunk ${i + 1}. Skipping chunk. Error: ${parseError.message}`);
+        console.error(`Raw response from chunk ${i + 1}:`, responseText);
+        continue;
+      }
+
+      if (aiParsed.incidents && Array.isArray(aiParsed.incidents)) {
+        aiParsed.incidents.forEach((inc: any) => {
+          if (!inc.barangay) return;
+          let normalizedBrgy = String(inc.barangay).trim();
           if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
           if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
 
-          // Try to find the best match in VALID_BARANGAYS
           const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
           if (exactMatch) {
             normalizedBrgy = exactMatch;
@@ -422,6 +462,33 @@ INPUT DATA STARTS BELOW:
             description: inc.description || ""
           });
         });
+      } else {
+        const barangayData = aiParsed.barangays || aiParsed;
+        for (const [brgy, incidents] of Object.entries(barangayData)) {
+          if (Array.isArray(incidents)) {
+            incidents.forEach((inc: any) => {
+              let normalizedBrgy = brgy.trim();
+              if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+              if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+  
+              const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+              if (exactMatch) {
+                normalizedBrgy = exactMatch;
+              } else {
+                const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+                if (partialMatch) normalizedBrgy = partialMatch;
+              }
+  
+              flattened.push({
+                barangay: normalizedBrgy,
+                date_committed: inc.date || inc.date_committed || new Date().toISOString().split('T')[0],
+                offense: inc.offense || inc.incident_type || "Unknown Incident",
+                category: inc.category || (inc.offense && ['Theft', 'Robbery', 'Murder', 'Homicide', 'Physical Injury', 'Rape', 'Carnapping'].some(t => String(inc.offense).includes(t)) ? '8-Focus' : 'Non-Index'),
+                description: inc.description || ""
+              });
+            });
+          }
+        }
       }
     }
 
@@ -514,6 +581,7 @@ export const getAuditLogs = async (req: Request, res: Response) => {
 export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   try {
     const selectedBarangay = req.query.barangay ? String(req.query.barangay).trim() : 'ALL';
+    const selectedYear = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
 
     const snap = await db.collection('map_points').get();
     const points = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
@@ -541,35 +609,16 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
       });
     }
 
-    // Determine referenceDate to reconstruct the same 12-month window used in EJS
-    let referenceDate = new Date();
-    if (points.length > 0) {
-      let maxDate = new Date(0);
-      points.forEach((p: any) => {
-        if (p.incident_date) {
-          const d = new Date(p.incident_date);
-          if (!isNaN(d.getTime()) && d > maxDate) {
-            maxDate = d;
-          }
-        }
-      });
-      if (maxDate > referenceDate) {
-        referenceDate = maxDate;
-      }
-    }
-
-    // Build the 12-month array of crime counts (matching the EJS bar graph exactly)
+    // Build the Selected Year array of crime counts (matching the EJS bar graph exactly)
     const monthlyTrendData: { month: string; count: number }[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
+    for (let i = 0; i <= 11; i++) {
+      const d = new Date(selectedYear, i, 1);
       const monthLabel = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
-      const month = d.getMonth();
-      const year = d.getFullYear();
 
       const count = filteredPoints.filter((p: any) => {
         if (!p.incident_date) return false;
         const pd = new Date(p.incident_date);
-        return pd.getMonth() === month && pd.getFullYear() === year;
+        return pd.getMonth() === i && pd.getFullYear() === selectedYear;
       }).length;
 
       monthlyTrendData.push({ month: monthLabel, count });
@@ -579,8 +628,11 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
     const crimeCounts: { [key: string]: number } = {};
     const categoryCounts: { [key: string]: number } = {};
     filteredPoints.forEach((p: any) => {
-      if (p.incident_type) crimeCounts[p.incident_type] = (crimeCounts[p.incident_type] || 0) + 1;
-      if (p.category) categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+      const pd = new Date(p.incident_date);
+      if (pd.getFullYear() === selectedYear) {
+        if (p.incident_type) crimeCounts[p.incident_type] = (crimeCounts[p.incident_type] || 0) + 1;
+        if (p.category) categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+      }
     });
 
     const sortedCrimes = Object.entries(crimeCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -621,9 +673,9 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
     const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
 
     if (totalCount === 0) {
-      analysisText = `The trend over the last 12 months shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment with no visible criminal activity.`;
+      analysisText = `The trend for ${selectedYear} shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment.`;
     } else {
-      analysisText = `The trend over the last 12 months shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
+      analysisText = `The trend for ${selectedYear} shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
     }
 
     res.json({
@@ -638,9 +690,8 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
 
 export const getDashboard = async (req: Request, res: Response) => {
   try {
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
+    const currentYearStartStr = `${currentYear}-01-01`;
 
     const [
       allMapPointsSnap,
@@ -650,7 +701,7 @@ export const getDashboard = async (req: Request, res: Response) => {
       totalBulletinsSnap,
       allReportsSnap
     ] = await Promise.all([
-      db.collection('map_points').where('incident_date', '>=', oneYearAgoStr).get(),
+      db.collection('map_points').get(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
       db.collection('anonymous_tips').count().get(),
       db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
@@ -702,11 +753,17 @@ export const getDashboard = async (req: Request, res: Response) => {
     const todayPoints = allPoints.filter((p: any) => p.incident_date && typeof p.incident_date === 'string' && p.incident_date.startsWith(todayStr));
     const yesterdayPoints = allPoints.filter((p: any) => p.incident_date && typeof p.incident_date === 'string' && p.incident_date.startsWith(yesterdayStr));
 
+    const currentYearPoints = allPoints.filter((p: any) => {
+      if (!p.incident_date) return false;
+      const d = new Date(p.incident_date);
+      return !isNaN(d.getTime()) && d.getFullYear() === currentYear;
+    });
+
     const todayStats = {
       total: todayPoints.length,
-      focus: allPoints.filter((p: any) => p.category === '8-Focus').length,
-      nonIndex: allPoints.filter((p: any) => p.category === 'Non-Index').length,
-      psi: allPoints.filter((p: any) => p.category === 'PSI').length,
+      focus: currentYearPoints.filter((p: any) => p.category === '8-Focus').length,
+      nonIndex: currentYearPoints.filter((p: any) => p.category === 'Non-Index').length,
+      psi: currentYearPoints.filter((p: any) => p.category === 'PSI').length,
       comparison: 0,
       totalTips: totalTipsCount,
       totalBulletins: totalBulletinsCount,
@@ -721,7 +778,7 @@ export const getDashboard = async (req: Request, res: Response) => {
 
     // High Risk Barangays
     const brgyMap: { [key: string]: number } = {};
-    allPoints.forEach((p: any) => {
+    currentYearPoints.forEach((p: any) => {
       if (p.barangay) brgyMap[p.barangay] = (brgyMap[p.barangay] || 0) + 1;
     });
 
@@ -735,18 +792,16 @@ export const getDashboard = async (req: Request, res: Response) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // Monthly Trends (Last 12 Months from Reference)
+    // Monthly Trends (Current Year: Jan - Dec)
     const monthlyTrends: any[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
+    for (let i = 0; i <= 11; i++) {
+      const d = new Date(currentYear, i, 1);
       const monthLabel = d.toLocaleString('en-US', { month: 'short' });
-      const month = d.getMonth();
-      const year = d.getFullYear();
 
       const mPoints = allPoints.filter((p: any) => {
         if (!p.incident_date) return false;
         const pd = new Date(p.incident_date);
-        return pd.getMonth() === month && pd.getFullYear() === year;
+        return pd.getMonth() === i && pd.getFullYear() === currentYear;
       });
 
       monthlyTrends.push({
@@ -1053,6 +1108,9 @@ export const updateTip = async (req: Request, res: Response) => {
 
 export const getMap = async (req: Request, res: Response) => {
   try {
+    const currentYear = new Date().getFullYear();
+    const currentYearStartStr = `${currentYear}-01-01`;
+
     const snap = await db.collection('map_points').get();
     const points = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       .filter((p: any) => {
@@ -1375,9 +1433,12 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 export const getReports = async (req: Request, res: Response) => {
   try {
+    const currentYear = new Date().getFullYear();
+    const currentYearStartStr = `${currentYear}-01-01`;
+
     const [reportsSnap, allPointsSnap] = await Promise.all([
-      db.collection('intelligence_scans').orderBy('timestamp', 'desc').get(),
-      db.collection('map_points').orderBy('incident_date', 'desc').get()
+      db.collection('intelligence_scans').where('timestamp', '>=', currentYearStartStr).orderBy('timestamp', 'desc').get(),
+      db.collection('map_points').where('incident_date', '>=', currentYearStartStr).orderBy('incident_date', 'desc').get()
     ]);
 
     const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));

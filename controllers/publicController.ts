@@ -46,7 +46,8 @@ export const getMapPoints = async (req: Request, res: Response) => {
   if (range) {
     const now = new Date();
     let dateLimit;
-    if (range === '1month') dateLimit = new Date(now.setMonth(now.getMonth() - 1));
+    if (range === 'currentYear') dateLimit = new Date(now.getFullYear(), 0, 1);
+    else if (range === '1month') dateLimit = new Date(now.setMonth(now.getMonth() - 1));
     else if (range === '2months') dateLimit = new Date(now.setMonth(now.getMonth() - 2));
     else if (range === '3months') dateLimit = new Date(now.setMonth(now.getMonth() - 3));
     else if (range === '7days') dateLimit = new Date(now.setDate(now.getDate() - 7));

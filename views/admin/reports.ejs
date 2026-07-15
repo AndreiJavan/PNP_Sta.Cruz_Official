@@ -111,7 +111,7 @@
                                         </div>
                                     </td>
                                     <td class="w-24 px-2 py-6 text-center">
-                                        <span class="text-sm font-black text-pnp-blue dark:text-pnp-gold tabular-nums tracking-tighter"><%= report.total_records || 0 %></span>
+                                        <span class="text-sm font-black text-white tabular-nums tracking-tighter"><%= report.total_records || 0 %></span>
                                     </td>
                                     <td class="w-24 px-2 py-6 text-center">
                                         <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['8-Focus']) > 0 ? 'bg-red-500/10 text-red-600 border border-red-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
@@ -119,12 +119,12 @@
                                         </span>
                                     </td>
                                     <td class="w-24 px-2 py-6 text-center">
-                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['Non-Index']) > 0 ? 'bg-slate-500/10 text-slate-600 border border-slate-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['Non-Index']) > 0 ? 'bg-blue-500/10 text-blue-500 border border-blue-500/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
                                             <%= (report.category_stats && report.category_stats['Non-Index']) || 0 %>
                                         </span>
                                     </td>
                                     <td class="w-24 px-2 py-6 text-center">
-                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['PSI']) > 0 ? 'bg-pnp-blue/10 text-pnp-blue-300 border border-pnp-blue/10' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black <%= (report.category_stats && report.category_stats['PSI']) > 0 ? 'bg-pnp-gold/10 text-pnp-gold border border-pnp-gold/20' : 'bg-gray-50 dark:bg-slate-800 text-gray-300 dark:text-slate-700' %>">
                                             <%= (report.category_stats && report.category_stats['PSI']) || 0 %>
                                         </span>
                                     </td>
@@ -614,7 +614,7 @@
                      </div>
                  </td>
                  <td class="px-8 py-6">
-                     <span class="text-sm font-black text-pnp-blue dark:text-pnp-gold">${report.total_records || 0}</span>
+                     <span class="text-sm font-black text-white">${report.total_records || 0}</span>
                  </td>
                  <td class="px-8 py-6 text-center">
                      <span class="px-4 py-2 rounded-full text-xs font-black ${(report.category_stats?.['8-Focus']) > 0 ? 'bg-red-500/10 text-red-500' : 'bg-gray-100 text-gray-400'}">
@@ -622,12 +622,12 @@
                      </span>
                  </td>
                  <td class="px-8 py-6 text-center">
-                     <span class="px-4 py-2 rounded-full text-xs font-black ${(report.category_stats?.['Non-Index']) > 0 ? 'bg-slate-500/10 text-slate-500' : 'bg-gray-100 text-gray-400'}">
+                     <span class="px-4 py-2 rounded-full text-xs font-black ${(report.category_stats?.['Non-Index']) > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-100 dark:bg-slate-800 text-gray-400'}">
                          ${(report.category_stats?.['Non-Index']) || 0}
                      </span>
                  </td>
                  <td class="px-8 py-6 text-center">
-                     <span class="px-4 py-2 rounded-full text-xs font-black ${(report.category_stats?.['PSI']) > 0 ? 'bg-blue-500/10 text-blue-500' : 'bg-gray-100 text-gray-400'}">
+                     <span class="px-4 py-2 rounded-full text-xs font-black ${(report.category_stats?.['PSI']) > 0 ? 'bg-pnp-gold/10 text-pnp-gold' : 'bg-gray-100 dark:bg-slate-800 text-gray-400'}">
                          ${(report.category_stats?.['PSI']) || 0}
                      </span>
                  </td>

@@ -185,10 +185,29 @@
                     <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Monthly Crime Trends</h3>
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Crime count over the last 12 months</p>
                 </div>
-                <!-- Barangay Filter Dropdown -->
-                <div class="relative w-full sm:w-56 shrink-0">
-                    <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends(this.value)" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
-                        <option value="ALL">ALL BARANGAYS</option>
+                <!-- Filters Container -->
+                <div class="flex items-center gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+                    <!-- Year Filter Dropdown -->
+                    <div class="relative w-full sm:w-28 shrink-0">
+                        <% 
+                            const availableYears = [...new Set(points.map(p => {
+                                if(!p.incident_date) return null;
+                                const d = new Date(p.incident_date);
+                                return !isNaN(d.getTime()) ? d.getFullYear() : null;
+                            }).filter(y => y !== null))].sort((a, b) => b - a);
+
+                            if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
+                        %>
+                        <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
+                            <% availableYears.forEach(year => { %>
+                                <option value="<%= year %>"><%= year %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <!-- Barangay Filter Dropdown -->
+                    <div class="relative w-full sm:w-56 shrink-0">
+                        <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
+                            <option value="ALL">ALL BARANGAYS</option>
                         <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
                             , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
                             , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
@@ -201,7 +220,9 @@
                             </option>
                         <% }) %>
                     </select>
+                    </select>
                 </div>
+            </div>
             </div>
             <div class="relative h-[310px] w-full mb-0">
                 <canvas id="crimeTrendChart"></canvas>
@@ -579,7 +600,7 @@
         updateDistributionChart();
 
         // Define bento details update function
-        window.updateBentoDetails = function(selectedBrgy) {
+        window.updateBentoDetails = function(selectedBrgy, selectedYear) {
             const overallCounts = {};
             const categoryCounts = {
                 '8-Focus': {},
@@ -588,7 +609,10 @@
             };
 
             const filteredPoints = points.filter(p => {
+                if (!p.incident_date) return false;
                 if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
+                const d = new Date(p.incident_date);
+                if (d.getFullYear() !== selectedYear) return false;
                 return true;
             });
 
@@ -688,7 +712,7 @@
         };
 
         // Initialize bento details with overall (ALL) data
-        window.updateBentoDetails('ALL');
+        window.updateBentoDetails('ALL', new Date().getFullYear());
 
         // --- Monthly Trend Barangay Filter Initialization ---
         // (Pre-rendered on server-side using EJS to match map.ejs dropdown)
@@ -700,41 +724,27 @@
     });
 
     // --- Monthly Crime Trends Filtering Logic ---
-    window.filterMonthlyTrends = function(selectedBrgy) {
-        // Update AI Trend Insights dynamically based on selected barangay
+    window.filterMonthlyTrends = function() {
+        const brgyDropdown = document.getElementById('monthlyTrendBarangayFilter');
+        const yrDropdown = document.getElementById('monthlyTrendYearFilter');
+        const selectedBrgy = brgyDropdown ? brgyDropdown.value : 'ALL';
+        const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : new Date().getFullYear();
+
+        // Update AI Trend Insights dynamically based on selected barangay and year
         if (typeof window.generateAITrends === 'function') {
-            window.generateAITrends(selectedBrgy);
+            window.generateAITrends(selectedBrgy, selectedYear);
         }
 
         // Update bento details dynamically
         if (typeof window.updateBentoDetails === 'function') {
-            window.updateBentoDetails(selectedBrgy);
+            window.updateBentoDetails(selectedBrgy, selectedYear);
         }
 
-        // Determine referenceDate from points (matches server-side logic)
-        let referenceDate = new Date();
-        if (points.length > 0) {
-            let maxDate = new Date(0);
-            points.forEach(p => {
-                if (p.incident_date) {
-                    const d = new Date(p.incident_date);
-                    if (!isNaN(d.getTime()) && d > maxDate) {
-                        maxDate = d;
-                    }
-                }
-            });
-            if (maxDate > referenceDate) {
-                referenceDate = maxDate;
-            }
-        }
-
-        // Generate the 12 month buckets
+        // Generate the 12 month buckets (Current Year Jan-Dec)
         const monthlyTrends = [];
-        for (let i = 11; i >= 0; i--) {
-            const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
+        for (let i = 0; i <= 11; i++) {
+            const d = new Date(selectedYear, i, 1);
             const monthLabel = d.toLocaleString('en-US', { month: 'short' });
-            const month = d.getMonth();
-            const year = d.getFullYear();
 
             const mPoints = points.filter(p => {
                 if (!p.incident_date) return false;
@@ -742,7 +752,7 @@
                 if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
                 
                 const pd = new Date(p.incident_date);
-                return pd.getMonth() === month && pd.getFullYear() === year;
+                return pd.getMonth() === i && pd.getFullYear() === selectedYear;
             });
 
             monthlyTrends.push({
@@ -762,15 +772,19 @@
         }
     };
 
-    window.generateAITrends = async function(selectedBrgy) {
+    window.generateAITrends = async function(selectedBrgy, selectedYear) {
         const resultDiv = document.getElementById('aiAnalysisResult');
         const generateBtn = document.getElementById('aiGenerateBtn');
         if (!resultDiv || !generateBtn) return;
 
-        // If not passed, find the active value in the dropdown
+        // If not passed, find the active value in the dropdowns
         if (!selectedBrgy) {
             const dropdown = document.getElementById('monthlyTrendBarangayFilter');
             selectedBrgy = dropdown ? dropdown.value : 'ALL';
+        }
+        if (!selectedYear) {
+            const yrDropdown = document.getElementById('monthlyTrendYearFilter');
+            selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : new Date().getFullYear();
         }
 
         generateBtn.disabled = true;
@@ -782,14 +796,14 @@
             <div class="flex items-center gap-3 py-2">
                 <div class="w-4 h-4 rounded-full border-2 border-pnp-blue dark:border-pnp-gold border-t-transparent animate-spin shrink-0"></div>
                 <div class="flex flex-col items-start">
-                    <p class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest animate-pulse">Analyzing ${displayName}...</p>
-                    <p class="text-[8px] text-slate-400 dark:text-slate-500 font-mono tracking-tighter">CORRELATING BAR GRAPH TRENDS</p>
+                    <p class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest animate-pulse">Generating AI Analysis for ${selectedYear}...</p>
+                    <p class="text-[8px] text-slate-400 dark:text-slate-500 font-mono tracking-tighter">GPT-OSS 120B NEURAL CORRELATION IN PROGRESS</p>
                 </div>
             </div>
         `;
 
         try {
-            const response = await fetch(`/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}`);
+            const response = await fetch(`/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}&year=${selectedYear}`);
             const result = await response.json();
 
             if (result.success) {
