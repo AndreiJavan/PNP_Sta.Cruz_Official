@@ -115,75 +115,175 @@ class Query {
 
       if (this.isCount) {
         q = sb.from(this.table).select('*', { count: 'exact', head: true });
-      } else {
-        q = sb.from(this.table).select('*');
-      }
-
-      // Apply filters
-      for (const f of this.filters) {
-        switch (f.op) {
-          case '==':
-          case '=':
-            q = q.eq(f.field, f.value);
-            break;
-          case '>':
-            q = q.gt(f.field, f.value);
-            break;
-          case '<':
-            q = q.lt(f.field, f.value);
-            break;
-          case '>=':
-            q = q.gte(f.field, f.value);
-            break;
-          case '<=':
-            q = q.lte(f.field, f.value);
-            break;
-          case '!=':
-            q = q.neq(f.field, f.value);
-            break;
-          case 'array-contains':
-            q = q.contains(f.field, [f.value]);
-            break;
-          case 'in':
-            q = q.in(f.field, f.value);
-            break;
+        // Apply filters
+        for (const f of this.filters) {
+          switch (f.op) {
+            case '==':
+            case '=':
+              q = q.eq(f.field, f.value);
+              break;
+            case '>':
+              q = q.gt(f.field, f.value);
+              break;
+            case '<':
+              q = q.lt(f.field, f.value);
+              break;
+            case '>=':
+              q = q.gte(f.field, f.value);
+              break;
+            case '<=':
+              q = q.lte(f.field, f.value);
+              break;
+            case '!=':
+              q = q.neq(f.field, f.value);
+              break;
+            case 'array-contains':
+              q = q.contains(f.field, [f.value]);
+              break;
+            case 'in':
+              q = q.in(f.field, f.value);
+              break;
+          }
         }
-      }
-
-      // Apply order
-      if (this.orderParams) {
-        q = q.order(this.orderParams.field, { ascending: this.orderParams.ascending });
-      }
-
-      // Apply limit and offset
-      if (this.limitN !== null) {
-        if (this.offsetN !== null) {
-          q = q.range(this.offsetN, this.offsetN + this.limitN - 1);
-        } else {
-          q = q.limit(this.limitN);
+        const { count, error } = await q;
+        if (error) {
+          if (error.code === 'PGRST205' || error.code === 'PGRST204') {
+            return { data: () => ({ count: 0 }) };
+          }
+          throw error;
         }
-      } else if (this.offsetN !== null) {
-        // Just offset, no limit (Supabase requires range)
-        // We'll use a very large number for the upper bound
-        q = q.range(this.offsetN, 999999);
-      }
-
-      const { data, count, error } = await q;
-
-      if (error) {
-        if (error.code === 'PGRST205' || error.code === 'PGRST204') {
-          if (this.isCount) return { data: () => ({ count: 0 }) };
-          console.warn(`Supabase schema error (${error.code}) for ${this.table}. Returning empty results.`);
-          return { docs: [], empty: true, size: 0 };
-        }
-        throw error;
-      }
-
-      if (this.isCount) {
         return { data: () => ({ count: count || 0 }) };
       }
 
-      const docs = (data || []).map((row: any) => ({
+      // If we have an explicit limit or offset, we do standard querying
+      if (this.limitN !== null || this.offsetN !== null) {
+        q = sb.from(this.table).select('*');
+        // Apply filters
+        for (const f of this.filters) {
+          switch (f.op) {
+            case '==':
+            case '=':
+              q = q.eq(f.field, f.value);
+              break;
+            case '>':
+              q = q.gt(f.field, f.value);
+              break;
+            case '<':
+              q = q.lt(f.field, f.value);
+              break;
+            case '>=':
+              q = q.gte(f.field, f.value);
+              break;
+            case '<=':
+              q = q.lte(f.field, f.value);
+              break;
+            case '!=':
+              q = q.neq(f.field, f.value);
+              break;
+            case 'array-contains':
+              q = q.contains(f.field, [f.value]);
+              break;
+            case 'in':
+              q = q.in(f.field, f.value);
+              break;
+          }
+        }
+        if (this.orderParams) {
+          q = q.order(this.orderParams.field, { ascending: this.orderParams.ascending });
+        }
+        if (this.limitN !== null) {
+          if (this.offsetN !== null) {
+            q = q.range(this.offsetN, this.offsetN + this.limitN - 1);
+          } else {
+            q = q.limit(this.limitN);
+          }
+        } else if (this.offsetN !== null) {
+          q = q.range(this.offsetN, 999999);
+        }
+        const { data, error } = await q;
+        if (error) {
+          if (error.code === 'PGRST205' || error.code === 'PGRST204') {
+            return { docs: [], empty: true, size: 0 };
+          }
+          throw error;
+        }
+        const docs = (data || []).map((row: any) => ({
+          id: row.id,
+          data: () => row,
+          ref: new Doc(this.table, row.id)
+        }));
+        return {
+          docs,
+          empty: docs.length === 0,
+          size: docs.length
+        };
+      }
+
+      // Otherwise (no limit and no offset specified), we fetch ALL records using pagination/range
+      // to bypass Supabase's default 1000 row restriction.
+      let allData: any[] = [];
+      let from = 0;
+      let hasMore = true;
+      const pageSize = 1000;
+
+      while (hasMore) {
+        let pageQuery = sb.from(this.table).select('*');
+        // Apply filters
+        for (const f of this.filters) {
+          switch (f.op) {
+            case '==':
+            case '=':
+              pageQuery = pageQuery.eq(f.field, f.value);
+              break;
+            case '>':
+              pageQuery = pageQuery.gt(f.field, f.value);
+              break;
+            case '<':
+              pageQuery = pageQuery.lt(f.field, f.value);
+              break;
+            case '>=':
+              pageQuery = pageQuery.gte(f.field, f.value);
+              break;
+            case '<=':
+              pageQuery = pageQuery.lte(f.field, f.value);
+              break;
+            case '!=':
+              pageQuery = pageQuery.neq(f.field, f.value);
+              break;
+            case 'array-contains':
+              pageQuery = pageQuery.contains(f.field, [f.value]);
+              break;
+            case 'in':
+              pageQuery = pageQuery.in(f.field, f.value);
+              break;
+          }
+        }
+        if (this.orderParams) {
+          pageQuery = pageQuery.order(this.orderParams.field, { ascending: this.orderParams.ascending });
+        }
+        
+        const to = from + pageSize - 1;
+        pageQuery = pageQuery.range(from, to);
+
+        const { data, error } = await pageQuery;
+        if (error) {
+          if (error.code === 'PGRST205' || error.code === 'PGRST204') {
+            break;
+          }
+          throw error;
+        }
+
+        const pageData = data || [];
+        allData = allData.concat(pageData);
+
+        if (pageData.length < pageSize) {
+          hasMore = false;
+        } else {
+          from += pageSize;
+        }
+      }
+
+      const docs = allData.map((row: any) => ({
         id: row.id,
         data: () => row,
         ref: new Doc(this.table, row.id)

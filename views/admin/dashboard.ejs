@@ -22,6 +22,11 @@
     if (typeof points !== 'undefined' && points) {
         safePoints = points;
     }
+
+    let defaultYearVal = new Date().getFullYear();
+    if (typeof defaultYear !== 'undefined' && defaultYear) {
+        defaultYearVal = defaultYear;
+    }
     
     // Calculate unique barangays covered
     const uniqueBarangays = new Set(safePoints.map(p => p.barangay).filter(b => b));
@@ -71,7 +76,7 @@
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-5xl font-black tabular-nums tracking-tighter"><%= safeStats.focus + safeStats.nonIndex + safeStats.psi %></h2>
+                <h2 id="kpiTotalCrimes" class="text-5xl font-black tabular-nums tracking-tighter"><%= safeStats.focus + safeStats.nonIndex + safeStats.psi %></h2>
                 <div class="flex flex-col mb-1">
                     <span class="text-[8px] font-black text-blue-400 uppercase tracking-[0.1em]">Crimes</span>
                     <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Total Logs</span>
@@ -191,16 +196,17 @@
                     <div class="relative w-full sm:w-28 shrink-0">
                         <% 
                             const availableYears = [...new Set(points.map(p => {
-                                if(!p.incident_date) return null;
-                                const d = new Date(p.incident_date);
-                                return !isNaN(d.getTime()) ? d.getFullYear() : null;
+                                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+                                if(!rawDate) return null;
+                                const d = new Date(rawDate);
+                                return !isNaN(d.getTime()) ? d.getUTCFullYear() : null;
                             }).filter(y => y !== null))].sort((a, b) => b - a);
 
                             if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
                         %>
                         <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
                             <% availableYears.forEach(year => { %>
-                                <option value="<%= year %>"><%= year %></option>
+                                <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
                             <% }) %>
                         </select>
                     </div>
@@ -257,7 +263,7 @@
                 <div class="mb-4 pb-4 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
                     <div>
                         <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Top 3 Barangays</h3>
-                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Top 3 Crime Distribution</p>
+                        <p id="distributionSubtitle" class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Top 3 Crime Distribution</p>
                     </div>
                 </div>
                 
@@ -348,11 +354,17 @@
         const filterEl = document.getElementById('monthlyTrendBarangayFilter');
         const selectedBrgy = filterEl ? filterEl.value : 'ALL';
         
+        // Also respect the selected year filter!
+        const yrDropdown = document.getElementById('monthlyTrendYearFilter');
+        const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
+        
         const filtered = points.filter(p => {
-            if (!p.incident_date) return false;
+            const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+            if (!rawDate) return false;
             if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
-            const d = new Date(p.incident_date);
-            const m = d.toLocaleString('en-US', { month: 'short' });
+            const d = new Date(rawDate);
+            if (d.getUTCFullYear() !== selectedYear) return false;
+            const m = d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
             return m === monthLabel && p.category === categoryLabel;
         });
 
@@ -367,8 +379,9 @@
         }
 
         list.innerHTML = filtered.map(p => {
-            const dateObj = new Date(p.incident_date);
-            const dateStr = isNaN(dateObj.getTime()) ? p.incident_date : dateObj.toLocaleDateString('en-US', { 
+            const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+            const dateObj = new Date(rawDate);
+            const dateStr = isNaN(dateObj.getTime()) ? rawDate : dateObj.toLocaleDateString('en-US', { 
                 month: 'short', 
                 day: 'numeric', 
                 year: 'numeric' 
@@ -425,10 +438,26 @@
         // Logic to filter the dashboard or open map with filter
         window.location.href = `/admin/map?category=${category}`;
     };
-    function updateDistributionChart() {
+    function updateDistributionChart(selectedYear) {
         const ctx = document.getElementById('crimeDistributionChart').getContext('2d');
         const listContainer = document.getElementById('topSectorsList');
-        const filteredPoints = points;
+        
+        if (!selectedYear) {
+            const yrDropdown = document.getElementById('monthlyTrendYearFilter');
+            selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
+        }
+
+        const subtitleEl = document.getElementById('distributionSubtitle');
+        if (subtitleEl) {
+            subtitleEl.textContent = `Top 3 Crime Distribution (${selectedYear})`;
+        }
+
+        const filteredPoints = points.filter(p => {
+            const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+            if (!rawDate) return false;
+            const d = new Date(rawDate);
+            return d.getUTCFullYear() === selectedYear;
+        });
         
         const counts = {};
         filteredPoints.forEach(p => {
@@ -633,7 +662,7 @@
         });
 
         // Initialize Distribution Chart
-        updateDistributionChart();
+        updateDistributionChart(<%= defaultYearVal %>);
 
         // Define bento details update function
         window.updateBentoDetails = function(selectedBrgy, selectedYear) {
@@ -645,10 +674,11 @@
             };
 
             const filteredPoints = points.filter(p => {
-                if (!p.incident_date) return false;
+                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+                if (!rawDate) return false;
                 if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
-                const d = new Date(p.incident_date);
-                if (d.getFullYear() !== selectedYear) return false;
+                const d = new Date(rawDate);
+                if (d.getUTCFullYear() !== selectedYear) return false;
                 return true;
             });
 
@@ -722,6 +752,9 @@
             setDomSafe('topPSI', topPSI.name);
             setDomSafe('countPSI', topPSI.count);
 
+            // Dynamically update total crime count KPI card
+            setDomSafe('kpiTotalCrimes', filteredPoints.length);
+
             // Dynamically update Trend Cards Left Borders
             const card8 = document.getElementById('card8Focus');
             if (card8) card8.style.borderLeftColor = color8Focus;
@@ -751,14 +784,14 @@
         };
 
         // Initialize bento details with overall (ALL) data
-        window.updateBentoDetails('ALL', new Date().getFullYear());
+        window.updateBentoDetails('ALL', <%= defaultYearVal %>);
 
         // --- Monthly Trend Barangay Filter Initialization ---
         // (Pre-rendered on server-side using EJS to match map.ejs dropdown)
 
         // Instantly invoke AI Trend diagnostics on load
         if (typeof window.generateAITrends === 'function') {
-            window.generateAITrends('ALL');
+            window.generateAITrends('ALL', <%= defaultYearVal %>);
         }
     });
 
@@ -767,7 +800,7 @@
         const brgyDropdown = document.getElementById('monthlyTrendBarangayFilter');
         const yrDropdown = document.getElementById('monthlyTrendYearFilter');
         const selectedBrgy = brgyDropdown ? brgyDropdown.value : 'ALL';
-        const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : new Date().getFullYear();
+        const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
 
         // Update AI Trend Insights dynamically based on selected barangay and year
         if (typeof window.generateAITrends === 'function') {
@@ -779,6 +812,11 @@
             window.updateBentoDetails(selectedBrgy, selectedYear);
         }
 
+        // Update crime distribution dynamically for the selected year
+        if (typeof updateDistributionChart === 'function') {
+            updateDistributionChart(selectedYear);
+        }
+
         // Generate the 12 month buckets (Current Year Jan-Dec)
         const monthlyTrends = [];
         for (let i = 0; i <= 11; i++) {
@@ -786,12 +824,13 @@
             const monthLabel = d.toLocaleString('en-US', { month: 'short' });
 
             const mPoints = points.filter(p => {
-                if (!p.incident_date) return false;
+                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+                if (!rawDate) return false;
                 // Filter by barangay if not ALL
                 if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
                 
-                const pd = new Date(p.incident_date);
-                return pd.getMonth() === i && pd.getFullYear() === selectedYear;
+                const pd = new Date(rawDate);
+                return pd.getUTCMonth() === i && pd.getUTCFullYear() === selectedYear;
             });
 
             monthlyTrends.push({
@@ -829,7 +868,7 @@
         }
         if (!selectedYear) {
             const yrDropdown = document.getElementById('monthlyTrendYearFilter');
-            selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : new Date().getFullYear();
+            selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
         }
 
         generateBtn.disabled = true;
