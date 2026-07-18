@@ -19,7 +19,18 @@ export const getHome = async (req: Request, res: Response) => {
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     }).filter(b => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
-    res.render('public/home', { title: 'Home', hotlines, bulletins });
+    let newsArticles = [];
+    try {
+      const newsRes = await fetch('https://newsapi.org/v2/top-headlines?country=ph&pageSize=10&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
+      const newsData = await newsRes.json();
+      if (newsData.articles) {
+        newsArticles = newsData.articles;
+      }
+    } catch (e) {
+      console.error('Error fetching news:', e);
+    }
+
+    res.render('public/home', { title: 'Home', hotlines, bulletins, newsArticles });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading home page');

@@ -16,14 +16,14 @@
             <span class="text-xs font-bold uppercase tracking-widest">Official Portal &bull; PNP Sta. Cruz</span>
         </div>
 
-        <h1 class="text-4xl md:text-6xl font-black text-white mb-6 leading-tight tracking-tight drop-shadow-lg animate-fade-in-up"
+        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight tracking-tight drop-shadow-lg animate-fade-in-up"
             style="animation-delay: 0.1s;">
             Welcome to the <span
                 class="text-transparent bg-clip-text bg-gradient-to-r from-pnp-gold to-yellow-300">Public
                 Bulletin</span>
         </h1>
 
-        <p class="text-lg md:text-xl text-blue-100 font-light max-w-3xl mx-auto mb-6 leading-relaxed drop-shadow-md animate-fade-in-up"
+        <p class="text-base md:text-lg text-blue-100 font-light max-w-3xl mx-auto mb-6 leading-relaxed drop-shadow-md animate-fade-in-up"
             style="animation-delay: 0.2s;">
             Stay informed with the latest updates, advisories, missing persons, and wanted persons alerts from the Sta.
             Cruz PNP Station.
@@ -34,17 +34,17 @@
 <!-- Bulletins Section -->
 <section class="py-16 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[50vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <% if (locals.bulletins && bulletins.length > 0) { %>
-            <% const carouselBulletins = bulletins.slice(0, 6); %>
+        <% if (locals.newsArticles && newsArticles.length > 0) { %>
+            <% const carouselNews = newsArticles.slice(0, 10); %>
             <!-- Carousel Container -->
             <div class="mb-20">
                 <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
                         <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-3 border border-pnp-blue/10 dark:border-pnp-gold/25">
-                            <i class="fas fa-bullhorn text-[10px]"></i>
-                            <span class="text-[9px] font-black uppercase tracking-widest">Recent Announcements</span>
+                            <i class="fas fa-newspaper text-[10px]"></i>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Recent News</span>
                         </div>
-                        <h2 class="text-3xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Latest Bulletins</h2>
+                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Latest News</h2>
                     </div>
                 </div>
 
@@ -62,54 +62,44 @@
                     <div class="overflow-hidden w-full rounded-[2.5rem] border border-gray-100 dark:border-slate-800/60 shadow-xl bg-white dark:bg-slate-900">
                     <!-- Inner Track -->
                     <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
-                        <% carouselBulletins.forEach((bulletin, index) => { %>
+                        <% carouselNews.forEach((news, index) => { %>
                             <div class="w-full shrink-0 flex-none px-6 md:px-12 py-10 md:py-14">
-                                <a href="/bulletins/<%= bulletin.id %>" class="flex flex-col lg:flex-row items-stretch gap-10 hover:no-underline group">
+                                <a href="<%= news.url %>" target="_blank" class="flex flex-col lg:flex-row items-stretch gap-10 hover:no-underline group">
                                     <!-- Image Container -->
                                     <div class="w-full lg:w-1/2 h-64 md:h-80 rounded-[2rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50">
-                                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                                            <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                                        <% } else if (bulletin.photo_path) { %>
-                                            <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                        <% if (news.urlToImage) { %>
+                                            <img src="<%= news.urlToImage %>" alt="<%= news.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                         <% } else { %>
                                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-850">
-                                                <i class="fas fa-bullhorn text-5xl text-slate-300 dark:text-slate-700"></i>
+                                                <i class="fas fa-newspaper text-5xl text-slate-300 dark:text-slate-700"></i>
                                             </div>
                                         <% } %>
                                         <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300"></div>
                                         <div class="absolute bottom-6 left-6 text-white font-black text-[9px] uppercase tracking-widest bg-pnp-blue/80 dark:bg-slate-950/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
                                             <i class="fas fa-clock mr-1.5 text-pnp-gold"></i>
-                                            <%= new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
+                                            <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
                                         </div>
                                     </div>
                                     
                                     <!-- Content Info -->
                                     <div class="w-full lg:w-1/2 flex flex-col justify-center text-left py-2">
                                         <div class="mb-4">
-                                            <% 
-                                                const badgeColors = {
-                                                    'Crime Advisory': 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/30 border-yellow-100 dark:border-yellow-900/20',
-                                                    'Recovered Property': 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 border-green-100 dark:border-green-900/20',
-                                                    'General Announcement': 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 border-blue-100 dark:border-blue-900/20'
-                                                };
-                                                const defaultBadge = 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700';
-                                            %>
-                                            <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border <%= badgeColors[bulletin.category] || defaultBadge %>">
-                                                <%= bulletin.category %>
+                                            <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                                                <%= news.source.name || 'News' %>
                                             </span>
                                         </div>
                                         
                                         <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-5 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors tracking-tight line-clamp-2">
-                                            <%= bulletin.title %>
+                                            <%= news.title %>
                                         </h3>
                                         
                                         <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
-                                            <%= bulletin.body %>
+                                            <%= news.description || 'Click to read full article...' %>
                                         </p>
                                         
                                         <div class="mt-2">
                                             <span class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                                                Read Announcement <i class="fas fa-arrow-right ml-2.5 text-[9px]"></i>
+                                                Read Article <i class="fas fa-arrow-right ml-2.5 text-[9px]"></i>
                                             </span>
                                         </div>
                                     </div>
@@ -120,7 +110,7 @@
 
                     <!-- Slide Dots/Indicators -->
                     <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-30">
-                        <% carouselBulletins.forEach((_, index) => { %>
+                        <% carouselNews.forEach((_, index) => { %>
                             <button class="carousel-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-pnp-gold transition-all duration-300 focus:outline-none" data-slide="<%= index %>"></button>
                         <% }) %>
                     </div>
