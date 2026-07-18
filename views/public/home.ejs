@@ -1,5 +1,5 @@
 <!-- Hero Section -->
-<section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-slate-900">
+<section id="hero-section" class="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-slate-900">
     <div class="absolute inset-0 z-0">
         <img src="/images/home-hero.jpg" alt="Sta. Cruz Laguna"
             class="w-full h-full object-cover opacity-40 mix-blend-overlay scale-105 animate-[pulse_10s_ease-in-out_infinite_alternate]"
@@ -31,8 +31,36 @@
     </div>
 </section>
 
+<!-- Top 5 Trend Crimes Section -->
+<section id="trends-section" class="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 border-b border-gray-100 dark:border-slate-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-12 animate-fade-in-up">
+            <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-3 border border-pnp-blue/10 dark:border-pnp-gold/25">
+                <i class="fas fa-chart-line text-[10px]"></i>
+                <span class="text-[9px] font-black uppercase tracking-widest">Incident Statistics</span>
+            </div>
+            <h2 class="text-3xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-3">Top 5 Trend Crimes</h2>
+            <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold max-w-2xl mx-auto">
+                Real-time frequency analysis of reported security incidents and public safety cases in Santa Cruz. Click on any crime category to explore its geographic distribution on the interactive map.
+            </p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="trendsLoading" class="flex flex-col items-center justify-center py-20 space-y-3 animate-pulse">
+            <div class="w-12 h-12 border-4 border-pnp-blue/10 border-t-pnp-blue dark:border-pnp-gold/10 dark:border-t-pnp-gold rounded-full animate-spin"></div>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyzing Incident Logs...</p>
+        </div>
+
+        <!-- Trend Grid -->
+        <div id="trendsContent" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <!-- Populated dynamically via JS -->
+        </div>
+    </div>
+</section>
+
 <!-- Bulletins Section -->
-<section class="py-16 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[50vh]">
+<section id="bulletins-section" class="py-16 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[50vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <% if (locals.bulletins && bulletins.length > 0) { %>
             <% const carouselBulletins = bulletins.slice(0, 6); %>
@@ -128,82 +156,213 @@
             </div> <!-- Closes Carousel Wrapper (Outer) -->
         </div> <!-- Closes Carousel Container -->
         <% } %>
+    </div>
+</section>
 
-        <div class="border-t border-gray-100 dark:border-slate-800/80 pt-16">
-            <div class="mb-10 text-center md:text-left">
-                <h3 class="text-2xl font-black text-pnp-blue dark:text-white uppercase tracking-tight">All Directives & Advisories</h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">Browse the full feed of general announcements</p>
+<!-- About Section (Unifies About view onto scrollable home) -->
+<section id="about-section" class="py-24 bg-white dark:bg-slate-900/40 transition-colors duration-300 relative border-b border-gray-100 dark:border-slate-800/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-3 border border-pnp-blue/10 dark:border-pnp-gold/25">
+                <i class="fas fa-info-circle text-[10px]"></i>
+                <span class="text-[9px] font-black uppercase tracking-widest">About PNP Sta. Cruz</span>
             </div>
-            <% if (locals.bulletins && bulletins.length > 0) { %>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <% bulletins.forEach(bulletin=> { %>
-                        <a href="/bulletins/<%= bulletin.id %>"
-                            class="group flex flex-col bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-slate-800 overflow-hidden transform hover:-translate-y-2 h-full">
-                            <% if (bulletin.photo_paths && bulletin.photo_paths.length> 0) { %>
-                                <div class="h-48 overflow-hidden relative shrink-0">
-                                    <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
-                                        class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                                    <div
-                                        class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    </div>
-                                </div>
-                                <% } else { %>
-                                    <div
-                                        class="h-48 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center shrink-0">
-                                        <i class="fas fa-file-alt text-4xl text-slate-300 dark:text-slate-600"></i>
-                                    </div>
-                                    <% } %>
-                                        <div class="p-8 flex flex-col flex-grow">
-                                            <% const badgeColors={ 'Wanted Person'
-                                                : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
-                                                , 'Missing Person'
-                                                : 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20'
-                                                , 'Crime Advisory'
-                                                : 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
-                                                , 'Recovered Property'
-                                                : 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
-                                                , 'General Announcement'
-                                                : 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' }; %>
-                                                <div class="mb-4">
-                                                    <span
-                                                        class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= badgeColors[bulletin.category] || 'text-slate-600 bg-slate-100 dark:text-slate-400 dark:bg-slate-800' %>">
-                                                        <%= bulletin.category %>
-                                                    </span>
-                                                </div>
-                                                <h4
-                                                    class="text-xl font-bold text-slate-900 dark:text-white leading-tight mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors line-clamp-2">
-                                                    <%= bulletin.title %>
-                                                </h4>
-                                                <p
-                                                    class="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-6 leading-relaxed flex-grow">
-                                                    <%= bulletin.body %>
-                                                </p>
-                                                <div
-                                                    class="pt-4 border-t border-gray-50 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500 font-bold flex justify-between items-center mt-auto">
-                                                    <span><i class="far fa-calendar-alt mr-1"></i>
-                                                        <%= new Date(bulletin.created_at).toLocaleDateString(undefined, {
-                                                            year: 'numeric' , month: 'short' , day: 'numeric' }) %>
-                                                    </span>
-                                                    <span
-                                                        class="text-pnp-blue dark:text-pnp-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0"><i
-                                                            class="fas fa-arrow-right"></i></span>
-                                                </div>
-                                        </div>
-                        </a>
-                        <% }) %>
+            <h2 class="text-3xl md:text-4xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-4">Serving with Honor & Integrity</h2>
+            <div class="w-16 h-1 bg-pnp-gold mx-auto rounded-full"></div>
+        </div>
+
+        <!-- System Introduction -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
+            <div class="relative">
+                <div class="rounded-[2.5rem] overflow-hidden shadow-xl border-4 border-white dark:border-slate-800 relative z-10 h-72 md:h-96 bg-slate-150">
+                    <img src="/images/about-pnp.jpg" alt="PNP Sta. Cruz" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=800'">
                 </div>
-            <% } else { %>
-                <div
-                    class="text-center py-20 bg-white dark:bg-slate-900 rounded-[2rem] border border-dashed border-gray-200 dark:border-slate-800 max-w-3xl mx-auto">
-                    <div
-                        class="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400 shadow-inner">
-                        <i class="fas fa-inbox text-3xl"></i>
+                <div class="absolute -bottom-6 -right-6 w-48 h-48 bg-pnp-gold rounded-[2.5rem] -z-0 opacity-15"></div>
+                <div class="absolute -top-6 -left-6 w-40 h-40 bg-pnp-blue rounded-[2.5rem] -z-0 opacity-15"></div>
+            </div>
+
+            <div class="space-y-6">
+                <span class="text-xs font-black text-pnp-gold uppercase tracking-[0.2em] block">Our System</span>
+                <h3 class="text-2xl md:text-3xl font-black text-pnp-blue dark:text-pnp-gold tracking-tight leading-snug">
+                    Advanced Crime Visualization for Sta. Cruz, Laguna
+                </h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm md:text-base leading-relaxed">
+                    The Sta. Cruz Crime Mapping System is a specialized geospatial platform designed to enhance public
+                    safety through interactive data visualization. By mapping incidents in real-time, we provide the PNP and
+                    the community with actionable insights to maintain peace and order in our beloved municipality.
+                </p>
+                <div class="grid grid-cols-2 gap-6 pt-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800/80">
+                        <p class="text-2xl md:text-3xl font-black text-pnp-blue dark:text-pnp-gold mb-1 tracking-tight">26</p>
+                        <p class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Barangays Covered</p>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-2">No Active Bulletins</h3>
-                    <p class="text-slate-500 dark:text-slate-400 font-medium">There are currently no public
-                        announcements or updates to display.</p>
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800/80">
+                        <p class="text-2xl md:text-3xl font-black text-pnp-blue dark:text-pnp-gold mb-1 tracking-tight">24/7</p>
+                        <p class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Active Duty Service</p>
+                    </div>
                 </div>
-            <% } %>
+            </div>
+        </div>
+
+        <!-- Mission & Vision -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
+            <div class="bg-pnp-blue text-white p-8 md:p-10 rounded-[2.5rem] shadow-md relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                    <i class="fas fa-bullseye text-8xl"></i>
+                </div>
+                <span class="text-[9px] font-black text-pnp-gold uppercase tracking-[0.2em] mb-3 block">Our Purpose</span>
+                <h4 class="text-2xl font-black tracking-tight mb-3">Mission</h4>
+                <p class="text-blue-100 text-xs md:text-sm leading-relaxed relative z-10">
+                    To enforce the law, prevent and control crimes, maintain peace and order, and ensure public safety and
+                    internal security with the active support of the community.
+                </p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/40 p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-800/80 relative overflow-hidden group">
+                <div class="absolute -right-6 -bottom-6 text-slate-200 dark:text-slate-800 opacity-20 group-hover:scale-110 transition-transform duration-700">
+                    <i class="fas fa-eye text-8xl"></i>
+                </div>
+                <span class="text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] mb-3 block">Our Future</span>
+                <h4 class="text-2xl font-black text-pnp-gold dark:text-pnp-gold tracking-tight mb-3">Vision</h4>
+                <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm leading-relaxed relative z-10">
+                    Imploring the aid of the Almighty, by 2030, We shall be a highly capable, effective and credible police
+                    service working in partnership with a responsive community towards the attainment of a safer place to
+                    live, work and do business.
+                </p>
+            </div>
+        </div>
+
+        <!-- Personnel/Roster Section -->
+        <div class="bg-slate-50 dark:bg-slate-800/30 rounded-[2.5rem] p-8 md:p-12 border border-gray-100 dark:border-slate-800/80 mb-20">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <!-- Left/Main Column: Personnel List -->
+                <div class="lg:col-span-7 space-y-6">
+                    <div class="mb-6 text-left">
+                        <span class="text-[9px] font-black text-pnp-gold uppercase tracking-[0.2em] mb-2 block">Station Registry</span>
+                        <h4 class="text-3xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-3">Key Personnel & Command</h4>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold">Our dedicated service members maintaining safety and security in Sta. Cruz</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-left">
+                        <!-- PGEN JOSE MELENCIO C NARTATEZ JR -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PGEN JOSE MELENCIO C NARTATEZ JR</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">CHIEF PNP</p>
+                        </div>
+
+                        <!-- PBGEN HANSEL M MARANTAN -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PBGEN HANSEL M MARANTAN</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">ACTING REGIONAL DIRECTOR</p>
+                        </div>
+
+                        <!-- PCOL SANDRO JAY DC TAFALLA -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PCOL SANDRO JAY DC TAFALLA</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">ACTING PROVINCIAL DIRECTOR, LAGUNA PPO</p>
+                        </div>
+
+                        <!-- PLT COL JOJO I SABENIANO -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center border-l-4 border-l-pnp-gold">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PLT COL JOJO I SABENIANO</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">CHIEF OF POLICE</p>
+                        </div>
+
+                        <!-- PCPT GADY R MABANTO -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PCPT GADY R MABANTO</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">DEPUTY CHIEF OF POLICE</p>
+                        </div>
+
+                        <!-- PCPT ANDY O MESANA -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PCPT ANDY O MESANA</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">CHIEF OPERATION PCO</p>
+                        </div>
+
+                        <!-- PLT ARIEL T GENTOLEO -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PLT ARIEL T GENTOLEO</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">C, ADMIN AND INTELLIGENCE SECTION</p>
+                        </div>
+
+                        <!-- PEMS MANOLITO M BINALAY -->
+                        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                            <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight">PEMS MANOLITO M BINALAY</h4>
+                            <p class="text-[10px] md:text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1.5 leading-none">MESPO</p>
+                        </div>
+
+                        <!-- Render dynamic active personnel from database if any -->
+                        <% if (locals.personnel && personnel.length > 0) { %>
+                            <% personnel.forEach(p => { %>
+                                <% if (p.full_name !== 'Super Administrator' && p.full_name !== 'Super admin' && p.full_name !== 'admin' && 
+                                       !['ARNEL J. ALBA', 'RENATO L. SANTOS', 'GREGORIO S. REYES', 'MARIA CLARA D. CRUZ', 'NARTATEZ', 'MARANTAN', 'TAFALLA', 'SABENIANO', 'MABANTO', 'MESANA', 'GENTOLEO', 'BINALAY'].some(n => p.full_name.toUpperCase().includes(n.toUpperCase()))) { %>
+                                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-gray-100 dark:border-slate-800/80 hover:border-pnp-gold/50 shadow-sm hover:shadow-md transition duration-300 flex flex-col justify-center">
+                                        <h4 class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold tracking-tight whitespace-normal break-words leading-tight"><%= p.full_name %></h4>
+                                        <p class="text-[10px] md:text-xs font-black text-emerald-500 dark:text-emerald-400 uppercase tracking-widest mt-1.5 leading-none"><%= p.role === 'superadmin' ? 'Station Administrator' : 'Active Duty Officer' %></p>
+                                    </div>
+                                <% } %>
+                            <% }) %>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Right Column: Command Photo Directory -->
+                <div class="lg:col-span-5 relative">
+                    <div class="rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 relative z-10 h-[32rem] bg-slate-100">
+                        <img src="/images/directory-pnp.jpg" alt="PNP Command Directory" class="w-full h-full object-cover scale-105 hover:scale-100 transition-all duration-700" onerror="this.src='https://images.unsplash.com/photo-1578575437130-527eed3abbec?q=80&w=800'">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-8 text-left">
+                            <span class="text-[9px] font-black text-pnp-gold uppercase tracking-[0.2em] mb-1.5 block">Service, Honor, Justice</span>
+                            <h4 class="text-xl font-black text-white uppercase tracking-tight leading-none mb-2">Municipal Command Group</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed font-semibold">Sta. Cruz Municipal Police Station Leadership Directory.</p>
+                        </div>
+                    </div>
+                    <div class="absolute -bottom-6 -left-6 w-48 h-48 bg-pnp-gold rounded-[2.5rem] -z-0 opacity-15"></div>
+                    <div class="absolute -top-6 -right-6 w-40 h-40 bg-pnp-blue rounded-[2.5rem] -z-0 opacity-15"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Core Values -->
+        <div class="text-center mb-12">
+            <span class="text-xs font-black text-pnp-gold uppercase tracking-[0.2em] mb-2 block">Our Core Values</span>
+            <h4 class="text-2xl md:text-3xl font-black text-pnp-blue dark:text-white tracking-tight">The Foundation of Our Service</h4>
+            <div class="w-16 h-1 bg-pnp-gold mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div class="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800/80 text-center hover:shadow-md transition duration-300 group">
+                <div class="w-12 h-12 bg-blue-50 dark:bg-blue-950 text-pnp-blue dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-pnp-blue group-hover:text-white transition duration-300">
+                    <i class="fas fa-dove text-lg"></i>
+                </div>
+                <h5 class="text-sm font-black text-pnp-blue dark:text-pnp-gold mb-1 uppercase tracking-tight">Makadiyos</h5>
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">(God-fearing)</p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800/80 text-center hover:shadow-md transition duration-300 group">
+                <div class="w-12 h-12 bg-yellow-50 dark:bg-yellow-950 text-pnp-gold rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-pnp-gold group-hover:text-white transition duration-300">
+                    <i class="fas fa-flag text-lg"></i>
+                </div>
+                <h5 class="text-sm font-black text-pnp-blue dark:text-pnp-gold mb-1 uppercase tracking-tight">Makabayan</h5>
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">(Nationalistic)</p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800/80 text-center hover:shadow-md transition duration-300 group">
+                <div class="w-12 h-12 bg-red-50 dark:bg-red-950 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-300">
+                    <i class="fas fa-hand-holding-heart text-lg"></i>
+                </div>
+                <h5 class="text-sm font-black text-pnp-blue dark:text-pnp-gold mb-1 uppercase tracking-tight">Makatao</h5>
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">(Humane)</p>
+            </div>
+
+            <div class="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-[2rem] border border-gray-100 dark:border-slate-800/80 text-center hover:shadow-md transition duration-300 group">
+                <div class="w-12 h-12 bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-green-600 group-hover:text-white transition duration-300">
+                    <i class="fas fa-leaf text-lg"></i>
+                </div>
+                <h5 class="text-sm font-black text-pnp-blue dark:text-pnp-gold mb-1 uppercase tracking-tight">Makakalikasan</h5>
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">(Environment)</p>
+            </div>
         </div>
     </div>
 </section>
@@ -234,6 +393,73 @@
 </div>
 
 <script>
+    function switchTab(tabId) {
+        const bulletinsBtn = document.getElementById('tab-btn-bulletins');
+        const incidentsBtn = document.getElementById('tab-btn-incidents');
+        const bulletinsContent = document.getElementById('tab-content-bulletins');
+        const incidentsContent = document.getElementById('tab-content-incidents');
+
+        if (!bulletinsBtn || !incidentsBtn || !bulletinsContent || !incidentsContent) return;
+
+        if (tabId === 'bulletins') {
+            bulletinsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-md';
+            incidentsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold';
+            
+            bulletinsContent.classList.remove('hidden', 'opacity-0');
+            bulletinsContent.classList.add('block', 'opacity-100');
+            
+            incidentsContent.classList.add('hidden', 'opacity-0');
+            incidentsContent.classList.remove('block', 'opacity-100');
+        } else {
+            incidentsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-md';
+            bulletinsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold';
+            
+            incidentsContent.classList.remove('hidden', 'opacity-0');
+            incidentsContent.classList.add('block', 'opacity-100');
+            
+            bulletinsContent.classList.add('hidden', 'opacity-0');
+            bulletinsContent.classList.remove('block', 'opacity-100');
+        }
+    }
+
+    function filterHomeBulletins() {
+        const selectedCategory = document.getElementById('homeBulletinCategory').value;
+        const cards = document.querySelectorAll('.bulletin-card');
+        const emptyState = document.getElementById('bulletins-empty-state');
+        const countIndicator = document.getElementById('bulletin-filter-count');
+        
+        let visibleCount = 0;
+        
+        cards.forEach(card => {
+            const category = card.getAttribute('data-category');
+            if (selectedCategory === 'All' || category === selectedCategory) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        if (emptyState) {
+            if (visibleCount === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+        
+        if (countIndicator) {
+            if (selectedCategory === 'All') {
+                countIndicator.textContent = 'Showing all announcements and updates';
+            } else {
+                countIndicator.textContent = `Showing ${visibleCount} entry in "${selectedCategory}"`;
+                if (visibleCount !== 1) {
+                    countIndicator.textContent = `Showing ${visibleCount} entries in "${selectedCategory}"`;
+                }
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         // Disclaimer Modal Logic
         const modal = document.getElementById('jurisdiction-modal');
@@ -258,6 +484,195 @@
             }, 500);
             localStorage.setItem('staCruzDisclaimerAccepted', 'true');
         });
+
+        // Top 5 Trend Crimes Logic
+        const trendsLoading = document.getElementById('trendsLoading');
+        const trendsContent = document.getElementById('trendsContent');
+
+        if (trendsContent) {
+            const allColors = {
+                'Theft': '#FFE135', 'Robbery': '#D97706', 'Murder': '#FF0000', 'Homicide': '#EF4444',
+                'Physical Injuries': '#10B981', 'Rape': '#A855F7', 'Carnapping (Motorcycle)': '#F59E0B',
+                'Carnapping (Motor Vehicle)': '#F97316', 'Violence Against Women and Children (VAWC)': '#E11D48',
+                'Cybercrime': '#3B82F6', 'Estafa': '#0891B2', 'Swindling / Fraud': '#06B6D4',
+                'Drug Possession': '#059669', 'Drug Sale': '#10B981', 'Drug Use': '#34D399',
+                'Illegal Gambling': '#7C3AED', 'Illegal Possession of Firearms': '#475569',
+                'Human Trafficking': '#DB2777', 'Child Abuse (RA 7610)': '#F43F5E', 'Damage to Property': '#B45309',
+                'Malicious Mischief': '#D97706', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': '#2563EB',
+                'Illegal Recruitment': '#9333EA', 'Ordinance Violations': '#94A3B8', 'Grave Threats': '#64748B',
+                'Alarm and Scandal': '#CBD5E1', 'Vehicular Accident': '#2563EB', 'Road Accident / Traffic Incident': '#1D4ED8',
+                'Fire Incident': '#EA580C', 'Flood Incident': '#3B82F6', 'Earthquake Incident': '#78350F',
+                'Landslide Incident': '#451A03', 'Disaster Incident Reports': '#4B5563', 'Public Disturbance Incident': '#4338CA',
+                'Emergency Response Incident': '#0891B2', 'Missing Person Report': '#0D9488', 'Rescue Operation Cases': '#059669'
+            };
+
+            const iconMapping = {
+                'Theft': 'fa-hands-holding-circle',
+                'Robbery': 'fa-mask',
+                'Murder': 'fa-skull-crossbones',
+                'Homicide': 'fa-skull',
+                'Physical Injuries': 'fa-user-injured',
+                'Rape': 'fa-circle-exclamation',
+                'Carnapping (Motorcycle)': 'fa-motorcycle',
+                'Carnapping (Motor Vehicle)': 'fa-car',
+                'Violence Against Women and Children (VAWC)': 'fa-person-dress-burst',
+                'Cybercrime': 'fa-laptop-code',
+                'Estafa': 'fa-building-columns',
+                'Swindling / Fraud': 'fa-money-bill-transfer',
+                'Drug Possession': 'fa-pills',
+                'Drug Sale': 'fa-handshake-simple-slash',
+                'Drug Use': 'fa-pills',
+                'Illegal Gambling': 'fa-dice',
+                'Illegal Possession of Firearms': 'fa-gun',
+                'Human Trafficking': 'fa-users-line',
+                'Child Abuse (RA 7610)': 'fa-child',
+                'Damage to Property': 'fa-house-damage',
+                'Malicious Mischief': 'fa-burst',
+                'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': 'fa-network-wired',
+                'Illegal Recruitment': 'fa-user-tie-slash',
+                'Ordinance Violations': 'fa-gavel',
+                'Grave Threats': 'fa-triangle-exclamation',
+                'Alarm and Scandal': 'fa-bullhorn',
+                'Vehicular Accident': 'fa-car-burst',
+                'Road Accident / Traffic Incident': 'fa-car-burst',
+                'Fire Incident': 'fa-fire',
+                'Flood Incident': 'fa-house-flood-water',
+                'Earthquake Incident': 'fa-mountain-sun',
+                'Landslide Incident': 'fa-mountain',
+                'Disaster Incident Reports': 'fa-shield-halved',
+                'Public Disturbance Incident': 'fa-volume-high',
+                'Emergency Response Incident': 'fa-kit-medical',
+                'Missing Person Report': 'fa-user-slash',
+                'Rescue Operation Cases': 'fa-kit-medical'
+            };
+
+            function getTacticalColor(name) {
+                if (!name) return '#ccc';
+                const searchName = name.trim().toUpperCase();
+                for (const [key, color] of Object.entries(allColors)) {
+                    if (key.toUpperCase() === searchName) return color;
+                }
+                for (const [key, color] of Object.entries(allColors)) {
+                    if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return color;
+                }
+                return '#ccc';
+            }
+
+            function getCrimeIcon(name) {
+                if (!name) return 'fa-shield-halved';
+                const searchName = name.trim().toUpperCase();
+                for (const [key, icon] of Object.entries(iconMapping)) {
+                    if (key.toUpperCase() === searchName) return icon;
+                }
+                for (const [key, icon] of Object.entries(iconMapping)) {
+                    if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return icon;
+                }
+                return 'fa-shield-halved';
+            }
+
+            fetch('/api/map-points')
+                .then(res => res.json())
+                .then(points => {
+                    const validPoints = Array.isArray(points) ? points : [];
+                    const counts = {};
+                    validPoints.forEach(p => {
+                        if (p.incident_type) {
+                            counts[p.incident_type] = (counts[p.incident_type] || 0) + 1;
+                        }
+                    });
+
+                    const sortedCrimes = Object.entries(counts)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 5);
+
+                    const maxCount = sortedCrimes.length > 0 ? sortedCrimes[0][1] : 1;
+                    const totalIncidents = validPoints.length || 1;
+
+                    if (sortedCrimes.length > 0) {
+                        const rankMedals = [
+                            'bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 text-amber-950 border-amber-200/50 shadow-amber-500/20', // Gold
+                            'bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500 text-slate-950 border-slate-200/50 shadow-slate-500/20', // Silver
+                            'bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 text-amber-50 border-amber-600/50 shadow-amber-800/20', // Bronze
+                            'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-gray-100 dark:border-slate-700 shadow-sm', // Rank 4
+                            'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-gray-100 dark:border-slate-700 shadow-sm'  // Rank 5
+                        ];
+
+                        trendsContent.innerHTML = sortedCrimes.map(([type, count], index) => {
+                            const pctOfTotal = ((count / totalIncidents) * 100).toFixed(1);
+                            const pctOfMax = ((count / maxCount) * 100).toFixed(0);
+                            const themeColor = getTacticalColor(type);
+                            const iconClass = getCrimeIcon(type);
+                            const rankBadge = index + 1;
+
+                            return `
+                                <a href="/map?crime=${encodeURIComponent(type)}" class="group flex flex-col justify-between p-6 bg-slate-50 dark:bg-slate-950 rounded-[2rem] border border-gray-150 dark:border-slate-800/80 hover:border-pnp-blue/20 dark:hover:border-pnp-gold/30 hover:bg-white dark:hover:bg-slate-900 shadow-sm hover:shadow-2xl dark:hover:shadow-pnp-gold/[0.03] hover:-translate-y-1.5 transition duration-300 transform">
+                                    <div class="space-y-4">
+                                        <!-- Card Top: Medal & Icon -->
+                                        <div class="flex items-center justify-between">
+                                            <span class="w-8 h-8 rounded-full border flex items-center justify-center font-black text-xs ${rankMedals[index]} shadow-md">
+                                                #${rankBadge}
+                                            </span>
+                                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center border transition group-hover:scale-110 duration-300" style="background-color: ${themeColor}15; color: ${themeColor}; border-color: ${themeColor}25;">
+                                                <i class="fas ${iconClass} text-sm"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Card Mid: Info -->
+                                        <div class="space-y-1.5">
+                                            <h3 class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2 min-h-[2rem] leading-snug">
+                                                ${type}
+                                            </h3>
+                                            <div class="flex items-baseline space-x-1">
+                                                <span class="text-2xl font-black tracking-tight text-slate-850 dark:text-slate-100">${count}</span>
+                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cases</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card Bottom: Micro-progress bar -->
+                                    <div class="space-y-3 mt-4 pt-4 border-t border-gray-100 dark:border-slate-900">
+                                        <div class="space-y-1">
+                                            <div class="flex justify-between text-[8px] font-bold uppercase tracking-wider text-slate-400">
+                                                <span>Ratio of Total</span>
+                                                <span class="font-black" style="color: ${themeColor}">${pctOfTotal}%</span>
+                                            </div>
+                                            <div class="w-full h-1.5 bg-gray-150 dark:bg-slate-900 rounded-full overflow-hidden">
+                                                <div class="h-full rounded-full transition-all duration-1000 ease-out" style="width: ${pctOfMax}%; background-color: ${themeColor};"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action indicator -->
+                                        <div class="flex items-center text-[8px] font-black uppercase tracking-widest text-pnp-blue/75 dark:text-pnp-gold/75 group-hover:translate-x-1 transition duration-200">
+                                            <span>Explore Sector Map</span>
+                                            <i class="fas fa-chevron-right ml-1 text-[7px]"></i>
+                                        </div>
+                                    </div>
+                                </a>
+                            `;
+                        }).join('');
+
+                        if (trendsLoading) {
+                            trendsLoading.classList.add('hidden');
+                        }
+                        trendsContent.classList.remove('hidden');
+                    } else {
+                        if (trendsLoading) {
+                            trendsLoading.innerHTML = `
+                                <div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center">
+                                    <i class="fas fa-info text-slate-400"></i>
+                                </div>
+                                <p class="text-[10px] text-gray-400 font-bold uppercase py-2">No dynamic data recorded</p>
+                            `;
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching home trends:', err);
+                    if (trendsLoading) {
+                        trendsLoading.innerHTML = `<p class="text-[10px] text-rose-500 font-bold uppercase py-2">Failed to load statistics</p>`;
+                    }
+                });
+        }
 
         // Carousel Slider Logic
         const track = document.getElementById('carousel-track');
@@ -340,6 +755,36 @@
                 startAutoplay();
             }
         }
+
+        // Tab and Category from query string check
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        const categoryParam = urlParams.get('category');
+        
+        if (tab === 'incidents') {
+            switchTab('incidents');
+            const feedEl = document.getElementById('tab-btn-incidents');
+            if (feedEl) {
+                setTimeout(() => {
+                    feedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        } else if (tab === 'bulletins' || categoryParam) {
+            switchTab('bulletins');
+            if (categoryParam) {
+                const categorySelect = document.getElementById('homeBulletinCategory');
+                if (categorySelect) {
+                    categorySelect.value = categoryParam;
+                    filterHomeBulletins();
+                }
+            }
+            const feedEl = document.getElementById('tab-btn-bulletins');
+            if (feedEl) {
+                setTimeout(() => {
+                    feedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        }
     });
 </script>
 
@@ -360,5 +805,28 @@
     .animate-fade-in-up {
         animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         opacity: 0;
+    }
+
+    .home-barangay-label-tooltip {
+        background: rgba(15, 23, 42, 0.75) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        color: #ffffff !important;
+        font-weight: 800 !important;
+        font-size: 8px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: center;
+        white-space: pre-wrap;
+        line-height: 1.2;
+        padding: 3px 6px !important;
+        z-index: 1000 !important;
+    }
+    .home-barangay-label-tooltip::before,
+    .home-barangay-label-tooltip::after {
+        display: none !important;
     }
 </style>

@@ -40,11 +40,34 @@
     <!-- Search & Filter -->
     <div
         class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16">
-        <div class="relative">
-            <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
-                placeholder="Search <%= title.toLowerCase() %>..."
-                class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
-            <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
+        <div class="flex flex-col gap-6">
+            <div class="relative">
+                <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                    placeholder="Search bulletins..."
+                    class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
+            </div>
+            
+            <!-- Category Filter Pills -->
+            <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-gray-100 dark:border-slate-700/50">
+                <span class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mr-2">Filter Category:</span>
+                <button onclick="setCategoryFilter('All', this)" 
+                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md transition duration-300">
+                    All Bulletins
+                </button>
+                <button onclick="setCategoryFilter('Crime Advisory', this)" 
+                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300">
+                    Crime Advisories
+                </button>
+                <button onclick="setCategoryFilter('Recovered Property', this)" 
+                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300">
+                    Recovered Property
+                </button>
+                <button onclick="setCategoryFilter('General Announcement', this)" 
+                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300">
+                    General Announcements
+                </button>
+            </div>
         </div>
     </div>
 
@@ -52,7 +75,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         <% bulletins.forEach(bulletin=> { %>
             <div
-                class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col">
+                class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col"
+                data-category="<%= bulletin.category %>">
                 <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
                     <div class="h-64 overflow-hidden relative">
                         <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
@@ -127,6 +151,23 @@
 </div>
 
 <script>
+    let currentCategory = 'All';
+
+    function setCategoryFilter(category, btnElement) {
+        currentCategory = category;
+        
+        // Update styling of pill buttons
+        const buttons = document.querySelectorAll('.category-pill-btn');
+        buttons.forEach(btn => {
+            btn.className = 'category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300';
+        });
+        
+        // Mark the clicked one as active
+        btnElement.className = 'category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md transition duration-300';
+        
+        filterPublicBulletins();
+    }
+
     function filterPublicBulletins() {
         const searchInput = document.getElementById('publicSearchInput').value.toLowerCase();
         const cards = document.querySelectorAll('.grid > .group');
@@ -136,14 +177,17 @@
         cards.forEach(card => {
             const h3 = card.querySelector('h3');
             const p = card.querySelector('p');
+            const cat = card.getAttribute('data-category');
             if (!h3 || !p) return;
+            
             const title = h3.textContent.toLowerCase();
             const body = p.textContent.toLowerCase();
             
             const matchesSearch = title.includes(searchInput) || body.includes(searchInput);
+            const matchesCategory = currentCategory === 'All' || cat === currentCategory;
             
-            if (matchesSearch) {
-                card.style.display = '';
+            if (matchesSearch && matchesCategory) {
+                card.style.display = 'flex';
                 anyVisible = true;
             } else {
                 card.style.display = 'none';

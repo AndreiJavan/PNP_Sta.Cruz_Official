@@ -178,19 +178,17 @@
 
                 <!-- Desktop Nav -->
                 <nav class="hidden lg:flex items-center space-x-1">
-                    <a href="/"
+                    <a href="/#hero-section"
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
                     <a href="/map"
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Crime
                         Map</a>
-                    <a href="/wanted-persons"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Wanted Persons</a>
-                    <a href="/missing-persons"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Missing Persons</a>
+                    <a href="/bulletins"
+                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Bulletins</a>
 
                     <a href="/hotlines"
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
-                    <a href="/about"
+                    <a href="/#about-section"
                         class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
 
 
@@ -229,13 +227,12 @@
             </button>
         </div>
         <nav class="flex flex-col space-y-4">
-            <a href="/" class="text-2xl font-black text-white hover:text-pnp-gold transition">Home</a>
+            <a href="/#hero-section" class="text-2xl font-black text-white hover:text-pnp-gold transition">Home</a>
             <a href="/map" class="text-2xl font-black text-white hover:text-pnp-gold transition">Crime Map</a>
-            <a href="/wanted-persons" class="text-2xl font-black text-white hover:text-pnp-gold transition">Wanted Persons</a>
-            <a href="/missing-persons" class="text-2xl font-black text-white hover:text-pnp-gold transition">Missing Persons</a>
+            <a href="/bulletins" class="text-2xl font-black text-white hover:text-pnp-gold transition">Bulletins</a>
 
             <a href="/hotlines" class="text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
-            <a href="/about" class="text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
+            <a href="/#about-section" class="text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
 
             <% if (locals.user) { %>
                 <a href="/admin/dashboard" class="text-2xl font-black text-pnp-gold pt-8">Admin Dashboard</a>
@@ -291,6 +288,18 @@
                                     class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Crime Map
                             </a>
+                            <a href="/bulletins"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Bulletins
+                            </a>
+                            <a href="/incidents"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Incident News
+                            </a>
                             <a href="/wanted-persons"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
                                 <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
@@ -308,7 +317,7 @@
                                     class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Hotlines
                             </a>
-                            <a href="/about"
+                            <a href="/#about-section"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
                                 <i
                                     class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
@@ -394,7 +403,7 @@
             </a>
             <% } %>
 
-            <script>
+             <script>
                 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
                 const closeMenuBtn = document.getElementById('closeMenuBtn');
                 const mobileMenu = document.getElementById('mobileMenu');
@@ -414,8 +423,11 @@
                 const desktopLinks = document.querySelectorAll('header nav a');
                 desktopLinks.forEach(link => {
                     const href = link.getAttribute('href');
-                    if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
-                        link.classList.add('bg-white/20', 'text-pnp-gold');
+                    if (href) {
+                        const pathOnly = href.split('#')[0] || '/';
+                        if (currentPath === pathOnly || (pathOnly !== '/' && currentPath.startsWith(pathOnly))) {
+                            link.classList.add('bg-white/20', 'text-pnp-gold');
+                        }
                     }
                 });
 
@@ -423,18 +435,13 @@
                 const mobileLinks = document.querySelectorAll('#mobileMenu nav a');
                 mobileLinks.forEach(link => {
                     const href = link.getAttribute('href');
-                    if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
-                        link.classList.remove('text-white');
-                        link.classList.add('text-pnp-gold');
+                    if (href) {
+                        const pathOnly = href.split('#')[0] || '/';
+                        if (currentPath === pathOnly || (pathOnly !== '/' && currentPath.startsWith(pathOnly))) {
+                            link.classList.remove('text-white');
+                            link.classList.add('text-pnp-gold');
+                        }
                     }
-                });
-
-                mobileMenuBtn.addEventListener('click', () => {
-                    mobileMenuBackdrop.classList.remove('hidden');
-                    // Small delay to allow display block to apply before opacity
-                    setTimeout(() => mobileMenuBackdrop.classList.remove('opacity-0'), 10);
-                    mobileMenu.classList.remove('translate-x-full');
-                    document.body.style.overflow = 'hidden';
                 });
 
                 const closeMenu = () => {
@@ -446,8 +453,77 @@
                     document.body.style.overflow = 'auto';
                 };
 
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenuBackdrop.classList.remove('hidden');
+                    // Small delay to allow display block to apply before opacity
+                    setTimeout(() => mobileMenuBackdrop.classList.remove('opacity-0'), 10);
+                    mobileMenu.classList.remove('translate-x-full');
+                    document.body.style.overflow = 'hidden';
+                });
+
                 closeMenuBtn.addEventListener('click', closeMenu);
                 mobileMenuBackdrop.addEventListener('click', closeMenu);
+
+                // Smooth Scroll Logic for Hash Anchors
+                const initSmoothScroll = () => {
+                    const handleAnchorClick = (e) => {
+                        const href = e.currentTarget.getAttribute('href');
+                        if (href && (href.startsWith('/#') || href.startsWith('#'))) {
+                            const hashIndex = href.indexOf('#');
+                            const targetId = href.substring(hashIndex);
+                            try {
+                                const targetEl = document.querySelector(targetId);
+                                if (targetEl) {
+                                    e.preventDefault();
+                                    closeMenu();
+                                    
+                                    const headerHeight = document.querySelector('header')?.offsetHeight || 96;
+                                    const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - headerHeight - 16;
+                                    
+                                    window.scrollTo({
+                                        top: targetPosition,
+                                        behavior: 'smooth'
+                                    });
+                                    
+                                    // Update URL hash without scroll jumping
+                                    history.pushState(null, '', href);
+                                }
+                            } catch (err) {
+                                console.error('Error in selector query:', err);
+                            }
+                        }
+                    };
+
+                    document.querySelectorAll('a[href*="#"]').forEach(link => {
+                        link.removeEventListener('click', handleAnchorClick);
+                        link.addEventListener('click', handleAnchorClick);
+                    });
+
+                    // On-load smooth scroll if hash is present
+                    if (window.location.hash) {
+                        setTimeout(() => {
+                            try {
+                                const targetEl = document.querySelector(window.location.hash);
+                                if (targetEl) {
+                                    const headerHeight = document.querySelector('header')?.offsetHeight || 96;
+                                    const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - headerHeight - 16;
+                                    window.scrollTo({
+                                        top: targetPosition,
+                                        behavior: 'smooth'
+                                    });
+                                }
+                            } catch (err) {
+                                console.error('Error on-load hash scroll:', err);
+                            }
+                        }, 400);
+                    }
+                };
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initSmoothScroll);
+                } else {
+                    initSmoothScroll();
+                }
             </script>
 </body>
 
