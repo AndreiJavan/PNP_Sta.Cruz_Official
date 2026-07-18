@@ -21,7 +21,7 @@ export const getHome = async (req: Request, res: Response) => {
 
     let newsArticles: any[] = [];
     try {
-      const newsRes = await fetch('https://newsapi.org/v2/everything?q=philippines&sortBy=publishedAt&pageSize=10&apiKey=22ddb47c95d96e8ea39594ec3bcac16d');
+      const newsRes = await fetch('https://gnews.io/api/v4/search?q=philippines&lang=en&country=ph&max=10&apikey=078321d17caa13357c3a256f8baf34b2');
       const newsData = await newsRes.json();
       if (newsData.articles) {
         newsArticles = newsData.articles;

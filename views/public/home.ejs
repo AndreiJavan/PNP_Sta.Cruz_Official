@@ -118,6 +118,94 @@
             </div> <!-- Closes Carousel Wrapper (Outer) -->
         </div> <!-- Closes Carousel Container -->
         <% } %>
+
+        <!-- Bulletins Content -->
+        <div class="mt-16">
+            <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
+                        <i class="fas fa-bullhorn text-[10px]"></i>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Station Bulletins</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Public Advisories & Updates</h2>
+                </div>
+                <div class="w-full sm:w-auto">
+                    <select id="homeBulletinCategory" onchange="filterHomeBulletins()" class="w-full sm:w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-xl focus:ring-pnp-blue focus:border-pnp-blue block p-2.5 font-bold outline-none shadow-sm cursor-pointer">
+                        <option value="All">All Categories</option>
+                        <option value="Wanted Person">Wanted Persons</option>
+                        <option value="Missing Person">Missing Persons</option>
+                        <option value="Crime Advisory">Crime Advisories</option>
+                        <option value="Recovered Property">Recovered Properties</option>
+                        <option value="General Announcement">General Announcements</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <span id="bulletin-filter-count" class="text-xs font-bold text-slate-500 uppercase tracking-widest">Showing all announcements and updates</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <% if (locals.bulletins && bulletins.length > 0) { %>
+                    <% bulletins.forEach(bulletin => { %>
+                        <div class="bulletin-card group bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" data-category="<%= bulletin.category %>">
+                            <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                                <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+                                    <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                    <% if (bulletin.photo_paths.length > 1) { %>
+                                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg">
+                                            <i class="fas fa-images"></i>
+                                            <span>+<%= bulletin.photo_paths.length - 1 %></span>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% } else if (bulletin.photo_path) { %>
+                                <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+                                    <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                </div>
+                            <% } else { %>
+                                <div class="h-48 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border-b border-gray-100 dark:border-slate-800/50">
+                                    <i class="fas fa-bullhorn text-4xl text-slate-300 dark:text-slate-700 group-hover:text-pnp-blue transition-colors"></i>
+                                </div>
+                            <% } %>
+
+                            <div class="p-6 flex-grow flex flex-col">
+                                <div class="flex justify-between items-start mb-4">
+                                    <% const badgeColors = { 'Wanted Person': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800', 'Missing Person': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800', 'Crime Advisory': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800', 'Recovered Property': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800', 'General Announcement': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800' }; %>
+                                    <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm <%= badgeColors[bulletin.category] || 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700' %>">
+                                        <%= bulletin.category %>
+                                    </span>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded-md">
+                                        <%= new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
+                                    </span>
+                                </div>
+
+                                <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2">
+                                    <%= bulletin.title %>
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
+                                    <%= bulletin.body %>
+                                </p>
+
+                                <div class="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                                    <a href="/bulletins/<%= bulletin.id %>" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest group-hover:underline flex items-center">
+                                        View Details <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+
+            <div id="bulletins-empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+                <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-folder-open text-2xl text-slate-300 dark:text-slate-600"></i>
+                </div>
+                <h3 class="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">No Bulletins Found</h3>
+                <p class="text-xs text-slate-500 mt-2">No records match the selected category.</p>
+            </div>
+        </div>
     </div>
 </section>
 
