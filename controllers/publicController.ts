@@ -17,11 +17,11 @@ export const getHome = async (req: Request, res: Response) => {
     const bulletins = activeBulletinsSnap.docs.map(doc => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    });
+    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
     let newsArticles: any[] = [];
     try {
-      const newsRes = await fetch('https://gnews.io/api/v4/search?q=philippines&lang=en&country=ph&max=10&apikey=078321d17caa13357c3a256f8baf34b2');
+      const newsRes = await fetch('https://newsapi.org/v2/top-headlines?country=ph&category=technology&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
       const newsData = await newsRes.json();
       if (newsData.articles) {
         newsArticles = newsData.articles;
