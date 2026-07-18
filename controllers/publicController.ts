@@ -21,7 +21,7 @@ export const getHome = async (req: Request, res: Response) => {
 
     let newsArticles: any[] = [];
     try {
-      const newsRes = await fetch('https://newsapi.org/v2/top-headlines?country=ph&pageSize=10&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
+      const newsRes = await fetch('https://newsapi.org/v2/everything?q=philippines&sortBy=publishedAt&pageSize=10&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
       const newsData = await newsRes.json();
       if (newsData.articles) {
         newsArticles = newsData.articles;
