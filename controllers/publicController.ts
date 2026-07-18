@@ -17,7 +17,18 @@ export const getHome = async (req: Request, res: Response) => {
     const bulletins = activeBulletinsSnap.docs.map(doc => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    });
+    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
+
+    let newsArticles: any[] = [];
+    try {
+      const newsRes = await fetch('https://newsapi.org/v2/everything?q=philippines&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
+      const newsData = await newsRes.json();
+      if (newsData.articles) {
+        newsArticles = newsData.articles;
+      }
+    } catch (e) {
+      console.error('Error fetching news:', e);
+    }
 
     // Fetch police incidents (map points) to show on home feed
     const mapPointsSnap = await db.collection('map_points').get();
@@ -49,7 +60,7 @@ export const getHome = async (req: Request, res: Response) => {
       console.error('Error fetching personnel for public home:', usersErr);
     }
 
-    res.render('public/home', { title: 'Home', hotlines, bulletins, incidents, personnel, layout: 'layouts/main' });
+    res.render('public/home', { title: 'Home', hotlines, bulletins, incidents, personnel, newsArticles, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading home page');
