@@ -570,7 +570,13 @@
                         message: `Archive Updated: ${result.count} tactical records committed.`,
                         type: "success"
                     });
-                    location.reload();
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('return_to') === 'map') {
+                        window.location.href = '/admin/map';
+                    } else {
+                        location.reload();
+                    }
              } else {
                  throw new Error(result.message || "Disk Sync Failed");
              }
@@ -668,6 +674,13 @@
          const urlParams = new URLSearchParams(window.location.search);
          const barangay = urlParams.get('barangay');
          const crime = urlParams.get('crime');
+         const addNew = urlParams.get('add_new');
+         
+         if (addNew === 'true') {
+             setTimeout(() => {
+                 openManualEntry();
+             }, 300);
+         }
          
          if (urlParams.has('barangay') || crime) {
              setTimeout(() => {

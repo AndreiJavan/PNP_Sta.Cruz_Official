@@ -1406,25 +1406,9 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
 
     const sortedCrimes = Object.entries(crimeCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-    // GPT-OSS 1208 Local Offline Trend & Pattern Analyzer
+    // Calculate trend characteristics
     const counts = monthlyTrendData.map(item => item.count);
     const totalCount = counts.reduce((a, b) => a + b, 0);
-
-    let trend = "stable with minor fluctuations";
-    if (totalCount > 0) {
-      const halfLength = Math.floor(counts.length / 2);
-      const firstHalf = counts.slice(0, halfLength).reduce((a, b) => a + b, 0);
-      const secondHalf = counts.slice(halfLength).reduce((a, b) => a + b, 0);
-
-      const diffPercent = (secondHalf - firstHalf) / (firstHalf || 1);
-      if (diffPercent > 0.15) {
-        trend = "experiencing a general upward trend";
-      } else if (diffPercent < -0.15) {
-        trend = "showing a steady downward trend";
-      } else {
-        trend = "fluctuating within a stable range";
-      }
-    }
 
     let peakMonth = "";
     let peakCount = -1;
@@ -1437,14 +1421,49 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
 
     const topCrime = sortedCrimes.length > 0 ? sortedCrimes[0][0] : 'N/A';
     const topCrimeCount = sortedCrimes.length > 0 ? sortedCrimes[0][1] : 0;
-
-    let analysisText = "";
     const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
 
-    if (totalCount === 0) {
-      analysisText = `The trend for ${selectedYear} shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment.`;
-    } else {
-      analysisText = `The trend for ${selectedYear} shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
+    let analysisText = "";
+
+    try {
+      const client = getGptOssClient();
+      const prompt = `Analyze the following crime data for ${barangayName} in the year ${selectedYear}.
+Total Incidents: ${totalCount}
+Peak Month: ${peakMonth} with ${peakCount} incidents
+Top Crime: ${topCrime} (${topCrimeCount} incidents)
+Monthly data: ${JSON.stringify(monthlyTrendData)}
+
+Provide exactly 3 simple and short sentences. 
+Sentence 1: State the accurate trend (e.g. upward, downward, stable).
+Sentence 2: State the patterns (highest crime and peak month).
+Sentence 3: Suggest a direct prevention plan for the dashboard based on these patterns.
+
+IMPORTANT: Separate each sentence with exactly one blank line between them.`;
+
+      const aiResponse = await client.models.generateContent({
+        model: 'gemini-3.5-flash',
+        contents: prompt
+      });
+
+      analysisText = aiResponse.text || "Failed to generate AI analysis.";
+    } catch (aiError) {
+      console.warn("AI Generation failed, falling back to static generation:", aiError);
+      let trend = "stable with minor fluctuations";
+      if (totalCount > 0) {
+        const halfLength = Math.floor(counts.length / 2);
+        const firstHalf = counts.slice(0, halfLength).reduce((a, b) => a + b, 0);
+        const secondHalf = counts.slice(halfLength).reduce((a, b) => a + b, 0);
+        const diffPercent = (secondHalf - firstHalf) / (firstHalf || 1);
+        if (diffPercent > 0.15) trend = "experiencing a general upward trend";
+        else if (diffPercent < -0.15) trend = "showing a steady downward trend";
+        else trend = "fluctuating within a stable range";
+      }
+
+      if (totalCount === 0) {
+        analysisText = `The trend for ${selectedYear} shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment.`;
+      } else {
+        analysisText = `The trend for ${selectedYear} shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
+      }
     }
 
     res.json({

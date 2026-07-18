@@ -74,18 +74,23 @@ export const getMapPoints = async (req: Request, res: Response) => {
   }
 
   if (range) {
-    const now = new Date();
-    let dateLimit;
-    if (range === 'currentYear') dateLimit = new Date(now.getFullYear(), 0, 1);
-    else if (range === '1month') dateLimit = new Date(now.setMonth(now.getMonth() - 1));
-    else if (range === '2months') dateLimit = new Date(now.setMonth(now.getMonth() - 2));
-    else if (range === '3months') dateLimit = new Date(now.setMonth(now.getMonth() - 3));
-    else if (range === '7days') dateLimit = new Date(now.setDate(now.getDate() - 7));
-    else if (range === '30days') dateLimit = new Date(now.setDate(now.getDate() - 30));
-    else if (range === '6months') dateLimit = new Date(now.setMonth(now.getMonth() - 6));
+    const rangeStr = String(range).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rangeStr)) {
+      query = query.where('incident_date', '==', rangeStr);
+    } else {
+      const now = new Date();
+      let dateLimit;
+      if (range === 'currentYear') dateLimit = new Date(now.getFullYear(), 0, 1);
+      else if (range === '1month') dateLimit = new Date(now.setMonth(now.getMonth() - 1));
+      else if (range === '2months') dateLimit = new Date(now.setMonth(now.getMonth() - 2));
+      else if (range === '3months') dateLimit = new Date(now.setMonth(now.getMonth() - 3));
+      else if (range === '7days') dateLimit = new Date(now.setDate(now.getDate() - 7));
+      else if (range === '30days') dateLimit = new Date(now.setDate(now.getDate() - 30));
+      else if (range === '6months') dateLimit = new Date(now.setMonth(now.getMonth() - 6));
 
-    if (dateLimit) {
-      query = query.where('incident_date', '>=', dateLimit.toISOString());
+      if (dateLimit) {
+        query = query.where('incident_date', '>=', dateLimit.toISOString());
+      }
     }
   }
 
