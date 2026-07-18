@@ -1,5 +1,5 @@
 <!-- Hero Section -->
-<section id="hero-section" class="relative min-h-[50vh] flex items-center justify-center overflow-hidden bg-slate-900">
+<section id="hero-section" class="relative min-h-[40vh] flex items-center justify-center overflow-hidden bg-slate-900">
     <div class="absolute inset-0 z-0">
         <img src="/images/home-hero.jpg" alt="Sta. Cruz Laguna"
             class="w-full h-full object-cover opacity-40 mix-blend-overlay scale-105 animate-[pulse_10s_ease-in-out_infinite_alternate]"
@@ -9,9 +9,9 @@
         </div>
     </div>
 
-    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center mt-10">
+    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center mt-6">
         <div
-            class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-5 py-2 rounded-full mb-8 border border-white/20 animate-fade-in-up">
+            class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-5 py-2 rounded-full mb-4 border border-white/20 animate-fade-in-up">
             <i class="fas fa-shield-halved text-sm"></i>
             <span class="text-xs font-bold uppercase tracking-widest">Official Portal &bull; PNP Sta. Cruz</span>
         </div>
@@ -31,48 +31,20 @@
     </div>
 </section>
 
-<!-- Top 5 Trend Crimes Section -->
-<section id="trends-section" class="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 border-b border-gray-100 dark:border-slate-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Section Header -->
-        <div class="text-center mb-12 animate-fade-in-up">
-            <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-3 border border-pnp-blue/10 dark:border-pnp-gold/25">
-                <i class="fas fa-chart-line text-[10px]"></i>
-                <span class="text-[9px] font-black uppercase tracking-widest">Incident Statistics</span>
-            </div>
-            <h2 class="text-3xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-3">Top 5 Trend Crimes</h2>
-            <p class="text-xs text-slate-400 dark:text-slate-500 font-semibold max-w-2xl mx-auto">
-                Real-time frequency analysis of reported security incidents and public safety cases in Santa Cruz. Click on any crime category to explore its geographic distribution on the interactive map.
-            </p>
-        </div>
-
-        <!-- Loading State -->
-        <div id="trendsLoading" class="flex flex-col items-center justify-center py-20 space-y-3 animate-pulse">
-            <div class="w-12 h-12 border-4 border-pnp-blue/10 border-t-pnp-blue dark:border-pnp-gold/10 dark:border-t-pnp-gold rounded-full animate-spin"></div>
-            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyzing Incident Logs...</p>
-        </div>
-
-        <!-- Trend Grid -->
-        <div id="trendsContent" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            <!-- Populated dynamically via JS -->
-        </div>
-    </div>
-</section>
-
 <!-- Bulletins Section -->
-<section id="bulletins-section" class="py-16 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[50vh]">
+<section id="bulletins-section" class="py-8 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[40vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <% if (locals.newsArticles && newsArticles.length > 0) { %>
             <% const carouselNews = newsArticles.slice(0, 10); %>
             <!-- Carousel Container -->
-            <div class="mb-20">
-                <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div class="mb-10">
+                <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
-                        <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-3 border border-pnp-blue/10 dark:border-pnp-gold/25">
+                        <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
                             <i class="fas fa-newspaper text-[10px]"></i>
-                            <span class="text-[9px] font-black uppercase tracking-widest">Recent News</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest">National News</span>
                         </div>
-                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Latest News</h2>
+                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">National News</h2>
                     </div>
                 </div>
 
@@ -91,10 +63,10 @@
                     <!-- Inner Track -->
                     <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
                         <% carouselNews.forEach((news, index) => { %>
-                            <div class="w-full shrink-0 flex-none px-6 md:px-12 py-10 md:py-14">
-                                <a href="<%= news.url %>" target="_blank" class="flex flex-col lg:flex-row items-stretch gap-10 hover:no-underline group">
+                            <div class="w-full shrink-0 flex-none px-4 md:px-8 py-6 md:py-8">
+                                <a href="<%= news.url %>" target="_blank" class="flex flex-col lg:flex-row items-stretch gap-6 hover:no-underline group">
                                     <!-- Image Container -->
-                                    <div class="w-full lg:w-1/2 h-64 md:h-80 rounded-[2rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50">
+                                    <div class="w-full lg:w-1/2 h-48 md:h-64 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50">
                                         <% if (news.urlToImage) { %>
                                             <img src="<%= news.urlToImage %>" alt="<%= news.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                         <% } else { %>
@@ -150,10 +122,10 @@
 </section>
 
 <!-- About Section (Unifies About view onto scrollable home) -->
-<section id="about-section" class="py-24 bg-white dark:bg-slate-900/40 transition-colors duration-300 relative border-b border-gray-100 dark:border-slate-800/50">
+<section id="about-section" class="py-12 bg-white dark:bg-slate-900/40 transition-colors duration-300 relative border-b border-gray-100 dark:border-slate-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
-        <div class="text-center mb-16">
+        <div class="text-center mb-8">
             <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-3 border border-pnp-blue/10 dark:border-pnp-gold/25">
                 <i class="fas fa-info-circle text-[10px]"></i>
                 <span class="text-[9px] font-black uppercase tracking-widest">About PNP Sta. Cruz</span>
@@ -474,195 +446,6 @@
             }, 500);
             localStorage.setItem('staCruzDisclaimerAccepted', 'true');
         });
-
-        // Top 5 Trend Crimes Logic
-        const trendsLoading = document.getElementById('trendsLoading');
-        const trendsContent = document.getElementById('trendsContent');
-
-        if (trendsContent) {
-            const allColors = {
-                'Theft': '#FFE135', 'Robbery': '#D97706', 'Murder': '#FF0000', 'Homicide': '#EF4444',
-                'Physical Injuries': '#10B981', 'Rape': '#A855F7', 'Carnapping (Motorcycle)': '#F59E0B',
-                'Carnapping (Motor Vehicle)': '#F97316', 'Violence Against Women and Children (VAWC)': '#E11D48',
-                'Cybercrime': '#3B82F6', 'Estafa': '#0891B2', 'Swindling / Fraud': '#06B6D4',
-                'Drug Possession': '#059669', 'Drug Sale': '#10B981', 'Drug Use': '#34D399',
-                'Illegal Gambling': '#7C3AED', 'Illegal Possession of Firearms': '#475569',
-                'Human Trafficking': '#DB2777', 'Child Abuse (RA 7610)': '#F43F5E', 'Damage to Property': '#B45309',
-                'Malicious Mischief': '#D97706', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': '#2563EB',
-                'Illegal Recruitment': '#9333EA', 'Ordinance Violations': '#94A3B8', 'Grave Threats': '#64748B',
-                'Alarm and Scandal': '#CBD5E1', 'Vehicular Accident': '#2563EB', 'Road Accident / Traffic Incident': '#1D4ED8',
-                'Fire Incident': '#EA580C', 'Flood Incident': '#3B82F6', 'Earthquake Incident': '#78350F',
-                'Landslide Incident': '#451A03', 'Disaster Incident Reports': '#4B5563', 'Public Disturbance Incident': '#4338CA',
-                'Emergency Response Incident': '#0891B2', 'Missing Person Report': '#0D9488', 'Rescue Operation Cases': '#059669'
-            };
-
-            const iconMapping = {
-                'Theft': 'fa-hands-holding-circle',
-                'Robbery': 'fa-mask',
-                'Murder': 'fa-skull-crossbones',
-                'Homicide': 'fa-skull',
-                'Physical Injuries': 'fa-user-injured',
-                'Rape': 'fa-circle-exclamation',
-                'Carnapping (Motorcycle)': 'fa-motorcycle',
-                'Carnapping (Motor Vehicle)': 'fa-car',
-                'Violence Against Women and Children (VAWC)': 'fa-person-dress-burst',
-                'Cybercrime': 'fa-laptop-code',
-                'Estafa': 'fa-building-columns',
-                'Swindling / Fraud': 'fa-money-bill-transfer',
-                'Drug Possession': 'fa-pills',
-                'Drug Sale': 'fa-handshake-simple-slash',
-                'Drug Use': 'fa-pills',
-                'Illegal Gambling': 'fa-dice',
-                'Illegal Possession of Firearms': 'fa-gun',
-                'Human Trafficking': 'fa-users-line',
-                'Child Abuse (RA 7610)': 'fa-child',
-                'Damage to Property': 'fa-house-damage',
-                'Malicious Mischief': 'fa-burst',
-                'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)': 'fa-network-wired',
-                'Illegal Recruitment': 'fa-user-tie-slash',
-                'Ordinance Violations': 'fa-gavel',
-                'Grave Threats': 'fa-triangle-exclamation',
-                'Alarm and Scandal': 'fa-bullhorn',
-                'Vehicular Accident': 'fa-car-burst',
-                'Road Accident / Traffic Incident': 'fa-car-burst',
-                'Fire Incident': 'fa-fire',
-                'Flood Incident': 'fa-house-flood-water',
-                'Earthquake Incident': 'fa-mountain-sun',
-                'Landslide Incident': 'fa-mountain',
-                'Disaster Incident Reports': 'fa-shield-halved',
-                'Public Disturbance Incident': 'fa-volume-high',
-                'Emergency Response Incident': 'fa-kit-medical',
-                'Missing Person Report': 'fa-user-slash',
-                'Rescue Operation Cases': 'fa-kit-medical'
-            };
-
-            function getTacticalColor(name) {
-                if (!name) return '#ccc';
-                const searchName = name.trim().toUpperCase();
-                for (const [key, color] of Object.entries(allColors)) {
-                    if (key.toUpperCase() === searchName) return color;
-                }
-                for (const [key, color] of Object.entries(allColors)) {
-                    if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return color;
-                }
-                return '#ccc';
-            }
-
-            function getCrimeIcon(name) {
-                if (!name) return 'fa-shield-halved';
-                const searchName = name.trim().toUpperCase();
-                for (const [key, icon] of Object.entries(iconMapping)) {
-                    if (key.toUpperCase() === searchName) return icon;
-                }
-                for (const [key, icon] of Object.entries(iconMapping)) {
-                    if (searchName.includes(key.toUpperCase()) || key.toUpperCase().includes(searchName)) return icon;
-                }
-                return 'fa-shield-halved';
-            }
-
-            fetch('/api/map-points')
-                .then(res => res.json())
-                .then(points => {
-                    const validPoints = Array.isArray(points) ? points : [];
-                    const counts = {};
-                    validPoints.forEach(p => {
-                        if (p.incident_type) {
-                            counts[p.incident_type] = (counts[p.incident_type] || 0) + 1;
-                        }
-                    });
-
-                    const sortedCrimes = Object.entries(counts)
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 5);
-
-                    const maxCount = sortedCrimes.length > 0 ? sortedCrimes[0][1] : 1;
-                    const totalIncidents = validPoints.length || 1;
-
-                    if (sortedCrimes.length > 0) {
-                        const rankMedals = [
-                            'bg-gradient-to-br from-amber-300 via-amber-400 to-amber-500 text-amber-950 border-amber-200/50 shadow-amber-500/20', // Gold
-                            'bg-gradient-to-br from-slate-300 via-slate-400 to-slate-500 text-slate-950 border-slate-200/50 shadow-slate-500/20', // Silver
-                            'bg-gradient-to-br from-amber-600 via-amber-700 to-amber-800 text-amber-50 border-amber-600/50 shadow-amber-800/20', // Bronze
-                            'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-gray-100 dark:border-slate-700 shadow-sm', // Rank 4
-                            'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-gray-100 dark:border-slate-700 shadow-sm'  // Rank 5
-                        ];
-
-                        trendsContent.innerHTML = sortedCrimes.map(([type, count], index) => {
-                            const pctOfTotal = ((count / totalIncidents) * 100).toFixed(1);
-                            const pctOfMax = ((count / maxCount) * 100).toFixed(0);
-                            const themeColor = getTacticalColor(type);
-                            const iconClass = getCrimeIcon(type);
-                            const rankBadge = index + 1;
-
-                            return `
-                                <a href="/map?crime=${encodeURIComponent(type)}" class="group flex flex-col justify-between p-6 bg-slate-50 dark:bg-slate-950 rounded-[2rem] border border-gray-150 dark:border-slate-800/80 hover:border-pnp-blue/20 dark:hover:border-pnp-gold/30 hover:bg-white dark:hover:bg-slate-900 shadow-sm hover:shadow-2xl dark:hover:shadow-pnp-gold/[0.03] hover:-translate-y-1.5 transition duration-300 transform">
-                                    <div class="space-y-4">
-                                        <!-- Card Top: Medal & Icon -->
-                                        <div class="flex items-center justify-between">
-                                            <span class="w-8 h-8 rounded-full border flex items-center justify-center font-black text-xs ${rankMedals[index]} shadow-md">
-                                                #${rankBadge}
-                                            </span>
-                                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center border transition group-hover:scale-110 duration-300" style="background-color: ${themeColor}15; color: ${themeColor}; border-color: ${themeColor}25;">
-                                                <i class="fas ${iconClass} text-sm"></i>
-                                            </div>
-                                        </div>
-
-                                        <!-- Card Mid: Info -->
-                                        <div class="space-y-1.5">
-                                            <h3 class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2 min-h-[2rem] leading-snug">
-                                                ${type}
-                                            </h3>
-                                            <div class="flex items-baseline space-x-1">
-                                                <span class="text-2xl font-black tracking-tight text-slate-850 dark:text-slate-100">${count}</span>
-                                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Cases</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Card Bottom: Micro-progress bar -->
-                                    <div class="space-y-3 mt-4 pt-4 border-t border-gray-100 dark:border-slate-900">
-                                        <div class="space-y-1">
-                                            <div class="flex justify-between text-[8px] font-bold uppercase tracking-wider text-slate-400">
-                                                <span>Ratio of Total</span>
-                                                <span class="font-black" style="color: ${themeColor}">${pctOfTotal}%</span>
-                                            </div>
-                                            <div class="w-full h-1.5 bg-gray-150 dark:bg-slate-900 rounded-full overflow-hidden">
-                                                <div class="h-full rounded-full transition-all duration-1000 ease-out" style="width: ${pctOfMax}%; background-color: ${themeColor};"></div>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Action indicator -->
-                                        <div class="flex items-center text-[8px] font-black uppercase tracking-widest text-pnp-blue/75 dark:text-pnp-gold/75 group-hover:translate-x-1 transition duration-200">
-                                            <span>Explore Sector Map</span>
-                                            <i class="fas fa-chevron-right ml-1 text-[7px]"></i>
-                                        </div>
-                                    </div>
-                                </a>
-                            `;
-                        }).join('');
-
-                        if (trendsLoading) {
-                            trendsLoading.classList.add('hidden');
-                        }
-                        trendsContent.classList.remove('hidden');
-                    } else {
-                        if (trendsLoading) {
-                            trendsLoading.innerHTML = `
-                                <div class="w-10 h-10 rounded-xl bg-gray-50 dark:bg-slate-800 flex items-center justify-center">
-                                    <i class="fas fa-info text-slate-400"></i>
-                                </div>
-                                <p class="text-[10px] text-gray-400 font-bold uppercase py-2">No dynamic data recorded</p>
-                            `;
-                        }
-                    }
-                })
-                .catch(err => {
-                    console.error('Error fetching home trends:', err);
-                    if (trendsLoading) {
-                        trendsLoading.innerHTML = `<p class="text-[10px] text-rose-500 font-bold uppercase py-2">Failed to load statistics</p>`;
-                    }
-                });
-        }
 
         // Carousel Slider Logic
         const track = document.getElementById('carousel-track');
