@@ -17,9 +17,9 @@ export const getHome = async (req: Request, res: Response) => {
     const bulletins = activeBulletinsSnap.docs.map(doc => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    }).filter(b => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
+    });
 
-    let newsArticles = [];
+    let newsArticles: any[] = [];
     try {
       const newsRes = await fetch('https://newsapi.org/v2/top-headlines?country=ph&pageSize=10&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
       const newsData = await newsRes.json();
@@ -30,7 +30,37 @@ export const getHome = async (req: Request, res: Response) => {
       console.error('Error fetching news:', e);
     }
 
-    res.render('public/home', { title: 'Home', hotlines, bulletins, newsArticles });
+    // Fetch police incidents (map points) to show on home feed
+    const mapPointsSnap = await db.collection('map_points').get();
+    let incidents = mapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .filter((p: any) => {
+        const dateStr = String(p.incident_date || '');
+        const isPlaceholder = dateStr === 'N/A' ||
+          dateStr === '' ||
+          dateStr === '2026-04-27T09:22:14.910Z' ||
+          p.description === 'Strategic placeholder data';
+        return !isPlaceholder;
+      });
+
+    // Sort by incident_date descending
+    incidents.sort((a: any, b: any) => {
+      const dateA = new Date(a.incident_date).getTime();
+      const dateB = new Date(b.incident_date).getTime();
+      return dateB - dateA;
+    });
+
+    // Fetch active personnel/officers
+    let personnel: any[] = [];
+    try {
+      const usersSnap = await db.collection('users').get();
+      personnel = usersSnap.docs
+        .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+        .filter((u: any) => u.status === 'active');
+    } catch (usersErr) {
+      console.error('Error fetching personnel for public home:', usersErr);
+    }
+
+    res.render('public/home', { title: 'Home', hotlines, bulletins, incidents, personnel, newsArticles, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading home page');
@@ -38,7 +68,7 @@ export const getHome = async (req: Request, res: Response) => {
 };
 
 export const getMap = (req: Request, res: Response) => {
-  res.render('public/map', { title: 'Crime Map', hideFooter: true });
+  res.render('public/map', { title: 'Crime Map', hideFooter: true, layout: 'layouts/main' });
 };
 
 export const getMapPoints = async (req: Request, res: Response) => {
@@ -57,7 +87,8 @@ export const getMapPoints = async (req: Request, res: Response) => {
   if (range) {
     const now = new Date();
     let dateLimit;
-    if (range === '1month') dateLimit = new Date(now.setMonth(now.getMonth() - 1));
+    if (range === 'currentYear') dateLimit = new Date(now.getFullYear(), 0, 1);
+    else if (range === '1month') dateLimit = new Date(now.setMonth(now.getMonth() - 1));
     else if (range === '2months') dateLimit = new Date(now.setMonth(now.getMonth() - 2));
     else if (range === '3months') dateLimit = new Date(now.setMonth(now.getMonth() - 3));
     else if (range === '7days') dateLimit = new Date(now.setDate(now.getDate() - 7));
@@ -111,7 +142,7 @@ export const getBulletins = async (req: Request, res: Response) => {
 
     const offset = (Number(page) - 1) * limit;
     bulletins = bulletins.slice(offset, offset + limit);
-    res.render('public/bulletins', { title: 'Bulletins', pageTitle: 'Public Bulletins', bulletins, category, search, page: Number(page) });
+    res.render('public/bulletins', { title: 'Bulletins', pageTitle: 'Public Bulletins', bulletins, category, search, page: Number(page), layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading Bulletins');
@@ -134,7 +165,7 @@ export const getWantedPersons = async (req: Request, res: Response) => {
     }
     const offset = (Number(page) - 1) * limit;
     bulletins = bulletins.slice(offset, offset + limit);
-    res.render('public/bulletins', { title: 'Wanted Persons', pageTitle: 'Wanted Persons', bulletins, category: 'Wanted Person', search, page: Number(page) });
+    res.render('public/bulletins', { title: 'Wanted Persons', pageTitle: 'Wanted Persons', bulletins, category: 'Wanted Person', search, page: Number(page), layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading Wanted Persons');
@@ -157,7 +188,7 @@ export const getMissingPersons = async (req: Request, res: Response) => {
     }
     const offset = (Number(page) - 1) * limit;
     bulletins = bulletins.slice(offset, offset + limit);
-    res.render('public/bulletins', { title: 'Missing Persons', pageTitle: 'Missing Persons', bulletins, category: 'Missing Person', search, page: Number(page) });
+    res.render('public/bulletins', { title: 'Missing Persons', pageTitle: 'Missing Persons', bulletins, category: 'Missing Person', search, page: Number(page), layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading Missing Persons');
@@ -170,23 +201,26 @@ export const getBulletinDetail = async (req: Request, res: Response) => {
     if (!doc.exists) return res.status(404).send('Bulletin not found');
     const d = doc.data();
     const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    res.render('public/bulletin_detail', { title: bulletin.title, bulletin });
+    res.render('public/bulletin_detail', { title: bulletin.title, bulletin, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading bulletin detail');
   }
 };
 
-
 export const getAbout = (req: Request, res: Response) => {
-  res.render('public/about', { title: 'About' });
+  res.render('public/about', { title: 'About', layout: 'layouts/main' });
+};
+
+export const getIncidents = async (req: Request, res: Response) => {
+  res.redirect('/?tab=incidents');
 };
 
 export const getHotlines = async (req: Request, res: Response) => {
   try {
     const snap = await db.collection('hotlines').orderBy('category').get();
     const hotlines = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.render('public/hotlines', { title: 'Emergency Hotlines', hotlines });
+    res.render('public/hotlines', { title: 'Emergency Hotlines', hotlines, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading hotlines');

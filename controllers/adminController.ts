@@ -3,7 +3,7 @@ import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
 import mammoth from 'mammoth';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { createRequire } from 'module';
 import nodemailer from 'nodemailer';
 
@@ -85,20 +85,23 @@ const MANUAL_PINS = [
 ];
 
 // Initialize AI
-let genAI: GoogleGenerativeAI | null = null;
+let genAI: GoogleGenAI | null = null;
 
 function getGptOssClient() {
-  const apiKey = process.env.GPT_OSS_120B_API_KEY || process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GPT_OSS_120B_API_KEY;
   if (!apiKey) {
-    throw new Error('GPT_OSS_120B_API_KEY is not defined. Please configure it in your environment variables.');
-  }
-
-  if (!apiKey.startsWith('AIza')) {
-    console.warn('CRITICAL WARNING: GPT_OSS_120B_API_KEY does not appear to be a valid Google API Key format.');
+    throw new Error('GEMINI_API_KEY is not defined. Please configure it in your settings.');
   }
 
   if (!genAI) {
-    genAI = new GoogleGenerativeAI(apiKey);
+    genAI = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
   return genAI;
 }
@@ -233,7 +236,99 @@ export const toggleSidebarState = async (req: Request, res: Response) => {
 export const processAIExtraction = async (req: Request, res: Response) => {
   try {
     let textContent = '';
+    const programmaticRirPsiRecords: any[] = [];
     console.log('AI Extraction Request received. File present:', !!(req as any).file);
+
+    const parseExcelDate = (val: any): string => {
+      if (!val) return new Date().toISOString().split('T')[0];
+      
+      if (val instanceof Date) {
+        return val.toISOString().split('T')[0];
+      }
+      
+      const num = Number(val);
+      if (!isNaN(num) && num > 30000 && num < 60000) {
+        // Excel base date is 1899-12-30
+        const date = new Date((num - 25569) * 86400 * 1000);
+        if (!isNaN(date.getTime())) {
+          return date.toISOString().split('T')[0];
+        }
+      }
+      
+      const str = String(val).trim();
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        return d.toISOString().split('T')[0];
+      }
+      
+      const cleanStr = str.replace(/[^\w\s-/.]/g, '');
+      const dClean = new Date(cleanStr);
+      if (!isNaN(dClean.getTime())) {
+        return dClean.toISOString().split('T')[0];
+      }
+      
+      return str || new Date().toISOString().split('T')[0];
+    };
+
+    const parseExcelTime = (val: any): string | null => {
+      if (val === undefined || val === null || val === '') return null;
+      
+      if (val instanceof Date) {
+        const hours = String(val.getHours()).padStart(2, '0');
+        const minutes = String(val.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes}`;
+      }
+      
+      const num = Number(val);
+      if (!isNaN(num) && num >= 0 && num < 1) {
+        const totalSeconds = Math.round(num * 24 * 60 * 60);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      }
+      
+      const str = String(val).trim();
+      if (/^\d{3,4}$/.test(str)) {
+        const padded = str.padStart(4, '0');
+        return `${padded.substring(0, 2)}:${padded.substring(2, 4)}`;
+      }
+      
+      const match = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+      if (match) {
+        let hours = parseInt(match[1], 10);
+        const minutes = match[2];
+        const ampm = match[3];
+        if (ampm) {
+          if (ampm.toUpperCase() === 'PM' && hours < 12) hours += 12;
+          if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+        }
+        return `${String(hours).padStart(2, '0')}:${minutes}`;
+      }
+      
+      return str;
+    };
+
+    const normalizeBarangay = (rawLoc: string): string => {
+      let normalizedBrgy = String(rawLoc || '').trim();
+      if (!normalizedBrgy) return 'Poblacion I (Barangay I)';
+      
+      if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+      if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+      if (normalizedBrgy.startsWith('brgy. ')) normalizedBrgy = normalizedBrgy.replace('brgy. ', '');
+      if (normalizedBrgy.startsWith('barangay ')) normalizedBrgy = normalizedBrgy.replace('barangay ', '');
+
+      const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+      if (exactMatch) {
+        return exactMatch;
+      }
+      
+      const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+      if (partialMatch) {
+        return partialMatch;
+      }
+      
+      return normalizedBrgy;
+    };
 
     if ((req as any).file) {
       const buffer = (req as any).file.buffer;
@@ -248,11 +343,280 @@ export const processAIExtraction = async (req: Request, res: Response) => {
         mimetype.includes('excel') ||
         mimetype.includes('spreadsheet')
       ) {
+        const getSheetCategory = (name: string): '8-Focus' | 'Non-Index' | 'PSI' | null => {
+          const lower = name.toLowerCase().trim();
+          if (lower.includes('focus') || lower.includes('8') || lower.includes('crimes')) {
+            return '8-Focus';
+          }
+          if (lower.includes('non-index') || lower.includes('non index') || lower.includes('non_index')) {
+            return 'Non-Index';
+          }
+          if (lower.includes('rir') || lower.includes('psi') || lower.includes('reckless') || lower.includes('public safety') || lower.includes('accident')) {
+            return 'PSI';
+          }
+          return null;
+        };
+
         console.log('Processing Excel/CSV data');
         const workbook = XLSX.read(buffer, { type: 'buffer' });
         workbook.SheetNames.forEach(sheetName => {
           const sheet = workbook.Sheets[sheetName];
-          textContent += `[Sheet: ${sheetName}]\n` + XLSX.utils.sheet_to_csv(sheet) + '\n';
+          const category = getSheetCategory(sheetName);
+          
+          if (category) {
+            console.log(`[PROGRAMMATIC SCANNER] Processing sheet "${sheetName}" row-by-row (Category: ${category})`);
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
+            
+            if (!rows || rows.length === 0) return;
+
+            const seqScores = Array(30).fill(0);
+            const offenseScores = Array(30).fill(0);
+            const barangayScores = Array(30).fill(0);
+            const dateScores = Array(30).fill(0);
+            const timeScores = Array(30).fill(0);
+
+            // Look at first 40 rows to detect headers and column types
+            for (let r = 0; r < Math.min(rows.length, 40); r++) {
+              const row = rows[r];
+              if (!Array.isArray(row)) continue;
+              for (let c = 0; c < row.length; c++) {
+                const val = String(row[c] || '').trim();
+                if (!val) continue;
+
+                const lowerVal = val.toLowerCase();
+
+                // Sequence column scoring
+                if (lowerVal === 'no.' || lowerVal === 'no' || lowerVal === 'seq' || lowerVal === 'seq.' || lowerVal === 'sequence' || lowerVal === 'item' || lowerVal === 'index') {
+                  seqScores[c] += 150;
+                }
+                const num = Number(val);
+                if (!isNaN(num) && num > 0 && num < 1000) {
+                  seqScores[c] += 10;
+                }
+
+                // Offense scoring
+                if (lowerVal.includes('offense') || lowerVal.includes('incident') || lowerVal.includes('crime') || lowerVal.includes('particulars') || lowerVal.includes('case') || lowerVal.includes('nature') || lowerVal.includes('violation') || lowerVal.includes('classification')) {
+                  offenseScores[c] += 100;
+                }
+
+                // Barangay scoring
+                if (lowerVal.includes('barangay') || lowerVal.includes('brgy') || lowerVal.includes('location') || lowerVal.includes('place') || lowerVal.includes('address') || lowerVal.includes('venue') || lowerVal.includes('area') || lowerVal.includes('sector')) {
+                  barangayScores[c] += 100;
+                }
+
+                // Date scoring
+                if (lowerVal.includes('date committed') || lowerVal.includes('date_committed') || lowerVal.includes('date') || lowerVal.includes('dt') || lowerVal.includes('when')) {
+                  dateScores[c] += 100;
+                }
+
+                // Time scoring
+                if (lowerVal.includes('time committed') || lowerVal.includes('time_committed') || lowerVal.includes('time') || lowerVal.includes('hr') || lowerVal.includes('hour')) {
+                  timeScores[c] += 100;
+                }
+
+                // Value heuristics
+                const cleanCell = val.replace(/^(brgy\.?|barangay)\s+/i, '').toLowerCase().trim();
+                const hasBrgyMatch = VALID_BARANGAYS.some(b => {
+                  const bLow = b.toLowerCase();
+                  return bLow === cleanCell || bLow.includes(cleanCell) || cleanCell.includes(bLow);
+                });
+                if (hasBrgyMatch) {
+                  barangayScores[c] += 15;
+                }
+
+                const dateRegex = /\b\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2},? \d{4}\b/i;
+                if (dateRegex.test(val)) {
+                  dateScores[c] += 15;
+                }
+
+                const timeRegex = /\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?\b|\b\d{4}\s*hrs\b/i;
+                if (timeRegex.test(val)) {
+                  timeScores[c] += 15;
+                }
+
+                const isOffenseText = [
+                  'reckless', 'imprudence', 'damage', 'property', 'homicide', 'injury', 'injuries',
+                  'accident', 'collision', 'vehicular', 'rir', 'psi', 'theft', 'robbery', 'murder', 'rape', 'drugs',
+                  'violation', 'assault', 'physical', 'physical injury'
+                ].some(keyword => lowerVal.includes(keyword));
+                if (isOffenseText && isNaN(num) && !dateRegex.test(val) && !timeRegex.test(val)) {
+                  offenseScores[c] += 10;
+                }
+              }
+            }
+
+            // Find best columns
+            let seqColIdx = seqScores.indexOf(Math.max(...seqScores));
+            if (Math.max(...seqScores) === 0) seqColIdx = -1;
+
+            const exclude: number[] = [];
+            if (seqColIdx !== -1) exclude.push(seqColIdx);
+
+            const getBestColIdx = (scores: number[], excl: number[]): number => {
+              let maxScore = -1;
+              let bestIdx = -1;
+              for (let i = 0; i < scores.length; i++) {
+                if (excl.includes(i)) continue;
+                if (scores[i] > maxScore) {
+                  maxScore = scores[i];
+                  bestIdx = i;
+                }
+              }
+              return bestIdx;
+            };
+
+            let offenseColIdx = getBestColIdx(offenseScores, exclude);
+            if (offenseColIdx !== -1 && offenseScores[offenseColIdx] > 0) exclude.push(offenseColIdx);
+            else offenseColIdx = -1;
+
+            let barangayColIdx = getBestColIdx(barangayScores, exclude);
+            if (barangayColIdx !== -1 && barangayScores[barangayColIdx] > 0) exclude.push(barangayColIdx);
+            else barangayColIdx = -1;
+
+            let dateColIdx = getBestColIdx(dateScores, exclude);
+            if (dateColIdx !== -1 && dateScores[dateColIdx] > 0) exclude.push(dateColIdx);
+            else dateColIdx = -1;
+
+            let timeColIdx = getBestColIdx(timeScores, exclude);
+            if (timeColIdx !== -1 && timeScores[timeColIdx] > 0) exclude.push(timeColIdx);
+            else timeColIdx = -1;
+
+            // Fallback for missing column assignments using remaining columns
+            const availableCols: number[] = [];
+            for (let i = 0; i < 20; i++) {
+              if (i !== seqColIdx) availableCols.push(i);
+            }
+
+            if (offenseColIdx === -1) offenseColIdx = availableCols[0] !== undefined ? availableCols[0] : 0;
+            if (barangayColIdx === -1) barangayColIdx = availableCols[1] !== undefined ? availableCols[1] : 1;
+            if (dateColIdx === -1) dateColIdx = availableCols[2] !== undefined ? availableCols[2] : 2;
+            if (timeColIdx === -1) timeColIdx = availableCols[3] !== undefined ? availableCols[3] : 3;
+
+            console.log(`[PROGRAMMATIC SCANNER] Column mapping for "${sheetName}": Seq=${seqColIdx}, Offense=${offenseColIdx}, Barangay=${barangayColIdx}, Date=${dateColIdx}, Time=${timeColIdx}`);
+
+            // Find where headers end and data starts
+            let headerRowIndex = -1;
+            let maxHeaderMatches = 0;
+            for (let r = 0; r < Math.min(rows.length, 30); r++) {
+              const row = rows[r];
+              if (!Array.isArray(row)) continue;
+              let matches = 0;
+              for (let c = 0; c < row.length; c++) {
+                const val = String(row[c] || '').toLowerCase().trim();
+                if (
+                  val.includes('offense') || val.includes('incident') || val.includes('crime') || val.includes('particulars') || val.includes('case') || val.includes('nature') ||
+                  val.includes('barangay') || val.includes('brgy') || val.includes('location') || val.includes('place') || val.includes('address') ||
+                  val.includes('date committed') || val.includes('date_committed') || val.includes('date') ||
+                  val.includes('time committed') || val.includes('time_committed') || val.includes('time') ||
+                  val.includes('sequence') || val.includes('no.')
+                ) {
+                  matches++;
+                }
+              }
+              if (matches > maxHeaderMatches) {
+                maxHeaderMatches = matches;
+                headerRowIndex = r;
+              }
+            }
+
+            const dataStartIndex = headerRowIndex !== -1 ? headerRowIndex + 1 : 0;
+            let validRowCount = 0;
+
+            for (let r = dataStartIndex; r < rows.length; r++) {
+              const row = rows[r];
+              if (!Array.isArray(row) || row.length === 0) continue;
+
+              const offenseVal = offenseColIdx !== -1 && row[offenseColIdx] !== undefined ? String(row[offenseColIdx]).trim() : '';
+              if (!offenseVal) continue;
+
+              // Filter out obvious header/summary strings
+              const lowerOffense = offenseVal.toLowerCase();
+              if (lowerOffense.includes('total') || lowerOffense.includes('summary') || lowerOffense === 'offense' || lowerOffense === 'incident' || lowerOffense === 'particulars' || lowerOffense === 'crime' || lowerOffense === 'nature') {
+                continue;
+              }
+              // Skip if it's purely a sequence number
+              if (/^\d+$/.test(offenseVal)) {
+                continue;
+              }
+
+              let barangayVal = barangayColIdx !== -1 && row[barangayColIdx] !== undefined ? String(row[barangayColIdx]).trim() : '';
+              if (!barangayVal || barangayVal.toLowerCase() === 'barangay' || barangayVal.toLowerCase() === 'brgy') {
+                for (let c = 0; c < row.length; c++) {
+                  const cellStr = String(row[c] || '').trim();
+                  if (!cellStr) continue;
+                  const cleanCell = cellStr.replace(/^(brgy\.?|barangay)\s+/i, '').toLowerCase().trim();
+                  const match = VALID_BARANGAYS.find(b => b.toLowerCase() === cleanCell || b.toLowerCase().includes(cleanCell) || cleanCell.includes(b.toLowerCase()));
+                  if (match) {
+                    barangayVal = cellStr;
+                    break;
+                  }
+                }
+              }
+              const normalizedBrgy = normalizeBarangay(barangayVal);
+
+              let dateVal = dateColIdx !== -1 && row[dateColIdx] !== undefined ? row[dateColIdx] : '';
+              if (!dateVal) {
+                const dateRegex = /\b\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}\b|\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]* \d{1,2},? \d{4}\b/i;
+                for (let c = 0; c < row.length; c++) {
+                  const cellStr = String(row[c] || '').trim();
+                  if (dateRegex.test(cellStr)) {
+                    dateVal = cellStr;
+                    break;
+                  }
+                }
+              }
+              const cleanD = parseExcelDate(dateVal);
+
+              let timeVal = timeColIdx !== -1 && row[timeColIdx] !== undefined ? row[timeColIdx] : '';
+              if (timeVal === undefined || timeVal === null || timeVal === '') {
+                const timeRegex = /\b\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?\b|\b\d{4}\s*hrs\b/i;
+                for (let c = 0; c < row.length; c++) {
+                  const cellStr = String(row[c] || '').trim();
+                  if (timeRegex.test(cellStr)) {
+                    timeVal = cellStr;
+                    break;
+                  }
+                }
+              }
+              const cleanT = parseExcelTime(timeVal);
+
+              // Normalize crime name and check if category can be refined
+              let finalCategory = category;
+              let rawOffense = offenseVal;
+              const trimOff = rawOffense.trim().toLowerCase();
+              if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+                rawOffense = 'Estafa';
+                finalCategory = 'Non-Index';
+              } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+                rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+                finalCategory = 'Non-Index';
+              }
+
+              // Refine category based on normalized offense keywords if they are highly characteristic
+              const lowerOff = rawOffense.toLowerCase();
+              if (lowerOff.includes('reckless imprudence') || lowerOff.includes('reckless impudence') || /\brir\b/i.test(lowerOff)) {
+                finalCategory = 'PSI';
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOff.includes(t)) && !lowerOff.includes('anti-rape') && !lowerOff.includes('anti rape')) {
+                finalCategory = '8-Focus';
+              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOff.includes(t))) {
+                finalCategory = 'PSI';
+              }
+
+              validRowCount++;
+              programmaticRirPsiRecords.push({
+                barangay: normalizedBrgy,
+                date_committed: cleanD,
+                time_committed: cleanT,
+                offense: rawOffense,
+                category: finalCategory,
+                description: `Extracted programmatically row-by-row from sheet ${sheetName}`
+              });
+            }
+
+            console.log(`[PROGRAMMATIC SCANNER] Successfully processed sheet "${sheetName}": Extracted ${validRowCount} records programmatically.`);
+          } else {
+            textContent += `[Sheet: ${sheetName}]\n` + XLSX.utils.sheet_to_csv(sheet) + '\n';
+          }
         });
         console.log('Excel text extracted. Length:', textContent.length);
       } else if (
@@ -271,141 +635,495 @@ export const processAIExtraction = async (req: Request, res: Response) => {
       textContent = req.body.data;
     }
 
-    if (!textContent || textContent.trim().length === 0) {
-      console.warn('Extraction failed: No text content found.');
-      return res.status(400).json({ success: false, error: 'Target document contains no readable text data.' });
-    }
-
-    if (!process.env.GPT_OSS_120B_API_KEY && !process.env.GEMINI_API_KEY) {
-      console.error('CRITICAL: GPT_OSS_120B_API_KEY is missing from environment.');
-      return res.status(500).json({ success: false, error: 'GPT-OSS 120B Error: API Key not configured. Please add GPT_OSS_120B_API_KEY to your environment.' });
-    }
-
-    const client = getGptOssClient();
-    const primaryModel = 'gemini-2.5-flash';
-    const fallbackModel = 'gemini-2.5-flash-lite';
-
-    console.log(`[NEURAL SCAN] Initiating tactical extraction via GPT-OSS 120B (utilizing ${primaryModel})...`);
-    let model = client.getGenerativeModel({ model: primaryModel });
-
-    const prompt = `
-ROLE:
-You are a strict data extraction engine for a law enforcement crime information system.
-
-You ONLY extract structured crime incident data from the provided text.
-You DO NOT explain. You DO NOT add comments. You DO NOT hallucinate.
-
----
-
-LOCATION CONTEXT:
-Santa Cruz, Laguna, Philippines
-
----
-
-VALID BARANGAYS (STRICT MATCH ONLY):
-Alipit, Bagumbayan, Bubukal, Calios, Duhat, Gatid, Jasaan, Labuin, Malinao, Oogong, Pagsawitan, Palasan, Patimbao, Poblacion I (Barangay I), Poblacion II (Barangay II), Poblacion III (Barangay III), Poblacion IV (Barangay IV), Poblacion V (Barangay V), San Jose, San Juan, San Pablo Norte, San Pablo Sur, Santisima Cruz, Santo Angel Central, Santo Angel Norte, Santo Angel Sur
-
----
-
-CLASSIFICATION RULES:
-
-1. 8-Focus Crimes:
-Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping (Motor Vehicle or Motorcycle)
-
-2. PSI (Public Safety Index):
-Vehicular Accident, Traffic Incident, Fire Incident
-
-3. Non-Index:
-All other incidents
-
----
-
-EXTRACTION RULES:
-
-- Extract ONLY real incidents explicitly stated in the text
-- DO NOT create or assume missing data
-- If date is missing, use null
-- Normalize date format to: YYYY-MM-DD
-- Barangay MUST match EXACTLY from the valid list
-- If barangay is unclear or not in list, SKIP the record
-- Categorize strictly based on rules above
-- If unsure, use "Non-Index"
-- Remove duplicate incidents
-- Keep descriptions short but meaningful
-
----
-
-CRITICAL OUTPUT RULES:
-
-- Output MUST be valid JSON
-- NO markdown (no \`\`\` blocks)
-- NO explanations
-- NO extra text
-- NO comments
-- NO trailing commas
-
----
-
-OUTPUT FORMAT (STRICT):
-
-{
-  "barangays": {
-    "BarangayName": [
-      {
-        "date": "YYYY-MM-DD",
-        "offense": "string",
-        "category": "8-Focus | PSI | Non-Index",
-        "description": "string"
-      }
-    ]
-  }
-}
-
----
-
-INPUT DATA STARTS BELOW:
-    `;
-
-    let result;
-    try {
-      result = await model.generateContent([prompt, textContent]);
-    } catch (apiErr: any) {
-      console.warn(`[RECOVERY] Primary model ${primaryModel} failed. Attempting fallback to ${fallbackModel}...`);
-      try {
-        model = client.getGenerativeModel({ model: fallbackModel });
-        result = await model.generateContent([prompt, textContent]);
-      } catch (fallbackErr: any) {
-        console.error('GPT-OSS 120B Fallback Error:', fallbackErr);
-        if (apiErr.message?.includes('unregistered callers') || fallbackErr.message?.includes('unregistered callers')) {
-          throw new Error('API Key is rejected. Ensure your GPT_OSS_120B_API_KEY is properly configured in settings.');
-        }
-        throw new Error('The scanning engine is currently under high demand. Please attempt extraction again in a few moments.');
-      }
-    }
-
-    const responseText = result.response.text();
-    console.log('AI Raw Response received. Length:', responseText.length);
-
-    let aiParsed;
-    try {
-      aiParsed = cleanAndParseJSON(responseText);
-    } catch (parseError: any) {
-      console.error('JSON Parse Error from AI:', responseText);
-      throw new Error(`Failed to extract structured data: ${parseError.message}`);
+    if ((!textContent || textContent.trim().length === 0) && programmaticRirPsiRecords.length === 0) {
+      console.warn('Extraction failed: No text content or programmatic records found.');
+      return res.status(400).json({ success: false, error: 'Target document contains no readable data.' });
     }
 
     const flattened: any[] = [];
-    const barangayData = aiParsed.barangays || aiParsed;
+    if (textContent && textContent.trim().length > 0) {
+      if (!process.env.GPT_OSS_120B_API_KEY && !process.env.GEMINI_API_KEY) {
+        console.error('CRITICAL: GPT_OSS_120B_API_KEY is missing from environment.');
+        return res.status(500).json({ success: false, error: 'GPT-OSS 120B Error: API Key not configured. Please add GPT_OSS_120B_API_KEY to your environment.' });
+      }
 
-    for (const [brgy, incidents] of Object.entries(barangayData)) {
-      if (Array.isArray(incidents)) {
-        incidents.forEach((inc: any) => {
-          // Normalize barangay name
-          let normalizedBrgy = brgy.trim();
+      const client = getGptOssClient();
+      const primaryModel = 'gemini-3.5-flash';
+      const fallbackModel = 'gemini-3.1-flash-lite';
+
+      console.log(`[NEURAL SCAN] Initiating tactical extraction via GPT-OSS 120B (utilizing ${primaryModel})...`);
+
+    const prompt = `You are an expert in extracting Philippine National Police (PNP) police records from Microsoft Excel workbooks.
+
+Your objective is to accurately and efficiently extract police records from the workbook while avoiding duplicate, missing, or hallucinated data.
+
+=================================================
+WORKFLOW
+=================================================
+
+Always follow these steps in order.
+
+=================================================
+STEP 1 - IDENTIFY VALID WORKSHEETS
+=================================================
+
+First, read ONLY the worksheet names.
+
+Do not extract any data yet.
+
+Only process worksheets whose names closely match:
+
+• 8 Focus
+• 8-Focus
+• 8 Focus Crimes
+• 8FOCUS
+
+• Non-Index
+• NON INDEX
+• NON-INDEX
+
+• RIR
+• PSI
+• RIR/PSI
+• RIR - PSI
+• RIR_PSI
+
+Ignore every other worksheet.
+
+Examples:
+
+• Summary
+• Dashboard
+• Statistics
+• Charts
+• Graphs
+• Pivot
+• Legend
+• Notes
+• Read Me
+• Instructions
+
+=================================================
+STEP 2 - PROCESS WORKSHEETS
+=================================================
+
+Process worksheets one at a time in this order:
+
+1. 8-Focus
+2. Non-Index
+3. RIR / PSI
+
+Finish one worksheet before processing the next.
+
+Never combine records from different worksheets.
+
+=================================================
+STEP 3 - LOCATE THE DATA TABLE
+=================================================
+
+Within the current worksheet:
+
+Locate the table containing the police records.
+
+Find the header row first.
+
+Identify the columns corresponding to:
+
+• Offense
+• Barangay (or Location)
+• Date Committed
+• Time Committed
+
+Column names may have slight formatting differences but should represent the same information.
+
+Do not read data outside the identified table.
+
+=================================================
+STEP 4 - EXTRACT RECORDS
+=================================================
+
+Starting immediately after the header row,
+
+read each row until the end of the table.
+
+Extract only:
+
+• Offense
+• Barangay
+• Date Committed
+• Time Committed
+
+Ignore:
+
+• Blank rows
+• Empty rows
+• Totals
+• Grand Totals
+• Summary rows
+• Footer text
+• Notes
+• Charts
+• Graphs
+• Repeated headers
+• Merged titles
+
+If an entire row is empty, skip it.
+
+=================================================
+STEP 5 - VERIFY EACH RECORD
+=================================================
+
+For every extracted row:
+
+Verify that:
+
+• Offense exists.
+• Barangay exists (if present in the worksheet).
+• Date Committed belongs to the same row.
+• Time Committed belongs to the same row.
+
+Do not shift values between rows.
+
+Do not combine information from multiple rows.
+
+If Offense is empty, ignore the row.
+
+If Barangay, Date Committed, or Time Committed is missing, return null for that field.
+
+Never guess missing values.
+
+=================================================
+STEP 6 - NORMALIZE OFFENSE NAMES
+=================================================
+
+Normalize offenses that refer to the same crime.
+
+Examples:
+
+THEFT
+Theft
+THEFT - RPC Art. 308
+
+↓
+
+Theft
+
+--------------------------------
+
+ROBBERY
+Robbery
+ROBBERY - RPC Art. 293
+
+↓
+
+Robbery
+
+--------------------------------
+
+HOMICIDE
+Homicide
+HOMICIDE - RPC Art. 249
+
+↓
+
+Homicide
+
+--------------------------------
+
+MURDER
+Murder
+MURDER - RPC Art. 248
+
+↓
+
+Murder
+
+--------------------------------
+
+COMPREHENSIVE DANGEROUS DRUGS ACT OF 2002
+Dangerous Drugs Act Violation
+COMPREHENSIVE DANGEROUS DRUGS ACT OF 2002 - RA 9165
+
+↓
+
+Comprehensive Dangerous Drugs Act (RA 9165)
+
+Normalize by removing:
+
+• Capitalization differences
+• RPC article references
+• RA numbers
+• PD numbers
+• BP numbers
+• Extra punctuation
+• Extra spaces
+
+Do NOT merge legally different crimes.
+
+Examples:
+
+Theft ≠ Qualified Theft
+
+Homicide ≠ Reckless Imprudence Resulting to Homicide
+
+=================================================
+STEP 7 - ASSIGN CATEGORY
+=================================================
+
+Assign the category using ONLY the worksheet name.
+
+Worksheet Name              Category
+
+8 Focus                     8-Focus Crime
+
+Non-Index                   Non-Index Crime
+
+RIR                          PSI
+
+PSI                          PSI
+
+RIR/PSI                      PSI
+
+Do not determine the category from the offense.
+
+=================================================
+STEP 8 - COUNT RECORDS
+=================================================
+
+After extraction is complete,
+
+count only the successfully extracted police records.
+
+Do not count:
+
+• Blank rows
+• Totals
+• Summary rows
+• Header rows
+• Notes
+• Charts
+
+Return the exact total for each worksheet.
+
+=================================================
+STEP 9 - FINAL VERIFICATION
+=================================================
+
+After all worksheets have been processed:
+
+Verify that:
+
+• Every record came from a valid worksheet.
+• Every record contains an Offense.
+• Barangay, Date Committed, and Time Committed belong to the same row.
+• Duplicate offense names have been normalized.
+• Legally different offenses remain separate.
+• The total number of extracted records matches the number of valid data rows.
+• No records from ignored worksheets are included.
+
+=================================================
+OUTPUT FORMAT
+=================================================
+
+Return ONLY valid JSON.
+
+{
+  "worksheets": [
+    {
+      "worksheet": "8 Focus",
+      "category": "8-Focus Crime",
+      "totalRecords": 120,
+      "records": [
+        {
+          "offense": "Theft",
+          "barangay": "Brgy. Bubukal",
+          "dateCommitted": "2026-01-15",
+          "timeCommitted": "13:45"
+        }
+      ]
+    },
+    {
+      "worksheet": "Non-Index",
+      "category": "Non-Index Crime",
+      "totalRecords": 85,
+      "records": []
+    },
+    {
+      "worksheet": "RIR",
+      "category": "PSI",
+      "totalRecords": 42,
+      "records": []
+    }
+  ]
+}
+
+=================================================
+IMPORTANT RULES
+=================================================
+
+• Read worksheet names before reading any data.
+• Process one worksheet completely before moving to the next.
+• Locate the header row first, then read only the data rows beneath it.
+• Extract only the required fields.
+• Do not guess or invent values.
+• Use null for missing Barangay, Date Committed, or Time Committed.
+• Ignore invalid or empty rows.
+• Normalize duplicate offense names.
+• Keep legally different offenses separate.
+• Count records only after extraction and verification.
+• Return only valid JSON.
+• Do not include explanations, comments, or Markdown.
+
+INPUT DATA STARTS BELOW:
+`;
+
+    const MAX_CHUNK_SIZE = 8000;
+    const chunks: string[] = [];
+    let currentChunk = '';
+    const lines = textContent.split('\n');
+    for (const line of lines) {
+      if (currentChunk.length + line.length > MAX_CHUNK_SIZE) {
+        chunks.push(currentChunk);
+        currentChunk = line + '\n';
+      } else {
+        currentChunk += line + '\n';
+      }
+    }
+    if (currentChunk.trim()) chunks.push(currentChunk);
+
+    const flattened: any[] = [];
+    console.log(`[NEURAL SCAN] Splitting data into ${chunks.length} chunks for processing...`);
+
+    for (let i = 0; i < chunks.length; i++) {
+      console.log(`[NEURAL SCAN] Processing chunk ${i + 1}/${chunks.length}...`);
+      let result;
+      let attempt = 0;
+      const maxAttempts = 3;
+      let success = false;
+
+      while (attempt < maxAttempts && !success) {
+        attempt++;
+        try {
+          result = await client.models.generateContent({
+            model: primaryModel,
+            contents: [prompt, chunks[i]],
+            config: {
+              responseMimeType: 'application/json'
+            }
+          });
+          success = true;
+        } catch (apiErr: any) {
+          console.warn(`[RECOVERY] Primary model ${primaryModel} failed on chunk ${i + 1}, attempt ${attempt}. Error detail:`, apiErr.message || apiErr);
+          console.warn(`Attempting fallback to ${fallbackModel}...`);
+          try {
+            result = await client.models.generateContent({
+              model: fallbackModel,
+              contents: [prompt, chunks[i]],
+              config: {
+                responseMimeType: 'application/json'
+              }
+            });
+            success = true;
+          } catch (fallbackErr: any) {
+            console.error(`GPT-OSS 120B Fallback Error on chunk ${i + 1}, attempt ${attempt}:`, fallbackErr);
+            if (apiErr.message?.includes('unregistered callers') || fallbackErr.message?.includes('unregistered callers')) {
+              throw new Error('API Key is rejected. Ensure your GEMINI_API_KEY is properly configured in settings.');
+            }
+            if (attempt === maxAttempts) {
+              throw new Error(`The scanning engine failed on part ${i + 1} of the document after ${maxAttempts} attempts. Please attempt extraction again in a few moments.`);
+            } else {
+              console.warn(`[RETRY] Retrying chunk ${i + 1} in 3 seconds...`);
+              await new Promise(res => setTimeout(res, 3000));
+            }
+          }
+        }
+      }
+
+      const responseText = result?.text || '';
+      console.log(`Chunk ${i + 1} AI Raw Response received. Length:`, responseText.length);
+
+      let aiParsed;
+      try {
+        aiParsed = cleanAndParseJSON(responseText);
+      } catch (parseError: any) {
+        console.warn(`[WARNING] JSON Parse Error from AI on chunk ${i + 1}. Skipping chunk. Error: ${parseError.message}`);
+        console.error(`Raw response from chunk ${i + 1}:`, responseText);
+        continue;
+      }
+
+      if (aiParsed.worksheets && Array.isArray(aiParsed.worksheets)) {
+        aiParsed.worksheets.forEach((ws: any) => {
+          const wsCategory = ws.category;
+          let mappedCategory = 'Non-Index';
+          if (wsCategory === '8-Focus Crime' || wsCategory === '8-Focus' || wsCategory === '8-Focus Crimes' || wsCategory === '8 Focus') {
+            mappedCategory = '8-Focus';
+          } else if (wsCategory === 'PSI' || wsCategory === 'RIR' || wsCategory === 'RIR/PSI' || wsCategory === 'RIR - PSI' || wsCategory === 'RIR_PSI' || wsCategory === 'RIR / PSI') {
+            mappedCategory = 'PSI';
+          } else if (wsCategory === 'Non-Index Crime' || wsCategory === 'Non-Index') {
+            mappedCategory = 'Non-Index';
+          }
+
+          if (ws.records && Array.isArray(ws.records)) {
+            ws.records.forEach((rec: any) => {
+              const rawLoc = rec.Location || rec.location || rec.barangay || rec.Barangay || '';
+              let normalizedBrgy = String(rawLoc).trim();
+              if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+              if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+
+              const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+              if (exactMatch) {
+                normalizedBrgy = exactMatch;
+              } else {
+                const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+                if (partialMatch) normalizedBrgy = partialMatch;
+              }
+
+              let rawOffense = rec.Offense || rec.offense || rec.incident_type || "Unknown Incident";
+              let rawCategory = mappedCategory;
+
+              if (typeof rawOffense === 'string') {
+                const trimOff = rawOffense.trim().toLowerCase();
+                if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+                  rawOffense = 'Estafa';
+                  rawCategory = 'Non-Index';
+                } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+                  rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+                  rawCategory = 'Non-Index';
+                }
+              }
+
+              let finalCategory = rawCategory;
+              const lowerOffense = String(rawOffense).toLowerCase();
+              if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+                finalCategory = 'PSI';
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+                finalCategory = '8-Focus';
+              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+                finalCategory = 'PSI';
+              }
+
+              const rawDate = rec.Date || rec.date || rec.dateCommitted || rec.date_committed || new Date().toISOString().split('T')[0];
+              const cleanD = String(rawDate).split('T')[0].split(' ')[0];
+              const rawTime = rec.Time || rec.time || rec.timeCommitted || rec.time_committed || null;
+
+              flattened.push({
+                barangay: normalizedBrgy,
+                date_committed: cleanD,
+                time_committed: rawTime,
+                offense: rawOffense,
+                category: finalCategory,
+                description: rec.description || rec.Description || ""
+              });
+            });
+          }
+        });
+      } else if (aiParsed.incidents && Array.isArray(aiParsed.incidents)) {
+        aiParsed.incidents.forEach((inc: any) => {
+          if (!inc.barangay) return;
+          let normalizedBrgy = String(inc.barangay).trim();
           if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
           if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
 
-          // Try to find the best match in VALID_BARANGAYS
           const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
           if (exactMatch) {
             normalizedBrgy = exactMatch;
@@ -414,18 +1132,118 @@ INPUT DATA STARTS BELOW:
             if (partialMatch) normalizedBrgy = partialMatch;
           }
 
+          let rawOffense = inc.offense || inc.incident_type || "Unknown Incident";
+          let rawCategory = inc.category;
+
+          if (typeof rawOffense === 'string') {
+            const trimOff = rawOffense.trim().toLowerCase();
+            if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+              rawOffense = 'Estafa';
+              rawCategory = 'Non-Index';
+            } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+              rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+              rawCategory = 'Non-Index';
+            }
+          }
+
+          let finalCategory = 'Non-Index';
+          const lowerOffense = String(rawOffense).toLowerCase();
+          if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+            finalCategory = 'PSI';
+          } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+            finalCategory = '8-Focus';
+          } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+            finalCategory = 'PSI';
+          } else if (rawCategory === '8-Focus' || rawCategory === 'PSI' || rawCategory === 'Non-Index') {
+            finalCategory = rawCategory;
+          }
+
           flattened.push({
             barangay: normalizedBrgy,
-            date_committed: inc.date || inc.date_committed || new Date().toISOString().split('T')[0],
-            offense: inc.offense || inc.incident_type || "Unknown Incident",
-            category: inc.category || (inc.offense && ['Theft', 'Robbery', 'Murder', 'Homicide', 'Physical Injury', 'Rape', 'Carnapping'].some(t => String(inc.offense).includes(t)) ? '8-Focus' : 'Non-Index'),
+            date_committed: String(inc.dateCommitted || inc.date_committed || inc.date || new Date().toISOString().split('T')[0]).split('T')[0].split(' ')[0],
+            time_committed: inc.timeCommitted || inc.time_committed || inc.time || null,
+            offense: rawOffense,
+            category: finalCategory,
             description: inc.description || ""
           });
         });
+      } else {
+        const barangayData = aiParsed.barangays || aiParsed;
+        for (const [brgy, incidents] of Object.entries(barangayData)) {
+          if (Array.isArray(incidents)) {
+            incidents.forEach((inc: any) => {
+              let normalizedBrgy = brgy.trim();
+              if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
+              if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
+  
+              const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
+              if (exactMatch) {
+                normalizedBrgy = exactMatch;
+              } else {
+                const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
+                if (partialMatch) normalizedBrgy = partialMatch;
+              }
+  
+              let rawOffense = inc.offense || inc.incident_type || "Unknown Incident";
+              let rawCategory = inc.category;
+
+              if (typeof rawOffense === 'string') {
+                const trimOff = rawOffense.trim().toLowerCase();
+                if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+                  rawOffense = 'Estafa';
+                  rawCategory = 'Non-Index';
+                } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+                  rawOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+                  rawCategory = 'Non-Index';
+                }
+              }
+
+              let finalCategory = 'Non-Index';
+              const lowerOffense = String(rawOffense).toLowerCase();
+              if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+                finalCategory = 'PSI';
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+                finalCategory = '8-Focus';
+              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+                finalCategory = 'PSI';
+              } else if (rawCategory === '8-Focus' || rawCategory === 'PSI' || rawCategory === 'Non-Index') {
+                finalCategory = rawCategory;
+              }
+
+              flattened.push({
+                barangay: normalizedBrgy,
+                date_committed: String(inc.dateCommitted || inc.date_committed || inc.date || new Date().toISOString().split('T')[0]).split('T')[0].split(' ')[0],
+                time_committed: inc.timeCommitted || inc.time_committed || inc.time || null,
+                offense: rawOffense,
+                category: finalCategory,
+                description: inc.description || ""
+              });
+            });
+          }
+        }
       }
     }
+  }
 
-    return res.json({ success: true, data: flattened });
+    // Server-side strict deduplication to avoid any repetition
+    const seen = new Set<string>();
+    const allRecords = [...programmaticRirPsiRecords, ...flattened];
+    const uniqueFlattened = allRecords.filter((item: any) => {
+      const brgyKey = String(item.barangay).trim().toLowerCase();
+      const dateKey = String(item.date_committed).trim();
+      const timeKey = item.time_committed ? String(item.time_committed).trim() : '';
+      const offenseKey = String(item.offense).trim().toLowerCase();
+      const compositeKey = `${brgyKey}|${dateKey}|${timeKey}|${offenseKey}`;
+      
+      if (seen.has(compositeKey)) {
+        console.log(`[DEDUPLICATOR] Filtered out duplicate incident: ${compositeKey}`);
+        return false;
+      }
+      seen.add(compositeKey);
+      return true;
+    });
+
+    return res.json({ success: true, data: uniqueFlattened });
   } catch (err: any) {
     console.error('AI Processing Error:', err);
     return res.status(500).json({ success: false, error: `Neural Unit Error: ${err.message}` });
@@ -511,12 +1329,34 @@ export const getAuditLogs = async (req: Request, res: Response) => {
   }
 };
 
+const getYearFromPoint = (p: any): number | null => {
+  const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+  if (!rawDate) return null;
+  const d = new Date(rawDate);
+  return !isNaN(d.getTime()) ? d.getUTCFullYear() : null;
+};
+
+const getMonthFromPoint = (p: any): number | null => {
+  const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+  if (!rawDate) return null;
+  const d = new Date(rawDate);
+  return !isNaN(d.getTime()) ? d.getUTCMonth() : null;
+};
+
 export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   try {
     const selectedBarangay = req.query.barangay ? String(req.query.barangay).trim() : 'ALL';
+    const selectedYear = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
 
     const snap = await db.collection('map_points').get();
-    const points = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    const points = snap.docs.map(doc => {
+      const data = doc.data();
+      let cat = data.category || 'Non-Index';
+      if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
+        cat = 'PSI';
+      }
+      return { id: doc.id, ...data, category: cat };
+    })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
         const isPlaceholder = dateStr === 'N/A' ||
@@ -541,35 +1381,14 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
       });
     }
 
-    // Determine referenceDate to reconstruct the same 12-month window used in EJS
-    let referenceDate = new Date();
-    if (points.length > 0) {
-      let maxDate = new Date(0);
-      points.forEach((p: any) => {
-        if (p.incident_date) {
-          const d = new Date(p.incident_date);
-          if (!isNaN(d.getTime()) && d > maxDate) {
-            maxDate = d;
-          }
-        }
-      });
-      if (maxDate > referenceDate) {
-        referenceDate = maxDate;
-      }
-    }
-
-    // Build the 12-month array of crime counts (matching the EJS bar graph exactly)
+    // Build the Selected Year array of crime counts (matching the EJS bar graph exactly)
     const monthlyTrendData: { month: string; count: number }[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
-      const monthLabel = d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
-      const month = d.getMonth();
-      const year = d.getFullYear();
+    for (let i = 0; i <= 11; i++) {
+      const d = new Date(Date.UTC(selectedYear, i, 1));
+      const monthLabel = d.toLocaleString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 
       const count = filteredPoints.filter((p: any) => {
-        if (!p.incident_date) return false;
-        const pd = new Date(p.incident_date);
-        return pd.getMonth() === month && pd.getFullYear() === year;
+        return getMonthFromPoint(p) === i && getYearFromPoint(p) === selectedYear;
       }).length;
 
       monthlyTrendData.push({ month: monthLabel, count });
@@ -579,8 +1398,10 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
     const crimeCounts: { [key: string]: number } = {};
     const categoryCounts: { [key: string]: number } = {};
     filteredPoints.forEach((p: any) => {
-      if (p.incident_type) crimeCounts[p.incident_type] = (crimeCounts[p.incident_type] || 0) + 1;
-      if (p.category) categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+      if (getYearFromPoint(p) === selectedYear) {
+        if (p.incident_type) crimeCounts[p.incident_type] = (crimeCounts[p.incident_type] || 0) + 1;
+        if (p.category) categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+      }
     });
 
     const sortedCrimes = Object.entries(crimeCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -621,9 +1442,9 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
     const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
 
     if (totalCount === 0) {
-      analysisText = `The trend over the last 12 months shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment with no visible criminal activity.`;
+      analysisText = `The trend for ${selectedYear} shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment.`;
     } else {
-      analysisText = `The trend over the last 12 months shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
+      analysisText = `The trend for ${selectedYear} shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
     }
 
     res.json({
@@ -636,12 +1457,106 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   }
 };
 
+export const getReportAnalysis = async (req: Request, res: Response) => {
+  try {
+    const reportId = req.params.id;
+    const doc = await db.collection('intelligence_scans').doc(reportId).get();
+    if (!doc.exists) {
+      return res.status(404).json({ success: false, error: 'Report not found' });
+    }
+    const report = doc.data();
+    const rawData = report?.raw_data || [];
+
+    if (rawData.length === 0) {
+      return res.json({ success: true, analysis: 'No record items to analyze.' });
+    }
+
+    // Attempt AI analysis if API key is defined and valid
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GPT_OSS_120B_API_KEY;
+    if (apiKey) {
+      try {
+        const client = getGptOssClient();
+
+        // Prepare serialized data safely, omitting/hiding time because it's optional
+        const serializedData = rawData.map((item: any, idx: number) => {
+          const cleanD = String(item.date_committed || item.date || 'N/A').split('T')[0].split(' ')[0];
+          return `${idx + 1}. Barangay: ${item.barangay || 'N/A'}, Offense: ${item.offense || item.incident_type || 'N/A'}, Category: ${item.category || 'N/A'}, Date: ${cleanD}${item.time_committed ? `, Time: ${item.time_committed}` : ''}, Description: ${item.description || 'N/A'}`;
+        }).slice(0, 100).join('\n');
+
+        const prompt = `You are a high-level Crime Pattern and Security Intelligence Analyst. Analyze the following batch of intelligence scan data and generate a clear, highly polished, professional summary of crime patterns and security trends. Focus on:
+1. Incident distribution across Barangays.
+2. The breakdown between key risk pillars: "8-Focus", "PSI" (Public Safety Index, covering accidents/fires/disasters), and "Non-Index". Do not refer to RIR/PSI - refer to it strictly as PSI.
+3. Notable hotspots, trends, and specific areas requiring immediate law enforcement attention or public safety resources.
+
+Format your response in professional Markdown with bullet points, bold key terms, and clear sections.
+
+Intelligence Data:
+${serializedData}`;
+
+        const response = await client.models.generateContent({
+          model: 'gemini-3.5-flash',
+          contents: prompt
+        });
+        const text = response.text;
+        if (text && text.trim().length > 0) {
+          return res.json({ success: true, analysis: text });
+        }
+      } catch (aiErr) {
+        console.warn('AI analysis failed, falling back to local analysis:', aiErr);
+      }
+    }
+
+    const analysisText = generateLocalReportAnalysis(rawData);
+    res.json({ success: true, analysis: analysisText });
+  } catch (err: any) {
+    console.error('Error in getReportAnalysis:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+function generateLocalReportAnalysis(rawData: any[]): string {
+  const counts = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0 };
+  const brgyCounts: { [key: string]: number } = {};
+  const crimeCounts: { [key: string]: number } = {};
+
+  rawData.forEach((item: any) => {
+    let cat = item.category || 'Non-Index';
+    if (cat === 'RIR/PSI') cat = 'PSI';
+    if (cat in counts) {
+      counts[cat as '8-Focus' | 'PSI' | 'Non-Index']++;
+    } else {
+      counts['Non-Index']++;
+    }
+
+    const brgy = item.barangay || 'Unknown';
+    brgyCounts[brgy] = (brgyCounts[brgy] || 0) + 1;
+
+    const offense = item.offense || item.incident_type || 'Unknown';
+    crimeCounts[offense] = (crimeCounts[offense] || 0) + 1;
+  });
+
+  const sortedBrgy = Object.entries(brgyCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const sortedCrimes = Object.entries(crimeCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  const topBrgyText = sortedBrgy.map(([name, count]) => `**Brgy. ${name}** (${count} record${count === 1 ? '' : 's'})`).join(', ');
+  const topCrimeText = sortedCrimes.map(([name, count]) => `**${name}** (${count} occurrenc${count === 1 ? 'e' : 'es'})`).join(', ');
+
+  return `### **CPICRS Security Intelligence Summary**
+
+This report summarizes **${rawData.length} crime and public safety records** scanned from recent tactical signals.
+
+#### **I. Pillar Breakdown**
+- **8-Focus**: **${counts['8-Focus']} cases** — Highlights major street level indexes (Theft, Robbery, Homicide, Homicide, Rape).
+- **PSI (Public Safety Index)**: **${counts['PSI']} cases** — Captures road accidents, physical hazards, traffic events, and disaster/rescue compliance.
+- **Non-Index**: **${counts['Non-Index']} cases** — Covers local municipal ordinances, special laws, drug possession, cybercrime, and minor security threats.
+
+#### **II. Pattern Analysis**
+- **Sectors of Concern**: The primary hotspots identified in this dataset are ${topBrgyText || 'N/A'}. These sectors account for the highest density of reported incidents and should be prioritized for patrol routing.
+- **Frequent Offenses**: The most recurrent security signals detected are ${topCrimeText || 'N/A'}. Highly concentrated incident types require dedicated community resources or traffic/patrol checkpoints to actively discourage ongoing patterns.`;
+}
+
 export const getDashboard = async (req: Request, res: Response) => {
   try {
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-    const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
-
     const [
       allMapPointsSnap,
       anonymousTipsSnap,
@@ -650,7 +1565,7 @@ export const getDashboard = async (req: Request, res: Response) => {
       totalBulletinsSnap,
       allReportsSnap
     ] = await Promise.all([
-      db.collection('map_points').where('incident_date', '>=', oneYearAgoStr).get(),
+      db.collection('map_points').get(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
       db.collection('anonymous_tips').count().get(),
       db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
@@ -658,8 +1573,30 @@ export const getDashboard = async (req: Request, res: Response) => {
       db.collection('intelligence_scans').get()
     ]);
 
+    const scansMap: { [key: string]: string } = {};
+    allReportsSnap.docs.forEach((doc: any) => {
+      const data = doc.data();
+      const stats = data.category_stats || {};
+      scansMap[doc.id] = stats.entry_type || 'scanned';
+    });
+
     const allPoints = allMapPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .map((doc: any) => {
+        const data = doc.data();
+        let entryType = data.entry_type;
+        if (!entryType) {
+          if (data.report_id) {
+            entryType = scansMap[data.report_id] || 'scanned';
+          } else {
+            entryType = 'manual';
+          }
+        }
+        let cat = data.category || 'Non-Index';
+        if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
+          cat = 'PSI';
+        }
+        return { id: doc.id, ...data, category: cat, entry_type: entryType };
+      })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
         const isPlaceholder = dateStr === 'N/A' ||
@@ -676,6 +1613,17 @@ export const getDashboard = async (req: Request, res: Response) => {
     const totalBulletinsCount = totalBulletinsSnap.data().count;
     const totalReportsCount = filteredReports.length;
     const notifications = notificationsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
+    const availableYears: number[] = Array.from(
+      new Set<number>(
+        allPoints
+          .map((p: any) => getYearFromPoint(p))
+          .filter((y): y is number => y !== null)
+      )
+    ).sort((a: number, b: number) => b - a);
+
+    const defaultYear: number = availableYears.length > 0 ? availableYears[0] : new Date().getFullYear();
+    const selectedYear: number = req.query.year ? parseInt(req.query.year as string, 10) : defaultYear;
 
     // Time-based calculations - Reference date is latest of (Now, Latest Record)
     let referenceDate = new Date();
@@ -702,11 +1650,15 @@ export const getDashboard = async (req: Request, res: Response) => {
     const todayPoints = allPoints.filter((p: any) => p.incident_date && typeof p.incident_date === 'string' && p.incident_date.startsWith(todayStr));
     const yesterdayPoints = allPoints.filter((p: any) => p.incident_date && typeof p.incident_date === 'string' && p.incident_date.startsWith(yesterdayStr));
 
+    const currentYearPoints = allPoints.filter((p: any) => {
+      return getYearFromPoint(p) === selectedYear;
+    });
+
     const todayStats = {
       total: todayPoints.length,
-      focus: allPoints.filter((p: any) => p.category === '8-Focus').length,
-      nonIndex: allPoints.filter((p: any) => p.category === 'Non-Index').length,
-      psi: allPoints.filter((p: any) => p.category === 'PSI').length,
+      focus: currentYearPoints.filter((p: any) => p.category === '8-Focus').length,
+      nonIndex: currentYearPoints.filter((p: any) => p.category === 'Non-Index').length,
+      psi: currentYearPoints.filter((p: any) => p.category === 'PSI').length,
       comparison: 0,
       totalTips: totalTipsCount,
       totalBulletins: totalBulletinsCount,
@@ -721,7 +1673,7 @@ export const getDashboard = async (req: Request, res: Response) => {
 
     // High Risk Barangays
     const brgyMap: { [key: string]: number } = {};
-    allPoints.forEach((p: any) => {
+    currentYearPoints.forEach((p: any) => {
       if (p.barangay) brgyMap[p.barangay] = (brgyMap[p.barangay] || 0) + 1;
     });
 
@@ -735,25 +1687,24 @@ export const getDashboard = async (req: Request, res: Response) => {
       .sort((a, b) => b.count - a.count)
       .slice(0, 10);
 
-    // Monthly Trends (Last 12 Months from Reference)
+    // Monthly Trends (Current Year: Jan - Dec)
     const monthlyTrends: any[] = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(referenceDate.getFullYear(), referenceDate.getMonth() - i, 1);
-      const monthLabel = d.toLocaleString('en-US', { month: 'short' });
-      const month = d.getMonth();
-      const year = d.getFullYear();
+    for (let i = 0; i <= 11; i++) {
+      const d = new Date(Date.UTC(selectedYear, i, 1));
+      const monthLabel = d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
 
       const mPoints = allPoints.filter((p: any) => {
-        if (!p.incident_date) return false;
-        const pd = new Date(p.incident_date);
-        return pd.getMonth() === month && pd.getFullYear() === year;
+        return getMonthFromPoint(p) === i && getYearFromPoint(p) === selectedYear;
       });
 
       monthlyTrends.push({
         month: monthLabel,
-        focus: mPoints.filter((p: any) => p.category === '8-Focus').length,
-        nonIndex: mPoints.filter((p: any) => p.category === 'Non-Index').length,
-        psi: mPoints.filter((p: any) => p.category === 'PSI').length
+        focusManual: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'manual').length,
+        focusScanned: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'scanned').length,
+        nonIndexManual: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'manual').length,
+        nonIndexScanned: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
+        psiManual: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'manual').length,
+        psiScanned: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'scanned').length
       });
     }
 
@@ -782,6 +1733,7 @@ export const getDashboard = async (req: Request, res: Response) => {
       alerts,
       notifications,
       points: allPoints,
+      defaultYear: selectedYear,
       layout: 'layouts/admin'
     });
   } catch (err) {
@@ -809,8 +1761,6 @@ export const getBulletins = async (req: Request, res: Response) => {
     let query: any = db.collection('bulletins');
     if (category) {
       query = query.where('category', '==', category);
-    } else {
-      query = query.where('category', '!=', 'Wanted Person').where('category', '!=', 'Missing Person');
     }
     
     const snap = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).get();
@@ -818,8 +1768,6 @@ export const getBulletins = async (req: Request, res: Response) => {
     let countQuery: any = db.collection('bulletins');
     if (category) {
       countQuery = countQuery.where('category', '==', category);
-    } else {
-      countQuery = countQuery.where('category', '!=', 'Wanted Person').where('category', '!=', 'Missing Person');
     }
     const countSnap = await countQuery.count().get();
 
@@ -1057,8 +2005,18 @@ export const updateTip = async (req: Request, res: Response) => {
 
 export const getMap = async (req: Request, res: Response) => {
   try {
+    const currentYear = new Date().getFullYear();
+    const currentYearStartStr = `${currentYear}-01-01`;
+
     const snap = await db.collection('map_points').get();
-    const points = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    const points = snap.docs.map(doc => {
+      const data = doc.data();
+      let cat = data.category || 'Non-Index';
+      if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
+        cat = 'PSI';
+      }
+      return { id: doc.id, ...data, category: cat };
+    })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
         const isPlaceholder = dateStr === 'N/A' ||
@@ -1084,18 +2042,34 @@ export const postMapPoint = async (req: Request, res: Response) => {
   try {
     const pin = MANUAL_PINS.find(p => p.name === barangay);
 
-    // Categorization logic
-    const focus8 = ['Murder', 'Homicide', 'Physical Injury', 'Rape', 'Robbery', 'Theft', 'Carnapping MV', 'Carnapping MC'];
-    const psi = ['Vehicular Accident', 'Traffic Accident', 'Public Safety', 'Fire Incident'];
+    let finalOffense = incident_type || '';
     let category = 'Non-Index';
-    if (focus8.includes(incident_type)) category = '8-Focus';
-    else if (psi.includes(incident_type)) category = 'PSI';
+    
+    if (typeof finalOffense === 'string') {
+      const trimOff = finalOffense.trim().toLowerCase();
+      if (trimOff === '/es' || trimOff === 'es' || trimOff === 'estafa' || trimOff === 'fraud' || trimOff === 'swindling') {
+        finalOffense = 'Estafa';
+        category = 'Non-Index';
+      } else if (trimOff === '/d' || trimOff === 'd' || trimOff === 'drugs' || trimOff === 'dangerous drugs' || trimOff === 'ra 9165' || trimOff === 'comprehensive dangerous drugs act (ra 9165)') {
+        finalOffense = 'Comprehensive Dangerous Drugs Act (RA 9165)';
+        category = 'Non-Index';
+      }
+    }
 
-    await logAction(req, 'MAP_POINT_ADD', `Added manual map point: ${incident_type} in Brgy. ${barangay}`);
+    const lowerOffense = String(finalOffense).toLowerCase();
+    if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
+      category = 'PSI';
+    } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'physical injuries', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+      category = '8-Focus';
+    } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident', 'accident', 'safety'].some(t => lowerOffense.includes(t))) {
+      category = 'PSI';
+    }
+
+    await logAction(req, 'MAP_POINT_ADD', `Added manual map point: ${finalOffense} in Brgy. ${barangay}`);
     await db.collection('map_points').add({
       lat: pin ? pin.lat : 0,
       lng: pin ? pin.lng : 0,
-      incident_type,
+      incident_type: finalOffense,
       incident_date,
       barangay,
       description: description || '',
@@ -1379,15 +2353,40 @@ export const deleteUser = async (req: Request, res: Response) => {
 
 export const getReports = async (req: Request, res: Response) => {
   try {
+    const currentYear = new Date().getFullYear();
+    const currentYearStartStr = `${currentYear}-01-01`;
+
     const [reportsSnap, allPointsSnap] = await Promise.all([
-      db.collection('intelligence_scans').orderBy('timestamp', 'desc').get(),
-      db.collection('map_points').orderBy('incident_date', 'desc').get()
+      db.collection('intelligence_scans').where('timestamp', '>=', currentYearStartStr).orderBy('timestamp', 'desc').get(),
+      db.collection('map_points').where('incident_date', '>=', currentYearStartStr).orderBy('incident_date', 'desc').get()
     ]);
 
     const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
+    const scansMap: { [key: string]: string } = {};
+    reportsSnap.docs.forEach((doc: any) => {
+      const data = doc.data();
+      const stats = data.category_stats || {};
+      scansMap[doc.id] = stats.entry_type || 'scanned';
+    });
+
     const allPoints = allPointsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .map((doc: any) => {
+        const data = doc.data();
+        let entryType = data.entry_type;
+        if (!entryType) {
+          if (data.report_id) {
+            entryType = scansMap[data.report_id] || 'scanned';
+          } else {
+            entryType = 'manual';
+          }
+        }
+        let cat = data.category || 'Non-Index';
+        if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
+          cat = 'PSI';
+        }
+        return { id: doc.id, ...data, category: cat, entry_type: entryType };
+      })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
         const isPlaceholder = dateStr === 'N/A' ||
@@ -1428,9 +2427,12 @@ export const getReports = async (req: Request, res: Response) => {
 
       monthlyTrends.push({
         month: monthLabel,
-        focus: mPoints.filter((p: any) => p.category === '8-Focus').length,
-        nonIndex: mPoints.filter((p: any) => p.category === 'Non-Index').length,
-        psi: mPoints.filter((p: any) => p.category === 'PSI').length
+        focusManual: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'manual').length,
+        focusScanned: mPoints.filter((p: any) => p.category === '8-Focus' && p.entry_type === 'scanned').length,
+        nonIndexManual: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'manual').length,
+        nonIndexScanned: mPoints.filter((p: any) => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
+        psiManual: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'manual').length,
+        psiScanned: mPoints.filter((p: any) => p.category === 'PSI' && p.entry_type === 'scanned').length
       });
     }
 

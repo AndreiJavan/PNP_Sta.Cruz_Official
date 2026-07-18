@@ -56,7 +56,6 @@ router.get('/bulletins/:id/edit', getEditBulletin);
 router.post('/bulletins/:id/edit', memoryUpload.array('photos', 5), postEditBulletin);
 router.post('/bulletins/:id/delete', deleteBulletin);
 
-
 // Map
 router.get('/map', getMap);
 router.post('/map/add', postMapPoint);

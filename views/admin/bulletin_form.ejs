@@ -72,8 +72,15 @@
 
                     <button type="button"
                             onclick="document.getElementById('photos').click()"
-                            class="w-full bg-pnp-blue text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition">
-                        Choose / Replace Images (Max 5)
+                            class="w-full bg-pnp-blue text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
+                        Choose / Add Images (Max 5)
+                    </button>
+
+                    <button type="button"
+                            onclick="clearAllImages()"
+                            id="clearAllImagesBtn"
+                            class="w-full bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition hidden">
+                        Remove All Images
                     </button>
 
                     <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
@@ -86,6 +93,8 @@
 
         <!-- RIGHT SIDE: FORM FIELDS -->
         <div id="rightPanel" class="space-y-6 flex flex-col transition-all duration-300">
+
+
 
             <!-- TITLE -->
             <div class="space-y-2">
@@ -229,6 +238,8 @@
     let currentPreviewSlide = 0;
     let previewTotalSlides = <%= bulletin && bulletin.photo_paths ? bulletin.photo_paths.length : (bulletin && bulletin.photo_path ? 1 : 0) %>;
     
+    let accumulatedFiles = [];
+
     function movePreview(direction) {
         if (previewTotalSlides <= 1) return;
         currentPreviewSlide = (currentPreviewSlide + direction + previewTotalSlides) % previewTotalSlides;
@@ -243,9 +254,11 @@
             if (idx === currentPreviewSlide) {
                 slide.classList.replace('opacity-0', 'opacity-100');
                 slide.classList.replace('z-0', 'z-10');
+                slide.classList.remove('pointer-events-none');
             } else {
                 slide.classList.replace('opacity-100', 'opacity-0');
                 slide.classList.replace('z-10', 'z-0');
+                slide.classList.add('pointer-events-none');
             }
         });
         
@@ -256,6 +269,15 @@
             } else {
                 ind.classList.remove('bg-white');
                 ind.classList.add('bg-white/40');
+            }
+        });
+
+        const deleteBtns = document.querySelectorAll('.delete-slide-btn');
+        deleteBtns.forEach((btn, idx) => {
+            if (idx === currentPreviewSlide) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
             }
         });
     }
@@ -279,47 +301,109 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('ring-2', 'ring-pnp-blue');
-
-            const dt = e.dataTransfer;
-            if (dt.files && dt.files.length > 5) {
-                alert('You can only upload a maximum of 5 images.');
-                return;
-            }
-            
-            fileInput.files = dt.files;
-            handleFiles(dt.files);
+            handleFiles(e.dataTransfer.files);
         });
     }
 
     function handleFiles(files) {
         if (!files || files.length === 0) return;
         
-        if (files.length > 5) {
-            alert('You can only upload a maximum of 5 images.');
-            fileInput.value = ''; // Clear input
+        Array.from(files).forEach(file => {
+            if (accumulatedFiles.length < 5) {
+                accumulatedFiles.push(file);
+            }
+        });
+
+        if (accumulatedFiles.length > 5) {
+            alert('You can only upload a maximum of 5 images. Extra files were ignored.');
+            accumulatedFiles = accumulatedFiles.slice(0, 5);
+        }
+        
+        syncFileInput();
+        renderAccumulatedFiles();
+    }
+
+    function syncFileInput() {
+        const dt = new DataTransfer();
+        accumulatedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+        
+        const clearBtn = document.getElementById('clearAllImagesBtn');
+        if (accumulatedFiles.length > 0) {
+            clearBtn.classList.remove('hidden');
+        } else {
+            clearBtn.classList.add('hidden');
+        }
+    }
+
+    function removeSingleImage(index) {
+        accumulatedFiles.splice(index, 1);
+        syncFileInput();
+        
+        if (accumulatedFiles.length === 0) {
+            clearAllImages();
+        } else {
+            if (currentPreviewSlide >= accumulatedFiles.length) {
+                currentPreviewSlide = Math.max(0, accumulatedFiles.length - 1);
+            }
+            renderAccumulatedFiles();
+        }
+    }
+
+    function clearAllImages() {
+        accumulatedFiles = [];
+        syncFileInput();
+        const previewCarousel = document.getElementById('previewCarousel');
+        previewCarousel.innerHTML = `
+            <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10">
+                <i class="fas fa-images text-gray-400 text-5xl mb-4"></i>
+                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images</span>
+            </div>
+        `;
+        currentPreviewSlide = 0;
+        previewTotalSlides = 0;
+        document.getElementById('clearAllImagesBtn').classList.add('hidden');
+    }
+
+    function renderAccumulatedFiles() {
+        const previewCarousel = document.getElementById('previewCarousel');
+        previewCarousel.innerHTML = '';
+        previewTotalSlides = accumulatedFiles.length;
+
+        if (accumulatedFiles.length === 0) {
+            clearAllImages();
             return;
         }
 
-        const previewCarousel = document.getElementById('previewCarousel');
-        previewCarousel.innerHTML = '';
-        currentPreviewSlide = 0;
-        previewTotalSlides = files.length;
-
         let loadedCount = 0;
 
-        Array.from(files).forEach((file, index) => {
+        accumulatedFiles.forEach((file, index) => {
             const reader = new FileReader();
             reader.onload = function (e) {
+                const slideWrapper = document.createElement('div');
+                slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${index === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`;
+                slideWrapper.dataset.index = index;
+                
                 const img = document.createElement('img');
                 img.src = e.target.result;
-                img.className = `absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out preview-slide ${index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'}`;
-                img.dataset.index = index;
-                previewCarousel.appendChild(img);
+                img.className = `w-full h-full object-cover rounded-md`;
+                
+                const delBtn = document.createElement('button');
+                delBtn.type = "button";
+                delBtn.className = `delete-slide-btn absolute top-3 right-3 z-30 bg-red-500/80 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition focus:outline-none shadow-lg ${index === currentPreviewSlide ? '' : 'hidden'}`;
+                delBtn.innerHTML = '<i class="fas fa-trash text-[10px]"></i>';
+                delBtn.onclick = (event) => {
+                    event.stopPropagation();
+                    removeSingleImage(index);
+                };
+
+                slideWrapper.appendChild(img);
+                slideWrapper.appendChild(delBtn);
+                previewCarousel.appendChild(slideWrapper);
                 
                 loadedCount++;
                 
-                // Add controls once all are loaded
-                if (loadedCount === files.length && files.length > 1) {
+                if (loadedCount === accumulatedFiles.length && accumulatedFiles.length > 1) {
                     let controls = `
                         <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
                             <i class="fas fa-chevron-left text-xs"></i>
@@ -327,10 +411,10 @@
                         <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
                             <i class="fas fa-chevron-right text-xs"></i>
                         </button>
-                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
+                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators pointer-events-none">
                     `;
-                    for(let i = 0; i < files.length; i++) {
-                        controls += `<div class="w-1.5 h-1.5 rounded-full transition-colors ${i === 0 ? 'bg-white' : 'bg-white/40'}" data-indicator="${i}"></div>`;
+                    for(let i = 0; i < accumulatedFiles.length; i++) {
+                        controls += `<div class="w-1.5 h-1.5 rounded-full transition-colors ${i === currentPreviewSlide ? 'bg-white' : 'bg-white/40'}" data-indicator="${i}"></div>`;
                     }
                     controls += `</div>`;
                     previewCarousel.insertAdjacentHTML('beforeend', controls);
@@ -397,4 +481,5 @@
         setTimeout(syncPanels, 500);
     });
     window.addEventListener('resize', syncPanels);
+
 </script>
