@@ -37,37 +37,13 @@
 </style>
 
 <div class="container mx-auto px-4 py-20">
-    <!-- Search & Filter -->
-    <div
-        class="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16">
-        <div class="flex flex-col gap-6">
-            <div class="relative">
-                <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
-                    placeholder="Search bulletins..."
-                    class="w-full pl-12 pr-6 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
-                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600"></i>
-            </div>
-            
-            <!-- Category Filter Pills -->
-            <div class="flex flex-wrap items-center gap-2.5 pt-2 border-t border-gray-100 dark:border-slate-700/50">
-                <span class="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 mr-2">Filter Category:</span>
-                <button onclick="setCategoryFilter('All', this)" 
-                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md transition duration-300">
-                    All Bulletins
-                </button>
-                <button onclick="setCategoryFilter('Crime Advisory', this)" 
-                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300">
-                    Crime Advisories
-                </button>
-                <button onclick="setCategoryFilter('Recovered Property', this)" 
-                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300">
-                    Recovered Property
-                </button>
-                <button onclick="setCategoryFilter('General Announcement', this)" 
-                    class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300">
-                    General Announcements
-                </button>
-            </div>
+    <!-- Search -->
+    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-xl mx-auto flex justify-center">
+        <div class="relative w-full">
+            <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                placeholder="Search..."
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 text-sm"></i>
         </div>
     </div>
 
