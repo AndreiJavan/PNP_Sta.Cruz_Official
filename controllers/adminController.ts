@@ -44,25 +44,43 @@ async function logAction(req: Request, action: string, details: string) {
   }
 }
 
-// Workaround for Supabase 'bulletins_category_check' constraint
+// Workaround for Supabase 'bulletins_category_check' constraint and missing 'video_path' column
 const STANDARD_CATEGORIES = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
 
-const encodeCustomCategory = (category: string, body: string) => {
+const encodeCustomCategory = (category: string, body: string, videoPaths?: string[]) => {
+  let encodedBody = body;
+  let cat = category;
   if (!STANDARD_CATEGORIES.includes(category)) {
-    return {
-      category: 'General Announcement',
-      body: body + `\n<!--CUSTOM_CATEGORY:${category}-->`
-    };
+    cat = 'General Announcement';
+    encodedBody = encodedBody + `\n<!--CUSTOM_CATEGORY:${category}-->`;
   }
-  return { category, body };
+  if (videoPaths && videoPaths.length > 0) {
+    encodedBody = encodedBody + `\n<!--VIDEO_PATHS:${JSON.stringify(videoPaths)}-->`;
+  }
+  return { category: cat, body: encodedBody };
 };
 
 export const decodeCustomCategory = (item: any) => {
-  if (item && item.body && item.body.includes('<!--CUSTOM_CATEGORY:')) {
-    const match = item.body.match(/<!--CUSTOM_CATEGORY:(.*?)-->/);
-    if (match) {
-      item.category = match[1];
-      item.body = item.body.replace(/\n?<!--CUSTOM_CATEGORY:.*?-->/g, '');
+  if (item && item.body) {
+    if (item.body.includes('<!--CUSTOM_CATEGORY:')) {
+      const match = item.body.match(/<!--CUSTOM_CATEGORY:(.*?)-->/);
+      if (match) {
+        item.category = match[1];
+        item.body = item.body.replace(/\n?<!--CUSTOM_CATEGORY:.*?-->/g, '');
+      }
+    }
+    if (item.body.includes('<!--VIDEO_PATHS:')) {
+      const match = item.body.match(/<!--VIDEO_PATHS:(.*?)-->/);
+      if (match) {
+        try {
+          const video_paths = JSON.parse(match[1]);
+          item.video_paths = video_paths;
+          item.video_path = match[1];
+        } catch (e) {
+          console.error('Error decoding video paths:', e);
+        }
+        item.body = item.body.replace(/\n?<!--VIDEO_PATHS:.*?-->/g, '');
+      }
     }
   }
   return item;
@@ -1770,6 +1788,15 @@ const parsePhotos = (path: string | undefined): string[] => {
   return [path];
 };
 
+const parseVideos = (path: string | undefined): string[] => {
+  if (!path) return [];
+  try {
+    const parsed = JSON.parse(path);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) { }
+  return [path];
+};
+
 export const getBulletins = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
@@ -1792,7 +1819,7 @@ export const getBulletins = async (req: Request, res: Response) => {
 
     const bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
     });
     const totalPages = Math.ceil(countSnap.data().count / limit);
 
@@ -1808,56 +1835,101 @@ export const getBulletins = async (req: Request, res: Response) => {
 
 export const getCreateBulletin = (req: Request, res: Response) => {
   const category = req.query.category as string || '';
-  res.render('admin/bulletin_form', { title: 'New Bulletin', bulletin: null, defaultCategory: category, layout: 'layouts/admin' });
+  const isPublic = !req.originalUrl.startsWith('/admin');
+  res.render('admin/bulletin_form', {
+    title: 'New Bulletin',
+    bulletin: null,
+    defaultCategory: category,
+    layout: isPublic ? 'layouts/main' : 'layouts/admin',
+    isPublic
+  });
 };
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
-  const encoded = encodeCustomCategory(rawCategory, body);
-
   try {
+    let uploadedPhotoPaths: string[] = [];
+    let uploadedVideoPaths: string[] = [];
+
+    let files = (req as any).files;
+    if (files && Array.isArray(files)) {
+      const photos = files.filter(f => f.fieldname === 'photos');
+      const videos = files.filter(f => f.fieldname === 'videos');
+      files = {
+        photos: photos.length > 0 ? photos : undefined,
+        videos: videos.length > 0 ? videos : undefined
+      };
+    }
+    if (files) {
+      let totalUploaded = 0;
+      if (files.photos && files.photos.length > 0) {
+        for (const file of files.photos) {
+          if (totalUploaded >= 5) break;
+          const fileExt = file.originalname.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const path = `bulletins/${fileName}`;
+          try {
+            const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+            uploadedPhotoPaths.push(publicUrl);
+            totalUploaded++;
+            console.log(`[BULLETIN] Image uploaded successfully: ${publicUrl}`);
+          } catch (storageErr) {
+            console.error('[BULLETIN] Supabase Storage Error:', storageErr);
+          }
+        }
+      }
+
+      if (files.videos && files.videos.length > 0) {
+        for (const file of files.videos) {
+          if (totalUploaded >= 5) break;
+          const fileExt = file.originalname.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const path = `bulletins/${fileName}`;
+          try {
+            const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+            uploadedVideoPaths.push(publicUrl);
+            totalUploaded++;
+            console.log(`[BULLETIN] Video uploaded successfully: ${publicUrl}`);
+          } catch (storageErr) {
+            console.error('[BULLETIN] Supabase Storage Error:', storageErr);
+          }
+        }
+      }
+    }
+
+    const encoded = encodeCustomCategory(rawCategory, body, uploadedVideoPaths);
+
     const data: any = {
       title,
       category: encoded.category,
       body: encoded.body,
-      posted_by: req.session.user.id,
+      posted_by: req.session?.user?.id || 'public-user',
       is_archived: false,
       created_at: new Date().toISOString()
     };
 
-    if ((req as any).files && (req as any).files.length > 0) {
-      const files = (req as any).files;
-      const uploadedPaths: string[] = [];
-
-      for (const file of files) {
-        const fileExt = file.originalname.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const path = `bulletins/${fileName}`;
-
-        try {
-          const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
-          uploadedPaths.push(publicUrl);
-          console.log(`[BULLETIN] Image uploaded successfully: ${publicUrl}`);
-        } catch (storageErr) {
-          console.error('[BULLETIN] Supabase Storage Error:', storageErr);
-        }
-      }
-
-      if (uploadedPaths.length > 0) {
-        data.photo_path = JSON.stringify(uploadedPaths);
-      }
+    if (uploadedPhotoPaths.length > 0) {
+      data.photo_path = JSON.stringify(uploadedPhotoPaths);
     }
 
     await logAction(req, 'BULLETIN_CREATE', `Created informational bulletin: ${title}`);
     await db.collection('bulletins').add(data);
-    if (encoded.category === 'Wanted Person') {
+
+    const isPublic = !req.originalUrl.startsWith('/admin');
+    const redirectPrefix = isPublic ? '/bulletins' : '/admin/bulletins';
+
+    if (encoded.category === 'Wanted Person' && !isPublic) {
       res.redirect('/admin/bulletins?category=Wanted%20Person');
-    } else if (encoded.category === 'Missing Person') {
+    } else if (encoded.category === 'Wanted Person' && isPublic) {
+      res.redirect('/wanted-persons');
+    } else if (encoded.category === 'Missing Person' && !isPublic) {
       res.redirect('/admin/bulletins?category=Missing%20Person');
+    } else if (encoded.category === 'Missing Person' && isPublic) {
+      res.redirect('/missing-persons');
     } else {
-      res.redirect('/admin/bulletins');
+      res.redirect(redirectPrefix);
     }
   } catch (err: any) {
     console.error(err);
@@ -1872,8 +1944,8 @@ export const getEditBulletin = async (req: Request, res: Response) => {
   try {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
     const d = doc.data();
-    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin' });
+    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
+    res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin', isPublic: false });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading bulletin');
@@ -1881,12 +1953,77 @@ export const getEditBulletin = async (req: Request, res: Response) => {
 };
 
 export const postEditBulletin = async (req: Request, res: Response) => {
-  const { title, category, custom_category, body, is_archived } = req.body;
+  const { title, category, custom_category, body, is_archived, existing_photos, existing_videos } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
-  const encoded = encodeCustomCategory(rawCategory, body);
-
   try {
+    let finalPhotos: string[] = [];
+    if (existing_photos) {
+      try {
+        finalPhotos = JSON.parse(existing_photos);
+      } catch (e) {
+        console.error('Error parsing existing_photos:', e);
+      }
+    }
+
+    let finalVideos: string[] = [];
+    if (existing_videos) {
+      try {
+        finalVideos = JSON.parse(existing_videos);
+      } catch (e) {
+        console.error('Error parsing existing_videos:', e);
+      }
+    }
+
+    let files = (req as any).files;
+    if (files && Array.isArray(files)) {
+      const photos = files.filter(f => f.fieldname === 'photos');
+      const videos = files.filter(f => f.fieldname === 'videos');
+      files = {
+        photos: photos.length > 0 ? photos : undefined,
+        videos: videos.length > 0 ? videos : undefined
+      };
+    }
+    if (files) {
+      if (files.photos && files.photos.length > 0) {
+        const uploadedPaths: string[] = [];
+        for (const file of files.photos) {
+          if (finalPhotos.length + finalVideos.length + uploadedPaths.length >= 5) break;
+          const fileExt = file.originalname.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const path = `bulletins/${fileName}`;
+          try {
+            const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+            uploadedPaths.push(publicUrl);
+            console.log(`[BULLETIN EDIT] Image updated: ${publicUrl}`);
+          } catch (storageErr) {
+            console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
+          }
+        }
+        finalPhotos = [...finalPhotos, ...uploadedPaths];
+      }
+
+      if (files.videos && files.videos.length > 0) {
+        const uploadedVideoPaths: string[] = [];
+        for (const file of files.videos) {
+          if (finalPhotos.length + finalVideos.length + uploadedVideoPaths.length >= 5) break;
+          const fileExt = file.originalname.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+          const path = `bulletins/${fileName}`;
+          try {
+            const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
+            uploadedVideoPaths.push(publicUrl);
+            console.log(`[BULLETIN EDIT] Video updated: ${publicUrl}`);
+          } catch (storageErr) {
+            console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
+          }
+        }
+        finalVideos = [...finalVideos, ...uploadedVideoPaths];
+      }
+    }
+
+    const encoded = encodeCustomCategory(rawCategory, body, finalVideos);
+
     const data: any = {
       title,
       category: encoded.category,
@@ -1895,28 +2032,8 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       updated_at: new Date().toISOString()
     };
 
-    if ((req as any).files && (req as any).files.length > 0) {
-      const files = (req as any).files;
-      const uploadedPaths: string[] = [];
-
-      for (const file of files) {
-        const fileExt = file.originalname.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const path = `bulletins/${fileName}`;
-
-        try {
-          const publicUrl = await db.storage.upload('bulletins', path, file.buffer, file.mimetype);
-          uploadedPaths.push(publicUrl);
-          console.log(`[BULLETIN EDIT] Image updated: ${publicUrl}`);
-        } catch (storageErr) {
-          console.error('[BULLETIN EDIT] Supabase Storage Error:', storageErr);
-        }
-      }
-
-      if (uploadedPaths.length > 0) {
-        data.photo_path = JSON.stringify(uploadedPaths);
-      }
-    }
+    // Always update these so that any deleted items are properly removed from the list
+    data.photo_path = JSON.stringify(finalPhotos);
 
     await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);

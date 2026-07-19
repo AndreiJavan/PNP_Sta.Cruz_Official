@@ -1,12 +1,12 @@
-<div class="max-w-7xl mx-auto w-full px-4">
+<div class="max-w-7xl mx-auto w-full px-4 py-8">
     <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden w-full">
         <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
             <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs"><%= bulletin ? 'Edit Bulletin' : 'Create New Bulletin' %></h3>
-            <a href="/admin/bulletins" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
+            <a href="<%= typeof isPublic !== 'undefined' && isPublic ? '/bulletins' : '/admin/bulletins' %>" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
         </div>
         
         <form id="bulletinForm"
-      action="<%= bulletin ? '/admin/bulletins/' + bulletin.id + '/edit' : '/admin/bulletins/create' %>"
+      action="<%= bulletin ? '/admin/bulletins/' + bulletin.id + '/edit' : (typeof isPublic !== 'undefined' && isPublic ? '/bulletins/create' : '/admin/bulletins/create') %>"
       method="POST"
       enctype="multipart/form-data"
       class="p-8 space-y-8"
@@ -15,27 +15,44 @@
     <!-- 2 COLUMN MAIN LAYOUT -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
 
-        <!-- LEFT SIDE: IMAGE -->
+        <!-- LEFT SIDE: UNIFIED MEDIA -->
         <div id="leftPanel" class="space-y-4 flex flex-col transition-all duration-300">
 
             <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Upload Image
+                Upload Media (Images & Videos)
             </label>
 
-            <!-- IMAGE PREVIEW BOX -->
+            <!-- UNIFIED MEDIA PREVIEW BOX -->
             <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
 
                 <div id="dropZone"
-                    onclick="document.getElementById('photos').click()"
-                    class="w-full min-h-[300px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue p-2 relative">
+                    onclick="document.getElementById('mediaInput').click()"
+                    class="w-full min-h-[350px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue p-2 relative">
 
-                    <!-- Existing image OR preview -->
-                    <div id="previewCarousel" class="relative w-full h-full min-h-[300px] flex items-center justify-center bg-gray-100 dark:bg-slate-800 group overflow-hidden rounded-md">
-                        <% if (bulletin && bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                            <% bulletin.photo_paths.forEach(function(path, index) { %>
-                                <img src="<%= path %>" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' %> preview-slide" data-index="<%= index %>" onerror="this.style.display='none';">
+                    <!-- Existing media OR preview -->
+                    <div id="previewCarousel" class="relative w-full h-full min-h-[350px] flex items-center justify-center bg-gray-100 dark:bg-slate-800 group overflow-hidden rounded-md">
+                        <% 
+                            let mediaItems = [];
+                            if (bulletin) {
+                                if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                                    bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
+                                }
+                                if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
+                                    bulletin.photo_paths.forEach(p => mediaItems.push({ type: 'image', path: p }));
+                                } else if (bulletin.photo_path) {
+                                    mediaItems.push({ type: 'image', path: bulletin.photo_path });
+                                }
+                            }
+                        %>
+                        <% if (mediaItems.length > 0) { %>
+                            <% mediaItems.forEach(function(item, index) { %>
+                                <% if (item.type === 'image') { %>
+                                    <img src="<%= item.path %>" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide" data-index="<%= index %>" onerror="this.style.display='none';">
+                                <% } else { %>
+                                    <video src="<%= item.path %>" controls class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide" data-index="<%= index %>"></video>
+                                <% } %>
                             <% }); %>
-                            <% if (bulletin.photo_paths.length > 1) { %>
+                            <% if (mediaItems.length > 1) { %>
                                 <!-- Controls -->
                                 <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
                                     <i class="fas fa-chevron-left text-xs"></i>
@@ -45,24 +62,30 @@
                                 </button>
                                 <!-- Indicators -->
                                 <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
-                                    <% bulletin.photo_paths.forEach(function(_, index) { %>
+                                    <% mediaItems.forEach(function(_, index) { %>
                                         <div class="w-1.5 h-1.5 rounded-full transition-colors <%= index === 0 ? 'bg-white' : 'bg-white/40' %>" data-indicator="<%= index %>"></div>
                                     <% }); %>
                                 </div>
                             <% } %>
-                        <% } else if (bulletin && bulletin.photo_path) { %>
-                            <img src="<%= bulletin.photo_path %>" class="absolute inset-0 w-full h-full object-cover opacity-100 z-10 preview-slide" data-index="0" onerror="this.style.display='none';">
                         <% } else { %>
-                            <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10">
-                                <i class="fas fa-images text-gray-400 text-5xl mb-4"></i>
-                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images</span>
+                            <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
+                                <i class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
+                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 files (Images & Videos combined)</span>
                             </div>
                         <% } %>
                     </div>
                 </div>
 
-                <!-- FILE INPUT -->
+                <!-- FILE INPUTS -->
                 <div class="mt-4">
+                    <!-- This input handles the click event and receives both images and videos -->
+                    <input type="file"
+                        id="mediaInput"
+                        accept="image/*,video/*"
+                        multiple
+                        class="hidden">
+
+                    <!-- These hidden inputs are submitted to the server -->
                     <input type="file"
                         name="photos"
                         id="photos"
@@ -70,25 +93,37 @@
                         multiple
                         class="hidden">
 
+                    <input type="file"
+                        name="videos"
+                        id="videos"
+                        accept="video/*"
+                        multiple
+                        class="hidden">
+
+                    <!-- Hidden inputs to track existing media files when editing -->
+                    <input type="hidden" name="existing_photos" id="existing_photos_input">
+                    <input type="hidden" name="existing_videos" id="existing_videos_input">
+
                     <button type="button"
-                            onclick="document.getElementById('photos').click()"
-                            class="w-full bg-pnp-blue text-white py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
-                        Choose / Add Images (Max 5)
+                            onclick="document.getElementById('mediaInput').click()"
+                            class="w-full bg-pnp-blue text-white py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
+                        Choose / Add Media (Max 5 Files combined)
                     </button>
 
                     <button type="button"
-                            onclick="clearAllImages()"
-                            id="clearAllImagesBtn"
+                            onclick="clearAllMedia()"
+                            id="clearAllMediaBtn"
                             class="w-full bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition hidden">
-                        Remove All Images
+                        Remove All Media
                     </button>
 
                     <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
-                        PNG, JPG, JPEG or WEBP (Leave empty for imageless)
+                        Images (PNG, JPG, WEBP) & Videos (MP4, WEBM) - Max 5 files total
                     </p>
                 </div>
 
             </div>
+
         </div>
 
         <!-- RIGHT SIDE: FORM FIELDS -->
@@ -232,13 +267,32 @@
         }
     }
 
+    const mediaInput = document.getElementById('mediaInput');
     const fileInput = document.getElementById('photos');
+    const videoFileInput = document.getElementById('videos');
     const dropZone = document.getElementById('dropZone');
     
     let currentPreviewSlide = 0;
-    let previewTotalSlides = <%= bulletin && bulletin.photo_paths ? bulletin.photo_paths.length : (bulletin && bulletin.photo_path ? 1 : 0) %>;
     
-    let accumulatedFiles = [];
+    // Existing media from bulletin if editing
+    let existingMedia = [];
+    <% if (bulletin) { %>
+        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+            <% bulletin.video_paths.forEach(function(path) { %>
+                existingMedia.push({ type: 'video', path: '<%= path %>', isExisting: true });
+            <% }); %>
+        <% } %>
+        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+            <% bulletin.photo_paths.forEach(function(path) { %>
+                existingMedia.push({ type: 'image', path: '<%= path %>', isExisting: true });
+            <% }); %>
+        <% } %>
+    <% } %>
+
+    let previewTotalSlides = existingMedia.length;
+    
+    let accumulatedFiles = []; // New images files
+    let accumulatedVideos = []; // New videos files
 
     function movePreview(direction) {
         if (previewTotalSlides <= 1) return;
@@ -252,13 +306,11 @@
         
         slides.forEach((slide, idx) => {
             if (idx === currentPreviewSlide) {
-                slide.classList.replace('opacity-0', 'opacity-100');
-                slide.classList.replace('z-0', 'z-10');
-                slide.classList.remove('pointer-events-none');
+                slide.classList.remove('opacity-0', 'pointer-events-none');
+                slide.classList.add('opacity-100', 'z-10');
             } else {
-                slide.classList.replace('opacity-100', 'opacity-0');
-                slide.classList.replace('z-10', 'z-0');
-                slide.classList.add('pointer-events-none');
+                slide.classList.remove('opacity-100', 'z-10');
+                slide.classList.add('opacity-0', 'pointer-events-none');
             }
         });
         
@@ -282,9 +334,9 @@
         });
     }
 
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            handleFiles(this.files);
+    if (mediaInput) {
+        mediaInput.addEventListener('change', function () {
+            handleMediaFiles(this.files);
         });
     }
 
@@ -301,135 +353,254 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('ring-2', 'ring-pnp-blue');
-            handleFiles(e.dataTransfer.files);
+            handleMediaFiles(e.dataTransfer.files);
         });
     }
 
-    function handleFiles(files) {
+    function handleMediaFiles(files) {
         if (!files || files.length === 0) return;
         
+        let ignoredSome = false;
+
         Array.from(files).forEach(file => {
-            if (accumulatedFiles.length < 5) {
+            const currentTotalCount = existingMedia.length + accumulatedFiles.length + accumulatedVideos.length;
+            if (currentTotalCount >= 5) {
+                ignoredSome = true;
+                return;
+            }
+
+            if (file.type.startsWith('image/')) {
                 accumulatedFiles.push(file);
+            } else if (file.type.startsWith('video/')) {
+                accumulatedVideos.push(file);
+            } else {
+                ignoredSome = true;
             }
         });
 
-        if (accumulatedFiles.length > 5) {
-            alert('You can only upload a maximum of 5 images. Extra files were ignored.');
-            accumulatedFiles = accumulatedFiles.slice(0, 5);
+        if (ignoredSome) {
+            alert('You can only upload a maximum of 5 files (images and videos combined). Some files were ignored.');
         }
         
-        syncFileInput();
-        renderAccumulatedFiles();
+        syncFileInputs();
+        renderAllMedia();
     }
 
-    function syncFileInput() {
-        const dt = new DataTransfer();
-        accumulatedFiles.forEach(f => dt.items.add(f));
-        fileInput.files = dt.files;
-        
-        const clearBtn = document.getElementById('clearAllImagesBtn');
-        if (accumulatedFiles.length > 0) {
-            clearBtn.classList.remove('hidden');
-        } else {
-            clearBtn.classList.add('hidden');
-        }
+    function syncFileInputs() {
+        // Sync photos input
+        const dtPhotos = new DataTransfer();
+        accumulatedFiles.forEach(f => dtPhotos.items.add(f));
+        fileInput.files = dtPhotos.files;
+
+        // Sync videos input
+        const dtVideos = new DataTransfer();
+        accumulatedVideos.forEach(f => dtVideos.items.add(f));
+        videoFileInput.files = dtVideos.files;
     }
 
-    function removeSingleImage(index) {
-        accumulatedFiles.splice(index, 1);
-        syncFileInput();
-        
-        if (accumulatedFiles.length === 0) {
-            clearAllImages();
+    function removeMediaItem(item) {
+        if (item.isExisting) {
+            existingMedia.splice(item.index, 1);
         } else {
-            if (currentPreviewSlide >= accumulatedFiles.length) {
-                currentPreviewSlide = Math.max(0, accumulatedFiles.length - 1);
+            if (item.type === 'image') {
+                accumulatedFiles.splice(item.index, 1);
+            } else {
+                accumulatedVideos.splice(item.index, 1);
             }
-            renderAccumulatedFiles();
+            syncFileInputs();
         }
+
+        // Adjust slide index if it is out of bounds
+        const totalItems = existingMedia.length + accumulatedFiles.length + accumulatedVideos.length;
+        if (currentPreviewSlide >= totalItems) {
+            currentPreviewSlide = Math.max(0, totalItems - 1);
+        }
+
+        renderAllMedia();
     }
 
-    function clearAllImages() {
+    function clearAllMedia() {
+        existingMedia = [];
         accumulatedFiles = [];
-        syncFileInput();
-        const previewCarousel = document.getElementById('previewCarousel');
-        previewCarousel.innerHTML = `
-            <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10">
-                <i class="fas fa-images text-gray-400 text-5xl mb-4"></i>
-                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images</span>
-            </div>
-        `;
+        accumulatedVideos = [];
+        syncFileInputs();
         currentPreviewSlide = 0;
-        previewTotalSlides = 0;
-        document.getElementById('clearAllImagesBtn').classList.add('hidden');
+        renderAllMedia();
     }
 
-    function renderAccumulatedFiles() {
+    function renderAllMedia() {
         const previewCarousel = document.getElementById('previewCarousel');
-        previewCarousel.innerHTML = '';
-        previewTotalSlides = accumulatedFiles.length;
+        if (!previewCarousel) return;
 
-        if (accumulatedFiles.length === 0) {
-            clearAllImages();
+        // Update hidden input fields for the form post
+        syncHiddenInputs();
+
+        // Build list of all items to display
+        const itemsToRender = [];
+        
+        // 1. Existing videos
+        existingMedia.forEach((item, index) => {
+            if (item.type === 'video') {
+                itemsToRender.push({
+                    type: item.type,
+                    src: item.path,
+                    isExisting: true,
+                    index: index
+                });
+            }
+        });
+
+        // 2. Newly added videos
+        accumulatedVideos.forEach((file, index) => {
+            itemsToRender.push({
+                type: 'video',
+                file: file,
+                isExisting: false,
+                index: index
+            });
+        });
+
+        // 3. Existing photos
+        existingMedia.forEach((item, index) => {
+            if (item.type === 'image') {
+                itemsToRender.push({
+                    type: item.type,
+                    src: item.path,
+                    isExisting: true,
+                    index: index
+                });
+            }
+        });
+        
+        // 4. Newly added photos
+        accumulatedFiles.forEach((file, index) => {
+            itemsToRender.push({
+                type: 'image',
+                file: file,
+                isExisting: false,
+                index: index
+            });
+        });
+        
+        previewTotalSlides = itemsToRender.length;
+        
+        if (previewTotalSlides === 0) {
+            previewCarousel.innerHTML = `
+                <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
+                    <i class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images & 2 videos</span>
+                </div>
+            `;
+            currentPreviewSlide = 0;
+            document.getElementById('clearAllMediaBtn').classList.add('hidden');
+            syncPanels();
             return;
         }
-
+        
+        document.getElementById('clearAllMediaBtn').classList.remove('hidden');
+        previewCarousel.innerHTML = '';
+        
         let loadedCount = 0;
-
-        accumulatedFiles.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const slideWrapper = document.createElement('div');
-                slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${index === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`;
-                slideWrapper.dataset.index = index;
-                
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.className = `w-full h-full object-cover rounded-md`;
-                
-                const delBtn = document.createElement('button');
-                delBtn.type = "button";
-                delBtn.className = `delete-slide-btn absolute top-3 right-3 z-30 bg-red-500/80 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition focus:outline-none shadow-lg ${index === currentPreviewSlide ? '' : 'hidden'}`;
-                delBtn.innerHTML = '<i class="fas fa-trash text-[10px]"></i>';
-                delBtn.onclick = (event) => {
-                    event.stopPropagation();
-                    removeSingleImage(index);
-                };
-
-                slideWrapper.appendChild(img);
+        
+        itemsToRender.forEach((item, slideIndex) => {
+            const slideWrapper = document.createElement('div');
+            slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${slideIndex === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`;
+            slideWrapper.dataset.index = slideIndex;
+            
+            const delBtn = document.createElement('button');
+            delBtn.type = "button";
+            delBtn.className = `delete-slide-btn absolute top-3 right-3 z-30 bg-red-500/80 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition focus:outline-none shadow-lg ${slideIndex === currentPreviewSlide ? '' : 'hidden'}`;
+            delBtn.innerHTML = '<i class="fas fa-trash text-[10px]"></i>';
+            delBtn.onclick = (event) => {
+                event.stopPropagation();
+                removeMediaItem(item);
+            };
+            
+            if (item.isExisting) {
+                if (item.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.className = `w-full h-full object-cover rounded-md`;
+                    img.onclick = (e) => {
+                        e.stopPropagation();
+                        openImageModal(item.src);
+                    };
+                    slideWrapper.appendChild(img);
+                } else {
+                    const video = document.createElement('video');
+                    video.src = item.src;
+                    video.className = `w-full h-full object-cover rounded-md`;
+                    video.controls = true;
+                    video.onclick = (e) => e.stopPropagation();
+                    slideWrapper.appendChild(video);
+                }
                 slideWrapper.appendChild(delBtn);
                 previewCarousel.appendChild(slideWrapper);
-                
                 loadedCount++;
-                
-                if (loadedCount === accumulatedFiles.length && accumulatedFiles.length > 1) {
-                    let controls = `
-                        <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                            <i class="fas fa-chevron-left text-xs"></i>
-                        </button>
-                        <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                            <i class="fas fa-chevron-right text-xs"></i>
-                        </button>
-                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators pointer-events-none">
-                    `;
-                    for(let i = 0; i < accumulatedFiles.length; i++) {
-                        controls += `<div class="w-1.5 h-1.5 rounded-full transition-colors ${i === currentPreviewSlide ? 'bg-white' : 'bg-white/40'}" data-indicator="${i}"></div>`;
+                checkAndAddControls(loadedCount, itemsToRender.length);
+            } else {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (item.type === 'image') {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = `w-full h-full object-cover rounded-md`;
+                        img.onclick = (evt) => {
+                            evt.stopPropagation();
+                            openImageModal(e.target.result);
+                        };
+                        slideWrapper.appendChild(img);
+                    } else {
+                        const video = document.createElement('video');
+                        video.src = e.target.result;
+                        video.className = `w-full h-full object-cover rounded-md`;
+                        video.controls = true;
+                        video.onclick = (evt) => evt.stopPropagation();
+                        slideWrapper.appendChild(video);
                     }
-                    controls += `</div>`;
-                    previewCarousel.insertAdjacentHTML('beforeend', controls);
-                }
-                syncPanels();
-            };
-            reader.readAsDataURL(file);
+                    slideWrapper.appendChild(delBtn);
+                    previewCarousel.appendChild(slideWrapper);
+                    loadedCount++;
+                    checkAndAddControls(loadedCount, itemsToRender.length);
+                };
+                reader.readAsDataURL(item.file);
+            }
         });
+    }
+
+    function checkAndAddControls(loadedCount, totalCount) {
+        if (loadedCount === totalCount && totalCount > 1) {
+            const previewCarousel = document.getElementById('previewCarousel');
+            let controls = `
+                <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </button>
+                <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </button>
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators pointer-events-none">
+            `;
+            for (let i = 0; i < totalCount; i++) {
+                controls += `<div class="w-1.5 h-1.5 rounded-full transition-colors ${i === currentPreviewSlide ? 'bg-white' : 'bg-white/40'}" data-indicator="${i}"></div>`;
+            }
+            controls += `</div>`;
+            previewCarousel.insertAdjacentHTML('beforeend', controls);
+        }
+        syncPanels();
+    }
+
+    function syncHiddenInputs() {
+        const existingPhotos = existingMedia.filter(m => m.type === 'image').map(m => m.path);
+        const existingVideos = existingMedia.filter(m => m.type === 'video').map(m => m.path);
+        
+        document.getElementById('existing_photos_input').value = JSON.stringify(existingPhotos);
+        document.getElementById('existing_videos_input').value = JSON.stringify(existingVideos);
     }
 
     const modal = document.getElementById('imageModal');
     const modalImage = document.getElementById('modalImage');
 
     function openImageModal(src) {
-        // Fallback to previewImage src if not provided
         const finalSrc = src || document.getElementById('previewImage')?.src;
         if (!finalSrc || finalSrc.includes('hidden')) return;
 
@@ -458,7 +629,7 @@
             closeImageModal();
         }
     });
-    
+
     function syncPanels() {
         const rightPanel = document.getElementById('rightPanel');
         const leftPanel = document.getElementById('leftPanel');
@@ -466,7 +637,6 @@
 
         if (!rightPanel || !leftPanel || !dropZone) return;
 
-        // Use requestAnimationFrame for smoother sync
         requestAnimationFrame(() => {
             const rightHeight = rightPanel.offsetHeight;
             if (rightHeight > 0) {
@@ -477,9 +647,11 @@
 
     window.addEventListener('load', () => {
         syncPanels();
-        // Additional sync after small delay to catch late layout shifts
         setTimeout(syncPanels, 500);
     });
     window.addEventListener('resize', syncPanels);
+
+    // Initial load
+    renderAllMedia();
 
 </script>

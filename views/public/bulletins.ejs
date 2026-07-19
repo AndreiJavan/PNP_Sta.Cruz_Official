@@ -1,0 +1,192 @@
+<div class="relative min-h-[60vh] flex items-center overflow-hidden">
+    <!-- Hero Background with Overlay -->
+    <div class="absolute inset-0 z-0">
+        <img src="https://picsum.photos/seed/police/1920/1080?blur=4" alt="Sta. Cruz Laguna"
+            class="w-full h-full object-cover">
+        <div
+            class="absolute inset-0 bg-gradient-to-r from-pnp-blue via-pnp-blue/90 to-transparent dark:from-slate-950 dark:via-slate-900/95 dark:to-transparent">
+        </div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-3xl">
+            <div
+                class="inline-flex items-center space-x-2 bg-pnp-gold/20 text-pnp-gold px-4 py-2 rounded-full mb-8 border border-pnp-gold/30 animate-fade-in">
+                <i class="fas fa-shield-halved text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-widest">Official Public Safety Portal</span>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
+                <span class="text-pnp-gold"><%= title %></span>
+            </h1>
+
+            <p class="text-xl text-blue-100 dark:text-gray-300 mb-8 leading-relaxed max-w-2xl">
+                Stay updated with the latest alerts and activities in Sta. Cruz.
+            </p>
+
+            <div class="flex flex-wrap gap-4">
+                <!-- Public posting disabled -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+</style>
+
+<div class="container mx-auto px-4 py-20">
+    <!-- Search -->
+    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-xl mx-auto flex justify-center">
+        <div class="relative w-full">
+            <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
+                placeholder="Search..."
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 text-sm"></i>
+        </div>
+    </div>
+
+    <!-- Bulletin Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <% bulletins.forEach(bulletin=> { %>
+            <div
+                class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col"
+                data-category="<%= bulletin.category %>">
+                <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+                    <div class="h-64 overflow-hidden relative bg-black">
+                        <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-110 transition duration-700 pointer-events-none"></video>
+                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest flex items-center space-x-2">
+                                <i class="fas fa-images"></i>
+                                <span>+<%= bulletin.photo_paths.length %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                    <div class="h-64 overflow-hidden relative">
+                        <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
+                            class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <% if (bulletin.photo_paths.length > 1) { %>
+                            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest flex items-center space-x-2">
+                                <i class="fas fa-images"></i>
+                                <span>+<%= bulletin.photo_paths.length - 1 %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else if (bulletin.photo_path) { %>
+                    <div class="h-64 overflow-hidden">
+                        <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>"
+                            class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                    </div>
+                <% } else { %>
+                    <div class="h-64 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center">
+                        <i class="fas fa-bullhorn text-4xl text-gray-200 dark:text-slate-700 group-hover:text-pnp-blue transition-colors"></i>
+                    </div>
+                <% } %>
+
+                            <div class="p-6 md:p-10 flex-grow flex flex-col">
+                                <div class="flex flex-wrap justify-between items-center gap-2 mb-6">
+                                    <% const badgeColors={ 'Wanted Person'
+                                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                        , 'Missing Person'
+                                        : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
+                                        , 'Crime Advisory'
+                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                                        , 'Recovered Property'
+                                        : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                                        , 'General Announcement'
+                                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' }; %>
+                                        <span
+                                            class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest <%= badgeColors[bulletin.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
+                                            <%= bulletin.category %>
+                                        </span>
+                                        <span
+                                            class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">
+                                            <%= new Date(bulletin.created_at).toLocaleDateString() %>
+                                        </span>
+                                </div>
+
+                                <h3
+                                    class="text-xl font-black text-pnp-blue dark:text-white mb-4 leading-tight group-hover:text-pnp-gold transition duration-300">
+                                    <%= bulletin.title %>
+                                </h3>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-8 line-clamp-3">
+                                    <%= bulletin.body %>
+                                </p>
+
+                                <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700">
+                                    <a href="/bulletins/<%= bulletin.id %>"
+                                        class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition">
+                                        Read Full Details <i class="fas fa-arrow-right ml-3 text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+            </div>
+            <% }) %>
+    </div>
+
+    <div id="noResultsDiv" class="text-center py-20" style="<%= bulletins.length === 0 ? 'display: block;' : 'display: none;' %>">
+        <div class="w-20 h-20 bg-gray-50 dark:bg-slate-900/50 text-gray-200 dark:text-slate-700 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-search text-3xl"></i>
+        </div>
+        <h3 class="text-xl font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">No bulletins found
+        </h3>
+        <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your search or filter criteria.</p>
+    </div>
+</div>
+
+<script>
+    let currentCategory = 'All';
+
+    function setCategoryFilter(category, btnElement) {
+        currentCategory = category;
+        
+        // Update styling of pill buttons
+        const buttons = document.querySelectorAll('.category-pill-btn');
+        buttons.forEach(btn => {
+            btn.className = 'category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700 transition duration-300';
+        });
+        
+        // Mark the clicked one as active
+        btnElement.className = 'category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md transition duration-300';
+        
+        filterPublicBulletins();
+    }
+
+    function filterPublicBulletins() {
+        const searchInput = document.getElementById('publicSearchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.grid > .group');
+        
+        let anyVisible = false;
+        
+        cards.forEach(card => {
+            const h3 = card.querySelector('h3');
+            const p = card.querySelector('p');
+            const cat = card.getAttribute('data-category');
+            if (!h3 || !p) return;
+            
+            const title = h3.textContent.toLowerCase();
+            const body = p.textContent.toLowerCase();
+            
+            const matchesSearch = title.includes(searchInput) || body.includes(searchInput);
+            const matchesCategory = currentCategory === 'All' || cat === currentCategory;
+            
+            if (matchesSearch && matchesCategory) {
+                card.style.display = 'flex';
+                anyVisible = true;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+        
+        const noResultsDiv = document.getElementById('noResultsDiv');
+        if (noResultsDiv) {
+            noResultsDiv.style.display = anyVisible ? 'none' : 'block';
+        }
+    }
+</script>
