@@ -300,6 +300,19 @@
         const sortedBarangays = Object.entries(barangayCounts).sort((a, b) => b[1] - a[1]);
         const sortedMonths = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]);
 
+        // Calculate time scope
+        const dates = currentPoints
+            .map(p => new Date(p.incident_date || p.date || p.created_at).getTime())
+            .filter(t => !isNaN(t));
+        let timeScope = "";
+        if (dates.length > 0) {
+            const minDate = new Date(Math.min(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            const maxDate = new Date(Math.max(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+            timeScope = minDate === maxDate ? `on ${minDate}` : `for the period between ${minDate} and ${maxDate}`;
+        } else {
+            timeScope = "for the selected period";
+        }
+
         const mostCommonCrime = sortedTypes.length > 0 ? sortedTypes[0] : ['N/A', 0];
         const mostAffectedBrgy = sortedBarangays.length > 0 ? sortedBarangays[0] : ['N/A', 0];
         const peakMonth = sortedMonths.length > 0 ? sortedMonths[0] : ['N/A', 0];
@@ -327,7 +340,7 @@
             </div>
             <div>
                 <h4 class="font-bold text-slate-800 dark:text-white mb-2">Executive Summary</h4>
-                <p>Based on the filtered data, a total of <strong>${totalCrimes}</strong> incidents were recorded. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes in the dataset. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
+                <p>Based on the filtered data, a total of <strong>${totalCrimes}</strong> incidents were recorded <strong>${timeScope}</strong>. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes in the dataset. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
             </div>
         `;
 
