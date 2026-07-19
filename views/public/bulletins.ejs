@@ -60,6 +60,9 @@
                 <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
                     <div class="h-64 overflow-hidden relative bg-black">
                         <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-110 transition duration-700 pointer-events-none"></video>
+                        <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
+                            <i class="fas fa-play text-white text-4xl opacity-90 group-hover:scale-110 transition duration-300"></i>
+                        </div>
                         <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
                             <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest flex items-center space-x-2">
                                 <i class="fas fa-images"></i>

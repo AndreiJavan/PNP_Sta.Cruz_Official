@@ -34,13 +34,13 @@
                         <% 
                             let mediaItems = [];
                             if (bulletin) {
-                                if (bulletin.video_paths && bulletin.video_paths.length > 0) {
-                                    bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
-                                }
                                 if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
                                     bulletin.photo_paths.forEach(p => mediaItems.push({ type: 'image', path: p }));
                                 } else if (bulletin.photo_path) {
                                     mediaItems.push({ type: 'image', path: bulletin.photo_path });
+                                }
+                                if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                                    bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
                                 }
                             }
                         %>
@@ -277,14 +277,14 @@
     // Existing media from bulletin if editing
     let existingMedia = [];
     <% if (bulletin) { %>
-        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-            <% bulletin.video_paths.forEach(function(path) { %>
-                existingMedia.push({ type: 'video', path: '<%= path %>', isExisting: true });
-            <% }); %>
-        <% } %>
         <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
             <% bulletin.photo_paths.forEach(function(path) { %>
                 existingMedia.push({ type: 'image', path: '<%= path %>', isExisting: true });
+            <% }); %>
+        <% } %>
+        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+            <% bulletin.video_paths.forEach(function(path) { %>
+                existingMedia.push({ type: 'video', path: '<%= path %>', isExisting: true });
             <% }); %>
         <% } %>
     <% } %>
@@ -438,44 +438,30 @@
         // Build list of all items to display
         const itemsToRender = [];
         
-        // 1. Existing videos
+        // 1. Existing media
         existingMedia.forEach((item, index) => {
-            if (item.type === 'video') {
-                itemsToRender.push({
-                    type: item.type,
-                    src: item.path,
-                    isExisting: true,
-                    index: index
-                });
-            }
-        });
-
-        // 2. Newly added videos
-        accumulatedVideos.forEach((file, index) => {
             itemsToRender.push({
-                type: 'video',
+                type: item.type,
+                src: item.path,
+                isExisting: true,
+                index: index
+            });
+        });
+        
+        // 2. Newly added photos
+        accumulatedFiles.forEach((file, index) => {
+            itemsToRender.push({
+                type: 'image',
                 file: file,
                 isExisting: false,
                 index: index
             });
         });
-
-        // 3. Existing photos
-        existingMedia.forEach((item, index) => {
-            if (item.type === 'image') {
-                itemsToRender.push({
-                    type: item.type,
-                    src: item.path,
-                    isExisting: true,
-                    index: index
-                });
-            }
-        });
         
-        // 4. Newly added photos
-        accumulatedFiles.forEach((file, index) => {
+        // 3. Newly added videos
+        accumulatedVideos.forEach((file, index) => {
             itemsToRender.push({
-                type: 'image',
+                type: 'video',
                 file: file,
                 isExisting: false,
                 index: index

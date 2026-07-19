@@ -129,15 +129,7 @@
                     </div>
                     <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Public Advisories & Updates</h2>
                 </div>
-<<<<<<< HEAD
                 <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-=======
-                <div class="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
-                    <button onclick="generateTrendsReport()" class="w-full sm:w-auto bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-bold py-2.5 px-5 rounded-xl transition-colors duration-300 uppercase tracking-widest text-xs shadow-md flex items-center justify-center space-x-2">
-                        <i class="fas fa-chart-line text-xs"></i>
-                        <span>View Crime Trends</span>
-                    </button>
->>>>>>> db3ae43fac797e33d9306d515fa7047f36491979
                     <select id="homeBulletinCategory" onchange="filterHomeBulletins()" class="w-full sm:w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-xl focus:ring-pnp-blue focus:border-pnp-blue block p-2.5 font-bold outline-none shadow-sm cursor-pointer">
                         <option value="All">All Categories</option>
                         <option value="Crime Advisory">Crime Advisories</option>
@@ -252,131 +244,7 @@
     </div>
 </div>
 
-<!-- Trends & Patterns Modal -->
-<div id="trends-modal" class="fixed inset-0 z-[2000] flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
-    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="closeTrendsModal()"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-11/12 max-w-2xl rounded-[2rem] p-8 md:p-10 shadow-2xl border border-gray-100 dark:border-slate-800 transform scale-95 transition-transform duration-500" id="trends-modal-content">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white flex items-center"><i class="fas fa-chart-line text-pnp-blue dark:text-pnp-gold mr-3"></i> Crime Trends & Patterns</h3>
-            <button onclick="closeTrendsModal()" class="text-gray-400 hover:text-pnp-gold transition">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <div id="trends-report-content" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed space-y-4">
-            <!-- Content injected via JS -->
-        </div>
-        <div class="mt-8 flex justify-end">
-            <button onclick="window.print()" class="px-5 py-2.5 bg-pnp-blue text-white hover:bg-pnp-gold hover:text-pnp-blue rounded-xl font-bold uppercase tracking-widest text-xs transition">
-                <i class="fas fa-print mr-2"></i> Print Report
-            </button>
-        </div>
-    </div>
-</div>
-
 <script>
-    async function generateTrendsReport() {
-        const btn = document.querySelector('button[onclick="generateTrendsReport()"]');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
-        btn.disabled = true;
-
-        try {
-            const response = await fetch('/api/map-points');
-            const currentPoints = await response.json();
-            
-            if (!currentPoints || currentPoints.length === 0) {
-                alert('No crime data available to generate a report.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                return;
-            }
-
-            let totalCrimes = currentPoints.length;
-            
-            const typeCounts = {};
-            const barangayCounts = {};
-            const monthCounts = {};
-
-            currentPoints.forEach(p => {
-                const type = p.incident_type || 'Unknown';
-                const brgy = p.barangay || 'Unknown';
-                typeCounts[type] = (typeCounts[type] || 0) + 1;
-                barangayCounts[brgy] = (barangayCounts[brgy] || 0) + 1;
-                
-                const pDate = new Date(p.incident_date || p.date || p.created_at);
-                if (!isNaN(pDate.getTime())) {
-                    const month = pDate.toLocaleString('default', { month: 'long' });
-                    monthCounts[month] = (monthCounts[month] || 0) + 1;
-                }
-            });
-
-            const sortedTypes = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
-            const sortedBarangays = Object.entries(barangayCounts).sort((a, b) => b[1] - a[1]);
-            const sortedMonths = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]);
-
-            const mostCommonCrime = sortedTypes.length > 0 ? sortedTypes[0] : ['N/A', 0];
-            const mostAffectedBrgy = sortedBarangays.length > 0 ? sortedBarangays[0] : ['N/A', 0];
-            const peakMonth = sortedMonths.length > 0 ? sortedMonths[0] : ['N/A', 0];
-            
-            const crimePercentage = totalCrimes > 0 ? ((mostCommonCrime[1]/totalCrimes)*100).toFixed(1) : 0;
-
-            const reportHtml = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Incidents</p>
-                        <p class="text-3xl font-black text-pnp-blue dark:text-pnp-gold">${totalCrimes}</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Peak Month</p>
-                        <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${peakMonth[0]} <span class="text-sm text-gray-500">(${peakMonth[1]} cases)</span></p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Most Prevalent Crime</p>
-                        <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${mostCommonCrime[0]} <span class="text-sm text-gray-500">(${mostCommonCrime[1]} cases)</span></p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Most Affected Barangay</p>
-                        <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${mostAffectedBrgy[0]} <span class="text-sm text-gray-500">(${mostAffectedBrgy[1]} cases)</span></p>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Executive Summary</h4>
-                    <p>Based on the system's recorded data, a total of <strong>${totalCrimes}</strong> incidents have been logged. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
-                </div>
-            `;
-
-            document.getElementById('trends-report-content').innerHTML = reportHtml;
-
-            const modal = document.getElementById('trends-modal');
-            const content = document.getElementById('trends-modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 10);
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        } catch (err) {
-            console.error(err);
-            alert('An error occurred while generating the report.');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    function closeTrendsModal() {
-        const modal = document.getElementById('trends-modal');
-        const content = document.getElementById('trends-modal-content');
-        modal.classList.add('opacity-0');
-        content.classList.remove('scale-100');
-        content.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 500);
-    }
-
     function switchTab(tabId) {
         const bulletinsBtn = document.getElementById('tab-btn-bulletins');
         const incidentsBtn = document.getElementById('tab-btn-incidents');
