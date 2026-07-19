@@ -436,13 +436,14 @@
         const content = document.getElementById('modal-content');
         const acceptBtn = document.getElementById('accept-disclaimer');
 
-        // Always show modal on load as requested
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            content.classList.remove('scale-95');
-            content.classList.add('scale-100');
-        }, 100);
+        if (!sessionStorage.getItem('staCruzDisclaimerAccepted')) {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 100);
+        }
 
         acceptBtn.addEventListener('click', () => {
             modal.classList.add('opacity-0');
@@ -451,7 +452,7 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
             }, 500);
-            localStorage.setItem('staCruzDisclaimerAccepted', 'true');
+            sessionStorage.setItem('staCruzDisclaimerAccepted', 'true');
         });
 
         // Carousel Slider Logic
