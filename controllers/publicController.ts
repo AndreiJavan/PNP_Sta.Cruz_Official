@@ -7,14 +7,14 @@ import { decodeCustomCategory } from './adminController.js';
 export const getHome = async (req: Request, res: Response) => {
   try {
     const hotlinesSnap = await db.collection('hotlines').limit(5).get();
-    const hotlines = hotlinesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const hotlines = hotlinesSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const activeBulletinsSnap = await db.collection('bulletins')
       .where('is_archived', '!=', true)
       .orderBy('created_at', 'desc')
       .get();
       
-    const bulletins = activeBulletinsSnap.docs.map(doc => {
+    const bulletins = activeBulletinsSnap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
     }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
@@ -224,7 +224,7 @@ export const getIncidents = async (req: Request, res: Response) => {
 export const getHotlines = async (req: Request, res: Response) => {
   try {
     const snap = await db.collection('hotlines').orderBy('category').get();
-    const hotlines = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     res.render('public/hotlines', { title: 'Emergency Hotlines', hotlines, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
