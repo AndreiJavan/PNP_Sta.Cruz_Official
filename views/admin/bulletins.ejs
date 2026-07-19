@@ -65,7 +65,11 @@
                     <% bulletins.sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).forEach(bulletin => { %>
                         <div data-category="<%= bulletin.category %>" class="group bg-white dark:bg-slate-900/50 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row items-start md:items-center gap-6 relative overflow-hidden">
                             <!-- Thumbnail -->
-                            <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                            <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+                                <div class="w-full md:w-32 h-40 md:h-24 rounded-2xl overflow-hidden shrink-0 bg-black relative">
+                                    <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-110 transition duration-700 pointer-events-none"></video>
+                                </div>
+                            <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
                                 <div class="w-full md:w-32 h-40 md:h-24 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
                                     <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                                 </div>

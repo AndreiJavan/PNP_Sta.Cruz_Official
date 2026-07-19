@@ -21,9 +21,13 @@
                 <span class="text-pnp-gold"><%= title %></span>
             </h1>
 
-            <p class="text-xl text-blue-100 dark:text-gray-300 mb-10 leading-relaxed max-w-2xl">
+            <p class="text-xl text-blue-100 dark:text-gray-300 mb-8 leading-relaxed max-w-2xl">
                 Stay updated with the latest alerts and activities in Sta. Cruz.
             </p>
+
+            <div class="flex flex-wrap gap-4">
+                <!-- Public posting disabled -->
+            </div>
         </div>
     </div>
 </div>
@@ -53,7 +57,17 @@
             <div
                 class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col"
                 data-category="<%= bulletin.category %>">
-                <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+                    <div class="h-64 overflow-hidden relative bg-black">
+                        <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-110 transition duration-700 pointer-events-none"></video>
+                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                            <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest flex items-center space-x-2">
+                                <i class="fas fa-images"></i>
+                                <span>+<%= bulletin.photo_paths.length %></span>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
                     <div class="h-64 overflow-hidden relative">
                         <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
                             class="w-full h-full object-cover group-hover:scale-110 transition duration-700">

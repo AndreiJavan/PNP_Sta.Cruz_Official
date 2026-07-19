@@ -51,9 +51,9 @@ router.post('/api/toggle-sidebar', (req: any, res) => {
 // Bulletins
 router.get('/bulletins', getBulletins);
 router.get('/bulletins/create', getCreateBulletin);
-router.post('/bulletins/create', memoryUpload.array('photos', 5), postCreateBulletin);
+router.post('/bulletins/create', memoryUpload.any(), postCreateBulletin);
 router.get('/bulletins/:id/edit', getEditBulletin);
-router.post('/bulletins/:id/edit', memoryUpload.array('photos', 5), postEditBulletin);
+router.post('/bulletins/:id/edit', memoryUpload.any(), postEditBulletin);
 router.post('/bulletins/:id/delete', deleteBulletin);
 
 // Map
