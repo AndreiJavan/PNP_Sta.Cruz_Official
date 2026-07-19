@@ -1,234 +1,230 @@
 <div class="max-w-7xl mx-auto w-full px-4 py-8">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden w-full">
+    <div
+        class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden w-full">
         <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
-            <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs"><%= bulletin ? 'Edit Bulletin' : 'Create New Bulletin' %></h3>
-            <a href="<%= typeof isPublic !== 'undefined' && isPublic ? '/bulletins' : '/admin/bulletins' %>" class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
+            <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">
+                <%= bulletin ? 'Edit Bulletin' : 'Create New Bulletin' %>
+            </h3>
+            <a href="<%= typeof isPublic !== 'undefined' && isPublic ? '/bulletins' : '/admin/bulletins' %>"
+                class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
         </div>
-        
+
         <form id="bulletinForm"
-      action="<%= bulletin ? '/admin/bulletins/' + bulletin.id + '/edit' : (typeof isPublic !== 'undefined' && isPublic ? '/bulletins/create' : '/admin/bulletins/create') %>"
-      method="POST"
-      enctype="multipart/form-data"
-      class="p-8 space-y-8"
-      onsubmit="handleBulletinSubmit(event); return false;">
+            action="<%= bulletin ? '/admin/bulletins/' + bulletin.id + '/edit' : (typeof isPublic !== 'undefined' && isPublic ? '/bulletins/create' : '/admin/bulletins/create') %>"
+            method="POST" enctype="multipart/form-data" class="p-8 space-y-8"
+            onsubmit="handleBulletinSubmit(event); return false;">
 
-    <!-- 2 COLUMN MAIN LAYOUT -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            <!-- 2 COLUMN MAIN LAYOUT -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
 
-        <!-- LEFT SIDE: UNIFIED MEDIA -->
-        <div id="leftPanel" class="space-y-4 flex flex-col transition-all duration-300">
+                <!-- LEFT SIDE: UNIFIED MEDIA -->
+                <div id="leftPanel" class="space-y-4 flex flex-col transition-all duration-300">
 
-            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                Upload Media (Images & Videos)
-            </label>
+                    <label
+                        class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                        Upload Media (Images & Videos)
+                    </label>
 
-            <!-- UNIFIED MEDIA PREVIEW BOX -->
-            <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <!-- UNIFIED MEDIA PREVIEW BOX -->
+                    <div
+                        class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
 
-                <div id="dropZone"
-                    onclick="document.getElementById('mediaInput').click()"
-                    class="w-full min-h-[350px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue p-2 relative">
+                        <div id="dropZone" onclick="document.getElementById('mediaInput').click()"
+                            class="w-full min-h-[350px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue p-2 relative">
 
-                    <!-- Existing media OR preview -->
-                    <div id="previewCarousel" class="relative w-full h-full min-h-[350px] flex items-center justify-center bg-gray-100 dark:bg-slate-800 group overflow-hidden rounded-md">
-                        <% 
-                            let mediaItems = [];
-                            if (bulletin) {
-                                if (bulletin.video_paths && bulletin.video_paths.length > 0) {
-                                    bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
-                                }
-                                if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
+                            <!-- Existing media OR preview -->
+                            <div id="previewCarousel"
+                                class="relative w-full h-full min-h-[350px] flex items-center justify-center bg-gray-100 dark:bg-slate-800 group overflow-hidden rounded-md">
+                                <% let mediaItems=[]; if (bulletin) { if (bulletin.photo_paths &&
+                                    bulletin.photo_paths.length> 0) {
                                     bulletin.photo_paths.forEach(p => mediaItems.push({ type: 'image', path: p }));
-                                } else if (bulletin.photo_path) {
+                                    } else if (bulletin.photo_path) {
                                     mediaItems.push({ type: 'image', path: bulletin.photo_path });
-                                }
-                            }
-                        %>
-                        <% if (mediaItems.length > 0) { %>
-                            <% mediaItems.forEach(function(item, index) { %>
-                                <% if (item.type === 'image') { %>
-                                    <img src="<%= item.path %>" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide" data-index="<%= index %>" onerror="this.style.display='none';">
-                                <% } else { %>
-                                    <video src="<%= item.path %>" controls class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide" data-index="<%= index %>"></video>
-                                <% } %>
-                            <% }); %>
-                            <% if (mediaItems.length > 1) { %>
-                                <!-- Controls -->
-                                <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                                    <i class="fas fa-chevron-left text-xs"></i>
-                                </button>
-                                <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                                    <i class="fas fa-chevron-right text-xs"></i>
-                                </button>
-                                <!-- Indicators -->
-                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
-                                    <% mediaItems.forEach(function(_, index) { %>
-                                        <div class="w-1.5 h-1.5 rounded-full transition-colors <%= index === 0 ? 'bg-white' : 'bg-white/40' %>" data-indicator="<%= index %>"></div>
-                                    <% }); %>
-                                </div>
-                            <% } %>
-                        <% } else { %>
-                            <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
-                                <i class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
-                                <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 files (Images & Videos combined)</span>
+                                    }
+                                    if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                                    bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
+                                    }
+                                    }
+                                    %>
+                                    <% if (mediaItems.length> 0) { %>
+                                        <% mediaItems.forEach(function(item, index) { %>
+                                            <% if (item.type==='image' ) { %>
+                                                <img src="<%= item.path %>"
+                                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide"
+                                                    data-index="<%= index %>" onerror="this.style.display='none';">
+                                                <% } else { %>
+                                                    <video src="<%= item.path %>" controls
+                                                        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide"
+                                                        data-index="<%= index %>"></video>
+                                                    <% } %>
+                                                        <% }); %>
+                                                            <% if (mediaItems.length> 1) { %>
+                                                                <!-- Controls -->
+                                                                <button type="button"
+                                                                    onclick="event.stopPropagation(); movePreview(-1)"
+                                                                    class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                                                                    <i class="fas fa-chevron-left text-xs"></i>
+                                                                </button>
+                                                                <button type="button"
+                                                                    onclick="event.stopPropagation(); movePreview(1)"
+                                                                    class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
+                                                                    <i class="fas fa-chevron-right text-xs"></i>
+                                                                </button>
+                                                                <!-- Indicators -->
+                                                                <div
+                                                                    class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
+                                                                    <% mediaItems.forEach(function(_, index) { %>
+                                                                        <div class="w-1.5 h-1.5 rounded-full transition-colors <%= index === 0 ? 'bg-white' : 'bg-white/40' %>"
+                                                                            data-indicator="<%= index %>"></div>
+                                                                        <% }); %>
+                                                                </div>
+                                                                <% } %>
+                                                                    <% } else { %>
+                                                                        <div id="placeholderIconContainer"
+                                                                            class="flex flex-col items-center justify-center z-10 pointer-events-none">
+                                                                            <i
+                                                                                class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
+                                                                            <span
+                                                                                class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag
+                                                                                & Drop or Click<br>Up to 5 files (Images
+                                                                                & Videos combined)</span>
+                                                                        </div>
+                                                                        <% } %>
                             </div>
-                        <% } %>
+                        </div>
+
+                        <!-- FILE INPUTS -->
+                        <div class="mt-4">
+                            <!-- This input handles the click event and receives both images and videos -->
+                            <input type="file" id="mediaInput" accept="image/*,video/*" multiple class="hidden">
+
+                            <!-- These hidden inputs are submitted to the server -->
+                            <input type="file" name="photos" id="photos" accept="image/*" multiple class="hidden">
+
+                            <input type="file" name="videos" id="videos" accept="video/*" multiple class="hidden">
+
+                            <!-- Hidden inputs to track existing media files when editing -->
+                            <input type="hidden" name="existing_photos" id="existing_photos_input">
+                            <input type="hidden" name="existing_videos" id="existing_videos_input">
+
+                            <button type="button" onclick="document.getElementById('mediaInput').click()"
+                                class="w-full bg-pnp-blue text-white py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
+                                Choose / Add Media (Max 5 Files combined)
+                            </button>
+
+                            <button type="button" onclick="clearAllMedia()" id="clearAllMediaBtn"
+                                class="w-full bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition hidden">
+                                Remove All Media
+                            </button>
+
+                            <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
+                                Images (PNG, JPG, WEBP) & Videos (MP4, WEBM) - Max 5 files total
+                            </p>
+                        </div>
+
                     </div>
+
                 </div>
 
-                <!-- FILE INPUTS -->
-                <div class="mt-4">
-                    <!-- This input handles the click event and receives both images and videos -->
-                    <input type="file"
-                        id="mediaInput"
-                        accept="image/*,video/*"
-                        multiple
-                        class="hidden">
+                <!-- RIGHT SIDE: FORM FIELDS -->
+                <div id="rightPanel" class="space-y-6 flex flex-col transition-all duration-300">
 
-                    <!-- These hidden inputs are submitted to the server -->
-                    <input type="file"
-                        name="photos"
-                        id="photos"
-                        accept="image/*"
-                        multiple
-                        class="hidden">
 
-                    <input type="file"
-                        name="videos"
-                        id="videos"
-                        accept="video/*"
-                        multiple
-                        class="hidden">
 
-                    <!-- Hidden inputs to track existing media files when editing -->
-                    <input type="hidden" name="existing_photos" id="existing_photos_input">
-                    <input type="hidden" name="existing_videos" id="existing_videos_input">
+                    <!-- TITLE -->
+                    <div class="space-y-2">
+                        <label for="title"
+                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin
+                            Title</label>
+                        <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>"
+                            required placeholder="Enter a clear, descriptive title"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                    </div>
 
-                    <button type="button"
-                            onclick="document.getElementById('mediaInput').click()"
-                            class="w-full bg-pnp-blue text-white py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
-                        Choose / Add Media (Max 5 Files combined)
-                    </button>
+                    <!-- CATEGORY -->
+                    <div class="space-y-2">
+                        <label
+                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                            Category
+                        </label>
 
-                    <button type="button"
-                            onclick="clearAllMedia()"
-                            id="clearAllMediaBtn"
-                            class="w-full bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition hidden">
-                        Remove All Media
-                    </button>
+                        <% const standardCategories=['Wanted Person', 'Missing Person' , 'Crime Advisory'
+                            , 'Recovered Property' , 'General Announcement' ]; const isCustomCategory=bulletin &&
+                            bulletin.category && !standardCategories.includes(bulletin.category); %>
 
-                    <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
-                        Images (PNG, JPG, WEBP) & Videos (MP4, WEBM) - Max 5 files total
-                    </p>
+                            <select name="category" id="category" required onchange="toggleCustomCategory(this.value)"
+                                class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+
+                                <option value="" disabled <%=!bulletin && (typeof defaultCategory==='undefined' ||
+                                    !defaultCategory) ? 'selected' : '' %>>Select Category</option>
+
+                                <% standardCategories.forEach(cat=> { %>
+                                    <option value="<%= cat %>" <%=(bulletin && bulletin.category===cat) || (typeof
+                                        defaultCategory !=='undefined' && defaultCategory===cat) ? 'selected' : '' %>>
+                                        <%= cat %>
+                                    </option>
+                                    <% }) %>
+
+                                        <option value="Other" <%=isCustomCategory ? 'selected' : '' %>>
+                                            Other (Custom)
+                                        </option>
+
+                            </select>
+                    </div>
+
+                    <!-- CUSTOM CATEGORY -->
+                    <div id="customCategoryContainer" class="space-y-2 <%= isCustomCategory ? '' : 'hidden' %>">
+                        <label
+                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                            New Category
+                        </label>
+
+                        <input type="text" name="custom_category" id="custom_category"
+                            value="<%= isCustomCategory ? bulletin.category : '' %>" placeholder="Enter custom category"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="flex-1 flex flex-col space-y-2">
+                        <label
+                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                            Bulletin Body
+                        </label>
+
+                        <textarea name="body" id="body" rows="12" required
+                            placeholder="Enter the full content of the bulletin..."
+                            class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white"><%= bulletin ? bulletin.body : '' %></textarea>
+                    </div>
+
                 </div>
 
+            </div>
+
+            <!-- SUBMIT BUTTON (UNCHANGED STYLE PURPOSE, JUST ALIGNED RIGHT) -->
+            <div class="pt-6 border-t border-gray-50 dark:border-slate-700 flex justify-end">
+                <button type="submit"
+                    class="bg-pnp-blue text-white font-bold py-4 px-12 rounded-xl shadow-lg transition duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs">
+                    <%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %>
+                </button>
+            </div>
+
+        </form>
+
+        <!-- IMAGE VIEW MODAL -->
+        <div id="imageModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+
+            <div class="relative max-w-4xl w-full p-4">
+
+                <!-- CLOSE BUTTON -->
+                <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white text-2xl font-bold">
+                    &times;
+                </button>
+
+                <!-- IMAGE -->
+                <img id="modalImage" class="w-full max-h-[80vh] object-contain rounded-xl shadow-lg bg-black">
             </div>
 
         </div>
-
-        <!-- RIGHT SIDE: FORM FIELDS -->
-        <div id="rightPanel" class="space-y-6 flex flex-col transition-all duration-300">
-
-
-
-            <!-- TITLE -->
-            <div class="space-y-2">
-                <label for="title" class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin Title</label>
-                <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>" required placeholder="Enter a clear, descriptive title" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
-            </div>
-
-            <!-- CATEGORY -->
-            <div class="space-y-2">
-                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                    Category
-                </label>
-
-                <% 
-                    const standardCategories = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
-                    const isCustomCategory = bulletin && bulletin.category && !standardCategories.includes(bulletin.category);
-                %>
-
-                <select name="category"
-                        id="category"
-                        required
-                        onchange="toggleCustomCategory(this.value)"
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
-
-                    <option value="" disabled <%= !bulletin && (typeof defaultCategory === 'undefined' || !defaultCategory) ? 'selected' : '' %>>Select Category</option>
-
-                    <% standardCategories.forEach(cat => { %>
-                        <option value="<%= cat %>" <%= (bulletin && bulletin.category === cat) || (typeof defaultCategory !== 'undefined' && defaultCategory === cat) ? 'selected' : '' %>>
-                            <%= cat %>
-                        </option>
-                    <% }) %>
-
-                    <option value="Other" <%= isCustomCategory ? 'selected' : '' %>>
-                        Other (Custom)
-                    </option>
-
-                </select>
-            </div>
-
-            <!-- CUSTOM CATEGORY -->
-            <div id="customCategoryContainer" class="space-y-2 <%= isCustomCategory ? '' : 'hidden' %>">
-                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                    New Category
-                </label>
-
-                <input type="text"
-                       name="custom_category"
-                       id="custom_category"
-                       value="<%= isCustomCategory ? bulletin.category : '' %>"
-                       placeholder="Enter custom category"
-                       class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
-            </div>
-
-            <!-- BODY -->
-            <div class="flex-1 flex flex-col space-y-2">
-                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                    Bulletin Body
-                </label>
-
-                <textarea name="body"
-                          id="body"
-                          rows="12"
-                          required
-                          placeholder="Enter the full content of the bulletin..."
-                          class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white"><%= bulletin ? bulletin.body : '' %></textarea>
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- SUBMIT BUTTON (UNCHANGED STYLE PURPOSE, JUST ALIGNED RIGHT) -->
-    <div class="pt-6 border-t border-gray-50 dark:border-slate-700 flex justify-end">
-        <button type="submit"
-                class="bg-pnp-blue text-white font-bold py-4 px-12 rounded-xl shadow-lg transition duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs">
-            <%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %>
-        </button>
-    </div>
-
-</form>
-
-<!-- IMAGE VIEW MODAL -->
-<div id="imageModal"
-     class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
-
-    <div class="relative max-w-4xl w-full p-4">
-
-        <!-- CLOSE BUTTON -->
-        <button onclick="closeImageModal()"
-                class="absolute top-2 right-2 text-white text-2xl font-bold">
-            &times;
-        </button>
-
-        <!-- IMAGE -->
-        <img id="modalImage"
-             class="w-full max-h-[80vh] object-contain rounded-xl shadow-lg bg-black">
-    </div>
-
-</div>
 
     </div>
 </div>
@@ -250,18 +246,18 @@
         event.preventDefault();
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
-        
+
         const confirmFn = window.strategicConfirm || (async (args) => {
             return confirm(args?.message || `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`);
         });
-        
+
         const confirmed = await confirmFn({
             title: isEdit ? 'Update Confirmation' : 'Post Confirmation',
             message: `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`,
             confirmText: isEdit ? 'Update Now' : 'Post Now',
             type: 'info'
         });
-        
+
         if (confirmed) {
             document.getElementById('bulletinForm').submit();
         }
@@ -271,26 +267,26 @@
     const fileInput = document.getElementById('photos');
     const videoFileInput = document.getElementById('videos');
     const dropZone = document.getElementById('dropZone');
-    
+
     let currentPreviewSlide = 0;
-    
+
     // Existing media from bulletin if editing
     let existingMedia = [];
     <% if (bulletin) { %>
-        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-            <% bulletin.video_paths.forEach(function(path) { %>
-                existingMedia.push({ type: 'video', path: '<%= path %>', isExisting: true });
+        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+            <% bulletin.photo_paths.forEach(function (path) { %>
+        existingMedia.push({ type: 'image', path: '<%= path %>', isExisting: true });
             <% }); %>
         <% } %>
-        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-            <% bulletin.photo_paths.forEach(function(path) { %>
-                existingMedia.push({ type: 'image', path: '<%= path %>', isExisting: true });
+        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+            <% bulletin.video_paths.forEach(function (path) { %>
+            existingMedia.push({ type: 'video', path: '<%= path %>', isExisting: true });
             <% }); %>
         <% } %>
     <% } %>
 
-    let previewTotalSlides = existingMedia.length;
-    
+        let previewTotalSlides = existingMedia.length;
+
     let accumulatedFiles = []; // New images files
     let accumulatedVideos = []; // New videos files
 
@@ -299,11 +295,11 @@
         currentPreviewSlide = (currentPreviewSlide + direction + previewTotalSlides) % previewTotalSlides;
         updatePreviewCarousel();
     }
-    
+
     function updatePreviewCarousel() {
         const slides = document.querySelectorAll('.preview-slide');
         const indicators = document.querySelectorAll('.preview-indicators div');
-        
+
         slides.forEach((slide, idx) => {
             if (idx === currentPreviewSlide) {
                 slide.classList.remove('opacity-0', 'pointer-events-none');
@@ -313,7 +309,7 @@
                 slide.classList.add('opacity-0', 'pointer-events-none');
             }
         });
-        
+
         indicators.forEach((ind, idx) => {
             if (idx === currentPreviewSlide) {
                 ind.classList.add('bg-white');
@@ -359,7 +355,7 @@
 
     function handleMediaFiles(files) {
         if (!files || files.length === 0) return;
-        
+
         let ignoredSome = false;
 
         Array.from(files).forEach(file => {
@@ -381,7 +377,7 @@
         if (ignoredSome) {
             alert('You can only upload a maximum of 5 files (images and videos combined). Some files were ignored.');
         }
-        
+
         syncFileInputs();
         renderAllMedia();
     }
@@ -437,20 +433,28 @@
 
         // Build list of all items to display
         const itemsToRender = [];
-        
-        // 1. Existing videos
+
+        // 1. Existing media
         existingMedia.forEach((item, index) => {
-            if (item.type === 'video') {
-                itemsToRender.push({
-                    type: item.type,
-                    src: item.path,
-                    isExisting: true,
-                    index: index
-                });
-            }
+            itemsToRender.push({
+                type: item.type,
+                src: item.path,
+                isExisting: true,
+                index: index
+            });
         });
 
-        // 2. Newly added videos
+        // 2. Newly added photos
+        accumulatedFiles.forEach((file, index) => {
+            itemsToRender.push({
+                type: 'image',
+                file: file,
+                isExisting: false,
+                index: index
+            });
+        });
+
+        // 3. Newly added videos
         accumulatedVideos.forEach((file, index) => {
             itemsToRender.push({
                 type: 'video',
@@ -460,30 +464,8 @@
             });
         });
 
-        // 3. Existing photos
-        existingMedia.forEach((item, index) => {
-            if (item.type === 'image') {
-                itemsToRender.push({
-                    type: item.type,
-                    src: item.path,
-                    isExisting: true,
-                    index: index
-                });
-            }
-        });
-        
-        // 4. Newly added photos
-        accumulatedFiles.forEach((file, index) => {
-            itemsToRender.push({
-                type: 'image',
-                file: file,
-                isExisting: false,
-                index: index
-            });
-        });
-        
         previewTotalSlides = itemsToRender.length;
-        
+
         if (previewTotalSlides === 0) {
             previewCarousel.innerHTML = `
                 <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
@@ -496,17 +478,17 @@
             syncPanels();
             return;
         }
-        
+
         document.getElementById('clearAllMediaBtn').classList.remove('hidden');
         previewCarousel.innerHTML = '';
-        
+
         let loadedCount = 0;
-        
+
         itemsToRender.forEach((item, slideIndex) => {
             const slideWrapper = document.createElement('div');
             slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${slideIndex === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`;
             slideWrapper.dataset.index = slideIndex;
-            
+
             const delBtn = document.createElement('button');
             delBtn.type = "button";
             delBtn.className = `delete-slide-btn absolute top-3 right-3 z-30 bg-red-500/80 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition focus:outline-none shadow-lg ${slideIndex === currentPreviewSlide ? '' : 'hidden'}`;
@@ -515,7 +497,7 @@
                 event.stopPropagation();
                 removeMediaItem(item);
             };
-            
+
             if (item.isExisting) {
                 if (item.type === 'image') {
                     const img = document.createElement('img');
@@ -540,7 +522,7 @@
                 checkAndAddControls(loadedCount, itemsToRender.length);
             } else {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     if (item.type === 'image') {
                         const img = document.createElement('img');
                         img.src = e.target.result;
@@ -592,7 +574,7 @@
     function syncHiddenInputs() {
         const existingPhotos = existingMedia.filter(m => m.type === 'image').map(m => m.path);
         const existingVideos = existingMedia.filter(m => m.type === 'video').map(m => m.path);
-        
+
         document.getElementById('existing_photos_input').value = JSON.stringify(existingPhotos);
         document.getElementById('existing_videos_input').value = JSON.stringify(existingVideos);
     }
