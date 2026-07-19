@@ -100,9 +100,10 @@
                                 <select id="crimeDateMode" onchange="onCrimeDateModeChange()"
                                     class="w-full px-3 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
                                     <option value="thisYear">This Year (Default)</option>
-                                    <option value="monthYear">Month & Year</option>
-                                    <option value="yearOnly">Year Only</option>
-                                    <option value="customRange">Custom Date Range</option>
+                                    <option value="allTime">All Time</option>
+                                    <option value="monthYear">Specific Month & Year</option>
+                                    <option value="yearOnly">Specific Year</option>
+                                    <option value="customRange">Custom Range</option>
                                 </select>
                             </div>
 
@@ -510,7 +511,10 @@
             const itemDate = new Date(pDateStr);
             if (isNaN(itemDate.getTime())) return true; // Keep if date is invalid
 
-            if (crimeDateFilterMode === 'thisYear') {
+            if (crimeDateFilterMode === 'allTime') {
+                return true;
+            }
+            else if (crimeDateFilterMode === 'thisYear') {
                 const startOfYear = new Date(currentYear, 0, 1);
                 return itemDate >= startOfYear && itemDate <= new Date();
             }
@@ -558,7 +562,10 @@
         let text = '';
         const currentYear = new Date().getFullYear();
 
-        if (crimeDateFilterMode === 'thisYear') {
+        if (crimeDateFilterMode === 'allTime') {
+            text = `Showing: All Time`;
+        }
+        else if (crimeDateFilterMode === 'thisYear') {
             text = `Showing: January 1, ${currentYear} – Today`;
         }
         else if (crimeDateFilterMode === 'monthYear') {
@@ -587,7 +594,9 @@
 
         const btnLabelEl = document.getElementById('crimeDateLabel');
         if (btnLabelEl) {
-            if (crimeDateFilterMode === 'thisYear') {
+            if (crimeDateFilterMode === 'allTime') {
+                btnLabelEl.textContent = 'All Time';
+            } else if (crimeDateFilterMode === 'thisYear') {
                 btnLabelEl.textContent = 'This Year (Default)';
             } else if (crimeDateFilterMode === 'monthYear') {
                 const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
