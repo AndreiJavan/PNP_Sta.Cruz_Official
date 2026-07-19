@@ -78,17 +78,83 @@
                             </div>
                             <div class="space-y-1">
                                 <label class="text-[9px] font-bold text-gray-400 uppercase">Crime Date</label>
-                                <select id="filterRange" onchange="loadMapPoints(false)"
-                                    class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none">
-                                    <option value="currentYear" selected>Current Year</option>
-                                    <option value="">All Time</option>
-                                    <option value="1month">Last 1 Month</option>
-                                    <option value="2months">Last 2 Months</option>
-                                    <option value="3months">Last 3 Months</option>
-                                </select>
+                                <button id="crimeDateBtn" type="button" onclick="toggleCrimeDatePopover(event)"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white flex items-center justify-between shadow-sm cursor-pointer group hover:bg-white dark:hover:bg-slate-800">
+                                    <span id="crimeDateLabel" class="truncate">This Year (Default)</span>
+                                    <i class="fas fa-calendar-alt text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition"></i>
+                                </button>
                             </div>
                         </div>
-                    </div>
+
+                        <!-- Crime Date Inline Selector Container (Responsive & Non-Clipped) -->
+                        <div id="crimeDatePopover" class="hidden mt-3 bg-gray-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700/50 space-y-3 transition-all duration-300">
+                            <!-- Date filter option selection -->
+                            <div class="space-y-1">
+                                <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter Method</label>
+                                <select id="crimeDateMode" onchange="onCrimeDateModeChange()"
+                                    class="w-full px-3 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
+                                    <option value="thisYear">This Year (Default)</option>
+                                    <option value="monthYear">Month & Year</option>
+                                    <option value="yearOnly">Year Only</option>
+                                    <option value="customRange">Custom Date Range</option>
+                                </select>
+                            </div>
+
+                            <!-- Mode 2: Month & Year Sub-controls -->
+                            <div id="modeMonthYear" class="hidden grid grid-cols-2 gap-2">
+                                <div class="space-y-1">
+                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Month</label>
+                                    <select id="filterMonth" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7" selected>July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Year</label>
+                                    <select id="filterMonthYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
+                                        <option value="2026" selected>2026</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2024">2024</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2022">2022</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Mode 3: Year Sub-controls -->
+                            <div id="modeYearOnly" class="hidden space-y-1">
+                                <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Select Year</label>
+                                <select id="filterYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                </select>
+                            </div>
+
+                            <!-- Mode 4: Custom Date Range Sub-controls -->
+                            <div id="modeCustomRange" class="hidden grid grid-cols-2 gap-2">
+                                <div class="space-y-1">
+                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">From</label>
+                                    <input type="date" id="filterFromDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none dark:text-white text-center">
+                                </div>
+                                <div class="space-y-1">
+                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">To</label>
+                                    <input type="date" id="filterToDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none dark:text-white text-center">
+                                </div>
+                            </div>
+                        </div>  </div>
                 </div>
                 
                 <div id="dynamicLegend"
@@ -229,6 +295,276 @@
     let boundaryLayerGroup;
     let currentPoints = [];
     const barangayGeoJsonUrl = '/data/santa_cruz_boundaries.json';
+
+    // Custom Crime Date Filter State & Functions
+    let crimeDateFilterMode = 'thisYear'; // 'thisYear', 'monthYear', 'yearOnly', 'customRange'
+    let crimeDateSelectedMonth = new Date().getMonth() + 1; // 1-12
+    let crimeDateSelectedYear = new Date().getFullYear();
+    let crimeDateCustomFrom = '';
+    let crimeDateCustomTo = '';
+    let allMapPointsCached = [];
+
+    function populateYearDropdowns(points) {
+        const years = new Set();
+        // Always include the current/present year
+        const currentYear = new Date().getFullYear();
+        years.add(currentYear);
+
+        points.forEach(p => {
+            const pDateStr = p.incident_date || p.date || p.created_at;
+            if (pDateStr) {
+                const itemDate = new Date(pDateStr);
+                if (!isNaN(itemDate.getTime())) {
+                    years.add(itemDate.getFullYear());
+                }
+            }
+        });
+        
+        // Convert to array and sort descending
+        let sortedYears = Array.from(years).sort((a, b) => b - a);
+        
+        const filterMonthYear = document.getElementById('filterMonthYear');
+        const filterYear = document.getElementById('filterYear');
+        
+        if (filterMonthYear) {
+            const currentVal = filterMonthYear.value;
+            filterMonthYear.innerHTML = sortedYears.map(yr => 
+                `<option value="${yr}">${yr}</option>`
+            ).join('');
+            // Try to restore previous value, otherwise select first option
+            if (sortedYears.includes(parseInt(currentVal))) {
+                filterMonthYear.value = currentVal;
+            } else {
+                filterMonthYear.value = currentYear;
+                crimeDateSelectedYear = currentYear;
+            }
+        }
+        
+        if (filterYear) {
+            const currentVal = filterYear.value;
+            filterYear.innerHTML = sortedYears.map(yr => 
+                `<option value="${yr}">${yr}</option>`
+            ).join('');
+            // Try to restore previous value, otherwise select first option
+            if (sortedYears.includes(parseInt(currentVal))) {
+                filterYear.value = currentVal;
+            } else {
+                filterYear.value = currentYear;
+                crimeDateSelectedYear = currentYear;
+            }
+        }
+
+        // Restrict calendar pickers dynamically based on available/present years
+        const minYear = Math.min(...sortedYears);
+        const fromDateInput = document.getElementById('filterFromDate');
+        const toDateInput = document.getElementById('filterToDate');
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        if (fromDateInput) {
+            fromDateInput.setAttribute('min', `${minYear}-01-01`);
+            fromDateInput.setAttribute('max', todayStr);
+        }
+        if (toDateInput) {
+            toDateInput.setAttribute('min', `${minYear}-01-01`);
+            toDateInput.setAttribute('max', todayStr);
+        }
+    }
+
+    function toggleCrimeDatePopover(event) {
+        if (event) event.stopPropagation();
+        const popover = document.getElementById('crimeDatePopover');
+        if (popover) {
+            popover.classList.toggle('hidden');
+        }
+    }
+
+    function onCrimeDateModeChange() {
+        const mode = document.getElementById('crimeDateMode').value;
+        
+        // Hide all sub-controls
+        document.getElementById('modeMonthYear').classList.add('hidden');
+        document.getElementById('modeYearOnly').classList.add('hidden');
+        document.getElementById('modeCustomRange').classList.add('hidden');
+        
+        // Show selected sub-controls
+        if (mode === 'monthYear') {
+            document.getElementById('modeMonthYear').classList.remove('hidden');
+        } else if (mode === 'yearOnly') {
+            document.getElementById('modeYearOnly').classList.remove('hidden');
+        } else if (mode === 'customRange') {
+            document.getElementById('modeCustomRange').classList.remove('hidden');
+        }
+
+        // Apply automatically
+        applyCrimeDateFilter(false);
+    }
+
+    function filterPointsByDate(points) {
+        const currentYear = new Date().getFullYear();
+        
+        return points.filter(p => {
+            const pDateStr = p.incident_date || p.date || p.created_at;
+            if (!pDateStr) return true; // Keep if no date available
+            
+            const itemDate = new Date(pDateStr);
+            if (isNaN(itemDate.getTime())) return true; // Keep if date is invalid
+            
+            if (crimeDateFilterMode === 'thisYear') {
+                const startOfYear = new Date(currentYear, 0, 1);
+                return itemDate >= startOfYear && itemDate <= new Date();
+            } 
+            else if (crimeDateFilterMode === 'monthYear') {
+                const selectedMonth0Idx = parseInt(crimeDateSelectedMonth) - 1;
+                const selectedYearInt = parseInt(crimeDateSelectedYear);
+                
+                const startOfMonth = new Date(selectedYearInt, selectedMonth0Idx, 1);
+                const endOfMonth = new Date(selectedYearInt, selectedMonth0Idx + 1, 0, 23, 59, 59, 999);
+                return itemDate >= startOfMonth && itemDate <= endOfMonth;
+            } 
+            else if (crimeDateFilterMode === 'yearOnly') {
+                const selectedYearInt = parseInt(crimeDateSelectedYear);
+                const startOfYear = new Date(selectedYearInt, 0, 1);
+                const endOfYear = new Date(selectedYearInt, 11, 31, 23, 59, 59, 999);
+                return itemDate >= startOfYear && itemDate <= endOfYear;
+            } 
+            else if (crimeDateFilterMode === 'customRange') {
+                let start = null;
+                if (crimeDateCustomFrom) {
+                    start = new Date(crimeDateCustomFrom + 'T00:00:00');
+                }
+                let end = null;
+                if (crimeDateCustomTo) {
+                    end = new Date(crimeDateCustomTo + 'T23:59:59');
+                }
+                
+                if (start && end) {
+                    return itemDate >= start && itemDate <= end;
+                } else if (start) {
+                    return itemDate >= start;
+                } else if (end) {
+                    return itemDate <= end;
+                }
+                return true;
+            }
+            return true;
+        });
+    }
+
+    function updateActivePeriodDisplay() {
+        const activePeriodEl = document.getElementById('activePeriodDisplay');
+        if (!activePeriodEl) return;
+        
+        let text = '';
+        const currentYear = new Date().getFullYear();
+        
+        if (crimeDateFilterMode === 'thisYear') {
+            text = `Showing: January 1, ${currentYear} – Today`;
+        } 
+        else if (crimeDateFilterMode === 'monthYear') {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const mName = monthNames[parseInt(crimeDateSelectedMonth) - 1];
+            text = `Showing: ${mName} ${crimeDateSelectedYear}`;
+        } 
+        else if (crimeDateFilterMode === 'yearOnly') {
+            text = `Showing: Year ${crimeDateSelectedYear}`;
+        } 
+        else if (crimeDateFilterMode === 'customRange') {
+            const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            let fromText = 'Beginning';
+            let toText = 'Today';
+            
+            if (crimeDateCustomFrom) {
+                fromText = new Date(crimeDateCustomFrom + 'T00:00:00').toLocaleDateString('en-US', formatOptions);
+            }
+            if (crimeDateCustomTo) {
+                toText = new Date(crimeDateCustomTo + 'T00:00:00').toLocaleDateString('en-US', formatOptions);
+            }
+            text = `Showing: ${fromText} – ${toText}`;
+        }
+        
+        activePeriodEl.textContent = text;
+        
+        const btnLabelEl = document.getElementById('crimeDateLabel');
+        if (btnLabelEl) {
+            if (crimeDateFilterMode === 'thisYear') {
+                btnLabelEl.textContent = 'This Year (Default)';
+            } else if (crimeDateFilterMode === 'monthYear') {
+                const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const mShort = monthNamesShort[parseInt(crimeDateSelectedMonth) - 1];
+                btnLabelEl.textContent = `${mShort} ${crimeDateSelectedYear}`;
+            } else if (crimeDateFilterMode === 'yearOnly') {
+                btnLabelEl.textContent = `Year ${crimeDateSelectedYear}`;
+            } else if (crimeDateFilterMode === 'customRange') {
+                btnLabelEl.textContent = 'Custom Range';
+            }
+        }
+    }
+
+    function applyCrimeDateFilter(shouldClose = false) {
+        const mode = document.getElementById('crimeDateMode').value;
+        crimeDateFilterMode = mode;
+        
+        if (mode === 'monthYear') {
+            crimeDateSelectedMonth = document.getElementById('filterMonth').value;
+            crimeDateSelectedYear = document.getElementById('filterMonthYear').value;
+        } else if (mode === 'yearOnly') {
+            crimeDateSelectedYear = document.getElementById('filterYear').value;
+        } else if (mode === 'customRange') {
+            crimeDateCustomFrom = document.getElementById('filterFromDate').value;
+            crimeDateCustomTo = document.getElementById('filterToDate').value;
+        }
+        
+        updateActivePeriodDisplay();
+        loadMapPoints(false);
+        if (shouldClose) {
+            const popover = document.getElementById('crimeDatePopover');
+            if (popover) popover.classList.add('hidden');
+        }
+    }
+
+    function resetCrimeDateFilter() {
+        crimeDateFilterMode = 'thisYear';
+        const now = new Date();
+        crimeDateSelectedMonth = now.getMonth() + 1;
+        crimeDateSelectedYear = now.getFullYear();
+        crimeDateCustomFrom = '';
+        crimeDateCustomTo = '';
+        
+        document.getElementById('crimeDateMode').value = 'thisYear';
+        document.getElementById('filterMonth').value = crimeDateSelectedMonth;
+        document.getElementById('filterMonthYear').value = crimeDateSelectedYear;
+        document.getElementById('filterYear').value = crimeDateSelectedYear;
+        
+        const currentYear = new Date().getFullYear();
+        const todayStr = new Date().toISOString().split('T')[0];
+        const fromDateInput = document.getElementById('filterFromDate');
+        const toDateInput = document.getElementById('filterToDate');
+        if (fromDateInput) {
+            fromDateInput.value = `${currentYear}-01-01`;
+            fromDateInput.setAttribute('max', todayStr);
+        }
+        if (toDateInput) {
+            toDateInput.value = todayStr;
+            toDateInput.setAttribute('max', todayStr);
+        }
+        
+        onCrimeDateModeChange();
+        updateActivePeriodDisplay();
+        loadMapPoints(false);
+        const popover = document.getElementById('crimeDatePopover');
+        if (popover) popover.classList.add('hidden');
+    }
+
+    // Global document click listener to close popover
+    document.addEventListener('click', function(event) {
+        const popover = document.getElementById('crimeDatePopover');
+        const button = document.getElementById('crimeDateBtn');
+        if (popover && button) {
+            if (!popover.contains(event.target) && !button.contains(event.target)) {
+                popover.classList.add('hidden');
+            }
+        }
+    });
 
     const policeStations = [
         {
@@ -527,9 +863,7 @@
     }
 
     async function loadMapPoints(shouldLocate = true) {
-        const range = document.getElementById('filterRange').value;
         const barangay = document.getElementById('filterBarangay').value;
-
 
         // Automatically locate when barangay is selected
         if (barangay && shouldLocate) {
@@ -544,22 +878,32 @@
         const topIncidentsList = document.getElementById('topIncidentsList');
         const topIncidentsRange = document.getElementById('topIncidentsRange');
 
-        const rangeText = {
-            'currentYear': 'Current Year',
-            '': 'All Time',
-            '1month': 'Last 1 Month',
-            '2months': 'Last 2 Months',
-            '3months': 'Last 3 Months'
-        };
-        if (topIncidentsRange) topIncidentsRange.textContent = rangeText[range] || 'All Time';
+        if (topIncidentsRange) {
+            if (crimeDateFilterMode === 'thisYear') {
+                topIncidentsRange.textContent = 'This Year';
+            } else if (crimeDateFilterMode === 'monthYear') {
+                const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                topIncidentsRange.textContent = `${monthNamesShort[parseInt(crimeDateSelectedMonth) - 1]} ${crimeDateSelectedYear}`;
+            } else if (crimeDateFilterMode === 'yearOnly') {
+                topIncidentsRange.textContent = `Year ${crimeDateSelectedYear}`;
+            } else if (crimeDateFilterMode === 'customRange') {
+                topIncidentsRange.textContent = 'Custom Range';
+            }
+        }
 
         try {
-            // Fetch ALL points for the selected range to ensure correct density/heatmap calculations relative to global peak density!
-            const url = `/api/map-points?range=${encodeURIComponent(range)}`;
-            const response = await fetch(url);
-            const points = await response.json();
+            // Fetch ALL points once (All Time) and cache them
+            if (allMapPointsCached.length === 0) {
+                const url = `/api/map-points`;
+                const response = await fetch(url);
+                const points = await response.json();
+                allMapPointsCached = Array.isArray(points) ? points : [];
+                populateYearDropdowns(allMapPointsCached);
+            }
 
-            currentPoints = Array.isArray(points) ? points : [];
+            // Apply our elegant custom date filter locally!
+            currentPoints = filterPointsByDate(allMapPointsCached);
+
             populateClassificationDropdown();
             updateHeatmap();
             updateLegend();
@@ -1175,7 +1519,7 @@
                 scrollWheelZoom: false,
                 boxZoom: false,
                 keyboard: false,
-                attributionControl: true,
+                attributionControl: false,
                 minZoom: 13,
                 maxZoom: 18,
                 maxBounds: bounds,
@@ -1371,6 +1715,23 @@
     document.addEventListener('DOMContentLoaded', () => {
         initMap();
 
+        // Prefill default custom range picker dates
+        const currentYear = new Date().getFullYear();
+        const fromDateInput = document.getElementById('filterFromDate');
+        const toDateInput = document.getElementById('filterToDate');
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (fromDateInput) {
+            fromDateInput.value = `${currentYear}-01-01`;
+            fromDateInput.setAttribute('max', todayStr);
+        }
+        if (toDateInput) {
+            toDateInput.value = todayStr;
+            toDateInput.setAttribute('max', todayStr);
+        }
+
+        // Initialize display badge text
+        updateActivePeriodDisplay();
+
         // Robust event listeners for all map filters
         const setupListener = (id, callback) => {
             const el = document.getElementById(id);
@@ -1393,7 +1754,6 @@
         });
 
         setupListener('filterBarangay', () => loadMapPoints());
-        setupListener('filterRange', () => loadMapPoints());
     });
 </script>
 
