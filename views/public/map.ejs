@@ -25,7 +25,7 @@
         <div class="bg-pnp-blue p-6 pr-16 text-white relative">
             <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Location Overview</h3>
             <h4 class="text-xl font-black tracking-tighter">Sta. Cruz Map</h4>
-            
+
 
             <!-- Close button inside sidebar for better UX -->
             <button onclick="toggleSidebar()"
@@ -57,7 +57,8 @@
                                         </option>
                                         <% }) %>
                                 </select>
-                                <button onclick="document.getElementById('filterBarangay').value=''; const m=document.getElementById('mapDisplayMode'); if(m) m.value='density'; locateBarangay(false); if(typeof loadMapPoints === 'function') loadMapPoints(false);"
+                                <button
+                                    onclick="document.getElementById('filterBarangay').value=''; const m=document.getElementById('mapDisplayMode'); if(m) m.value='density'; locateBarangay(false); if(typeof loadMapPoints === 'function') loadMapPoints(false);"
                                     class="px-4 py-2 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center"
                                     title="Default to All Barangays">
                                     <i class="fas fa-globe"></i>
@@ -67,7 +68,8 @@
                         <div class="grid grid-cols-2 gap-2 mt-2">
                             <div class="space-y-1">
                                 <label class="text-[9px] font-bold text-gray-400 uppercase">Category</label>
-                                <select id="mapDisplayMode" onchange="const fc = document.getElementById('filterClassification'); if (fc) fc.value = 'All'; updateHeatmap(); updateLegend();"
+                                <select id="mapDisplayMode"
+                                    onchange="const fc = document.getElementById('filterClassification'); if (fc) fc.value = 'All'; updateHeatmap(); updateLegend();"
                                     class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none cursor-pointer">
                                     <option value="density">All Crimes</option>
                                     <option value="density_focus">Major Crimes</option>
@@ -81,16 +83,20 @@
                                 <button id="crimeDateBtn" type="button" onclick="toggleCrimeDatePopover(event)"
                                     class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white flex items-center justify-between shadow-sm cursor-pointer group hover:bg-white dark:hover:bg-slate-800">
                                     <span id="crimeDateLabel" class="truncate">This Year (Default)</span>
-                                    <i class="fas fa-calendar-alt text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition"></i>
+                                    <i
+                                        class="fas fa-calendar-alt text-[10px] text-gray-400 dark:text-gray-500 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition"></i>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Crime Date Inline Selector Container (Responsive & Non-Clipped) -->
-                        <div id="crimeDatePopover" class="hidden mt-3 bg-gray-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700/50 space-y-3 transition-all duration-300">
+                        <div id="crimeDatePopover"
+                            class="hidden mt-3 bg-gray-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-gray-100 dark:border-slate-700/50 space-y-3 transition-all duration-300">
                             <!-- Date filter option selection -->
                             <div class="space-y-1">
-                                <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter Method</label>
+                                <label
+                                    class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Filter
+                                    Method</label>
                                 <select id="crimeDateMode" onchange="onCrimeDateModeChange()"
                                     class="w-full px-3 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white">
                                     <option value="thisYear">This Year (Default)</option>
@@ -103,8 +109,10 @@
                             <!-- Mode 2: Month & Year Sub-controls -->
                             <div id="modeMonthYear" class="hidden grid grid-cols-2 gap-2">
                                 <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Month</label>
-                                    <select id="filterMonth" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
+                                    <label
+                                        class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Month</label>
+                                    <select id="filterMonth" onchange="applyCrimeDateFilter(false)"
+                                        class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
                                         <option value="1">January</option>
                                         <option value="2">February</option>
                                         <option value="3">March</option>
@@ -120,8 +128,10 @@
                                     </select>
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Year</label>
-                                    <select id="filterMonthYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
+                                    <label
+                                        class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Year</label>
+                                    <select id="filterMonthYear" onchange="applyCrimeDateFilter(false)"
+                                        class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
                                         <option value="2026" selected>2026</option>
                                         <option value="2025">2025</option>
                                         <option value="2024">2024</option>
@@ -133,8 +143,11 @@
 
                             <!-- Mode 3: Year Sub-controls -->
                             <div id="modeYearOnly" class="hidden space-y-1">
-                                <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Select Year</label>
-                                <select id="filterYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
+                                <label
+                                    class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Select
+                                    Year</label>
+                                <select id="filterYear" onchange="applyCrimeDateFilter(false)"
+                                    class="w-full px-2 py-1.5 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none dark:text-white">
                                     <option value="2026" selected>2026</option>
                                     <option value="2025">2025</option>
                                     <option value="2024">2024</option>
@@ -146,19 +159,23 @@
                             <!-- Mode 4: Custom Date Range Sub-controls -->
                             <div id="modeCustomRange" class="hidden grid grid-cols-2 gap-2">
                                 <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">From</label>
-                                    <input type="date" id="filterFromDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none dark:text-white text-center">
+                                    <label
+                                        class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">From</label>
+                                    <input type="date" id="filterFromDate" onchange="applyCrimeDateFilter(false)"
+                                        class="w-full px-2 py-1 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none dark:text-white text-center">
                                 </div>
                                 <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">To</label>
-                                    <input type="date" id="filterToDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none dark:text-white text-center">
+                                    <label
+                                        class="text-[8px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">To</label>
+                                    <input type="date" id="filterToDate" onchange="applyCrimeDateFilter(false)"
+                                        class="w-full px-2 py-1 bg-white dark:bg-slate-850 border border-gray-150 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none dark:text-white text-center">
                                 </div>
                             </div>
-                        </div>  </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div id="dynamicLegend"
-                    class="space-y-2 overflow-y-auto custom-scrollbar-thin">
+
+                <div id="dynamicLegend" class="space-y-2 overflow-y-auto custom-scrollbar-thin">
                     <p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Loading data...</p>
                 </div>
             </div>
@@ -171,7 +188,7 @@
         <div class="bg-pnp-blue p-6 pr-16 text-white relative">
             <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Crime Data</h3>
             <h4 class="text-xl font-black tracking-tighter">Incident Breakdown</h4>
-            
+
             <!-- Close button inside sidebar for better UX -->
             <button onclick="toggleIncidentsSidebar()"
                 class="absolute top-6 right-8 text-pnp-gold/50 hover:text-pnp-gold transition">
@@ -183,7 +200,8 @@
             <div class="p-5 space-y-4">
                 <!-- Classification Filter Dropdown within the Crime Data Container -->
                 <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
+                    <label
+                        class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
                         <i class="fas fa-filter mr-2 text-pnp-blue dark:text-pnp-gold"></i> Classification Filter
                     </label>
                     <select id="filterClassification"
@@ -191,14 +209,6 @@
                         <option value="All">All Classifications</option>
                     </select>
                 </div>
-
-                <hr class="border-gray-100 dark:border-slate-700/50">
-
-                <!-- Trends & Patterns Report Button -->
-                <button onclick="generateTrendsReport()" class="w-full bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-bold py-3 rounded-xl transition-colors duration-300 uppercase tracking-widest text-[10px] shadow-md flex items-center justify-center space-x-2">
-                    <i class="fas fa-chart-line text-xs"></i>
-                    <span>View Trends & Patterns</span>
-                </button>
 
                 <hr class="border-gray-100 dark:border-slate-700/50">
 
@@ -229,28 +239,20 @@
     </div>
 </div>
 
-<!-- Trends & Patterns Modal -->
-<div id="trends-modal" class="fixed inset-0 z-[2000] flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
-    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="closeTrendsModal()"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-11/12 max-w-2xl rounded-[2rem] p-8 md:p-10 shadow-2xl border border-gray-100 dark:border-slate-800 transform scale-95 transition-transform duration-500" id="trends-modal-content">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white flex items-center"><i class="fas fa-chart-line text-pnp-blue dark:text-pnp-gold mr-3"></i> Crime Trends & Patterns</h3>
-            <button onclick="closeTrendsModal()" class="text-gray-400 hover:text-pnp-gold transition">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-        <div id="trends-report-content" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed space-y-4">
-            <!-- Content injected via JS -->
-        </div>
-        <div class="mt-8 flex justify-end">
-            <button onclick="window.print()" class="px-5 py-2.5 bg-pnp-blue text-white hover:bg-pnp-gold hover:text-pnp-blue rounded-xl font-bold uppercase tracking-widest text-xs transition">
-                <i class="fas fa-print mr-2"></i> Print Report
-            </button>
-        </div>
-    </div>
-</div>
-
 <style>
+    .barangay-label-tooltip {
+        background: rgba(15, 23, 42, 0.75) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        color: #ffffff !important;
+        font-weight: 900 !important;
+        font-size: 9px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8) !important;
         text-align: center;
         white-space: pre-wrap;
         line-height: 1.2;
@@ -278,7 +280,7 @@
         }
 
         let totalCrimes = currentPoints.length;
-        
+
         const typeCounts = {};
         const barangayCounts = {};
         const monthCounts = {};
@@ -288,7 +290,7 @@
             const brgy = p.barangay || 'Unknown';
             typeCounts[type] = (typeCounts[type] || 0) + 1;
             barangayCounts[brgy] = (barangayCounts[brgy] || 0) + 1;
-            
+
             const pDate = new Date(p.incident_date || p.date || p.created_at);
             if (!isNaN(pDate.getTime())) {
                 const month = pDate.toLocaleString('default', { month: 'long' });
@@ -300,24 +302,11 @@
         const sortedBarangays = Object.entries(barangayCounts).sort((a, b) => b[1] - a[1]);
         const sortedMonths = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]);
 
-        // Calculate time scope
-        const dates = currentPoints
-            .map(p => new Date(p.incident_date || p.date || p.created_at).getTime())
-            .filter(t => !isNaN(t));
-        let timeScope = "";
-        if (dates.length > 0) {
-            const minDate = new Date(Math.min(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            const maxDate = new Date(Math.max(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            timeScope = minDate === maxDate ? `on ${minDate}` : `for the period between ${minDate} and ${maxDate}`;
-        } else {
-            timeScope = "for the selected period";
-        }
-
         const mostCommonCrime = sortedTypes.length > 0 ? sortedTypes[0] : ['N/A', 0];
         const mostAffectedBrgy = sortedBarangays.length > 0 ? sortedBarangays[0] : ['N/A', 0];
         const peakMonth = sortedMonths.length > 0 ? sortedMonths[0] : ['N/A', 0];
-        
-        const crimePercentage = totalCrimes > 0 ? ((mostCommonCrime[1]/totalCrimes)*100).toFixed(1) : 0;
+
+        const crimePercentage = totalCrimes > 0 ? ((mostCommonCrime[1] / totalCrimes) * 100).toFixed(1) : 0;
 
         const reportHtml = `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -340,7 +329,7 @@
             </div>
             <div>
                 <h4 class="font-bold text-slate-800 dark:text-white mb-2">Executive Summary</h4>
-                <p>Based on the filtered data, a total of <strong>${totalCrimes}</strong> incidents were recorded <strong>${timeScope}</strong>. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes in the dataset. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
+                <p>Based on the filtered data, a total of <strong>${totalCrimes}</strong> incidents were recorded. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes in the dataset. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
             </div>
         `;
 
@@ -370,16 +359,16 @@
     function cycleBarangay(direction) {
         const select = document.getElementById('filterBarangay');
         if (!select) return;
-        
+
         let newIndex = select.selectedIndex + direction;
         if (newIndex < 0) newIndex = select.options.length - 1;
         if (newIndex >= select.options.length) newIndex = 0;
-        
+
         select.selectedIndex = newIndex;
-        
+
         const event = new Event('change');
         select.dispatchEvent(event);
-        
+
         if (typeof locateBarangay === 'function' && select.value !== "") {
             locateBarangay();
         } else if (select.value === "" && map) {
@@ -387,9 +376,9 @@
         }
     }
 
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-        
+
         if (e.key === 'ArrowLeft') {
             e.preventDefault();
             cycleBarangay(-1);
@@ -431,16 +420,16 @@
                 }
             }
         });
-        
+
         // Convert to array and sort descending
         let sortedYears = Array.from(years).sort((a, b) => b - a);
-        
+
         const filterMonthYear = document.getElementById('filterMonthYear');
         const filterYear = document.getElementById('filterYear');
-        
+
         if (filterMonthYear) {
             const currentVal = filterMonthYear.value;
-            filterMonthYear.innerHTML = sortedYears.map(yr => 
+            filterMonthYear.innerHTML = sortedYears.map(yr =>
                 `<option value="${yr}">${yr}</option>`
             ).join('');
             // Try to restore previous value, otherwise select first option
@@ -451,10 +440,10 @@
                 crimeDateSelectedYear = currentYear;
             }
         }
-        
+
         if (filterYear) {
             const currentVal = filterYear.value;
-            filterYear.innerHTML = sortedYears.map(yr => 
+            filterYear.innerHTML = sortedYears.map(yr =>
                 `<option value="${yr}">${yr}</option>`
             ).join('');
             // Try to restore previous value, otherwise select first option
@@ -492,12 +481,12 @@
 
     function onCrimeDateModeChange() {
         const mode = document.getElementById('crimeDateMode').value;
-        
+
         // Hide all sub-controls
         document.getElementById('modeMonthYear').classList.add('hidden');
         document.getElementById('modeYearOnly').classList.add('hidden');
         document.getElementById('modeCustomRange').classList.add('hidden');
-        
+
         // Show selected sub-controls
         if (mode === 'monthYear') {
             document.getElementById('modeMonthYear').classList.remove('hidden');
@@ -513,32 +502,32 @@
 
     function filterPointsByDate(points) {
         const currentYear = new Date().getFullYear();
-        
+
         return points.filter(p => {
             const pDateStr = p.incident_date || p.date || p.created_at;
             if (!pDateStr) return true; // Keep if no date available
-            
+
             const itemDate = new Date(pDateStr);
             if (isNaN(itemDate.getTime())) return true; // Keep if date is invalid
-            
+
             if (crimeDateFilterMode === 'thisYear') {
                 const startOfYear = new Date(currentYear, 0, 1);
                 return itemDate >= startOfYear && itemDate <= new Date();
-            } 
+            }
             else if (crimeDateFilterMode === 'monthYear') {
                 const selectedMonth0Idx = parseInt(crimeDateSelectedMonth) - 1;
                 const selectedYearInt = parseInt(crimeDateSelectedYear);
-                
+
                 const startOfMonth = new Date(selectedYearInt, selectedMonth0Idx, 1);
                 const endOfMonth = new Date(selectedYearInt, selectedMonth0Idx + 1, 0, 23, 59, 59, 999);
                 return itemDate >= startOfMonth && itemDate <= endOfMonth;
-            } 
+            }
             else if (crimeDateFilterMode === 'yearOnly') {
                 const selectedYearInt = parseInt(crimeDateSelectedYear);
                 const startOfYear = new Date(selectedYearInt, 0, 1);
                 const endOfYear = new Date(selectedYearInt, 11, 31, 23, 59, 59, 999);
                 return itemDate >= startOfYear && itemDate <= endOfYear;
-            } 
+            }
             else if (crimeDateFilterMode === 'customRange') {
                 let start = null;
                 if (crimeDateCustomFrom) {
@@ -548,7 +537,7 @@
                 if (crimeDateCustomTo) {
                     end = new Date(crimeDateCustomTo + 'T23:59:59');
                 }
-                
+
                 if (start && end) {
                     return itemDate >= start && itemDate <= end;
                 } else if (start) {
@@ -565,26 +554,26 @@
     function updateActivePeriodDisplay() {
         const activePeriodEl = document.getElementById('activePeriodDisplay');
         if (!activePeriodEl) return;
-        
+
         let text = '';
         const currentYear = new Date().getFullYear();
-        
+
         if (crimeDateFilterMode === 'thisYear') {
             text = `Showing: January 1, ${currentYear} – Today`;
-        } 
+        }
         else if (crimeDateFilterMode === 'monthYear') {
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const mName = monthNames[parseInt(crimeDateSelectedMonth) - 1];
             text = `Showing: ${mName} ${crimeDateSelectedYear}`;
-        } 
+        }
         else if (crimeDateFilterMode === 'yearOnly') {
             text = `Showing: Year ${crimeDateSelectedYear}`;
-        } 
+        }
         else if (crimeDateFilterMode === 'customRange') {
             const formatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
             let fromText = 'Beginning';
             let toText = 'Today';
-            
+
             if (crimeDateCustomFrom) {
                 fromText = new Date(crimeDateCustomFrom + 'T00:00:00').toLocaleDateString('en-US', formatOptions);
             }
@@ -593,9 +582,9 @@
             }
             text = `Showing: ${fromText} – ${toText}`;
         }
-        
+
         activePeriodEl.textContent = text;
-        
+
         const btnLabelEl = document.getElementById('crimeDateLabel');
         if (btnLabelEl) {
             if (crimeDateFilterMode === 'thisYear') {
@@ -615,7 +604,7 @@
     function applyCrimeDateFilter(shouldClose = false) {
         const mode = document.getElementById('crimeDateMode').value;
         crimeDateFilterMode = mode;
-        
+
         if (mode === 'monthYear') {
             crimeDateSelectedMonth = document.getElementById('filterMonth').value;
             crimeDateSelectedYear = document.getElementById('filterMonthYear').value;
@@ -625,7 +614,7 @@
             crimeDateCustomFrom = document.getElementById('filterFromDate').value;
             crimeDateCustomTo = document.getElementById('filterToDate').value;
         }
-        
+
         updateActivePeriodDisplay();
         loadMapPoints(false);
         if (shouldClose) {
@@ -641,12 +630,12 @@
         crimeDateSelectedYear = now.getFullYear();
         crimeDateCustomFrom = '';
         crimeDateCustomTo = '';
-        
+
         document.getElementById('crimeDateMode').value = 'thisYear';
         document.getElementById('filterMonth').value = crimeDateSelectedMonth;
         document.getElementById('filterMonthYear').value = crimeDateSelectedYear;
         document.getElementById('filterYear').value = crimeDateSelectedYear;
-        
+
         const currentYear = new Date().getFullYear();
         const todayStr = new Date().toISOString().split('T')[0];
         const fromDateInput = document.getElementById('filterFromDate');
@@ -659,7 +648,7 @@
             toDateInput.value = todayStr;
             toDateInput.setAttribute('max', todayStr);
         }
-        
+
         onCrimeDateModeChange();
         updateActivePeriodDisplay();
         loadMapPoints(false);
@@ -668,7 +657,7 @@
     }
 
     // Global document click listener to close popover
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         const popover = document.getElementById('crimeDatePopover');
         const button = document.getElementById('crimeDateBtn');
         if (popover && button) {
@@ -1133,14 +1122,14 @@
         });
 
         const sorted = Array.from(offenses).sort();
-        
+
         let html = `<option value="All">All Classifications</option>`;
         sorted.forEach(off => {
             html += `<option value="${off}" ${off === currentVal ? 'selected' : ''}>${off}</option>`;
         });
 
         dropdown.innerHTML = html;
-        
+
         if (currentVal !== 'All' && !offenses.has(currentVal)) {
             dropdown.value = 'All';
         }
@@ -1638,6 +1627,8 @@
                 maxBoundsViscosity: 1.0
             }).fitBounds(bounds);
 
+            window.map = map;
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
             }).addTo(map);
@@ -1684,7 +1675,7 @@
                             f.geometry.coordinates.forEach(poly => maskCoords.push(poly[0]));
                         }
                     });
-                    
+
                     const isDark = document.documentElement.classList.contains('dark');
                     L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
                         style: {
@@ -1805,6 +1796,13 @@
             sidebar.classList.remove('sidebar-visible');
             if (toggleBtn) toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
         }
+
+        // Prevent rendering errors (grey tiles) and keep map static
+        setTimeout(() => {
+            if (window.map) {
+                window.map.invalidateSize({ pan: false });
+            }
+        }, 350);
     }
 
     function toggleIncidentsSidebar() {
@@ -1822,6 +1820,13 @@
                 if (toggleBtn) toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
             }
         }
+
+        // Prevent rendering errors (grey tiles) and keep map static
+        setTimeout(() => {
+            if (window.map) {
+                window.map.invalidateSize({ pan: false });
+            }
+        }, 350);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
