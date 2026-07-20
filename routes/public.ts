@@ -8,9 +8,11 @@ router.get('/map', publicController.getMap);
 router.get('/api/map-points', publicController.getMapPoints);
 router.get('/wanted-persons', publicController.getWantedPersons);
 router.get('/missing-persons', publicController.getMissingPersons);
+router.get('/bulletins', publicController.getBulletins);
 router.get('/bulletins/:id', publicController.getBulletinDetail);
 
 router.get('/about', publicController.getAbout);
 router.get('/hotlines', publicController.getHotlines);
+router.get('/news', publicController.getNews);
 
 export default router;
