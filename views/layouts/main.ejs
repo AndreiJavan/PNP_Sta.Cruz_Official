@@ -154,6 +154,28 @@
         .custom-pnp-popup .leaflet-popup-tip {
             background: #C8A415;
         }
+
+        /* Custom Scrollbars */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(26, 58, 92, 0.3);
+            border-radius: 8px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(200, 164, 21, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(26, 58, 92, 0.6);
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(200, 164, 21, 0.6);
+        }
     </style>
 </head>
 
