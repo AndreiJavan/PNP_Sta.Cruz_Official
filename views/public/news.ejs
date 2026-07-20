@@ -125,7 +125,7 @@
             <div id="news-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center">
             </div>
             <h3 id="news-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight"></h3>
-            <div id="news-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 mb-10"></div>
+            <div id="news-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
         </div>
     </div>
 </div>
@@ -192,29 +192,47 @@
             mediaContainer.innerHTML = '';
             dotsContainer.innerHTML = '';
             
-            let photoPaths = [];
+            let mediaItems = [];
             if (article.photo_paths && article.photo_paths.length > 0) {
-                photoPaths = article.photo_paths;
+                article.photo_paths.forEach(p => {
+                    mediaItems.push({ type: 'image', url: p });
+                });
             } else if (article.urlToImage) {
-                photoPaths = [article.urlToImage];
+                mediaItems.push({ type: 'image', url: article.urlToImage });
             }
 
-            if (photoPaths.length > 0) {
-                mediaContainer.innerHTML = photoPaths.map((url, idx) => `
-                    <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                        <img src="${url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
-                    </div>
-                `).join('');
+            if (article.video_paths && article.video_paths.length > 0) {
+                article.video_paths.forEach(v => {
+                    mediaItems.push({ type: 'video', url: v });
+                });
+            }
+
+            if (mediaItems.length > 0) {
+                mediaContainer.innerHTML = mediaItems.map((item, idx) => {
+                    if (item.type === 'video') {
+                        return `
+                            <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                <video src="${item.url}" class="w-full h-full object-contain" controls></video>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
+                            </div>
+                        `;
+                    }
+                }).join('');
                 
                 window.currentNewsModalSlide = 0;
-                window.totalNewsModalSlides = photoPaths.length;
+                window.totalNewsModalSlides = mediaItems.length;
 
-                if (photoPaths.length > 1) {
+                if (mediaItems.length > 1) {
                     prevBtn.classList.remove('hidden');
                     nextBtn.classList.remove('hidden');
                     dotsContainer.classList.remove('hidden');
                     
-                    dotsContainer.innerHTML = photoPaths.map((_, idx) => `
+                    dotsContainer.innerHTML = mediaItems.map((_, idx) => `
                         <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
                     `).join('');
                 } else {
@@ -233,12 +251,7 @@
         document.getElementById('news-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(article.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
         document.getElementById('news-modal-title').textContent = article.headline;
         
-        // Split content into paragraphs
-        const contentDiv = document.getElementById('news-modal-content');
-        contentDiv.innerHTML = '';
-        const p1 = document.createElement('p');
-        p1.textContent = article.fullContent;
-        contentDiv.appendChild(p1);
+        document.getElementById('news-modal-content').textContent = article.fullContent;
 
         const modal = document.getElementById('news-modal');
         const content = modal.querySelector('.relative');

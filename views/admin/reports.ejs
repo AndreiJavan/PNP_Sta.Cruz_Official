@@ -257,7 +257,7 @@
     const CRIMES_BY_PILLAR = {
         '8-Focus': ['Murder', 'Homicide', 'Physical Injuries', 'Rape', 'Robbery', 'Theft', 'Carnapping (Motorcycle)', 'Carnapping (Motor Vehicle)'],
         'Non-Index': ['Violence Against Women and Children (VAWC)', 'Cybercrime', 'Estafa', 'Swindling / Fraud', 'Drug Possession', 'Drug Sale', 'Drug Use', 'Illegal Gambling', 'Illegal Possession of Firearms', 'Human Trafficking', 'Child Abuse (RA 7610)', 'Damage to Property', 'Malicious Mischief', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)', 'Illegal Recruitment', 'Ordinance Violations', 'Grave Threats', 'Alarm and Scandal'],
-        'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Fire Incident', 'Flood Incident', 'Earthquake Incident', 'Landslide Incident', 'Disaster Incident Reports', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report', 'Rescue Operation Cases']
+        'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report']
     };
     window.CRIMES_BY_PILLAR = CRIMES_BY_PILLAR;
 
@@ -267,9 +267,9 @@
         } else if (cat === 'Non-Index') {
             return "VAWC, Cybercrime, Estafa, Swindling, Drug Offenses, Illegal Gambling, Ordinance Violations, etc.";
         } else if (cat === 'PSI') {
-            return "Vehicular Accident, Road Accident, Fire Incident, Flood Incident, Earthquake Incident, Landslide Incident, etc.";
+            return "Vehicular Accident, Road Accident, Public Disturbance, Emergency Response, Missing Person, etc.";
         } else if (cat === 'All') {
-            return "All Classifications: 8-Focus (Murder, Theft, etc.), Non-Index (VAWC, Cybercrime, etc.), PSI (Accidents, Fire, etc.)";
+            return "All Classifications: 8-Focus (Murder, Theft, etc.), Non-Index (VAWC, Cybercrime, etc.), PSI (Accidents, Public Disturbance, etc.)";
         }
         return "";
     };
@@ -403,7 +403,7 @@
          const CRIMES_BY_PILLAR = {
              '8-Focus': ['Murder', 'Homicide', 'Physical Injuries', 'Rape', 'Robbery', 'Theft', 'Carnapping (Motorcycle)', 'Carnapping (Motor Vehicle)'],
              'Non-Index': ['Violence Against Women and Children (VAWC)', 'Cybercrime', 'Estafa', 'Swindling / Fraud', 'Drug Possession', 'Drug Sale', 'Drug Use', 'Illegal Gambling', 'Illegal Possession of Firearms', 'Human Trafficking', 'Child Abuse (RA 7610)', 'Damage to Property', 'Malicious Mischief', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)', 'Illegal Recruitment', 'Ordinance Violations', 'Grave Threats', 'Alarm and Scandal'],
-             'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Fire Incident', 'Flood Incident', 'Earthquake Incident', 'Landslide Incident', 'Disaster Incident Reports', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report', 'Rescue Operation Cases']
+             'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report']
          };
 
          reviewData.forEach((item, index) => {

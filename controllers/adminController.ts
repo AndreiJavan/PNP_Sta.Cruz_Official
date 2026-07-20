@@ -1811,34 +1811,24 @@ const parseVideos = (path: string | undefined): string[] => {
 
 export const getBulletins = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
     const category = req.query.category as string;
-    const limit = 20;
-    const offset = (page - 1) * limit;
 
     let query: any = db.collection('bulletins');
-    if (category) {
+    if (category && category !== 'All') {
       query = query.where('category', '==', category);
     }
     
-    const snap = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).get();
-    
-    let countQuery: any = db.collection('bulletins');
-    if (category) {
-      countQuery = countQuery.where('category', '==', category);
-    }
-    const countSnap = await countQuery.count().get();
+    const snap = await query.orderBy('created_at', 'desc').get();
 
     const bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
     });
-    const totalPages = Math.ceil(countSnap.data().count / limit);
 
     const title = category === 'Wanted Person' ? 'Wanted Persons' : 
                   category === 'Missing Person' ? 'Missing Persons' : 'Bulletins';
 
-    res.render('admin/bulletins', { title, bulletins, currentPage: page, totalPages, category, layout: 'layouts/admin' });
+    res.render('admin/bulletins', { title, bulletins, category, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading bulletins');

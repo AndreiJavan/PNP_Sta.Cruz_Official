@@ -10,14 +10,13 @@ export const getHome = async (req: Request, res: Response) => {
     const hotlines = hotlinesSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const activeBulletinsSnap = await db.collection('bulletins')
-      .where('is_archived', '!=', true)
       .orderBy('created_at', 'desc')
       .get();
       
     const bulletins = activeBulletinsSnap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
+    }).filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
     // Filter out mock data for public advisory, and restrict to the 4 target categories
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
@@ -33,6 +32,7 @@ export const getHome = async (req: Request, res: Response) => {
         fullContent: b.body,
         urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
         photo_paths: b.photo_paths,
+        video_paths: b.video_paths || [],
         publishedAt: b.created_at || new Date().toISOString(),
         author: 'Station Desk'
       }));
@@ -77,14 +77,13 @@ export const getHome = async (req: Request, res: Response) => {
 export const getNews = async (req: Request, res: Response) => {
   try {
     const activeBulletinsSnap = await db.collection('bulletins')
-      .where('is_archived', '!=', true)
       .orderBy('created_at', 'desc')
       .get();
       
     const dbBulletins = activeBulletinsSnap.docs.map((doc: any) => {
       const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths) });
-    }).filter((b: any) => b.category === 'General Announcement' && !b.id.startsWith('bulletin-'));
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
+    }).filter((b: any) => b.is_archived !== true && b.category === 'General Announcement' && !b.id.startsWith('bulletin-'));
 
     const newsList = dbBulletins.map((b: any) => ({
       id: b.id,
@@ -93,6 +92,7 @@ export const getNews = async (req: Request, res: Response) => {
       fullContent: b.body,
       urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
       photo_paths: b.photo_paths,
+      video_paths: b.video_paths || [],
       publishedAt: b.created_at || new Date().toISOString(),
       author: 'Station Desk'
     }));
@@ -174,25 +174,20 @@ const parseVideos = (path: string | undefined, existingPaths?: any): string[] =>
 
 export const getBulletins = async (req: Request, res: Response) => {
   const { category, search, page = 1 } = req.query;
-  const limit = 10;
+  const limit = 50;
   try {
-    let query: any = db.collection('bulletins').where('is_archived', '!=', true);
-    const snap = await query.orderBy('created_at', 'desc').get();
+    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
     
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     let bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person')
+    }).filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
       .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
 
     let activeCategory = category;
     if (!activeCategory || activeCategory === 'All' || !allowedAdvisoryCategories.includes(String(activeCategory))) {
       activeCategory = 'Crime Advisory';
-    }
-
-    if (activeCategory) {
-      bulletins = bulletins.filter((b: any) => b.category === activeCategory);
     }
 
     if (search) {
@@ -213,12 +208,11 @@ export const getWantedPersons = async (req: Request, res: Response) => {
   const { search, page = 1 } = req.query;
   const limit = 10;
   try {
-    let query: any = db.collection('bulletins').where('is_archived', '!=', true).where('category', '==', 'Wanted Person');
-    const snap = await query.orderBy('created_at', 'desc').get();
+    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
     let bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths) });
-    });
+    }).filter((b: any) => b.is_archived !== true && b.category === 'Wanted Person');
     if (search) {
       const s = String(search).toLowerCase();
       bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
@@ -236,12 +230,11 @@ export const getMissingPersons = async (req: Request, res: Response) => {
   const { search, page = 1 } = req.query;
   const limit = 10;
   try {
-    let query: any = db.collection('bulletins').where('is_archived', '!=', true).where('category', '==', 'Missing Person');
-    const snap = await query.orderBy('created_at', 'desc').get();
+    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
     let bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths) });
-    });
+    }).filter((b: any) => b.is_archived !== true && b.category === 'Missing Person');
     if (search) {
       const s = String(search).toLowerCase();
       bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
@@ -260,7 +253,7 @@ export const getBulletinDetail = async (req: Request, res: Response) => {
     const doc = await db.collection('bulletins').doc(req.params.id).get();
     if (!doc.exists) return res.status(404).send('Bulletin not found');
     const d = doc.data();
-    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths) });
+    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
     res.render('public/bulletin_detail', { title: bulletin.title, bulletin, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);

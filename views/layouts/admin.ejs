@@ -139,6 +139,7 @@
             #sidebar:not(.sidebar-hidden)+#mainContent {
                 margin-left: 18rem;
                 /* w-72 matches aside width */
+                width: calc(100% - 18rem) !important;
             }
         }
 
@@ -330,7 +331,7 @@
             mainContent.classList.toggle('main-content-expanded');
 
             const isHidden = sidebar.classList.contains('sidebar-hidden');
-            if (isHidden) {
+            if (isHidden || window.innerWidth < 1024) {
                 layoutHeader.style.left = '0';
                 if (layoutFooter) layoutFooter.style.left = '0';
             } else {

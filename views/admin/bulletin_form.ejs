@@ -148,41 +148,31 @@
                             Category
                         </label>
 
-                        <% const standardCategories=['Wanted Person', 'Missing Person' , 'Crime Advisory'
-                            , 'Recovered Property' , 'General Announcement' ]; const isCustomCategory=bulletin &&
+                        <% const standardCategories=['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness', 'General Announcement']; const isCustomCategory=bulletin &&
                             bulletin.category && !standardCategories.includes(bulletin.category); %>
 
-                            <select name="category" id="category" required onchange="toggleCustomCategory(this.value)"
+                            <select name="category" id="category" required
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
 
                                 <option value="" disabled <%=!bulletin && (typeof defaultCategory==='undefined' ||
                                     !defaultCategory) ? 'selected' : '' %>>Select Category</option>
 
-                                <% standardCategories.forEach(cat=> { %>
-                                    <option value="<%= cat %>" <%=(bulletin && bulletin.category===cat) || (typeof
-                                        defaultCategory !=='undefined' && defaultCategory===cat) ? 'selected' : '' %>>
-                                        <%= cat %>
-                                    </option>
-                                    <% }) %>
+                                <optgroup label="PUBLIC ADVISORIES (Broadcast to Public Advisory Page)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                    <option value="Crime Advisory" <%= ((bulletin && bulletin.category === 'Crime Advisory') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Crime Advisory')) ? 'selected' : '' %>>Crime Advisory</option>
+                                    <option value="Traffic Advisory" <%= ((bulletin && bulletin.category === 'Traffic Advisory') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Traffic Advisory')) ? 'selected' : '' %>>Traffic Advisory</option>
+                                    <option value="Cybercrime Advisory" <%= ((bulletin && bulletin.category === 'Cybercrime Advisory') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Cybercrime Advisory')) ? 'selected' : '' %>>Cybercrime Advisory</option>
+                                    <option value="Community Awareness" <%= ((bulletin && bulletin.category === 'Community Awareness') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Community Awareness')) ? 'selected' : '' %>>Community Awareness</option>
+                                </optgroup>
 
-                                        <option value="Other" <%=isCustomCategory ? 'selected' : '' %>>
-                                            Other (Custom)
-                                        </option>
+                                <optgroup label="NEWS & RELEASES (Broadcast to News Feed)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                    <option value="General Announcement" <%= ((bulletin && bulletin.category === 'General Announcement') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'General Announcement')) ? 'selected' : '' %>>General Announcement (News / Press Release)</option>
+                                </optgroup>
 
                             </select>
                     </div>
 
-                    <!-- CUSTOM CATEGORY -->
-                    <div id="customCategoryContainer" class="space-y-2 <%= isCustomCategory ? '' : 'hidden' %>">
-                        <label
-                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                            New Category
-                        </label>
 
-                        <input type="text" name="custom_category" id="custom_category"
-                            value="<%= isCustomCategory ? bulletin.category : '' %>" placeholder="Enter custom category"
-                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
-                    </div>
+
 
                     <!-- BODY -->
                     <div class="flex-1 flex flex-col space-y-2">
