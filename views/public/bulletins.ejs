@@ -165,26 +165,23 @@
 <div id="bulletin-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
     <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeBulletinModal()"></div>
     <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-5xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col max-h-[90vh]">
-        <!-- Header / Media Banner -->
-        <div class="relative h-56 md:h-80 bg-slate-950 overflow-hidden shrink-0">
-            <!-- Dynamic Media Collage Container -->
-            <div id="bulletin-modal-collage-container" class="w-full h-full"></div>
-            
-            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none"></div>
-            <button onclick="closeBulletinModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-black/40 hover:bg-black/80 backdrop-blur-md text-white flex items-center justify-center focus:outline-none transition-all duration-300 z-10 border border-white/10 hover:scale-110">
-                <i class="fas fa-times text-sm"></i>
+        <!-- Header with Close Button -->
+        <div class="relative flex justify-between items-center p-6 md:px-10 md:pt-8 bg-white dark:bg-slate-900 z-10 border-b border-gray-100 dark:border-slate-800/60 shrink-0">
+            <span id="bulletin-modal-category" class="text-[10px] md:text-xs font-black uppercase tracking-widest text-pnp-blue dark:text-pnp-gold bg-pnp-blue/10 dark:bg-pnp-gold/10 px-4 py-2 rounded-xl"></span>
+            <button onclick="closeBulletinModal()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300">
+                <i class="fas fa-times"></i>
             </button>
-            <div class="absolute bottom-6 left-6 md:bottom-10 md:left-10 md:right-10 pointer-events-none z-10 flex flex-col items-start">
-                <span id="bulletin-modal-category" class="text-[10px] md:text-xs font-black uppercase tracking-widest text-pnp-gold bg-pnp-blue/90 px-3 py-1.5 rounded-lg border border-white/10 mb-4 shadow-lg backdrop-blur-sm"></span>
-            </div>
         </div>
 
         <!-- Body Scrollable Content -->
         <div class="p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar">
-            <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-3 flex items-center"></div>
-            <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight"></h3>
+            <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
+            <h3 id="bulletin-modal-title" class="text-2xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
             
-            <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap"></div>
+            <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
+            
+            <!-- Dynamic Media Full Stack Container -->
+            <div id="bulletin-modal-media-container" class="w-full flex flex-col gap-6"></div>
         </div>
     </div>
 </div>
@@ -284,9 +281,9 @@
         const bulletin = bulletinsDatabase.find(b => b.id === bulletinId);
         if (!bulletin) return;
 
-        const collageContainer = document.getElementById('bulletin-modal-collage-container');
-        if (collageContainer) {
-            collageContainer.innerHTML = '';
+        const mediaContainer = document.getElementById('bulletin-modal-media-container');
+        if (mediaContainer) {
+            mediaContainer.innerHTML = '';
             
             // Collect all photos and videos
             const mediaItems = [];
@@ -307,93 +304,16 @@
                 mediaItems.push({ type: 'photo', url: bulletin.photo_path });
             }
 
-            if (mediaItems.length === 0) {
-                collageContainer.innerHTML = `
-                    <div class="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <i class="fas fa-bullhorn text-6xl text-slate-300 dark:text-slate-600"></i>
-                    </div>
-                `;
-            } else if (mediaItems.length === 1) {
-                const item = mediaItems[0];
-                if (item.type === 'video') {
-                    collageContainer.innerHTML = `<video src="${item.url}" controls class="w-full h-full object-contain"></video>`;
-                } else {
-                    collageContainer.innerHTML = `<img src="${item.url}" class="w-full h-full object-contain" alt="${bulletin.title}">`;
-                }
-            } else if (mediaItems.length === 2) {
-                collageContainer.innerHTML = `
-                    <div class="grid grid-cols-2 h-full w-full gap-1">
-                        ${mediaItems.map(item => {
-                            if (item.type === 'video') {
-                                return `<div class="relative h-full bg-black"><video src="${item.url}" controls class="w-full h-full object-contain"></video></div>`;
-                            } else {
-                                return `<div class="relative h-full overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500"></div>`;
-                            }
-                        }).join('')}
-                    </div>
-                `;
-            } else if (mediaItems.length === 3) {
-                const renderItemHtml = (item, extraClass = '') => {
+            if (mediaItems.length > 0) {
+                const renderItemHtml = (item) => {
                     if (item.type === 'video') {
-                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-contain"></video></div>`;
+                        return `<div class="w-full bg-slate-950 rounded-2xl overflow-hidden shadow-lg"><video src="${item.url}" controls class="w-full h-auto max-h-[80vh] object-contain"></video></div>`;
                     } else {
-                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500"></div>`;
+                        return `<div class="w-full bg-slate-950 rounded-2xl overflow-hidden shadow-lg"><img src="${item.url}" class="w-full h-auto max-h-[80vh] object-contain" alt="${bulletin.title}"></div>`;
                     }
                 };
-                collageContainer.innerHTML = `
-                    <div class="grid grid-cols-3 h-full w-full gap-1 bg-black">
-                        ${renderItemHtml(mediaItems[0], 'col-span-2 h-full')}
-                        <div class="grid grid-rows-2 gap-1 h-full">
-                            ${renderItemHtml(mediaItems[1], 'h-full')}
-                            ${renderItemHtml(mediaItems[2], 'h-full')}
-                        </div>
-                    </div>
-                `;
-            } else {
-                // 4 or more items
-                const mainItem = mediaItems[0];
-                const sideItems = mediaItems.slice(1, 4); // get up to 3 items for the right side
-                const remainingCount = mediaItems.length - 4;
-
-                const renderItemHtml = (item, extraClass = '') => {
-                    if (item.type === 'video') {
-                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-contain"></video></div>`;
-                    } else {
-                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500"></div>`;
-                    }
-                };
-
-                const renderSideItemHtml = (item, index) => {
-                    const isLast = index === 2 && remainingCount > 0;
-                    if (item.type === 'video') {
-                        return `
-                        <div class="relative h-full bg-black">
-                            <video src="${item.url}" controls class="w-full h-full object-contain"></video>
-                            ${isLast ? `
-                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                <span class="text-white text-xl font-black">+${remainingCount + 1}</span>
-                            </div>` : ''}
-                        </div>`;
-                    } else {
-                        return `
-                        <div class="relative h-full overflow-hidden bg-black">
-                            <img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500">
-                            ${isLast ? `
-                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                <span class="text-white text-xl font-black">+${remainingCount + 1}</span>
-                            </div>` : ''}
-                        </div>`;
-                    }
-                };
-
-                collageContainer.innerHTML = `
-                    <div class="grid grid-cols-3 h-full w-full gap-1 bg-black">
-                        ${renderItemHtml(mainItem, 'col-span-2 h-full')}
-                        <div class="grid grid-rows-3 gap-1 h-full">
-                            ${sideItems.map((item, idx) => renderSideItemHtml(item, idx)).join('')}
-                        </div>
-                    </div>
-                `;
+                
+                mediaContainer.innerHTML = mediaItems.map(item => renderItemHtml(item)).join('');
             }
         }
 
