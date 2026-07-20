@@ -64,8 +64,8 @@
                 class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col"
                 data-category="<%= bulletin.category %>">
                 <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-                    <div class="h-64 overflow-hidden relative bg-black">
-                        <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-110 transition duration-700 pointer-events-none"></video>
+                    <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0">
+                        <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-contain group-hover:scale-105 transition duration-700 pointer-events-none"></video>
                         <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
                             <i class="fas fa-play text-white text-4xl opacity-90 group-hover:scale-110 transition duration-300"></i>
                         </div>
@@ -77,9 +77,9 @@
                         <% } %>
                     </div>
                 <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                    <div class="h-64 overflow-hidden relative">
+                    <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0">
                         <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
-                            class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            class="w-full h-full object-contain group-hover:scale-105 transition duration-700">
                         <% if (bulletin.photo_paths.length > 1) { %>
                             <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold tracking-widest flex items-center space-x-2">
                                 <i class="fas fa-images"></i>
@@ -88,9 +88,9 @@
                         <% } %>
                     </div>
                 <% } else if (bulletin.photo_path) { %>
-                    <div class="h-64 overflow-hidden">
+                    <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0">
                         <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>"
-                            class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                            class="w-full h-full object-contain group-hover:scale-105 transition duration-700">
                     </div>
                 <% } else { %>
                     <div class="h-64 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center">
@@ -316,18 +316,18 @@
             } else if (mediaItems.length === 1) {
                 const item = mediaItems[0];
                 if (item.type === 'video') {
-                    collageContainer.innerHTML = `<video src="${item.url}" controls class="w-full h-full object-cover"></video>`;
+                    collageContainer.innerHTML = `<video src="${item.url}" controls class="w-full h-full object-contain"></video>`;
                 } else {
-                    collageContainer.innerHTML = `<img src="${item.url}" class="w-full h-full object-cover" alt="${bulletin.title}">`;
+                    collageContainer.innerHTML = `<img src="${item.url}" class="w-full h-full object-contain" alt="${bulletin.title}">`;
                 }
             } else if (mediaItems.length === 2) {
                 collageContainer.innerHTML = `
                     <div class="grid grid-cols-2 h-full w-full gap-1">
                         ${mediaItems.map(item => {
                             if (item.type === 'video') {
-                                return `<div class="relative h-full bg-black"><video src="${item.url}" controls class="w-full h-full object-cover"></video></div>`;
+                                return `<div class="relative h-full bg-black"><video src="${item.url}" controls class="w-full h-full object-contain"></video></div>`;
                             } else {
-                                return `<div class="relative h-full overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></div>`;
+                                return `<div class="relative h-full overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500"></div>`;
                             }
                         }).join('')}
                     </div>
@@ -335,9 +335,9 @@
             } else if (mediaItems.length === 3) {
                 const renderItemHtml = (item, extraClass = '') => {
                     if (item.type === 'video') {
-                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-cover"></video></div>`;
+                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-contain"></video></div>`;
                     } else {
-                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></div>`;
+                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500"></div>`;
                     }
                 };
                 collageContainer.innerHTML = `
@@ -357,9 +357,9 @@
 
                 const renderItemHtml = (item, extraClass = '') => {
                     if (item.type === 'video') {
-                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-cover"></video></div>`;
+                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-contain"></video></div>`;
                     } else {
-                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></div>`;
+                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500"></div>`;
                     }
                 };
 
@@ -368,7 +368,7 @@
                     if (item.type === 'video') {
                         return `
                         <div class="relative h-full bg-black">
-                            <video src="${item.url}" controls class="w-full h-full object-cover"></video>
+                            <video src="${item.url}" controls class="w-full h-full object-contain"></video>
                             ${isLast ? `
                             <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <span class="text-white text-xl font-black">+${remainingCount + 1}</span>
@@ -377,7 +377,7 @@
                     } else {
                         return `
                         <div class="relative h-full overflow-hidden bg-black">
-                            <img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                            <img src="${item.url}" class="w-full h-full object-contain hover:scale-105 transition duration-500">
                             ${isLast ? `
                             <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <span class="text-white text-xl font-black">+${remainingCount + 1}</span>
