@@ -27,7 +27,7 @@
             <div class="relative w-full h-64 md:h-96 overflow-hidden group bg-slate-100 dark:bg-slate-900" id="bulletinCarousel">
                 <% mediaItems.forEach(function(item, index) { %>
                     <% if (item.type === 'image') { %>
-                        <img src="<%= item.path %>" alt="<%= bulletin.title %> - Image <%= index + 1 %>" class="absolute inset-0 w-full h-full object-contain md:object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' %>" data-index="<%= index %>">
+                        <img src="<%= item.path %>" alt="<%= bulletin.title %> - Image <%= index + 1 %>" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' %>" data-index="<%= index %>">
                     <% } else if (item.type === 'video') { %>
                         <div class="absolute inset-0 w-full h-full flex items-center justify-center transition-opacity duration-500 ease-in-out bg-black <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %>" data-index="<%= index %>">
                             <video src="<%= item.path %>" controls class="w-full h-full object-contain" onclick="event.stopPropagation();"></video>
