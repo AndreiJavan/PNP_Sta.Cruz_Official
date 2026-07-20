@@ -244,6 +244,31 @@
 
     async function handleBulletinSubmit(event) {
         event.preventDefault();
+
+        // Prevent Vercel 413 Payload Too Large
+        let totalSize = 0;
+        accumulatedFiles.forEach(f => totalSize += f.size);
+        accumulatedVideos.forEach(f => totalSize += f.size);
+        
+        const MAX_PAYLOAD_SIZE = 4.4 * 1024 * 1024; // 4.4 MB limit
+        
+        if (totalSize > MAX_PAYLOAD_SIZE) {
+            const sizeInMB = (totalSize / (1024 * 1024)).toFixed(2);
+            const msg = `Your files total ${sizeInMB}MB, which exceeds the 4.5MB system upload limit. Please compress your videos/images or upload fewer files.`;
+            
+            if (window.strategicConfirm) {
+                window.strategicConfirm({
+                    title: 'Payload Too Large',
+                    message: msg,
+                    confirmText: 'Understood',
+                    type: 'error'
+                });
+            } else {
+                alert(msg);
+            }
+            return;
+        }
+
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
 
