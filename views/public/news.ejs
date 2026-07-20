@@ -97,9 +97,20 @@
 <div id="news-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
     <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeNewsModal()"></div>
     <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
-        <!-- Left Side: Image -->
+        <!-- Left Side: Image Carousel -->
         <div class="w-full lg:w-[50%] relative bg-black flex items-center justify-center min-h-[250px] md:min-h-[400px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
-            <img id="news-modal-img" src="" alt="News Image" class="absolute inset-0 w-full h-full object-contain">
+            <div id="news-modal-media-container" class="w-full h-full relative overflow-hidden flex">
+                <!-- Media injected here -->
+            </div>
+            
+            <button id="news-modal-prev-btn" onclick="newsModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                <i class="fas fa-chevron-left text-sm"></i>
+            </button>
+            <button id="news-modal-next-btn" onclick="newsModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                <i class="fas fa-chevron-right text-sm"></i>
+            </button>
+            
+            <div id="news-modal-dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 hidden"></div>
         </div>
 
         <!-- Right Side: Text Content -->
@@ -172,7 +183,52 @@
         const article = newsDatabase.find(n => n.id === newsId);
         if (!article) return;
 
-        document.getElementById('news-modal-img').src = article.urlToImage;
+        const mediaContainer = document.getElementById('news-modal-media-container');
+        const prevBtn = document.getElementById('news-modal-prev-btn');
+        const nextBtn = document.getElementById('news-modal-next-btn');
+        const dotsContainer = document.getElementById('news-modal-dots-container');
+
+        if (mediaContainer) {
+            mediaContainer.innerHTML = '';
+            dotsContainer.innerHTML = '';
+            
+            let photoPaths = [];
+            if (article.photo_paths && article.photo_paths.length > 0) {
+                photoPaths = article.photo_paths;
+            } else if (article.urlToImage) {
+                photoPaths = [article.urlToImage];
+            }
+
+            if (photoPaths.length > 0) {
+                mediaContainer.innerHTML = photoPaths.map((url, idx) => `
+                    <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                        <img src="${url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
+                    </div>
+                `).join('');
+                
+                window.currentNewsModalSlide = 0;
+                window.totalNewsModalSlides = photoPaths.length;
+
+                if (photoPaths.length > 1) {
+                    prevBtn.classList.remove('hidden');
+                    nextBtn.classList.remove('hidden');
+                    dotsContainer.classList.remove('hidden');
+                    
+                    dotsContainer.innerHTML = photoPaths.map((_, idx) => `
+                        <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                    `).join('');
+                } else {
+                    prevBtn.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
+                    dotsContainer.classList.add('hidden');
+                }
+            } else {
+                mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700"><i class="fas fa-image text-5xl"></i></div>`;
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                dotsContainer.classList.add('hidden');
+            }
+        }
         document.getElementById('news-modal-author').textContent = `By ${article.author}`;
         document.getElementById('news-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(article.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
         document.getElementById('news-modal-title').textContent = article.headline;
@@ -206,4 +262,66 @@
             modal.classList.add('hidden');
         }, 300);
     }
+</script>
+
+<script>
+    function newsModalUpdate() {
+        const slides = document.querySelectorAll('#news-modal-media-container [data-slide]');
+        const dots = document.querySelectorAll('#news-modal-dots-container [data-dot]');
+        
+        slides.forEach((slide, idx) => {
+            if (idx === window.currentNewsModalSlide) {
+                slide.classList.replace('opacity-0', 'opacity-100');
+                slide.classList.replace('z-0', 'z-10');
+                slide.classList.remove('pointer-events-none');
+            } else {
+                slide.classList.replace('opacity-100', 'opacity-0');
+                slide.classList.replace('z-10', 'z-0');
+                slide.classList.add('pointer-events-none');
+            }
+        });
+        
+        dots.forEach((dot, idx) => {
+            if (idx === window.currentNewsModalSlide) {
+                dot.classList.replace('bg-white/40', 'bg-white');
+                dot.classList.remove('hover:bg-white/80');
+                dot.classList.add('scale-125');
+            } else {
+                dot.classList.replace('bg-white', 'bg-white/40');
+                dot.classList.add('hover:bg-white/80');
+                dot.classList.remove('scale-125');
+            }
+        });
+    }
+
+    function newsModalNext() {
+        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
+        window.currentNewsModalSlide = (window.currentNewsModalSlide + 1) % window.totalNewsModalSlides;
+        newsModalUpdate();
+    }
+
+    function newsModalPrev() {
+        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
+        window.currentNewsModalSlide = (window.currentNewsModalSlide - 1 + window.totalNewsModalSlides) % window.totalNewsModalSlides;
+        newsModalUpdate();
+    }
+
+    function newsModalGoTo(idx) {
+        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
+        window.currentNewsModalSlide = idx;
+        newsModalUpdate();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('news-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+            if (e.key === 'ArrowLeft') {
+                newsModalPrev();
+            } else if (e.key === 'ArrowRight') {
+                newsModalNext();
+            } else if (e.key === 'Escape') {
+                closeNewsModal();
+            }
+        }
+    });
 </script>
