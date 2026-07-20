@@ -207,39 +207,75 @@
     </div>
 </section>
 
-<!-- Officials Section -->
-<section id="officials-section" class="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 relative">
+<!-- Directory Section -->
+<section id="directory-section" class="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 relative border-t border-gray-50 dark:border-slate-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-12 text-center">
-            <h2 class="text-3xl font-black text-pnp-blue dark:text-white uppercase tracking-tight mb-2">Station Officials & Personnel</h2>
-            <p class="text-slate-500 dark:text-slate-400 text-sm">Meet the dedicated team serving the Sta. Cruz municipality.</p>
-            <div class="w-16 h-1 bg-pnp-gold mx-auto mt-6 rounded-full"></div>
-        </div>
+        
+        <div class="flex flex-col lg:flex-row gap-12 items-center">
+            <!-- Left Side: Image -->
+            <div class="w-full lg:w-[45%] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700/60 group relative bg-gray-50 dark:bg-slate-800 flex items-center justify-center p-2 shrink-0">
+                <img src="/images/directory-pnp.jpg" alt="Sta Cruz Municipal Police Station Directory" class="w-full h-auto object-contain rounded-[1.5rem] group-hover:scale-[1.02] transition-transform duration-500">
+            </div>
 
-        <% if (locals.personnel && personnel.length > 0) { %>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <% personnel.forEach(official => { %>
-                    <div class="bg-gray-50 dark:bg-slate-800 rounded-[2rem] p-8 border border-gray-100 dark:border-slate-700/60 shadow-sm hover:shadow-2xl transition-all duration-300 text-center group hover:-translate-y-1">
-                        <div class="w-20 h-20 bg-pnp-blue/5 dark:bg-pnp-blue/20 text-pnp-blue dark:text-pnp-gold rounded-[1.5rem] rotate-3 group-hover:rotate-0 flex items-center justify-center mx-auto mb-5 transition-transform duration-300 border border-pnp-blue/10 dark:border-pnp-gold/20">
-                            <i class="fas fa-user-shield text-3xl"></i>
-                        </div>
-                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight mb-1 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors line-clamp-1" title="<%= official.full_name %>"><%= official.full_name %></h3>
-                        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">
-                            <%= official.role === 'superadmin' ? 'Commanding Officer' : 'Station Staff' %>
-                        </p>
-                        <div class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-green-200 dark:border-green-800/50 shadow-sm">
-                            <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-                            <span>Active Duty</span>
-                        </div>
+            <!-- Right Side: Text Directory -->
+            <div class="w-full lg:w-[55%] space-y-8 pl-0 lg:pl-4">
+                <div class="border-l-4 border-pnp-gold pl-6 py-2 inline-block w-full bg-gradient-to-r from-gray-50 to-transparent dark:from-slate-800/50 dark:to-transparent rounded-r-2xl">
+                    <h2 class="text-3xl md:text-4xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-2">Sta Cruz</h2>
+                    <h2 class="text-2xl md:text-3xl font-black text-slate-700 dark:text-slate-300 uppercase tracking-tighter leading-none mb-2">Municipal Police Station</h2>
+                    <h2 class="text-xl md:text-2xl font-black text-pnp-gold uppercase tracking-[0.2em] leading-none">Directory</h2>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PGEN JOSE MELENCIO C NARTATE JR</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief PNP</p>
                     </div>
-                <% }) %>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PBGEN HANSEL M MARANTAN</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Regional Director</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCOL SANDRO JAY DC TAPALLA</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Provincial Director, Laguna PPO</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT COL JOJO J SABENIANO</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief of Police</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT GADY R MABANTO</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Deputy Chief of Police</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT ANDY O MESANA</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief Operation PCO</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT ARIEL T GENTOLEO</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Cadmin and Intelligence Section</p>
+                    </div>
+
+                    <!-- Item -->
+                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PEMS MANOLITO M BINALAY</h4>
+                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Mespo</p>
+                    </div>
+                </div>
             </div>
-        <% } else { %>
-            <div class="text-center py-12 bg-gray-50 dark:bg-slate-800 rounded-[2rem] border border-dashed border-gray-200 dark:border-slate-700">
-                <i class="fas fa-users-slash text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
-                <p class="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-widest">No personnel records found</p>
-            </div>
-        <% } %>
+        </div>
     </div>
 </section>
 
