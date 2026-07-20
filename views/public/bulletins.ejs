@@ -455,4 +455,18 @@
         window.currentBulletinModalSlide = idx;
         bulletinModalUpdate();
     }
+
+    // Keyboard navigation for carousel
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('bulletin-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+            if (e.key === 'ArrowLeft') {
+                bulletinModalPrev();
+            } else if (e.key === 'ArrowRight') {
+                bulletinModalNext();
+            } else if (e.key === 'Escape') {
+                closeBulletinModal();
+            }
+        }
+    });
 </script>
