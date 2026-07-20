@@ -1,0 +1,196 @@
+<div class="relative min-h-[40vh] flex items-center overflow-hidden pt-24 pb-32 bg-slate-950">
+    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950 to-slate-950"></div>
+
+    <!-- Hero Content -->
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="max-w-3xl">
+            <div class="inline-flex items-center space-x-2 bg-pnp-gold/20 text-pnp-gold px-4 py-2 rounded-full mb-6 border border-pnp-gold/30">
+                <i class="fas fa-newspaper text-sm animate-pulse"></i>
+                <span class="text-xs font-black uppercase tracking-widest">Official News</span>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight tracking-tighter uppercase">
+                PNP Sta. Cruz <span class="text-pnp-gold">News Feed</span>
+            </h1>
+
+            <p class="text-lg text-blue-100 dark:text-gray-300 mb-2 leading-relaxed max-w-2xl">
+                Stay informed with official updates, news releases, and safety advisories directly from the Sta. Cruz Municipal Police Station.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="bg-slate-50 dark:bg-slate-950 py-16 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Search and Filter Section -->
+        <div class="mb-12 bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col md:flex-row items-center justify-between gap-4 -mt-24 relative z-20">
+            <div class="relative w-full md:max-w-md">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-slate-400"></i>
+                </div>
+                <input type="text" id="news-search-input" oninput="filterNews()" placeholder="Search articles by title or content..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100 transition">
+            </div>
+            <div class="hidden flex items-center space-x-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <i class="fas fa-filter text-pnp-gold"></i>
+                <span id="news-count-label">Showing <%= newsList.length %> Articles</span>
+            </div>
+        </div>
+
+        <!-- News Grid -->
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <% newsList.forEach((news) => { %>
+                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>">
+                    
+                    <!-- Image Wrapper -->
+                    <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0">
+                        <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700 select-none">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <div class="absolute top-6 left-6 bg-pnp-blue/90 dark:bg-pnp-gold/90 text-white dark:text-pnp-blue text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg">
+                            Press Release
+                        </div>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-8 flex-grow flex flex-col justify-between">
+                        <div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center">
+                                <i class="fas fa-calendar-day mr-2 text-pnp-gold"></i>
+                                <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) %>
+                            </div>
+                            
+                            <h3 class="text-lg font-black text-slate-900 dark:text-white leading-snug mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2">
+                                <%= news.headline %>
+                            </h3>
+                            
+                            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 line-clamp-3">
+                                <%= news.description %>
+                            </p>
+                        </div>
+
+                        <div class="pt-6 border-t border-gray-100 dark:border-slate-800/60 flex items-center justify-between">
+                            <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
+                            <button onclick="openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
+                                <span>See More</span>
+                                <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            <% }) %>
+        </div>
+
+        <!-- No Results -->
+        <div id="no-news-results" class="hidden text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 shadow-sm">
+            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
+                <i class="fas fa-newspaper"></i>
+            </div>
+            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-2 uppercase">No Articles Found</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">We couldn't find any news articles matching your search criteria. Try using different keywords.</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- INTERACTIVE NEWS DETAIL MODAL -->
+<div id="news-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="closeNewsModal()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-11/12 max-w-4xl rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800 transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+        <!-- Header Banner -->
+        <div class="relative h-64 md:h-96 bg-slate-900 overflow-hidden shrink-0">
+            <img id="news-modal-img" src="" alt="News Image" class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+            <button onclick="closeNewsModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-md text-white flex items-center justify-center focus:outline-none transition">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="absolute bottom-6 left-8 right-8">
+                <span id="news-modal-author" class="text-[9px] font-black uppercase tracking-widest text-pnp-gold bg-pnp-blue/80 px-2.5 py-1 rounded border border-white/10"></span>
+            </div>
+        </div>
+
+        <!-- Body Scrollable Content -->
+        <div class="p-8 md:p-10 overflow-y-auto">
+            <div id="news-modal-date" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3"></div>
+            <h3 id="news-modal-title" class="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-5"></h3>
+            <div id="news-modal-content" class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-4"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0 flex justify-end">
+            <button onclick="closeNewsModal()" class="bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-bold px-6 py-3 rounded-xl transition uppercase tracking-widest text-xs focus:outline-none">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const newsDatabase = <%- JSON.stringify(newsList) %>;
+
+    function filterNews() {
+        const query = document.getElementById('news-search-input').value.toLowerCase().trim();
+        const cards = document.querySelectorAll('.news-card');
+        const noResults = document.getElementById('no-news-results');
+        const countLabel = document.getElementById('news-count-label');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const title = card.getAttribute('data-title');
+            const content = card.getAttribute('data-content');
+            if (title.includes(query) || content.includes(query)) {
+                card.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        countLabel.textContent = `Showing ${visibleCount} Article${visibleCount === 1 ? '' : 's'}`;
+
+        if (visibleCount === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+
+    function openNewsModal(newsId) {
+        const article = newsDatabase.find(n => n.id === newsId);
+        if (!article) return;
+
+        document.getElementById('news-modal-img').src = article.urlToImage;
+        document.getElementById('news-modal-author').textContent = `By ${article.author}`;
+        document.getElementById('news-modal-date').textContent = new Date(article.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'});
+        document.getElementById('news-modal-title').textContent = article.headline;
+        
+        // Split content into paragraphs
+        const contentDiv = document.getElementById('news-modal-content');
+        contentDiv.innerHTML = '';
+        const p1 = document.createElement('p');
+        p1.textContent = article.fullContent;
+        contentDiv.appendChild(p1);
+
+        const modal = document.getElementById('news-modal');
+        const content = modal.querySelector('.relative');
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 50);
+    }
+
+    function closeNewsModal() {
+        const modal = document.getElementById('news-modal');
+        const content = modal.querySelector('.relative');
+
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+</script>

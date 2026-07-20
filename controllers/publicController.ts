@@ -7,28 +7,34 @@ import { decodeCustomCategory } from './adminController.js';
 export const getHome = async (req: Request, res: Response) => {
   try {
     const hotlinesSnap = await db.collection('hotlines').limit(5).get();
-    const hotlines = hotlinesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const hotlines = hotlinesSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     const activeBulletinsSnap = await db.collection('bulletins')
       .where('is_archived', '!=', true)
       .orderBy('created_at', 'desc')
       .get();
       
-    const bulletins = activeBulletinsSnap.docs.map(doc => {
+    const bulletins = activeBulletinsSnap.docs.map((doc: any) => {
       const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
     }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
-    let newsArticles: any[] = [];
-    try {
-      const newsRes = await fetch('https://newsapi.org/v2/everything?q=philippines&apiKey=6f8c75e4b92c40f58be7987fea7763d1');
-      const newsData = await newsRes.json();
-      if (newsData.articles) {
-        newsArticles = newsData.articles;
-      }
-    } catch (e) {
-      console.error('Error fetching news:', e);
-    }
+    // Filter out mock data for public advisory, and restrict to the 4 target categories
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
+
+    // Map only "General Announcement" bulletins (excluding mock) to the policeNewsList for database-driven news
+    const policeNewsList = bulletins
+      .filter((b: any) => b.category === 'General Announcement' && !b.id.startsWith('bulletin-'))
+      .map((b: any) => ({
+        id: b.id,
+        headline: b.title,
+        description: b.body,
+        fullContent: b.body,
+        urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+        publishedAt: b.created_at || new Date().toISOString(),
+        author: 'Station Desk'
+      }));
 
     // Fetch police incidents (map points) to show on home feed
     const mapPointsSnap = await db.collection('map_points').get();
@@ -54,16 +60,45 @@ export const getHome = async (req: Request, res: Response) => {
     try {
       const usersSnap = await db.collection('users').get();
       personnel = usersSnap.docs
-        .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-        .filter((u: any) => u.status === 'active');
+         .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+         .filter((u: any) => u.status === 'active');
     } catch (usersErr) {
       console.error('Error fetching personnel for public home:', usersErr);
     }
 
-    res.render('public/home', { title: 'Home', hotlines, bulletins, incidents, personnel, newsArticles, layout: 'layouts/main' });
+    res.render('public/home', { title: 'Home', hotlines, bulletins: filteredBulletins, incidents, personnel, policeNewsList, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading home page');
+  }
+};
+
+export const getNews = async (req: Request, res: Response) => {
+  try {
+    const activeBulletinsSnap = await db.collection('bulletins')
+      .where('is_archived', '!=', true)
+      .orderBy('created_at', 'desc')
+      .get();
+      
+    const dbBulletins = activeBulletinsSnap.docs.map((doc: any) => {
+      const d = doc.data();
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
+    }).filter((b: any) => b.category === 'General Announcement' && !b.id.startsWith('bulletin-'));
+
+    const newsList = dbBulletins.map((b: any) => ({
+      id: b.id,
+      headline: b.title,
+      description: b.body,
+      fullContent: b.body,
+      urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+      publishedAt: b.created_at || new Date().toISOString(),
+      author: 'Station Desk'
+    }));
+
+    res.render('public/news', { title: 'Station Releases', newsList, layout: 'layouts/main' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error loading News');
   }
 };
 
@@ -124,6 +159,15 @@ const parsePhotos = (path: string | undefined): string[] => {
   return [path];
 };
 
+const parseVideos = (path: string | undefined): string[] => {
+  if (!path) return [];
+  try {
+    const parsed = JSON.parse(path);
+    if (Array.isArray(parsed)) return parsed;
+  } catch (e) {}
+  return [path];
+};
+
 export const getBulletins = async (req: Request, res: Response) => {
   const { category, search, page = 1 } = req.query;
   const limit = 10;
@@ -131,13 +175,20 @@ export const getBulletins = async (req: Request, res: Response) => {
     let query: any = db.collection('bulletins').where('is_archived', '!=', true);
     const snap = await query.orderBy('created_at', 'desc').get();
     
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     let bulletins = snap.docs.map((doc: any) => {
       const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path) });
-    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person');
+      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
+    }).filter((b: any) => b.category !== 'Wanted Person' && b.category !== 'Missing Person')
+      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
 
-    if (category && category !== 'All') {
-      bulletins = bulletins.filter((b: any) => b.category === category);
+    let activeCategory = category;
+    if (!activeCategory || activeCategory === 'All' || !allowedAdvisoryCategories.includes(String(activeCategory))) {
+      activeCategory = 'Crime Advisory';
+    }
+
+    if (activeCategory) {
+      bulletins = bulletins.filter((b: any) => b.category === activeCategory);
     }
 
     if (search) {
@@ -147,7 +198,7 @@ export const getBulletins = async (req: Request, res: Response) => {
 
     const offset = (Number(page) - 1) * limit;
     bulletins = bulletins.slice(offset, offset + limit);
-    res.render('public/bulletins', { title: 'Bulletins', pageTitle: 'Public Bulletins', bulletins, category, search, page: Number(page), layout: 'layouts/main' });
+    res.render('public/bulletins', { title: 'Public Advisory', pageTitle: 'Public Advisory', bulletins, category: activeCategory, search, page: Number(page), layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
     res.status(500).send('Error loading Bulletins');
@@ -224,7 +275,7 @@ export const getIncidents = async (req: Request, res: Response) => {
 export const getHotlines = async (req: Request, res: Response) => {
   try {
     const snap = await db.collection('hotlines').orderBy('category').get();
-    const hotlines = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     res.render('public/hotlines', { title: 'Emergency Hotlines', hotlines, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);

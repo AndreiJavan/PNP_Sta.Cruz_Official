@@ -1,15 +1,8 @@
 <!-- Hero Section -->
-<section id="hero-section" class="relative min-h-[40vh] flex items-center justify-center overflow-hidden bg-slate-900">
-    <div class="absolute inset-0 z-0">
-        <img src="/images/home-hero.jpg" alt="Sta. Cruz Laguna"
-            class="w-full h-full object-cover opacity-40 mix-blend-overlay scale-105 animate-[pulse_10s_ease-in-out_infinite_alternate]"
-            onerror="this.src='https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?q=80&w=1920&auto=format&fit=crop'">
-        <div
-            class="absolute inset-0 bg-gradient-to-b from-pnp-blue/80 via-pnp-blue/60 to-slate-900 dark:from-slate-950/90 dark:via-slate-900/80 dark:to-slate-950">
-        </div>
-    </div>
+<section id="hero-section" class="relative min-h-[40vh] py-16 md:py-24 flex items-center justify-center overflow-hidden bg-slate-950">
+    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950 to-slate-950"></div>
 
-    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center mt-6">
+    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
         <div
             class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-5 py-2 rounded-full mb-4 border border-white/20 animate-fade-in-up">
             <i class="fas fa-shield-halved text-sm"></i>
@@ -34,17 +27,17 @@
 <!-- Bulletins Section -->
 <section id="bulletins-section" class="py-8 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[40vh]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <% if (locals.newsArticles && newsArticles.length > 0) { %>
-            <% const carouselNews = newsArticles.slice(0, 10); %>
+        <% if (locals.policeNewsList && policeNewsList.length > 0) { %>
+            <% const carouselNews = policeNewsList.slice(0, 5); %>
             <!-- Carousel Container -->
             <div class="mb-10">
                 <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
                         <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
                             <i class="fas fa-newspaper text-[10px]"></i>
-                            <span class="text-[9px] font-black uppercase tracking-widest">National News</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Official News</span>
                         </div>
-                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">National News</h2>
+                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Police News</h2>
                     </div>
                 </div>
 
@@ -64,11 +57,11 @@
                     <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
                         <% carouselNews.forEach((news, index) => { %>
                             <div class="w-full shrink-0 flex-none px-4 md:px-8 py-6 md:py-8">
-                                <a href="<%= news.url %>" target="_blank" class="flex flex-col lg:flex-row items-stretch gap-6 hover:no-underline group">
+                                <a href="/news" class="flex flex-col lg:flex-row items-stretch gap-6 hover:no-underline group">
                                     <!-- Image Container -->
                                     <div class="w-full lg:w-1/2 h-48 md:h-64 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50">
                                         <% if (news.urlToImage) { %>
-                                            <img src="<%= news.urlToImage %>" alt="<%= news.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                         <% } else { %>
                                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-850">
                                                 <i class="fas fa-newspaper text-5xl text-slate-300 dark:text-slate-700"></i>
@@ -85,12 +78,12 @@
                                     <div class="w-full lg:w-1/2 flex flex-col justify-center text-left py-2">
                                         <div class="mb-4">
                                             <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700">
-                                                <%= news.source.name || 'News' %>
+                                                By <%= news.author || 'Station Desk' %>
                                             </span>
                                         </div>
                                         
                                         <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-5 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors tracking-tight line-clamp-2">
-                                            <%= news.title %>
+                                            <%= news.headline %>
                                         </h3>
                                         
                                         <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
@@ -99,7 +92,7 @@
                                         
                                         <div class="mt-2">
                                             <span class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                                                Read Article <i class="fas fa-arrow-right ml-2.5 text-[9px]"></i>
+                                                See More <i class="fas fa-arrow-right ml-2.5 text-[9px]"></i>
                                             </span>
                                         </div>
                                     </div>
@@ -125,27 +118,15 @@
                 <div>
                     <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
                         <i class="fas fa-bullhorn text-[10px]"></i>
-                        <span class="text-[9px] font-black uppercase tracking-widest">Station Bulletins</span>
+                        <span class="text-[9px] font-black uppercase tracking-widest">Public Advisory</span>
                     </div>
                     <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Public Advisories & Updates</h2>
                 </div>
-                <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
-                    <select id="homeBulletinCategory" onchange="filterHomeBulletins()" class="w-full sm:w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm rounded-xl focus:ring-pnp-blue focus:border-pnp-blue block p-2.5 font-bold outline-none shadow-sm cursor-pointer">
-                        <option value="All">All Categories</option>
-                        <option value="Crime Advisory">Crime Advisories</option>
-                        <option value="Recovered Property">Recovered Properties</option>
-                        <option value="General Announcement">General Announcements</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="mb-6">
-                <span id="bulletin-filter-count" class="text-xs font-bold text-slate-500 uppercase tracking-widest">Showing all announcements and updates</span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <% if (locals.bulletins && bulletins.length > 0) { %>
-                    <% bulletins.forEach(bulletin => { %>
+                    <% bulletins.slice(0, 3).forEach(bulletin => { %>
                         <div class="bulletin-card group bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" data-category="<%= bulletin.category %>">
                             <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
                                 <div class="h-48 overflow-hidden relative bg-black">
@@ -197,7 +178,7 @@
 
                                 <div class="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
                                     <a href="/bulletins/<%= bulletin.id %>" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest group-hover:underline flex items-center">
-                                        View Details <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
+                                        See More <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
                                     </a>
                                 </div>
                             </div>
@@ -205,6 +186,15 @@
                     <% }) %>
                 <% } %>
             </div>
+
+            <% if (locals.bulletins && bulletins.length > 0) { %>
+                <div class="mt-12 text-center">
+                    <a href="/bulletins" class="inline-flex items-center space-x-2 bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue dark:bg-pnp-gold dark:text-pnp-blue dark:hover:bg-white text-white font-bold px-8 py-4 rounded-xl transition duration-300 shadow-md uppercase tracking-widest text-xs">
+                        <span>See More Bulletins</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            <% } %>
 
             <div id="bulletins-empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
                 <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -392,44 +382,6 @@
         }
     }
 
-    function filterHomeBulletins() {
-        const selectedCategory = document.getElementById('homeBulletinCategory').value;
-        const cards = document.querySelectorAll('.bulletin-card');
-        const emptyState = document.getElementById('bulletins-empty-state');
-        const countIndicator = document.getElementById('bulletin-filter-count');
-        
-        let visibleCount = 0;
-        
-        cards.forEach(card => {
-            const category = card.getAttribute('data-category');
-            if (selectedCategory === 'All' || category === selectedCategory) {
-                card.style.display = 'flex';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        if (emptyState) {
-            if (visibleCount === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-            }
-        }
-        
-        if (countIndicator) {
-            if (selectedCategory === 'All') {
-                countIndicator.textContent = 'Showing all announcements and updates';
-            } else {
-                countIndicator.textContent = `Showing ${visibleCount} entry in "${selectedCategory}"`;
-                if (visibleCount !== 1) {
-                    countIndicator.textContent = `Showing ${visibleCount} entries in "${selectedCategory}"`;
-                }
-            }
-        }
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         // Disclaimer Modal Logic
         const modal = document.getElementById('jurisdiction-modal');
@@ -552,13 +504,6 @@
             }
         } else if (tab === 'bulletins' || categoryParam) {
             switchTab('bulletins');
-            if (categoryParam) {
-                const categorySelect = document.getElementById('homeBulletinCategory');
-                if (categorySelect) {
-                    categorySelect.value = categoryParam;
-                    filterHomeBulletins();
-                }
-            }
             const feedEl = document.getElementById('tab-btn-bulletins');
             if (feedEl) {
                 setTimeout(() => {

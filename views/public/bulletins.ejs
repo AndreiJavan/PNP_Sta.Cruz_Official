@@ -1,12 +1,5 @@
-<div class="relative min-h-[60vh] flex items-center overflow-hidden">
-    <!-- Hero Background with Overlay -->
-    <div class="absolute inset-0 z-0">
-        <img src="https://picsum.photos/seed/police/1920/1080?blur=4" alt="Sta. Cruz Laguna"
-            class="w-full h-full object-cover">
-        <div
-            class="absolute inset-0 bg-gradient-to-r from-pnp-blue via-pnp-blue/90 to-transparent dark:from-slate-950 dark:via-slate-900/95 dark:to-transparent">
-        </div>
-    </div>
+<div class="relative min-h-[45vh] flex items-center overflow-hidden bg-slate-950 pt-24 pb-16">
+    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950 to-slate-950"></div>
 
     <!-- Hero Content -->
     <div class="container mx-auto px-4 relative z-10">
@@ -40,16 +33,29 @@
     .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
 </style>
 
-<div class="container mx-auto px-4 py-20">
-    <!-- Search -->
-    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-xl mx-auto flex justify-center">
-        <div class="relative w-full">
-            <input type="text" id="publicSearchInput" onkeyup="filterPublicBulletins()" value="<%= typeof search !== 'undefined' ? search : '' %>"
-                placeholder="Search..."
-                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-pnp-blue/10 focus:border-pnp-blue outline-none transition font-bold text-sm text-gray-700 dark:text-gray-300">
-            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 dark:text-gray-600 text-sm"></i>
+<div class="container mx-auto px-4 py-20 <%= (category === 'Wanted Person' || category === 'Missing Person') ? 'pt-24' : '' %>">
+    <!-- Category Pills instead of Search -->
+    <% if (category !== 'Wanted Person' && category !== 'Missing Person') { %>
+    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-4xl mx-auto flex flex-col items-center">
+        <div class="flex flex-wrap gap-3 justify-center">
+            <% 
+                const activeCat = category && category !== 'All' ? category : 'Crime Advisory';
+            %>
+            <button onclick="setCategoryFilter('Crime Advisory', this)" class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Crime Advisory' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md' : 'bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700' %> transition duration-300">
+                Crime Advisories
+            </button>
+            <button onclick="setCategoryFilter('Traffic Advisory', this)" class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Traffic Advisory' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md' : 'bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700' %> transition duration-300">
+                Traffic Advisories
+            </button>
+            <button onclick="setCategoryFilter('Cybercrime Advisory', this)" class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Cybercrime Advisory' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md' : 'bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700' %> transition duration-300">
+                Cybercrime Advisories
+            </button>
+            <button onclick="setCategoryFilter('Community Awareness', this)" class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Community Awareness' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md' : 'bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700' %> transition duration-300">
+                Community Awareness
+            </button>
         </div>
     </div>
+    <% } %>
 
     <!-- Bulletin Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -100,6 +106,18 @@
                                         : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                                         , 'Crime Advisory'
                                         : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                                        , 'Crime Advisories'
+                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
+                                        , 'Traffic Advisory'
+                                        : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                                        , 'Traffic Advisories'
+                                        : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
+                                        , 'VAWC Advisory'
+                                        : 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'
+                                        , 'VAWC Advisories'
+                                        : 'bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400'
+                                        , 'Community Awareness'
+                                        : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
                                         , 'Recovered Property'
                                         : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
                                         , 'General Announcement'
@@ -123,10 +141,10 @@
                                 </p>
 
                                 <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700">
-                                    <a href="/bulletins/<%= bulletin.id %>"
-                                        class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition">
+                                    <button onclick="openBulletinModal('<%= bulletin.id %>')"
+                                        class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition focus:outline-none">
                                         Read Full Details <i class="fas fa-arrow-right ml-3 text-[10px]"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
             </div>
@@ -143,8 +161,44 @@
     </div>
 </div>
 
+<!-- INTERACTIVE BULLETIN DETAIL MODAL -->
+<div id="bulletin-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="closeBulletinModal()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-11/12 max-w-4xl rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800 transform scale-95 transition-transform duration-300 flex flex-col max-h-[90vh]">
+        <!-- Header / Media Banner -->
+        <div class="relative h-64 md:h-[28rem] bg-slate-950 overflow-hidden shrink-0">
+            <!-- Dynamic Media Collage Container -->
+            <div id="bulletin-modal-collage-container" class="w-full h-full"></div>
+            
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none"></div>
+            <button onclick="closeBulletinModal()" class="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/50 hover:bg-black/75 backdrop-blur-md text-white flex items-center justify-center focus:outline-none transition z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="absolute bottom-6 left-8 right-8 pointer-events-none">
+                <span id="bulletin-modal-category" class="text-[9px] font-black uppercase tracking-widest text-pnp-gold bg-pnp-blue/80 px-2.5 py-1 rounded border border-white/10"></span>
+            </div>
+        </div>
+
+        <!-- Body Scrollable Content -->
+        <div class="p-8 md:p-10 overflow-y-auto">
+            <div id="bulletin-modal-date" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3"></div>
+            <h3 id="bulletin-modal-title" class="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-5"></h3>
+            
+            <div id="bulletin-modal-content" class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-4 whitespace-pre-wrap"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t border-gray-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 shrink-0 flex justify-end">
+            <button onclick="closeBulletinModal()" class="bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-bold px-6 py-3 rounded-xl transition uppercase tracking-widest text-xs focus:outline-none">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
-    let currentCategory = 'All';
+    const bulletinsDatabase = <%- JSON.stringify(bulletins) %>;
+    let currentCategory = '<%= category && category !== "All" ? category : "Crime Advisory" %>';
 
     function setCategoryFilter(category, btnElement) {
         currentCategory = category;
@@ -162,22 +216,43 @@
     }
 
     function filterPublicBulletins() {
-        const searchInput = document.getElementById('publicSearchInput').value.toLowerCase();
+        const searchInputEl = document.getElementById('publicSearchInput');
+        const searchInput = searchInputEl ? searchInputEl.value.toLowerCase() : '';
         const cards = document.querySelectorAll('.grid > .group');
         
         let anyVisible = false;
+        const pageCategory = '<%= category %>';
         
         cards.forEach(card => {
             const h3 = card.querySelector('h3');
             const p = card.querySelector('p');
-            const cat = card.getAttribute('data-category');
+            const cat = card.getAttribute('data-category') || '';
             if (!h3 || !p) return;
             
             const title = h3.textContent.toLowerCase();
             const body = p.textContent.toLowerCase();
             
-            const matchesSearch = title.includes(searchInput) || body.includes(searchInput);
-            const matchesCategory = currentCategory === 'All' || cat === currentCategory;
+            const matchesSearch = searchInput === '' || title.includes(searchInput) || body.includes(searchInput);
+            
+            let matchesCategory = false;
+            if (pageCategory === 'Wanted Person' || pageCategory === 'Missing Person') {
+                matchesCategory = true; // No filter buttons shown, so allow all matching the page's category
+            } else {
+                const normCat = cat.toLowerCase().trim();
+                const normCur = currentCategory.toLowerCase().trim();
+                
+                if (normCur === 'crime advisory' && (normCat === 'crime advisory' || normCat === 'crime advisories')) {
+                    matchesCategory = true;
+                } else if (normCur === 'traffic advisory' && (normCat === 'traffic advisory' || normCat === 'traffic advisories')) {
+                    matchesCategory = true;
+                } else if (normCur === 'cybercrime advisory' && (normCat === 'cybercrime advisory' || normCat === 'cybercrime advisories' || normCat.includes('cyber'))) {
+                    matchesCategory = true;
+                } else if (normCur === 'community awareness' && (normCat === 'community awareness' || normCat.includes('community') || normCat.includes('awareness'))) {
+                    matchesCategory = true;
+                } else if (normCur === normCat) {
+                    matchesCategory = true;
+                }
+            }
             
             if (matchesSearch && matchesCategory) {
                 card.style.display = 'flex';
@@ -192,4 +267,164 @@
             noResultsDiv.style.display = anyVisible ? 'none' : 'block';
         }
     }
+
+    function openBulletinModal(bulletinId) {
+        const bulletin = bulletinsDatabase.find(b => b.id === bulletinId);
+        if (!bulletin) return;
+
+        const collageContainer = document.getElementById('bulletin-modal-collage-container');
+        if (collageContainer) {
+            collageContainer.innerHTML = '';
+            
+            // Collect all photos and videos
+            const mediaItems = [];
+            
+            if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                bulletin.video_paths.forEach(url => {
+                    if (url) mediaItems.push({ type: 'video', url });
+                });
+            } else if (bulletin.video_path) {
+                mediaItems.push({ type: 'video', url: bulletin.video_path });
+            }
+
+            if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
+                bulletin.photo_paths.forEach(url => {
+                    if (url) mediaItems.push({ type: 'photo', url });
+                });
+            } else if (bulletin.photo_path) {
+                mediaItems.push({ type: 'photo', url: bulletin.photo_path });
+            }
+
+            if (mediaItems.length === 0) {
+                collageContainer.innerHTML = `
+                    <div class="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                        <i class="fas fa-bullhorn text-6xl text-slate-300 dark:text-slate-600"></i>
+                    </div>
+                `;
+            } else if (mediaItems.length === 1) {
+                const item = mediaItems[0];
+                if (item.type === 'video') {
+                    collageContainer.innerHTML = `<video src="${item.url}" controls class="w-full h-full object-cover"></video>`;
+                } else {
+                    collageContainer.innerHTML = `<img src="${item.url}" class="w-full h-full object-cover" alt="${bulletin.title}">`;
+                }
+            } else if (mediaItems.length === 2) {
+                collageContainer.innerHTML = `
+                    <div class="grid grid-cols-2 h-full w-full gap-1">
+                        ${mediaItems.map(item => {
+                            if (item.type === 'video') {
+                                return `<div class="relative h-full bg-black"><video src="${item.url}" controls class="w-full h-full object-cover"></video></div>`;
+                            } else {
+                                return `<div class="relative h-full overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></div>`;
+                            }
+                        }).join('')}
+                    </div>
+                `;
+            } else if (mediaItems.length === 3) {
+                const renderItemHtml = (item, extraClass = '') => {
+                    if (item.type === 'video') {
+                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-cover"></video></div>`;
+                    } else {
+                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></div>`;
+                    }
+                };
+                collageContainer.innerHTML = `
+                    <div class="grid grid-cols-3 h-full w-full gap-1 bg-black">
+                        ${renderItemHtml(mediaItems[0], 'col-span-2 h-full')}
+                        <div class="grid grid-rows-2 gap-1 h-full">
+                            ${renderItemHtml(mediaItems[1], 'h-full')}
+                            ${renderItemHtml(mediaItems[2], 'h-full')}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 4 or more items
+                const mainItem = mediaItems[0];
+                const sideItems = mediaItems.slice(1, 4); // get up to 3 items for the right side
+                const remainingCount = mediaItems.length - 4;
+
+                const renderItemHtml = (item, extraClass = '') => {
+                    if (item.type === 'video') {
+                        return `<div class="relative ${extraClass} bg-black"><video src="${item.url}" controls class="w-full h-full object-cover"></video></div>`;
+                    } else {
+                        return `<div class="relative ${extraClass} overflow-hidden bg-black"><img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500"></div>`;
+                    }
+                };
+
+                const renderSideItemHtml = (item, index) => {
+                    const isLast = index === 2 && remainingCount > 0;
+                    if (item.type === 'video') {
+                        return `
+                        <div class="relative h-full bg-black">
+                            <video src="${item.url}" controls class="w-full h-full object-cover"></video>
+                            ${isLast ? `
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="text-white text-xl font-black">+${remainingCount + 1}</span>
+                            </div>` : ''}
+                        </div>`;
+                    } else {
+                        return `
+                        <div class="relative h-full overflow-hidden bg-black">
+                            <img src="${item.url}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                            ${isLast ? `
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <span class="text-white text-xl font-black">+${remainingCount + 1}</span>
+                            </div>` : ''}
+                        </div>`;
+                    }
+                };
+
+                collageContainer.innerHTML = `
+                    <div class="grid grid-cols-3 h-full w-full gap-1 bg-black">
+                        ${renderItemHtml(mainItem, 'col-span-2 h-full')}
+                        <div class="grid grid-rows-3 gap-1 h-full">
+                            ${sideItems.map((item, idx) => renderSideItemHtml(item, idx)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        document.getElementById('bulletin-modal-category').textContent = bulletin.category;
+        document.getElementById('bulletin-modal-date').textContent = new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'});
+        document.getElementById('bulletin-modal-title').textContent = bulletin.title;
+        document.getElementById('bulletin-modal-content').textContent = bulletin.body;
+
+        const modal = document.getElementById('bulletin-modal');
+        const content = modal.querySelector('.relative');
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 50);
+    }
+
+    function closeBulletinModal() {
+        const modal = document.getElementById('bulletin-modal');
+        const content = modal.querySelector('.relative');
+        
+        // Pause all videos in collage if any
+        if (modal) {
+            const videos = modal.querySelectorAll('video');
+            videos.forEach(v => {
+                try {
+                    v.pause();
+                } catch (e) {}
+            });
+        }
+
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    // Trigger initial filter on DOMContentLoaded
+    window.addEventListener('DOMContentLoaded', () => {
+        filterPublicBulletins();
+    });
 </script>
