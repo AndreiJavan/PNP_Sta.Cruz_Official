@@ -353,6 +353,11 @@
         let errorMessage = '';
         const totalMediaCount = (existingMedia ? existingMedia.length : 0) + (accumulatedFiles ? accumulatedFiles.length : 0) + (accumulatedVideos ? accumulatedVideos.length : 0);
 
+        let totalBytes = 0;
+        if (typeof accumulatedFiles !== 'undefined') accumulatedFiles.forEach(f => totalBytes += f.size);
+        if (typeof accumulatedVideos !== 'undefined') accumulatedVideos.forEach(v => totalBytes += v.size);
+        const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
+
         if (cleanTitle.length === 0) {
             errorMessage = 'Please enter a bulletin title (at least 3 words required).';
         } else if (titleWords.length < 3) {
@@ -373,17 +378,19 @@
             errorMessage = 'At least 1 picture or video must be uploaded before posting.';
         } else if (totalMediaCount > 5) {
             errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain.`;
+        } else if (totalBytes > 4 * 1024 * 1024) {
+            errorMessage = `Combined media payload (${totalMB} MB) exceeds maximum upload limit of 4MB per request. Please compress or remove files.`;
         } else if (typeof accumulatedFiles !== 'undefined') {
             for (const f of accumulatedFiles) {
-                if (f.size > 5 * 1024 * 1024) {
-                    errorMessage = `Picture "${f.name}" exceeds maximum payload of 5MB.`;
+                if (f.size > 4 * 1024 * 1024) {
+                    errorMessage = `Picture "${f.name}" exceeds maximum allowed upload of 4MB.`;
                     break;
                 }
             }
             if (!errorMessage && typeof accumulatedVideos !== 'undefined') {
                 for (const v of accumulatedVideos) {
-                    if (v.size > 100 * 1024 * 1024) {
-                        errorMessage = `Video "${v.name}" exceeds maximum payload of 100MB.`;
+                    if (v.size > 4 * 1024 * 1024) {
+                        errorMessage = `Video "${v.name}" exceeds maximum allowed upload of 4MB.`;
                         break;
                     }
                 }
@@ -1060,21 +1067,87 @@
     });
     window.addEventListener('resize', syncPanels);
 
-    // Real-time input listeners for automatic validation
+    // Auto-save form draft to localStorage to prevent data loss on refresh
+    const DRAFT_KEY = 'bulletin_form_draft_<%= bulletin ? bulletin.id : "new" %>';
+
+    function saveFormDraft() {
+        const titleInput = document.getElementById('title');
+        const bodyInput = document.getElementById('body');
+        const categorySelect = document.getElementById('category');
+
+        if (!titleInput || !bodyInput) return;
+
+        const draftData = {
+            title: titleInput.value || '',
+            body: bodyInput.value || '',
+            category: categorySelect ? categorySelect.value : ''
+        };
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
+        } catch (e) {}
+    }
+
+    function restoreFormDraft() {
+        try {
+            const saved = localStorage.getItem(DRAFT_KEY);
+            if (!saved) return;
+            const draft = JSON.parse(saved);
+
+            const titleInput = document.getElementById('title');
+            const bodyInput = document.getElementById('body');
+            const categorySelect = document.getElementById('category');
+
+            const isEdit = <%= bulletin ? 'true' : 'false' %>;
+
+            // Only restore if fields are currently empty (or new creation)
+            if (!isEdit && titleInput && !titleInput.value && draft.title) {
+                titleInput.value = draft.title;
+            }
+            if (!isEdit && bodyInput && !bodyInput.value && draft.body) {
+                bodyInput.value = draft.body;
+            }
+            if (!isEdit && categorySelect && !categorySelect.value && draft.category) {
+                categorySelect.value = draft.category;
+            }
+        } catch (e) {}
+    }
+
+    function clearFormDraft() {
+        try {
+            localStorage.removeItem(DRAFT_KEY);
+        } catch (e) {}
+    }
+
+    // Real-time input listeners for automatic validation & draft saving
     document.addEventListener('DOMContentLoaded', () => {
         const titleInput = document.getElementById('title');
         const bodyInput = document.getElementById('body');
+        const categorySelect = document.getElementById('category');
+
+        restoreFormDraft();
 
         if (titleInput) {
-            titleInput.addEventListener('input', validateForm);
-            titleInput.addEventListener('keyup', validateForm);
+            titleInput.addEventListener('input', () => { validateForm(); saveFormDraft(); });
+            titleInput.addEventListener('keyup', () => { validateForm(); saveFormDraft(); });
         }
         if (bodyInput) {
-            bodyInput.addEventListener('input', validateForm);
-            bodyInput.addEventListener('keyup', validateForm);
+            bodyInput.addEventListener('input', () => { validateForm(); saveFormDraft(); });
+            bodyInput.addEventListener('keyup', () => { validateForm(); saveFormDraft(); });
         }
+        if (categorySelect) {
+            categorySelect.addEventListener('change', () => { validateForm(); saveFormDraft(); });
+        }
+
         validateForm();
     });
+
+    // Clear draft on successful form submit
+    const bulletinForm = document.getElementById('bulletinForm');
+    if (bulletinForm) {
+        bulletinForm.addEventListener('submit', () => {
+            clearFormDraft();
+        });
+    }
 
     // Initial load
     renderAllMedia();
