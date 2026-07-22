@@ -135,6 +135,20 @@ CREATE TABLE public.admin_notifications (
 );
 
 -- =====================================================
+-- RECYCLE BIN / ARCHIVE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.recycle_bin (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  category TEXT NOT NULL,
+  title TEXT NOT NULL,
+  original_id TEXT,
+  payload JSONB,
+  deleted_by TEXT,
+  deleted_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =====================================================
 -- RLS (ALLOW ALL - DEV MODE)
 -- =====================================================
 DO $$
