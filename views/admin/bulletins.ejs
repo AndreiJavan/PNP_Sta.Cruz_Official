@@ -180,8 +180,8 @@
 
         const confirmed = await confirmFn({
             title: "Delete Bulletin",
-            message: "Are you sure you want to permanently delete this bulletin announcement?",
-            confirmText: "Delete",
+            message: "Are you sure you want to delete this bulletin? It will be moved to the Archive for easy recovery.",
+            confirmText: "Move to Archive",
             cancelText: "Cancel",
             type: "danger"
         });

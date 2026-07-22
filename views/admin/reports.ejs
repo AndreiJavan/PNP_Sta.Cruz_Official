@@ -827,9 +827,9 @@
         if (btn && btn.disabled) return false;
 
         const confirmed = await window.strategicConfirm({
-            title: "Purge Confirmation",
-            message: "Secure Warning: Purging this intelligence record is irreversible. Are you sure you want to proceed?",
-            confirmText: "Delete Permanently",
+            title: "Delete Report Confirmation",
+            message: "Are you sure you want to delete this crime report? It will be moved to the Archive for easy recovery.",
+            confirmText: "Move to Archive",
             type: "danger"
         });
 
