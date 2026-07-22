@@ -35,9 +35,9 @@
 </style>
 
 <div class="container mx-auto px-4 py-20 <%= (category === 'Wanted Person' || category === 'Missing Person') ? 'pt-24' : '' %>">
-    <!-- Category Pills instead of Search -->
+    <!-- Category Pills & TTS Language Selector -->
     <% if (category !== 'Wanted Person' && category !== 'Missing Person') { %>
-    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-4xl mx-auto flex flex-col items-center">
+    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-4xl mx-auto flex flex-col items-center gap-6">
         <div class="flex flex-wrap gap-3 justify-center">
             <% 
                 const activeCat = category && category !== 'All' ? category : 'Crime Advisory';
@@ -54,6 +54,17 @@
             <button onclick="setCategoryFilter('Community Awareness', this)" class="category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Community Awareness' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md' : 'bg-gray-50 dark:bg-slate-900 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-200 dark:border-slate-700' %> transition duration-300">
                 Community Awareness
             </button>
+        </div>
+
+        <!-- TTS Language Selector -->
+        <div class="flex items-center space-x-3 bg-gray-50 dark:bg-slate-900 px-5 py-2 rounded-xl border border-gray-200 dark:border-slate-700">
+            <i class="fas fa-language text-pnp-blue dark:text-pnp-gold text-base"></i>
+            <label for="global-tts-lang-select" class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider hidden sm:inline">Audio Voice:</label>
+            <select id="global-tts-lang-select" class="tts-lang-select bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer">
+                <option value="fil-PH">🇵🇭 Tagalog / Filipino</option>
+                <option value="en-US">🇺🇸 English (US)</option>
+                <option value="en-PH">🇵🇭 English (PH)</option>
+            </select>
         </div>
     </div>
     <% } %>
