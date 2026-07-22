@@ -748,62 +748,32 @@
                 slideWrapper.appendChild(carouselWarning);
             }
 
-            if (item.isExisting) {
-                if (item.type === 'image') {
-                    const img = document.createElement('img');
-                    img.src = item.src;
-                    img.className = `w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition`;
-                    img.onclick = (e) => {
-                        e.stopPropagation();
-                        openMediaModal(item, item.src);
-                    };
-                    slideWrapper.appendChild(img);
-                } else {
-                    const video = document.createElement('video');
-                    video.src = item.src;
-                    video.className = `w-full h-full object-cover rounded-md cursor-pointer`;
-                    video.controls = true;
-                    video.onclick = (e) => {
-                        e.stopPropagation();
-                        openMediaModal(item, item.src);
-                    };
-                    slideWrapper.appendChild(video);
-                }
-                slideWrapper.appendChild(delBtn);
-                previewCarousel.appendChild(slideWrapper);
-                loadedCount++;
-                checkAndAddControls(loadedCount, itemsToRender.length);
-            } else {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const dataUrl = e.target.result;
-                    if (item.type === 'image') {
-                        const img = document.createElement('img');
-                        img.src = dataUrl;
-                        img.className = `w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition`;
-                        img.onclick = (evt) => {
-                            evt.stopPropagation();
-                            openMediaModal(item, dataUrl);
-                        };
-                        slideWrapper.appendChild(img);
-                    } else {
-                        const video = document.createElement('video');
-                        video.src = dataUrl;
-                        video.className = `w-full h-full object-cover rounded-md cursor-pointer`;
-                        video.controls = true;
-                        video.onclick = (evt) => {
-                            evt.stopPropagation();
-                            openMediaModal(item, dataUrl);
-                        };
-                        slideWrapper.appendChild(video);
-                    }
-                    slideWrapper.appendChild(delBtn);
-                    previewCarousel.appendChild(slideWrapper);
-                    loadedCount++;
-                    checkAndAddControls(loadedCount, itemsToRender.length);
+            const mediaUrl = item.isExisting ? item.src : URL.createObjectURL(item.file);
+
+            if (item.type === 'image') {
+                const img = document.createElement('img');
+                img.src = mediaUrl;
+                img.className = `w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition`;
+                img.onclick = (e) => {
+                    e.stopPropagation();
+                    openMediaModal(item, mediaUrl);
                 };
-                reader.readAsDataURL(item.file);
+                slideWrapper.appendChild(img);
+            } else {
+                const video = document.createElement('video');
+                video.src = mediaUrl;
+                video.className = `w-full h-full object-cover rounded-md cursor-pointer`;
+                video.controls = true;
+                video.onclick = (e) => {
+                    e.stopPropagation();
+                    openMediaModal(item, mediaUrl);
+                };
+                slideWrapper.appendChild(video);
             }
+            slideWrapper.appendChild(delBtn);
+            previewCarousel.appendChild(slideWrapper);
+            loadedCount++;
+            checkAndAddControls(loadedCount, itemsToRender.length);
         });
     }
 
@@ -971,7 +941,6 @@
             delBtn.onclick = (e) => {
                 e.stopPropagation();
                 removeMediaItem(item);
-                renderMediaGalleryGrid();
             };
 
             const typeBadge = document.createElement('span');
@@ -980,54 +949,32 @@
 
             let warningBadge = null;
             if (isOversized) {
-                const limitText = item.type === 'image' ? '5MB' : '100MB';
+                const limitText = item.type === 'image' ? '4MB' : '4MB';
                 const actualSize = item.file ? (item.file.size / (1024 * 1024)).toFixed(1) : '?';
                 warningBadge = document.createElement('div');
                 warningBadge.className = 'absolute inset-x-2 top-3 z-20 mr-12 bg-red-600/90 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center space-x-1 shadow-lg border border-red-400';
                 warningBadge.innerHTML = `<i class="fas fa-exclamation-circle text-xs"></i><span>EXCEEDS PAYLOAD (${actualSize}MB / ${limitText})</span>`;
             }
 
-            if (item.isExisting) {
-                if (item.type === 'image') {
-                    const img = document.createElement('img');
-                    img.src = item.src;
-                    img.className = 'w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300';
-                    img.onclick = () => openMediaModal(item, item.src);
-                    card.appendChild(img);
-                } else {
-                    const video = document.createElement('video');
-                    video.src = item.src;
-                    video.className = 'w-full h-full object-cover cursor-pointer';
-                    video.onclick = () => openMediaModal(item, item.src);
-                    card.appendChild(video);
-                }
-                card.appendChild(delBtn);
-                card.appendChild(typeBadge);
-                grid.appendChild(card);
+            const mediaUrl = item.isExisting ? item.src : URL.createObjectURL(item.file);
+
+            if (item.type === 'image') {
+                const img = document.createElement('img');
+                img.src = mediaUrl;
+                img.className = 'w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300';
+                img.onclick = () => openMediaModal(item, mediaUrl);
+                card.appendChild(img);
             } else {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const dataUrl = e.target.result;
-                    if (item.type === 'image') {
-                        const img = document.createElement('img');
-                        img.src = dataUrl;
-                        img.className = 'w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300';
-                        img.onclick = () => openMediaModal(item, dataUrl);
-                        card.appendChild(img);
-                    } else {
-                        const video = document.createElement('video');
-                        video.src = dataUrl;
-                        video.className = 'w-full h-full object-cover cursor-pointer';
-                        video.onclick = () => openMediaModal(item, dataUrl);
-                        card.appendChild(video);
-                    }
-                    card.appendChild(delBtn);
-                    card.appendChild(typeBadge);
-                    if (warningBadge) card.appendChild(warningBadge);
-                    grid.appendChild(card);
-                };
-                reader.readAsDataURL(item.file);
+                const video = document.createElement('video');
+                video.src = mediaUrl;
+                video.className = 'w-full h-full object-cover cursor-pointer';
+                video.onclick = () => openMediaModal(item, mediaUrl);
+                card.appendChild(video);
             }
+            card.appendChild(delBtn);
+            card.appendChild(typeBadge);
+            if (warningBadge) card.appendChild(warningBadge);
+            grid.appendChild(card);
         });
     }
 
