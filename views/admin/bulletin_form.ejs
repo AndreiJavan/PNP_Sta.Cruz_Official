@@ -378,22 +378,23 @@
             errorMessage = 'At least 1 picture or video must be uploaded before posting.';
         } else if (totalMediaCount > 5) {
             errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain.`;
-        } else if (totalBytes > 4 * 1024 * 1024) {
-            errorMessage = `Combined media payload (${totalMB} MB) exceeds maximum upload limit of 4MB per request. Please compress or remove files.`;
         } else if (typeof accumulatedFiles !== 'undefined') {
             for (const f of accumulatedFiles) {
-                if (f.size > 4 * 1024 * 1024) {
-                    errorMessage = `Picture "${f.name}" exceeds maximum allowed upload of 4MB.`;
+                if (f.size > 5 * 1024 * 1024) {
+                    errorMessage = `Picture "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of 5MB.`;
                     break;
                 }
             }
             if (!errorMessage && typeof accumulatedVideos !== 'undefined') {
                 for (const v of accumulatedVideos) {
-                    if (v.size > 4 * 1024 * 1024) {
-                        errorMessage = `Video "${v.name}" exceeds maximum allowed upload of 4MB.`;
+                    if (v.size > 100 * 1024 * 1024) {
+                        errorMessage = `Video "${v.name}" (${(v.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of 100MB.`;
                         break;
                     }
                 }
+            }
+            if (!errorMessage && totalBytes > 10 * 1024 * 1024) {
+                errorMessage = `Combined upload batch (${totalMB} MB) exceeds recommended server payload limit of 10MB. Please compress files before posting.`;
             }
         }
 
