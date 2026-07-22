@@ -197,7 +197,7 @@
                         </div>
 
                         <textarea name="body" id="body" rows="12" required
-                            placeholder="Enter the full content of the bulletin (Max 500 words / 5,000 characters)..."
+                            placeholder="Enter the full content of the bulletin (Min 5 words / 15 chars, Max 500 words / 5,000 chars)..."
                             class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white transition-all"><%= bulletin ? bulletin.body : '' %></textarea>
                     </div>
 
@@ -334,7 +334,7 @@
 
         if (bodyCounter) {
             bodyCounter.textContent = `${bodyWords.length} / 500 words (${bodyChars} / 5,000 chars)`;
-            if (bodyWords.length > 500 || bodyChars > 5000) {
+            if (bodyWords.length > 500 || bodyChars > 5000 || (cleanBody.length > 0 && (bodyWords.length < 5 || bodyChars < 15))) {
                 bodyCounter.classList.add('text-red-500');
                 bodyCounter.classList.remove('text-slate-400');
             } else {
@@ -352,10 +352,12 @@
             errorMessage = `Title exceeds upper limit of 100 characters (currently ${titleChars} characters).`;
         } else if (titleWords.length > 15) {
             errorMessage = `Title exceeds upper limit of 15 words (currently ${titleWords.length} words).`;
+        } else if (cleanBody.length > 0 && (bodyWords.length < 5 || bodyChars < 15)) {
+            errorMessage = `Bulletin body must be at least 5 words long (currently ${bodyWords.length} words / ${bodyChars} characters).`;
         } else if (bodyWords.length > 500) {
-            errorMessage = `Bulletin body exceeds limit of 500 words (currently ${bodyWords.length} words).`;
+            errorMessage = `Bulletin body exceeds upper limit of 500 words (currently ${bodyWords.length} words).`;
         } else if (bodyChars > 5000) {
-            errorMessage = `Bulletin body exceeds limit of 5,000 characters (currently ${bodyChars} characters).`;
+            errorMessage = `Bulletin body exceeds upper limit of 5,000 characters (currently ${bodyChars} characters).`;
         } else if (totalMediaCount > 5) {
             errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain before posting.`;
         } else if (typeof accumulatedFiles !== 'undefined') {

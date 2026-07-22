@@ -1861,9 +1861,12 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
-  // Validation 2: Body text length limiter (Max 500 words / 5,000 characters)
+  // Validation 2: Body text length limiter (Min 5 words / 15 chars, Max 500 words / 5,000 chars)
   const cleanBody = (body || '').trim();
   const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+  if (bodyWords.length < 5 || cleanBody.length < 15) {
+    return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+  }
   if (bodyWords.length > 500 || cleanBody.length > 5000) {
     return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words).`);
   }
@@ -1993,9 +1996,12 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
-  // Validation 2: Body text length limiter (Max 500 words / 5,000 characters)
+  // Validation 2: Body text length limiter (Min 5 words / 15 chars, Max 500 words / 5,000 chars)
   const cleanBody = (body || '').trim();
   const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+  if (bodyWords.length < 5 || cleanBody.length < 15) {
+    return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+  }
   if (bodyWords.length > 500 || cleanBody.length > 5000) {
     return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words).`);
   }
