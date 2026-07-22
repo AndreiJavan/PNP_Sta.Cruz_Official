@@ -78,7 +78,7 @@
                         <div class="pt-6 border-t border-gray-100 dark:border-slate-800/60 flex items-center justify-between">
                             <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
                             <div class="flex items-center space-x-3">
-                                <button id="tts-news-<%= news.id %>" onclick="speakReport('tts-news-<%= news.id %>', `<%= news.headline.replace(/`/g, '\\`') %>. <%= news.description.replace(/`/g, '\\`') %>`)" class="text-[10px] font-black text-slate-600 dark:text-slate-300 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                <button id="tts-news-<%= news.id %>" onclick="speakReport('tts-news-<%= news.id %>', `<%= news.headline.replace(/`/g, '\\`').replace(/"/g, '&quot;').replace(/\n/g, ' ') %>. <%= news.description.replace(/`/g, '\\`').replace(/"/g, '&quot;').replace(/\n/g, ' ') %>`)" class="text-[10px] font-black text-slate-600 dark:text-slate-300 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                                     <i class="fas fa-volume-high text-xs"></i>
                                     <span>Listen</span>
                                 </button>

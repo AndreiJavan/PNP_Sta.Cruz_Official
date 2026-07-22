@@ -68,10 +68,15 @@
             } catch (e) {}
         }
 
-        // 1. Try Puter.js TTS with language code parameter
+        // 1. Try Puter.js TTS with a 4-second timeout to prevent infinite hanging
         if (typeof puter !== 'undefined' && puter.ai && typeof puter.ai.txt2speech === 'function') {
             try {
-                const audio = await puter.ai.txt2speech(cleanText, lang);
+                const fetchAudioWithTimeout = Promise.race([
+                    puter.ai.txt2speech(cleanText, lang),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error("Puter TTS timeout")), 4000))
+                ]);
+
+                const audio = await fetchAudioWithTimeout;
                 if (audio && typeof audio.play === 'function') {
                     currentAudio = audio;
 
@@ -81,7 +86,7 @@
                     };
 
                     audio.onerror = (e) => {
-                        console.warn("Puter.js audio playback error:", e, "Falling back to browser Web Speech API.");
+                        console.warn("Puter.js audio playback error:", e, "Falling back to Web Speech API.");
                         fallbackNativeSpeech(cleanText, lang);
                     };
 
@@ -95,7 +100,7 @@
                     return;
                 }
             } catch (err) {
-                console.warn("Puter.js TTS encountered an error:", err, "Falling back to Web Speech API.");
+                console.warn("Puter.js TTS failed or timed out:", err, "Falling back to Web Speech API.");
             }
         }
 
