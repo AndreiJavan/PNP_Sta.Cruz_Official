@@ -1861,11 +1861,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');
   }
 
-  // Validation 2: Body text length limiter
+  // Validation 2: Body text length limiter (Max 500 words / 5,000 characters)
   const cleanBody = (body || '').trim();
   const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-  if (bodyWords.length > 2000 || cleanBody.length > 15000) {
-    return res.status(400).send('Validation Error: Content body is too long (maximum 2,000 words).');
+  if (bodyWords.length > 500 || cleanBody.length > 5000) {
+    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words).`);
   }
 
   try {
@@ -1982,6 +1982,23 @@ export const getEditBulletin = async (req: Request, res: Response) => {
 export const postEditBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, is_archived, existing_photos, existing_videos } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
+
+  // Validation 1: Title/Name character and word limits
+  const cleanTitle = (title || '').trim();
+  const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
+  if (cleanTitle.length < 2) {
+    return res.status(400).send('Validation Error: Title / Name must be at least 2 characters long.');
+  }
+  if (cleanTitle.length > 150 || titleWords.length > 25) {
+    return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');
+  }
+
+  // Validation 2: Body text length limiter (Max 500 words / 5,000 characters)
+  const cleanBody = (body || '').trim();
+  const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+  if (bodyWords.length > 500 || cleanBody.length > 5000) {
+    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words).`);
+  }
 
   try {
     let finalPhotos: string[] = [];

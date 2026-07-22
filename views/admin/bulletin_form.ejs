@@ -176,24 +176,32 @@
 
                     <!-- BODY -->
                     <div class="flex-1 flex flex-col space-y-2">
-                        <label
-                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                            Bulletin Body
-                        </label>
+                        <div class="flex justify-between items-center">
+                            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                                Bulletin Body
+                            </label>
+                            <span id="bodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                0 / 500 words
+                            </span>
+                        </div>
 
                         <textarea name="body" id="body" rows="12" required
-                            placeholder="Enter the full content of the bulletin..."
-                            class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white"><%= bulletin ? bulletin.body : '' %></textarea>
+                            placeholder="Enter the full content of the bulletin (Max 500 words / 5,000 characters)..."
+                            class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white transition-all"><%= bulletin ? bulletin.body : '' %></textarea>
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- SUBMIT BUTTON (UNCHANGED STYLE PURPOSE, JUST ALIGNED RIGHT) -->
-            <div class="pt-6 border-t border-gray-50 dark:border-slate-700 flex justify-end">
-                <button type="submit"
-                    class="bg-pnp-blue text-white font-bold py-4 px-12 rounded-xl shadow-lg transition duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs">
+            <!-- SUBMIT CONTAINER WITH REAL-TIME VALIDATION WARNING -->
+            <div class="pt-6 border-t border-gray-50 dark:border-slate-700 flex flex-col items-end space-y-3">
+                <div id="validationWarning" class="hidden flex items-center space-x-2 text-red-500 bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider animate-pulse">
+                    <i class="fas fa-exclamation-triangle text-sm"></i>
+                    <span id="validationWarningText">Input parameters exceed safety thresholds.</span>
+                </div>
+                <button type="submit" id="submitBulletinBtn"
+                    class="bg-pnp-blue text-white font-bold py-4 px-12 rounded-xl shadow-lg transition-all duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none">
                     <%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %>
                 </button>
             </div>
@@ -232,32 +240,82 @@
         }
     }
 
-    async function handleBulletinSubmit(event) {
-        event.preventDefault();
+    function validateForm() {
         const titleInput = document.getElementById('title');
         const bodyInput = document.getElementById('body');
+        const submitBtn = document.getElementById('submitBulletinBtn');
+        const warningBox = document.getElementById('validationWarning');
+        const warningText = document.getElementById('validationWarningText');
+        const bodyCounter = document.getElementById('bodyCounter');
 
-        const cleanTitle = (titleInput ? titleInput.value : '').trim();
+        if (!titleInput || !bodyInput || !submitBtn) return true;
+
+        const cleanTitle = (titleInput.value || '').trim();
         const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
 
-        if (cleanTitle.length < 2) {
-            alert('Title / Name must be at least 2 characters long.');
-            if (titleInput) titleInput.focus();
-            return;
-        }
-        if (cleanTitle.length > 150 || titleWords.length > 25) {
-            alert('Title / Name is too long. Please keep it under 150 characters / 25 words.');
-            if (titleInput) titleInput.focus();
-            return;
+        const cleanBody = (bodyInput.value || '').trim();
+        const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+        const bodyChars = cleanBody.length;
+
+        if (bodyCounter) {
+            bodyCounter.textContent = `${bodyWords.length} / 500 words (${bodyChars} / 5,000 chars)`;
+            if (bodyWords.length > 500 || bodyChars > 5000) {
+                bodyCounter.classList.add('text-red-500');
+                bodyCounter.classList.remove('text-slate-400');
+            } else {
+                bodyCounter.classList.remove('text-red-500');
+                bodyCounter.classList.add('text-slate-400');
+            }
         }
 
-        const cleanBody = (bodyInput ? bodyInput.value : '').trim();
-        const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-        if (bodyWords.length > 2000) {
-            alert('Content body is too long. Please limit to 2,000 words.');
-            if (bodyInput) bodyInput.focus();
-            return;
+        let errorMessage = '';
+
+        if (cleanTitle.length > 0 && cleanTitle.length < 2) {
+            errorMessage = 'Title must be at least 2 characters long.';
+        } else if (cleanTitle.length > 150) {
+            errorMessage = 'Title exceeds limit of 150 characters.';
+        } else if (titleWords.length > 25) {
+            errorMessage = 'Title exceeds limit of 25 words.';
+        } else if (bodyWords.length > 500) {
+            errorMessage = `Bulletin body exceeds limit of 500 words (currently ${bodyWords.length} words).`;
+        } else if (bodyChars > 5000) {
+            errorMessage = `Bulletin body exceeds limit of 5,000 characters (currently ${bodyChars} characters).`;
+        } else if (typeof accumulatedFiles !== 'undefined') {
+            for (const f of accumulatedFiles) {
+                if (f.size > 5 * 1024 * 1024) {
+                    errorMessage = `Picture "${f.name}" exceeds limit of 5MB.`;
+                    break;
+                }
+            }
+            if (!errorMessage && typeof accumulatedVideos !== 'undefined') {
+                for (const v of accumulatedVideos) {
+                    if (v.size > 100 * 1024 * 1024) {
+                        errorMessage = `Video "${v.name}" exceeds limit of 100MB.`;
+                        break;
+                    }
+                }
+            }
         }
+
+        if (errorMessage) {
+            if (warningBox && warningText) {
+                warningText.textContent = errorMessage;
+                warningBox.classList.remove('hidden');
+            }
+            submitBtn.disabled = true;
+            return false;
+        } else {
+            if (warningBox) {
+                warningBox.classList.add('hidden');
+            }
+            submitBtn.disabled = false;
+            return true;
+        }
+    }
+
+    async function handleBulletinSubmit(event) {
+        event.preventDefault();
+        if (!validateForm()) return;
 
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
@@ -408,6 +466,7 @@
 
         syncFileInputs();
         renderAllMedia();
+        validateForm();
     }
 
     function syncFileInputs() {
@@ -660,6 +719,22 @@
         setTimeout(syncPanels, 500);
     });
     window.addEventListener('resize', syncPanels);
+
+    // Real-time input listeners for automatic validation
+    document.addEventListener('DOMContentLoaded', () => {
+        const titleInput = document.getElementById('title');
+        const bodyInput = document.getElementById('body');
+
+        if (titleInput) {
+            titleInput.addEventListener('input', validateForm);
+            titleInput.addEventListener('keyup', validateForm);
+        }
+        if (bodyInput) {
+            bodyInput.addEventListener('input', validateForm);
+            bodyInput.addEventListener('keyup', validateForm);
+        }
+        validateForm();
+    });
 
     // Initial load
     renderAllMedia();
