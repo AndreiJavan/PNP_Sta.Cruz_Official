@@ -650,8 +650,17 @@
         let loadedCount = 0;
 
         itemsToRender.forEach((item, slideIndex) => {
+            const isOversized = !item.isExisting && (
+                (item.type === 'image' && item.file && item.file.size > 5 * 1024 * 1024) ||
+                (item.type === 'video' && item.file && item.file.size > 100 * 1024 * 1024)
+            );
+
             const slideWrapper = document.createElement('div');
-            slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${slideIndex === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`;
+            slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${
+                slideIndex === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+            } ${
+                isOversized ? 'border-4 border-red-500 rounded-lg overflow-hidden' : ''
+            }`;
             slideWrapper.dataset.index = slideIndex;
 
             const delBtn = document.createElement('button');
@@ -662,6 +671,16 @@
                 event.stopPropagation();
                 removeMediaItem(item);
             };
+
+            let carouselWarning = null;
+            if (isOversized) {
+                const limitText = item.type === 'image' ? '5MB' : '100MB';
+                const actualSize = item.file ? (item.file.size / (1024 * 1024)).toFixed(1) : '?';
+                carouselWarning = document.createElement('div');
+                carouselWarning.className = 'absolute top-3 left-3 z-30 bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center space-x-1.5 shadow-xl border border-white/20';
+                carouselWarning.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>EXCEEDS PAYLOAD (${actualSize}MB / ${limitText})</span>`;
+                slideWrapper.appendChild(carouselWarning);
+            }
 
             if (item.isExisting) {
                 if (item.type === 'image') {
@@ -863,8 +882,17 @@
         grid.innerHTML = '';
 
         itemsToRender.forEach((item, idx) => {
+            const isOversized = !item.isExisting && (
+                (item.type === 'image' && item.file && item.file.size > 5 * 1024 * 1024) ||
+                (item.type === 'video' && item.file && item.file.size > 100 * 1024 * 1024)
+            );
+
             const card = document.createElement('div');
-            card.className = 'relative group bg-slate-950 rounded-2xl overflow-hidden border border-white/10 shadow-lg aspect-square flex items-center justify-center';
+            card.className = `relative group bg-slate-950 rounded-2xl overflow-hidden shadow-lg aspect-square flex items-center justify-center transition-all ${
+                isOversized 
+                ? 'border-4 border-red-500 ring-4 ring-red-500/30' 
+                : 'border border-white/10'
+            }`;
 
             // Delete trashbin button on top-right of each image/video
             const delBtn = document.createElement('button');
@@ -881,6 +909,15 @@
             const typeBadge = document.createElement('span');
             typeBadge.className = 'absolute bottom-3 left-3 z-30 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-white border border-white/10';
             typeBadge.textContent = item.type === 'video' ? 'Video' : 'Picture';
+
+            let warningBadge = null;
+            if (isOversized) {
+                const limitText = item.type === 'image' ? '5MB' : '100MB';
+                const actualSize = item.file ? (item.file.size / (1024 * 1024)).toFixed(1) : '?';
+                warningBadge = document.createElement('div');
+                warningBadge.className = 'absolute inset-x-2 top-3 z-20 mr-12 bg-red-600/90 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center space-x-1 shadow-lg border border-red-400';
+                warningBadge.innerHTML = `<i class="fas fa-exclamation-circle text-xs"></i><span>EXCEEDS PAYLOAD (${actualSize}MB / ${limitText})</span>`;
+            }
 
             if (item.isExisting) {
                 if (item.type === 'image') {
@@ -918,6 +955,7 @@
                     }
                     card.appendChild(delBtn);
                     card.appendChild(typeBadge);
+                    if (warningBadge) card.appendChild(warningBadge);
                     grid.appendChild(card);
                 };
                 reader.readAsDataURL(item.file);
