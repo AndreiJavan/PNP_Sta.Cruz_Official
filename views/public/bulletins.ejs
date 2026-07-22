@@ -141,10 +141,14 @@
                                     <%= bulletin.body %>
                                 </p>
 
-                                <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700">
+                                <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700 flex items-center justify-between">
+                                    <button id="tts-bulletin-<%= bulletin.id %>" onclick="speakReport('tts-bulletin-<%= bulletin.id %>', `<%= bulletin.title.replace(/`/g, '\\`') %>. <%= bulletin.body.replace(/`/g, '\\`') %>`)" class="text-[10px] font-black text-slate-600 dark:text-slate-300 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-1.5 focus:outline-none transition px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                                        <i class="fas fa-volume-high text-xs"></i>
+                                        <span>Listen</span>
+                                    </button>
                                     <button onclick="openBulletinModal('<%= bulletin.id %>')"
                                         class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition focus:outline-none">
-                                        Read Full Details <i class="fas fa-arrow-right ml-3 text-[10px]"></i>
+                                        Read Details <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
                                     </button>
                                 </div>
                             </div>
@@ -189,8 +193,12 @@
                 <i class="fas fa-times"></i>
             </button>
 
-            <div class="mb-4 pr-12">
+            <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
                 <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-pnp-blue dark:text-pnp-gold bg-pnp-blue/10 dark:bg-pnp-gold/10 px-4 py-2 rounded-xl"></span>
+                <button id="tts-bulletin-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <i class="fas fa-volume-high text-xs"></i>
+                    <span>Read Advisory</span>
+                </button>
             </div>
             <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
             <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
@@ -370,6 +378,12 @@
         document.getElementById('bulletin-modal-title').textContent = bulletin.title;
         document.getElementById('bulletin-modal-content').textContent = bulletin.body;
 
+        const ttsBtn = document.getElementById('tts-bulletin-modal-btn');
+        if (ttsBtn) {
+            const speechText = `${bulletin.title}. ${bulletin.body}`;
+            ttsBtn.onclick = () => speakReport('tts-bulletin-modal-btn', speechText);
+        }
+
         const modal = document.getElementById('bulletin-modal');
         const content = modal.querySelector('.relative');
 
@@ -382,6 +396,7 @@
     }
 
     function closeBulletinModal() {
+        if (typeof stopSpeech === 'function') stopSpeech();
         const modal = document.getElementById('bulletin-modal');
         const content = modal.querySelector('.relative');
         
