@@ -208,20 +208,29 @@
 
         </form>
 
-        <!-- IMAGE VIEW MODAL -->
-        <div id="imageModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+        <!-- ENHANCED FULLSCREEN MEDIA VIEWER MODAL -->
+        <div id="mediaModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center z-[99999] p-4 transition-all duration-300">
+            <div class="relative max-w-5xl w-full flex flex-col items-center">
+                <!-- MODAL HEADER / CONTROLS -->
+                <div class="w-full flex justify-between items-center mb-3 px-2">
+                    <span id="modalMediaTitle" class="text-xs font-black uppercase tracking-widest text-slate-300">Media Preview</span>
+                    <div class="flex items-center space-x-3">
+                        <button type="button" id="modalRemoveBtn" onclick="removeCurrentModalMedia()" class="px-4 py-2 bg-red-500/20 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-2 border border-red-500/30">
+                            <i class="fas fa-trash-alt"></i>
+                            <span>Remove This File</span>
+                        </button>
+                        <button type="button" onclick="closeMediaModal()" class="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition focus:outline-none">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="relative max-w-4xl w-full p-4">
-
-                <!-- CLOSE BUTTON -->
-                <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white text-2xl font-bold">
-                    &times;
-                </button>
-
-                <!-- IMAGE -->
-                <img id="modalImage" class="w-full max-h-[80vh] object-contain rounded-xl shadow-lg bg-black">
+                <!-- MEDIA CONTENT CONTAINER -->
+                <div class="w-full max-h-[82vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center p-2 relative">
+                    <img id="modalImage" class="max-w-full max-h-[78vh] object-contain rounded-lg hidden">
+                    <video id="modalVideo" controls class="max-w-full max-h-[78vh] object-contain rounded-lg hidden"></video>
+                </div>
             </div>
-
         </div>
 
     </div>
@@ -589,18 +598,21 @@
                 if (item.type === 'image') {
                     const img = document.createElement('img');
                     img.src = item.src;
-                    img.className = `w-full h-full object-cover rounded-md`;
+                    img.className = `w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition`;
                     img.onclick = (e) => {
                         e.stopPropagation();
-                        openImageModal(item.src);
+                        openMediaModal(item, item.src);
                     };
                     slideWrapper.appendChild(img);
                 } else {
                     const video = document.createElement('video');
                     video.src = item.src;
-                    video.className = `w-full h-full object-cover rounded-md`;
+                    video.className = `w-full h-full object-cover rounded-md cursor-pointer`;
                     video.controls = true;
-                    video.onclick = (e) => e.stopPropagation();
+                    video.onclick = (e) => {
+                        e.stopPropagation();
+                        openMediaModal(item, item.src);
+                    };
                     slideWrapper.appendChild(video);
                 }
                 slideWrapper.appendChild(delBtn);
@@ -610,21 +622,25 @@
             } else {
                 const reader = new FileReader();
                 reader.onload = function (e) {
+                    const dataUrl = e.target.result;
                     if (item.type === 'image') {
                         const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = `w-full h-full object-cover rounded-md`;
+                        img.src = dataUrl;
+                        img.className = `w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition`;
                         img.onclick = (evt) => {
                             evt.stopPropagation();
-                            openImageModal(e.target.result);
+                            openMediaModal(item, dataUrl);
                         };
                         slideWrapper.appendChild(img);
                     } else {
                         const video = document.createElement('video');
-                        video.src = e.target.result;
-                        video.className = `w-full h-full object-cover rounded-md`;
+                        video.src = dataUrl;
+                        video.className = `w-full h-full object-cover rounded-md cursor-pointer`;
                         video.controls = true;
-                        video.onclick = (evt) => evt.stopPropagation();
+                        video.onclick = (evt) => {
+                            evt.stopPropagation();
+                            openMediaModal(item, dataUrl);
+                        };
                         slideWrapper.appendChild(video);
                     }
                     slideWrapper.appendChild(delBtn);
@@ -666,36 +682,69 @@
         document.getElementById('existing_videos_input').value = JSON.stringify(existingVideos);
     }
 
-    const modal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
+    let currentActiveModalItem = null;
 
-    function openImageModal(src) {
-        const finalSrc = src || document.getElementById('previewImage')?.src;
-        if (!finalSrc || finalSrc.includes('hidden')) return;
+    function openMediaModal(item, src) {
+        const modal = document.getElementById('mediaModal');
+        const modalImg = document.getElementById('modalImage');
+        const modalVid = document.getElementById('modalVideo');
+        const modalTitle = document.getElementById('modalMediaTitle');
 
-        modalImage.src = finalSrc;
+        if (!modal || !modalImg || !modalVid) return;
+
+        currentActiveModalItem = item;
+
+        if (item.type === 'video') {
+            modalImg.classList.add('hidden');
+            modalVid.src = src;
+            modalVid.classList.remove('hidden');
+            if (modalTitle) modalTitle.textContent = `Video Preview: ${item.file ? item.file.name : 'Existing Video'}`;
+        } else {
+            modalVid.classList.add('hidden');
+            modalVid.pause();
+            modalImg.src = src;
+            modalImg.classList.remove('hidden');
+            if (modalTitle) modalTitle.textContent = `Image Preview: ${item.file ? item.file.name : 'Existing Image'}`;
+        }
+
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
-    function closeImageModal() {
+    function closeMediaModal() {
+        const modal = document.getElementById('mediaModal');
+        const modalVid = document.getElementById('modalVideo');
         if (modal) {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
+        if (modalVid) {
+            modalVid.pause();
+            modalVid.src = '';
+        }
+        currentActiveModalItem = null;
     }
 
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeImageModal();
+    function removeCurrentModalMedia() {
+        if (currentActiveModalItem) {
+            const itemToRemove = currentActiveModalItem;
+            closeMediaModal();
+            removeMediaItem(itemToRemove);
+        }
+    }
+
+    const mediaModal = document.getElementById('mediaModal');
+    if (mediaModal) {
+        mediaModal.addEventListener('click', (e) => {
+            if (e.target === mediaModal) {
+                closeMediaModal();
             }
         });
     }
 
     document.addEventListener('keydown', (e) => {
         if (e.key === "Escape") {
-            closeImageModal();
+            closeMediaModal();
         }
     });
 
