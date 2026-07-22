@@ -150,6 +150,18 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Reports Pagination Bar -->
+            <div id="reportsPagination" class="p-6 border-t border-gray-100 dark:border-slate-800 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest" id="reportsPaginationInfo">
+                    Showing 0 of 0 reports
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="reportsPrevBtn" onclick="changeReportsPage(-1)" class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Previous</button>
+                    <span id="reportsPageIndicator" class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mx-3">Page 1 of 1</span>
+                    <button id="reportsNextBtn" onclick="changeReportsPage(1)" class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Next</button>
+                </div>
+            </div>
         </div>
 </div>
 
@@ -589,16 +601,50 @@
          }
      };
 
+     let currentReportsPage = 1;
+     const reportsPerPage = 10;
+     let filteredReportsList = reports || [];
+
+     function filterReports() {
+         const query = document.getElementById('reportSearchInput').value.toLowerCase().trim();
+         if (!query) {
+             filteredReportsList = reports || [];
+         } else {
+             filteredReportsList = (reports || []).filter(r => 
+                 (r.filename || '').toLowerCase().includes(query) || 
+                 (r.admin_name || '').toLowerCase().includes(query)
+             );
+         }
+         currentReportsPage = 1;
+         renderReportsTable();
+     }
+
+     function changeReportsPage(dir) {
+         currentReportsPage += dir;
+         renderReportsTable();
+     }
+
      function renderReportsTable() {
          const tbody = document.querySelector('tbody.divide-y');
          if (!tbody) return;
  
-         if (reports.length === 0) {
-             tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-20 text-center"><i class="fas fa-search text-gray-200 text-4xl mb-4 block"></i><span class="text-sm text-gray-400 font-bold uppercase tracking-widest">No intelligence scans captured yet</span></td></tr>`;
+         if (!filteredReportsList || filteredReportsList.length === 0) {
+             tbody.innerHTML = `<tr><td colspan="8" class="px-8 py-20 text-center"><i class="fas fa-search text-gray-200 text-4xl mb-4 block"></i><span class="text-sm text-gray-400 font-bold uppercase tracking-widest">No reports found</span></td></tr>`;
+             updateReportsPagination(0, 0, 1, 1);
              return;
          }
  
-         tbody.innerHTML = reports.map((report, index) => `
+         const totalItems = filteredReportsList.length;
+         const totalPages = Math.ceil(totalItems / reportsPerPage) || 1;
+
+         if (currentReportsPage > totalPages) currentReportsPage = totalPages;
+         if (currentReportsPage < 1) currentReportsPage = 1;
+
+         const startIndex = (currentReportsPage - 1) * reportsPerPage;
+         const endIndex = Math.min(startIndex + reportsPerPage, totalItems);
+         const pageItems = filteredReportsList.slice(startIndex, endIndex);
+
+         tbody.innerHTML = pageItems.map((report, index) => `
              <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors group animate-fade-in-up cursor-pointer" style="animation-delay: ${index * 30}ms" ondblclick="viewReportDetails('${report.id}')">
                  <td class="px-8 py-6">
                      <div class="flex flex-col">
@@ -612,7 +658,7 @@
                          </div>
                          <div class="flex flex-col max-w-[200px]">
                              <span class="text-sm font-black uppercase text-slate-600 dark:text-slate-300 tracking-tight leading-tight">${report.admin_name || 'System Administrator'}</span>
-                             <span class="text-xs text-slate-400 font-bold uppercase truncate" title="${report.filename || 'Neural Scan Buffer'}">${report.filename || 'Neural Scan Buffer'}</span>
+                             <span class="text-xs text-slate-400 font-bold uppercase truncate" title="${report.filename || 'Uploaded File'}">${report.filename || 'Uploaded File'}</span>
                          </div>
                      </div>
                  </td>
@@ -636,15 +682,15 @@
                  </td>
                  <td class="px-8 py-6 text-center">
                      <div class="flex flex-col items-center">
-                         ${(report.category_stats?.entry_type === 'manual' || report.filename === 'Manual Intelligence Session' || report.filename === 'Manual Entry Session') ? `
+                         ${(report.category_stats?.entry_type === 'manual' || report.filename === 'Manual Session' || report.filename === 'Manual Entry Session') ? `
                              <span class="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 flex items-center space-x-1">
                                  <i class="fas fa-keyboard text-[8px]"></i>
                                  <span>Manual</span>
                              </span>
                          ` : `
                              <span class="px-3 py-1 rounded-lg bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold text-[10px] font-black uppercase tracking-widest border border-pnp-blue/20 flex items-center space-x-1">
-                                 <i class="fas fa-barcode text-[8px]"></i>
-                                 <span>Scanned</span>
+                                 <i class="fas fa-file-excel text-[8px]"></i>
+                                 <span>Imported</span>
                              </span>
                          `}
                      </div>
@@ -663,10 +709,26 @@
                  </td>
              </tr>
          `).join('');
+
+         updateReportsPagination(startIndex + 1, endIndex, totalItems, totalPages);
+     }
+
+     function updateReportsPagination(start, end, total, totalPages) {
+         const info = document.getElementById('reportsPaginationInfo');
+         const indicator = document.getElementById('reportsPageIndicator');
+         const prevBtn = document.getElementById('reportsPrevBtn');
+         const nextBtn = document.getElementById('reportsNextBtn');
+
+         if (info) info.textContent = total > 0 ? `Showing ${start} - ${end} of ${total} reports` : `Showing 0 reports`;
+         if (indicator) indicator.textContent = `Page ${currentReportsPage} of ${totalPages}`;
+         if (prevBtn) prevBtn.disabled = (currentReportsPage <= 1);
+         if (nextBtn) nextBtn.disabled = (currentReportsPage >= totalPages);
+     }
      }
 
      document.addEventListener('DOMContentLoaded', () => {
          animateStats();
+         renderReportsTable();
          
          const urlParams = new URLSearchParams(window.location.search);
          const barangay = urlParams.get('barangay');

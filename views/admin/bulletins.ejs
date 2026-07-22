@@ -180,8 +180,9 @@
 
         const confirmed = await confirmFn({
             title: "Delete Bulletin",
-            message: "Permanently remove this intelligence notice from the public grid?",
-            confirmText: "Purge Entry",
+            message: "Are you sure you want to permanently delete this bulletin announcement?",
+            confirmText: "Delete",
+            cancelText: "Cancel",
             type: "danger"
         });
         

@@ -12,21 +12,21 @@
                     <i id="alertIcon" class="fas fa-shield-alt text-2xl"></i>
                 </div>
                 <div>
-                    <h3 id="alertTitle" class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">Strategic Alert</h3>
-                    <p id="alertSubtitle" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Operational Protocol Active</p>
+                    <h3 id="alertTitle" class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm">System Alert</h3>
+                    <p id="alertSubtitle" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Please Confirm Action</p>
                 </div>
             </div>
             
             <p id="alertMessage" class="text-sm font-bold text-slate-600 dark:text-slate-300 leading-relaxed">
-                Confirming intelligence parameters for deployment...
+                Are you sure you want to proceed?
             </p>
             
             <div class="flex items-center space-x-3 pt-2">
                 <button id="alertCancelBtn" class="flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
-                    Abort
+                    Cancel
                 </button>
                 <button id="alertConfirmBtn" class="flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95">
-                    Proceed
+                    Confirm
                 </button>
             </div>
         </div>
@@ -53,10 +53,10 @@
         window.strategicConfirm = function(options) {
             return new Promise((resolve) => {
                 const { 
-                    title: t = 'Strategic Confirmation', 
-                    message: m = 'Proceed with operation?', 
-                    confirmText = 'Proceed', 
-                    cancelText = 'Abort',
+                    title: t = 'System Confirmation', 
+                    message: m = 'Proceed with action?', 
+                    confirmText = 'Confirm', 
+                    cancelText = 'Cancel',
                     type = 'info' // info, warning, danger
                 } = options;
 
