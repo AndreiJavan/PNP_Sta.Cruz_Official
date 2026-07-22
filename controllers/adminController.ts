@@ -2060,19 +2060,37 @@ export const deleteBulletin = async (req: Request, res: Response) => {
     const docRef = db.collection('bulletins').doc(req.params.id);
     const docSnap = await docRef.get();
     let redirectUrl = '/admin/bulletins';
+
     if (docSnap.exists) {
       const data = docSnap.data();
-      if (data && data.category === 'Wanted Person') {
+      const adminName = req.session?.user?.full_name || req.session?.user?.username || 'System Admin';
+      const bulletinCategory = data.category || 'General Announcement';
+      const archiveCategory = (bulletinCategory === 'General Announcement' || bulletinCategory === 'News Releases') 
+        ? 'News Releases' 
+        : 'Public Advisories';
+
+      if (data.category === 'Wanted Person') {
         redirectUrl = '/admin/bulletins?category=Wanted%20Person';
-      } else if (data && data.category === 'Missing Person') {
+      } else if (data.category === 'Missing Person') {
         redirectUrl = '/admin/bulletins?category=Missing%20Person';
       }
+
+      // Move to recycle bin
+      await db.collection('recycle_bin').add({
+        category: archiveCategory,
+        title: data.title || 'Untitled Bulletin',
+        original_id: req.params.id,
+        payload: data,
+        deleted_by: adminName,
+        deleted_at: new Date().toISOString()
+      });
     }
-    await logAction(req, 'BULLETIN_DELETE', `Deleted bulletin ID: ${req.params.id}`);
+
+    await logAction(req, 'BULLETIN_ARCHIVED', `Archived bulletin ID: ${req.params.id}`);
     await docRef.delete();
     res.redirect(redirectUrl);
   } catch (err) {
-    console.error(err);
+    console.error('Error archiving bulletin:', err);
     res.status(500).send('Error deleting bulletin');
   }
 };
@@ -2593,26 +2611,44 @@ export const getReports = async (req: Request, res: Response) => {
 export const deleteReport = async (req: Request, res: Response) => {
   try {
     const reportId = req.params.id;
-    await logAction(req, 'REPORT_DELETE', `Deleted intelligence report and associated map points. ID: ${reportId}`);
-    console.log(`[DELETION PROTOCOL] Initiating purge for Report ID: ${reportId}`);
+    const adminName = req.session?.user?.full_name || req.session?.user?.username || 'System Admin';
 
-    // 1. Cascading deletion: Purge all map points associated with this report
-    // We MUST ensure the children are gone first before the parent
-    await db.collection('map_points').where('report_id', '==', reportId).delete();
-    console.log(`[DELETION PROTOCOL] Associated map points purged.`);
+    // 1. Fetch parent report scan
+    const reportDoc = await db.collection('intelligence_scans').doc(reportId).get();
+    if (!reportDoc.exists) {
+      return res.redirect('/admin/reports');
+    }
+    const reportData = reportDoc.data();
 
-    // 2. Small safety wait to ensure Postgres triggers/cache update (Optional but helps in some high-latency envs)
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // 2. Fetch associated map points
+    const pointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
+    const mapPointsData = pointsSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
 
-    // 3. Delete the scan report (Parent)
-    await db.collection('intelligence_scans').doc(reportId).delete();
-    console.log(`[DELETION PROTOCOL] Intelligence report ${reportId} successfully neutralized.`);
+    // 3. Store into recycle_bin collection
+    await db.collection('recycle_bin').add({
+      category: 'Crime Reports',
+      title: reportData.filename || `Report ${reportId.slice(-6)}`,
+      original_id: reportId,
+      payload: {
+        report: reportData,
+        map_points: mapPointsData
+      },
+      deleted_by: adminName,
+      deleted_at: new Date().toISOString()
+    });
 
+    // 4. Delete map points & scan document
+    const batch = db.batch();
+    pointsSnap.docs.forEach((doc: any) => batch.delete(doc.ref));
+    batch.delete(db.collection('intelligence_scans').doc(reportId).ref);
+    await batch.commit();
+
+    await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
     res.redirect('/admin/reports');
   } catch (err: any) {
-    console.error('Error deleting report and children:', err);
+    console.error('Error archiving report:', err);
     const errorMsg = err.message || JSON.stringify(err);
-    res.status(500).send(`Error deleting report: ${errorMsg}`);
+    res.status(500).send(`Error archiving report: ${errorMsg}`);
   }
 };
 export const bulkAddMapPoints = async (req: Request, res: Response) => {
@@ -2797,3 +2833,88 @@ export const rejectUser = async (req: Request, res: Response) => {
     res.status(500).send('Error rejecting account.');
   }
 };
+
+export const getArchive = async (req: Request, res: Response) => {
+  try {
+    const selectedCategory = (req.query.category as string) || 'All';
+    const snap = await db.collection('recycle_bin').orderBy('deleted_at', 'desc').get();
+    let items = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+
+    if (selectedCategory !== 'All') {
+      items = items.filter((item: any) => item.category === selectedCategory);
+    }
+
+    res.render('admin/archive', {
+      title: 'Archive',
+      category: selectedCategory,
+      items,
+      layout: 'layouts/admin'
+    });
+  } catch (err) {
+    console.error('Error fetching archive:', err);
+    res.status(500).send('Error loading archive');
+  }
+};
+
+export const restoreArchiveItem = async (req: Request, res: Response) => {
+  try {
+    const archiveId = req.params.id;
+    const docRef = db.collection('recycle_bin').doc(archiveId);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return res.redirect('/admin/archive');
+    }
+
+    const item = docSnap.data();
+    const { category, payload } = item;
+
+    if (category === 'Crime Reports' && payload) {
+      const { report, map_points } = payload;
+      if (report) {
+        await db.collection('intelligence_scans').doc(item.original_id || docRef.id).set(report);
+      }
+      if (map_points && Array.isArray(map_points)) {
+        const batch = db.batch();
+        map_points.forEach((pt: any) => {
+          const ptRef = db.collection('map_points').doc(pt.id || db.collection('map_points').doc().id);
+          const { id, ...ptData } = pt;
+          batch.set(ptRef, ptData);
+        });
+        await batch.commit();
+      }
+    } else if ((category === 'Public Advisories' || category === 'News Releases') && payload) {
+      await db.collection('bulletins').doc(item.original_id || docRef.id).set(payload);
+    }
+
+    await logAction(req, 'ARCHIVE_RESTORE', `Restored ${category} item: ${item.title}`);
+    await docRef.delete();
+
+    res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
+  } catch (err: any) {
+    console.error('Error restoring archived item:', err);
+    res.status(500).send('Error restoring archived item');
+  }
+};
+
+export const permanentlyDeleteArchiveItem = async (req: Request, res: Response) => {
+  try {
+    const archiveId = req.params.id;
+    const docRef = db.collection('recycle_bin').doc(archiveId);
+    const docSnap = await docRef.get();
+    let category = 'All';
+
+    if (docSnap.exists) {
+      const item = docSnap.data();
+      category = item.category || 'All';
+      await logAction(req, 'ARCHIVE_PERMANENT_DELETE', `Permanently deleted archived item: ${item.title}`);
+      await docRef.delete();
+    }
+
+    res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
+  } catch (err) {
+    console.error('Error permanently deleting archive item:', err);
+    res.status(500).send('Error deleting item');
+  }
+};
+

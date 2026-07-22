@@ -4,7 +4,7 @@ import {
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
   postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
-  getAITrendsAnalysis
+  getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem
 } from '../controllers/adminController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -69,6 +69,11 @@ router.post('/reports/extract', memoryUpload.single('file'), processAIExtraction
 router.post('/process-ai', memoryUpload.single('file'), processAIExtraction);
 router.post('/reports/save', saveReportBatch);
 router.post('/reports/:id/delete', deleteReport);
+
+// Recycle Bin & Archive
+router.get('/archive', getArchive);
+router.post('/archive/:id/restore', restoreArchiveItem);
+router.post('/archive/:id/permanent-delete', permanentlyDeleteArchiveItem);
 
 // Hotlines
 router.get('/hotlines', getHotlines);
