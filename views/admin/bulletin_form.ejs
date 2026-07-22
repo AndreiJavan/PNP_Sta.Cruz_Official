@@ -112,6 +112,12 @@
                                 Choose / Add Media
                             </button>
 
+                            <button type="button" onclick="openMediaGalleryModal()" id="viewGalleryBtn"
+                                class="w-full bg-slate-800 text-pnp-gold py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-700 transition mb-2 hidden flex items-center justify-center space-x-2 border border-pnp-gold/20">
+                                <i class="fas fa-images text-xs"></i>
+                                <span id="viewGalleryBtnText">View & Manage Uploaded Media</span>
+                            </button>
+
                             <button type="button" onclick="clearAllMedia()" id="clearAllMediaBtn"
                                 class="w-full bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition hidden">
                                 Remove All Media
@@ -229,6 +235,47 @@
                 <div class="w-full max-h-[82vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center p-2 relative">
                     <img id="modalImage" class="max-w-full max-h-[78vh] object-contain rounded-lg hidden">
                     <video id="modalVideo" controls class="max-w-full max-h-[78vh] object-contain rounded-lg hidden"></video>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALL UPLOADED MEDIA GALLERY GRID MODAL -->
+        <div id="mediaGalleryModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl hidden items-center justify-center z-[99998] p-4 md:p-8 transition-all duration-300">
+            <div class="relative max-w-6xl w-full h-[90vh] bg-slate-900 rounded-3xl border border-white/10 shadow-2xl flex flex-col overflow-hidden">
+                <!-- GALLERY MODAL HEADER -->
+                <div class="p-6 border-b border-white/10 flex items-center justify-between bg-slate-950">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-pnp-blue text-pnp-gold flex items-center justify-center border border-pnp-gold/20 shadow-md">
+                            <i class="fas fa-images text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-black text-white uppercase tracking-tight leading-none">Uploaded Media Gallery</h3>
+                            <p id="mediaGalleryCount" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Showing 0 attached files</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button type="button" onclick="document.getElementById('mediaInput').click()" class="px-4 py-2 bg-pnp-blue text-white hover:bg-blue-900 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                            + Add More Files
+                        </button>
+                        <button type="button" onclick="closeMediaGalleryModal()" class="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- GALLERY GRID CONTAINER -->
+                <div id="mediaGalleryGrid" class="flex-1 p-6 overflow-y-auto custom-scrollbar grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+                    <!-- Dynamic media card items will be injected here -->
+                </div>
+
+                <!-- GALLERY MODAL FOOTER -->
+                <div class="p-6 border-t border-white/10 bg-slate-950 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                        Note: Each item has a trash icon on top-right to delete individual pictures/videos. Max 5 allowed for final posting.
+                    </span>
+                    <button type="button" onclick="closeMediaGalleryModal()" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                        Close Gallery
+                    </button>
                 </div>
             </div>
         </div>
@@ -552,6 +599,17 @@
 
         previewTotalSlides = itemsToRender.length;
 
+        const viewGalleryBtn = document.getElementById('viewGalleryBtn');
+        const viewGalleryBtnText = document.getElementById('viewGalleryBtnText');
+        if (viewGalleryBtn) {
+            if (previewTotalSlides > 0) {
+                viewGalleryBtn.classList.remove('hidden');
+                if (viewGalleryBtnText) viewGalleryBtnText.textContent = `View & Manage Uploaded Media (${previewTotalSlides})`;
+            } else {
+                viewGalleryBtn.classList.add('hidden');
+            }
+        }
+
         if (previewTotalSlides === 0) {
             previewCarousel.innerHTML = `
                 <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
@@ -720,7 +778,130 @@
             const itemToRemove = currentActiveModalItem;
             closeMediaModal();
             removeMediaItem(itemToRemove);
+            renderMediaGalleryGrid();
         }
+    }
+
+    function openMediaGalleryModal() {
+        const galleryModal = document.getElementById('mediaGalleryModal');
+        if (!galleryModal) return;
+        renderMediaGalleryGrid();
+        galleryModal.classList.remove('hidden');
+        galleryModal.classList.add('flex');
+    }
+
+    function closeMediaGalleryModal() {
+        const galleryModal = document.getElementById('mediaGalleryModal');
+        if (galleryModal) {
+            galleryModal.classList.add('hidden');
+            galleryModal.classList.remove('flex');
+        }
+    }
+
+    function renderMediaGalleryGrid() {
+        const grid = document.getElementById('mediaGalleryGrid');
+        const countText = document.getElementById('mediaGalleryCount');
+        const viewGalleryBtnText = document.getElementById('viewGalleryBtnText');
+        if (!grid) return;
+
+        // Build list of all current items
+        const itemsToRender = [];
+        existingMedia.forEach((item, index) => {
+            itemsToRender.push({ type: item.type, src: item.path, isExisting: true, index: index });
+        });
+        accumulatedFiles.forEach((file, index) => {
+            itemsToRender.push({ type: 'image', file: file, isExisting: false, index: index });
+        });
+        accumulatedVideos.forEach((file, index) => {
+            itemsToRender.push({ type: 'video', file: file, isExisting: false, index: index });
+        });
+
+        if (countText) countText.textContent = `Showing ${itemsToRender.length} attached files`;
+        if (viewGalleryBtnText) viewGalleryBtnText.textContent = `Manage Uploaded Media (${itemsToRender.length})`;
+
+        const viewGalleryBtn = document.getElementById('viewGalleryBtn');
+        if (viewGalleryBtn) {
+            if (itemsToRender.length > 0) {
+                viewGalleryBtn.classList.remove('hidden');
+            } else {
+                viewGalleryBtn.classList.add('hidden');
+                closeMediaGalleryModal();
+            }
+        }
+
+        if (itemsToRender.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full py-16 flex flex-col items-center justify-center opacity-40 text-white">
+                    <i class="fas fa-images text-5xl mb-3"></i>
+                    <p class="text-xs font-black uppercase tracking-widest">No Media Files Uploaded Yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = '';
+
+        itemsToRender.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'relative group bg-slate-950 rounded-2xl overflow-hidden border border-white/10 shadow-lg aspect-square flex items-center justify-center';
+
+            // Delete trashbin button on top-right of each image/video
+            const delBtn = document.createElement('button');
+            delBtn.type = 'button';
+            delBtn.className = 'absolute top-3 right-3 z-30 bg-red-500 hover:bg-red-600 text-white w-9 h-9 rounded-xl flex items-center justify-center transition shadow-xl border border-white/20';
+            delBtn.innerHTML = '<i class="fas fa-trash-alt text-xs"></i>';
+            delBtn.title = 'Delete this file';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                removeMediaItem(item);
+                renderMediaGalleryGrid();
+            };
+
+            const typeBadge = document.createElement('span');
+            typeBadge.className = 'absolute bottom-3 left-3 z-30 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-white border border-white/10';
+            typeBadge.textContent = item.type === 'video' ? 'Video' : 'Picture';
+
+            if (item.isExisting) {
+                if (item.type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.className = 'w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300';
+                    img.onclick = () => openMediaModal(item, item.src);
+                    card.appendChild(img);
+                } else {
+                    const video = document.createElement('video');
+                    video.src = item.src;
+                    video.className = 'w-full h-full object-cover cursor-pointer';
+                    video.onclick = () => openMediaModal(item, item.src);
+                    card.appendChild(video);
+                }
+                card.appendChild(delBtn);
+                card.appendChild(typeBadge);
+                grid.appendChild(card);
+            } else {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const dataUrl = e.target.result;
+                    if (item.type === 'image') {
+                        const img = document.createElement('img');
+                        img.src = dataUrl;
+                        img.className = 'w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300';
+                        img.onclick = () => openMediaModal(item, dataUrl);
+                        card.appendChild(img);
+                    } else {
+                        const video = document.createElement('video');
+                        video.src = dataUrl;
+                        video.className = 'w-full h-full object-cover cursor-pointer';
+                        video.onclick = () => openMediaModal(item, dataUrl);
+                        card.appendChild(video);
+                    }
+                    card.appendChild(delBtn);
+                    card.appendChild(typeBadge);
+                    grid.appendChild(card);
+                };
+                reader.readAsDataURL(item.file);
+            }
+        });
     }
 
     const mediaModal = document.getElementById('mediaModal');
