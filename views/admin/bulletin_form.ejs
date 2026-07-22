@@ -378,23 +378,22 @@
             errorMessage = 'At least 1 picture or video must be uploaded before posting.';
         } else if (totalMediaCount > 5) {
             errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain.`;
+        } else if (totalBytes > 4 * 1024 * 1024) {
+            errorMessage = `Payload Limit Exceeded: Combined upload (${totalMB} MB) exceeds Vercel limit of 4MB. Please compress files or post fewer files.`;
         } else if (typeof accumulatedFiles !== 'undefined') {
             for (const f of accumulatedFiles) {
-                if (f.size > 5 * 1024 * 1024) {
-                    errorMessage = `Picture "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of 5MB.`;
+                if (f.size > 4 * 1024 * 1024) {
+                    errorMessage = `Picture "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum payload limit of 4MB.`;
                     break;
                 }
             }
             if (!errorMessage && typeof accumulatedVideos !== 'undefined') {
                 for (const v of accumulatedVideos) {
-                    if (v.size > 100 * 1024 * 1024) {
-                        errorMessage = `Video "${v.name}" (${(v.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of 100MB.`;
+                    if (v.size > 4 * 1024 * 1024) {
+                        errorMessage = `Video "${v.name}" (${(v.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum payload limit of 4MB.`;
                         break;
                     }
                 }
-            }
-            if (!errorMessage && totalBytes > 10 * 1024 * 1024) {
-                errorMessage = `Combined upload batch (${totalMB} MB) exceeds recommended server payload limit of 10MB. Please compress files before posting.`;
             }
         }
 
@@ -564,14 +563,14 @@
 
         Array.from(files).forEach(file => {
             if (file.type.startsWith('image/')) {
-                if (file.size > 5 * 1024 * 1024) {
-                    rejectedFiles.push(`Picture "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 5MB)`);
+                if (file.size > 4 * 1024 * 1024) {
+                    rejectedFiles.push(`Picture "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 4MB)`);
                 } else {
                     accumulatedFiles.push(file);
                 }
             } else if (file.type.startsWith('video/')) {
-                if (file.size > 100 * 1024 * 1024) {
-                    rejectedFiles.push(`Video "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 100MB)`);
+                if (file.size > 4 * 1024 * 1024) {
+                    rejectedFiles.push(`Video "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 4MB)`);
                 } else {
                     accumulatedVideos.push(file);
                 }
@@ -581,9 +580,9 @@
         if (rejectedFiles.length > 0) {
             const warningBox = document.getElementById('validationWarning');
             const warningText = document.getElementById('validationWarningText');
-            const msg = `Payload Limit Block: The following files exceed limits and were rejected:\n` + rejectedFiles.join('\n');
+            const msg = `Vercel Payload Protection: The following files exceed the 4MB limit and were rejected:\n` + rejectedFiles.join('\n');
             if (warningBox && warningText) {
-                warningText.textContent = `Payload Block: ${rejectedFiles[0]} exceeds size limit and was rejected.`;
+                warningText.textContent = `Payload Block: ${rejectedFiles[0]} exceeds Vercel 4MB limit and was rejected.`;
                 warningBox.classList.remove('hidden');
             }
             alert(msg);
@@ -596,9 +595,9 @@
     }
 
     function syncFileInputs() {
-        // Filter out any invalid file reference just in case
-        const validPhotos = accumulatedFiles.filter(f => f.size <= 5 * 1024 * 1024);
-        const validVideos = accumulatedVideos.filter(f => f.size <= 100 * 1024 * 1024);
+        // Filter out any invalid file reference over 4MB to guarantee Vercel safety
+        const validPhotos = accumulatedFiles.filter(f => f.size <= 4 * 1024 * 1024);
+        const validVideos = accumulatedVideos.filter(f => f.size <= 4 * 1024 * 1024);
 
         // Sync photos input
         const dtPhotos = new DataTransfer();
