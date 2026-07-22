@@ -1851,11 +1851,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
-  // Validation 1: Title/Name character and word limits
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 25 words / 150 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
-  if (cleanTitle.length < 2) {
-    return res.status(400).send('Validation Error: Title / Name must be at least 2 characters long.');
+  if (titleWords.length < 3) {
+    return res.status(400).send('Validation Error: Title / Name must be at least 3 words long.');
   }
   if (cleanTitle.length > 150 || titleWords.length > 25) {
     return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');
@@ -1983,11 +1983,11 @@ export const postEditBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, is_archived, existing_photos, existing_videos } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
-  // Validation 1: Title/Name character and word limits
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 25 words / 150 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
-  if (cleanTitle.length < 2) {
-    return res.status(400).send('Validation Error: Title / Name must be at least 2 characters long.');
+  if (titleWords.length < 3) {
+    return res.status(400).send('Validation Error: Title / Name must be at least 3 words long.');
   }
   if (cleanTitle.length > 150 || titleWords.length > 25) {
     return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');

@@ -270,8 +270,8 @@
 
         let errorMessage = '';
 
-        if (cleanTitle.length > 0 && cleanTitle.length < 2) {
-            errorMessage = 'Title must be at least 2 characters long.';
+        if (cleanTitle.length > 0 && titleWords.length < 3) {
+            errorMessage = 'Title must be at least 3 words long.';
         } else if (cleanTitle.length > 150) {
             errorMessage = 'Title exceeds limit of 150 characters.';
         } else if (titleWords.length > 25) {
