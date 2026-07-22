@@ -56,32 +56,46 @@
 
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
 
-        // 1. Try Puter.js TTS with language code parameter: puter.ai.txt2speech(text, language)
+        // Ensure browser compatibility shim for crypto.createHash if referenced internally by third-party libs
+        if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.createHash !== 'function') {
+            try {
+                window.crypto.createHash = function () {
+                    return {
+                        update: function () { return this; },
+                        digest: function () { return '00000000000000000000000000000000'; }
+                    };
+                };
+            } catch (e) {}
+        }
+
+        // 1. Try Puter.js TTS with language code parameter
         if (typeof puter !== 'undefined' && puter.ai && typeof puter.ai.txt2speech === 'function') {
             try {
                 const audio = await puter.ai.txt2speech(cleanText, lang);
-                currentAudio = audio;
+                if (audio && typeof audio.play === 'function') {
+                    currentAudio = audio;
 
-                audio.onended = () => {
-                    resetActiveButton();
-                    currentAudio = null;
-                };
+                    audio.onended = () => {
+                        resetActiveButton();
+                        currentAudio = null;
+                    };
 
-                audio.onerror = () => {
-                    console.warn("Puter.js TTS playback failed, attempting native browser fallback.");
-                    fallbackNativeSpeech(cleanText, lang);
-                };
+                    audio.onerror = (e) => {
+                        console.warn("Puter.js audio playback error:", e, "Falling back to browser Web Speech API.");
+                        fallbackNativeSpeech(cleanText, lang);
+                    };
 
-                if (btn) {
-                    btn.classList.remove('loading');
-                    btn.classList.add('speaking');
-                    btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
+                    if (btn) {
+                        btn.classList.remove('loading');
+                        btn.classList.add('speaking');
+                        btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
+                    }
+
+                    await audio.play();
+                    return;
                 }
-
-                await audio.play();
-                return;
             } catch (err) {
-                console.warn("Puter.js TTS error:", err, "Falling back to Web Speech API.");
+                console.warn("Puter.js TTS encountered an error:", err, "Falling back to Web Speech API.");
             }
         }
 
