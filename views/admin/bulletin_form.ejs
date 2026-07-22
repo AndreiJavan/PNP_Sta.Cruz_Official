@@ -184,6 +184,30 @@
                             </select>
                     </div>
 
+                    <!-- FACEBOOK LINK / URL FIELD -->
+                    <div class="space-y-2 p-4 rounded-xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-150 dark:border-slate-800">
+                        <div class="flex justify-between items-center">
+                            <label for="facebook_url"
+                                class="block text-[10px] font-bold text-[#1877F2] uppercase tracking-widest flex items-center space-x-1.5">
+                                <i class="fab fa-facebook text-sm"></i>
+                                <span>Facebook Post / Video Link (Optional)</span>
+                            </label>
+                            <% if (bulletin && (bulletin.facebook_url || bulletin.facebook_post_url)) { %>
+                                <span class="text-[9px] font-black uppercase tracking-wider bg-[#1877F2]/10 text-[#1877F2] px-2.5 py-0.5 rounded-full border border-[#1877F2]/20">
+                                    Link Active
+                                </span>
+                            <% } %>
+                        </div>
+                        <div class="relative">
+                            <input type="url" name="facebook_url" id="facebook_url" 
+                                value="<%= bulletin ? (bulletin.facebook_url || bulletin.facebook_post_url || '') : '' %>"
+                                placeholder="https://www.facebook.com/..."
+                                oninput="handleFbUrlChange(this.value);"
+                                class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-semibold dark:text-white transition-all">
+                        </div>
+                        <p class="text-[10px] text-slate-400 font-medium">When a Facebook post / video link is attached, file upload is optional.</p>
+                    </div>
+
 
 
 
@@ -417,6 +441,9 @@
         if (typeof accumulatedVideos !== 'undefined') accumulatedVideos.forEach(v => totalBytes += v.size);
         const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
 
+        const fbUrlInput = document.getElementById('facebook_url');
+        const hasFbUrl = fbUrlInput && fbUrlInput.value.trim().length > 0;
+
         if (cleanTitle.length === 0) {
             errorMessage = 'Please enter a bulletin title (at least 3 letters required).';
         } else if (titleChars < 3) {
@@ -429,8 +456,8 @@
             errorMessage = `Bulletin body must be at least 10 letters long (currently ${bodyChars} letters).`;
         } else if (bodyChars > 5000) {
             errorMessage = `Bulletin body exceeds upper limit of 5,000 letters (currently ${bodyChars} letters).`;
-        } else if (totalMediaCount === 0) {
-            errorMessage = 'At least 1 picture or video must be uploaded before posting.';
+        } else if (totalMediaCount === 0 && !hasFbUrl) {
+            errorMessage = 'At least 1 picture, video, or Facebook URL link must be provided before posting.';
         } else if (totalMediaCount > 5) {
             errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain.`;
         } else if (totalBytes > 25 * 1024 * 1024) {
@@ -706,6 +733,11 @@
         validateForm();
     }
 
+    function handleFbUrlChange(val) {
+        renderAllMedia();
+        validateForm();
+    }
+
     function renderAllMedia() {
         const previewCarousel = document.getElementById('previewCarousel');
         if (!previewCarousel) return;
@@ -759,13 +791,31 @@
             }
         }
 
+        const fbUrlInput = document.getElementById('facebook_url');
+        const fbUrlVal = fbUrlInput ? fbUrlInput.value.trim() : '';
+
         if (previewTotalSlides === 0) {
-            previewCarousel.innerHTML = `
-                <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
-                    <i class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
-                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images & 2 videos</span>
-                </div>
-            `;
+            if (fbUrlVal) {
+                const isVideo = /video|watch|reel/i.test(fbUrlVal);
+                const pluginType = isVideo ? 'video.php' : 'post.php';
+                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(fbUrlVal)}&show_text=true&width=500`;
+                previewCarousel.innerHTML = `
+                    <div class="w-full h-full min-h-[350px] bg-slate-950 rounded-lg p-2 flex flex-col items-center justify-center relative overflow-hidden">
+                        <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:330px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full rounded-md shadow-lg pointer-events-none"></iframe>
+                        <div class="absolute top-3 left-3 bg-[#1877F2] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md flex items-center space-x-1 z-20">
+                            <i class="fab fa-facebook"></i>
+                            <span>Embedded Facebook Release Preview</span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                previewCarousel.innerHTML = `
+                    <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
+                        <i class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
+                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images & 2 videos</span>
+                    </div>
+                `;
+            }
             currentPreviewSlide = 0;
             document.getElementById('clearAllMediaBtn').classList.add('hidden');
             syncPanels();

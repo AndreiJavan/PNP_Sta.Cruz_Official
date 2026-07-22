@@ -4,6 +4,14 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { decodeCustomCategory } from './adminController.js';
 
+function getFirstParagraph(text: string): string {
+  if (!text) return '';
+  const paragraphs = text.split(/\r?\n\r?\n/).map(p => p.trim()).filter(Boolean);
+  if (paragraphs.length > 0) return paragraphs[0];
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  return lines[0] || text;
+}
+
 export const getHome = async (req: Request, res: Response) => {
   try {
     const hotlinesSnap = await db.collection('hotlines').limit(5).get();
@@ -18,24 +26,29 @@ export const getHome = async (req: Request, res: Response) => {
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
     }).filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
-    // Filter out mock data for public advisory, and restrict to the 4 target categories
+    // Filter out mock data for public advisory, restrict to target categories, and exclude Facebook URL posts
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
+    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
 
-    // Map only "General Announcement" bulletins (excluding mock) to the policeNewsList for database-driven news
+    // Map "General Announcement" bulletins and Facebook URL posts to policeNewsList for news releases
     const policeNewsList = bulletins
-      .filter((b: any) => b.category === 'General Announcement' && !b.id.startsWith('bulletin-'))
-      .map((b: any) => ({
-        id: b.id,
-        headline: b.title,
-        description: b.body,
-        fullContent: b.body,
-        urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
-        photo_paths: b.photo_paths,
-        video_paths: b.video_paths || [],
-        publishedAt: b.created_at || new Date().toISOString(),
-        author: 'Station Desk'
-      }));
+      .filter((b: any) => (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'))
+      .map((b: any) => {
+        const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
+        const firstPara = getFirstParagraph(bodyText);
+        return {
+          id: b.id,
+          headline: b.title,
+          description: firstPara,
+          fullContent: bodyText,
+          urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+          photo_paths: b.photo_paths,
+          video_paths: b.video_paths || [],
+          facebook_url: b.facebook_url,
+          publishedAt: b.created_at || new Date().toISOString(),
+          author: b.facebook_url ? b.facebook_url : 'Station Desk'
+        };
+      });
 
     // Fetch police incidents (map points) to show on home feed
     const mapPointsSnap = await db.collection('map_points').get();
@@ -83,19 +96,24 @@ export const getNews = async (req: Request, res: Response) => {
     const dbBulletins = activeBulletinsSnap.docs.map((doc: any) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-    }).filter((b: any) => b.is_archived !== true && b.category === 'General Announcement' && !b.id.startsWith('bulletin-'));
+    }).filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'));
 
-    const newsList = dbBulletins.map((b: any) => ({
-      id: b.id,
-      headline: b.title,
-      description: b.body,
-      fullContent: b.body,
-      urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
-      photo_paths: b.photo_paths,
-      video_paths: b.video_paths || [],
-      publishedAt: b.created_at || new Date().toISOString(),
-      author: 'Station Desk'
-    }));
+    const newsList = dbBulletins.map((b: any) => {
+      const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
+      const firstPara = getFirstParagraph(bodyText);
+      return {
+        id: b.id,
+        headline: b.title,
+        description: firstPara,
+        fullContent: bodyText,
+        urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+        photo_paths: b.photo_paths,
+        video_paths: b.video_paths || [],
+        facebook_url: b.facebook_url,
+        publishedAt: b.created_at || new Date().toISOString(),
+        author: b.facebook_url ? b.facebook_url : 'Station Desk'
+      };
+    });
 
     res.render('public/news', { title: 'Station Releases', newsList, layout: 'layouts/main' });
   } catch (err) {
@@ -183,7 +201,7 @@ export const getBulletins = async (req: Request, res: Response) => {
       const d = doc.data();
       return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
     }).filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
-      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
+      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
 
     let activeCategory = category;
     if (!activeCategory || activeCategory === 'All' || !allowedAdvisoryCategories.includes(String(activeCategory))) {

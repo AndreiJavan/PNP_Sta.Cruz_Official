@@ -12,7 +12,7 @@
                     <label for="name"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Agency
                         Name</label>
-                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz" minlength="2" maxlength="100" title="Agency name must be 2 to 100 characters"
+                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz" minlength="2" maxlength="20" title="Agency name must be 2 to 20 characters" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
@@ -25,7 +25,7 @@
                 <div class="space-y-2">
                     <label for="category"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Category</label>
-                    <input type="text" name="category" id="category" list="categoryList" required placeholder="Type or select category (e.g. Police, Utility)" minlength="2" maxlength="50" title="Category must be 2 to 50 characters"
+                    <input type="text" name="category" id="category" list="categoryList" required placeholder="Type or select category (e.g. Police, Utility)" minlength="2" maxlength="20" title="Category must be 2 to 20 characters" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                     <datalist id="categoryList">
                         <option value="Police">
@@ -78,7 +78,7 @@
                                         <%= h.category %>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 flex items-center space-x-4">
+                                <td class="px-6 py-4 flex items-center space-x-4" id="actions_<%= h.id %>">
                                     <button type="button" onclick="toggleEditHotline('<%= h.id %>')" id="editBtn_<%= h.id %>" class="text-pnp-blue hover:text-blue-800 font-bold text-xs uppercase tracking-widest">Edit</button>
                                     <form action="/admin/hotlines/<%= h.id %>/delete" method="POST"
                                         onsubmit="confirmOperationalAction(event, { title: 'Delete Hotline', message: 'Are you sure you want to remove this emergency contact?', confirmText: 'Remove', type: 'danger' }); return false;">
@@ -96,6 +96,10 @@
 </div>
 
 <script>
+    if (!window.hotlineOriginals) {
+        window.hotlineOriginals = {};
+    }
+
     async function handleAddHotlineSubmit(event) {
         event.preventDefault();
         const form = event.target;
@@ -107,16 +111,16 @@
         const numVal = numInput ? numInput.value.trim() : '';
         const catVal = catInput ? catInput.value.trim() : '';
 
-        // Agency name limitation check (2 to 100 characters)
-        if (!agencyName || agencyName.length < 2 || agencyName.length > 100) {
+        // Agency name limitation check (2 to 20 characters)
+        if (!agencyName || agencyName.length < 2 || agencyName.length > 20) {
             if (window.strategicAlert) {
                 await window.strategicAlert({
                     title: 'Invalid Agency Name',
-                    message: 'Agency name must be between 2 and 100 characters.',
+                    message: 'Agency name must be between 2 and 20 characters.',
                     type: 'danger'
                 });
             } else {
-                alert('Agency name must be between 2 and 100 characters.');
+                alert('Agency name must be between 2 and 20 characters.');
             }
             if (nameInput) nameInput.focus();
             return false;
@@ -137,16 +141,16 @@
             return false;
         }
 
-        // Category limitation check (2 to 50 characters)
-        if (!catVal || catVal.length < 2 || catVal.length > 50) {
+        // Category limitation check (2 to 20 characters)
+        if (!catVal || catVal.length < 2 || catVal.length > 20) {
             if (window.strategicAlert) {
                 await window.strategicAlert({
                     title: 'Invalid Category',
-                    message: 'Category name must be between 2 and 50 characters.',
+                    message: 'Category name must be between 2 and 20 characters.',
                     type: 'danger'
                 });
             } else {
-                alert('Category name must be between 2 and 50 characters.');
+                alert('Category name must be between 2 and 20 characters.');
             }
             if (catInput) catInput.focus();
             return false;
@@ -170,11 +174,28 @@
         return false;
     }
 
+    function cancelEditHotline(id) {
+        if (window.hotlineOriginals && window.hotlineOriginals[id]) {
+            const orig = window.hotlineOriginals[id];
+            const nameTd = document.getElementById('name_' + id);
+            const numTd = document.getElementById('num_' + id);
+            const catTd = document.getElementById('cat_' + id);
+            const actionsTd = document.getElementById('actions_' + id);
+
+            if (nameTd) nameTd.innerHTML = orig.nameHtml;
+            if (numTd) numTd.innerHTML = orig.numHtml;
+            if (catTd) catTd.innerHTML = orig.catHtml;
+            if (actionsTd) actionsTd.innerHTML = orig.actionsHtml;
+
+            delete window.hotlineOriginals[id];
+        }
+    }
+
     async function toggleEditHotline(id) {
         const nameTd = document.getElementById('name_' + id);
         const numTd = document.getElementById('num_' + id);
         const catTd = document.getElementById('cat_' + id);
-        const editBtn = document.getElementById('editBtn_' + id);
+        const actionsTd = document.getElementById('actions_' + id);
         
         if (numTd.querySelector('input')) {
             const nameInput = nameTd.querySelector('input');
@@ -185,16 +206,16 @@
             const numVal = numInput ? numInput.value.trim() : '';
             const catVal = catInput ? catInput.value.trim() : '';
 
-            // Agency Name Limitation
-            if (!agencyName || agencyName.length < 2 || agencyName.length > 100) {
+            // Agency Name Limitation (2 to 20 characters)
+            if (!agencyName || agencyName.length < 2 || agencyName.length > 20) {
                 if (window.strategicAlert) {
                     await window.strategicAlert({
                         title: 'Invalid Agency Name',
-                        message: 'Agency name must be between 2 and 100 characters.',
+                        message: 'Agency name must be between 2 and 20 characters.',
                         type: 'danger'
                     });
                 } else {
-                    alert('Agency name must be between 2 and 100 characters.');
+                    alert('Agency name must be between 2 and 20 characters.');
                 }
                 if (nameInput) nameInput.focus();
                 return;
@@ -215,16 +236,16 @@
                 return;
             }
 
-            // Category Limitation (2 to 50 characters)
-            if (!catVal || catVal.length < 2 || catVal.length > 50) {
+            // Category Limitation (2 to 20 characters)
+            if (!catVal || catVal.length < 2 || catVal.length > 20) {
                 if (window.strategicAlert) {
                     await window.strategicAlert({
                         title: 'Invalid Category',
-                        message: 'Category name must be between 2 and 50 characters.',
+                        message: 'Category name must be between 2 and 20 characters.',
                         type: 'danger'
                     });
                 } else {
-                    alert('Category name must be between 2 and 50 characters.');
+                    alert('Category name must be between 2 and 20 characters.');
                 }
                 if (catInput) catInput.focus();
                 return;
@@ -252,19 +273,31 @@
             
             form.submit();
         } else {
+            // Store original HTML for cancel function
+            if (!window.hotlineOriginals) window.hotlineOriginals = {};
+            window.hotlineOriginals[id] = {
+                nameHtml: nameTd.innerHTML,
+                numHtml: numTd.innerHTML,
+                catHtml: catTd.innerHTML,
+                actionsHtml: actionsTd ? actionsTd.innerHTML : ''
+            };
+
             const currentName = nameTd.innerText.trim();
             const currentNum = numTd.innerText.trim().replace(/\s/g, '');
             const currentCat = catTd.getAttribute('data-category') || '';
             
-            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" required minlength="2" maxlength="100" placeholder="Agency Name" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
+            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" required minlength="2" maxlength="20" placeholder="Agency Name" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
             
             numTd.innerHTML = `<form id="editForm_${id}" action="/admin/hotlines/${id}/edit" method="POST"><input type="text" name="number" value="${currentNum}" required pattern="\\d{3,11}" maxlength="11" title="Exact digits only (3 to 11 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>`;
             
-            catTd.innerHTML = `<input type="text" name="category" list="categoryList" value="${currentCat}" required minlength="2" maxlength="50" placeholder="Category" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
+            catTd.innerHTML = `<input type="text" name="category" list="categoryList" value="${currentCat}" required minlength="2" maxlength="20" placeholder="Category" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
 
-            editBtn.innerText = 'Save';
-            editBtn.classList.remove('text-pnp-blue', 'hover:text-blue-800');
-            editBtn.classList.add('text-green-600', 'hover:text-green-800');
+            if (actionsTd) {
+                actionsTd.innerHTML = `
+                    <button type="button" onclick="toggleEditHotline('${id}')" id="editBtn_${id}" class="text-green-600 hover:text-green-800 font-bold text-xs uppercase tracking-widest">Save</button>
+                    <button type="button" onclick="cancelEditHotline('${id}')" id="cancelBtn_${id}" class="text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 font-bold text-xs uppercase tracking-widest">Cancel</button>
+                `;
+            }
         }
     }
 </script>

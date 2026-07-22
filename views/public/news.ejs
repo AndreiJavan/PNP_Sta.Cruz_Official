@@ -41,12 +41,24 @@
             <% newsList.forEach((news) => { %>
                 <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>">
                     
-                    <!-- Image Wrapper -->
-                    <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0">
-                        <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                        <div class="absolute top-6 left-6 bg-pnp-blue/90 dark:bg-pnp-gold/90 text-white dark:text-pnp-blue text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg">
-                            Press Release
+                    <!-- Image / Facebook Wrapper -->
+                    <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
+                        <% if (news.facebook_url) { %>
+                            <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=true&width=500" 
+                                width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
+                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
+                            <div class="absolute inset-0 bg-transparent cursor-pointer" onclick="openNewsModal('<%= news.id %>')"></div>
+                        <% } else { %>
+                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <% } %>
+                        <div class="absolute top-4 left-4 bg-pnp-blue/90 dark:bg-pnp-gold/90 text-white dark:text-pnp-blue text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-md z-10 flex items-center space-x-1">
+                            <% if (news.facebook_url) { %>
+                                <i class="fab fa-facebook text-[10px]"></i>
+                                <span>Facebook Release</span>
+                            <% } else { %>
+                                <span>Press Release</span>
+                            <% } %>
                         </div>
                     </div>
 
@@ -68,7 +80,14 @@
                         </div>
 
                         <div class="pt-6 border-t border-gray-100 dark:border-slate-800/60 flex items-center justify-between">
-                            <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
+                            <% if (news.facebook_url || (news.author && (news.author.startsWith('http://') || news.author.startsWith('https://')))) { %>
+                                <a href="<%= news.facebook_url || news.author %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-[10px] font-black text-[#1877F2] hover:underline uppercase tracking-wider" title="Official Facebook Post">
+                                    <i class="fab fa-facebook text-xs"></i>
+                                    <span>Official Facebook Post</span>
+                                </a>
+                            <% } else { %>
+                                <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
+                            <% } %>
                             <div class="flex items-center space-x-3">
                                 <button onclick="openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
                                     <span>See More</span>
@@ -121,7 +140,7 @@
             </button>
 
             <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
-                <span id="news-modal-author" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-pnp-blue dark:text-pnp-gold bg-pnp-blue/10 dark:bg-pnp-gold/10 px-4 py-2 rounded-xl"></span>
+                <div id="news-modal-author" class="inline-block"></div>
                 <button id="tts-news-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                     <i class="fas fa-volume-high text-xs"></i>
                     <span>Read Article</span>
@@ -130,7 +149,8 @@
             <div id="news-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center">
             </div>
             <h3 id="news-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight"></h3>
-            <div id="news-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
+            <div id="news-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-6"></div>
+            <div id="news-modal-fb-container" class="hidden mb-10"></div>
         </div>
     </div>
 </div>
@@ -197,66 +217,95 @@
             mediaContainer.innerHTML = '';
             dotsContainer.innerHTML = '';
             
-            let mediaItems = [];
-            if (article.photo_paths && article.photo_paths.length > 0) {
-                article.photo_paths.forEach(p => {
-                    mediaItems.push({ type: 'image', url: p });
-                });
-            } else if (article.urlToImage) {
-                mediaItems.push({ type: 'image', url: article.urlToImage });
-            }
+            if (article.facebook_url) {
+                const isVideo = /video|watch|reel/i.test(article.facebook_url);
+                const pluginType = isVideo ? 'video.php' : 'post.php';
+                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(article.facebook_url)}&show_text=true&width=500`;
+                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[350px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:350px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
+                </div>`;
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                dotsContainer.classList.add('hidden');
+            } else {
+                let mediaItems = [];
+                if (article.photo_paths && article.photo_paths.length > 0) {
+                    article.photo_paths.forEach(p => {
+                        mediaItems.push({ type: 'image', url: p });
+                    });
+                } else if (article.urlToImage) {
+                    mediaItems.push({ type: 'image', url: article.urlToImage });
+                }
 
-            if (article.video_paths && article.video_paths.length > 0) {
-                article.video_paths.forEach(v => {
-                    mediaItems.push({ type: 'video', url: v });
-                });
-            }
+                if (article.video_paths && article.video_paths.length > 0) {
+                    article.video_paths.forEach(v => {
+                        mediaItems.push({ type: 'video', url: v });
+                    });
+                }
 
-            if (mediaItems.length > 0) {
-                mediaContainer.innerHTML = mediaItems.map((item, idx) => {
-                    if (item.type === 'video') {
-                        return `
-                            <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                <video src="${item.url}" class="w-full h-full object-contain" controls></video>
-                            </div>
-                        `;
-                    } else {
-                        return `
-                            <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
-                            </div>
-                        `;
-                    }
-                }).join('');
-                
-                window.currentNewsModalSlide = 0;
-                window.totalNewsModalSlides = mediaItems.length;
-
-                if (mediaItems.length > 1) {
-                    prevBtn.classList.remove('hidden');
-                    nextBtn.classList.remove('hidden');
-                    dotsContainer.classList.remove('hidden');
+                if (mediaItems.length > 0) {
+                    mediaContainer.innerHTML = mediaItems.map((item, idx) => {
+                        if (item.type === 'video') {
+                            return `
+                                <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                    <video src="${item.url}" class="w-full h-full object-contain" controls></video>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                    <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
+                                </div>
+                            `;
+                        }
+                    }).join('');
                     
-                    dotsContainer.innerHTML = mediaItems.map((_, idx) => `
-                        <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
-                    `).join('');
+                    window.currentNewsModalSlide = 0;
+                    window.totalNewsModalSlides = mediaItems.length;
+
+                    if (mediaItems.length > 1) {
+                        prevBtn.classList.remove('hidden');
+                        nextBtn.classList.remove('hidden');
+                        dotsContainer.classList.remove('hidden');
+                        
+                        dotsContainer.innerHTML = mediaItems.map((_, idx) => `
+                            <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                        `).join('');
+                    } else {
+                        prevBtn.classList.add('hidden');
+                        nextBtn.classList.add('hidden');
+                        dotsContainer.classList.add('hidden');
+                    }
                 } else {
+                    mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700"><i class="fas fa-image text-5xl"></i></div>`;
                     prevBtn.classList.add('hidden');
                     nextBtn.classList.add('hidden');
                     dotsContainer.classList.add('hidden');
                 }
-            } else {
-                mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700"><i class="fas fa-image text-5xl"></i></div>`;
-                prevBtn.classList.add('hidden');
-                nextBtn.classList.add('hidden');
-                dotsContainer.classList.add('hidden');
             }
         }
-        document.getElementById('news-modal-author').textContent = `By ${article.author}`;
+        const authorEl = document.getElementById('news-modal-author');
+        if (authorEl) {
+            if (article.facebook_url || (article.author && (article.author.startsWith('http://') || article.author.startsWith('https://')))) {
+                const urlVal = article.facebook_url || article.author;
+                authorEl.innerHTML = `<a href="${urlVal}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-4 py-2 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm">
+                    <i class="fab fa-facebook text-sm"></i>
+                    <span>Open Official Facebook Post</span>
+                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
+                </a>`;
+            } else {
+                authorEl.innerHTML = `<span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 italic">By ${article.author || 'Station Desk'}</span>`;
+            }
+        }
         document.getElementById('news-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(article.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
         document.getElementById('news-modal-title').textContent = article.headline;
         
         document.getElementById('news-modal-content').textContent = article.fullContent;
+
+        const fbBox = document.getElementById('news-modal-fb-container');
+        if (fbBox) {
+            fbBox.classList.add('hidden');
+        }
 
         const ttsBtn = document.getElementById('tts-news-modal-btn');
         if (ttsBtn) {

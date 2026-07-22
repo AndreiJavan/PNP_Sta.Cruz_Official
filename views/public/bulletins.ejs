@@ -95,6 +95,12 @@
                         <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>"
                             class="w-full h-full object-contain group-hover:scale-105 transition duration-700">
                     </div>
+                <% } else if (bulletin.facebook_url) { %>
+                    <div class="h-80 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center border-b border-slate-800/80">
+                        <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(bulletin.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(bulletin.facebook_url) %>&show_text=true&width=500" 
+                            width="100%" height="100%" style="border:none;overflow:hidden;min-height:300px;" scrolling="no" frameborder="0" allowfullscreen="true" 
+                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full"></iframe>
+                    </div>
                 <% } else { %>
                     <div class="h-64 bg-gray-50 dark:bg-slate-900/50 flex items-center justify-center">
                         <i class="fas fa-bullhorn text-4xl text-gray-200 dark:text-slate-700 group-hover:text-pnp-blue transition-colors"></i>
@@ -139,11 +145,22 @@
                                     class="text-xl font-black text-pnp-blue dark:text-white mb-4 leading-tight group-hover:text-pnp-gold transition duration-300">
                                     <%= bulletin.title %>
                                 </h3>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-8 line-clamp-3">
+                                <p class="text-gray-500 dark:text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
                                     <%= bulletin.body %>
                                 </p>
 
-                                <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700 flex items-center justify-end">
+                                <% if (bulletin.facebook_url) { %>
+                                    <div class="mb-6">
+                                        <a href="<%= bulletin.facebook_url %>" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();"
+                                            class="inline-flex items-center space-x-2 px-4 py-2 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition shadow-md hover:shadow-lg">
+                                            <i class="fab fa-facebook text-sm"></i>
+                                            <span>View Official Facebook Post</span>
+                                            <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
+                                        </a>
+                                    </div>
+                                <% } %>
+
+                                <div class="mt-auto pt-6 border-t border-gray-50 dark:border-slate-700 flex items-center justify-end">
                                     <button onclick="openBulletinModal('<%= bulletin.id %>')"
                                         class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition focus:outline-none">
                                         Read Details <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
@@ -192,7 +209,10 @@
             </button>
 
             <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
-                <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-pnp-blue dark:text-pnp-gold bg-pnp-blue/10 dark:bg-pnp-gold/10 px-4 py-2 rounded-xl"></span>
+                <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                    <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700"></span>
+                    <div id="bulletin-modal-fb-btn" class="inline-block"></div>
+                </div>
                 <button id="tts-bulletin-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                     <i class="fas fa-volume-high text-xs"></i>
                     <span>Read Advisory</span>
@@ -360,6 +380,17 @@
                     nextBtn.classList.add('hidden');
                     dotsContainer.classList.add('hidden');
                 }
+            } else if (bulletin.facebook_url) {
+                // Embedded Facebook post/video iframe media
+                const isVideo = /video|watch|reel/i.test(bulletin.facebook_url);
+                const pluginType = isVideo ? 'video.php' : 'post.php';
+                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(bulletin.facebook_url)}&show_text=true&width=500`;
+                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[380px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:380px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
+                </div>`;
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                dotsContainer.classList.add('hidden');
             } else {
                 // Placeholder if no media
                 mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700">
@@ -375,6 +406,19 @@
         document.getElementById('bulletin-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
         document.getElementById('bulletin-modal-title').textContent = bulletin.title;
         document.getElementById('bulletin-modal-content').textContent = bulletin.body;
+
+        const fbBtn = document.getElementById('bulletin-modal-fb-btn');
+        if (fbBtn) {
+            if (bulletin.facebook_url) {
+                fbBtn.innerHTML = `<a href="${bulletin.facebook_url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition shadow-sm">
+                    <i class="fab fa-facebook text-xs"></i>
+                    <span>Open Official Facebook Post</span>
+                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
+                </a>`;
+            } else {
+                fbBtn.innerHTML = '';
+            }
+        }
 
         const ttsBtn = document.getElementById('tts-bulletin-modal-btn');
         if (ttsBtn) {

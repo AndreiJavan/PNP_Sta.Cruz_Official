@@ -207,17 +207,10 @@ function cleanAndParseJSON(text: string) {
 }
 
 export const getLogin = async (req: Request, res: Response) => {
-  const validAdminId = (await getValidUserId('admin-bypass-id')) || 'superadmin';
-  if (req.session) {
-    req.session.user = {
-      id: validAdminId,
-      username: 'admin',
-      full_name: 'System Administrator',
-      role: 'superadmin',
-      badge_number: 'PNP-001'
-    };
+  if (req.session && req.session.user) {
+    return res.redirect('/admin/dashboard');
   }
-  return res.redirect('/admin/dashboard');
+  return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: null });
 };
 
 export const postLogin = async (req: Request, res: Response) => {
@@ -1361,7 +1354,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
 
     const category = entry.category || 'Non-Index';
     if (!validCategories.includes(category)) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Invalid risk pillar / category.` });
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Invalid category.` });
     }
   }
 
@@ -1452,6 +1445,68 @@ const getMonthFromPoint = (p: any): number | null => {
   const d = new Date(rawDate);
   return !isNaN(d.getTime()) ? d.getUTCMonth() : null;
 };
+
+function buildDynamicAnalysisText(
+  barangayName: string,
+  selectedYear: number,
+  totalCount: number,
+  monthlyTrendData: any[],
+  sortedCrimes: [string, number][],
+  peakMonth: string,
+  peakCount: number
+): string {
+  if (totalCount === 0) {
+    return `**Trend**: Recorded incidents across ${barangayName} for ${selectedYear} remain exceptionally calm with zero active or reported crimes.
+
+**Pattern**: A consistent zero-incident baseline is observed across all 12 months.
+
+**Suggestions**: Maintain high-visibility preventive patrols, routine barangay tanod coordination, and active community outreach to preserve this peaceful environment.`;
+  }
+
+  // Calculate H1 vs H2
+  const h1 = (monthlyTrendData || []).slice(0, 6).reduce((acc: number, m: any) => acc + (m.count || 0), 0);
+  const h2 = (monthlyTrendData || []).slice(6, 12).reduce((acc: number, m: any) => acc + (m.count || 0), 0);
+  
+  let trendDirection = "a stable and balanced distribution";
+  if (h1 > 0 && h2 > h1) {
+    const pct = Math.round(((h2 - h1) / h1) * 100);
+    trendDirection = `an upward shift (+${pct}% in the second half of the year compared to H1)`;
+  } else if (h1 > 0 && h2 < h1) {
+    const pct = Math.round(((h1 - h2) / h1) * 100);
+    trendDirection = `a steady downward trajectory (-${pct}% reduction in the second half of the year)`;
+  } else if (h1 === 0 && h2 > 0) {
+    trendDirection = `an uptick in incident activity concentrated during the second half of ${selectedYear}`;
+  }
+
+  // Quiet month
+  const quietObj = (monthlyTrendData || []).reduce((min: any, m: any) => (m.count < min.count ? m : min), (monthlyTrendData && monthlyTrendData[0]) || { month: 'Jan', count: 0 });
+  const quietMonth = quietObj ? quietObj.month : 'N/A';
+  const quietCount = quietObj ? quietObj.count : 0;
+
+  // Top 3 Crimes
+  const topCrimeStr = (sortedCrimes && sortedCrimes.length > 0)
+    ? sortedCrimes.slice(0, 3).map(([name, cnt]) => `${name} (${cnt} case${cnt > 1 ? 's' : ''}, ${Math.round((cnt / totalCount) * 100)}%)`).join(', ')
+    : 'No major category concentration';
+
+  const topCrimeName = (sortedCrimes && sortedCrimes.length > 0) ? sortedCrimes[0][0].toLowerCase() : '';
+
+  let tailoredSuggestion = "Maintain targeted patrol operations, increase police visibility during high-activity periods, and engage community watch groups for proactive threat reporting.";
+  if (topCrimeName.includes('theft') || topCrimeName.includes('robbery') || topCrimeName.includes('burglary')) {
+    tailoredSuggestion = `Increase foot and mobile patrols in commercial areas, public markets, and transport hubs during peak hours. Coordinate with barangay tanods for continuous CCTV monitoring and street lighting enhancements.`;
+  } else if (topCrimeName.includes('injury') || topCrimeName.includes('assault') || topCrimeName.includes('brawl') || topCrimeName.includes('physical')) {
+    tailoredSuggestion = `Strictly enforce local liquor ordinances and night curfew. Deploy joint police-tanod standby teams near commercial plazas, recreation halls, and gathering spots during weekend evening hours.`;
+  } else if (topCrimeName.includes('traffic') || topCrimeName.includes('accident') || topCrimeName.includes('reckless')) {
+    tailoredSuggestion = `Establish speed control checkpoints and position traffic enforcers along key barangay arterial roads and intersections during peak commute hours.`;
+  } else if (topCrimeName.includes('cyber') || topCrimeName.includes('scam') || topCrimeName.includes('fraud')) {
+    tailoredSuggestion = `Conduct cyber-safety awareness workshops at local barangay halls and publish official public advisories regarding common digital fraud schemes.`;
+  }
+
+  return `**Trend**: Crime incidents in ${barangayName} for ${selectedYear} show ${trendDirection}, totaling ${totalCount} recorded incident${totalCount === 1 ? '' : 's'}. Peak volume occurred in ${peakMonth} (${peakCount} case${peakCount === 1 ? '' : 's'}), while ${quietMonth} recorded the lowest volume (${quietCount} case${quietCount === 1 ? '' : 's'}).
+
+**Pattern**: Incident distribution is driven primarily by ${topCrimeStr}. H1 accounted for ${h1} incident${h1 === 1 ? '' : 's'} (${Math.round((h1 / totalCount) * 100)}%) and H2 recorded ${h2} incident${h2 === 1 ? '' : 's'} (${Math.round((h2 / totalCount) * 100)}%).
+
+**Suggestions**: ${tailoredSuggestion}`;
+}
 
 export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   try {
@@ -1544,43 +1599,44 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
 
     try {
       const client = getGptOssClient();
-      const prompt = `Analyze the following crime data for ${barangayName} in the year ${selectedYear}.
+      const prompt = `You are GPT-OSS 120B, a high-level Crime Intelligence AI. Analyze the following crime data for ${barangayName} in the year ${selectedYear}:
 Total Incidents: ${totalCount}
-Peak Month: ${peakMonth} with ${peakCount} incidents
-Top Crime: ${topCrime} (${topCrimeCount} incidents)
-Monthly data: ${JSON.stringify(monthlyTrendData)}
+Peak Month: ${peakMonth || 'N/A'} with ${peakCount} incidents
+Top Crime Category: ${topCrime} (${topCrimeCount} incidents)
+Monthly Incident Breakdown: ${JSON.stringify(monthlyTrendData)}
 
-Provide exactly 3 simple and short sentences. 
-Sentence 1: State the accurate trend (e.g. upward, downward, stable).
-Sentence 2: State the patterns (highest crime and peak month).
-Sentence 3: Suggest a direct prevention plan for the dashboard based on these patterns.
+Provide a clear, actionable analysis organized strictly into 3 labelled sections with bold headers:
 
-IMPORTANT: Separate each sentence with exactly one blank line between them.`;
+**Trend**: [Concise statement on the overall direction - e.g., upward, downward, or stable trend]
 
-      const aiResponse = await client.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt
-      });
+**Pattern**: [Key criminal patterns identified, including highest incident types and peak months]
 
-      analysisText = aiResponse.text || "Failed to generate AI analysis.";
-    } catch (aiError: any) {
-      console.info("AI Generation falling back to static analysis:", aiError?.message || String(aiError));
-      let trend = "stable with minor fluctuations";
-      if (totalCount > 0) {
-        const halfLength = Math.floor(counts.length / 2);
-        const firstHalf = counts.slice(0, halfLength).reduce((a, b) => a + b, 0);
-        const secondHalf = counts.slice(halfLength).reduce((a, b) => a + b, 0);
-        const diffPercent = (secondHalf - firstHalf) / (firstHalf || 1);
-        if (diffPercent > 0.15) trend = "experiencing a general upward trend";
-        else if (diffPercent < -0.15) trend = "showing a steady downward trend";
-        else trend = "fluctuating within a stable range";
+**Suggestions**: [Actionable crime prevention strategies and patrol deployment recommendations for municipal police]
+
+IMPORTANT: Keep each section brief and separate them with blank lines.`;
+
+      let aiResponse: any = null;
+      const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+      for (const m of modelsToTry) {
+        try {
+          aiResponse = await client.models.generateContent({
+            model: m,
+            contents: prompt
+          });
+          if (aiResponse && aiResponse.text) break;
+        } catch (mErr: any) {
+          console.warn(`[AI TRENDS] Model ${m} failed:`, mErr?.message || mErr);
+        }
       }
 
-      if (totalCount === 0) {
-        analysisText = `The trend for ${selectedYear} shows that crime incidents across ${barangayName} remain exceptionally stable with zero active or recorded occurrences.\n\nThe pattern identified during this period indicates a highly secure, peaceful, and well-monitored local environment.`;
+      if (aiResponse && aiResponse.text) {
+        analysisText = aiResponse.text;
       } else {
-        analysisText = `The trend for ${selectedYear} shows that crime incidents in ${barangayName} are currently ${trend}, showing a notable peak of ${peakCount} incident${peakCount === 1 ? '' : 's'} recorded in ${peakMonth}.\n\nThe pattern of criminal activity reveals that ${topCrime} remains the most common incident type with ${topCrimeCount} case${topCrimeCount === 1 ? '' : 's'} documented over this period.`;
+        throw new Error('All Gemini model attempts exhausted or rate limited.');
       }
+    } catch (aiError: any) {
+      console.info("AI Generation falling back to dynamic intelligence analysis:", aiError?.message || String(aiError));
+      analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount);
     }
 
     res.json({
@@ -1588,12 +1644,13 @@ IMPORTANT: Separate each sentence with exactly one blank line between them.`;
       analysis: analysisText
     });
   } catch (err: any) {
-    console.warn('GPT-OSS Outermost Error Intercepted, returning elegant fallback analysis:', err);
+    console.warn('GPT-OSS Outermost Error Intercepted, returning dynamic analysis fallback:', err);
     const selectedBarangay = req.query.barangay ? String(req.query.barangay).trim() : 'ALL';
     const selectedYear = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
+    const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
     res.json({
       success: true,
-      analysis: `Our local predictive model is active and monitoring Barangay ${selectedBarangay === 'ALL' ? 'overall' : selectedBarangay} for ${selectedYear}.\n\nAll current crime indices report a stable and flat distribution with minimal overall activity.\n\nContinued visible patrols and routine safety advisory bulletins are recommended to maintain this status.`
+      analysis: buildDynamicAnalysisText(barangayName, selectedYear, 0, [], [], 'N/A', 0)
     });
   }
 };
@@ -1634,11 +1691,20 @@ Format your response in professional Markdown with bullet points, bold key terms
 Intelligence Data:
 ${serializedData}`;
 
-        const response = await client.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt
-        });
-        const text = response.text;
+        let response: any = null;
+        const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        for (const m of modelsToTry) {
+          try {
+            response = await client.models.generateContent({
+              model: m,
+              contents: prompt
+            });
+            if (response && response.text) break;
+          } catch (mErr: any) {
+            console.warn(`[REPORT ANALYSIS] Model ${m} failed:`, mErr?.message || mErr);
+          }
+        }
+        const text = response?.text;
         if (text && text.trim().length > 0) {
           return res.json({ success: true, analysis: text });
         }
@@ -1962,7 +2028,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       return res.status(400).send('Validation Error: Facebook Post URL is required.');
     }
     if (!cleanBody) {
-      cleanBody = `Official Facebook post update from PNP Sta. Cruz, Laguna.`;
+      cleanBody = cleanTitle;
     }
   } else {
     const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
@@ -2026,7 +2092,8 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       }
     }
 
-    const encoded = encodeCustomCategory(rawCategory || 'General Announcement', cleanBody, uploadedVideoPaths, isUrlPost ? finalFacebookUrl : undefined);
+    const targetCategory = isUrlPost ? 'General Announcement' : (rawCategory || 'General Announcement');
+    const encoded = encodeCustomCategory(targetCategory, cleanBody, uploadedVideoPaths, isUrlPost ? finalFacebookUrl : undefined);
 
     const validPostedBy = await getValidUserId(req.session?.user?.id);
     const data: any = {
@@ -2038,10 +2105,8 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       created_at: new Date().toISOString()
     };
 
-    if (isUrlPost && finalFacebookUrl) {
-      data.facebook_url = finalFacebookUrl;
-      data.is_facebook_post = true;
-    }
+    // Note: facebook_url is safely encoded inside encoded.body (as <!--FACEBOOK_URL:...-->) 
+    // to avoid Supabase PGRST204 errors when column doesn't exist in schema cache.
 
     if (uploadedPhotoPaths.length > 0) {
       data.photo_path = JSON.stringify(uploadedPhotoPaths);
@@ -2086,8 +2151,9 @@ export const getEditBulletin = async (req: Request, res: Response) => {
 };
 
 export const postEditBulletin = async (req: Request, res: Response) => {
-  const { title, category, custom_category, body, is_archived, existing_photos, existing_videos } = req.body;
+  const { title, category, custom_category, body, is_archived, existing_photos, existing_videos, facebook_url, facebook_post_url } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
+  const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
 
   // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
   const cleanTitle = (title || '').trim();
@@ -2142,8 +2208,8 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     const hasNewVideos = files && files.videos && files.videos.length > 0;
     const totalMedia = finalPhotos.length + finalVideos.length + (hasNewPhotos ? files.photos.length : 0) + (hasNewVideos ? files.videos.length : 0);
 
-    if (totalMedia === 0) {
-      return res.status(400).send('Validation Error: At least 1 picture or video must be attached to the bulletin.');
+    if (totalMedia === 0 && !finalFacebookUrl) {
+      return res.status(400).send('Validation Error: At least 1 picture, video, or Facebook URL link must be attached to the bulletin.');
     }
     if (files) {
       if (files.photos && files.photos.length > 0) {
@@ -2183,7 +2249,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       }
     }
 
-    const encoded = encodeCustomCategory(rawCategory, body, finalVideos);
+    const encoded = encodeCustomCategory(rawCategory, body, finalVideos, finalFacebookUrl || undefined);
 
     const data: any = {
       title,
@@ -2455,14 +2521,14 @@ export const postHotline = async (req: Request, res: Response) => {
   const trimmedNumber = (number || '').trim();
   const trimmedCat = (category || '').trim();
 
-  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
-    return res.status(400).send('Invalid agency name. Must be between 2 and 100 characters.');
+  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
+    return res.status(400).send('Invalid agency name. Must be between 2 and 20 characters.');
   }
   if (!/^\d{3,11}$/.test(trimmedNumber)) {
     return res.status(400).send('Invalid hotline number. Must contain exact digits only (3 to 11 digits), no characters or spaces.');
   }
-  if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 50) {
-    return res.status(400).send('Invalid category. Must be between 2 and 50 characters.');
+  if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 20) {
+    return res.status(400).send('Invalid category. Must be between 2 and 20 characters.');
   }
 
   try {
@@ -2486,14 +2552,14 @@ export const postEditHotline = async (req: Request, res: Response) => {
   const trimmedNumber = (number || '').trim();
   const trimmedCat = (category || '').trim();
 
-  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
-    return res.status(400).send('Invalid agency name. Must be between 2 and 100 characters.');
+  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
+    return res.status(400).send('Invalid agency name. Must be between 2 and 20 characters.');
   }
   if (!/^\d{3,11}$/.test(trimmedNumber)) {
     return res.status(400).send('Invalid hotline number. Must contain exact digits only (3 to 11 digits), no characters or spaces.');
   }
-  if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 50) {
-    return res.status(400).send('Invalid category. Must be between 2 and 50 characters.');
+  if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 20) {
+    return res.status(400).send('Invalid category. Must be between 2 and 20 characters.');
   }
 
   try {
@@ -3018,11 +3084,7 @@ export const getArchive = async (req: Request, res: Response) => {
   try {
     const selectedCategory = (req.query.category as string) || 'All';
     const snap = await db.collection('recycle_bin').orderBy('deleted_at', 'desc').get();
-    let items = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-
-    if (selectedCategory !== 'All') {
-      items = items.filter((item: any) => item.category === selectedCategory);
-    }
+    const items = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
     res.render('admin/archive', {
       title: 'Archive',
@@ -3033,6 +3095,30 @@ export const getArchive = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Error fetching archive:', err);
     res.status(500).send('Error loading archive');
+  }
+};
+
+export const clearAllArchive = async (req: Request, res: Response) => {
+  try {
+    const selectedCategory = (req.body.category as string) || (req.query.category as string) || 'All';
+    const snap = await db.collection('recycle_bin').get();
+
+    let docsToDelete = snap.docs;
+    if (selectedCategory && selectedCategory !== 'All') {
+      docsToDelete = snap.docs.filter((doc: any) => doc.data().category === selectedCategory);
+    }
+
+    if (docsToDelete.length > 0) {
+      const batch = db.batch();
+      docsToDelete.forEach((doc: any) => batch.delete(doc.ref));
+      await batch.commit();
+      await logAction(req, 'ARCHIVE_CLEAR_ALL', `Cleared ${docsToDelete.length} items from recycle bin (Category: ${selectedCategory})`);
+    }
+
+    res.redirect(`/admin/archive?category=${encodeURIComponent(selectedCategory)}`);
+  } catch (err) {
+    console.error('Error clearing archive:', err);
+    res.status(500).send('Error clearing archive');
   }
 };
 

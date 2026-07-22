@@ -123,7 +123,6 @@
         <div class="mb-4 flex justify-between items-center">
             <div>
                 <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Highest Incident </h3>
-                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Click category card to toggle graph visibility</p>
             </div>
             <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-500">
                 <i class="fas fa-filter text-xs"></i>
@@ -136,7 +135,6 @@
                 <div class="flex flex-col overflow-hidden mr-2">
                     <div class="flex items-center space-x-2 mb-1">
                         <span id="label8Focus" class="text-[9px] font-bold text-red-500 uppercase tracking-widest">8-Focus</span>
-                        <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-red-500 transition-colors hidden md:block"></i>
                     </div>
                     <span id="top8Focus" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
                 </div>
@@ -151,7 +149,6 @@
                 <div class="flex flex-col overflow-hidden mr-2">
                     <div class="flex items-center space-x-2 mb-1">
                         <span id="labelNonIndex" class="text-[9px] font-bold text-pnp-blue uppercase tracking-widest">Non-Index</span>
-                        <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-pnp-blue transition-colors hidden md:block"></i>
                     </div>
                     <span id="topNonIndex" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
                 </div>
@@ -166,7 +163,6 @@
                 <div class="flex flex-col overflow-hidden mr-2">
                     <div class="flex items-center space-x-2 mb-1">
                         <span id="labelPSI" class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest">PSI</span>
-                        <i class="fas fa-eye text-[8px] text-gray-400 group-hover/legend:text-pnp-gold transition-colors hidden md:block"></i>
                     </div>
                     <span id="topPSI" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
                 </div>
@@ -183,15 +179,15 @@
 
 <!-- Monthly Crime Trend Graph (Bento Main) -->
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col h-auto lg:h-[580px] transition-all hover:shadow-xl relative group justify-between">
+    <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col h-auto lg:h-[640px] transition-all hover:shadow-xl relative group justify-between overflow-hidden">
         <div class="flex flex-col">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 gap-4">
                 <div>
                     <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Monthly Crime Trends</h3>
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1 italic">Crime count over the last 12 months</p>
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 italic">Crime count over the last 12 months</p>
                 </div>
                 <!-- Filters Container -->
-                <div class="flex items-center gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+                <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
                     <!-- Year Filter Dropdown -->
                     <div class="relative w-full sm:w-28 shrink-0">
                         <% 
@@ -204,7 +200,7 @@
 
                             if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
                         %>
-                        <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
+                        <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
                             <% availableYears.forEach(year => { %>
                                 <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
                             <% }) %>
@@ -212,7 +208,7 @@
                     </div>
                     <!-- Barangay Filter Dropdown -->
                     <div class="relative w-full sm:w-56 shrink-0">
-                        <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
+                        <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700/50 rounded-2xl px-4 py-2 text-xs font-bold uppercase tracking-wider text-pnp-blue dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold transition-all cursor-pointer">
                             <option value="ALL">ALL BARANGAYS</option>
                         <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
                             , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
@@ -226,36 +222,35 @@
                             </option>
                         <% }) %>
                     </select>
-                    </select>
                 </div>
             </div>
             </div>
-            <div class="relative h-[310px] w-full mb-0">
+            <div class="relative h-[240px] w-full mb-0">
                 <canvas id="crimeTrendChart"></canvas>
             </div>
         </div>
 
         <!-- AI Trend Insights callout below the canvas -->
-        <div class="mt-2 pt-3 border-t border-gray-100 dark:border-slate-700/60 flex flex-col gap-1.5 flex-grow">
-            <div class="flex items-center justify-between mb-1">
-                <span class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.15em] flex items-center">
+        <div class="mt-2 pt-2.5 border-t border-gray-100 dark:border-slate-700/60 flex flex-col gap-1 flex-grow min-h-0 overflow-hidden">
+            <div class="flex items-center justify-between mb-1 shrink-0">
+                <span class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.12em]">
                     Trend and Pattern Analysis
                 </span>
                 <button onclick="generateAITrends()" id="aiGenerateBtn" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center justify-center w-6 h-6 shrink-0" title="Refresh Analysis">
                     <i class="fas fa-sync-alt text-[11px]"></i>
                 </button>
             </div>
-            <div id="aiAnalysisResult" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-medium max-h-[180px] overflow-y-auto custom-scrollbar pr-1 text-left mt-0.5 mb-0.5 flex-grow">
-                <div class="flex items-center gap-2 py-1">
+            <div id="aiAnalysisResult" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-medium max-h-[220px] overflow-y-auto custom-scrollbar pr-1.5 text-left mt-0.5 mb-0.5 flex-grow min-h-0">
+                <div class="flex items-center gap-2 py-2">
                     <div class="w-3.5 h-3.5 rounded-full border-2 border-pnp-blue dark:border-pnp-gold border-t-transparent animate-spin shrink-0"></div>
-                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Generating analysis...</span>
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Analyzing trends, patterns & suggestions...</span>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Right Column: Dual View (Distribution or Detailed Feed) -->
-    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col h-auto lg:h-[580px] transition-all hover:shadow-xl relative overflow-hidden group">
+    <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col h-auto lg:h-[640px] transition-all hover:shadow-xl relative overflow-hidden group">
         <!-- View 1: Recorded Crime Distribution -->
         <div id="distributionView" class="relative z-10 flex flex-col h-full animate-fade-in justify-between">
             <div class="absolute -right-12 -top-12 w-32 h-32 bg-pnp-blue/5 rounded-full blur-3xl"></div>
@@ -880,8 +875,8 @@
             <div class="flex items-center gap-3 py-2">
                 <div class="w-4 h-4 rounded-full border-2 border-pnp-blue dark:border-pnp-gold border-t-transparent animate-spin shrink-0"></div>
                 <div class="flex flex-col items-start">
-                    <p class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest animate-pulse">Generating AI Analysis for ${selectedYear}...</p>
-                    <p class="text-[8px] text-slate-400 dark:text-slate-500 font-mono tracking-tighter">GPT-OSS 120B NEURAL CORRELATION IN PROGRESS</p>
+                    <p class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest animate-pulse">Generating Trend Analysis for ${selectedYear}...</p>
+                    <p class="text-[8px] text-slate-400 dark:text-slate-500 font-mono tracking-tighter">DATA CORRELATION IN PROGRESS</p>
                 </div>
             </div>
         `;
@@ -928,32 +923,117 @@
 
     function formatMarkdown(text) {
         if (!text) return '';
-        let html = text;
+        let raw = text.replace(/```markdown|```/g, '').trim().replace(/\\n/g, '\n');
 
-        // Strip backticks if returned wrapped
-        html = html.replace(/```markdown|```/g, '');
+        const sectionConfigs = {
+            'trend': {
+                title: 'Trend Analysis',
+                subtitle: 'Directional Trajectory & Baseline',
+                icon: 'fas fa-chart-line',
+                iconColor: 'text-blue-600 dark:text-blue-400',
+                badgeBg: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300',
+                border: 'border-blue-200/80 dark:border-blue-800/60',
+                bg: 'bg-gradient-to-br from-blue-50/90 to-slate-50/50 dark:from-blue-950/20 dark:to-slate-900/40',
+                titleColor: 'text-pnp-blue dark:text-blue-300'
+            },
+            'pattern': {
+                title: 'Crime Pattern',
+                subtitle: 'Concentration & Key Drivers',
+                icon: 'fas fa-bullseye',
+                iconColor: 'text-amber-600 dark:text-amber-400',
+                badgeBg: 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300',
+                border: 'border-amber-200/80 dark:border-amber-800/60',
+                bg: 'bg-gradient-to-br from-amber-50/80 to-slate-50/50 dark:from-amber-950/20 dark:to-slate-900/40',
+                titleColor: 'text-amber-900 dark:text-amber-300'
+            },
+            'suggestion': {
+                title: 'Strategic Suggestions',
+                subtitle: 'Law Enforcement Directives',
+                icon: 'fas fa-lightbulb',
+                iconColor: 'text-emerald-600 dark:text-emerald-400',
+                badgeBg: 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300',
+                border: 'border-emerald-200/80 dark:border-emerald-800/60',
+                bg: 'bg-gradient-to-br from-emerald-50/80 to-slate-50/50 dark:from-emerald-950/20 dark:to-slate-900/40',
+                titleColor: 'text-emerald-900 dark:text-emerald-300'
+            }
+        };
 
-        // Match headers and style
-        html = html.replace(/^(?:###|##|#)\s+(.*?)$/gm, '<h4 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider mt-3 mb-1.5 border-b border-gray-100 dark:border-slate-700 pb-1 flex items-center gap-1.5"><i class="fas fa-shield-halved text-[10px]"></i> $1</h4>');
+        // Match section markers like **Trend**: or ### Trend or Trend: or **Suggestions**:
+        const sectionRegex = /(?:^|\n)(?:\#{1,4}\s*|\*{1,2}\s*)?(Trend|Pattern|Suggestions?|Recommendations?)(?:\*{1,2})?\s*[\:\-]?/gi;
+        
+        let matches = [];
+        let match;
+        while ((match = sectionRegex.exec(raw)) !== null) {
+            matches.push({
+                index: match.index,
+                length: match[0].length,
+                key: match[1].toLowerCase()
+            });
+        }
 
-        // Strong/bold
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-pnp-blue dark:text-pnp-gold">$1</strong>');
+        if (matches.length > 0) {
+            let cardsHtml = '<div class="grid grid-cols-1 gap-2 my-1 overflow-hidden">';
+            
+            for (let i = 0; i < matches.length; i++) {
+                const cur = matches[i];
+                const startPos = cur.index + cur.length;
+                const endPos = (i + 1 < matches.length) ? matches[i + 1].index : raw.length;
+                let bodyText = raw.substring(startPos, endPos).trim();
 
-        // Lists
-        html = html.replace(/^\d+\.\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
-        html = html.replace(/^[-*]\s+(.*?)$/gm, '<div class="flex items-start gap-2 ml-2 mb-1.5 text-slate-700 dark:text-slate-300"><span class="text-pnp-blue dark:text-pnp-gold font-bold text-[10px] shrink-0 mt-0.5">•</span><span class="text-xs leading-relaxed">$1</span></div>');
+                let normalizedKey = 'trend';
+                if (cur.key.startsWith('pattern')) normalizedKey = 'pattern';
+                else if (cur.key.startsWith('sug') || cur.key.startsWith('rec')) normalizedKey = 'suggestion';
 
-        // Standardize literal '\n' strings into real newlines
-        html = html.replace(/\\n/g, '\n');
+                const config = sectionConfigs[normalizedKey];
 
-        // Convert standard line breaks to paragraph styles where appropriate
-        const blocks = html.split(/\n\n+/);
-        html = blocks.map(b => {
-            if (b.trim().startsWith('<div') || b.trim().startsWith('<h4')) return b;
-            return `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-400 mb-4 last:mb-0">${b.replace(/\n/g, '<br>')}</p>`;
-        }).join('');
+                let formattedBody = bodyText
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>')
+                    .replace(/^[-*•]\s+(.*?)$/gm, '<li class="ml-2 list-disc marker:text-pnp-gold text-slate-700 dark:text-slate-300 mb-0.5">$1</li>')
+                    .replace(/\n\n+/g, '</p><p class="mt-1">')
+                    .replace(/\n/g, ' ');
 
-        return html;
+                if (formattedBody.includes('<li')) {
+                    formattedBody = `<ul class="my-0.5">${formattedBody}</ul>`;
+                } else {
+                    formattedBody = `<p>${formattedBody}</p>`;
+                }
+
+                cardsHtml += `
+                    <div class="p-3 rounded-xl border ${config.border} ${config.bg} shadow-2xs transition-all hover:shadow-xs overflow-hidden break-words">
+                        <div class="flex items-center justify-between mb-1 pb-1 border-b border-black/5 dark:border-white/5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded-lg flex items-center justify-center text-[10px] shadow-2xs ${config.badgeBg}">
+                                    <i class="${config.icon} ${config.iconColor}"></i>
+                                </span>
+                                <div>
+                                    <h5 class="text-[10px] font-black uppercase tracking-wider ${config.titleColor}">
+                                        ${config.title}
+                                    </h5>
+                                </div>
+                            </div>
+                            <span class="text-[8px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 hidden sm:inline">
+                                ${config.subtitle}
+                            </span>
+                        </div>
+                        <div class="text-[11px] leading-relaxed text-slate-700 dark:text-slate-300 font-medium pl-0.5 break-words">
+                            ${formattedBody}
+                        </div>
+                    </div>
+                `;
+            }
+
+            cardsHtml += '</div>';
+            return cardsHtml;
+        }
+
+        // Standard markdown fallback
+        let formatted = raw
+            .replace(/^(?:###|##|#)\s+(.*?)$/gm, '<h5 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider mt-2 mb-1 flex items-center gap-1.5"><i class="fas fa-shield-halved text-[10px]"></i> $1</h5>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>')
+            .replace(/^[-*•]\s+(.*?)$/gm, '<div class="flex items-start gap-1.5 ml-1 mb-1 text-slate-700 dark:text-slate-300"><span class="text-pnp-gold font-bold text-xs">•</span><span>$1</span></div>');
+
+        const blocks = formatted.split(/\n\n+/);
+        return blocks.map(b => `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 mb-2 last:mb-0">${b.replace(/\n/g, '<br>')}</p>`).join('');
     }
 </script>
 

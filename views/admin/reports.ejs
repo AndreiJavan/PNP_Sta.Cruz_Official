@@ -98,15 +98,10 @@
                                         </div>
                                     </td>
                                     <td class="px-8 py-6">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-gray-200 dark:border-slate-700 group-hover:scale-110 transition-all shadow-sm group-hover:rotate-3">
-                                                <i class="fas fa-microchip text-xs"></i>
-                                            </div>
-                                            <div class="flex flex-col truncate max-w-[200px]">
-                                                <span class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-300"><%= report.filename || 'Manual Transmission' %></span>
-                                                <div class="flex items-center space-x-2 mt-1">
-                                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70"><%= report.admin_name || 'Sys Admin' %></span>
-                                                </div>
+                                        <div onclick="event.stopPropagation(); viewReportDetails('<%= report.id %>')" title="Click to view report details" class="flex flex-col truncate max-w-[250px] cursor-pointer group/file">
+                                            <span class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover/file:text-pnp-blue dark:group-hover/file:text-pnp-gold transition duration-300 hover:underline"><%= report.filename || 'Manual Transmission' %></span>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70"><%= report.admin_name || 'Sys Admin' %></span>
                                             </div>
                                         </div>
                                     </td>
@@ -130,9 +125,9 @@
                                     </td>
                                     <td class="px-8 py-6 text-center">
                                         <% if (report.category_stats?.entry_type === 'manual' || report.filename?.includes('Manual')) { %>
-                                            <span class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10">MANUAL</span>
+                                            <span onclick="event.stopPropagation(); viewReportDetails('<%= report.id %>')" title="Click to view report details" class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500/15 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10 cursor-pointer hover:scale-105 active:scale-95 transition-all inline-block shadow-sm">MANUAL</span>
                                         <% } else { %>
-                                            <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10">SCANNED</span>
+                                            <span onclick="event.stopPropagation(); viewReportDetails('<%= report.id %>')" title="Click to view report details" class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 hover:bg-pnp-blue/15 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10 cursor-pointer hover:scale-105 active:scale-95 transition-all inline-block shadow-sm">SCANNED</span>
                                         <% } %>
                                     </td>
                                     <td class="px-8 py-6 text-right">
@@ -317,7 +312,37 @@
 
             <div>
                 <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Timeline Date</label>
-                <input type="date" id="batchDateInput" min="2024-01-01" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue">
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Day (DD)</label>
+                        <select id="batchDaySelect" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                            <% for(let d = 1; d <= 31; d++) { %>
+                                <% const dd = String(d).padStart(2, '0'); %>
+                                <option value="<%= dd %>"><%= dd %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Month</label>
+                        <select id="batchMonthSelect" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                            <% const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; %>
+                            <% months.forEach((mName, idx) => { %>
+                                <% const mm = String(idx + 1).padStart(2, '0'); %>
+                                <option value="<%= mm %>"><%= mName %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Year (YYYY)</label>
+                        <select id="batchYearSelect" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -457,11 +482,16 @@
 
      window.openBatchGeneratorModal = function(insertIndex = null) {
          targetInsertIndex = insertIndex;
-         const todayStr = new Date().toISOString().split('T')[0];
+         const now = new Date();
+         const todayDay = String(now.getDate()).padStart(2, '0');
+         const todayMonth = String(now.getMonth() + 1).padStart(2, '0');
+         const todayYear = String(now.getFullYear());
          
          const modal = document.getElementById('batchGeneratorModal');
          const brgySelect = document.getElementById('batchBarangaySelect');
-         const dateInput = document.getElementById('batchDateInput');
+         const daySelect = document.getElementById('batchDaySelect');
+         const monthSelect = document.getElementById('batchMonthSelect');
+         const yearSelect = document.getElementById('batchYearSelect');
          const countInput = document.getElementById('batchCount');
          const offenseInput = document.getElementById('batchOffenseInput');
          const catSelect = document.getElementById('batchCategorySelect');
@@ -470,10 +500,10 @@
              brgySelect.innerHTML = VALID_BARANGAYS.map(b => `<option value="${b}">${b}</option>`).join('');
          }
          
-         if (dateInput) {
-             dateInput.value = todayStr;
-             dateInput.max = todayStr;
-         }
+         if (daySelect) daySelect.value = todayDay;
+         if (monthSelect) monthSelect.value = todayMonth;
+         if (yearSelect) yearSelect.value = todayYear;
+
          if (countInput) countInput.value = '1';
          if (offenseInput) offenseInput.value = '';
          if (catSelect) catSelect.value = 'Non-Index';
@@ -507,7 +537,9 @@
      window.executeBatchGeneration = function() {
          const countInput = document.getElementById('batchCount');
          const brgySelect = document.getElementById('batchBarangaySelect');
-         const dateInput = document.getElementById('batchDateInput');
+         const daySelect = document.getElementById('batchDaySelect');
+         const monthSelect = document.getElementById('batchMonthSelect');
+         const yearSelect = document.getElementById('batchYearSelect');
          const catSelect = document.getElementById('batchCategorySelect');
          const offenseInput = document.getElementById('batchOffenseInput');
 
@@ -530,7 +562,12 @@
          }
          const count = rawCount;
          const barangay = (brgySelect ? brgySelect.value : '') || VALID_BARANGAYS[0];
-         const dateVal = dateInput ? dateInput.value : '';
+         
+         const dayVal = daySelect ? daySelect.value : String(new Date().getDate()).padStart(2, '0');
+         const monthVal = monthSelect ? monthSelect.value : String(new Date().getMonth() + 1).padStart(2, '0');
+         const yearVal = yearSelect ? yearSelect.value : String(new Date().getFullYear());
+         const dateVal = `${yearVal}-${monthVal}-${dayVal}`;
+
          const category = (catSelect ? catSelect.value : '') || 'Non-Index';
          const offense = offenseInput ? offenseInput.value.trim() : '';
 
@@ -647,6 +684,12 @@
              const offenseValue = item.offense || item.incident_type || '';
              const crimeOptions = CRIMES_BY_PILLAR[cat] || [];
              
+             const rawDateStr = item.date_committed || item.date || new Date().toISOString().split('T')[0];
+             const dateParts = rawDateStr.split('-');
+             const itemYear = dateParts[0] || '2026';
+             const itemMonth = dateParts[1] || '01';
+             const itemDay = dateParts[2] || '01';
+             
              tr.innerHTML = `
                  <td class="px-2 py-4 text-center border-r border-gray-100 dark:border-slate-800 w-14">
                      <button onclick="insertReviewRowAt(${index + 1})" title="Insert / Generate Rows Below" class="w-7 h-7 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition flex items-center justify-center mx-auto">
@@ -662,9 +705,28 @@
                         ${VALID_BARANGAYS.map(b => `<option value="${b}" ${b === item.barangay ? 'selected' : ''} class="dark:bg-slate-900">${b}</option>`).join('')}
                     </select>
                  </td>
-                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-40">
-                    <input type="date" value="${item.date_committed || item.date || ''}" min="2024-01-01" max="${new Date().toISOString().split('T')[0]}" onchange="updateReviewItem(${index}, 'date_committed', this.value)" 
-                        class="no-calendar-picker w-full h-full bg-transparent border-none text-[11px] font-black text-slate-500 dark:text-slate-300 focus:ring-0 p-4 outline-none">
+                 <td class="px-2 py-2 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-56">
+                    <div class="flex items-center space-x-1 justify-center">
+                        <select onchange="updateReviewItemDate(${index}, 'day', this.value)" title="Day (DD)" class="w-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                            ${[...Array(31)].map((_, i) => {
+                                const d = String(i + 1).padStart(2, '0');
+                                return `<option value="${d}" ${d === itemDay ? 'selected' : ''} class="dark:bg-slate-900">${d}</option>`;
+                            }).join('')}
+                        </select>
+                        <span class="text-slate-400 font-bold text-[10px]">/</span>
+                        <select onchange="updateReviewItemDate(${index}, 'month', this.value)" title="Month" class="w-16 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                            ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((mName, idx) => {
+                                const m = String(idx + 1).padStart(2, '0');
+                                return `<option value="${m}" ${m === itemMonth ? 'selected' : ''} class="dark:bg-slate-900">${mName}</option>`;
+                            }).join('')}
+                        </select>
+                        <span class="text-slate-400 font-bold text-[10px]">/</span>
+                        <select onchange="updateReviewItemDate(${index}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                            ${['2026', '2025', '2024', '2023', '2022'].map(y => {
+                                return `<option value="${y}" ${y === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${y}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64">
                     <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="100" oninput="if(this.value.length>100)this.value=this.value.slice(0,100);updateReviewItem(${index}, 'offense', this.value)" 
@@ -762,6 +824,23 @@
              }
              renderReviewTable();
          }
+     };
+
+     window.updateReviewItemDate = function(index, part, value) {
+         if (!reviewData[index]) return;
+         const rawDateStr = reviewData[index].date_committed || reviewData[index].date || new Date().toISOString().split('T')[0];
+         const parts = rawDateStr.split('-');
+         let y = parts[0] || '2026';
+         let m = parts[1] || '01';
+         let d = parts[2] || '01';
+         
+         if (part === 'day') d = String(value).padStart(2, '0');
+         if (part === 'month') m = String(value).padStart(2, '0');
+         if (part === 'year') y = String(value);
+
+         const newDate = `${y}-${m}-${d}`;
+         reviewData[index].date_committed = newDate;
+         reviewData[index].date = newDate;
      };
   
      window.editReviewRow = function(index) {
@@ -1039,15 +1118,10 @@
                          </div>
                      </td>
                      <td class="px-8 py-6">
-                         <div class="flex items-center space-x-4">
-                             <div class="w-10 h-10 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-gray-200 dark:border-slate-700 group-hover:scale-110 transition-all shadow-sm group-hover:rotate-3">
-                                 <i class="fas fa-microchip text-xs"></i>
-                             </div>
-                             <div class="flex flex-col truncate max-w-[200px]">
-                                 <span class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-300">${report.filename || 'Manual Transmission'}</span>
-                                 <div class="flex items-center space-x-2 mt-1">
-                                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70">${report.admin_name || 'Sys Admin'}</span>
-                                 </div>
+                         <div onclick="event.stopPropagation(); viewReportDetails('${report.id}')" title="Click to view report details" class="flex flex-col truncate max-w-[250px] cursor-pointer group/file">
+                             <span class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover/file:text-pnp-blue dark:group-hover/file:text-pnp-gold transition duration-300 hover:underline">${report.filename || 'Manual Transmission'}</span>
+                             <div class="flex items-center space-x-2 mt-1">
+                                 <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70">${report.admin_name || 'Sys Admin'}</span>
                              </div>
                          </div>
                      </td>
@@ -1070,10 +1144,10 @@
                          </span>
                      </td>
                      <td class="px-8 py-6 text-center">
-                         ${(report.category_stats?.entry_type === 'manual' || report.filename === 'Manual Intelligence Session' || report.filename === 'Manual Entry Session') ? `
-                             <span class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10">MANUAL</span>
+                         ${(report.category_stats?.entry_type === 'manual' || report.filename === 'Manual Intelligence Session' || report.filename === 'Manual Entry Session' || report.filename?.includes('Manual')) ? `
+                             <span onclick="event.stopPropagation(); viewReportDetails('${report.id}')" title="Click to view report details" class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 hover:bg-emerald-500/15 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10 cursor-pointer hover:scale-105 active:scale-95 transition-all inline-block shadow-sm">MANUAL</span>
                          ` : `
-                             <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10">SCANNED</span>
+                             <span onclick="event.stopPropagation(); viewReportDetails('${report.id}')" title="Click to view report details" class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 hover:bg-pnp-blue/15 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10 cursor-pointer hover:scale-105 active:scale-95 transition-all inline-block shadow-sm">SCANNED</span>
                          `}
                      </td>
                      <td class="px-8 py-6 text-right">
