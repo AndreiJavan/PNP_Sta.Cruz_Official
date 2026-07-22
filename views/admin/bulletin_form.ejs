@@ -248,7 +248,7 @@
         <div id="mediaGalleryModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl hidden items-center justify-center z-[99998] p-4 md:p-8 transition-all duration-300">
             <div class="relative max-w-6xl w-full h-[90vh] bg-slate-900 rounded-3xl border border-white/10 shadow-2xl flex flex-col overflow-hidden">
                 <!-- GALLERY MODAL HEADER -->
-                <div class="p-6 border-b border-white/10 flex items-center justify-between bg-slate-950">
+                <div class="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between bg-slate-950 gap-4">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-2xl bg-pnp-blue text-pnp-gold flex items-center justify-center border border-pnp-gold/20 shadow-md">
                             <i class="fas fa-images text-sm"></i>
@@ -258,6 +258,13 @@
                             <p id="mediaGalleryCount" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Showing 0 attached files</p>
                         </div>
                     </div>
+
+                    <!-- DYNAMIC GALLERY WARNING / STATUS ALERT -->
+                    <div id="galleryStatusAlert" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all hidden">
+                        <i id="galleryStatusIcon" class="fas fa-exclamation-triangle text-sm"></i>
+                        <span id="galleryStatusText">Status message</span>
+                    </div>
+
                     <div class="flex items-center space-x-3">
                         <button type="button" onclick="document.getElementById('mediaInput').click()" class="px-4 py-2 bg-pnp-blue text-white hover:bg-blue-900 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
                             + Add More Files
@@ -383,16 +390,29 @@
             }
         }
 
+        const galleryStatusAlert = document.getElementById('galleryStatusAlert');
+        const galleryStatusText = document.getElementById('galleryStatusText');
+
         if (errorMessage) {
             if (warningBox && warningText) {
                 warningText.textContent = errorMessage;
                 warningBox.classList.remove('hidden');
+            }
+            if (galleryStatusAlert && galleryStatusText) {
+                galleryStatusText.textContent = errorMessage;
+                galleryStatusAlert.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse';
+                galleryStatusAlert.classList.remove('hidden');
             }
             submitBtn.disabled = true;
             return false;
         } else {
             if (warningBox) {
                 warningBox.classList.add('hidden');
+            }
+            if (galleryStatusAlert && galleryStatusText) {
+                galleryStatusText.textContent = 'All media & inputs valid. Ready to post.';
+                galleryStatusAlert.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+                galleryStatusAlert.classList.remove('hidden');
             }
             submitBtn.disabled = false;
             return true;
@@ -573,6 +593,8 @@
         }
 
         renderAllMedia();
+        renderMediaGalleryGrid();
+        validateForm();
     }
 
     function clearAllMedia() {
@@ -582,6 +604,8 @@
         syncFileInputs();
         currentPreviewSlide = 0;
         renderAllMedia();
+        renderMediaGalleryGrid();
+        validateForm();
     }
 
     function renderAllMedia() {
@@ -874,6 +898,8 @@
                 closeMediaGalleryModal();
             }
         }
+
+        validateForm();
 
         if (itemsToRender.length === 0) {
             grid.innerHTML = `
