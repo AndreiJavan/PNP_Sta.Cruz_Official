@@ -144,12 +144,14 @@
                                 class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin
                                 Title</label>
                             <span id="titleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                0 / 15 words
+                                0 / 100 letters
                             </span>
                         </div>
                         <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>"
                             required minlength="2" maxlength="100" placeholder="Enter title (3-15 words, max 100 characters)"
+                            oninput="validateForm()"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white transition-all">
+                        <p id="titleInlineError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                     </div>
 
                     <!-- CATEGORY -->
@@ -192,13 +194,15 @@
                                 Bulletin Body
                             </label>
                             <span id="bodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                0 / 500 words
+                                0 / 5,000 letters
                             </span>
                         </div>
 
                         <textarea name="body" id="body" rows="12" required
-                            placeholder="Enter the full content of the bulletin (Min 5 words / 15 chars, Max 500 words / 5,000 chars)..."
+                            placeholder="Enter the full content of the bulletin (Min 10 letters, Max 5,000 letters)..."
+                            oninput="validateForm()"
                             class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white transition-all"><%= bulletin ? bulletin.body : '' %></textarea>
+                        <p id="bodyInlineError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                     </div>
 
                 </div>
@@ -314,40 +318,95 @@
         const submitBtn = document.getElementById('submitBulletinBtn');
         const warningBox = document.getElementById('validationWarning');
         const warningText = document.getElementById('validationWarningText');
+        
+        const titleCounter = document.getElementById('titleCounter');
         const bodyCounter = document.getElementById('bodyCounter');
 
-        const titleCounter = document.getElementById('titleCounter');
+        const titleInlineError = document.getElementById('titleInlineError');
+        const bodyInlineError = document.getElementById('bodyInlineError');
 
         if (!titleInput || !bodyInput || !submitBtn) return true;
 
         const cleanTitle = (titleInput.value || '').trim();
-        const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
         const titleChars = cleanTitle.length;
 
         if (titleCounter) {
-            titleCounter.textContent = `${titleWords.length} / 15 words (${titleChars} / 100 chars)`;
-            if (titleWords.length > 15 || titleChars > 100 || (cleanTitle.length > 0 && titleWords.length < 3)) {
-                titleCounter.classList.add('text-red-500');
-                titleCounter.classList.remove('text-slate-400');
-            } else {
-                titleCounter.classList.remove('text-red-500');
-                titleCounter.classList.add('text-slate-400');
+            titleCounter.textContent = `${titleChars} / 100 letters`;
+        }
+
+        if (titleChars === 0) {
+            if (titleInlineError) {
+                titleInlineError.textContent = 'Bulletin title is required (at least 3 letters).';
+                titleInlineError.classList.remove('hidden');
+                titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
+            titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+            titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+        } else if (titleChars < 3) {
+            if (titleInlineError) {
+                titleInlineError.textContent = `Title is too short. Minimum 3 letters required (currently ${titleChars} letters).`;
+                titleInlineError.classList.remove('hidden');
+                titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
+            }
+            titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+            titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+        } else if (titleChars > 100) {
+            if (titleInlineError) {
+                titleInlineError.textContent = `Title exceeds limit of 100 letters (currently ${titleChars} letters).`;
+                titleInlineError.classList.remove('hidden');
+                titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
+            }
+            titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+            titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+        } else {
+            if (titleInlineError) {
+                titleInlineError.textContent = '✓ Title length is valid.';
+                titleInlineError.classList.remove('hidden');
+                titleInlineError.className = 'text-[11px] font-bold text-emerald-500 mt-1';
+            }
+            titleInput.classList.remove('border-red-500', 'ring-red-500/20');
+            titleInput.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/20');
         }
 
         const cleanBody = (bodyInput.value || '').trim();
-        const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
         const bodyChars = cleanBody.length;
 
         if (bodyCounter) {
-            bodyCounter.textContent = `${bodyWords.length} / 500 words (${bodyChars} / 5,000 chars)`;
-            if (bodyWords.length > 500 || bodyChars > 5000 || (cleanBody.length > 0 && (bodyWords.length < 5 || bodyChars < 15))) {
-                bodyCounter.classList.add('text-red-500');
-                bodyCounter.classList.remove('text-slate-400');
-            } else {
-                bodyCounter.classList.remove('text-red-500');
-                bodyCounter.classList.add('text-slate-400');
+            bodyCounter.textContent = `${bodyChars} / 5,000 letters`;
+        }
+
+        if (bodyChars === 0) {
+            if (bodyInlineError) {
+                bodyInlineError.textContent = 'Description body is required (at least 10 letters).';
+                bodyInlineError.classList.remove('hidden');
+                bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
+            bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+            bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+        } else if (bodyChars < 10) {
+            if (bodyInlineError) {
+                bodyInlineError.textContent = `Description is too short. Minimum 10 letters required (currently ${bodyChars} letters).`;
+                bodyInlineError.classList.remove('hidden');
+                bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
+            }
+            bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+            bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+        } else if (bodyChars > 5000) {
+            if (bodyInlineError) {
+                bodyInlineError.textContent = `Description exceeds limit of 5,000 letters (currently ${bodyChars} letters).`;
+                bodyInlineError.classList.remove('hidden');
+                bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
+            }
+            bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+            bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+        } else {
+            if (bodyInlineError) {
+                bodyInlineError.textContent = '✓ Description content length is valid.';
+                bodyInlineError.classList.remove('hidden');
+                bodyInlineError.className = 'text-[11px] font-bold text-emerald-500 mt-1';
+            }
+            bodyInput.classList.remove('border-red-500', 'ring-red-500/20');
+            bodyInput.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/20');
         }
 
         let errorMessage = '';
@@ -359,42 +418,23 @@
         const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
 
         if (cleanTitle.length === 0) {
-            errorMessage = 'Please enter a bulletin title (at least 3 words required).';
-        } else if (titleWords.length < 3) {
-            errorMessage = `Title must be at least 3 words long (currently ${titleWords.length} words).`;
+            errorMessage = 'Please enter a bulletin title (at least 3 letters required).';
+        } else if (titleChars < 3) {
+            errorMessage = `Title must be at least 3 letters long (currently ${titleChars} letters).`;
         } else if (titleChars > 100) {
-            errorMessage = `Title exceeds upper limit of 100 characters (currently ${titleChars} characters).`;
-        } else if (titleWords.length > 15) {
-            errorMessage = `Title exceeds upper limit of 15 words (currently ${titleWords.length} words).`;
+            errorMessage = `Title exceeds upper limit of 100 letters (currently ${titleChars} letters).`;
         } else if (cleanBody.length === 0) {
-            errorMessage = 'Please enter the bulletin body content (at least 5 words required).';
-        } else if (bodyWords.length < 5 || bodyChars < 15) {
-            errorMessage = `Bulletin body must be at least 5 words long (currently ${bodyWords.length} words / ${bodyChars} characters).`;
-        } else if (bodyWords.length > 500) {
-            errorMessage = `Bulletin body exceeds upper limit of 500 words (currently ${bodyWords.length} words).`;
+            errorMessage = 'Please enter the bulletin body content (at least 10 letters required).';
+        } else if (bodyChars < 10) {
+            errorMessage = `Bulletin body must be at least 10 letters long (currently ${bodyChars} letters).`;
         } else if (bodyChars > 5000) {
-            errorMessage = `Bulletin body exceeds upper limit of 5,000 characters (currently ${bodyChars} characters).`;
+            errorMessage = `Bulletin body exceeds upper limit of 5,000 letters (currently ${bodyChars} letters).`;
         } else if (totalMediaCount === 0) {
             errorMessage = 'At least 1 picture or video must be uploaded before posting.';
         } else if (totalMediaCount > 5) {
             errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain.`;
-        } else if (totalBytes > 4 * 1024 * 1024) {
-            errorMessage = `Payload Limit Exceeded: Combined upload (${totalMB} MB) exceeds Vercel limit of 4MB. Please compress files or post fewer files.`;
-        } else if (typeof accumulatedFiles !== 'undefined') {
-            for (const f of accumulatedFiles) {
-                if (f.size > 4 * 1024 * 1024) {
-                    errorMessage = `Picture "${f.name}" (${(f.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum payload limit of 4MB.`;
-                    break;
-                }
-            }
-            if (!errorMessage && typeof accumulatedVideos !== 'undefined') {
-                for (const v of accumulatedVideos) {
-                    if (v.size > 4 * 1024 * 1024) {
-                        errorMessage = `Video "${v.name}" (${(v.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum payload limit of 4MB.`;
-                        break;
-                    }
-                }
-            }
+        } else if (totalBytes > 25 * 1024 * 1024) {
+            errorMessage = `Payload Limit Exceeded: Combined upload (${totalMB} MB) exceeds maximum limit of 25MB. Please compress files or post fewer files.`;
         }
 
         const galleryStatusAlert = document.getElementById('galleryStatusAlert');
@@ -560,38 +600,60 @@
         if (!files || files.length === 0) return;
 
         let rejectedFiles = [];
+        let videoPromises = [];
 
         Array.from(files).forEach(file => {
             if (file.type.startsWith('image/')) {
-                if (file.size > 4 * 1024 * 1024) {
-                    rejectedFiles.push(`Picture "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 4MB)`);
+                if (file.size > 5 * 1024 * 1024) {
+                    rejectedFiles.push(`Picture "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 5MB limit)`);
                 } else {
                     accumulatedFiles.push(file);
                 }
             } else if (file.type.startsWith('video/')) {
-                if (file.size > 4 * 1024 * 1024) {
-                    rejectedFiles.push(`Video "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 4MB)`);
+                if (file.size > 25 * 1024 * 1024) {
+                    rejectedFiles.push(`Video "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 25MB limit)`);
                 } else {
-                    accumulatedVideos.push(file);
+                    // Check duration asynchronously to reject movie videos (> 3 minutes)
+                    const p = new Promise(resolve => {
+                        const tempVid = document.createElement('video');
+                        tempVid.preload = 'metadata';
+                        tempVid.src = URL.createObjectURL(file);
+                        tempVid.onloadedmetadata = function() {
+                            URL.revokeObjectURL(tempVid.src);
+                            if (tempVid.duration > 180) { // > 3 minutes
+                                rejectedFiles.push(`Video "${file.name}" (${(tempVid.duration / 60).toFixed(1)} mins long - Movie videos exceeding 3 minutes are prohibited)`);
+                            } else {
+                                accumulatedVideos.push(file);
+                            }
+                            resolve();
+                        };
+                        tempVid.onerror = function() {
+                            rejectedFiles.push(`Video "${file.name}" (Corrupted or unsupported video format)`);
+                            resolve();
+                        };
+                    });
+                    videoPromises.push(p);
                 }
             }
         });
 
-        if (rejectedFiles.length > 0) {
-            const warningBox = document.getElementById('validationWarning');
-            const warningText = document.getElementById('validationWarningText');
-            const msg = `Vercel Payload Protection: The following files exceed the 4MB limit and were rejected:\n` + rejectedFiles.join('\n');
-            if (warningBox && warningText) {
-                warningText.textContent = `Payload Block: ${rejectedFiles[0]} exceeds Vercel 4MB limit and was rejected.`;
-                warningBox.classList.remove('hidden');
+        Promise.all(videoPromises).then(() => {
+            if (rejectedFiles.length > 0) {
+                const warningBox = document.getElementById('validationWarning');
+                const warningText = document.getElementById('validationWarningText');
+                const msg = `Upload Limitation Notice:\nThe following files were rejected:\n• ` + rejectedFiles.join('\n• ');
+                if (warningBox && warningText) {
+                    warningText.textContent = `Upload Blocked: ${rejectedFiles[0]}`;
+                    warningBox.classList.remove('hidden');
+                }
+                alert(msg);
             }
-            alert(msg);
-        }
 
-        syncFileInputs();
-        renderAllMedia();
-        renderMediaGalleryGrid();
-        validateForm();
+            syncFileInputs();
+            renderAllMedia();
+            renderMediaGalleryGrid();
+            validateForm();
+        });
     }
 
     function syncFileInputs() {

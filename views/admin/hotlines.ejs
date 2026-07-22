@@ -7,33 +7,33 @@
                 <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">Add New Hotline
                 </h3>
             </div>
-            <form action="/admin/hotlines/add" method="POST" class="p-6 space-y-6">
+            <form action="/admin/hotlines/add" method="POST" class="p-6 space-y-6" onsubmit="return handleAddHotlineSubmit(event)">
                 <div class="space-y-2">
                     <label for="name"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Agency
                         Name</label>
-                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz"
+                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz" minlength="2" maxlength="100" title="Agency name must be 2 to 100 characters"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
                     <label for="number"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Contact
                         Number</label>
-                    <input type="text" name="number" id="number" required placeholder="e.g., 09123456789" pattern="\d{1,11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);"
+                    <input type="text" name="number" id="number" required placeholder="e.g., 09123456789 or 911" pattern="\d{3,11}" maxlength="11" title="Exact digits only (3 to 11 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
                     <label for="category"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Category</label>
-                    <select name="category" id="category" required
+                    <input type="text" name="category" id="category" list="categoryList" required placeholder="Type or select category (e.g. Police, Utility)" minlength="2" maxlength="50" title="Category must be 2 to 50 characters"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
-                        <option value="Police">Police</option>
-                        <option value="Fire">Fire</option>
-                        <option value="Medical">Medical</option>
-                        <option value="Disaster">Disaster</option>
-                        <option value="Utility">Utility</option>
-                        <option value="Other">Other</option>
-                    </select>
+                    <datalist id="categoryList">
+                        <option value="Police">
+                        <option value="Fire">
+                        <option value="Medical">
+                        <option value="Disaster">
+                        <option value="Utility">
+                    </datalist>
                 </div>
                 <button type="submit"
                     class="w-full bg-pnp-blue text-white font-bold py-4 rounded-xl shadow-lg transition duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs">
@@ -96,39 +96,171 @@
 </div>
 
 <script>
-    function toggleEditHotline(id) {
+    async function handleAddHotlineSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const nameInput = document.getElementById('name');
+        const numInput = document.getElementById('number');
+        const catInput = document.getElementById('category');
+
+        const agencyName = nameInput ? nameInput.value.trim() : '';
+        const numVal = numInput ? numInput.value.trim() : '';
+        const catVal = catInput ? catInput.value.trim() : '';
+
+        // Agency name limitation check (2 to 100 characters)
+        if (!agencyName || agencyName.length < 2 || agencyName.length > 100) {
+            if (window.strategicAlert) {
+                await window.strategicAlert({
+                    title: 'Invalid Agency Name',
+                    message: 'Agency name must be between 2 and 100 characters.',
+                    type: 'danger'
+                });
+            } else {
+                alert('Agency name must be between 2 and 100 characters.');
+            }
+            if (nameInput) nameInput.focus();
+            return false;
+        }
+
+        // Contact number limitation check (exact 3 to 11 digits)
+        if (!/^\d{3,11}$/.test(numVal)) {
+            if (window.strategicAlert) {
+                await window.strategicAlert({
+                    title: 'Invalid Contact Number',
+                    message: 'Contact number must contain exact numeric digits only (3 to 11 digits). No characters or spaces allowed.',
+                    type: 'danger'
+                });
+            } else {
+                alert('Contact number must contain exact numeric digits only (3 to 11 digits). No characters or spaces allowed.');
+            }
+            if (numInput) numInput.focus();
+            return false;
+        }
+
+        // Category limitation check (2 to 50 characters)
+        if (!catVal || catVal.length < 2 || catVal.length > 50) {
+            if (window.strategicAlert) {
+                await window.strategicAlert({
+                    title: 'Invalid Category',
+                    message: 'Category name must be between 2 and 50 characters.',
+                    type: 'danger'
+                });
+            } else {
+                alert('Category name must be between 2 and 50 characters.');
+            }
+            if (catInput) catInput.focus();
+            return false;
+        }
+
+        let confirmed = false;
+        if (window.strategicConfirm) {
+            confirmed = await window.strategicConfirm({
+                title: 'Confirm Hotline Creation',
+                message: `Are you sure you want to save "${agencyName}" with contact number "${numVal}" under category "${catVal}" to the directory?`,
+                confirmText: 'Save Hotline',
+                type: 'info'
+            });
+        } else {
+            confirmed = confirm(`Are you sure you want to save "${agencyName}" (${numVal}) under category "${catVal}"?`);
+        }
+
+        if (confirmed) {
+            form.submit();
+        }
+        return false;
+    }
+
+    async function toggleEditHotline(id) {
         const nameTd = document.getElementById('name_' + id);
         const numTd = document.getElementById('num_' + id);
         const catTd = document.getElementById('cat_' + id);
         const editBtn = document.getElementById('editBtn_' + id);
         
         if (numTd.querySelector('input')) {
+            const nameInput = nameTd.querySelector('input');
+            const numInput = numTd.querySelector('input');
+            const catInput = catTd.querySelector('input');
+
+            const agencyName = nameInput ? nameInput.value.trim() : '';
+            const numVal = numInput ? numInput.value.trim() : '';
+            const catVal = catInput ? catInput.value.trim() : '';
+
+            // Agency Name Limitation
+            if (!agencyName || agencyName.length < 2 || agencyName.length > 100) {
+                if (window.strategicAlert) {
+                    await window.strategicAlert({
+                        title: 'Invalid Agency Name',
+                        message: 'Agency name must be between 2 and 100 characters.',
+                        type: 'danger'
+                    });
+                } else {
+                    alert('Agency name must be between 2 and 100 characters.');
+                }
+                if (nameInput) nameInput.focus();
+                return;
+            }
+
+            // Contact Number Limitation (3 to 11 digits only)
+            if (!/^\d{3,11}$/.test(numVal)) {
+                if (window.strategicAlert) {
+                    await window.strategicAlert({
+                        title: 'Invalid Contact Number',
+                        message: 'Hotline contact number must contain exact digits only (3 to 11 digits). No characters, spaces, or special symbols allowed.',
+                        type: 'danger'
+                    });
+                } else {
+                    alert('Hotline contact number must contain exact digits only (3 to 11 digits). No characters, spaces, or special symbols allowed.');
+                }
+                if (numInput) numInput.focus();
+                return;
+            }
+
+            // Category Limitation (2 to 50 characters)
+            if (!catVal || catVal.length < 2 || catVal.length > 50) {
+                if (window.strategicAlert) {
+                    await window.strategicAlert({
+                        title: 'Invalid Category',
+                        message: 'Category name must be between 2 and 50 characters.',
+                        type: 'danger'
+                    });
+                } else {
+                    alert('Category name must be between 2 and 50 characters.');
+                }
+                if (catInput) catInput.focus();
+                return;
+            }
+
+            // Confirmation before saving edits
+            let confirmed = false;
+            if (window.strategicConfirm) {
+                confirmed = await window.strategicConfirm({
+                    title: 'Confirm Hotline Update',
+                    message: `Are you sure you want to update the hotline for "${agencyName}" to number "${numVal}" and category "${catVal}"?`,
+                    confirmText: 'Update Hotline',
+                    type: 'warning'
+                });
+            } else {
+                confirmed = confirm(`Are you sure you want to update the hotline for "${agencyName}"?`);
+            }
+
+            if (!confirmed) return;
+
             const form = document.getElementById('editForm_' + id);
             
-            // Collect the values from name and category inputs before submitting
-            const nameInput = nameTd.querySelector('input');
-            const catSelect = catTd.querySelector('select');
-            
             if (nameInput) form.appendChild(nameInput);
-            if (catSelect) form.appendChild(catSelect);
+            if (catInput) form.appendChild(catInput);
             
             form.submit();
         } else {
             const currentName = nameTd.innerText.trim();
             const currentNum = numTd.innerText.trim().replace(/\s/g, '');
-            const currentCat = catTd.getAttribute('data-category');
+            const currentCat = catTd.getAttribute('data-category') || '';
             
-            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
+            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" required minlength="2" maxlength="100" placeholder="Agency Name" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
             
-            numTd.innerHTML = `<form id="editForm_${id}" action="/admin/hotlines/${id}/edit" method="POST"><input type="text" name="number" value="${currentNum}" required pattern="\\d{1,11}" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>`;
+            numTd.innerHTML = `<form id="editForm_${id}" action="/admin/hotlines/${id}/edit" method="POST"><input type="text" name="number" value="${currentNum}" required pattern="\\d{3,11}" maxlength="11" title="Exact digits only (3 to 11 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>`;
             
-            const categories = ['Police', 'Fire', 'Medical', 'Disaster', 'Utility', 'Other'];
-            let options = '';
-            categories.forEach(c => {
-                options += `<option value="${c}" ${c === currentCat ? 'selected' : ''}>${c}</option>`;
-            });
-            
-            catTd.innerHTML = `<select name="category" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">${options}</select>`;
+            catTd.innerHTML = `<input type="text" name="category" list="categoryList" value="${currentCat}" required minlength="2" maxlength="50" placeholder="Category" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
 
             editBtn.innerText = 'Save';
             editBtn.classList.remove('text-pnp-blue', 'hover:text-blue-800');

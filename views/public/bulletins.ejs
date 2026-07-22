@@ -1,5 +1,5 @@
 <div class="relative min-h-[45vh] flex items-center overflow-hidden bg-slate-950 pt-24 pb-16 bg-cover bg-center bg-no-repeat"
-     style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.95)), url('/images/stacruz_police_station.jpg');">
+     style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.95)), url('/images/home-hero.jpg');">
     <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/10 via-transparent to-slate-950/30"></div>
 
     <!-- Hero Content -->
@@ -56,16 +56,7 @@
             </button>
         </div>
 
-        <!-- TTS Language Selector -->
-        <div class="flex items-center space-x-3 bg-gray-50 dark:bg-slate-900 px-5 py-2 rounded-xl border border-gray-200 dark:border-slate-700">
-            <i class="fas fa-language text-pnp-blue dark:text-pnp-gold text-base"></i>
-            <label for="global-tts-lang-select" class="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider hidden sm:inline">Audio Voice:</label>
-            <select id="global-tts-lang-select" class="tts-lang-select bg-transparent text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none cursor-pointer">
-                <option value="fil-PH">🇵🇭 Tagalog / Filipino</option>
-                <option value="en-US">🇺🇸 English (US)</option>
-                <option value="en-PH">🇵🇭 English (PH)</option>
-            </select>
-        </div>
+
     </div>
     <% } %>
 
@@ -152,11 +143,7 @@
                                     <%= bulletin.body %>
                                 </p>
 
-                                <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700 flex items-center justify-between">
-                                    <button id="tts-bulletin-<%= bulletin.id %>" onclick="speakReport('tts-bulletin-<%= bulletin.id %>', `<%= bulletin.title.replace(/`/g, '\\`').replace(/"/g, '&quot;').replace(/\n/g, ' ') %>. <%= bulletin.body.replace(/`/g, '\\`').replace(/"/g, '&quot;').replace(/\n/g, ' ') %>`)" class="text-[10px] font-black text-slate-600 dark:text-slate-300 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-1.5 focus:outline-none transition px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-                                        <i class="fas fa-volume-high text-xs"></i>
-                                        <span>Listen</span>
-                                    </button>
+                                <div class="mt-auto pt-8 border-t border-gray-50 dark:border-slate-700 flex items-center justify-end">
                                     <button onclick="openBulletinModal('<%= bulletin.id %>')"
                                         class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition focus:outline-none">
                                         Read Details <i class="fas fa-arrow-right ml-2 text-[10px]"></i>

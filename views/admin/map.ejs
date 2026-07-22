@@ -1609,6 +1609,10 @@
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const barangayParam = urlParams.get('barangay');
+        const offenseParam = urlParams.get('offense');
+        const latParam = parseFloat(urlParams.get('lat'));
+        const lngParam = parseFloat(urlParams.get('lng'));
+
         if (barangayParam) {
             const barangaySelect = document.getElementById('filterBarangay');
             if (barangaySelect) {
@@ -1638,6 +1642,38 @@
         updateActivePeriodDisplay();
 
         initMap();
+
+        if (!isNaN(latParam) && !isNaN(lngParam) && latParam !== 0 && lngParam !== 0) {
+            setTimeout(() => {
+                if (window.map) {
+                    window.map.flyTo([latParam, lngParam], 16, { duration: 1.5 });
+                    
+                    const highlightPulse = L.divIcon({
+                        className: 'crime-highlight-marker',
+                        html: `
+                            <div class="relative flex items-center justify-center">
+                                <div class="absolute w-12 h-12 bg-red-500/50 rounded-full animate-ping"></div>
+                                <div class="w-8 h-8 bg-red-600 rounded-full border-2 border-white flex items-center justify-center text-white shadow-2xl z-10">
+                                    <i class="fas fa-bullseye text-xs"></i>
+                                </div>
+                            </div>
+                        `,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16]
+                    });
+
+                    const popupContent = `
+                        <div class="p-3 text-center min-w-[140px]">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-red-500 text-white tracking-widest inline-block">${offenseParam || 'CRIME INCIDENT'}</span>
+                            <p class="text-xs font-black text-slate-800 dark:text-white mt-2 uppercase">BRGY. ${barangayParam || 'LOCATION'}</p>
+                            <p class="text-[10px] text-slate-400 font-mono mt-1">${latParam.toFixed(4)}, ${lngParam.toFixed(4)}</p>
+                        </div>
+                    `;
+
+                    L.marker([latParam, lngParam], { icon: highlightPulse }).addTo(window.map).bindPopup(popupContent).openPopup();
+                }
+            }, 1000);
+        }
 
         // Robust event listeners for all map filters
         const setupListener = (id, callback) => {

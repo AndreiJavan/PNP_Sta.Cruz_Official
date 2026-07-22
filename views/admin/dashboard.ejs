@@ -36,82 +36,82 @@
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 
     <!-- Bulletins Card -->
-    <a href="/admin/bulletins" class="pnp-card pnp-glass-dark border-pnp-gold/10 p-6 rounded-[2.5rem] relative overflow-hidden group">
+    <a href="/admin/bulletins" class="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800/60 shadow-sm hover:shadow-2xl p-6 rounded-[2.5rem] relative overflow-hidden group transition-all duration-300">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pnp-gold/10 rounded-full blur-3xl group-hover:bg-pnp-gold/20 transition-all"></div>
-        <div class="relative z-10 text-white">
+        <div class="relative z-10 text-slate-800 dark:text-white">
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
-                    <span class="text-[9px] text-pnp-gold-300 font-black uppercase tracking-[0.2em] opacity-80">PNP Bulletins</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Bulletins</h3>
+                    <span class="text-[9px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.2em]">PNP Bulletins</span>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1 text-slate-900 dark:text-white">Bulletins</h3>
                 </div>
-                <div class="w-10 h-10 rounded-2xl bg-pnp-gold/20 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
+                <div class="w-10 h-10 rounded-2xl bg-pnp-blue/10 dark:bg-pnp-gold/20 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-pnp-blue/10 dark:border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-bullhorn"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-5xl font-black tabular-nums tracking-tighter"><%= safeStats.totalBulletins %></h2>
+                <h2 class="text-5xl font-black tabular-nums tracking-tighter text-slate-900 dark:text-white"><%= safeStats.totalBulletins %></h2>
                 <div class="flex flex-col mb-1">
-                    <span class="text-[8px] font-black text-pnp-gold uppercase tracking-[0.1em]">Active</span>
-                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Issued</span>
+                    <span class="text-[8px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.1em]">Active</span>
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-tighter leading-none">Issued</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                <span class="text-[8px] text-white/30 font-bold uppercase tracking-widest">DILG Sync</span>
-                <i class="fas fa-chevron-right text-[8px] text-white/20 group-hover:translate-x-1 transition-transform"></i>
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                <span class="text-[8px] text-slate-400 dark:text-white/30 font-bold uppercase tracking-widest">DILG Sync</span>
+                <i class="fas fa-chevron-right text-[8px] text-slate-400 dark:text-white/20 group-hover:translate-x-1 transition-transform"></i>
             </div>
         </div>
     </a>
 
     <!-- Reports Card -->
-    <a href="/admin/reports" class="pnp-card pnp-glass-dark border-blue-400/10 p-6 rounded-[2.5rem] relative overflow-hidden group">
+    <a href="/admin/reports" class="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800/60 shadow-sm hover:shadow-2xl p-6 rounded-[2.5rem] relative overflow-hidden group transition-all duration-300">
         <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-400/10 rounded-full blur-3xl group-hover:bg-blue-400/20 transition-all"></div>
-        <div class="relative z-10 text-white">
+        <div class="relative z-10 text-slate-800 dark:text-white">
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
-                    <span class="text-[9px] text-blue-300 font-black uppercase tracking-[0.2em] opacity-80">Crime Records</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Records</h3>
+                    <span class="text-[9px] text-pnp-blue dark:text-blue-300 font-black uppercase tracking-[0.2em]">Crime Records</span>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1 text-slate-900 dark:text-white">Records</h3>
                 </div>
-                <div class="w-10 h-10 rounded-2xl bg-blue-400/20 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
+                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-400/20 flex items-center justify-center text-pnp-blue dark:text-blue-400 border border-blue-500/10 dark:border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-microchip"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 id="kpiTotalCrimes" class="text-5xl font-black tabular-nums tracking-tighter"><%= safeStats.focus + safeStats.nonIndex + safeStats.psi %></h2>
+                <h2 id="kpiTotalCrimes" class="text-5xl font-black tabular-nums tracking-tighter text-slate-900 dark:text-white"><%= safeStats.focus + safeStats.nonIndex + safeStats.psi %></h2>
                 <div class="flex flex-col mb-1">
-                    <span class="text-[8px] font-black text-blue-400 uppercase tracking-[0.1em]">Crimes</span>
-                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Total Logs</span>
+                    <span class="text-[8px] font-black text-pnp-blue dark:text-blue-400 uppercase tracking-[0.1em]">Crimes</span>
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-tighter leading-none">Total Logs</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                <span class="text-[8px] text-white/30 font-bold uppercase tracking-widest">Live Analysis</span>
-                <i class="fas fa-chevron-right text-[8px] text-white/20 group-hover:translate-x-1 transition-transform"></i>
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                <span class="text-[8px] text-slate-400 dark:text-white/30 font-bold uppercase tracking-widest">Live Analysis</span>
+                <i class="fas fa-chevron-right text-[8px] text-slate-400 dark:text-white/20 group-hover:translate-x-1 transition-transform"></i>
             </div>
         </div>
     </a>
 
     <!-- Map Card -->
-    <a href="/admin/map" class="pnp-card pnp-glass-dark border-white/10 p-6 rounded-[2.5rem] relative overflow-hidden group">
-        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
-        <div class="relative z-10 text-white">
+    <a href="/admin/map" class="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800/60 shadow-sm hover:shadow-2xl p-6 rounded-[2.5rem] relative overflow-hidden group transition-all duration-300">
+        <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-pnp-blue/5 dark:bg-white/5 rounded-full blur-3xl group-hover:bg-pnp-blue/10 dark:group-hover:bg-white/10 transition-all"></div>
+        <div class="relative z-10 text-slate-800 dark:text-white">
             <div class="flex justify-between items-start mb-6">
                 <div class="flex flex-col">
-                    <span class="text-[9px] text-white/60 font-black uppercase tracking-[0.2em] opacity-80">Map Locations</span>
-                    <h3 class="text-xs font-black uppercase tracking-widest mt-1">Map</h3>
+                    <span class="text-[9px] text-pnp-blue dark:text-white/60 font-black uppercase tracking-[0.2em]">Map Locations</span>
+                    <h3 class="text-xs font-black uppercase tracking-widest mt-1 text-slate-900 dark:text-white">Map</h3>
                 </div>
-                <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/10 shadow-lg group-hover:scale-110 transition-transform">
+                <div class="w-10 h-10 rounded-2xl bg-pnp-blue/10 dark:bg-white/10 flex items-center justify-center text-pnp-blue dark:text-white border border-pnp-blue/10 dark:border-white/10 shadow-lg group-hover:scale-110 transition-transform">
                     <i class="fas fa-map-location-dot"></i>
                 </div>
             </div>
             <div class="flex items-end space-x-3 mb-2">
-                <h2 class="text-5xl font-black tabular-nums tracking-tighter">26</h2>
+                <h2 class="text-5xl font-black tabular-nums tracking-tighter text-slate-900 dark:text-white">26</h2>
                 <div class="flex flex-col mb-1">
-                    <span class="text-[8px] font-black text-white/50 uppercase tracking-[0.1em]">Barangays</span>
-                    <span class="text-[9px] font-bold text-white/40 uppercase tracking-tighter leading-none">Covered</span>
+                    <span class="text-[8px] font-black text-pnp-blue dark:text-white/50 uppercase tracking-[0.1em]">Barangays</span>
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-white/40 uppercase tracking-tighter leading-none">Covered</span>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                <span class="text-[8px] text-white/30 font-bold uppercase tracking-widest">Sector Mapping</span>
-                <i class="fas fa-chevron-right text-[8px] text-white/20 group-hover:translate-x-1 transition-transform"></i>
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-white/5 flex items-center justify-between">
+                <span class="text-[8px] text-slate-400 dark:text-white/30 font-bold uppercase tracking-widest">Sector Mapping</span>
+                <i class="fas fa-chevron-right text-[8px] text-slate-400 dark:text-white/20 group-hover:translate-x-1 transition-transform"></i>
             </div>
         </div>
     </a>

@@ -279,3 +279,37 @@ export const getHotlines = async (req: Request, res: Response) => {
     res.status(500).send('Error loading hotlines');
   }
 };
+
+export const translateToTagalog = async (req: Request, res: Response) => {
+  try {
+    const { text } = req.body;
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ error: 'Text parameter required' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
+    if (apiKey) {
+      try {
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey });
+        const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt
+        });
+
+        const tagalogText = response.text ? response.text.trim() : text;
+        return res.json({ success: true, tagalogText });
+      } catch (aiErr: any) {
+        console.warn('Gemini translation error, falling back to original text:', aiErr?.message || aiErr);
+      }
+    }
+
+    return res.json({ success: true, tagalogText: text });
+  } catch (err: any) {
+    console.error('Translation endpoint error:', err);
+    return res.json({ success: false, tagalogText: req.body.text || '' });
+  }
+};
+
