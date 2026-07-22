@@ -137,7 +137,7 @@
                             class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin
                             Title</label>
                         <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>"
-                            required placeholder="Enter a clear, descriptive title"
+                            required minlength="2" maxlength="150" placeholder="Enter a clear, descriptive title (2-150 characters)"
                             class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                     </div>
 
@@ -234,6 +234,31 @@
 
     async function handleBulletinSubmit(event) {
         event.preventDefault();
+        const titleInput = document.getElementById('title');
+        const bodyInput = document.getElementById('body');
+
+        const cleanTitle = (titleInput ? titleInput.value : '').trim();
+        const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
+
+        if (cleanTitle.length < 2) {
+            alert('Title / Name must be at least 2 characters long.');
+            if (titleInput) titleInput.focus();
+            return;
+        }
+        if (cleanTitle.length > 150 || titleWords.length > 25) {
+            alert('Title / Name is too long. Please keep it under 150 characters / 25 words.');
+            if (titleInput) titleInput.focus();
+            return;
+        }
+
+        const cleanBody = (bodyInput ? bodyInput.value : '').trim();
+        const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+        if (bodyWords.length > 2000) {
+            alert('Content body is too long. Please limit to 2,000 words.');
+            if (bodyInput) bodyInput.focus();
+            return;
+        }
+
         const isEdit = <%= bulletin ? 'true' : 'false' %>;
         const action = isEdit ? 'update' : 'create';
 
@@ -347,6 +372,7 @@
         if (!files || files.length === 0) return;
 
         let ignoredSome = false;
+        let errorMessage = '';
 
         Array.from(files).forEach(file => {
             const currentTotalCount = existingMedia.length + accumulatedFiles.length + accumulatedVideos.length;
@@ -356,15 +382,27 @@
             }
 
             if (file.type.startsWith('image/')) {
-                accumulatedFiles.push(file);
+                if (file.size > 5 * 1024 * 1024) {
+                    errorMessage += `Image "${file.name}" exceeds maximum allowed size of 5MB.\n`;
+                    ignoredSome = true;
+                } else {
+                    accumulatedFiles.push(file);
+                }
             } else if (file.type.startsWith('video/')) {
-                accumulatedVideos.push(file);
+                if (file.size > 100 * 1024 * 1024) {
+                    errorMessage += `Video "${file.name}" exceeds maximum allowed size of 100MB.\n`;
+                    ignoredSome = true;
+                } else {
+                    accumulatedVideos.push(file);
+                }
             } else {
                 ignoredSome = true;
             }
         });
 
-        if (ignoredSome) {
+        if (errorMessage) {
+            alert(errorMessage);
+        } else if (ignoredSome) {
             alert('You can only upload a maximum of 5 files (images and videos combined). Some files were ignored.');
         }
 

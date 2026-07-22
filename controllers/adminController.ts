@@ -1851,6 +1851,23 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
+  // Validation 1: Title/Name character and word limits
+  const cleanTitle = (title || '').trim();
+  const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
+  if (cleanTitle.length < 2) {
+    return res.status(400).send('Validation Error: Title / Name must be at least 2 characters long.');
+  }
+  if (cleanTitle.length > 150 || titleWords.length > 25) {
+    return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');
+  }
+
+  // Validation 2: Body text length limiter
+  const cleanBody = (body || '').trim();
+  const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+  if (bodyWords.length > 2000 || cleanBody.length > 15000) {
+    return res.status(400).send('Validation Error: Content body is too long (maximum 2,000 words).');
+  }
+
   try {
     let uploadedPhotoPaths: string[] = [];
     let uploadedVideoPaths: string[] = [];
@@ -1869,6 +1886,10 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       if (files.photos && files.photos.length > 0) {
         for (const file of files.photos) {
           if (totalUploaded >= 5) break;
+          // Per-image size check: Max 5MB
+          if (file.size > 5 * 1024 * 1024) {
+            return res.status(400).send(`Validation Error: Picture "${file.originalname}" exceeds maximum limit of 5MB.`);
+          }
           const fileExt = file.originalname.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const path = `bulletins/${fileName}`;
@@ -1886,6 +1907,10 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       if (files.videos && files.videos.length > 0) {
         for (const file of files.videos) {
           if (totalUploaded >= 5) break;
+          // Per-video size check: Max 100MB
+          if (file.size > 100 * 1024 * 1024) {
+            return res.status(400).send(`Validation Error: Video "${file.originalname}" exceeds maximum limit of 100MB.`);
+          }
           const fileExt = file.originalname.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const path = `bulletins/${fileName}`;

@@ -6,24 +6,23 @@ const storage = multer.memoryStorage();
 const upload = multer({ 
   storage: storage,
   limits: { 
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 100 * 1024 * 1024 // Overall max 100MB (for videos), checked specifically by mimetype in controllers
   },
   fileFilter: (req, file, cb) => {
-    const allowedMimeTypes = [
-      'image/jpeg', 
-      'image/png', 
-      'image/gif', 
+    const isImage = file.mimetype.startsWith('image/');
+    const isVideo = file.mimetype.startsWith('video/');
+    const isDoc = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.ms-excel',
       'text/csv',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/msword'
-    ];
+    ].includes(file.mimetype);
     
-    if (allowedMimeTypes.includes(file.mimetype)) {
+    if (isImage || isVideo || isDoc) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only Images, Excel, and DOCX are allowed.') as any, false);
+      cb(new Error('Invalid file type. Only Images, Videos, Excel, and DOCX are allowed.') as any, false);
     }
   }
 });
