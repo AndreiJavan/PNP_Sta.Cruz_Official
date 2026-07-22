@@ -86,7 +86,7 @@
                             </tr>
                         <% } else { %>
                             <% displayReports.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).forEach(report => { %>
-                                <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-800/40 transition-all group relative overflow-hidden cursor-pointer" ondblclick="viewReportDetails('<%= report.id %>')">
+                                <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-800/40 transition-all group relative overflow-hidden cursor-pointer" onclick="viewReportDetails('<%= report.id %>')">
                                     <td class="px-8 py-6">
                                         <div class="flex flex-col">
                                             <span class="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-tighter">
@@ -645,7 +645,7 @@
          const pageItems = filteredReportsList.slice(startIndex, endIndex);
 
          tbody.innerHTML = pageItems.map((report, index) => `
-             <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors group animate-fade-in-up cursor-pointer" style="animation-delay: ${index * 30}ms" ondblclick="viewReportDetails('${report.id}')">
+             <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-900/30 transition-colors group animate-fade-in-up cursor-pointer" style="animation-delay: ${index * 30}ms" onclick="viewReportDetails('${report.id}')">
                  <td class="px-8 py-6">
                      <div class="flex flex-col">
                          <span class="text-sm font-black text-slate-700 dark:text-slate-200">${new Date(report.timestamp).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -1165,22 +1165,19 @@
         document.getElementById('reportDetailsTitle').textContent = 'Recorded Crime | Incident';
         
         window.currentViewingReport = report;
-        renderReportDetailsModalContent('All');
+        renderReportDetailsModalContent('All', 'All', 1);
     }
-
-    function renderReportDetailsModalContent(filter, selectedOffense = 'All') {
+    function renderReportDetailsModalContent(filter, selectedOffense = 'All', modalPageNumber = 1) {
         if (window.isGlobalStats) {
-            window.currentStatsCategory = filter === 'All' ? '8-Focus' : filter; // Default to focus if 'All' clicked in global mode
+            window.currentStatsCategory = filter === 'All' ? '8-Focus' : filter;
             renderGlobalStatsModalContent();
             return;
         }
         const report = window.currentViewingReport;
-        const rawData = report.raw_data || [];
+        const rawData = report ? (report.raw_data || []) : [];
         
-        // Filter by category first
         let filteredData = filter === 'All' ? rawData : rawData.filter(item => item.category === filter);
         
-        // Filter by selected offense / classification
         if (selectedOffense && selectedOffense !== 'All') {
             filteredData = filteredData.filter(item => {
                 const itemOffense = (item.offense || item.incident_type || '').toUpperCase();
@@ -1189,13 +1186,11 @@
         }
         
         const content = document.getElementById('reportDetailsContent');
-        const batchId = `#${report.id.slice(-8).toUpperCase()}`;
-        const timestamp = new Date(report.timestamp).toLocaleString(undefined, { 
+        const timestamp = report ? new Date(report.timestamp).toLocaleString(undefined, { 
             month: 'short', day: 'numeric', year: 'numeric', 
             hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
+        }) : 'N/A';
 
-        // Collect classifications that are actually present in the given data for the selected category filter
         const existingOffenses = new Set();
         rawData.forEach(item => {
             const off = item.offense || item.incident_type;
@@ -1206,23 +1201,34 @@
 
         const combinedOffenses = Array.from(existingOffenses).sort();
 
+        // Pagination state for detail modal
+        const modalPage = modalPageNumber || 1;
+        const itemsPerPageModal = 15;
+        const totalModalItems = filteredData.length;
+        const totalModalPages = Math.ceil(totalModalItems / itemsPerPageModal) || 1;
+        const validModalPage = Math.min(Math.max(1, modalPage), totalModalPages);
+
+        const modalStartIndex = (validModalPage - 1) * itemsPerPageModal;
+        const modalEndIndex = Math.min(modalStartIndex + itemsPerPageModal, totalModalItems);
+        const pagedModalData = filteredData.slice(modalStartIndex, modalEndIndex);
+
         content.innerHTML = `
             <!-- Enhanced Batch Info Header -->
             <div class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="space-y-2">
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Neural Scanning Source</span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Report Source</span>
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-full bg-pnp-blue flex items-center justify-center text-[10px] font-black text-pnp-gold border border-pnp-gold/20">
                             ${(report.admin_name || 'A').charAt(0)}
                         </div>
                         <div class="flex flex-col">
                             <p class="text-sm font-black text-pnp-blue dark:text-pnp-gold uppercase leading-none">${report.admin_name || 'System Administrator'}</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px] mt-1" title="${report.filename || 'Neural Scan Buffer'}">${report.filename || 'Neural Scan Buffer'}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px] mt-1" title="${report.filename || 'Uploaded File'}">${report.filename || 'Uploaded File'}</p>
                         </div>
                     </div>
                 </div>
                 <div class="space-y-2">
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Extraction Timeline</span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Upload Date</span>
                     <div class="flex items-center space-x-2 text-slate-700 dark:text-white">
                         <i class="far fa-clock text-xs text-pnp-blue dark:text-pnp-gold"></i>
                         <p class="text-xs font-black uppercase font-mono tracking-tighter">${timestamp}</p>
@@ -1230,23 +1236,23 @@
                 </div>
                 <div class="md:col-span-2 flex flex-col items-end justify-center space-y-4">
                     <div class="flex items-center space-x-2 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
-                        <button onclick="renderReportDetailsModalContent('All')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'All' ? 'bg-pnp-blue text-white shadow-lg' : 'text-slate-400 hover:text-pnp-blue'}">All Intel</button>
-                        <button onclick="renderReportDetailsModalContent('8-Focus')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === '8-Focus' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-400 hover:text-red-500'}">8-Focus</button>
-                        <button onclick="renderReportDetailsModalContent('Non-Index')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'Non-Index' ? 'bg-slate-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-500'}">Non-Index</button>
-                        <button onclick="renderReportDetailsModalContent('PSI')" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'PSI' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-400 hover:text-blue-500'}">PSI</button>
+                        <button onclick="renderReportDetailsModalContent('All', 'All', 1)" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'All' ? 'bg-pnp-blue text-white shadow-lg' : 'text-slate-400 hover:text-pnp-blue'}">All Incidents</button>
+                        <button onclick="renderReportDetailsModalContent('8-Focus', 'All', 1)" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === '8-Focus' ? 'bg-red-500 text-white shadow-lg' : 'text-slate-400 hover:text-red-500'}">8-Focus</button>
+                        <button onclick="renderReportDetailsModalContent('Non-Index', 'All', 1)" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'Non-Index' ? 'bg-slate-500 text-white shadow-lg' : 'text-slate-400 hover:text-slate-500'}">Non-Index</button>
+                        <button onclick="renderReportDetailsModalContent('PSI', 'All', 1)" class="px-5 py-2 text-[10px] font-black uppercase rounded-xl transition-all ${filter === 'PSI' ? 'bg-blue-500 text-white shadow-lg' : 'text-slate-400 hover:text-blue-500'}">PSI</button>
                     </div>
                     <div class="flex items-center space-x-3 text-right">
                         <div class="text-left flex flex-col space-y-1">
                             <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block leading-none">Classification</span>
-                            <select id="modalClassificationDropdown" onchange="renderReportDetailsModalContent('${filter}', this.value)" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-1 focus:ring-pnp-blue outline-none cursor-pointer max-w-[220px] truncate">
+                            <select id="modalClassificationDropdown" onchange="renderReportDetailsModalContent('${filter}', this.value, 1)" class="px-3 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-1 focus:ring-pnp-blue outline-none cursor-pointer max-w-[220px] truncate">
                                 <option value="All" ${selectedOffense === 'All' ? 'selected' : ''} class="dark:bg-slate-900">All Classifications</option>
                                 ${combinedOffenses.map(o => `<option value="${o}" ${o.toUpperCase() === selectedOffense.toUpperCase() ? 'selected' : ''} class="dark:bg-slate-900">${o}</option>`).join('')}
                             </select>
                         </div>
                         <div class="w-px h-8 bg-gray-200 dark:bg-slate-700"></div>
                         <div class="text-right">
-                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none">Total Staged</span>
-                            <p class="text-lg font-black text-pnp-blue dark:text-white leading-none mt-1">${filteredData.length}</p>
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block leading-none">Total Incidents</span>
+                            <p class="text-lg font-black text-pnp-blue dark:text-white leading-none mt-1">${totalModalItems}</p>
                         </div>
                     </div>
                 </div>
@@ -1259,28 +1265,28 @@
                         <thead class="sticky top-0 z-10">
                             <tr class="bg-gray-50 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
                                 <th class="px-6 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-16 text-center bg-gray-50 dark:bg-slate-900">#</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Timeline</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Classification</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Sector (Barangay)</th>
-                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Risk Pillar</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/5 bg-gray-50 dark:bg-slate-900">Date Committed</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/3 bg-gray-50 dark:bg-slate-900">Offense / Crime</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-100 dark:border-slate-800 w-1/4 bg-gray-50 dark:bg-slate-900">Barangay</th>
+                                <th class="px-8 py-4 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-center bg-gray-50 dark:bg-slate-900">Category</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-800">
-                            ${filteredData.length === 0 ? `
+                            ${totalModalItems === 0 ? `
                                 <tr>
                                     <td colspan="5" class="px-8 py-24 text-center">
                                         <div class="flex flex-col items-center space-y-4 opacity-40">
-                                            <i class="fas fa-satellite-dish text-4xl text-pnp-blue"></i>
-                                            <span class="text-xs font-black uppercase tracking-[0.3em] italic">Intelligence Grid Empty: No records match filter</span>
+                                            <i class="fas fa-folder-open text-4xl text-pnp-blue"></i>
+                                            <span class="text-xs font-black uppercase tracking-[0.3em] italic">No records match selected filter</span>
                                         </div>
                                     </td>
                                 </tr>
-                            ` : filteredData.map((item, idx) => {
+                            ` : pagedModalData.map((item, idx) => {
                                 const cat = item.category || 'Non-Index';
                                 const badgeClass = cat === '8-Focus' ? 'bg-red-500/10 text-red-500 border-red-500/20' : (cat === 'PSI' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : 'bg-slate-500/10 text-slate-500 border-slate-500/20');
                                 return `
                                     <tr class="hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 transition-colors group animate-fade-in-up" style="animation-delay: ${idx * 15}ms">
-                                        <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-50 dark:border-slate-800 text-center tabular-nums">${idx + 1}</td>
+                                        <td class="px-6 py-4 text-[10px] font-black text-gray-400 border-r border-gray-50 dark:border-slate-800 text-center tabular-nums">${modalStartIndex + idx + 1}</td>
                                         <td class="px-8 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 font-mono border-r border-gray-50 dark:border-slate-800 tracking-tighter">${item.date || item.date_committed || 'N/A'}</td>
                                         <td class="px-8 py-4 text-xs font-black text-pnp-blue dark:text-white uppercase border-r border-gray-50 dark:border-slate-800 truncate" title="${item.offense || item.incident_type || 'Unknown'}">${item.offense || item.incident_type || 'Unknown'}</td>
                                         <td class="px-8 py-4 text-xs font-black text-slate-600 dark:text-slate-300 uppercase border-r border-gray-50 dark:border-slate-800">BRGY. ${item.barangay || 'UNKNOWN'}</td>
@@ -1296,6 +1302,18 @@
                             }).join('')}
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Modal Inner Pagination -->
+                <div class="mt-6 p-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl flex justify-between items-center">
+                    <div class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                        ${totalModalItems > 0 ? `Showing ${modalStartIndex + 1} - ${modalEndIndex} of ${totalModalItems} records` : `Showing 0 records`}
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="renderReportDetailsModalContent('${filter}', '${selectedOffense}', ${validModalPage - 1})" ${validModalPage <= 1 ? 'disabled' : ''} class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Previous</button>
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mx-2">Page ${validModalPage} of ${totalModalPages}</span>
+                        <button onclick="renderReportDetailsModalContent('${filter}', '${selectedOffense}', ${validModalPage + 1})" ${validModalPage >= totalModalPages ? 'disabled' : ''} class="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white border border-gray-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">Next</button>
+                    </div>
                 </div>
             </div>
         `;
