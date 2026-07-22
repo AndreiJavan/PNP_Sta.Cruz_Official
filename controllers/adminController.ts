@@ -1884,6 +1884,12 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
         videos: videos.length > 0 ? videos : undefined
       };
     }
+
+    const hasPhotos = files && files.photos && files.photos.length > 0;
+    const hasVideos = files && files.videos && files.videos.length > 0;
+    if (!hasPhotos && !hasVideos) {
+      return res.status(400).send('Validation Error: At least 1 picture or video must be uploaded before posting.');
+    }
     if (files) {
       let totalUploaded = 0;
       if (files.photos && files.photos.length > 0) {
@@ -2033,6 +2039,14 @@ export const postEditBulletin = async (req: Request, res: Response) => {
         photos: photos.length > 0 ? photos : undefined,
         videos: videos.length > 0 ? videos : undefined
       };
+    }
+
+    const hasNewPhotos = files && files.photos && files.photos.length > 0;
+    const hasNewVideos = files && files.videos && files.videos.length > 0;
+    const totalMedia = finalPhotos.length + finalVideos.length + (hasNewPhotos ? files.photos.length : 0) + (hasNewVideos ? files.videos.length : 0);
+
+    if (totalMedia === 0) {
+      return res.status(400).send('Validation Error: At least 1 picture or video must be attached to the bulletin.');
     }
     if (files) {
       if (files.photos && files.photos.length > 0) {
