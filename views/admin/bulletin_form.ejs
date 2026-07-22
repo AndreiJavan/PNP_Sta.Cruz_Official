@@ -109,7 +109,7 @@
 
                             <button type="button" onclick="document.getElementById('mediaInput').click()"
                                 class="w-full bg-pnp-blue text-white py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
-                                Choose / Add Media (Max 5 Files combined)
+                                Choose / Add Media
                             </button>
 
                             <button type="button" onclick="clearAllMedia()" id="clearAllMediaBtn"
@@ -118,7 +118,7 @@
                             </button>
 
                             <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
-                                Images (PNG, JPG, WEBP) & Videos (MP4, WEBM) - Max 5 files total
+                                Upload & preview media freely — Max 5 files allowed for final posting
                             </p>
                         </div>
 
@@ -278,6 +278,7 @@
         }
 
         let errorMessage = '';
+        const totalMediaCount = (existingMedia ? existingMedia.length : 0) + (accumulatedFiles ? accumulatedFiles.length : 0) + (accumulatedVideos ? accumulatedVideos.length : 0);
 
         if (cleanTitle.length > 0 && titleWords.length < 3) {
             errorMessage = 'Title must be at least 3 words long.';
@@ -289,6 +290,8 @@
             errorMessage = `Bulletin body exceeds limit of 500 words (currently ${bodyWords.length} words).`;
         } else if (bodyChars > 5000) {
             errorMessage = `Bulletin body exceeds limit of 5,000 characters (currently ${bodyChars} characters).`;
+        } else if (totalMediaCount > 5) {
+            errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain before posting.`;
         } else if (typeof accumulatedFiles !== 'undefined') {
             for (const f of accumulatedFiles) {
                 if (f.size > 5 * 1024 * 1024) {
@@ -438,39 +441,26 @@
     function handleMediaFiles(files) {
         if (!files || files.length === 0) return;
 
-        let ignoredSome = false;
         let errorMessage = '';
 
         Array.from(files).forEach(file => {
-            const currentTotalCount = existingMedia.length + accumulatedFiles.length + accumulatedVideos.length;
-            if (currentTotalCount >= 5) {
-                ignoredSome = true;
-                return;
-            }
-
             if (file.type.startsWith('image/')) {
                 if (file.size > 5 * 1024 * 1024) {
                     errorMessage += `Image "${file.name}" exceeds maximum allowed size of 5MB.\n`;
-                    ignoredSome = true;
                 } else {
                     accumulatedFiles.push(file);
                 }
             } else if (file.type.startsWith('video/')) {
                 if (file.size > 100 * 1024 * 1024) {
                     errorMessage += `Video "${file.name}" exceeds maximum allowed size of 100MB.\n`;
-                    ignoredSome = true;
                 } else {
                     accumulatedVideos.push(file);
                 }
-            } else {
-                ignoredSome = true;
             }
         });
 
         if (errorMessage) {
             alert(errorMessage);
-        } else if (ignoredSome) {
-            alert('You can only upload a maximum of 5 files (images and videos combined). Some files were ignored.');
         }
 
         syncFileInputs();
