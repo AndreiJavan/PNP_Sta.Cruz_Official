@@ -139,12 +139,17 @@
 
                     <!-- TITLE -->
                     <div class="space-y-2">
-                        <label for="title"
-                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin
-                            Title</label>
+                        <div class="flex justify-between items-center">
+                            <label for="title"
+                                class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin
+                                Title</label>
+                            <span id="titleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                0 / 15 words
+                            </span>
+                        </div>
                         <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>"
-                            required minlength="2" maxlength="150" placeholder="Enter a clear, descriptive title (2-150 characters)"
-                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
+                            required minlength="2" maxlength="100" placeholder="Enter title (3-15 words, max 100 characters)"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white transition-all">
                     </div>
 
                     <!-- CATEGORY -->
@@ -304,10 +309,24 @@
         const warningText = document.getElementById('validationWarningText');
         const bodyCounter = document.getElementById('bodyCounter');
 
+        const titleCounter = document.getElementById('titleCounter');
+
         if (!titleInput || !bodyInput || !submitBtn) return true;
 
         const cleanTitle = (titleInput.value || '').trim();
         const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
+        const titleChars = cleanTitle.length;
+
+        if (titleCounter) {
+            titleCounter.textContent = `${titleWords.length} / 15 words (${titleChars} / 100 chars)`;
+            if (titleWords.length > 15 || titleChars > 100 || (cleanTitle.length > 0 && titleWords.length < 3)) {
+                titleCounter.classList.add('text-red-500');
+                titleCounter.classList.remove('text-slate-400');
+            } else {
+                titleCounter.classList.remove('text-red-500');
+                titleCounter.classList.add('text-slate-400');
+            }
+        }
 
         const cleanBody = (bodyInput.value || '').trim();
         const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
@@ -329,10 +348,10 @@
 
         if (cleanTitle.length > 0 && titleWords.length < 3) {
             errorMessage = 'Title must be at least 3 words long.';
-        } else if (cleanTitle.length > 150) {
-            errorMessage = 'Title exceeds limit of 150 characters.';
-        } else if (titleWords.length > 25) {
-            errorMessage = 'Title exceeds limit of 25 words.';
+        } else if (titleChars > 100) {
+            errorMessage = `Title exceeds upper limit of 100 characters (currently ${titleChars} characters).`;
+        } else if (titleWords.length > 15) {
+            errorMessage = `Title exceeds upper limit of 15 words (currently ${titleWords.length} words).`;
         } else if (bodyWords.length > 500) {
             errorMessage = `Bulletin body exceeds limit of 500 words (currently ${bodyWords.length} words).`;
         } else if (bodyChars > 5000) {

@@ -1851,14 +1851,14 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
-  // Validation 1: Title/Name character and word limits (Min 3 words, Max 25 words / 150 chars)
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
   if (titleWords.length < 3) {
     return res.status(400).send('Validation Error: Title / Name must be at least 3 words long.');
   }
-  if (cleanTitle.length > 150 || titleWords.length > 25) {
-    return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');
+  if (cleanTitle.length > 100 || titleWords.length > 15) {
+    return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
   // Validation 2: Body text length limiter (Max 500 words / 5,000 characters)
@@ -1983,14 +1983,14 @@ export const postEditBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, is_archived, existing_photos, existing_videos } = req.body;
   const rawCategory = category === 'Other' ? custom_category : category;
 
-  // Validation 1: Title/Name character and word limits (Min 3 words, Max 25 words / 150 chars)
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
   if (titleWords.length < 3) {
     return res.status(400).send('Validation Error: Title / Name must be at least 3 words long.');
   }
-  if (cleanTitle.length > 150 || titleWords.length > 25) {
-    return res.status(400).send('Validation Error: Title / Name is too long (maximum 150 characters / 25 words).');
+  if (cleanTitle.length > 100 || titleWords.length > 15) {
+    return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
   // Validation 2: Body text length limiter (Max 500 words / 5,000 characters)
