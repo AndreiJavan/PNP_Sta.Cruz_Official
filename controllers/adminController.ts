@@ -2622,7 +2622,7 @@ export const deleteReport = async (req: Request, res: Response) => {
 
     // 2. Fetch associated map points
     const pointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
-    const mapPointsData = pointsSnap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+    const mapPointsData = (pointsSnap.docs || []).map((d: any) => ({ id: d.id, ...d.data() }));
 
     // 3. Store into recycle_bin collection
     await db.collection('recycle_bin').add({
@@ -2637,11 +2637,9 @@ export const deleteReport = async (req: Request, res: Response) => {
       deleted_at: new Date().toISOString()
     });
 
-    // 4. Delete map points & scan document
-    const batch = db.batch();
-    pointsSnap.docs.forEach((doc: any) => batch.delete(doc.ref));
-    batch.delete(db.collection('intelligence_scans').doc(reportId).ref);
-    await batch.commit();
+    // 4. Delete map points & scan document safely
+    await db.collection('map_points').where('report_id', '==', reportId).delete();
+    await db.collection('intelligence_scans').doc(reportId).delete();
 
     await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
     res.redirect('/admin/reports');
