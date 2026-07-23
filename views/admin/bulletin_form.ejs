@@ -38,11 +38,13 @@
                                 <% let mediaItems=[]; if (bulletin) { if (bulletin.photo_paths &&
                                     bulletin.photo_paths.length> 0) {
                                     bulletin.photo_paths.forEach(p => mediaItems.push({ type: 'image', path: p }));
-                                    } else if (bulletin.photo_path) {
+                                    } else if (bulletin.photo_path && bulletin.photo_path !== '[]' && !bulletin.photo_path.startsWith('[')) {
                                     mediaItems.push({ type: 'image', path: bulletin.photo_path });
                                     }
                                     if (bulletin.video_paths && bulletin.video_paths.length > 0) {
                                     bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
+                                    } else if (bulletin.video_path && bulletin.video_path !== '[]' && !bulletin.video_path.startsWith('[')) {
+                                    mediaItems.push({ type: 'video', path: bulletin.video_path });
                                     }
                                     }
                                     %>
@@ -161,25 +163,52 @@
                             Category
                         </label>
 
-                        <% const standardCategories=['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness', 'General Announcement']; const isCustomCategory=bulletin &&
-                            bulletin.category && !standardCategories.includes(bulletin.category); %>
+                        <% 
+                            const standardCategories=['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness', 'General Announcement']; 
+                            const isCustomCategory=bulletin && bulletin.category && !standardCategories.includes(bulletin.category);
+                            const currentCat = bulletin ? bulletin.category : (typeof defaultCategory !== 'undefined' ? defaultCategory : '');
+                            const isEditing = !!bulletin;
+                            const isPublicAdvisoryEdit = isEditing && currentCat !== 'General Announcement';
+                            const isGeneralAnnouncementEdit = isEditing && currentCat === 'General Announcement';
+                        %>
 
-                            <select name="category" id="category" required
+                            <select name="category" id="category" required onchange="validateForm()"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
 
-                                <option value="" disabled <%=!bulletin && (typeof defaultCategory==='undefined' ||
-                                    !defaultCategory) ? 'selected' : '' %>>Select Category</option>
+                                <option value="" disabled <%= !bulletin && !currentCat ? 'selected' : '' %>>Select Category</option>
 
-                                <optgroup label="PUBLIC ADVISORIES (Broadcast to Public Advisory Page)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                    <option value="Crime Advisory" <%= ((bulletin && bulletin.category === 'Crime Advisory') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Crime Advisory')) ? 'selected' : '' %>>Crime Advisory</option>
-                                    <option value="Traffic Advisory" <%= ((bulletin && bulletin.category === 'Traffic Advisory') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Traffic Advisory')) ? 'selected' : '' %>>Traffic Advisory</option>
-                                    <option value="Cybercrime Advisory" <%= ((bulletin && bulletin.category === 'Cybercrime Advisory') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Cybercrime Advisory')) ? 'selected' : '' %>>Cybercrime Advisory</option>
-                                    <option value="Community Awareness" <%= ((bulletin && bulletin.category === 'Community Awareness') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'Community Awareness')) ? 'selected' : '' %>>Community Awareness</option>
-                                </optgroup>
+                                <% if (isPublicAdvisoryEdit) { %>
+                                    <!-- When editing a Public Advisory, show ONLY the 4 Public Advisory categories -->
+                                    <optgroup label="PUBLIC ADVISORIES" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                        <option value="Crime Advisory" <%= currentCat === 'Crime Advisory' ? 'selected' : '' %>>Crime Advisory</option>
+                                        <option value="Traffic Advisory" <%= currentCat === 'Traffic Advisory' ? 'selected' : '' %>>Traffic Advisory</option>
+                                        <option value="Cybercrime Advisory" <%= currentCat === 'Cybercrime Advisory' ? 'selected' : '' %>>Cybercrime Advisory</option>
+                                        <option value="Community Awareness" <%= currentCat === 'Community Awareness' ? 'selected' : '' %>>Community Awareness</option>
+                                    </optgroup>
+                                <% } else if (isGeneralAnnouncementEdit) { %>
+                                    <!-- When editing a General Announcement -->
+                                    <optgroup label="NEWS & RELEASES (Broadcast to News Feed)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                        <option value="General Announcement" selected>General Announcement (News / Press Release)</option>
+                                    </optgroup>
+                                    <optgroup label="PUBLIC ADVISORIES (Broadcast to Public Advisory Page)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                        <option value="Crime Advisory">Crime Advisory</option>
+                                        <option value="Traffic Advisory">Traffic Advisory</option>
+                                        <option value="Cybercrime Advisory">Cybercrime Advisory</option>
+                                        <option value="Community Awareness">Community Awareness</option>
+                                    </optgroup>
+                                <% } else { %>
+                                    <!-- When creating a new bulletin -->
+                                    <optgroup label="PUBLIC ADVISORIES (Broadcast to Public Advisory Page)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                        <option value="Crime Advisory" <%= currentCat === 'Crime Advisory' ? 'selected' : '' %>>Crime Advisory</option>
+                                        <option value="Traffic Advisory" <%= currentCat === 'Traffic Advisory' ? 'selected' : '' %>>Traffic Advisory</option>
+                                        <option value="Cybercrime Advisory" <%= currentCat === 'Cybercrime Advisory' ? 'selected' : '' %>>Cybercrime Advisory</option>
+                                        <option value="Community Awareness" <%= currentCat === 'Community Awareness' ? 'selected' : '' %>>Community Awareness</option>
+                                    </optgroup>
 
-                                <optgroup label="NEWS & RELEASES (Broadcast to News Feed)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                    <option value="General Announcement" <%= ((bulletin && bulletin.category === 'General Announcement') || (typeof defaultCategory !== 'undefined' && defaultCategory === 'General Announcement')) ? 'selected' : '' %>>General Announcement (News / Press Release)</option>
-                                </optgroup>
+                                    <optgroup label="NEWS & RELEASES (Broadcast to News Feed)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
+                                        <option value="General Announcement" <%= currentCat === 'General Announcement' ? 'selected' : '' %>>General Announcement (News / Press Release)</option>
+                                    </optgroup>
+                                <% } %>
 
                             </select>
                     </div>
@@ -205,7 +234,8 @@
                                 oninput="handleFbUrlChange(this.value);"
                                 class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-semibold dark:text-white transition-all">
                         </div>
-                        <p class="text-[10px] text-slate-400 font-medium">When a Facebook post / video link is attached, file upload is optional.</p>
+                        <p id="fbUrlError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                        <p class="text-[10px] text-slate-400 font-medium">When a Facebook post / video link is attached, file upload is optional (General Announcements only).</p>
                     </div>
 
 
@@ -444,6 +474,21 @@
         const fbUrlInput = document.getElementById('facebook_url');
         const hasFbUrl = fbUrlInput && fbUrlInput.value.trim().length > 0;
 
+        const catSelect = document.getElementById('category');
+        const selectedCat = catSelect ? catSelect.value : '';
+        const advisoryCats = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+        const isAdvisoryCat = advisoryCats.includes(selectedCat) || (selectedCat && selectedCat !== 'General Announcement' && selectedCat !== 'Wanted Person' && selectedCat !== 'Missing Person');
+
+        const fbUrlError = document.getElementById('fbUrlError');
+        if (isAdvisoryCat && hasFbUrl) {
+            if (fbUrlError) {
+                fbUrlError.textContent = `❌ Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL or select "General Announcement".`;
+                fbUrlError.classList.remove('hidden');
+            }
+        } else {
+            if (fbUrlError) fbUrlError.classList.add('hidden');
+        }
+
         if (cleanTitle.length === 0) {
             errorMessage = 'Please enter a bulletin title (at least 3 letters required).';
         } else if (titleChars < 3) {
@@ -456,6 +501,8 @@
             errorMessage = `Bulletin body must be at least 10 letters long (currently ${bodyChars} letters).`;
         } else if (bodyChars > 5000) {
             errorMessage = `Bulletin body exceeds upper limit of 5,000 letters (currently ${bodyChars} letters).`;
+        } else if (isAdvisoryCat && hasFbUrl) {
+            errorMessage = `Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL link or select "General Announcement".`;
         } else if (totalMediaCount === 0 && !hasFbUrl) {
             errorMessage = 'At least 1 picture, video, or Facebook URL link must be provided before posting.';
         } else if (totalMediaCount > 5) {

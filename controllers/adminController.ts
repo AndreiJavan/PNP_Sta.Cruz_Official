@@ -1742,7 +1742,7 @@ function generateLocalReportAnalysis(rawData: any[]): string {
     crimeCounts[offense] = (crimeCounts[offense] || 0) + 1;
   });
 
-  const sortedBrgy = Object.entries(brgyCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const sortedBrgy = Object.entries(brgyCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const sortedCrimes = Object.entries(crimeCounts).sort((a, b) => b[1] - a[1]).slice(0, 3);
 
   const topBrgyText = sortedBrgy.map(([name, count]) => `**Brgy. ${name}** (${count} record${count === 1 ? '' : 's'})`).join(', ');
@@ -1951,19 +1951,27 @@ export const getDashboard = async (req: Request, res: Response) => {
 
 const parsePhotos = (path: string | undefined): string[] => {
   if (!path) return [];
+  if (path === '[]' || path === '""' || path === 'null') return [];
   try {
     const parsed = JSON.parse(path);
-    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed)) {
+      return parsed.filter((p: any) => typeof p === 'string' && p.trim().length > 0 && p !== '[]' && !p.startsWith('['));
+    }
   } catch (e) { }
+  if (path.startsWith('[') || path.startsWith('{') || path.startsWith('"')) return [];
   return [path];
 };
 
 const parseVideos = (path: string | undefined): string[] => {
   if (!path) return [];
+  if (path === '[]' || path === '""' || path === 'null') return [];
   try {
     const parsed = JSON.parse(path);
-    if (Array.isArray(parsed)) return parsed;
+    if (Array.isArray(parsed)) {
+      return parsed.filter((p: any) => typeof p === 'string' && p.trim().length > 0 && p !== '[]' && !p.startsWith('['));
+    }
   } catch (e) { }
+  if (path.startsWith('[') || path.startsWith('{') || path.startsWith('"')) return [];
   return [path];
 };
 
@@ -2013,6 +2021,14 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
   const rawCategory = category === 'Other' ? custom_category : category;
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
   const isUrlPost = publish_type === 'url' || finalFacebookUrl.length > 0;
+
+  // Validation: Public Advisories do NOT accept URLs or Facebook Post links
+  const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+  const isAdvisoryCat = advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'General Announcement' && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person');
+
+  if (isAdvisoryCat && (finalFacebookUrl.length > 0 || publish_type === 'url')) {
+    return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or attach image/video media for Public Advisories.`);
+  }
 
   // Validation 1: Title
   const cleanTitle = (title || '').trim();
@@ -2155,6 +2171,14 @@ export const postEditBulletin = async (req: Request, res: Response) => {
   const rawCategory = category === 'Other' ? custom_category : category;
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
 
+  // Validation: Public Advisories do NOT accept URLs or Facebook Post links
+  const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+  const isAdvisoryCat = advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'General Announcement' && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person');
+
+  if (isAdvisoryCat && finalFacebookUrl.length > 0) {
+    return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or remove the URL link to update this Public Advisory.`);
+  }
+
   // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
@@ -2260,7 +2284,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     };
 
     // Always update these so that any deleted items are properly removed from the list
-    data.photo_path = JSON.stringify(finalPhotos);
+    data.photo_path = finalPhotos.length > 0 ? JSON.stringify(finalPhotos) : '';
 
     await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);

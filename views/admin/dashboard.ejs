@@ -257,8 +257,8 @@
             <div>
                 <div class="mb-4 pb-4 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
                     <div>
-                        <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Top 3 Barangays</h3>
-                        <p id="distributionSubtitle" class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Top 3 Crime Distribution</p>
+                        <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">Top 5 Barangays</h3>
+                        <p id="distributionSubtitle" class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Top 5 Crime Distribution</p>
                     </div>
                 </div>
                 
@@ -267,7 +267,7 @@
                 </div>
             </div>
 
-            <div id="topSectorsList" class="mt-3 space-y-2 pt-3 border-t border-gray-50 dark:border-slate-700 max-h-[160px] overflow-y-auto custom-scrollbar pr-2">
+            <div id="topSectorsList" class="mt-3 space-y-2 pt-3 border-t border-gray-50 dark:border-slate-700 max-h-[260px] overflow-y-auto custom-scrollbar pr-2">
                 <!-- Injected via Script -->
             </div>
         </div>
@@ -444,7 +444,7 @@
 
         const subtitleEl = document.getElementById('distributionSubtitle');
         if (subtitleEl) {
-            subtitleEl.textContent = `Top 3 Crime Distribution (${selectedYear})`;
+            subtitleEl.textContent = `Top 5 Crime Distribution (${selectedYear})`;
         }
 
         const filteredPoints = points.filter(p => {
@@ -460,13 +460,13 @@
             counts[sector] = (counts[sector] || 0) + 1;
         });
 
-        // Sorted sectors - Top 3 only
+        // Sorted sectors - Top 5 only
         const sortedSectors = Object.entries(counts)
             .sort((a, b) => b[1] - a[1])
-            .slice(0, 3);
+            .slice(0, 5);
 
-        // Rich tactical color palette (Top 3)
-        const tacticalColorsPalette = ['#ef4444', '#3b82f6', '#D4AF37'];
+        // Rich tactical color palette (Top 5)
+        const tacticalColorsPalette = ['#ef4444', '#3b82f6', '#D4AF37', '#10b981', '#8b5cf6'];
 
         const pieLabels = sortedSectors.map(s => `Brgy. ${s[0]}`);
         const pieData = sortedSectors.map(s => s[1]);
