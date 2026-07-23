@@ -235,7 +235,7 @@
                                 class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-semibold dark:text-white transition-all">
                         </div>
                         <p id="fbUrlError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
-                        <p class="text-[10px] text-slate-400 font-medium">When a Facebook post / video link is attached, file upload is optional (General Announcements only).</p>
+                        <p class="text-[10px] text-slate-400 font-medium">When a Facebook post / video link is provided, the official embedded Facebook post is rendered directly (no image attachments required).</p>
                     </div>
 
 
@@ -263,16 +263,30 @@
 
             </div>
 
-            <!-- SUBMIT CONTAINER WITH REAL-TIME VALIDATION WARNING -->
-            <div class="pt-6 border-t border-gray-50 dark:border-slate-700 flex flex-col items-end space-y-3">
-                <div id="validationWarning" class="hidden flex items-center space-x-2 text-red-500 bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider animate-pulse">
-                    <i class="fas fa-exclamation-triangle text-sm"></i>
-                    <span id="validationWarningText">Input parameters exceed safety thresholds.</span>
+            <!-- SUBMIT CONTAINER WITH REAL-TIME ERROR DETECTOR & SUBMIT CONTROL -->
+            <div class="pt-6 border-t border-gray-100 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- ERROR DETECTOR STATUS BADGE/CARD -->
+                <div id="errorDetectorCard" class="w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300">
+                    <div id="errorDetectorIconContainer" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-red-500 text-white shadow-md animate-pulse">
+                        <i id="errorDetectorIcon" class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Error Detector</span>
+                            <span id="errorDetectorStatusBadge" class="text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-500 text-white shadow-sm">UPDATE BLOCKED</span>
+                        </div>
+                        <p id="errorDetectorText" class="text-xs font-bold mt-0.5 leading-snug truncate">Validating bulletin parameters...</p>
+                    </div>
                 </div>
-                <button type="submit" id="submitBulletinBtn"
-                    class="bg-pnp-blue text-white font-bold py-4 px-12 rounded-xl shadow-lg transition-all duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none">
-                    <%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %>
-                </button>
+
+                <!-- SUBMIT / UPDATE BUTTON -->
+                <div class="w-full md:w-auto shrink-0 flex items-center justify-end">
+                    <button type="submit" id="submitBulletinBtn"
+                        class="w-full md:w-auto bg-pnp-blue text-white font-black py-4 px-12 rounded-2xl shadow-xl transition-all duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center space-x-2">
+                        <i class="fas <%= bulletin ? 'fa-save' : 'fa-paper-plane' %>"></i>
+                        <span><%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %></span>
+                    </button>
+                </div>
             </div>
 
         </form>
@@ -370,9 +384,13 @@
         const titleInput = document.getElementById('title');
         const bodyInput = document.getElementById('body');
         const submitBtn = document.getElementById('submitBulletinBtn');
-        const warningBox = document.getElementById('validationWarning');
-        const warningText = document.getElementById('validationWarningText');
         
+        const errorCard = document.getElementById('errorDetectorCard');
+        const errorIconContainer = document.getElementById('errorDetectorIconContainer');
+        const errorIcon = document.getElementById('errorDetectorIcon');
+        const errorBadge = document.getElementById('errorDetectorStatusBadge');
+        const errorText = document.getElementById('errorDetectorText');
+
         const titleCounter = document.getElementById('titleCounter');
         const bodyCounter = document.getElementById('bodyCounter');
 
@@ -382,31 +400,32 @@
         if (!titleInput || !bodyInput || !submitBtn) return true;
 
         const cleanTitle = (titleInput.value || '').trim();
+        const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
         const titleChars = cleanTitle.length;
 
         if (titleCounter) {
-            titleCounter.textContent = `${titleChars} / 100 letters`;
+            titleCounter.textContent = `${titleWords.length} words / ${titleChars} letters`;
         }
 
         if (titleChars === 0) {
             if (titleInlineError) {
-                titleInlineError.textContent = 'Bulletin title is required (at least 3 letters).';
+                titleInlineError.textContent = 'Bulletin title is required (at least 3 words required).';
                 titleInlineError.classList.remove('hidden');
                 titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
             titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
             titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (titleChars < 3) {
+        } else if (titleWords.length < 3) {
             if (titleInlineError) {
-                titleInlineError.textContent = `Title is too short. Minimum 3 letters required (currently ${titleChars} letters).`;
+                titleInlineError.textContent = `Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${titleChars} characters).`;
                 titleInlineError.classList.remove('hidden');
                 titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
             titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
             titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (titleChars > 100) {
+        } else if (titleChars > 100 || titleWords.length > 15) {
             if (titleInlineError) {
-                titleInlineError.textContent = `Title exceeds limit of 100 letters (currently ${titleChars} letters).`;
+                titleInlineError.textContent = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleChars} characters).`;
                 titleInlineError.classList.remove('hidden');
                 titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
@@ -414,7 +433,7 @@
             titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
         } else {
             if (titleInlineError) {
-                titleInlineError.textContent = '✓ Title length is valid.';
+                titleInlineError.textContent = `✓ Title length is valid (${titleWords.length} words).`;
                 titleInlineError.classList.remove('hidden');
                 titleInlineError.className = 'text-[11px] font-bold text-emerald-500 mt-1';
             }
@@ -423,31 +442,32 @@
         }
 
         const cleanBody = (bodyInput.value || '').trim();
+        const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
         const bodyChars = cleanBody.length;
 
         if (bodyCounter) {
-            bodyCounter.textContent = `${bodyChars} / 5,000 letters`;
+            bodyCounter.textContent = `${bodyWords.length} words / ${bodyChars} letters`;
         }
 
         if (bodyChars === 0) {
             if (bodyInlineError) {
-                bodyInlineError.textContent = 'Description body is required (at least 10 letters).';
+                bodyInlineError.textContent = 'Description body is required (at least 5 words / 15 characters).';
                 bodyInlineError.classList.remove('hidden');
                 bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
             bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
             bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (bodyChars < 10) {
+        } else if (bodyWords.length < 5 || bodyChars < 15) {
             if (bodyInlineError) {
-                bodyInlineError.textContent = `Description is too short. Minimum 10 letters required (currently ${bodyChars} letters).`;
+                bodyInlineError.textContent = `Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyChars} characters).`;
                 bodyInlineError.classList.remove('hidden');
                 bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
             bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
             bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (bodyChars > 5000) {
+        } else if (bodyWords.length > 500 || bodyChars > 5000) {
             if (bodyInlineError) {
-                bodyInlineError.textContent = `Description exceeds limit of 5,000 letters (currently ${bodyChars} letters).`;
+                bodyInlineError.textContent = `Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${bodyChars} characters).`;
                 bodyInlineError.classList.remove('hidden');
                 bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
             }
@@ -455,7 +475,7 @@
             bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
         } else {
             if (bodyInlineError) {
-                bodyInlineError.textContent = '✓ Description content length is valid.';
+                bodyInlineError.textContent = `✓ Description content length is valid (${bodyWords.length} words).`;
                 bodyInlineError.classList.remove('hidden');
                 bodyInlineError.className = 'text-[11px] font-bold text-emerald-500 mt-1';
             }
@@ -472,7 +492,9 @@
         const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
 
         const fbUrlInput = document.getElementById('facebook_url');
-        const hasFbUrl = fbUrlInput && fbUrlInput.value.trim().length > 0;
+        const rawFbUrl = fbUrlInput ? (fbUrlInput.value || '').trim() : '';
+        const hasFbUrl = rawFbUrl.length > 0;
+        const isValidFbUrl = !hasFbUrl || /^(https?:\/\/)?(www\.|m\.|web\.)?(facebook\.com|fb\.watch|fb\.me|fb\.gg)\/.+/i.test(rawFbUrl);
 
         const catSelect = document.getElementById('category');
         const selectedCat = catSelect ? catSelect.value : '';
@@ -482,7 +504,12 @@
         const fbUrlError = document.getElementById('fbUrlError');
         if (isAdvisoryCat && hasFbUrl) {
             if (fbUrlError) {
-                fbUrlError.textContent = `❌ Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL or select "General Announcement".`;
+                fbUrlError.textContent = `❌ Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL link or select "General Announcement".`;
+                fbUrlError.classList.remove('hidden');
+            }
+        } else if (hasFbUrl && !isValidFbUrl) {
+            if (fbUrlError) {
+                fbUrlError.textContent = `❌ Error: Invalid Facebook URL format. Please enter a valid Facebook link starting with http:// or https:// (e.g. https://www.facebook.com/...).`;
                 fbUrlError.classList.remove('hidden');
             }
         } else {
@@ -490,19 +517,23 @@
         }
 
         if (cleanTitle.length === 0) {
-            errorMessage = 'Please enter a bulletin title (at least 3 letters required).';
-        } else if (titleChars < 3) {
-            errorMessage = `Title must be at least 3 letters long (currently ${titleChars} letters).`;
-        } else if (titleChars > 100) {
-            errorMessage = `Title exceeds upper limit of 100 letters (currently ${titleChars} letters).`;
-        } else if (cleanBody.length === 0) {
-            errorMessage = 'Please enter the bulletin body content (at least 10 letters required).';
-        } else if (bodyChars < 10) {
-            errorMessage = `Bulletin body must be at least 10 letters long (currently ${bodyChars} letters).`;
-        } else if (bodyChars > 5000) {
-            errorMessage = `Bulletin body exceeds upper limit of 5,000 letters (currently ${bodyChars} letters).`;
+            errorMessage = 'Please enter a bulletin title (at least 3 words required).';
+        } else if (titleWords.length < 3) {
+            errorMessage = `Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${titleChars} characters).`;
+        } else if (titleChars > 100 || titleWords.length > 15) {
+            errorMessage = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleChars} characters).`;
+        } else if (!selectedCat) {
+            errorMessage = 'Please select a Category for this bulletin.';
         } else if (isAdvisoryCat && hasFbUrl) {
             errorMessage = `Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL link or select "General Announcement".`;
+        } else if (hasFbUrl && !isValidFbUrl) {
+            errorMessage = 'Invalid Facebook URL format. Must be a valid Facebook post or video URL (e.g. https://www.facebook.com/...).';
+        } else if (cleanBody.length === 0) {
+            errorMessage = 'Please enter the bulletin body content (at least 5 words required).';
+        } else if (bodyWords.length < 5 || bodyChars < 15) {
+            errorMessage = `Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyChars} characters).`;
+        } else if (bodyWords.length > 500 || bodyChars > 5000) {
+            errorMessage = `Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${bodyChars} characters).`;
         } else if (totalMediaCount === 0 && !hasFbUrl) {
             errorMessage = 'At least 1 picture, video, or Facebook URL link must be provided before posting.';
         } else if (totalMediaCount > 5) {
@@ -515,23 +546,48 @@
         const galleryStatusText = document.getElementById('galleryStatusText');
 
         if (errorMessage) {
-            if (warningBox && warningText) {
-                warningText.textContent = errorMessage;
-                warningBox.classList.remove('hidden');
+            if (errorCard) {
+                errorCard.className = 'w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300';
+            }
+            if (errorIconContainer) {
+                errorIconContainer.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-red-500 text-white shadow-md animate-pulse';
+            }
+            if (errorIcon) {
+                errorIcon.className = 'fas fa-exclamation-triangle';
+            }
+            if (errorBadge) {
+                errorBadge.textContent = 'UPDATE BLOCKED';
+                errorBadge.className = 'text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-500 text-white shadow-sm';
+            }
+            if (errorText) {
+                errorText.textContent = errorMessage;
             }
             if (galleryStatusAlert && galleryStatusText) {
                 galleryStatusText.textContent = errorMessage;
                 galleryStatusAlert.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse';
                 galleryStatusAlert.classList.remove('hidden');
             }
-            submitBtn.disabled = true;
+            submitBtn.disabled = false;
             return false;
         } else {
-            if (warningBox) {
-                warningBox.classList.add('hidden');
+            if (errorCard) {
+                errorCard.className = 'w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200';
+            }
+            if (errorIconContainer) {
+                errorIconContainer.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-emerald-500 text-white shadow-md';
+            }
+            if (errorIcon) {
+                errorIcon.className = 'fas fa-check-circle';
+            }
+            if (errorBadge) {
+                errorBadge.textContent = 'READY TO UPDATE';
+                errorBadge.className = 'text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm';
+            }
+            if (errorText) {
+                errorText.textContent = 'All validation checks passed. You can now save/update this bulletin.';
             }
             if (galleryStatusAlert && galleryStatusText) {
-                galleryStatusText.textContent = 'All media & inputs valid. Ready to post.';
+                galleryStatusText.textContent = 'All media & inputs valid. Ready to post/update.';
                 galleryStatusAlert.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
                 galleryStatusAlert.classList.remove('hidden');
             }
@@ -542,27 +598,54 @@
 
     async function handleBulletinSubmit(event) {
         event.preventDefault();
-        if (!validateForm()) {
-            alert('Cannot submit bulletin: One or more validation constraints or payload size limits are broken. Please review the highlighted red warning.');
+        const isValid = validateForm();
+        const isEdit = <%= bulletin ? 'true' : 'false' %>;
+        const action = isEdit ? 'update' : 'create';
+
+        if (!isValid) {
+            const activeError = document.getElementById('errorDetectorText')?.textContent || 'Validation Error: Bulletin parameters exceed safety thresholds.';
+            const confirmFn = window.strategicConfirm || (async (args) => {
+                alert(args?.message || activeError);
+                return false;
+            });
+
+            await confirmFn({
+                title: isEdit ? 'Update Blocked - Validation Error' : 'Post Blocked - Validation Error',
+                message: activeError,
+                confirmText: 'Understand & Fix',
+                cancelText: 'Dismiss',
+                type: 'danger'
+            });
             return;
         }
 
         // Final payload pre-flight safety check for any oversized files
         for (const file of accumulatedFiles) {
             if (file.size > 5 * 1024 * 1024) {
-                alert(`Payload Protection Blocked Submit: Image "${file.name}" (${(file.size/(1024*1024)).toFixed(1)}MB) exceeds 5MB limit. Submit canceled.`);
+                const errorMsg = `Payload Protection Blocked Submit: Image "${file.name}" (${(file.size/(1024*1024)).toFixed(1)}MB) exceeds 5MB limit. Submit canceled.`;
+                const confirmFn = window.strategicConfirm || (async (args) => { alert(args.message); return false; });
+                await confirmFn({
+                    title: 'File Size Error',
+                    message: errorMsg,
+                    confirmText: 'Fix Files',
+                    type: 'danger'
+                });
                 return;
             }
         }
         for (const video of accumulatedVideos) {
             if (video.size > 100 * 1024 * 1024) {
-                alert(`Payload Protection Blocked Submit: Video "${video.name}" (${(video.size/(1024*1024)).toFixed(1)}MB) exceeds 100MB limit. Submit canceled.`);
+                const errorMsg = `Payload Protection Blocked Submit: Video "${video.name}" (${(video.size/(1024*1024)).toFixed(1)}MB) exceeds 100MB limit. Submit canceled.`;
+                const confirmFn = window.strategicConfirm || (async (args) => { alert(args.message); return false; });
+                await confirmFn({
+                    title: 'Video Size Error',
+                    message: errorMsg,
+                    confirmText: 'Fix Video',
+                    type: 'danger'
+                });
                 return;
             }
         }
-
-        const isEdit = <%= bulletin ? 'true' : 'false' %>;
-        const action = isEdit ? 'update' : 'create';
 
         const confirmFn = window.strategicConfirm || (async (args) => {
             return confirm(args?.message || `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`);
@@ -1242,6 +1325,12 @@
         }
         if (categorySelect) {
             categorySelect.addEventListener('change', () => { validateForm(); saveFormDraft(); });
+        }
+        const fbUrlInput = document.getElementById('facebook_url');
+        if (fbUrlInput) {
+            fbUrlInput.addEventListener('input', () => { validateForm(); saveFormDraft(); });
+            fbUrlInput.addEventListener('keyup', () => { validateForm(); saveFormDraft(); });
+            fbUrlInput.addEventListener('change', () => { validateForm(); saveFormDraft(); });
         }
 
         validateForm();

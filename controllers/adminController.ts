@@ -2050,11 +2050,14 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or attach image/video media for Public Advisories.`);
   }
 
-  // Validation 1: Title
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
-  if (titleWords.length < 2 && cleanTitle.length < 4) {
-    return res.status(400).send('Validation Error: Notice title must be provided.');
+  if (titleWords.length < 3) {
+    return res.status(400).send(`Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
+  }
+  if (cleanTitle.length > 100 || titleWords.length > 15) {
+    return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
   // Validation 2: Body / Facebook URL
@@ -2068,8 +2071,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     }
   } else {
     const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-    if (bodyWords.length < 2 || cleanBody.length < 5) {
-      return res.status(400).send('Validation Error: Bulletin description content is required for manual publication.');
+    if (bodyWords.length < 5 || cleanBody.length < 15) {
+      return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+    }
+    if (bodyWords.length > 500 || cleanBody.length > 5000) {
+      return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
     }
   }
 
@@ -2087,7 +2093,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       };
     }
 
-    if (files) {
+    if (isUrlPost || finalFacebookUrl.length > 0) {
+      // URL posts rely solely on the Facebook link embed - no photo/video media attachments
+      uploadedPhotoPaths = [];
+      uploadedVideoPaths = [];
+    } else if (files) {
       let totalUploaded = 0;
       if (files.photos && files.photos.length > 0) {
         for (const file of files.photos) {
@@ -2219,7 +2229,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
   if (titleWords.length < 3) {
-    return res.status(400).send('Validation Error: Title / Name must be at least 3 words long.');
+    return res.status(400).send(`Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
   if (cleanTitle.length > 100 || titleWords.length > 15) {
     return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
@@ -2232,7 +2242,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
   }
   if (bodyWords.length > 500 || cleanBody.length > 5000) {
-    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words).`);
+    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
   }
 
   try {
@@ -2268,10 +2278,14 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     const hasNewVideos = files && files.videos && files.videos.length > 0;
     const totalMedia = finalPhotos.length + finalVideos.length + (hasNewPhotos ? files.photos.length : 0) + (hasNewVideos ? files.videos.length : 0);
 
-    if (totalMedia === 0 && !finalFacebookUrl) {
+    if (finalFacebookUrl.length > 0) {
+      // URL posts rely solely on the Facebook link embed - no photo/video attachments
+      finalPhotos = [];
+      finalVideos = [];
+    } else if (totalMedia === 0) {
       return res.status(400).send('Validation Error: At least 1 picture, video, or Facebook URL link must be attached to the bulletin.');
     }
-    if (files) {
+    if (finalFacebookUrl.length === 0 && files) {
       if (files.photos && files.photos.length > 0) {
         const uploadedPaths: string[] = [];
         for (const file of files.photos) {

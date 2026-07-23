@@ -944,14 +944,17 @@
         const fbUrlVal = fbUrlInput ? fbUrlInput.value.trim() : '';
         const bodyVal = bodyInput ? bodyInput.value.trim() : '';
 
-        if (!titleVal || titleVal.length < 3) {
-            if (errorText) errorText.textContent = 'Please enter a valid title (at least 3 letters required).';
+        const titleWords = titleVal.split(/\s+/).filter(Boolean);
+        const bodyWords = bodyVal.split(/\s+/).filter(Boolean);
+
+        if (!titleVal || titleWords.length < 3) {
+            if (errorText) errorText.textContent = `Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${titleVal.length} characters).`;
             if (errorEl) errorEl.classList.remove('hidden');
             return false;
         }
 
-        if (titleVal.length > 100) {
-            if (errorText) errorText.textContent = 'Title cannot exceed 100 letters.';
+        if (titleVal.length > 100 || titleWords.length > 15) {
+            if (errorText) errorText.textContent = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleVal.length} characters).`;
             if (errorEl) errorEl.classList.remove('hidden');
             return false;
         }
@@ -963,13 +966,18 @@
                 return false;
             }
         } else {
-            if (!bodyVal || bodyVal.length < 10) {
-                if (errorText) errorText.textContent = 'Description content is required (at least 10 letters required).';
+            if (!bodyVal || bodyWords.length < 5 || bodyVal.length < 15) {
+                if (errorText) errorText.textContent = `Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyVal.length} characters).`;
                 if (errorEl) errorEl.classList.remove('hidden');
                 return false;
             }
-            if (bodyVal.length > 5000) {
-                if (errorText) errorText.textContent = 'Description content cannot exceed 5,000 letters.';
+            if (bodyWords.length > 500 || bodyVal.length > 5000) {
+                if (errorText) errorText.textContent = `Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words).`;
+                if (errorEl) errorEl.classList.remove('hidden');
+                return false;
+            }
+            if (modalMediaItems.length === 0 && !fbUrlVal) {
+                if (errorText) errorText.textContent = 'At least 1 picture, video, or Facebook link must be attached to the notice.';
                 if (errorEl) errorEl.classList.remove('hidden');
                 return false;
             }
@@ -1335,25 +1343,10 @@
                         </div>
                     </div>
 
-                    <!-- OPTIONAL FILE / MEDIA ATTACHMENTS FOR URL POST -->
-                    <div class="space-y-3 p-4 rounded-2xl bg-gray-50 dark:bg-slate-950 border border-gray-150 dark:border-slate-800">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                    Attach Media / Photo / Video Files <span class="text-slate-400 font-normal">(Optional)</span>
-                                </label>
-                                <p class="text-[10px] text-slate-400 font-medium">Attach supplementary images or video clips alongside this Facebook post link.</p>
-                            </div>
-                            <button type="button" onclick="document.getElementById('modalMediaInput').click()" class="px-4 py-2.5 bg-[#1877F2]/10 hover:bg-[#1877F2] text-[#1877F2] hover:text-white rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer flex items-center space-x-2 shrink-0">
-                                <i class="fas fa-paperclip"></i>
-                                <span id="urlAddFileBtnText">Choose / Upload File</span>
-                            </button>
-                        </div>
-
-                        <!-- Container showing attached file pills/cards -->
-                        <div id="urlAttachedFilesContainer" class="hidden pt-2 space-y-2 border-t border-gray-200 dark:border-slate-800">
-                            <div id="urlAttachedFilesList" class="space-y-2"></div>
-                        </div>
+                    <!-- Facebook Post Info Note -->
+                    <div class="p-3.5 rounded-xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-150 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center space-x-2">
+                        <i class="fab fa-facebook text-[#1877F2] text-sm"></i>
+                        <span>Facebook post URLs render the official embedded post directly without image file attachments.</span>
                     </div>
 
                     <!-- Category readout for URL post -->
