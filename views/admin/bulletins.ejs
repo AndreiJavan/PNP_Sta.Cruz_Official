@@ -101,7 +101,7 @@
                                 <div class="w-full lg:w-32 h-40 lg:h-24 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
                                     <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                                 </div>
-                            <% } else if (bulletin.photo_path) { %>
+                            <% } else if (bulletin.photo_path && bulletin.photo_path !== '[]' && !bulletin.photo_path.startsWith('[')) { %>
                                 <div class="w-full lg:w-32 h-40 lg:h-24 rounded-2xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800">
                                     <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
                                 </div>
@@ -417,6 +417,12 @@
                 selectedBadge.className = 'px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20';
             }
 
+            if (advisorySelect) {
+                advisorySelect.classList.add('hidden');
+                advisorySelect.name = "category_inactive";
+                advisorySelect.disabled = true;
+            }
+
             if (fbUrlInput) fbUrlInput.required = true;
             if (publishBody) publishBody.required = false;
 
@@ -450,11 +456,15 @@
                 if (advisorySelect) {
                     advisorySelect.classList.remove('hidden');
                     advisorySelect.name = "category";
+                    advisorySelect.disabled = false;
                 }
                 if (newsBadge) newsBadge.classList.add('hidden');
 
                 const newsCatHidden = document.getElementById('hiddenNewsCategory');
-                if (newsCatHidden) newsCatHidden.disabled = true;
+                if (newsCatHidden) {
+                    newsCatHidden.disabled = true;
+                    newsCatHidden.name = "category_inactive";
+                }
 
                 if (selectedBadge) {
                     selectedBadge.textContent = 'Public Advisory';
@@ -464,6 +474,7 @@
                 if (advisorySelect) {
                     advisorySelect.classList.add('hidden');
                     advisorySelect.name = "category_inactive";
+                    advisorySelect.disabled = true;
                 }
                 if (newsBadge) newsBadge.classList.remove('hidden');
 
@@ -522,6 +533,12 @@
         hiddenCat.name = 'category';
         hiddenCat.value = catVal;
         hiddenCat.disabled = false;
+
+        const advisorySelect = document.getElementById('publishCategoryAdvisory');
+        if (advisorySelect) {
+            advisorySelect.name = 'category_inactive';
+            advisorySelect.disabled = true;
+        }
     }
 
     function updateModalCounters() {

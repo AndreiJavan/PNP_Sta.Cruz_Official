@@ -2018,13 +2018,33 @@ export const getCreateBulletin = (req: Request, res: Response) => {
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, facebook_url, facebook_post_url, publish_type } = req.body;
-  const rawCategory = category === 'Other' ? custom_category : category;
+
+  // Safely extract rawCategory, resolving array inputs if multiple category fields were submitted
+  let rawCategory: string = '';
+  if (Array.isArray(category)) {
+    if (publish_type === 'url' || publish_type === 'news') {
+      rawCategory = 'General Announcement';
+    } else {
+      rawCategory = String(category.find((c: any) => c && String(c) !== 'General Announcement') || category[0] || '');
+    }
+  } else {
+    rawCategory = String(category === 'Other' ? custom_category : (category || ''));
+  }
+  rawCategory = rawCategory.trim();
+
+  // If publish_type is 'url', the intent is explicitly to import a Facebook URL as a General Announcement
+  if (publish_type === 'url') {
+    rawCategory = 'General Announcement';
+  }
+
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
-  const isUrlPost = publish_type === 'url' || finalFacebookUrl.length > 0;
+  const isUrlPost = publish_type === 'url' || (finalFacebookUrl.length > 0 && rawCategory === 'General Announcement');
 
   // Validation: Public Advisories do NOT accept URLs or Facebook Post links
   const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-  const isAdvisoryCat = advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'General Announcement' && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person');
+  const isAdvisoryCat = publish_type !== 'url' && rawCategory !== 'General Announcement' && (
+    advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person')
+  );
 
   if (isAdvisoryCat && (finalFacebookUrl.length > 0 || publish_type === 'url')) {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or attach image/video media for Public Advisories.`);
@@ -2168,12 +2188,28 @@ export const getEditBulletin = async (req: Request, res: Response) => {
 
 export const postEditBulletin = async (req: Request, res: Response) => {
   const { title, category, custom_category, body, is_archived, existing_photos, existing_videos, facebook_url, facebook_post_url } = req.body;
-  const rawCategory = category === 'Other' ? custom_category : category;
+
+  // Safely extract rawCategory, resolving array inputs if multiple category fields were submitted
+  let rawCategory: string = '';
+  if (Array.isArray(category)) {
+    rawCategory = String(category.find((c: any) => c && String(c) !== 'General Announcement') || category[0] || '');
+  } else {
+    rawCategory = String(category === 'Other' ? custom_category : (category || ''));
+  }
+  rawCategory = rawCategory.trim();
+
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
+
+  // If a Facebook URL is supplied AND General Announcement is present in category input, normalize rawCategory to General Announcement
+  if (finalFacebookUrl.length > 0 && (category === 'General Announcement' || (Array.isArray(category) && category.includes('General Announcement')))) {
+    rawCategory = 'General Announcement';
+  }
 
   // Validation: Public Advisories do NOT accept URLs or Facebook Post links
   const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-  const isAdvisoryCat = advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'General Announcement' && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person');
+  const isAdvisoryCat = rawCategory !== 'General Announcement' && (
+    advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person')
+  );
 
   if (isAdvisoryCat && finalFacebookUrl.length > 0) {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or remove the URL link to update this Public Advisory.`);
