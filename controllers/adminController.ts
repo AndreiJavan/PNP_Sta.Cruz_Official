@@ -6,6 +6,7 @@ import mammoth from 'mammoth';
 import { GoogleGenAI } from '@google/genai';
 import { createRequire } from 'module';
 import nodemailer from 'nodemailer';
+import { memoryCache } from '../utils/cache.js';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -1319,6 +1320,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     }
 
     await batch.commit();
+    memoryCache.clearNamespace('map_points');
     await logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`);
     res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
@@ -1952,6 +1954,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_CREATE', `Created informational bulletin: ${title}`);
     await db.collection('bulletins').add(data);
+    memoryCache.clearNamespace('bulletin');
 
     const isPublic = !req.originalUrl.startsWith('/admin');
     const redirectPrefix = isPublic ? '/bulletins' : '/admin/bulletins';
@@ -2101,6 +2104,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
     await db.collection('bulletins').doc(req.params.id).update(data);
+    memoryCache.clearNamespace('bulletin');
     if (encoded.category === 'Wanted Person') {
       res.redirect('/admin/bulletins?category=Wanted%20Person');
     } else if (encoded.category === 'Missing Person') {
@@ -2150,6 +2154,7 @@ export const deleteBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_ARCHIVED', `Archived bulletin ID: ${req.params.id}`);
     await docRef.delete();
+    memoryCache.clearNamespace('bulletin');
     res.redirect(redirectUrl);
   } catch (err) {
     console.error('Error archiving bulletin:', err);
@@ -2294,6 +2299,7 @@ export const postMapPoint = async (req: Request, res: Response) => {
       category,
       created_at: new Date().toISOString()
     });
+    memoryCache.clearNamespace('map_points');
     res.redirect('/admin/map');
   } catch (err) {
     console.error(err);
@@ -2305,6 +2311,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
   try {
     await logAction(req, 'MAP_POINT_DELETE', `Deleted tactical point ID: ${req.params.id}`);
     await db.collection('map_points').doc(req.params.id).delete();
+    memoryCache.clearNamespace('map_points');
 
     // Check if it's an AJAX request
     if (req.xhr || req.headers.accept?.includes('application/json')) {
@@ -2333,6 +2340,7 @@ export const purgePlaceholders = async (req: Request, res: Response) => {
     }
 
     await batch.commit();
+    memoryCache.flush();
 
     res.json({ success: true, message: 'All tactical data purged. System reset to zero-state.' });
   } catch (err) {
@@ -2365,6 +2373,7 @@ export const postHotline = async (req: Request, res: Response) => {
       category,
       updated_at: new Date().toISOString()
     });
+    memoryCache.clearNamespace('hotlines');
     res.redirect('/admin/hotlines');
   } catch (err) {
     console.error(err);
@@ -2385,6 +2394,7 @@ export const postEditHotline = async (req: Request, res: Response) => {
       category,
       updated_at: new Date().toISOString()
     });
+    memoryCache.clearNamespace('hotlines');
     res.redirect('/admin/hotlines');
   } catch (err) {
     console.error(err);
@@ -2396,6 +2406,7 @@ export const deleteHotline = async (req: Request, res: Response) => {
   try {
     await logAction(req, 'HOTLINE_DELETE', `Deleted hotline ID: ${req.params.id}`);
     await db.collection('hotlines').doc(req.params.id).delete();
+    memoryCache.clearNamespace('hotlines');
     res.redirect('/admin/hotlines');
   } catch (err) {
     console.error(err);
@@ -2949,6 +2960,7 @@ export const restoreArchiveItem = async (req: Request, res: Response) => {
 
     await logAction(req, 'ARCHIVE_RESTORE', `Restored ${category} item: ${item.title}`);
     await docRef.delete();
+    memoryCache.flush();
 
     res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
   } catch (err: any) {
