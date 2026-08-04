@@ -169,23 +169,35 @@
             font-size: 0px;
         }
         .goog-te-gadget .goog-te-combo {
-            color: #1A3A5C !important;
-            font-size: 14px;
-            padding: 6px 10px;
-            border-radius: 8px;
-            border: 2px solid #C8A415;
-            background-color: white;
+            color: #ffffff !important;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 12px; /* to match rounded-xl */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
             font-family: 'Inter', sans-serif;
             font-weight: 600;
             outline: none;
             cursor: pointer;
             margin: 0;
+            transition: all 0.3s ease;
         }
-        .dark .goog-te-gadget .goog-te-combo {
-            background-color: #1e293b;
-            color: #e2e8f0 !important;
-            border-color: #C8A415;
+        .goog-te-gadget .goog-te-combo:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
         }
+        /* Style the dropdown options for readability */
+        .goog-te-gadget .goog-te-combo option {
+            background-color: #1A3A5C;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        .dark .goog-te-gadget .goog-te-combo option {
+            background-color: #0f172a;
+        }
+        /* Hide Google Translate tooltip/popup if any */
+        #goog-gt-tt { display: none !important; }
     </style>
 </head>
 
