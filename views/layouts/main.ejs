@@ -156,6 +156,36 @@
         .custom-pnp-popup .leaflet-popup-tip {
             background: #C8A415;
         }
+
+        /* Google Translate overrides */
+        .goog-te-banner-frame.skiptranslate {
+            display: none !important;
+        }
+        body {
+            top: 0px !important;
+        }
+        .goog-te-gadget {
+            color: transparent !important;
+            font-size: 0px;
+        }
+        .goog-te-gadget .goog-te-combo {
+            color: #1A3A5C !important;
+            font-size: 14px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 2px solid #C8A415;
+            background-color: white;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+            margin: 0;
+        }
+        .dark .goog-te-gadget .goog-te-combo {
+            background-color: #1e293b;
+            color: #e2e8f0 !important;
+            border-color: #C8A415;
+        }
     </style>
 </head>
 
@@ -197,6 +227,9 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-4">
+                    <!-- Google Translate Widget -->
+                    <div id="google_translate_element"></div>
+
                     <!-- Mobile Menu Toggle -->
                     <button id="mobileMenuBtn"
                         class="lg:hidden w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-xl">
@@ -512,6 +545,18 @@
                     initSmoothScroll();
                 }
             </script>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,tl',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 
 </html>
