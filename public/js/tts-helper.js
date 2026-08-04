@@ -127,7 +127,18 @@
 
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = lang || 'en-US';
+        
+        // Check if the requested language voice actually exists
+        const voices = window.speechSynthesis.getVoices();
+        const hasLangVoice = voices.some(v => v.lang.toLowerCase().startsWith(lang.toLowerCase().split('-')[0]));
+        
+        if (lang === 'fil-PH' && !hasLangVoice) {
+            console.warn('Filipino voice not found on this device. Falling back to default voice.');
+            utterance.lang = 'en-US';
+        } else {
+            utterance.lang = lang || 'en-US';
+        }
+        
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
 
