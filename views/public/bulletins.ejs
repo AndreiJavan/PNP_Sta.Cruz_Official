@@ -213,13 +213,7 @@
                     <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700"></span>
                     <div id="bulletin-modal-fb-btn" class="inline-block"></div>
                 </div>
-                <div class="flex items-center space-x-2">
-                    <select id="tts-bot-select-bulletin" class="text-xs font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-pnp-blue">
-                        <option value="browser">Device Voice</option>
-                        <option value="puter-openai">Cloud Voice (OpenAI)</option>
-                        <option value="puter-google">Cloud Voice (Google)</option>
-                    </select>
-                    <div class="flex space-x-2">
+                <div class="flex space-x-2">
                     <button id="tts-bulletin-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                         <i class="fas fa-volume-high text-xs"></i>
                         <span>Read (EN)</span>
@@ -436,9 +430,8 @@
         const ttsBtnTl = document.getElementById('tts-bulletin-modal-btn-tl');
         if (ttsBtn) {
             const speechText = `${bulletin.title}. ${bulletin.body}`;
-            const getBot = () => document.getElementById('tts-bot-select-bulletin')?.value || 'browser';
-            ttsBtn.onclick = () => speakReport('tts-bulletin-modal-btn', speechText, 'en-US', getBot());
-            if(ttsBtnTl) ttsBtnTl.onclick = () => speakTagalogReport('tts-bulletin-modal-btn-tl', speechText, getBot());
+            ttsBtn.onclick = () => speakReport('tts-bulletin-modal-btn', speechText, 'en-US');
+            if(ttsBtnTl) ttsBtnTl.onclick = () => speakTagalogReport('tts-bulletin-modal-btn-tl', speechText);
         }
 
         const modal = document.getElementById('bulletin-modal');

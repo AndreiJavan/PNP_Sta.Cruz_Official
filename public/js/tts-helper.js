@@ -37,34 +37,7 @@
         selectors.forEach(sel => sel.value = lang);
     }
 
-    async function handlePuterSpeech(text, botType, btn, fallbackLang) {
-        if (typeof puter === 'undefined') {
-            console.warn('Puter.js not loaded. Falling back to native.');
-            fallbackNativeSpeech(text, fallbackLang);
-            return;
-        }
-        
-        try {
-            const provider = botType === 'puter-openai' ? 'openai' : 'google';
-            const audio = await puter.ai.txt2speech(text, { provider: provider });
-            currentAudio = audio;
-            
-            if (btn) {
-                btn.classList.remove('loading');
-                btn.classList.add('speaking');
-                btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
-            }
-            
-            audio.onended = () => { resetActiveButton(); };
-            audio.onerror = () => { resetActiveButton(); };
-            audio.play();
-        } catch(err) {
-            console.error('Puter TTS error:', err);
-            fallbackNativeSpeech(text, fallbackLang);
-        }
-    }
-
-    async function speakReport(btnId, text, langOverride, botType = 'browser') {
+    async function speakReport(btnId, text, langOverride) {
         if (!text || !text.trim()) return;
 
         const btn = document.getElementById(btnId);
@@ -102,14 +75,11 @@
             } catch (e) {}
         }
 
-        if (botType.startsWith('puter-')) {
-            handlePuterSpeech(cleanText, botType, btn, lang);
-        } else {
-            fallbackNativeSpeech(cleanText, lang);
-        }
+        // Use native Web Speech API directly for TTS
+        fallbackNativeSpeech(cleanText, lang);
     }
 
-    async function speakTagalogReport(btnId, text, botType = 'browser') {
+    async function speakTagalogReport(btnId, text) {
         if (!text || !text.trim()) return;
 
         const btn = document.getElementById(btnId);
@@ -141,18 +111,10 @@
             const data = await response.json();
             const tagalogText = data.success && data.tagalogText ? data.tagalogText : cleanText;
             
-            if (botType.startsWith('puter-')) {
-                handlePuterSpeech(tagalogText, botType, btn, 'fil-PH');
-            } else {
-                fallbackNativeSpeech(tagalogText, 'fil-PH');
-            }
+            fallbackNativeSpeech(tagalogText, 'fil-PH');
         } catch (error) {
             console.error('Translation error:', error);
-            if (botType.startsWith('puter-')) {
-                handlePuterSpeech(cleanText, botType, btn, 'fil-PH');
-            } else {
-                fallbackNativeSpeech(cleanText, 'fil-PH');
-            }
+            fallbackNativeSpeech(cleanText, 'fil-PH');
         }
     }
 
@@ -165,18 +127,7 @@
 
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        
-        // Check if the requested language voice actually exists
-        const voices = window.speechSynthesis.getVoices();
-        const hasLangVoice = voices.some(v => v.lang.toLowerCase().startsWith(lang.toLowerCase().split('-')[0]));
-        
-        if (lang === 'fil-PH' && !hasLangVoice) {
-            console.warn('Filipino voice not found on this device. Falling back to default voice.');
-            utterance.lang = 'en-US';
-        } else {
-            utterance.lang = lang || 'en-US';
-        }
-        
+        utterance.lang = lang || 'en-US';
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
 
