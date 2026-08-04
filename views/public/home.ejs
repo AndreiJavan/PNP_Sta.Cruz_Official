@@ -1,6 +1,7 @@
 <!-- Hero Section -->
-<section id="hero-section" class="relative min-h-[40vh] py-16 md:py-24 flex items-center justify-center overflow-hidden bg-slate-950">
-    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950 to-slate-950"></div>
+<section id="hero-section" class="relative min-h-[40vh] py-16 md:py-24 flex items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat"
+    style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)), url('/images/directory-pnp-2.jpg');">
+    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950/40 to-slate-950/80"></div>
 
     <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
         <div
@@ -12,14 +13,12 @@
         <h1 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight tracking-tight drop-shadow-lg animate-fade-in-up"
             style="animation-delay: 0.1s;">
             Welcome to the <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-pnp-gold to-yellow-300">Public
-                Bulletin</span>
+                class="text-transparent bg-clip-text bg-gradient-to-r from-pnp-gold to-yellow-300">Community Safety Portal</span>
         </h1>
 
         <p class="text-base md:text-lg text-blue-100 font-light max-w-3xl mx-auto mb-6 leading-relaxed drop-shadow-md animate-fade-in-up"
             style="animation-delay: 0.2s;">
-            Stay informed with the latest updates, advisories, missing persons, and wanted persons alerts from the Sta.
-            Cruz PNP Station.
+            Stay connected with official advisories, incident updates, crime prevention campaigns, and important community announcements from the Sta. Cruz Municipal Police Station.
         </p>
     </div>
 </section>
@@ -57,29 +56,41 @@
                     <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
                         <% carouselNews.forEach((news, index) => { %>
                             <div class="w-full shrink-0 flex-none px-4 md:px-8 py-6 md:py-8">
-                                <a href="/news" class="flex flex-col lg:flex-row items-stretch gap-6 hover:no-underline group">
-                                    <!-- Image Container -->
-                                    <div class="w-full lg:w-1/2 h-48 md:h-64 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50">
-                                        <% if (news.urlToImage) { %>
+                                <div onclick="window.location.href='/news'" class="flex flex-col sm:flex-row items-stretch gap-5 sm:gap-6 md:gap-8 group cursor-pointer">
+                                    <!-- Image / Facebook Container -->
+                                    <div class="w-full sm:w-1/2 h-52 sm:h-64 md:h-72 lg:h-80 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50 flex items-center justify-center">
+                                        <% if (news.facebook_url) { %>
+                                            <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=false&width=500" 
+                                                width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
+                                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
+                                        <% } else if (news.urlToImage) { %>
                                             <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                         <% } else { %>
                                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-850">
                                                 <i class="fas fa-newspaper text-5xl text-slate-300 dark:text-slate-700"></i>
                                             </div>
                                         <% } %>
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300"></div>
-                                        <div class="absolute bottom-6 left-6 text-white font-black text-[9px] uppercase tracking-widest bg-pnp-blue/80 dark:bg-slate-950/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
+                                        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 text-white font-black text-[9px] uppercase tracking-widest bg-pnp-blue/80 dark:bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-white/10 z-10">
                                             <i class="fas fa-clock mr-1.5 text-pnp-gold"></i>
                                             <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
                                         </div>
                                     </div>
                                     
                                     <!-- Content Info -->
-                                    <div class="w-full lg:w-1/2 flex flex-col justify-center text-left py-2">
+                                    <div class="w-full sm:w-1/2 flex flex-col justify-center text-left py-2">
                                         <div class="mb-4">
-                                            <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700">
-                                                By <%= news.author || 'Station Desk' %>
-                                            </span>
+                                            <% if (news.facebook_url || (news.author && (news.author.startsWith('http://') || news.author.startsWith('https://')))) { %>
+                                                <a href="<%= news.facebook_url || news.author %>" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-[#1877F2] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition shadow-sm" title="Open Official Facebook Post">
+                                                    <i class="fab fa-facebook text-xs"></i>
+                                                    <span>Official Facebook Post</span>
+                                                    <i class="fas fa-external-link-alt text-[8px] ml-1 opacity-70"></i>
+                                                </a>
+                                            <% } else { %>
+                                                <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700">
+                                                    By <%= news.author || 'Station Desk' %>
+                                                </span>
+                                            <% } %>
                                         </div>
                                         
                                         <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-5 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors tracking-tight line-clamp-2">
@@ -96,7 +107,7 @@
                                             </span>
                                         </div>
                                     </div>
-                                </a>
+                                </div>
                             </div>
                         <% }) %>
                     </div>
@@ -127,7 +138,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <% if (locals.bulletins && bulletins.length > 0) { %>
                     <% bulletins.slice(0, 3).forEach(bulletin => { %>
-                        <div class="bulletin-card group bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" data-category="<%= bulletin.category %>">
+                        <div class="bulletin-card group bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-category="<%= bulletin.category %>" onclick="openBulletinModal('<%= bulletin.id %>')">
                             <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
                                 <div class="h-48 overflow-hidden relative bg-black">
                                     <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-105 transition duration-700 pointer-events-none"></video>
@@ -151,6 +162,12 @@
                             <% } else if (bulletin.photo_path) { %>
                                 <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
                                     <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                </div>
+                            <% } else if (bulletin.facebook_url) { %>
+                                <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center border-b border-slate-800">
+                                    <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(bulletin.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(bulletin.facebook_url) %>&show_text=false&width=500" 
+                                        width="100%" height="100%" style="border:none;overflow:hidden;min-height:240px;" scrolling="no" frameborder="0" allowfullscreen="true" 
+                                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full"></iframe>
                                 </div>
                             <% } else { %>
                                 <div class="h-48 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border-b border-gray-100 dark:border-slate-800/50">
@@ -177,9 +194,9 @@
                                 </p>
 
                                 <div class="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                                    <a href="/bulletins/<%= bulletin.id %>" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest group-hover:underline flex items-center">
+                                    <button type="button" onclick="event.stopPropagation(); openBulletinModal('<%= bulletin.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest group-hover:underline flex items-center focus:outline-none">
                                         See More <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -304,7 +321,246 @@
     </div>
 </div>
 
+<!-- INTERACTIVE BULLETIN DETAIL MODAL -->
+<div id="bulletin-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeBulletinModal()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
+        
+        <!-- Left Side: Media Carousel -->
+        <div class="w-full lg:w-[50%] relative bg-black flex items-center justify-center min-h-[250px] md:min-h-[400px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
+            <div id="bulletin-modal-media-container" class="w-full h-full relative overflow-hidden flex">
+                <!-- Media injected here -->
+            </div>
+            
+            <button id="modal-prev-btn" onclick="bulletinModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                <i class="fas fa-chevron-left text-sm"></i>
+            </button>
+            <button id="modal-next-btn" onclick="bulletinModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                <i class="fas fa-chevron-right text-sm"></i>
+            </button>
+            
+            <div id="modal-dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 hidden"></div>
+        </div>
+
+        <!-- Right Side: Text Content -->
+        <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none">
+            <button onclick="closeBulletinModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300 z-10">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
+                <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                    <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700"></span>
+                    <div id="bulletin-modal-fb-btn" class="inline-block"></div>
+                </div>
+                <button id="tts-bulletin-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <i class="fas fa-volume-high text-xs"></i>
+                    <span>Read Advisory</span>
+                </button>
+            </div>
+            <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
+            <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
+            
+            <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
+        </div>
+    </div>
+</div>
+
 <script>
+    const bulletinsDatabase = <%- JSON.stringify(locals.bulletins || []) %>;
+
+    function openBulletinModal(bulletinId) {
+        const bulletin = bulletinsDatabase.find(b => b.id === bulletinId);
+        if (!bulletin) return;
+
+        const mediaContainer = document.getElementById('bulletin-modal-media-container');
+        const prevBtn = document.getElementById('modal-prev-btn');
+        const nextBtn = document.getElementById('modal-next-btn');
+        const dotsContainer = document.getElementById('modal-dots-container');
+
+        if (mediaContainer) {
+            mediaContainer.innerHTML = '';
+            dotsContainer.innerHTML = '';
+            
+            const mediaItems = [];
+            
+            if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                bulletin.video_paths.forEach(url => {
+                    if (url) mediaItems.push({ type: 'video', url });
+                });
+            } else if (bulletin.video_path) {
+                mediaItems.push({ type: 'video', url: bulletin.video_path });
+            }
+
+            if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
+                bulletin.photo_paths.forEach(url => {
+                    if (url) mediaItems.push({ type: 'photo', url });
+                });
+            } else if (bulletin.photo_path) {
+                mediaItems.push({ type: 'photo', url: bulletin.photo_path });
+            }
+
+            if (mediaItems.length > 0) {
+                const renderItemHtml = (item, idx) => {
+                    if (item.type === 'video') {
+                        return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                    <video src="${item.url}" controls class="w-full h-full object-contain"></video>
+                                </div>`;
+                    } else {
+                        return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                    <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
+                                </div>`;
+                    }
+                };
+                
+                mediaContainer.innerHTML = mediaItems.map((item, idx) => renderItemHtml(item, idx)).join('');
+                
+                window.currentBulletinModalSlide = 0;
+                window.totalBulletinModalSlides = mediaItems.length;
+
+                if (mediaItems.length > 1) {
+                    prevBtn.classList.remove('hidden');
+                    nextBtn.classList.remove('hidden');
+                    dotsContainer.classList.remove('hidden');
+                    
+                    dotsContainer.innerHTML = mediaItems.map((_, idx) => `
+                        <button onclick="bulletinModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                    `).join('');
+                } else {
+                    prevBtn.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
+                    dotsContainer.classList.add('hidden');
+                }
+            } else {
+                mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700">
+                    <i class="fas fa-image text-5xl"></i>
+                </div>`;
+                prevBtn.classList.add('hidden');
+                nextBtn.classList.add('hidden');
+                dotsContainer.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('bulletin-modal-category').textContent = bulletin.category;
+        document.getElementById('bulletin-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
+        document.getElementById('bulletin-modal-title').textContent = bulletin.title;
+        document.getElementById('bulletin-modal-content').textContent = bulletin.body;
+
+        const fbBtn = document.getElementById('bulletin-modal-fb-btn');
+        if (fbBtn) {
+            if (bulletin.facebook_url) {
+                fbBtn.innerHTML = `<a href="${bulletin.facebook_url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition shadow-sm">
+                    <i class="fab fa-facebook text-xs"></i>
+                    <span>Open Official Facebook Post</span>
+                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
+                </a>`;
+            } else {
+                fbBtn.innerHTML = '';
+            }
+        }
+
+        const ttsBtn = document.getElementById('tts-bulletin-modal-btn');
+        if (ttsBtn) {
+            const speechText = `${bulletin.title}. ${bulletin.body}`;
+            ttsBtn.onclick = () => speakReport('tts-bulletin-modal-btn', speechText);
+        }
+
+        const modal = document.getElementById('bulletin-modal');
+        const content = modal.querySelector('.relative');
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 50);
+    }
+
+    function closeBulletinModal() {
+        if (typeof stopSpeech === 'function') stopSpeech();
+        const modal = document.getElementById('bulletin-modal');
+        if (!modal) return;
+        const content = modal.querySelector('.relative');
+        
+        const videos = modal.querySelectorAll('video');
+        videos.forEach(v => {
+            try {
+                v.pause();
+            } catch (e) {}
+        });
+
+        modal.classList.add('opacity-0');
+        if (content) {
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+        }
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    function bulletinModalUpdate() {
+        const slides = document.querySelectorAll('#bulletin-modal-media-container [data-slide]');
+        const dots = document.querySelectorAll('#modal-dots-container [data-dot]');
+        
+        slides.forEach((slide, idx) => {
+            if (idx === window.currentBulletinModalSlide) {
+                slide.classList.replace('opacity-0', 'opacity-100');
+                slide.classList.replace('z-0', 'z-10');
+                slide.classList.remove('pointer-events-none');
+            } else {
+                slide.classList.replace('opacity-100', 'opacity-0');
+                slide.classList.replace('z-10', 'z-0');
+                slide.classList.add('pointer-events-none');
+                
+                const vid = slide.querySelector('video');
+                if (vid) { try { vid.pause(); } catch(e){} }
+            }
+        });
+        
+        dots.forEach((dot, idx) => {
+            if (idx === window.currentBulletinModalSlide) {
+                dot.classList.replace('bg-white/40', 'bg-white');
+                dot.classList.remove('hover:bg-white/80');
+                dot.classList.add('scale-125');
+            } else {
+                dot.classList.replace('bg-white', 'bg-white/40');
+                dot.classList.add('hover:bg-white/80');
+                dot.classList.remove('scale-125');
+            }
+        });
+    }
+
+    function bulletinModalNext() {
+        if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
+        window.currentBulletinModalSlide = (window.currentBulletinModalSlide + 1) % window.totalBulletinModalSlides;
+        bulletinModalUpdate();
+    }
+
+    function bulletinModalPrev() {
+        if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
+        window.currentBulletinModalSlide = (window.currentBulletinModalSlide - 1 + window.totalBulletinModalSlides) % window.totalBulletinModalSlides;
+        bulletinModalUpdate();
+    }
+
+    function bulletinModalGoTo(idx) {
+        if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
+        window.currentBulletinModalSlide = idx;
+        bulletinModalUpdate();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('bulletin-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+            if (e.key === 'ArrowLeft') {
+                bulletinModalPrev();
+            } else if (e.key === 'ArrowRight') {
+                bulletinModalNext();
+            } else if (e.key === 'Escape') {
+                closeBulletinModal();
+            }
+        }
+    });
 
     async function generateTrendsReport() {
         const btn = document.querySelector('button[onclick="generateTrendsReport()"]');
@@ -625,4 +881,21 @@
     .home-barangay-label-tooltip::after {
         display: none !important;
     }
-</style>
+
+    .custom-modal-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-modal-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(148, 163, 184, 0.5);
+        border-radius: 20px;
+    }
+    .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(71, 85, 105, 0.5);
+    }
+    .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(148, 163, 184, 0.8);
+    }
+</style>    

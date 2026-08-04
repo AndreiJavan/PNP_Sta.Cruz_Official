@@ -49,6 +49,14 @@ const getPersonnelCached = async (): Promise<any[]> => {
   return personnel;
 };
 
+function getFirstParagraph(text: string): string {
+  if (!text) return '';
+  const paragraphs = text.split(/\r?\n\r?\n/).map(p => p.trim()).filter(Boolean);
+  if (paragraphs.length > 0) return paragraphs[0];
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  return lines[0] || text;
+}
+
 export const getHome = async (req: Request, res: Response) => {
   try {
     const allHotlines = await getHotlinesCached();
@@ -57,24 +65,29 @@ export const getHome = async (req: Request, res: Response) => {
     const bulletins = (await getRawBulletinsCached())
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
-    // Filter out mock data for public advisory, and restrict to the 4 target categories
+    // Filter out mock data for public advisory, restrict to target categories, and exclude Facebook URL posts
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
+    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
 
-    // Map only "General Announcement" bulletins (excluding mock) to the policeNewsList for database-driven news
+    // Map "General Announcement" bulletins and Facebook URL posts to policeNewsList for news releases
     const policeNewsList = bulletins
-      .filter((b: any) => b.category === 'General Announcement' && !b.id.startsWith('bulletin-'))
-      .map((b: any) => ({
-        id: b.id,
-        headline: b.title,
-        description: b.body,
-        fullContent: b.body,
-        urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
-        photo_paths: b.photo_paths,
-        video_paths: b.video_paths || [],
-        publishedAt: b.created_at || new Date().toISOString(),
-        author: 'Station Desk'
-      }));
+      .filter((b: any) => (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'))
+      .map((b: any) => {
+        const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
+        const firstPara = getFirstParagraph(bodyText);
+        return {
+          id: b.id,
+          headline: b.title,
+          description: firstPara,
+          fullContent: bodyText,
+          urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+          photo_paths: b.photo_paths,
+          video_paths: b.video_paths || [],
+          facebook_url: b.facebook_url,
+          publishedAt: b.created_at || new Date().toISOString(),
+          author: b.facebook_url ? b.facebook_url : 'Station Desk'
+        };
+      });
 
     // Fetch police incidents (map points) to show on home feed
     const mapPointsCacheKey = 'map_points:all_unfiltered';
@@ -118,19 +131,24 @@ export const getHome = async (req: Request, res: Response) => {
 export const getNews = async (req: Request, res: Response) => {
   try {
     const rawBulletins = await getRawBulletinsCached();
-    const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && b.category === 'General Announcement' && !b.id.startsWith('bulletin-'));
+    const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'));
 
-    const newsList = dbBulletins.map((b: any) => ({
-      id: b.id,
-      headline: b.title,
-      description: b.body,
-      fullContent: b.body,
-      urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
-      photo_paths: b.photo_paths,
-      video_paths: b.video_paths || [],
-      publishedAt: b.created_at || new Date().toISOString(),
-      author: 'Station Desk'
-    }));
+    const newsList = dbBulletins.map((b: any) => {
+      const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
+      const firstPara = getFirstParagraph(bodyText);
+      return {
+        id: b.id,
+        headline: b.title,
+        description: firstPara,
+        fullContent: bodyText,
+        urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+        photo_paths: b.photo_paths,
+        video_paths: b.video_paths || [],
+        facebook_url: b.facebook_url,
+        publishedAt: b.created_at || new Date().toISOString(),
+        author: b.facebook_url ? b.facebook_url : 'Station Desk'
+      };
+    });
 
     res.render('public/news', { title: 'Station Releases', newsList, layout: 'layouts/main' });
   } catch (err) {
@@ -223,7 +241,7 @@ export const getBulletins = async (req: Request, res: Response) => {
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     let bulletins = rawBulletins
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
-      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
+      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
 
     let activeCategory = category;
     if (!activeCategory || activeCategory === 'All' || !allowedAdvisoryCategories.includes(String(activeCategory))) {
@@ -317,3 +335,37 @@ export const getHotlines = async (req: Request, res: Response) => {
     res.status(500).send('Error loading hotlines');
   }
 };
+
+export const translateToTagalog = async (req: Request, res: Response) => {
+  try {
+    const { text } = req.body;
+    if (!text || typeof text !== 'string') {
+      return res.status(400).json({ error: 'Text parameter required' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
+    if (apiKey) {
+      try {
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey });
+        const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
+
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt
+        });
+
+        const tagalogText = response.text ? response.text.trim() : text;
+        return res.json({ success: true, tagalogText });
+      } catch (aiErr: any) {
+        console.warn('Gemini translation error, falling back to original text:', aiErr?.message || aiErr);
+      }
+    }
+
+    return res.json({ success: true, tagalogText: text });
+  } catch (err: any) {
+    console.error('Translation endpoint error:', err);
+    return res.json({ success: false, tagalogText: req.body.text || '' });
+  }
+};
+
