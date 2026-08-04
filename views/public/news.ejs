@@ -141,10 +141,16 @@
 
             <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
                 <div id="news-modal-author" class="inline-block"></div>
-                <button id="tts-news-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <i class="fas fa-volume-high text-xs"></i>
-                    <span>Read Article</span>
-                </button>
+                <div class="flex space-x-2">
+                    <button id="tts-news-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-volume-high text-xs"></i>
+                        <span>Read (EN)</span>
+                    </button>
+                    <button id="tts-news-modal-btn-tl" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-language text-xs"></i>
+                        <span>Read (TL)</span>
+                    </button>
+                </div>
             </div>
             <div id="news-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center">
             </div>
@@ -308,9 +314,11 @@
         }
 
         const ttsBtn = document.getElementById('tts-news-modal-btn');
+        const ttsBtnTl = document.getElementById('tts-news-modal-btn-tl');
         if (ttsBtn) {
             const speechText = `${article.headline}. ${article.fullContent}`;
-            ttsBtn.onclick = () => speakReport('tts-news-modal-btn', speechText);
+            ttsBtn.onclick = () => speakReport('tts-news-modal-btn', speechText, 'en-US');
+            if(ttsBtnTl) ttsBtnTl.onclick = () => speakTagalogReport('tts-news-modal-btn-tl', speechText);
         }
 
         const modal = document.getElementById('news-modal');

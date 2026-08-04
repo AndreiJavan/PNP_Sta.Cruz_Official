@@ -12,7 +12,11 @@
         const btn = document.getElementById(activeBtnId);
         if (btn) {
             btn.classList.remove('speaking', 'loading');
-            btn.innerHTML = `<i class="fas fa-volume-high text-xs"></i><span>Listen</span>`;
+            if (btn.dataset.originalHtml) {
+                btn.innerHTML = btn.dataset.originalHtml;
+            } else {
+                btn.innerHTML = `<i class="fas fa-volume-high text-xs"></i><span>Listen</span>`;
+            }
         }
         activeBtnId = null;
     }
@@ -50,6 +54,9 @@
 
         activeBtnId = btnId;
         if (btn) {
+            if (!btn.dataset.originalHtml) {
+                btn.dataset.originalHtml = btn.innerHTML;
+            }
             btn.classList.add('loading');
             btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Loading...</span>`;
         }
@@ -70,6 +77,45 @@
 
         // Use native Web Speech API directly for TTS
         fallbackNativeSpeech(cleanText, lang);
+    }
+
+    async function speakTagalogReport(btnId, text) {
+        if (!text || !text.trim()) return;
+
+        const btn = document.getElementById(btnId);
+
+        if (activeBtnId === btnId) {
+            stopSpeech();
+            return;
+        }
+
+        stopSpeech();
+        activeBtnId = btnId;
+        
+        if (btn) {
+            if (!btn.dataset.originalHtml) {
+                btn.dataset.originalHtml = btn.innerHTML;
+            }
+            btn.classList.add('loading');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Translating...</span>`;
+        }
+
+        const cleanText = text.replace(/<[^>]*>/g, '').trim();
+
+        try {
+            const response = await fetch('/api/translate-tagalog', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: cleanText })
+            });
+            const data = await response.json();
+            const tagalogText = data.success && data.tagalogText ? data.tagalogText : cleanText;
+            
+            fallbackNativeSpeech(tagalogText, 'fil-PH');
+        } catch (error) {
+            console.error('Translation error:', error);
+            fallbackNativeSpeech(cleanText, 'fil-PH');
+        }
     }
 
     function fallbackNativeSpeech(cleanText, lang) {
@@ -134,6 +180,7 @@
 
     // Expose global methods
     window.speakReport = speakReport;
+    window.speakTagalogReport = speakTagalogReport;
     window.stopSpeech = stopSpeech;
     window.setLanguagePreference = setLanguagePreference;
 })();
