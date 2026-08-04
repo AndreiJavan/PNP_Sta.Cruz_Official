@@ -75,8 +75,36 @@
             } catch (e) {}
         }
 
-        // Use native Web Speech API directly for TTS
-        fallbackNativeSpeech(cleanText, lang);
+        // Use Puter.js Text-to-Speech
+        try {
+            if (typeof puter !== 'undefined' && puter.ai) {
+                const audio = await puter.ai.txt2speech(cleanText);
+                currentAudio = audio;
+                
+                audio.onended = () => {
+                    resetActiveButton();
+                };
+                
+                audio.onerror = () => {
+                    resetActiveButton();
+                };
+                
+                if (activeBtnId) {
+                    if (btn) {
+                        btn.classList.remove('loading');
+                        btn.classList.add('speaking');
+                        btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
+                    }
+                }
+                
+                audio.play();
+            } else {
+                fallbackNativeSpeech(cleanText, lang);
+            }
+        } catch (error) {
+            console.error('Puter TTS error:', error);
+            fallbackNativeSpeech(cleanText, lang);
+        }
     }
 
     async function speakTagalogReport(btnId, text) {
@@ -97,23 +125,38 @@
                 btn.dataset.originalHtml = btn.innerHTML;
             }
             btn.classList.add('loading');
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Translating...</span>`;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Loading Audio...</span>`;
         }
 
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
 
         try {
-            const response = await fetch('/api/translate-tagalog', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: cleanText })
-            });
-            const data = await response.json();
-            const tagalogText = data.success && data.tagalogText ? data.tagalogText : cleanText;
-            
-            fallbackNativeSpeech(tagalogText, 'fil-PH');
+            if (typeof puter !== 'undefined' && puter.ai) {
+                const audio = await puter.ai.txt2speech(cleanText);
+                currentAudio = audio;
+                
+                audio.onended = () => {
+                    resetActiveButton();
+                };
+                
+                audio.onerror = () => {
+                    resetActiveButton();
+                };
+                
+                if (activeBtnId) {
+                    if (btn) {
+                        btn.classList.remove('loading');
+                        btn.classList.add('speaking');
+                        btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
+                    }
+                }
+                
+                audio.play();
+            } else {
+                fallbackNativeSpeech(cleanText, 'fil-PH');
+            }
         } catch (error) {
-            console.error('Translation error:', error);
+            console.error('Puter TTS error:', error);
             fallbackNativeSpeech(cleanText, 'fil-PH');
         }
     }
