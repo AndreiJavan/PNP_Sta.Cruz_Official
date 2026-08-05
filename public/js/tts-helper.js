@@ -81,6 +81,29 @@
         }
 
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
+        let speechTextToPlay = cleanText;
+
+        if (voiceValue === 'fil-PH') {
+            if (btn) {
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Translating...</span>`;
+            }
+            try {
+                const response = await fetch('/api/translate-tagalog', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: cleanText })
+                });
+                const data = await response.json();
+                if (data.success && data.tagalogText) {
+                    speechTextToPlay = data.tagalogText;
+                }
+            } catch (err) {
+                console.error('Translation error:', err);
+            }
+            if (btn && activeBtnId === btnId) {
+                btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Loading...</span>`;
+            }
+        }
 
         // Ensure browser compatibility shim for crypto.createHash if referenced internally by third-party libs
         if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.createHash !== 'function') {
@@ -98,7 +121,7 @@
             // Use Puter.js Text-to-Speech
             try {
                 if (typeof puter !== 'undefined' && puter.ai) {
-                    const audio = await puter.ai.txt2speech(cleanText, voiceValue);
+                    const audio = await puter.ai.txt2speech(speechTextToPlay, voiceValue);
                     currentAudio = audio;
 
                     audio.onended = () => {
@@ -119,14 +142,14 @@
 
                     audio.play();
                 } else {
-                    fallbackNativeSpeech(cleanText, voiceValue);
+                    fallbackNativeSpeech(speechTextToPlay, voiceValue);
                 }
             } catch (error) {
                 console.error('Puter TTS error:', error);
-                fallbackNativeSpeech(cleanText, voiceValue);
+                fallbackNativeSpeech(speechTextToPlay, voiceValue);
             }
         } else if (voiceType === 'native') {
-            fallbackNativeSpeech(cleanText, null, voiceValue);
+            fallbackNativeSpeech(speechTextToPlay, null, voiceValue);
         }
     }
 
