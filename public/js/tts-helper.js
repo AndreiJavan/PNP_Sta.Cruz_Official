@@ -256,10 +256,6 @@
             let optionsHtml = `
                 <option value="puter:fil-PH">Puter AI - Tagalog</option>
                 <option value="puter:en-US">Puter AI - English</option>
-                <option value="puter:fr-FR">Puter AI - French</option>
-                <option value="puter:de-DE">Puter AI - German</option>
-                <option value="puter:es-ES">Puter AI - Spanish</option>
-                <option value="puter:it-IT">Puter AI - Italian</option>
             `;
 
             select.innerHTML = optionsHtml;
@@ -277,6 +273,8 @@
 
             if (currentSelected) {
                 select.value = currentSelected;
+            } else {
+                select.value = 'puter:fil-PH';
             }
         });
     }
