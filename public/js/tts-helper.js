@@ -83,7 +83,7 @@
                         digest: function () { return '00000000000000000000000000000000'; }
                     };
                 };
-            } catch (e) {}
+            } catch (e) { }
         }
 
         if (voiceType === 'puter') {
@@ -92,15 +92,15 @@
                 if (typeof puter !== 'undefined' && puter.ai) {
                     const audio = await puter.ai.txt2speech(cleanText, voiceValue);
                     currentAudio = audio;
-                    
+
                     audio.onended = () => {
                         resetActiveButton();
                     };
-                    
+
                     audio.onerror = () => {
                         resetActiveButton();
                     };
-                    
+
                     if (activeBtnId) {
                         if (btn) {
                             btn.classList.remove('loading');
@@ -108,7 +108,7 @@
                             btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
                         }
                     }
-                    
+
                     audio.play();
                 } else {
                     fallbackNativeSpeech(cleanText, voiceValue);
@@ -134,7 +134,7 @@
 
         stopSpeech();
         activeBtnId = btnId;
-        
+
         if (btn) {
             if (!btn.dataset.originalHtml) {
                 btn.dataset.originalHtml = btn.innerHTML;
@@ -149,15 +149,15 @@
             if (typeof puter !== 'undefined' && puter.ai) {
                 const audio = await puter.ai.txt2speech(cleanText, 'fil-PH');
                 currentAudio = audio;
-                
+
                 audio.onended = () => {
                     resetActiveButton();
                 };
-                
+
                 audio.onerror = () => {
                     resetActiveButton();
                 };
-                
+
                 if (activeBtnId) {
                     if (btn) {
                         btn.classList.remove('loading');
@@ -165,7 +165,7 @@
                         btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
                     }
                 }
-                
+
                 audio.play();
             } else {
                 fallbackNativeSpeech(cleanText, 'fil-PH');
@@ -185,7 +185,7 @@
 
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        
+
         if (voiceName) {
             const voices = window.speechSynthesis.getVoices();
             const selectedVoice = voices.find(v => v.name === voiceName);
@@ -226,7 +226,7 @@
             try {
                 currentAudio.pause();
                 currentAudio.currentTime = 0;
-            } catch (e) {}
+            } catch (e) { }
             currentAudio = null;
         }
 
@@ -243,7 +243,7 @@
 
         selectors.forEach(select => {
             const currentSelected = select.value;
-            
+
             // Keep or initialize standard Puter options
             let optionsHtml = `
                 <option value="puter:fil-PH">Puter AI - Tagalog</option>
@@ -253,7 +253,7 @@
                 <option value="puter:es-ES">Puter AI - Spanish</option>
                 <option value="puter:it-IT">Puter AI - Italian</option>
             `;
-            
+
             select.innerHTML = optionsHtml;
 
             // Add native system voices
@@ -276,7 +276,7 @@
     // Initialize dropdowns when DOM loads or voices change
     document.addEventListener('DOMContentLoaded', () => {
         populateVoiceSelectors();
-        
+
         const selectors = document.querySelectorAll('.tts-lang-select');
         selectors.forEach(sel => {
             sel.value = selectedLanguage;
