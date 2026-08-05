@@ -48,9 +48,17 @@
             const container = btn.closest('.relative') || btn.parentElement;
             const selector = container ? container.querySelector('.tts-voice-select') : document.querySelector('.tts-voice-select');
             if (selector && selector.value) {
-                const parts = selector.value.split(':');
-                voiceType = parts[0];
-                voiceValue = parts[1];
+                const val = selector.value;
+                if (val.startsWith('native:')) {
+                    voiceType = 'native';
+                    voiceValue = val.replace('native:', '');
+                } else if (val.startsWith('puter:')) {
+                    voiceType = 'puter';
+                    voiceValue = val.replace('puter:', '');
+                } else {
+                    voiceType = 'puter';
+                    voiceValue = val; // Treat plain language codes (e.g. "fil-PH") as Puter
+                }
             }
         }
 
