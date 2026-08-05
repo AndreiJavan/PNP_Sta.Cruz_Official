@@ -41,7 +41,18 @@
         if (!text || !text.trim()) return;
 
         const btn = document.getElementById(btnId);
-        const lang = langOverride || getSelectedLanguage();
+        let voiceType = 'puter';
+        let voiceValue = langOverride || getSelectedLanguage();
+
+        if (btn) {
+            const container = btn.closest('.relative') || btn.parentElement;
+            const selector = container ? container.querySelector('.tts-voice-select') : document.querySelector('.tts-voice-select');
+            if (selector && selector.value) {
+                const parts = selector.value.split(':');
+                voiceType = parts[0];
+                voiceValue = parts[1];
+            }
+        }
 
         // If clicking the currently speaking button, stop playback
         if (activeBtnId === btnId) {
@@ -75,35 +86,39 @@
             } catch (e) {}
         }
 
-        // Use Puter.js Text-to-Speech
-        try {
-            if (typeof puter !== 'undefined' && puter.ai) {
-                const audio = await puter.ai.txt2speech(cleanText);
-                currentAudio = audio;
-                
-                audio.onended = () => {
-                    resetActiveButton();
-                };
-                
-                audio.onerror = () => {
-                    resetActiveButton();
-                };
-                
-                if (activeBtnId) {
-                    if (btn) {
-                        btn.classList.remove('loading');
-                        btn.classList.add('speaking');
-                        btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
+        if (voiceType === 'puter') {
+            // Use Puter.js Text-to-Speech
+            try {
+                if (typeof puter !== 'undefined' && puter.ai) {
+                    const audio = await puter.ai.txt2speech(cleanText, voiceValue);
+                    currentAudio = audio;
+                    
+                    audio.onended = () => {
+                        resetActiveButton();
+                    };
+                    
+                    audio.onerror = () => {
+                        resetActiveButton();
+                    };
+                    
+                    if (activeBtnId) {
+                        if (btn) {
+                            btn.classList.remove('loading');
+                            btn.classList.add('speaking');
+                            btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
+                        }
                     }
+                    
+                    audio.play();
+                } else {
+                    fallbackNativeSpeech(cleanText, voiceValue);
                 }
-                
-                audio.play();
-            } else {
-                fallbackNativeSpeech(cleanText, lang);
+            } catch (error) {
+                console.error('Puter TTS error:', error);
+                fallbackNativeSpeech(cleanText, voiceValue);
             }
-        } catch (error) {
-            console.error('Puter TTS error:', error);
-            fallbackNativeSpeech(cleanText, lang);
+        } else if (voiceType === 'native') {
+            fallbackNativeSpeech(cleanText, null, voiceValue);
         }
     }
 
@@ -132,7 +147,7 @@
 
         try {
             if (typeof puter !== 'undefined' && puter.ai) {
-                const audio = await puter.ai.txt2speech(cleanText);
+                const audio = await puter.ai.txt2speech(cleanText, 'fil-PH');
                 currentAudio = audio;
                 
                 audio.onended = () => {
@@ -161,7 +176,7 @@
         }
     }
 
-    function fallbackNativeSpeech(cleanText, lang) {
+    function fallbackNativeSpeech(cleanText, lang, voiceName) {
         if (!('speechSynthesis' in window)) {
             alert('Text-to-speech is not supported in this browser.');
             resetActiveButton();
@@ -170,7 +185,19 @@
 
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(cleanText);
-        utterance.lang = lang || 'en-US';
+        
+        if (voiceName) {
+            const voices = window.speechSynthesis.getVoices();
+            const selectedVoice = voices.find(v => v.name === voiceName);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+        } else if (lang) {
+            utterance.lang = lang;
+        } else {
+            utterance.lang = 'en-US';
+        }
+
         utterance.rate = 0.95;
         utterance.pitch = 1.0;
 
@@ -210,8 +237,46 @@
         resetActiveButton();
     }
 
-    // Initialize dropdowns when DOM loads
+    function populateVoiceSelectors() {
+        const selectors = document.querySelectorAll('.tts-voice-select');
+        if (selectors.length === 0) return;
+
+        selectors.forEach(select => {
+            const currentSelected = select.value;
+            
+            // Keep or initialize standard Puter options
+            let optionsHtml = `
+                <option value="puter:fil-PH">Puter AI - Tagalog</option>
+                <option value="puter:en-US">Puter AI - English</option>
+                <option value="puter:fr-FR">Puter AI - French</option>
+                <option value="puter:de-DE">Puter AI - German</option>
+                <option value="puter:es-ES">Puter AI - Spanish</option>
+                <option value="puter:it-IT">Puter AI - Italian</option>
+            `;
+            
+            select.innerHTML = optionsHtml;
+
+            // Add native system voices
+            if ('speechSynthesis' in window) {
+                const voices = window.speechSynthesis.getVoices();
+                voices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = `native:${voice.name}`;
+                    option.textContent = `System - ${voice.name} (${voice.lang})`;
+                    select.appendChild(option);
+                });
+            }
+
+            if (currentSelected) {
+                select.value = currentSelected;
+            }
+        });
+    }
+
+    // Initialize dropdowns when DOM loads or voices change
     document.addEventListener('DOMContentLoaded', () => {
+        populateVoiceSelectors();
+        
         const selectors = document.querySelectorAll('.tts-lang-select');
         selectors.forEach(sel => {
             sel.value = selectedLanguage;
@@ -221,9 +286,14 @@
         });
     });
 
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = populateVoiceSelectors;
+    }
+
     // Expose global methods
     window.speakReport = speakReport;
     window.speakTagalogReport = speakTagalogReport;
     window.stopSpeech = stopSpeech;
     window.setLanguagePreference = setLanguagePreference;
+    window.populateVoiceSelectors = populateVoiceSelectors;
 })();
