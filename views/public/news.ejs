@@ -150,6 +150,10 @@
                         <i class="fas fa-volume-high text-xs"></i>
                         <span>Listen</span>
                     </button>
+                    <button id="translate-news-modal-btn" onclick="toggleTranslation('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', 'tts-news-modal-btn')" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-language text-sm"></i>
+                        <span>Translate</span>
+                    </button>
                 </div>
             </div>
             <div id="news-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center">
@@ -313,10 +317,8 @@
             fbBox.classList.add('hidden');
         }
 
-        const ttsBtn = document.getElementById('tts-news-modal-btn');
-        if (ttsBtn) {
-            const speechText = `${article.headline}. ${article.fullContent}`;
-            ttsBtn.onclick = () => speakReport('tts-news-modal-btn', speechText);
+        if (typeof resetTranslationButton === 'function') {
+            resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline, article.fullContent, 'tts-news-modal-btn');
         }
 
         const modal = document.getElementById('news-modal');

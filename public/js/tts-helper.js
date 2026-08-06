@@ -98,28 +98,6 @@
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
         let speechTextToPlay = cleanText;
 
-        if (targetLanguage === 'fil-PH') {
-            if (btn) {
-                btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Translating...</span>`;
-            }
-            try {
-                const response = await fetch('/api/translate-tagalog', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: cleanText })
-                });
-                const data = await response.json();
-                if (data.success && data.tagalogText) {
-                    speechTextToPlay = data.tagalogText;
-                }
-            } catch (err) {
-                console.error('Translation error:', err);
-            }
-            if (btn && activeBtnId === btnId) {
-                btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Loading...</span>`;
-            }
-        }
-
         // Ensure browser compatibility shim for crypto.createHash if referenced internally by third-party libs
         if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.createHash !== 'function') {
             try {
@@ -343,10 +321,104 @@
         window.speechSynthesis.onvoiceschanged = populateVoiceSelectors;
     }
 
+    async function toggleTranslation(btnId, titleElId, contentElId, ttsBtnId) {
+        const btn = document.getElementById(btnId);
+        const titleEl = document.getElementById(titleElId);
+        const contentEl = document.getElementById(contentElId);
+        const ttsBtn = document.getElementById(ttsBtnId);
+
+        if (!btn || !titleEl || !contentEl) return;
+
+        const isTranslated = btn.dataset.translated === 'true';
+
+        if (!isTranslated) {
+            btn.disabled = true;
+            const originalHtml = btn.innerHTML;
+            btn.dataset.originalHtml = originalHtml;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin text-sm"></i><span>Translating...</span>`;
+
+            btn.dataset.origTitle = titleEl.textContent;
+            btn.dataset.origContent = contentEl.textContent;
+
+            try {
+                const titleRes = await fetch('/api/translate-tagalog', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: titleEl.textContent })
+                }).then(r => r.json());
+
+                const contentRes = await fetch('/api/translate-tagalog', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: contentEl.textContent })
+                }).then(r => r.json());
+
+                if (titleRes.success && titleRes.tagalogText) {
+                    titleEl.textContent = titleRes.tagalogText;
+                }
+                if (contentRes.success && contentRes.tagalogText) {
+                    contentEl.textContent = contentRes.tagalogText;
+                }
+
+                btn.dataset.translated = 'true';
+                btn.innerHTML = `<i class="fas fa-undo text-sm"></i><span>Show Original</span>`;
+
+                if (ttsBtn) {
+                    const newSpeechText = `${titleEl.textContent}. ${contentEl.textContent}`;
+                    ttsBtn.onclick = () => speakReport(ttsBtnId, newSpeechText);
+                }
+            } catch (err) {
+                console.error('Translation error:', err);
+                btn.innerHTML = originalHtml;
+            } finally {
+                btn.disabled = false;
+            }
+        } else {
+            titleEl.textContent = btn.dataset.origTitle || titleEl.textContent;
+            contentEl.textContent = btn.dataset.origContent || contentEl.textContent;
+
+            btn.dataset.translated = 'false';
+            btn.innerHTML = `<i class="fas fa-language text-sm"></i><span>Translate</span>`;
+
+            if (ttsBtn) {
+                const origSpeechText = `${titleEl.textContent}. ${contentEl.textContent}`;
+                ttsBtn.onclick = () => speakReport(ttsBtnId, origSpeechText);
+            }
+        }
+    }
+
+    function resetTranslationButton(btnId, titleElId, contentElId, originalTitle, originalContent, ttsBtnId) {
+        const btn = document.getElementById(btnId);
+        const titleEl = document.getElementById(titleElId);
+        const contentEl = document.getElementById(contentElId);
+        const ttsBtn = document.getElementById(ttsBtnId);
+
+        if (btn) {
+            btn.dataset.translated = 'false';
+            btn.innerHTML = `<i class="fas fa-language text-sm"></i><span>Translate</span>`;
+            btn.dataset.origTitle = originalTitle;
+            btn.dataset.origContent = originalContent;
+        }
+
+        if (titleEl && originalTitle) {
+            titleEl.textContent = originalTitle;
+        }
+        if (contentEl && originalContent) {
+            contentEl.textContent = originalContent;
+        }
+
+        if (ttsBtn && originalTitle && originalContent) {
+            const origSpeechText = `${originalTitle}. ${originalContent}`;
+            ttsBtn.onclick = () => speakReport(ttsBtnId, origSpeechText);
+        }
+    }
+
     // Expose global methods
     window.speakReport = speakReport;
     window.speakTagalogReport = speakTagalogReport;
     window.stopSpeech = stopSpeech;
     window.setLanguagePreference = setLanguagePreference;
     window.populateVoiceSelectors = populateVoiceSelectors;
+    window.toggleTranslation = toggleTranslation;
+    window.resetTranslationButton = resetTranslationButton;
 })();

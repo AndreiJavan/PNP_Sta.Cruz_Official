@@ -362,6 +362,10 @@
                         <i class="fas fa-volume-high text-xs"></i>
                         <span>Listen</span>
                     </button>
+                    <button id="translate-bulletin-modal-btn" onclick="toggleTranslation('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', 'tts-bulletin-modal-btn')" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-language text-sm"></i>
+                        <span>Translate</span>
+                    </button>
                 </div>
             </div>
             <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
@@ -465,10 +469,8 @@
             }
         }
 
-        const ttsBtn = document.getElementById('tts-bulletin-modal-btn');
-        if (ttsBtn) {
-            const speechText = `${bulletin.title}. ${bulletin.body}`;
-            ttsBtn.onclick = () => speakReport('tts-bulletin-modal-btn', speechText);
+        if (typeof resetTranslationButton === 'function') {
+            resetTranslationButton('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', bulletin.title, bulletin.body, 'tts-bulletin-modal-btn');
         }
 
         const modal = document.getElementById('bulletin-modal');
