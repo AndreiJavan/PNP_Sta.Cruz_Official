@@ -43,6 +43,11 @@
         const btn = document.getElementById(btnId);
         let voiceType = 'puter';
         let voiceValue = langOverride || getSelectedLanguage();
+        let targetLanguage = 'en-US';
+
+        if (voiceValue === 'fil-PH') {
+            targetLanguage = 'fil-PH';
+        }
 
         if (btn) {
             const container = btn.closest('.relative') || btn.parentElement;
@@ -52,12 +57,22 @@
                 if (val.startsWith('native:')) {
                     voiceType = 'native';
                     voiceValue = val.replace('native:', '');
-                } else if (val.startsWith('puter:')) {
-                    voiceType = 'puter';
-                    voiceValue = val.replace('puter:', '');
+                    targetLanguage = getSelectedLanguage() === 'fil-PH' ? 'fil-PH' : 'en-US';
                 } else {
-                    voiceType = 'puter';
-                    voiceValue = val; // Treat plain language codes (e.g. "fil-PH") as Puter
+                    const parts = val.split(':');
+                    if (parts.length >= 3) {
+                        voiceType = parts[0];
+                        voiceValue = parts[1];
+                        targetLanguage = parts[2];
+                    } else if (parts.length === 2) {
+                        voiceType = parts[0];
+                        voiceValue = parts[1];
+                        targetLanguage = parts[1] === 'fil-PH' ? 'fil-PH' : 'en-US';
+                    } else {
+                        voiceType = 'puter';
+                        voiceValue = val;
+                        targetLanguage = val === 'fil-PH' ? 'fil-PH' : 'en-US';
+                    }
                 }
             }
         }
@@ -83,7 +98,7 @@
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
         let speechTextToPlay = cleanText;
 
-        if (voiceValue === 'fil-PH') {
+        if (targetLanguage === 'fil-PH') {
             if (btn) {
                 btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i><span>Translating...</span>`;
             }
@@ -117,11 +132,33 @@
             } catch (e) { }
         }
 
-        if (voiceType === 'puter') {
+        if (voiceType === 'native') {
+            fallbackNativeSpeech(speechTextToPlay, null, voiceValue);
+        } else {
             // Use Puter.js Text-to-Speech
             try {
                 if (typeof puter !== 'undefined' && puter.ai) {
-                    const audio = await puter.ai.txt2speech(speechTextToPlay, voiceValue);
+                    let audio;
+                    if (voiceType === 'openai') {
+                        audio = await puter.ai.txt2speech(speechTextToPlay, {
+                            provider: 'openai',
+                            model: 'tts-1',
+                            voice: voiceValue
+                        });
+                    } else if (voiceType === 'polly') {
+                        audio = await puter.ai.txt2speech(speechTextToPlay, {
+                            provider: 'aws-polly',
+                            voice: voiceValue,
+                            language: targetLanguage
+                        });
+                    } else if (voiceType === 'elevenlabs') {
+                        audio = await puter.ai.txt2speech(speechTextToPlay, {
+                            provider: 'elevenlabs',
+                            voice: voiceValue
+                        });
+                    } else {
+                        audio = await puter.ai.txt2speech(speechTextToPlay, voiceValue);
+                    }
                     currentAudio = audio;
 
                     audio.onended = () => {
@@ -142,14 +179,12 @@
 
                     audio.play();
                 } else {
-                    fallbackNativeSpeech(speechTextToPlay, voiceValue);
+                    fallbackNativeSpeech(speechTextToPlay, targetLanguage);
                 }
             } catch (error) {
                 console.error('Puter TTS error:', error);
-                fallbackNativeSpeech(speechTextToPlay, voiceValue);
+                fallbackNativeSpeech(speechTextToPlay, targetLanguage);
             }
-        } else if (voiceType === 'native') {
-            fallbackNativeSpeech(speechTextToPlay, null, voiceValue);
         }
     }
 
@@ -275,10 +310,19 @@
         selectors.forEach(select => {
             const currentSelected = select.value;
 
-            // Keep or initialize standard Puter options
+            // Keep or initialize standard Puter and custom AI provider options
             let optionsHtml = `
                 <option value="puter:fil-PH">Puter AI - Tagalog</option>
                 <option value="puter:en-US">Puter AI - English</option>
+                <option value="openai:alloy:fil-PH">OpenAI Alloy - Tagalog</option>
+                <option value="openai:alloy:en-US">OpenAI Alloy - English US</option>
+                <option value="openai:nova:fil-PH">OpenAI Nova - Tagalog</option>
+                <option value="openai:nova:en-US">OpenAI Nova - English US</option>
+                <option value="openai:shimmer:fil-PH">OpenAI Shimmer - Tagalog</option>
+                <option value="openai:shimmer:en-US">OpenAI Shimmer - English US</option>
+                <option value="polly:Joanna:en-US">Polly Joanna - English US</option>
+                <option value="polly:Matthew:en-US">Polly Matthew - English US</option>
+                <option value="elevenlabs:Rachel:en-US">ElevenLabs Rachel - English US</option>
             `;
 
             select.innerHTML = optionsHtml;
