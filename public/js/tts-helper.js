@@ -340,25 +340,40 @@
             btn.dataset.origTitle = titleEl.textContent;
             btn.dataset.origContent = contentEl.textContent;
 
+            const translateTextHelper = async (textToTranslate) => {
+                if (!textToTranslate || !textToTranslate.trim()) return textToTranslate;
+                if (typeof puter !== 'undefined' && puter.ai) {
+                    try {
+                        const prompt = `Translate the following text into clear, natural, official Tagalog (Filipino). Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${textToTranslate}`;
+                        const response = await puter.ai.chat(prompt);
+                        if (response && response.trim()) {
+                            return response.trim();
+                        }
+                    } catch (e) {
+                        console.warn('Puter AI chat translation failed, falling back to server:', e);
+                    }
+                }
+                try {
+                    const res = await fetch('/api/translate-tagalog', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: textToTranslate })
+                    }).then(r => r.json());
+                    if (res.success && res.tagalogText) {
+                        return res.tagalogText;
+                    }
+                } catch (e) {
+                    console.error('Server translation failed:', e);
+                }
+                return textToTranslate;
+            };
+
             try {
-                const titleRes = await fetch('/api/translate-tagalog', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: titleEl.textContent })
-                }).then(r => r.json());
+                const translatedTitle = await translateTextHelper(titleEl.textContent);
+                const translatedContent = await translateTextHelper(contentEl.textContent);
 
-                const contentRes = await fetch('/api/translate-tagalog', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: contentEl.textContent })
-                }).then(r => r.json());
-
-                if (titleRes.success && titleRes.tagalogText) {
-                    titleEl.textContent = titleRes.tagalogText;
-                }
-                if (contentRes.success && contentRes.tagalogText) {
-                    contentEl.textContent = contentRes.tagalogText;
-                }
+                titleEl.textContent = translatedTitle;
+                contentEl.textContent = translatedContent;
 
                 btn.dataset.translated = 'true';
                 btn.innerHTML = `<i class="fas fa-undo text-sm"></i><span>Show Original</span>`;
