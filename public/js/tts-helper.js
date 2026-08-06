@@ -310,38 +310,18 @@
         selectors.forEach(select => {
             const currentSelected = select.value;
 
-            // Keep or initialize standard Puter and custom AI provider options
+            // Simple dropdown with premium OpenAI Tagalog and English options
             let optionsHtml = `
-                <option value="puter:fil-PH">Puter AI - Tagalog</option>
-                <option value="puter:en-US">Puter AI - English</option>
-                <option value="openai:alloy:fil-PH">OpenAI Alloy - Tagalog</option>
-                <option value="openai:alloy:en-US">OpenAI Alloy - English US</option>
-                <option value="openai:nova:fil-PH">OpenAI Nova - Tagalog</option>
-                <option value="openai:nova:en-US">OpenAI Nova - English US</option>
-                <option value="openai:shimmer:fil-PH">OpenAI Shimmer - Tagalog</option>
-                <option value="openai:shimmer:en-US">OpenAI Shimmer - English US</option>
-                <option value="polly:Joanna:en-US">Polly Joanna - English US</option>
-                <option value="polly:Matthew:en-US">Polly Matthew - English US</option>
-                <option value="elevenlabs:Rachel:en-US">ElevenLabs Rachel - English US</option>
+                <option value="openai:nova:fil-PH">Tagalog / Filipino</option>
+                <option value="openai:nova:en-US">English (US)</option>
             `;
 
             select.innerHTML = optionsHtml;
 
-            // Add native system voices
-            if ('speechSynthesis' in window) {
-                const voices = window.speechSynthesis.getVoices();
-                voices.forEach(voice => {
-                    const option = document.createElement('option');
-                    option.value = `native:${voice.name}`;
-                    option.textContent = `System - ${voice.name} (${voice.lang})`;
-                    select.appendChild(option);
-                });
-            }
-
-            if (currentSelected) {
+            if (currentSelected && (currentSelected === 'openai:nova:fil-PH' || currentSelected === 'openai:nova:en-US')) {
                 select.value = currentSelected;
             } else {
-                select.value = 'puter:fil-PH';
+                select.value = 'openai:nova:fil-PH';
             }
         });
     }
