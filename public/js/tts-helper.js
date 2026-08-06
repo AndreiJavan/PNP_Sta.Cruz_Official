@@ -116,27 +116,7 @@
             // Use Puter.js Text-to-Speech
             try {
                 if (typeof puter !== 'undefined' && puter.ai) {
-                    let audio;
-                    if (voiceType === 'openai') {
-                        audio = await puter.ai.txt2speech(speechTextToPlay, {
-                            provider: 'openai',
-                            model: 'tts-1',
-                            voice: voiceValue
-                        });
-                    } else if (voiceType === 'polly') {
-                        audio = await puter.ai.txt2speech(speechTextToPlay, {
-                            provider: 'aws-polly',
-                            voice: voiceValue,
-                            language: targetLanguage
-                        });
-                    } else if (voiceType === 'elevenlabs') {
-                        audio = await puter.ai.txt2speech(speechTextToPlay, {
-                            provider: 'elevenlabs',
-                            voice: voiceValue
-                        });
-                    } else {
-                        audio = await puter.ai.txt2speech(speechTextToPlay, voiceValue);
-                    }
+                    const audio = await puter.ai.txt2speech(speechTextToPlay, voiceValue);
                     currentAudio = audio;
 
                     audio.onended = () => {
@@ -288,18 +268,18 @@
         selectors.forEach(select => {
             const currentSelected = select.value;
 
-            // Simple dropdown with premium OpenAI Tagalog and English options
+            // Simple dropdown with premium Puter Tagalog and English options
             let optionsHtml = `
-                <option value="openai:nova:fil-PH">Tagalog / Filipino</option>
-                <option value="openai:nova:en-US">English (US)</option>
+                <option value="puter:fil-PH">Tagalog / Filipino</option>
+                <option value="puter:en-US">English (US)</option>
             `;
 
             select.innerHTML = optionsHtml;
 
-            if (currentSelected && (currentSelected === 'openai:nova:fil-PH' || currentSelected === 'openai:nova:en-US')) {
+            if (currentSelected && (currentSelected === 'puter:fil-PH' || currentSelected === 'puter:en-US')) {
                 select.value = currentSelected;
             } else {
-                select.value = 'openai:nova:fil-PH';
+                select.value = 'puter:fil-PH';
             }
         });
     }
@@ -342,6 +322,33 @@
 
             const translateTextHelper = async (textToTranslate) => {
                 if (!textToTranslate || !textToTranslate.trim()) return textToTranslate;
+                
+                // 1. Try server-side translator first
+                try {
+                    const res = await fetch('/api/translate-tagalog', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: textToTranslate })
+                    }).then(r => r.json());
+                    if (res.success && res.tagalogText && res.tagalogText.trim() !== textToTranslate.trim()) {
+                        return res.tagalogText;
+                    }
+                } catch (e) {
+                    console.warn('Server translation failed, trying fallback:', e);
+                }
+
+                // 2. Try free client-side MyMemory API fallback (supports large requests & instant translation)
+                try {
+                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|tl`);
+                    const data = await response.json();
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        return data.responseData.translatedText;
+                    }
+                } catch (e) {
+                    console.warn('MyMemory translation failed:', e);
+                }
+
+                // 3. Try client-side Puter AI fallback
                 if (typeof puter !== 'undefined' && puter.ai) {
                     try {
                         const prompt = `Translate the following text into clear, natural, official Tagalog (Filipino). Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${textToTranslate}`;
@@ -350,20 +357,8 @@
                             return response.trim();
                         }
                     } catch (e) {
-                        console.warn('Puter AI chat translation failed, falling back to server:', e);
+                        console.warn('Puter AI chat translation failed:', e);
                     }
-                }
-                try {
-                    const res = await fetch('/api/translate-tagalog', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: textToTranslate })
-                    }).then(r => r.json());
-                    if (res.success && res.tagalogText) {
-                        return res.tagalogText;
-                    }
-                } catch (e) {
-                    console.error('Server translation failed:', e);
                 }
                 return textToTranslate;
             };
