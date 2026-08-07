@@ -369,3 +369,54 @@ export const translateToTagalog = async (req: Request, res: Response) => {
   }
 };
 
+export const chatWithArticle = async (req: Request, res: Response) => {
+  try {
+    const { articleTitle, articleContent, userMessage, chatHistory } = req.body;
+    if (!articleTitle || !articleContent || !userMessage) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    const apiKey = process.env.CHAT_GEMINI_KEY || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Gemini API key not configured' });
+    }
+
+    const { GoogleGenAI } = await import('@google/genai');
+    const ai = new GoogleGenAI({ apiKey });
+
+    let historyContext = "";
+    if (chatHistory && Array.isArray(chatHistory)) {
+      historyContext = chatHistory.map((m: any) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n');
+    }
+
+    const prompt = `You are a helpful public safety AI assistant for the Sta. Cruz Municipal Police Station. Your job is to answer questions about the article/bulletin provided below.
+
+=== ARTICLE DETAILS ===
+Title: ${articleTitle}
+Content: ${articleContent}
+
+=== CONSTRAINTS ===
+1. You must answer questions related ONLY to this specific article.
+2. If the user asks something outside the article's scope, content, or context (e.g. general knowledge, unrelated topics, personal questions, or other incidents), you must politely decline and state that you are only programmed to discuss this specific article.
+3. Keep your answers clear, concise, and helpful.
+
+=== CHAT HISTORY ===
+${historyContext}
+
+User: ${userMessage}
+Assistant:`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt
+    });
+
+    const reply = response.text ? response.text.trim() : "I'm sorry, I couldn't generate a response.";
+    return res.json({ success: true, reply });
+  } catch (err: any) {
+    console.error('Chat with article endpoint error:', err);
+    return res.status(500).json({ error: err.message || 'An unexpected error occurred' });
+  }
+};
+
+

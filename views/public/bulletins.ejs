@@ -215,8 +215,8 @@
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap justify-end">
                     <select class="tts-voice-select text-[10px] px-2 py-1 max-w-[125px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none font-bold">
-                        <option value="puter:fil-PH" selected>Tagalog / Filipino</option>
-                        <option value="puter:en-US">English (US)</option>
+                        <option value="google:fil-PH" selected>Tagalog / Filipino</option>
+                        <option value="google:en-US">English (US)</option>
                     </select>
                     <button id="tts-bulletin-modal-btn" onclick="" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                         <i class="fas fa-volume-high text-xs"></i>
@@ -232,6 +232,35 @@
             <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
             
             <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
+
+            <!-- Chatbot Section -->
+            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
+                        <i class="fas fa-robot text-base animate-pulse"></i>
+                        <span>Ask AI Assistant</span>
+                    </h4>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase tracking-wider">Gemini AI</span>
+                </div>
+                
+                <!-- Chat Window -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-gray-100 dark:border-slate-850 overflow-hidden flex flex-col h-[280px]">
+                    <!-- Messages Area -->
+                    <div id="bulletin-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 custom-modal-scrollbar text-xs">
+                        <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-300 max-w-[85%] mr-auto">
+                            Hello! I am your AI assistant for this bulletin. Feel free to ask me any questions about the information presented above.
+                        </div>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800/80 flex items-center gap-2 shrink-0">
+                        <input type="text" id="bulletin-chat-input" placeholder="Ask about this bulletin..." class="flex-grow bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100" onkeydown="if(event.key === 'Enter') sendBulletinChat()">
+                        <button onclick="sendBulletinChat()" class="bg-pnp-blue hover:bg-blue-700 text-white dark:bg-pnp-gold dark:hover:bg-yellow-600 dark:text-pnp-blue px-3.5 py-2 rounded-xl transition flex items-center justify-center shrink-0">
+                            <i class="fas fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -434,6 +463,10 @@
             resetTranslationButton('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', bulletin.title, bulletin.body, 'tts-bulletin-modal-btn');
         }
 
+        if (typeof clearBulletinChat === 'function') {
+            clearBulletinChat();
+        }
+
         const modal = document.getElementById('bulletin-modal');
         const content = modal.querySelector('.relative');
 
@@ -447,6 +480,7 @@
 
     function closeBulletinModal() {
         if (typeof stopSpeech === 'function') stopSpeech();
+        if (typeof clearBulletinChat === 'function') clearBulletinChat();
         const modal = document.getElementById('bulletin-modal');
         const content = modal.querySelector('.relative');
         
@@ -466,6 +500,91 @@
         setTimeout(() => {
             modal.classList.add('hidden');
         }, 300);
+    }
+
+    let bulletinChatHistory = [];
+    
+    function appendBulletinChatMessage(sender, text) {
+        const chatBox = document.getElementById('bulletin-chat-messages');
+        if (!chatBox) return;
+        
+        const isUser = sender === 'user';
+        const msgDiv = document.createElement('div');
+        msgDiv.className = isUser 
+            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-semibold"
+            : "bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-350 max-w-[85%] mr-auto text-left shadow-sm";
+        
+        msgDiv.textContent = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    
+    async function sendBulletinChat() {
+        const inputEl = document.getElementById('bulletin-chat-input');
+        if (!inputEl) return;
+        
+        const text = inputEl.value.trim();
+        if (!text) return;
+        
+        inputEl.value = '';
+        inputEl.disabled = true;
+        
+        appendBulletinChatMessage('user', text);
+        
+        const chatBox = document.getElementById('bulletin-chat-messages');
+        const indicator = document.createElement('div');
+        indicator.id = 'bulletin-chat-typing';
+        indicator.className = 'text-[10px] text-slate-400 dark:text-slate-500 italic p-1 mr-auto flex items-center gap-1.5';
+        indicator.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i><span>Assistant is thinking...</span>`;
+        chatBox.appendChild(indicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        try {
+            const articleTitle = document.getElementById('bulletin-modal-title').textContent;
+            const articleContent = document.getElementById('bulletin-modal-content').textContent;
+            
+            const res = await fetch('/api/chat-article', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    articleTitle,
+                    articleContent,
+                    userMessage: text,
+                    chatHistory: bulletinChatHistory
+                })
+            }).then(r => r.json());
+            
+            const ind = document.getElementById('bulletin-chat-typing');
+            if (ind) ind.remove();
+            
+            if (res.success && res.reply) {
+                appendBulletinChatMessage('assistant', res.reply);
+                bulletinChatHistory.push({ role: 'user', text });
+                bulletinChatHistory.push({ role: 'assistant', text: res.reply });
+            } else {
+                appendBulletinChatMessage('assistant', "Sorry, I encountered an issue generating a response.");
+            }
+        } catch (e) {
+            console.error('Chat error:', e);
+            const ind = document.getElementById('bulletin-chat-typing');
+            if (ind) ind.remove();
+            appendBulletinChatMessage('assistant', "Failed to connect to assistant service.");
+        } finally {
+            inputEl.disabled = false;
+            inputEl.focus();
+        }
+    }
+    
+    function clearBulletinChat() {
+        bulletinChatHistory = [];
+        const chatBox = document.getElementById('bulletin-chat-messages');
+        if (chatBox) {
+            chatBox.innerHTML = `
+                <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-300 max-w-[85%] mr-auto">
+                    Hello! I am your AI assistant for this bulletin. Feel free to ask me any questions about the information presented above.
+                </div>
+            `;
+        }
     }
 
     // Trigger initial filter on DOMContentLoaded
