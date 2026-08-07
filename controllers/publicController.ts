@@ -343,12 +343,39 @@ export const translateToTagalog = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Text parameter required' });
     }
 
+    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
+
+    if (openrouterKey) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${openrouterKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:5000",
+            "X-Title": "PNP Sta. Cruz System"
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await response.json() as any;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          const tagalogText = data.choices[0].message.content.trim();
+          return res.json({ success: true, tagalogText });
+        }
+      } catch (err: any) {
+        console.warn('OpenRouter translation error, falling back to Gemini API:', err?.message || err);
+      }
+    }
+
     const apiKey = process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
     if (apiKey) {
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
-        const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -376,14 +403,6 @@ export const chatWithArticle = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    const apiKey = process.env.CHAT_GEMINI_KEY || process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'Gemini API key not configured' });
-    }
-
-    const { GoogleGenAI } = await import('@google/genai');
-    const ai = new GoogleGenAI({ apiKey });
-
     let historyContext = "";
     if (chatHistory && Array.isArray(chatHistory)) {
       historyContext = chatHistory.map((m: any) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n');
@@ -406,13 +425,50 @@ ${historyContext}
 User: ${userMessage}
 Assistant:`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt
-    });
+    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    if (openrouterKey) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${openrouterKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:5000",
+            "X-Title": "PNP Sta. Cruz System"
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await response.json() as any;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          const reply = data.choices[0].message.content.trim();
+          return res.json({ success: true, reply });
+        }
+      } catch (err: any) {
+        console.warn('OpenRouter chatbot error, falling back to Gemini API:', err?.message || err);
+      }
+    }
 
-    const reply = response.text ? response.text.trim() : "I'm sorry, I couldn't generate a response.";
-    return res.json({ success: true, reply });
+    const apiKey = process.env.CHAT_GEMINI_KEY || process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      try {
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey });
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt
+        });
+
+        const reply = response.text ? response.text.trim() : "I'm sorry, I couldn't generate a response.";
+        return res.json({ success: true, reply });
+      } catch (aiErr: any) {
+        console.error('Gemini chatbot error:', aiErr?.message || aiErr);
+      }
+    }
+
+    return res.status(500).json({ error: 'AI services are currently unavailable.' });
   } catch (err: any) {
     console.error('Chat with article endpoint error:', err);
     return res.status(500).json({ error: err.message || 'An unexpected error occurred' });
