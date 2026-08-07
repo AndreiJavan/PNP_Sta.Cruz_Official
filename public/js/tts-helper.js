@@ -37,11 +37,101 @@
         selectors.forEach(sel => sel.value = lang);
     }
 
+    let googleTTSActive = false;
+
+    function splitTextIntoChunks(text, maxLength) {
+        const chunks = [];
+        const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+/g) || [text];
+        
+        let currentChunk = "";
+        for (const sentence of sentences) {
+            if ((currentChunk + sentence).length > maxLength) {
+                if (currentChunk.trim()) {
+                    chunks.push(currentChunk.trim());
+                }
+                if (sentence.length > maxLength) {
+                    // Force split long sentence by words
+                    const words = sentence.split(/\s+/);
+                    let subChunk = "";
+                    for (const word of words) {
+                        if ((subChunk + " " + word).length > maxLength) {
+                            if (subChunk.trim()) chunks.push(subChunk.trim());
+                            subChunk = word;
+                        } else {
+                            subChunk += (subChunk ? " " : "") + word;
+                        }
+                    }
+                    currentChunk = subChunk;
+                } else {
+                    currentChunk = sentence;
+                }
+            } else {
+                currentChunk += (currentChunk ? " " : "") + sentence;
+            }
+        }
+        if (currentChunk.trim()) {
+            chunks.push(currentChunk.trim());
+        }
+        return chunks;
+    }
+
+    function playGoogleTTS(text, lang) {
+        return new Promise((resolve, reject) => {
+            googleTTSActive = true;
+            const chunks = splitTextIntoChunks(text, 180);
+            if (chunks.length === 0) {
+                googleTTSActive = false;
+                reject(new Error("No text to speak"));
+                return;
+            }
+            
+            let currentIndex = 0;
+            
+            function playNext() {
+                if (!googleTTSActive) {
+                    resolve();
+                    return;
+                }
+                if (currentIndex >= chunks.length) {
+                    googleTTSActive = false;
+                    resolve();
+                    return;
+                }
+                
+                const chunk = chunks[currentIndex];
+                const requestLang = lang === 'fil-PH' ? 'tl' : lang;
+                const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${requestLang}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+                
+                const audio = new Audio(url);
+                currentAudio = audio;
+                
+                audio.onended = () => {
+                    if (googleTTSActive) {
+                        currentIndex++;
+                        playNext();
+                    }
+                };
+                
+                audio.onerror = (e) => {
+                    googleTTSActive = false;
+                    reject(e);
+                };
+                
+                audio.play().catch(err => {
+                    googleTTSActive = false;
+                    reject(err);
+                });
+            }
+            
+            playNext();
+        });
+    }
+
     async function speakReport(btnId, text, langOverride) {
         if (!text || !text.trim()) return;
 
         const btn = document.getElementById(btnId);
-        let voiceType = 'puter';
+        let voiceType = 'google';
         let voiceValue = langOverride || getSelectedLanguage();
         let targetLanguage = 'en-US';
 
@@ -69,7 +159,7 @@
                         voiceValue = parts[1];
                         targetLanguage = parts[1] === 'fil-PH' ? 'fil-PH' : 'en-US';
                     } else {
-                        voiceType = 'puter';
+                        voiceType = 'google';
                         voiceValue = val;
                         targetLanguage = val === 'fil-PH' ? 'fil-PH' : 'en-US';
                     }
@@ -98,49 +188,19 @@
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
         let speechTextToPlay = cleanText;
 
-        // Ensure browser compatibility shim for crypto.createHash if referenced internally by third-party libs
-        if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.createHash !== 'function') {
-            try {
-                window.crypto.createHash = function () {
-                    return {
-                        update: function () { return this; },
-                        digest: function () { return '00000000000000000000000000000000'; }
-                    };
-                };
-            } catch (e) { }
-        }
-
         if (voiceType === 'native') {
             fallbackNativeSpeech(speechTextToPlay, null, voiceValue);
         } else {
-            // Use Puter.js Text-to-Speech
             try {
-                if (typeof puter !== 'undefined' && puter.ai) {
-                    const audio = await puter.ai.txt2speech(speechTextToPlay, voiceValue);
-                    currentAudio = audio;
-
-                    audio.onended = () => {
-                        resetActiveButton();
-                    };
-
-                    audio.onerror = () => {
-                        resetActiveButton();
-                    };
-
-                    if (activeBtnId) {
-                        if (btn) {
-                            btn.classList.remove('loading');
-                            btn.classList.add('speaking');
-                            btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
-                        }
-                    }
-
-                    audio.play();
-                } else {
-                    fallbackNativeSpeech(speechTextToPlay, targetLanguage);
+                if (btn) {
+                    btn.classList.remove('loading');
+                    btn.classList.add('speaking');
+                    btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
                 }
+                await playGoogleTTS(speechTextToPlay, targetLanguage);
+                resetActiveButton();
             } catch (error) {
-                console.error('Puter TTS error:', error);
+                console.warn('Google TTS failed, trying native Web Speech API fallback:', error);
                 fallbackNativeSpeech(speechTextToPlay, targetLanguage);
             }
         }
@@ -170,32 +230,15 @@
         const cleanText = text.replace(/<[^>]*>/g, '').trim();
 
         try {
-            if (typeof puter !== 'undefined' && puter.ai) {
-                const audio = await puter.ai.txt2speech(cleanText, 'fil-PH');
-                currentAudio = audio;
-
-                audio.onended = () => {
-                    resetActiveButton();
-                };
-
-                audio.onerror = () => {
-                    resetActiveButton();
-                };
-
-                if (activeBtnId) {
-                    if (btn) {
-                        btn.classList.remove('loading');
-                        btn.classList.add('speaking');
-                        btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
-                    }
-                }
-
-                audio.play();
-            } else {
-                fallbackNativeSpeech(cleanText, 'fil-PH');
+            if (btn) {
+                btn.classList.remove('loading');
+                btn.classList.add('speaking');
+                btn.innerHTML = `<i class="fas fa-stop text-xs text-red-400"></i><span>Stop</span>`;
             }
+            await playGoogleTTS(cleanText, 'fil-PH');
+            resetActiveButton();
         } catch (error) {
-            console.error('Puter TTS error:', error);
+            console.warn('Google Tagalog TTS failed, trying native Web Speech API fallback:', error);
             fallbackNativeSpeech(cleanText, 'fil-PH');
         }
     }
@@ -246,6 +289,7 @@
     }
 
     function stopSpeech() {
+        googleTTSActive = false;
         if (currentAudio) {
             try {
                 currentAudio.pause();
@@ -268,18 +312,18 @@
         selectors.forEach(select => {
             const currentSelected = select.value;
 
-            // Simple dropdown with premium Puter Tagalog and English options
+            // Simple dropdown with premium Google Tagalog and English options
             let optionsHtml = `
-                <option value="puter:fil-PH">Tagalog / Filipino</option>
-                <option value="puter:en-US">English (US)</option>
+                <option value="google:fil-PH">Tagalog / Filipino</option>
+                <option value="google:en-US">English (US)</option>
             `;
 
             select.innerHTML = optionsHtml;
 
-            if (currentSelected && (currentSelected === 'puter:fil-PH' || currentSelected === 'puter:en-US')) {
-                select.value = currentSelected;
+            if (currentSelected && (currentSelected.includes('fil-PH') || currentSelected.includes('en-US'))) {
+                select.value = currentSelected.includes('fil-PH') ? 'google:fil-PH' : 'google:en-US';
             } else {
-                select.value = 'puter:fil-PH';
+                select.value = 'google:fil-PH';
             }
         });
     }
