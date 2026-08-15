@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Text-to-Speech Helper -->
+    <script src="https://js.puter.com/v2/"></script>
     <script src="/js/tts-helper.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
@@ -237,8 +238,6 @@
 
             <% if (locals.user) { %>
                 <a href="/admin/dashboard" class="text-2xl font-black text-pnp-gold pt-8">Admin Dashboard</a>
-            <% } else { %>
-                <a href="/admin/login" class="text-2xl font-black text-pnp-gold pt-8">Admin Portal</a>
             <% } %>
         </nav>
     </div>
@@ -317,6 +316,12 @@
                                     class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 About
                             </a>
+                            <% if (locals.user) { %>
+                            <a href="/admin/dashboard"
+                                class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
+                                <i class="fas fa-shield-halved text-[8px] mr-2 transition"></i> Admin Dashboard
+                            </a>
+                            <% } %>
                         </div>
                     </div>
 

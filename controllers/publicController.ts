@@ -3,6 +3,51 @@ import { db } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { decodeCustomCategory } from './adminController.js';
+import { memoryCache } from '../utils/cache.js';
+
+// Cached Data Helpers
+const getRawBulletinsCached = async (): Promise<any[]> => {
+  const cacheKey = 'bulletins:all';
+  const cached = memoryCache.get<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
+  const bulletins = snap.docs.map((doc: any) => {
+    const d = doc.data();
+    return decodeCustomCategory({
+      id: doc.id,
+      ...d,
+      photo_paths: parsePhotos(d.photo_path, d.photo_paths),
+      video_paths: parseVideos(d.video_path, d.video_paths)
+    });
+  });
+  memoryCache.set(cacheKey, bulletins, 3 * 60 * 1000); // 3 minutes cache
+  return bulletins;
+};
+
+const getHotlinesCached = async (): Promise<any[]> => {
+  const cacheKey = 'hotlines:all';
+  const cached = memoryCache.get<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const snap = await db.collection('hotlines').orderBy('category').get();
+  const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+  memoryCache.set(cacheKey, hotlines, 5 * 60 * 1000); // 5 minutes cache
+  return hotlines;
+};
+
+const getPersonnelCached = async (): Promise<any[]> => {
+  const cacheKey = 'personnel:active';
+  const cached = memoryCache.get<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const usersSnap = await db.collection('users').get();
+  const personnel = usersSnap.docs
+    .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+    .filter((u: any) => u.status === 'active');
+  memoryCache.set(cacheKey, personnel, 5 * 60 * 1000);
+  return personnel;
+};
 
 function getFirstParagraph(text: string): string {
   if (!text) return '';
@@ -14,17 +59,11 @@ function getFirstParagraph(text: string): string {
 
 export const getHome = async (req: Request, res: Response) => {
   try {
-    const hotlinesSnap = await db.collection('hotlines').limit(5).get();
-    const hotlines = hotlinesSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const allHotlines = await getHotlinesCached();
+    const hotlines = allHotlines.slice(0, 5);
 
-    const activeBulletinsSnap = await db.collection('bulletins')
-      .orderBy('created_at', 'desc')
-      .get();
-      
-    const bulletins = activeBulletinsSnap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-    }).filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
+    const bulletins = (await getRawBulletinsCached())
+      .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
     // Filter out mock data for public advisory, restrict to target categories, and exclude Facebook URL posts
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
@@ -51,31 +90,33 @@ export const getHome = async (req: Request, res: Response) => {
       });
 
     // Fetch police incidents (map points) to show on home feed
-    const mapPointsSnap = await db.collection('map_points').get();
-    let incidents = mapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((p: any) => {
-        const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' ||
-          dateStr === '' ||
-          dateStr === '2026-04-27T09:22:14.910Z' ||
-          p.description === 'Strategic placeholder data';
-        return !isPlaceholder;
-      });
+    const mapPointsCacheKey = 'map_points:all_unfiltered';
+    let incidents = memoryCache.get<any[]>(mapPointsCacheKey);
+    if (!incidents) {
+      const mapPointsSnap = await db.collection('map_points').get();
+      incidents = mapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
+        .filter((p: any) => {
+          const dateStr = String(p.incident_date || '');
+          const isPlaceholder = dateStr === 'N/A' ||
+            dateStr === '' ||
+            dateStr === '2026-04-27T09:22:14.910Z' ||
+            p.description === 'Strategic placeholder data';
+          return !isPlaceholder;
+        });
 
-    // Sort by incident_date descending
-    incidents.sort((a: any, b: any) => {
-      const dateA = new Date(a.incident_date).getTime();
-      const dateB = new Date(b.incident_date).getTime();
-      return dateB - dateA;
-    });
+      // Sort by incident_date descending
+      incidents.sort((a: any, b: any) => {
+        const dateA = new Date(a.incident_date).getTime();
+        const dateB = new Date(b.incident_date).getTime();
+        return dateB - dateA;
+      });
+      memoryCache.set(mapPointsCacheKey, incidents, 3 * 60 * 1000);
+    }
 
     // Fetch active personnel/officers
     let personnel: any[] = [];
     try {
-      const usersSnap = await db.collection('users').get();
-      personnel = usersSnap.docs
-         .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-         .filter((u: any) => u.status === 'active');
+      personnel = await getPersonnelCached();
     } catch (usersErr) {
       console.error('Error fetching personnel for public home:', usersErr);
     }
@@ -89,14 +130,8 @@ export const getHome = async (req: Request, res: Response) => {
 
 export const getNews = async (req: Request, res: Response) => {
   try {
-    const activeBulletinsSnap = await db.collection('bulletins')
-      .orderBy('created_at', 'desc')
-      .get();
-      
-    const dbBulletins = activeBulletinsSnap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-    }).filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'));
+    const rawBulletins = await getRawBulletinsCached();
+    const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'));
 
     const newsList = dbBulletins.map((b: any) => {
       const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
@@ -128,6 +163,12 @@ export const getMap = (req: Request, res: Response) => {
 
 export const getMapPoints = async (req: Request, res: Response) => {
   const { type, range, barangay } = req.query;
+  const cacheKey = `map_points:${type || ''}:${range || ''}:${barangay || ''}`;
+
+  const cachedPoints = memoryCache.get<any[]>(cacheKey);
+  if (cachedPoints) {
+    return res.json(cachedPoints);
+  }
 
   let query: any = db.collection('map_points');
 
@@ -163,6 +204,7 @@ export const getMapPoints = async (req: Request, res: Response) => {
   try {
     const snap = await query.get();
     const points = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    memoryCache.set(cacheKey, points, 3 * 60 * 1000); // 3 minutes cache
     res.json(points);
   } catch (err) {
     console.error(err);
@@ -194,13 +236,11 @@ export const getBulletins = async (req: Request, res: Response) => {
   const { category, search, page = 1 } = req.query;
   const limit = 50;
   try {
-    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
+    const rawBulletins = await getRawBulletinsCached();
     
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-    let bulletins = snap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-    }).filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
+    let bulletins = rawBulletins
+      .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
       .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
 
     let activeCategory = category;
@@ -226,11 +266,8 @@ export const getWantedPersons = async (req: Request, res: Response) => {
   const { search, page = 1 } = req.query;
   const limit = 10;
   try {
-    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
-    let bulletins = snap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths) });
-    }).filter((b: any) => b.is_archived !== true && b.category === 'Wanted Person');
+    const rawBulletins = await getRawBulletinsCached();
+    let bulletins = rawBulletins.filter((b: any) => b.is_archived !== true && b.category === 'Wanted Person');
     if (search) {
       const s = String(search).toLowerCase();
       bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
@@ -248,11 +285,8 @@ export const getMissingPersons = async (req: Request, res: Response) => {
   const { search, page = 1 } = req.query;
   const limit = 10;
   try {
-    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
-    let bulletins = snap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths) });
-    }).filter((b: any) => b.is_archived !== true && b.category === 'Missing Person');
+    const rawBulletins = await getRawBulletinsCached();
+    let bulletins = rawBulletins.filter((b: any) => b.is_archived !== true && b.category === 'Missing Person');
     if (search) {
       const s = String(search).toLowerCase();
       bulletins = bulletins.filter((b: any) => b.title.toLowerCase().includes(s) || b.body.toLowerCase().includes(s));
@@ -268,10 +302,15 @@ export const getMissingPersons = async (req: Request, res: Response) => {
 
 export const getBulletinDetail = async (req: Request, res: Response) => {
   try {
-    const doc = await db.collection('bulletins').doc(req.params.id).get();
-    if (!doc.exists) return res.status(404).send('Bulletin not found');
-    const d = doc.data();
-    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
+    const cacheKey = `bulletin_detail:${req.params.id}`;
+    let bulletin = memoryCache.get<any>(cacheKey);
+    if (!bulletin) {
+      const doc = await db.collection('bulletins').doc(req.params.id).get();
+      if (!doc.exists) return res.status(404).send('Bulletin not found');
+      const d = doc.data();
+      bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
+      memoryCache.set(cacheKey, bulletin, 5 * 60 * 1000);
+    }
     res.render('public/bulletin_detail', { title: bulletin.title, bulletin, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
@@ -289,8 +328,7 @@ export const getIncidents = async (req: Request, res: Response) => {
 
 export const getHotlines = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('hotlines').orderBy('category').get();
-    const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const hotlines = await getHotlinesCached();
     res.render('public/hotlines', { title: 'Emergency Hotlines', hotlines, layout: 'layouts/main' });
   } catch (err) {
     console.error(err);
@@ -305,12 +343,39 @@ export const translateToTagalog = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Text parameter required' });
     }
 
+    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
+
+    if (openrouterKey) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${openrouterKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:5000",
+            "X-Title": "PNP Sta. Cruz System"
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await response.json() as any;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          const tagalogText = data.choices[0].message.content.trim();
+          return res.json({ success: true, tagalogText });
+        }
+      } catch (err: any) {
+        console.warn('OpenRouter translation error, falling back to Gemini API:', err?.message || err);
+      }
+    }
+
     const apiKey = process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
     if (apiKey) {
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
-        const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
 
         const response = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
@@ -331,6 +396,7 @@ export const translateToTagalog = async (req: Request, res: Response) => {
   }
 };
 
+<<<<<<< HEAD
 export const postSetLanguage = async (req: Request, res: Response) => {
   try {
     const { lang } = req.body;
@@ -361,3 +427,85 @@ export const postSetLanguage = async (req: Request, res: Response) => {
   }
 };
 
+=======
+export const chatWithArticle = async (req: Request, res: Response) => {
+  try {
+    const { articleTitle, articleContent, userMessage, chatHistory } = req.body;
+    if (!articleTitle || !articleContent || !userMessage) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+
+    let historyContext = "";
+    if (chatHistory && Array.isArray(chatHistory)) {
+      historyContext = chatHistory.map((m: any) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n');
+    }
+
+    const prompt = `You are a helpful public safety AI assistant for the Sta. Cruz Municipal Police Station. Your job is to answer questions about the article/bulletin provided below.
+
+=== ARTICLE DETAILS ===
+Title: ${articleTitle}
+Content: ${articleContent}
+
+=== CONSTRAINTS ===
+1. You must answer questions related ONLY to this specific article.
+2. If the user asks something outside the article's scope, content, or context (e.g. general knowledge, unrelated topics, personal questions, or other incidents), you must politely decline and state that you are only programmed to discuss this specific article.
+3. Keep your answers clear, concise, and helpful.
+
+=== CHAT HISTORY ===
+${historyContext}
+
+User: ${userMessage}
+Assistant:`;
+
+    const openrouterKey = process.env.OPENROUTER_API_KEY;
+    if (openrouterKey) {
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${openrouterKey}`,
+            "Content-Type": "application/json",
+            "HTTP-Referer": "http://localhost:5000",
+            "X-Title": "PNP Sta. Cruz System"
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await response.json() as any;
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          const reply = data.choices[0].message.content.trim();
+          return res.json({ success: true, reply });
+        }
+      } catch (err: any) {
+        console.warn('OpenRouter chatbot error, falling back to Gemini API:', err?.message || err);
+      }
+    }
+
+    const apiKey = process.env.CHAT_GEMINI_KEY || process.env.GEMINI_API_KEY;
+    if (apiKey) {
+      try {
+        const { GoogleGenAI } = await import('@google/genai');
+        const ai = new GoogleGenAI({ apiKey });
+        const response = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt
+        });
+
+        const reply = response.text ? response.text.trim() : "I'm sorry, I couldn't generate a response.";
+        return res.json({ success: true, reply });
+      } catch (aiErr: any) {
+        console.error('Gemini chatbot error:', aiErr?.message || aiErr);
+      }
+    }
+
+    return res.status(500).json({ error: 'AI services are currently unavailable.' });
+  } catch (err: any) {
+    console.error('Chat with article endpoint error:', err);
+    return res.status(500).json({ error: err.message || 'An unexpected error occurred' });
+  }
+};
+
+
+>>>>>>> e8cf233dd2a920677212887eeb59fb9502f3098b

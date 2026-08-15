@@ -48,7 +48,11 @@ app.use(cors({
   origin: true,
   credentials: true
 }));
-app.use(express.static(path.join(process.cwd(), 'public')));
+app.use(express.static(path.join(process.cwd(), 'public'), {
+  maxAge: '1d',
+  etag: true,
+  lastModified: true
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -82,9 +86,12 @@ app.set('layout', 'layouts/main');
 
 // Global Variables for Views
 app.use((req, res, next) => {
-  res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-  res.header('Expires', '-1');
-  res.header('Pragma', 'no-cache');
+  // Set no-cache only for HTML dynamic page renders / API responses, preserving static asset caching
+  if (!req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i)) {
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache');
+  }
 
   res.locals.sessionId = req.sessionID;
 
