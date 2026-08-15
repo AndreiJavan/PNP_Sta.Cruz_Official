@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { i18nMiddleware } from './middleware/i18n.js';
 
 // Routes
 import publicRoutes from './routes/public.js';
@@ -21,7 +22,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-
+// Favicon handler
+app.get(['/favicon.ico', '/favicon.png'], (req, res) => res.status(204).end());
 
 // Trust proxy for Vercel/Cloud Run
 app.set('trust proxy', 1);
@@ -64,6 +66,9 @@ app.use(session({
     maxAge: 30 * 24 * 60 * 60 * 1000,
   }
 }));
+
+// i18n Internationalization Middleware
+app.use(i18nMiddleware);
 
 
 

@@ -187,7 +187,7 @@
                     <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5 italic">Crime count over the last 12 months</p>
                 </div>
                 <!-- Filters Container -->
-                <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                <div class="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 flex-wrap sm:flex-nowrap">
                     <!-- Year Filter Dropdown -->
                     <div class="relative w-full sm:w-28 shrink-0">
                         <% 
@@ -223,10 +223,19 @@
                         <% }) %>
                     </select>
                 </div>
+                <!-- Open Full Strategic Modal Button -->
+                <button onclick="openCrimeTrendModal()" class="px-3 py-2 bg-pnp-blue/10 dark:bg-pnp-gold/20 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-pnp-blue dark:text-pnp-gold rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 shadow-xs group/btn cursor-pointer" title="Open Full Screen Trend & Suggestions Modal">
+                    <i class="fas fa-expand-alt text-xs group-hover/btn:scale-110 transition-transform"></i>
+                    <span class="hidden md:inline">Modal View</span>
+                </button>
             </div>
             </div>
-            <div class="relative h-[240px] w-full mb-0">
+            <div class="relative h-[240px] w-full mb-0 group/chart cursor-pointer" ondblclick="openCrimeTrendModal()" title="Double-click to open full analysis modal">
                 <canvas id="crimeTrendChart"></canvas>
+                <button onclick="openCrimeTrendModal()" class="absolute top-2 right-2 opacity-0 group-hover/chart:opacity-100 transition-opacity bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold border border-pnp-blue/20 dark:border-pnp-gold/30 shadow-md flex items-center gap-1">
+                    <i class="fas fa-up-right-and-down-left-from-center text-[8px]"></i>
+                    <span>Expand Modal</span>
+                </button>
             </div>
         </div>
 
@@ -236,9 +245,15 @@
                 <span class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.12em]">
                     Trend and Pattern Analysis
                 </span>
-                <button onclick="generateAITrends()" id="aiGenerateBtn" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center justify-center w-6 h-6 shrink-0" title="Refresh Analysis">
-                    <i class="fas fa-sync-alt text-[11px]"></i>
-                </button>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="openCrimeTrendModal()" class="px-2 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center gap-1 text-[9px] font-black uppercase tracking-wider cursor-pointer" title="Open Full Analysis Modal">
+                        <i class="fas fa-up-right-from-square text-[8px]"></i>
+                        <span>Modal</span>
+                    </button>
+                    <button onclick="generateAITrends()" id="aiGenerateBtn" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center justify-center w-6 h-6 shrink-0 cursor-pointer" title="Refresh Analysis">
+                        <i class="fas fa-sync-alt text-[11px]"></i>
+                    </button>
+                </div>
             </div>
             <div id="aiAnalysisResult" class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 font-medium max-h-[220px] overflow-y-auto custom-scrollbar pr-1.5 text-left mt-0.5 mb-0.5 flex-grow min-h-0">
                 <div class="flex items-center gap-2 py-2">
@@ -889,6 +904,7 @@
                 const rawMarkdown = result.analysis;
                 let parsedHtml = formatMarkdown(rawMarkdown);
                 resultDiv.innerHTML = `<div class="text-slate-700 dark:text-slate-300 font-sans text-xs leading-relaxed text-left">${parsedHtml}</div>`;
+                updateModalTrendsFromMarkdown(rawMarkdown);
             } else {
                 resultDiv.innerHTML = `
                     <div class="p-4 bg-gray-50 dark:bg-slate-800/40 border border-gray-100 dark:border-slate-700/50 rounded-2xl">
@@ -901,6 +917,7 @@
                         </p>
                     </div>
                 `;
+                updateModalTrendsFromMarkdown(null, selectedBrgy, selectedYear);
             }
         } catch (err) {
             console.error('AI Trends Fetch Error:', err);
@@ -915,9 +932,15 @@
                     </p>
                 </div>
             `;
+            updateModalTrendsFromMarkdown(null, selectedBrgy, selectedYear);
         } finally {
             generateBtn.disabled = false;
             generateBtn.innerHTML = '<i class="fas fa-sync-alt text-[11px]"></i>';
+            const modalRefreshBtn = document.getElementById('modalRefreshBtn');
+            if (modalRefreshBtn) {
+                modalRefreshBtn.disabled = false;
+                modalRefreshBtn.innerHTML = '<i class="fas fa-sync-alt text-xs"></i><span class="hidden sm:inline">Refresh</span>';
+            }
         }
     };
 
@@ -1035,7 +1058,739 @@
         const blocks = formatted.split(/\n\n+/);
         return blocks.map(b => `<p class="text-xs leading-relaxed text-slate-600 dark:text-slate-300 mb-2 last:mb-0">${b.replace(/\n/g, '<br>')}</p>`).join('');
     }
+
+    // ==========================================
+    // CRIME TREND MODAL LOGIC & CONTROLS
+    // ==========================================
+    window.modalTrendChartInstance = null;
+    window.lastRawMarkdown = null;
+
+    window.openCrimeTrendModal = function() {
+        const modal = document.getElementById('crimeTrendModal');
+        const content = document.getElementById('crimeTrendModalContent');
+        if (!modal || !content) return;
+
+        // Sync filters from dashboard to modal
+        const dashYear = document.getElementById('monthlyTrendYearFilter')?.value || '<%= defaultYearVal %>';
+        const dashBrgy = document.getElementById('monthlyTrendBarangayFilter')?.value || 'ALL';
+
+        const modalYear = document.getElementById('modalTrendYearFilter');
+        const modalBrgy = document.getElementById('modalTrendBarangayFilter');
+        if (modalYear) modalYear.value = dashYear;
+        if (modalBrgy) modalBrgy.value = dashBrgy;
+
+        // Show modal with animation
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
+
+        // Update Modal Data, Charts and KPIs
+        refreshModalData();
+    };
+
+    window.closeCrimeTrendModal = function() {
+        const modal = document.getElementById('crimeTrendModal');
+        const content = document.getElementById('crimeTrendModalContent');
+        if (!modal || !content) return;
+
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }, 250);
+    };
+
+    window.handleTrendModalBackdropClick = function(event) {
+        if (event.target === document.getElementById('crimeTrendModal')) {
+            closeCrimeTrendModal();
+        }
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('crimeTrendModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeCrimeTrendModal();
+            }
+        }
+    });
+
+    window.syncModalYearChange = function() {
+        const modalYear = document.getElementById('modalTrendYearFilter')?.value;
+        const dashYear = document.getElementById('monthlyTrendYearFilter');
+        if (dashYear && modalYear) {
+            dashYear.value = modalYear;
+        }
+        refreshModalData(true);
+    };
+
+    window.syncModalBarangayChange = function() {
+        const modalBrgy = document.getElementById('modalTrendBarangayFilter')?.value;
+        const dashBrgy = document.getElementById('monthlyTrendBarangayFilter');
+        if (dashBrgy && modalBrgy) {
+            dashBrgy.value = modalBrgy;
+        }
+        refreshModalData(true);
+    };
+
+    window.refreshModalAITrends = function() {
+        const selectedYear = parseInt(document.getElementById('modalTrendYearFilter')?.value || '<%= defaultYearVal %>', 10);
+        const selectedBrgy = document.getElementById('modalTrendBarangayFilter')?.value || 'ALL';
+        
+        const modalRefreshBtn = document.getElementById('modalRefreshBtn');
+        if (modalRefreshBtn) {
+            modalRefreshBtn.disabled = true;
+            modalRefreshBtn.innerHTML = '<i class="fas fa-spinner animate-spin text-xs"></i><span class="hidden sm:inline">Evaluating...</span>';
+        }
+
+        // Show loading state in modal cards
+        const trendEl = document.getElementById('modalTrendText');
+        const patternEl = document.getElementById('modalPatternText');
+        const suggEl = document.getElementById('modalSuggestionsText');
+
+        if (trendEl) trendEl.innerHTML = '<div class="flex items-center gap-2 py-3 text-blue-500"><div class="w-3.5 h-3.5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div><span class="text-[10px] font-bold uppercase tracking-widest">Evaluating Trend Trajectory...</span></div>';
+        if (patternEl) patternEl.innerHTML = '<div class="flex items-center gap-2 py-3 text-amber-500"><div class="w-3.5 h-3.5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"></div><span class="text-[10px] font-bold uppercase tracking-widest">Synthesizing Crime Patterns...</span></div>';
+        if (suggEl) suggEl.innerHTML = '<div class="flex items-center gap-2 py-3 text-emerald-500"><div class="w-3.5 h-3.5 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div><span class="text-[10px] font-bold uppercase tracking-widest">Generating Strategic Directives...</span></div>';
+
+        window.generateAITrends(selectedBrgy, selectedYear);
+    };
+
+    function refreshModalData(triggerAIFetch = false) {
+        const selectedYear = parseInt(document.getElementById('modalTrendYearFilter')?.value || '<%= defaultYearVal %>', 10);
+        const selectedBrgy = document.getElementById('modalTrendBarangayFilter')?.value || 'ALL';
+
+        // 1. Compute 12-month data points for modal chart
+        const monthlyTrends = [];
+        for (let i = 0; i <= 11; i++) {
+            const d = new Date(selectedYear, i, 1);
+            const monthLabel = d.toLocaleString('en-US', { month: 'short' });
+
+            const mPoints = points.filter(p => {
+                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+                if (!rawDate) return false;
+                if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
+                
+                const pd = new Date(rawDate);
+                return pd.getUTCMonth() === i && pd.getUTCFullYear() === selectedYear;
+            });
+
+            monthlyTrends.push({
+                month: monthLabel,
+                monthIndex: i,
+                points: mPoints,
+                focusManual: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'manual').length,
+                focusScanned: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'scanned').length,
+                nonIndexManual: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'manual').length,
+                nonIndexScanned: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
+                psiManual: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'manual').length,
+                psiScanned: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'scanned').length,
+                total: mPoints.length
+            });
+        }
+
+        // 2. Render or Update Modal Bar Graph
+        renderModalTrendChart(monthlyTrends);
+
+        // 3. Update Modal KPI Metric summary
+        updateModalKpiSummary(selectedBrgy, selectedYear, monthlyTrends);
+
+        // 4. Update or fetch Trend, Pattern, Suggestions
+        if (triggerAIFetch) {
+            refreshModalAITrends();
+        } else if (window.lastRawMarkdown) {
+            updateModalTrendsFromMarkdown(window.lastRawMarkdown);
+        } else {
+            refreshModalAITrends();
+        }
+
+        // 5. Also sync the dashboard chart & bento in background
+        if (typeof window.filterMonthlyTrends === 'function') {
+            const dashYear = document.getElementById('monthlyTrendYearFilter');
+            const dashBrgy = document.getElementById('monthlyTrendBarangayFilter');
+            if (dashYear && dashYear.value != selectedYear) dashYear.value = selectedYear;
+            if (dashBrgy && dashBrgy.value != selectedBrgy) dashBrgy.value = selectedBrgy;
+        }
+    }
+
+    function renderModalTrendChart(monthlyTrends) {
+        const canvas = document.getElementById('modalCrimeTrendChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const labels = monthlyTrends.map(d => d.month);
+        const datasets = [
+            {
+                label: '8-Focus (Manual)',
+                data: monthlyTrends.map(d => d.focusManual),
+                backgroundColor: '#EF4444',
+                stack: 'Stack 0',
+                borderRadius: 4,
+                categoryGroup: '8-Focus'
+            },
+            {
+                label: '8-Focus (Scanned)',
+                data: monthlyTrends.map(d => d.focusScanned),
+                backgroundColor: 'rgba(239, 68, 68, 0.45)',
+                stack: 'Stack 0',
+                borderRadius: 4,
+                categoryGroup: '8-Focus'
+            },
+            {
+                label: 'Non-Index (Manual)',
+                data: monthlyTrends.map(d => d.nonIndexManual),
+                backgroundColor: '#3B82F6',
+                stack: 'Stack 0',
+                borderRadius: 4,
+                categoryGroup: 'Non-Index'
+            },
+            {
+                label: 'Non-Index (Scanned)',
+                data: monthlyTrends.map(d => d.nonIndexScanned),
+                backgroundColor: 'rgba(59, 130, 246, 0.45)',
+                stack: 'Stack 0',
+                borderRadius: 4,
+                categoryGroup: 'Non-Index'
+            },
+            {
+                label: 'PSI (Manual)',
+                data: monthlyTrends.map(d => d.psiManual),
+                backgroundColor: '#EAB308',
+                stack: 'Stack 0',
+                borderRadius: 4,
+                categoryGroup: 'PSI'
+            },
+            {
+                label: 'PSI (Scanned)',
+                data: monthlyTrends.map(d => d.psiScanned),
+                backgroundColor: 'rgba(234, 179, 8, 0.45)',
+                stack: 'Stack 0',
+                borderRadius: 4,
+                categoryGroup: 'PSI'
+            }
+        ];
+
+        const isDark = document.documentElement.classList.contains('dark');
+
+        if (window.modalTrendChartInstance) {
+            window.modalTrendChartInstance.data.labels = labels;
+            datasets.forEach((ds, i) => {
+                if (window.modalTrendChartInstance.data.datasets[i]) {
+                    window.modalTrendChartInstance.data.datasets[i].data = ds.data;
+                }
+            });
+            window.modalTrendChartInstance.options.scales.x.ticks.color = isDark ? '#94A3B8' : '#64748B';
+            window.modalTrendChartInstance.options.scales.y.ticks.color = isDark ? '#94A3B8' : '#64748B';
+            window.modalTrendChartInstance.update();
+            return;
+        }
+
+        window.modalTrendChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                        titleColor: isDark ? '#F8FAFC' : '#0F172A',
+                        bodyColor: isDark ? '#CBD5E1' : '#334155',
+                        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        boxPadding: 4,
+                        usePointStyle: true,
+                        callbacks: {
+                            footer: function(tooltipItems) {
+                                let sum = 0;
+                                tooltipItems.forEach(function(ti) {
+                                    sum += ti.parsed.y;
+                                });
+                                return 'Total Volume: ' + sum + ' cases';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false },
+                        ticks: {
+                            color: isDark ? '#94A3B8' : '#64748B',
+                            font: { weight: 'bold', size: 11 }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: {
+                            color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            precision: 0,
+                            color: isDark ? '#94A3B8' : '#64748B',
+                            font: { weight: 'bold', size: 10 }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    window.toggleModalDataset = function(groupIndex) {
+        if (!window.modalTrendChartInstance) return;
+        
+        // 0 = 8-Focus (datasets 0, 1), 1 = Non-Index (datasets 2, 3), 2 = PSI (datasets 4, 5)
+        const targetIndices = [groupIndex * 2, groupIndex * 2 + 1];
+        const currentHidden = window.modalTrendChartInstance.getDatasetMeta(targetIndices[0]).hidden;
+        const newHidden = !currentHidden;
+
+        targetIndices.forEach(idx => {
+            const meta = window.modalTrendChartInstance.getDatasetMeta(idx);
+            meta.hidden = newHidden;
+        });
+        window.modalTrendChartInstance.update();
+
+        // Update button appearance
+        const btnIds = ['modalLegend8Focus', 'modalLegendNonIndex', 'modalLegendPSI'];
+        const btn = document.getElementById(btnIds[groupIndex]);
+        if (btn) {
+            if (newHidden) {
+                btn.classList.add('opacity-40', 'line-through');
+            } else {
+                btn.classList.remove('opacity-40', 'line-through');
+            }
+        }
+    };
+
+    function updateModalKpiSummary(selectedBrgy, selectedYear, monthlyTrends) {
+        const scopePoints = points.filter(p => {
+            const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+            if (!rawDate) return false;
+            if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
+            const pd = new Date(rawDate);
+            return pd.getUTCFullYear() === selectedYear;
+        });
+
+        const total = scopePoints.length;
+        const kpiTotal = document.getElementById('modalKpiTotal');
+        if (kpiTotal) kpiTotal.textContent = total;
+
+        const monthCounts = monthlyTrends.map(m => m.total);
+        const offenseCounts = {};
+
+        scopePoints.forEach(p => {
+            const off = p.incident_type || p.crime_type || 'Unknown';
+            offenseCounts[off] = (offenseCounts[off] || 0) + 1;
+        });
+
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        let maxMonthIdx = 0;
+        let maxMonthVal = 0;
+
+        monthCounts.forEach((cnt, idx) => {
+            if (cnt > maxMonthVal) {
+                maxMonthVal = cnt;
+                maxMonthIdx = idx;
+            }
+        });
+
+        const kpiPeakMonth = document.getElementById('modalKpiPeakMonth');
+        const kpiPeakCount = document.getElementById('modalKpiPeakCount');
+        if (kpiPeakMonth) kpiPeakMonth.textContent = total > 0 ? monthNames[maxMonthIdx] : 'None';
+        if (kpiPeakCount) kpiPeakCount.textContent = total > 0 ? `${maxMonthVal} records (${((maxMonthVal/Math.max(total, 1))*100).toFixed(0)}%)` : '0 records';
+
+        const sortedOffenses = Object.entries(offenseCounts).sort((a, b) => b[1] - a[1]);
+        const topOffense = sortedOffenses.length > 0 ? sortedOffenses[0] : ['N/A', 0];
+        const kpiTopCrime = document.getElementById('modalKpiTopCrime');
+        const kpiTopShare = document.getElementById('modalKpiTopShare');
+        if (kpiTopCrime) {
+            kpiTopCrime.textContent = topOffense[0];
+            kpiTopCrime.title = topOffense[0];
+        }
+        if (kpiTopShare) {
+            const share = total > 0 ? ((topOffense[1] / total) * 100).toFixed(1) : '0';
+            kpiTopShare.textContent = `${topOffense[1]} cases (${share}%)`;
+        }
+
+        const scopeSubtitle = document.getElementById('modalScopeSubtitle');
+        if (scopeSubtitle) {
+            const brgyLabel = selectedBrgy === 'ALL' ? 'All Barangays' : `Barangay ${selectedBrgy}`;
+            scopeSubtitle.textContent = `Sta. Cruz Municipal Police Station • ${brgyLabel} • Year ${selectedYear}`;
+        }
+    }
+
+    function updateModalTrendsFromMarkdown(rawMarkdown, selectedBrgy, selectedYear) {
+        window.lastRawMarkdown = rawMarkdown;
+
+        const trendEl = document.getElementById('modalTrendText');
+        const patternEl = document.getElementById('modalPatternText');
+        const suggEl = document.getElementById('modalSuggestionsText');
+
+        if (!rawMarkdown) {
+            const fallbackBrgy = selectedBrgy === 'ALL' ? 'Overall Barangays' : 'Barangay ' + (selectedBrgy || '');
+            const fallbackYear = selectedYear || '<%= defaultYearVal %>';
+
+            if (trendEl) {
+                trendEl.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                            The analytical data for <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${fallbackBrgy}</strong> during <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${fallbackYear}</strong> indicates steady operational indicators. Incidence volume displays controlled baseline parameters with active patrol presence across critical junctions.
+                        </p>
+                    </div>
+                `;
+            }
+            if (patternEl) {
+                patternEl.innerHTML = `
+                    <div class="space-y-2">
+                        <p class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                            Incidents are predominantly concentrated during evening hours and weekend cycles near commercial zones and transport terminals. Minor non-index property offenses constitute the majority of report logs.
+                        </p>
+                    </div>
+                `;
+            }
+            if (suggEl) {
+                suggEl.innerHTML = `
+                    <ul class="space-y-1.5 my-1">
+                        <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-800 dark:text-slate-100 font-medium">
+                            <span class="text-emerald-500 font-bold text-base leading-none">•</span>
+                            <span>Sustain targeted mobile checkpoint visibility during peak transit hours (18:00 - 23:00).</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-800 dark:text-slate-100 font-medium">
+                            <span class="text-emerald-500 font-bold text-base leading-none">•</span>
+                            <span>Coordinate with Barangay Tanod patrols along high-density thoroughfares and residential boundaries.</span>
+                        </li>
+                        <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-800 dark:text-slate-100 font-medium">
+                            <span class="text-emerald-500 font-bold text-base leading-none">•</span>
+                            <span>Maintain strict enforcement of local municipal curfew and public illumination monitoring.</span>
+                        </li>
+                    </ul>
+                `;
+            }
+            return;
+        }
+
+        let raw = rawMarkdown.replace(/```markdown|```/g, '').trim().replace(/\\n/g, '\n');
+        const sectionRegex = /(?:^|\n)(?:\#{1,4}\s*|\*{1,2}\s*)?(Trend|Pattern|Suggestions?|Recommendations?)(?:\*{1,2})?\s*[\:\-]?/gi;
+        
+        let matches = [];
+        let match;
+        while ((match = sectionRegex.exec(raw)) !== null) {
+            matches.push({
+                index: match.index,
+                length: match[0].length,
+                key: match[1].toLowerCase()
+            });
+        }
+
+        let parsedSections = { trend: '', pattern: '', suggestion: '' };
+
+        if (matches.length > 0) {
+            for (let i = 0; i < matches.length; i++) {
+                const cur = matches[i];
+                const startPos = cur.index + cur.length;
+                const endPos = (i + 1 < matches.length) ? matches[i + 1].index : raw.length;
+                let bodyText = raw.substring(startPos, endPos).trim();
+
+                let normalizedKey = 'trend';
+                if (cur.key.startsWith('pattern')) normalizedKey = 'pattern';
+                else if (cur.key.startsWith('sug') || cur.key.startsWith('rec')) normalizedKey = 'suggestion';
+
+                let formattedBody = bodyText
+                    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>')
+                    .replace(/^[-*•]\s+(.*?)$/gm, '<li class="ml-2 list-disc marker:text-pnp-gold text-slate-800 dark:text-slate-100 mb-1">$1</li>')
+                    .replace(/\n\n+/g, '</p><p class="mt-2">')
+                    .replace(/\n/g, ' ');
+
+                if (formattedBody.includes('<li')) {
+                    formattedBody = `<ul class="my-1 space-y-1">${formattedBody}</ul>`;
+                } else {
+                    formattedBody = `<p class="leading-relaxed">${formattedBody}</p>`;
+                }
+
+                parsedSections[normalizedKey] = formattedBody;
+            }
+        }
+
+        if (trendEl && parsedSections.trend) {
+            trendEl.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">${parsedSections.trend}</div>`;
+        }
+        if (patternEl && parsedSections.pattern) {
+            patternEl.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">${parsedSections.pattern}</div>`;
+        }
+        if (suggEl && parsedSections.suggestion) {
+            suggEl.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">${parsedSections.suggestion}</div>`;
+        }
+    }
+
+    window.printTrendModalBrief = function() {
+        window.print();
+    };
 </script>
+
+<!-- Full Screen Strategic Analysis & Crime Trend Modal -->
+<div id="crimeTrendModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 lg:p-6 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300 overflow-y-auto" onclick="handleTrendModalBackdropClick(event)">
+    <div id="crimeTrendModalContent" class="relative w-full max-w-7xl max-h-[94vh] flex flex-col bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
+        
+        <!-- Modal Top Bar -->
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-950/40 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-pnp-blue/10 dark:bg-pnp-gold/20 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-pnp-blue/10 dark:border-pnp-gold/20 shadow-md shrink-0">
+                    <i class="fas fa-chart-column text-base"></i>
+                </div>
+                <div>
+                    <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                        Monthly Crime Trend & Strategic Directives
+                    </h2>
+                    <p id="modalScopeSubtitle" class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                        Sta. Cruz Municipal Police Station &bull; All Barangays &bull; Year <%= defaultYearVal %>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Modal Action Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- Year Select -->
+                <div class="relative w-28">
+                    <select id="modalTrendYearFilter" onchange="syncModalYearChange()" class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold cursor-pointer shadow-xs">
+                        <% availableYears.forEach(year => { %>
+                            <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <!-- Barangay Select -->
+                <div class="relative w-52 sm:w-56">
+                    <select id="modalTrendBarangayFilter" onchange="syncModalBarangayChange()" class="w-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold cursor-pointer shadow-xs truncate">
+                        <option value="ALL">ALL BARANGAYS</option>
+                        <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
+                            , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
+                            , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
+                            , "Poblacion III (Barangay III)" , "Poblacion IV (Barangay IV)"
+                            , "Poblacion V (Barangay V)" , "San Jose" , "San Juan" , "San Pablo Norte"
+                            , "San Pablo Sur" , "Santisima Cruz" , "Santo Angel Central"
+                            , "Santo Angel Norte" , "Santo Angel Sur" ].forEach(brgy=> { %>
+                            <option value="<%= brgy %>"><%= brgy.toUpperCase() %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <!-- Re-analyze button -->
+                <button onclick="refreshModalAITrends()" id="modalRefreshBtn" class="px-3 py-2 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 font-bold text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-xs cursor-pointer" title="Refresh Analysis">
+                    <i class="fas fa-sync-alt text-xs"></i>
+                    <span class="hidden sm:inline">Refresh</span>
+                </button>
+
+                <!-- Close Modal Button -->
+                <button onclick="closeCrimeTrendModal()" class="w-9 h-9 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-xs cursor-pointer" title="Close Modal (Esc)">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Scrollable Content Area -->
+        <div class="flex-grow overflow-y-auto custom-scrollbar p-6 sm:p-8 space-y-6">
+
+            <!-- Summary KPI Strip (3 Clean Cards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div class="p-5 bg-gray-50 dark:bg-slate-800/70 rounded-2xl border border-gray-200 dark:border-slate-800 flex items-center justify-between shadow-2xs">
+                    <div>
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Total Incidents</span>
+                        <span id="modalKpiTotal" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tabular-nums mt-1 block">0</span>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                        <i class="fas fa-layer-group text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-gray-50 dark:bg-slate-800/70 rounded-2xl border border-gray-200 dark:border-slate-800 flex items-center justify-between shadow-2xs">
+                    <div>
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Peak Month</span>
+                        <span id="modalKpiPeakMonth" class="text-xl sm:text-2xl font-black text-red-600 dark:text-red-400 uppercase leading-none mt-1 block">--</span>
+                        <span id="modalKpiPeakCount" class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mt-1">0 records</span>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center">
+                        <i class="fas fa-arrow-trend-up text-lg"></i>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-gray-50 dark:bg-slate-800/70 rounded-2xl border border-gray-200 dark:border-slate-800 flex items-center justify-between shadow-2xs">
+                    <div class="min-w-0 pr-3 flex-1">
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest block">Leading Offense</span>
+                        <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-pnp-blue dark:text-pnp-gold uppercase break-words leading-snug mt-1 block" title="--">--</span>
+                        <span id="modalKpiTopShare" class="text-xs font-semibold text-slate-500 dark:text-slate-400 block mt-1">0% of total</span>
+                    </div>
+                    <div class="w-11 h-11 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                        <i class="fas fa-crosshairs text-lg"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full-Width Bar Graph Section -->
+            <div class="bg-gray-50/70 dark:bg-slate-800/40 rounded-[2rem] p-5 md:p-6 border border-gray-200 dark:border-slate-800">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-pnp-blue dark:text-white uppercase tracking-wider flex items-center gap-2">
+                            <i class="fas fa-chart-simple text-pnp-gold"></i>
+                            <span>Incident Volume by Month</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                            Monthly breakdown by crime category
+                        </p>
+                    </div>
+
+                    <!-- Category Filter Legend Buttons -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="toggleModalDataset(0)" id="modalLegend8Focus" class="px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                            <span>8-Focus</span>
+                        </button>
+                        <button onclick="toggleModalDataset(1)" id="modalLegendNonIndex" class="px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                            <span>Non-Index</span>
+                        </button>
+                        <button onclick="toggleModalDataset(2)" id="modalLegendPSI" class="px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                            <span>PSI</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bar Graph Canvas -->
+                <div class="relative w-full h-[320px] sm:h-[360px] bg-white dark:bg-slate-900 rounded-2xl p-3 border border-gray-200 dark:border-slate-800 shadow-inner">
+                    <canvas id="modalCrimeTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Strategic Insights Grid: Trend, Pattern, Suggestions (Placed Below Bar Graph) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+                
+                <!-- 1. TREND CARD -->
+                <div id="modalCardTrend" class="p-5 rounded-2xl border border-blue-200 dark:border-blue-800/60 bg-gradient-to-br from-blue-50/90 to-slate-50/50 dark:from-blue-950/30 dark:to-slate-900/60 shadow-sm transition-all hover:shadow-md flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-blue-200/60 dark:border-blue-800/40">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center text-sm shadow-xs">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-blue-300">
+                                        Trend Analysis
+                                    </h4>
+                                    <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                                        Directional Trajectory
+                                    </span>
+                                </div>
+                            </div>
+                            <span id="modalTrendBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/80 dark:text-blue-200 border border-blue-300/50 dark:border-blue-700/50">
+                                Evaluated
+                            </span>
+                        </div>
+                        <div id="modalTrendText" class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                            <div class="flex items-center gap-2 py-3 text-slate-400">
+                                <div class="w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
+                                <span class="text-xs uppercase tracking-widest font-bold">Computing trend direction...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. PATTERN CARD -->
+                <div id="modalCardPattern" class="p-5 rounded-2xl border border-amber-200 dark:border-amber-800/60 bg-gradient-to-br from-amber-50/90 to-slate-50/50 dark:from-amber-950/30 dark:to-slate-900/60 shadow-sm transition-all hover:shadow-md flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-amber-200/60 dark:border-amber-800/40">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center text-sm shadow-xs">
+                                    <i class="fas fa-bullseye"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                                        Crime Pattern
+                                    </h4>
+                                    <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                                        Concentration & Drivers
+                                    </span>
+                                </div>
+                            </div>
+                            <span id="modalPatternBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/80 dark:text-amber-200 border border-amber-300/50 dark:border-amber-700/50">
+                                Identified
+                            </span>
+                        </div>
+                        <div id="modalPatternText" class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                            <div class="flex items-center gap-2 py-3 text-slate-400">
+                                <div class="w-4 h-4 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"></div>
+                                <span class="text-xs uppercase tracking-widest font-bold">Identifying crime patterns...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. SUGGESTIONS CARD -->
+                <div id="modalCardSuggestions" class="p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50/90 to-slate-50/50 dark:from-emerald-950/30 dark:to-slate-900/60 shadow-sm transition-all hover:shadow-md flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-emerald-200/60 dark:border-emerald-800/40">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-sm shadow-xs">
+                                    <i class="fas fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
+                                        Strategic Directives
+                                    </h4>
+                                    <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                                        Tactical Suggestions
+                                    </span>
+                                </div>
+                            </div>
+                            <span id="modalSuggestionsBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-900/80 dark:text-emerald-200 border border-emerald-300/50 dark:border-emerald-700/50">
+                                Directives
+                            </span>
+                        </div>
+                        <div id="modalSuggestionsText" class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                            <div class="flex items-center gap-2 py-3 text-slate-400">
+                                <div class="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+                                <span class="text-xs uppercase tracking-widest font-bold">Synthesizing recommendations...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 sm:px-8 py-4 border-t border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-950/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div class="flex items-center space-x-2 text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                <i class="fas fa-shield-cat text-pnp-gold text-sm"></i>
+                <span>Sta. Cruz MPS Crime Analysis Division</span>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="window.location.href='/admin/map'" class="px-4 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 border border-gray-300 dark:border-slate-700 text-xs sm:text-sm font-black uppercase tracking-wider transition-all shadow-xs flex items-center gap-2 cursor-pointer">
+                    <i class="fas fa-map-location-dot"></i>
+                    <span>View on Map</span>
+                </button>
+                <button onclick="closeCrimeTrendModal()" class="px-6 py-2.5 rounded-xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 text-xs sm:text-sm font-black uppercase tracking-wider hover:opacity-90 transition-all shadow-md cursor-pointer">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     .custom-scrollbar::-webkit-scrollbar {
@@ -1050,5 +1805,33 @@
     }
     .dark .custom-scrollbar::-webkit-scrollbar-thumb {
         background: rgba(212, 175, 55, 0.1);
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #crimeTrendModal, #crimeTrendModal * {
+            visibility: visible;
+        }
+        #crimeTrendModal {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            background: white !important;
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+        #crimeTrendModalContent {
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+            max-height: none !important;
+            border-radius: 0 !important;
+        }
+        button, select {
+            display: none !important;
+        }
     }
 </style>

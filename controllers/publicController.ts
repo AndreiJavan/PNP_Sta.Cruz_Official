@@ -331,3 +331,33 @@ export const translateToTagalog = async (req: Request, res: Response) => {
   }
 };
 
+export const postSetLanguage = async (req: Request, res: Response) => {
+  try {
+    const { lang } = req.body;
+    const selectedLang = (lang === 'fil' || lang === 'en') ? lang : 'en';
+
+    if (req.session) {
+      req.session.language = selectedLang;
+      if (req.session.user) {
+        req.session.user.language = selectedLang;
+        try {
+          if (req.session.user.id) {
+            await db.collection('users').doc(req.session.user.id).update({
+              language: selectedLang,
+              updated_at: new Date().toISOString()
+            });
+          }
+        } catch (dbErr) {
+          console.warn('Failed to update language in DB:', dbErr);
+        }
+      }
+    }
+
+    res.cookie('cpicrs_lang', selectedLang, { maxAge: 365 * 24 * 60 * 60 * 1000, httpOnly: false });
+    return res.json({ success: true, language: selectedLang });
+  } catch (err: any) {
+    console.error('Error setting language:', err);
+    return res.status(500).json({ success: false, error: 'Failed to update language' });
+  }
+};
+

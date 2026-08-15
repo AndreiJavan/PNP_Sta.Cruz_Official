@@ -15,5 +15,6 @@ router.get('/about', publicController.getAbout);
 router.get('/hotlines', publicController.getHotlines);
 router.get('/news', publicController.getNews);
 router.post('/api/translate-tagalog', publicController.translateToTagalog);
+router.post('/api/user/language', publicController.postSetLanguage);
 
 export default router;

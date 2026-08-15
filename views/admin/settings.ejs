@@ -1,0 +1,154 @@
+<div class="max-w-4xl mx-auto space-y-8">
+  <!-- Header Banner -->
+  <div class="bg-pnp-blue text-white p-8 rounded-3xl shadow-xl border-b-4 border-pnp-gold flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+    <div class="flex items-center space-x-5">
+      <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl text-pnp-gold border border-white/20">
+        <i class="fas fa-sliders-h"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-black tracking-tight"><%= t('settings.title') %></h1>
+        <p class="text-xs text-blue-200/80 font-medium mt-1"><%= t('settings.subtitle') %></p>
+      </div>
+    </div>
+  </div>
+
+  <form action="/admin/settings" method="POST" class="space-y-8">
+    <!-- Language Settings Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-6">
+      <div class="flex items-center space-x-4 border-b border-gray-100 dark:border-slate-700 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center text-lg font-bold">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider"><%= t('settings.language_preference') %></h2>
+          <p class="text-xs text-gray-500 dark:text-slate-400"><%= t('settings.language_desc') %></p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <label class="relative flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 <%= currentLang === 'en' ? 'border-pnp-gold bg-amber-500/5 dark:bg-amber-500/10' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300' %>">
+          <input type="radio" name="language" value="en" class="sr-only" <%= currentLang === 'en' ? 'checked' : '' %> onchange="changeLanguageFast('en')">
+          <div class="flex items-center space-x-4 w-full">
+            <span class="text-3xl">🇺🇸</span>
+            <div class="flex-grow">
+              <span class="block text-sm font-black text-gray-900 dark:text-white"><%= t('header.english') %></span>
+              <span class="block text-[11px] text-gray-500 dark:text-slate-400">English (United States)</span>
+            </div>
+            <% if (currentLang === 'en') { %>
+              <i class="fas fa-check-circle text-pnp-gold text-lg"></i>
+            <% } %>
+          </div>
+        </label>
+
+        <label class="relative flex items-center p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 <%= currentLang === 'fil' ? 'border-pnp-gold bg-amber-500/5 dark:bg-amber-500/10' : 'border-gray-200 dark:border-slate-700 hover:border-gray-300' %>">
+          <input type="radio" name="language" value="fil" class="sr-only" <%= currentLang === 'fil' ? 'checked' : '' %> onchange="changeLanguageFast('fil')">
+          <div class="flex items-center space-x-4 w-full">
+            <span class="text-3xl">🇵🇭</span>
+            <div class="flex-grow">
+              <span class="block text-sm font-black text-gray-900 dark:text-white"><%= t('header.filipino') %></span>
+              <span class="block text-[11px] text-gray-500 dark:text-slate-400">Wikang Tagalog / Filipino</span>
+            </div>
+            <% if (currentLang === 'fil') { %>
+              <i class="fas fa-check-circle text-pnp-gold text-lg"></i>
+            <% } %>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Profile Info Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-6">
+      <div class="flex items-center space-x-4 border-b border-gray-100 dark:border-slate-700 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center text-lg font-bold">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider"><%= t('settings.profile_info') %></h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.full_name') %></label>
+          <input type="text" name="full_name" value="<%= currentUser.full_name || '' %>" required class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-pnp-gold focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.username') %></label>
+          <input type="text" value="<%= currentUser.username || '' %>" disabled class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 font-medium cursor-not-allowed">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.email') %></label>
+          <input type="email" value="<%= currentUser.email || 'N/A' %>" disabled class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400 font-medium cursor-not-allowed">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.role') %></label>
+          <div class="px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-slate-800 flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span class="text-xs font-black uppercase text-gray-700 dark:text-slate-300"><%= currentUser.role || 'Staff' %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security & Password Card -->
+    <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-slate-700/60 space-y-6">
+      <div class="flex items-center space-x-4 border-b border-gray-100 dark:border-slate-700 pb-4">
+        <div class="w-10 h-10 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center text-lg font-bold">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-wider"><%= t('settings.security') %></h2>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.current_password') %></label>
+          <input type="password" name="current_password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-pnp-gold focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.new_password') %></label>
+          <input type="password" name="new_password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-pnp-gold focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider mb-2"><%= t('settings.confirm_password') %></label>
+          <input type="password" name="confirm_password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-white font-medium focus:ring-2 focus:ring-pnp-gold focus:outline-none">
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center justify-end space-x-4">
+      <a href="/admin/dashboard" class="px-6 py-3.5 rounded-2xl bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 text-xs font-bold uppercase tracking-wider hover:bg-gray-200 transition">
+        <%= t('actions.cancel') %>
+      </a>
+      <button type="submit" class="px-8 py-3.5 rounded-2xl bg-pnp-blue text-white hover:bg-blue-900 text-xs font-black uppercase tracking-widest shadow-lg border-2 border-pnp-gold transition duration-200 flex items-center space-x-2">
+        <i class="fas fa-save"></i>
+        <span><%= t('actions.save') %></span>
+      </button>
+    </div>
+  </form>
+</div>
+
+<script>
+  function changeLanguageFast(lang) {
+    if (typeof switchLanguage === 'function') {
+      switchLanguage(lang);
+    } else {
+      localStorage.setItem('cpicrs_lang', lang);
+      document.cookie = 'cpicrs_lang=' + lang + '; path=/; max-age=31536000';
+      fetch('/admin/api/user/language', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lang: lang })
+      }).then(function() {
+        window.location.reload();
+      });
+    }
+  }
+</script>

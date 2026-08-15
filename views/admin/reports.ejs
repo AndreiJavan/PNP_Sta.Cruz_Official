@@ -882,7 +882,7 @@
              const rowNum = i + 1;
              
              // 1. Missing basic fields check (Barangay)
-             if (!r.barangay || !r.barangay.trim()) {
+             if (!r.barangay || !String(r.barangay).trim()) {
                  await window.strategicAlert({
                      title: "Validation Failure",
                      message: `Row #${rowNum}: Barangay (Sector) is missing. Please select a valid Barangay before synchronizing.`,
@@ -891,7 +891,18 @@
                  return;
              }
 
-             if (!VALID_BARANGAYS.includes(r.barangay.trim())) {
+             // Auto-normalize barangay matching (handles "Alipit", "Brgy. Alipit", "alipit", etc.)
+             const cleanB = String(r.barangay).trim();
+             const matchedB = VALID_BARANGAYS.find(b => 
+                 b.toLowerCase() === cleanB.toLowerCase() ||
+                 b.toLowerCase() === cleanB.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase() ||
+                 cleanB.toLowerCase().includes(b.toLowerCase())
+             );
+             if (matchedB) {
+                 r.barangay = matchedB;
+             }
+
+             if (!VALID_BARANGAYS.includes(r.barangay)) {
                  await window.strategicAlert({
                      title: "Invalid Sector",
                      message: `Row #${rowNum}: "${r.barangay}" is not a recognized Santa Cruz Barangay. Please select a valid Barangay.`,
