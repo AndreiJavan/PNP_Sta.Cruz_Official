@@ -439,7 +439,7 @@
                 newsChatHistory.push({ role: 'user', text });
                 newsChatHistory.push({ role: 'assistant', text: res.reply });
             } else {
-                appendChatMessage('assistant', "Sorry, I encountered an issue generating a response.");
+                appendChatMessage('assistant', res.error || "Sorry, I encountered an issue generating a response.");
             }
         } catch (e) {
             console.error('Chat error:', e);

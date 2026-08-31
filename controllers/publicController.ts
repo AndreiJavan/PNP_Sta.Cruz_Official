@@ -358,6 +358,7 @@ export const translateToTagalog = async (req: Request, res: Response) => {
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
+            max_tokens: 1000,
             messages: [{ role: "user", content: prompt }]
           })
         });
@@ -365,6 +366,8 @@ export const translateToTagalog = async (req: Request, res: Response) => {
         if (data.choices && data.choices[0] && data.choices[0].message) {
           const tagalogText = data.choices[0].message.content.trim();
           return res.json({ success: true, tagalogText });
+        } else {
+          console.warn('OpenRouter translation returned no choices, falling back to Gemini API:', data);
         }
       } catch (err: any) {
         console.warn('OpenRouter translation error, falling back to Gemini API:', err?.message || err);
@@ -378,7 +381,7 @@ export const translateToTagalog = async (req: Request, res: Response) => {
         const ai = new GoogleGenAI({ apiKey });
 
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: prompt
         });
 
@@ -438,6 +441,7 @@ Assistant:`;
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
+            max_tokens: 1000,
             messages: [{ role: "user", content: prompt }]
           })
         });
@@ -445,6 +449,8 @@ Assistant:`;
         if (data.choices && data.choices[0] && data.choices[0].message) {
           const reply = data.choices[0].message.content.trim();
           return res.json({ success: true, reply });
+        } else {
+          console.warn('OpenRouter chatbot returned no choices, falling back to Gemini API:', data);
         }
       } catch (err: any) {
         console.warn('OpenRouter chatbot error, falling back to Gemini API:', err?.message || err);
@@ -457,7 +463,7 @@ Assistant:`;
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
+          model: 'gemini-3.6-flash',
           contents: prompt
         });
 

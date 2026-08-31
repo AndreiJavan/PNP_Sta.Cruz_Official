@@ -601,7 +601,7 @@
                 bulletinChatHistory.push({ role: 'user', text });
                 bulletinChatHistory.push({ role: 'assistant', text: res.reply });
             } else {
-                appendBulletinChatMessage('assistant', "Sorry, I encountered an issue generating a response.");
+                appendBulletinChatMessage('assistant', res.error || "Sorry, I encountered an issue generating a response.");
             }
         } catch (e) {
             console.error('Chat error:', e);
