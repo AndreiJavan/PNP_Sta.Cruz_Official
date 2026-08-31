@@ -39,7 +39,7 @@
         <!-- News Grid -->
         <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <% newsList.forEach((news) => { %>
-                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>">
+                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" onclick="openNewsModal('<%= news.id %>')">
                     
                     <!-- Image / Facebook Wrapper -->
                     <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
@@ -89,8 +89,8 @@
                                 <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
                             <% } %>
                             <div class="flex items-center space-x-3">
-                                <button onclick="openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
-                                    <span>See More</span>
+                                <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
+                                    <span>Read Details</span>
                                     <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
                                 </button>
                             </div>
