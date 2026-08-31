@@ -357,7 +357,7 @@
     }
 
     function openBulletinModal(bulletinId) {
-        const bulletin = bulletinsDatabase.find(b => b.id === bulletinId);
+        const bulletin = bulletinsDatabase.find(b => String(b.id) === String(bulletinId));
         if (!bulletin) return;
 
         const mediaContainer = document.getElementById('bulletin-modal-media-container');
@@ -367,16 +367,7 @@
 
         if (mediaContainer) {
             mediaContainer.innerHTML = '';
-            dotsContainer.innerHTML = '';
-            
-            // Collect all photos and videos
-            const sanitizeModalUrl = (url) => {
-                if (!url || typeof url !== 'string') return '/images/PNP.jpg';
-                let clean = url.trim();
-                if (!clean) return '/images/PNP.jpg';
-                if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/images/')) return clean;
-                return '/images/PNP.jpg';
-            };
+            if (dotsContainer) dotsContainer.innerHTML = '';
 
             const mediaItems = [];
             
@@ -390,10 +381,10 @@
 
             if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
                 bulletin.photo_paths.forEach(url => {
-                    if (url) mediaItems.push({ type: 'photo', url: sanitizeModalUrl(url) });
+                    if (url) mediaItems.push({ type: 'photo', url });
                 });
             } else if (bulletin.photo_path) {
-                mediaItems.push({ type: 'photo', url: sanitizeModalUrl(bulletin.photo_path) });
+                mediaItems.push({ type: 'photo', url: bulletin.photo_path });
             }
 
             if (mediaItems.length === 0) {
@@ -407,7 +398,7 @@
                             </div>`;
                 } else {
                     return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-slate-900 ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                                <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain p-2 select-none" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                             </div>`;
                 }
             };

@@ -244,7 +244,7 @@
     }
 
     function openNewsModal(newsId) {
-        const article = newsDatabase.find(n => n.id === newsId);
+        const article = newsDatabase.find(n => String(n.id) === String(newsId));
         if (!article) return;
 
         const mediaContainer = document.getElementById('news-modal-media-container');
@@ -254,7 +254,7 @@
 
         if (mediaContainer) {
             mediaContainer.innerHTML = '';
-            dotsContainer.innerHTML = '';
+            if (dotsContainer) dotsContainer.innerHTML = '';
             
             if (article.facebook_url) {
                 const isVideo = /video|watch|reel/i.test(article.facebook_url);
@@ -282,22 +282,25 @@
                     });
                 }
 
-                if (mediaItems.length > 0) {
-                    mediaContainer.innerHTML = mediaItems.map((item, idx) => {
-                        if (item.type === 'video') {
-                            return `
-                                <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                    <video src="${item.url}" class="w-full h-full object-contain" controls></video>
-                                </div>
-                            `;
-                        } else {
-                            return `
-                                <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                    <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                                </div>
-                            `;
-                        }
-                    }).join('');
+                if (mediaItems.length === 0) {
+                    mediaItems.push({ type: 'image', url: '/images/PNP.jpg' });
+                }
+
+                mediaContainer.innerHTML = mediaItems.map((item, idx) => {
+                    if (item.type === 'video') {
+                        return `
+                            <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                <video src="${item.url}" class="w-full h-full object-contain" controls></video>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-slate-900 ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain p-2 select-none" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                            </div>
+                        `;
+                    }
+                }).join('');
                     
                     window.currentNewsModalSlide = 0;
                     window.totalNewsModalSlides = mediaItems.length;
