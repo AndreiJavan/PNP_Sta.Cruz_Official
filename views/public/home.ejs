@@ -439,47 +439,51 @@
                 mediaItems.push({ type: 'photo', url: bulletin.photo_path });
             }
 
-            if (mediaItems.length === 0) {
-                mediaItems.push({ type: 'photo', url: '/images/PNP.jpg' });
-            }
-
-            const renderItemHtml = (item, idx) => {
-                if (item.type === 'video') {
-                    return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                <video src="${item.url}" controls class="w-full h-full object-contain"></video>
-                            </div>`;
-                } else {
-                    return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-slate-900 ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain p-2 select-none" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                            </div>`;
+            if (bulletin.facebook_url && mediaItems.length === 0) {
+                const isVideo = /video|watch|reel/i.test(bulletin.facebook_url);
+                const pluginType = isVideo ? 'video.php' : 'post.php';
+                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(bulletin.facebook_url)}&show_text=true&width=500`;
+                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[380px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:380px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
+                </div>`;
+                if (prevBtn) prevBtn.classList.add('hidden');
+                if (nextBtn) nextBtn.classList.add('hidden');
+                if (dotsContainer) dotsContainer.classList.add('hidden');
+            } else {
+                if (mediaItems.length === 0) {
+                    mediaItems.push({ type: 'photo', url: '/images/PNP.jpg' });
                 }
-            };
-            
-            mediaContainer.innerHTML = mediaItems.map((item, idx) => renderItemHtml(item, idx)).join('');
+
+                const renderItemHtml = (item, idx) => {
+                    if (item.type === 'video') {
+                        return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                    <video src="${item.url}" controls class="w-full h-full object-contain"></video>
+                                </div>`;
+                    } else {
+                        return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-slate-900 ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                    <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain p-2 select-none" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                                </div>`;
+                    }
+                };
                 
+                mediaContainer.innerHTML = mediaItems.map((item, idx) => renderItemHtml(item, idx)).join('');
                 window.currentBulletinModalSlide = 0;
                 window.totalBulletinModalSlides = mediaItems.length;
 
                 if (mediaItems.length > 1) {
-                    prevBtn.classList.remove('hidden');
-                    nextBtn.classList.remove('hidden');
-                    dotsContainer.classList.remove('hidden');
-                    
-                    dotsContainer.innerHTML = mediaItems.map((_, idx) => `
-                        <button onclick="bulletinModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
-                    `).join('');
+                    if (prevBtn) prevBtn.classList.remove('hidden');
+                    if (nextBtn) nextBtn.classList.remove('hidden');
+                    if (dotsContainer) {
+                        dotsContainer.classList.remove('hidden');
+                        dotsContainer.innerHTML = mediaItems.map((_, idx) => `
+                            <button onclick="bulletinModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                        `).join('');
+                    }
                 } else {
-                    prevBtn.classList.add('hidden');
-                    nextBtn.classList.add('hidden');
-                    dotsContainer.classList.add('hidden');
+                    if (prevBtn) prevBtn.classList.add('hidden');
+                    if (nextBtn) nextBtn.classList.add('hidden');
+                    if (dotsContainer) dotsContainer.classList.add('hidden');
                 }
-            } else {
-                mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700">
-                    <i class="fas fa-image text-5xl"></i>
-                </div>`;
-                prevBtn.classList.add('hidden');
-                nextBtn.classList.add('hidden');
-                dotsContainer.classList.add('hidden');
             }
         }
 
