@@ -80,7 +80,7 @@ export const getHome = async (req: Request, res: Response) => {
           headline: b.title,
           description: firstPara,
           fullContent: bodyText,
-          urlToImage: (b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop',
+          urlToImage: normalizeImageUrl((b.photo_paths && b.photo_paths[0]) || b.photo_path || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=800&auto=format&fit=crop'),
           photo_paths: b.photo_paths,
           video_paths: b.video_paths || [],
           facebook_url: b.facebook_url,
@@ -212,14 +212,45 @@ export const getMapPoints = async (req: Request, res: Response) => {
   }
 };
 
+export const normalizeImageUrl = (url: string | undefined): string => {
+  if (!url || typeof url !== 'string') return '/images/PNP.jpg';
+  let clean = url.trim();
+  if (!clean) return '/images/PNP.jpg';
+
+  if (clean.startsWith('http://')) {
+    clean = clean.replace('http://', 'https://');
+  }
+
+  if (clean.startsWith('https://')) {
+    return clean;
+  }
+
+  const filename = clean.split('/').pop();
+  const supabaseUrl = process.env.SUPABASE_URL;
+
+  if (supabaseUrl && filename) {
+    const cleanSupabaseUrl = supabaseUrl.replace(/\/$/, '');
+    return `${cleanSupabaseUrl}/storage/v1/object/public/bulletins/bulletins/${filename}`;
+  }
+
+  return clean.startsWith('/') ? clean : `/${clean}`;
+};
+
 const parsePhotos = (path: string | undefined, existingPaths?: any): string[] => {
-  if (Array.isArray(existingPaths) && existingPaths.length > 0) return existingPaths;
-  if (!path) return [];
-  try {
-    const parsed = JSON.parse(path);
-    if (Array.isArray(parsed)) return parsed;
-  } catch (e) {}
-  return [path];
+  let rawList: string[] = [];
+  if (Array.isArray(existingPaths) && existingPaths.length > 0) {
+    rawList = existingPaths;
+  } else if (path) {
+    try {
+      const parsed = JSON.parse(path);
+      if (Array.isArray(parsed)) rawList = parsed;
+      else rawList = [path];
+    } catch (e) {
+      rawList = [path];
+    }
+  }
+
+  return rawList.map(url => normalizeImageUrl(url));
 };
 
 const parseVideos = (path: string | undefined, existingPaths?: any): string[] => {

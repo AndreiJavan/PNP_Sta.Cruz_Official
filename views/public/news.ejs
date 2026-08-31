@@ -49,7 +49,7 @@
                                 allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
                             <div class="absolute inset-0 bg-transparent cursor-pointer" onclick="openNewsModal('<%= news.id %>')"></div>
                         <% } else { %>
-                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none">
+                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                         <% } %>
                         <div class="absolute top-4 left-4 bg-pnp-blue/90 dark:bg-pnp-gold/90 text-white dark:text-pnp-blue text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-md z-10 flex items-center space-x-1">
@@ -293,7 +293,7 @@
                         } else {
                             return `
                                 <div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                    <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
+                                    <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                                 </div>
                             `;
                         }
