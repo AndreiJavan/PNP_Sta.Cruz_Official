@@ -8,22 +8,161 @@ import { createRequire } from 'module';
 import nodemailer from 'nodemailer';
 import { memoryCache } from '../utils/cache.js';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'andreijavan05@gmail.com',
-    pass: 'mwcb ioze huql sxgd'
+// Robust Gmail SMTP Notification Dispatcher
+function getEmailConfig() {
+  const emailUser = (process.env.EMAIL_USER || process.env.GMAIL_USER || 'andreijavan05@gmail.com').trim();
+  const emailPass = (process.env.EMAIL_PASS || process.env.GMAIL_PASS || process.env.GMAIL_APP_PASSWORD || 'cbsn gzat xkfw lydr').replace(/\s+/g, '');
+  return {
+    emailUser,
+    emailPass,
+    fromAddress: `CPICRS System <${emailUser}>`
+  };
+}
+
+function createTransporter() {
+  const { emailUser, emailPass } = getEmailConfig();
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass
+    }
+  });
+}
+
+async function sendEmailNotification(options: { to: string; subject: string; html: string; logContext?: string }) {
+  const { fromAddress, emailUser } = getEmailConfig();
+  const transporter = createTransporter();
+  try {
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to: options.to,
+      subject: options.subject,
+      html: options.html
+    });
+    console.log(`[EMAIL DISPATCH SUCCESS] ${options.logContext || 'Notification'} delivered to: ${options.to} (MessageId: ${info.messageId})`);
+    return { success: true, messageId: info.messageId };
+  } catch (err: any) {
+    console.error(`[EMAIL DISPATCH FAILURE] Failed to send email to ${options.to} (${options.logContext || 'Notification'}):`, err?.message || err);
+    if (err?.code === 'EAUTH' || (err?.message && err.message.includes('535'))) {
+      console.warn(`[GMAIL SMTP CONFIG HINT] Google rejected the login credentials for "${emailUser}".\n` +
+        `To resolve this:\n` +
+        `1. Ensure 2-Step Verification is enabled on your Google Account: https://myaccount.google.com/security\n` +
+        `2. Generate a 16-character App Password at: https://myaccount.google.com/apppasswords\n` +
+        `3. Set EMAIL_USER="${emailUser}" and EMAIL_PASS="<your-16-char-app-password>" in your environment / .env file.`);
+    }
+    return { success: false, error: err };
   }
-});
+}
 
 // Shared Tactical Assets
-const VALID_BARANGAYS = [
+export const VALID_BARANGAYS = [
   "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
   "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
   "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)",
   "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur",
   "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
 ];
+
+/**
+ * Universal Santa Cruz Barangay Normalizer.
+ * Accurately parses abbreviations and shorthand notations such as:
+ * - "I (POB.)", "POB. I", "Pob 1", "Brgy 1", "Barangay I" -> "Poblacion I (Barangay I)"
+ * - "II (POB.)", "POB. II", "Pob 2", "Brgy 2", "Barangay II" -> "Poblacion II (Barangay II)"
+ * - "III (POB.)", "POB. III", "Pob 3", "Brgy 3", "Barangay III" -> "Poblacion III (Barangay III)"
+ * - "IV (POB.)", "POB. IV", "Pob 4", "Brgy 4", "Barangay IV" -> "Poblacion IV (Barangay IV)"
+ * - "V (POB.)", "POB. V", "Pob 5", "Brgy 5", "Barangay V" -> "Poblacion V (Barangay V)"
+ * - "Sto. Angel Central/Norte/Sur", "San Pablo Norte/Sur", "Santisima Cruz", "Alipit", etc.
+ */
+export function normalizeSantaCruzBarangay(rawLoc: string): string {
+  if (!rawLoc || typeof rawLoc !== 'string') return 'Poblacion I (Barangay I)';
+  const s = rawLoc.trim();
+  if (!s) return 'Poblacion I (Barangay I)';
+
+  // 1. Direct exact match check
+  const exact = VALID_BARANGAYS.find(b => b.toLowerCase() === s.toLowerCase());
+  if (exact) return exact;
+
+  // Clean standard prefixes and location suffixes
+  let clean = s.replace(/^(brgy\.?|bgy\.?|barangay|sector)\s+/i, '').trim();
+  clean = clean.replace(/,\s*(sta\.?\s*cruz|santa\s*cruz|laguna).*$/i, '').trim();
+
+  const cleanExact = VALID_BARANGAYS.find(b => b.toLowerCase() === clean.toLowerCase());
+  if (cleanExact) return cleanExact;
+
+  const lower = clean.toLowerCase();
+
+  // 2. Poblacion pattern normalization
+  // Poblacion 1 / I (including "I (POB.)", "I (POB)", "1 (POB)", "POB I", etc.)
+  if (/^(pob\.?|poblacion)?\s*(1|i)\s*(\(pob\.?\)|\(poblacion\)|\(barangay\s*(1|i)\))?$/i.test(clean) || 
+      /^(1|i)\s*\(\s*(pob\.?|poblacion)\s*\)$/i.test(clean) ||
+      /^(pob\.?|poblacion)\s*(1|i)$/i.test(clean) ||
+      ['poblacion 1', 'poblacion i', 'pob 1', 'pob i', 'brgy 1', 'brgy i', 'i (pob.)', 'i (pob)', '1 (pob)', '1 (pob.)', 'i(pob)', 'i(pob.)', 'pob. i', 'pob. 1', 'barangay 1', 'barangay i', '1', 'i'].includes(lower)) {
+    return 'Poblacion I (Barangay I)';
+  }
+
+  // Poblacion 2 / II
+  if (/^(pob\.?|poblacion)?\s*(2|ii)\s*(\(pob\.?\)|\(poblacion\)|\(barangay\s*(2|ii)\))?$/i.test(clean) || 
+      /^(2|ii)\s*\(\s*(pob\.?|poblacion)\s*\)$/i.test(clean) ||
+      /^(pob\.?|poblacion)\s*(2|ii)$/i.test(clean) ||
+      ['poblacion 2', 'poblacion ii', 'pob 2', 'pob ii', 'brgy 2', 'brgy ii', 'ii (pob.)', 'ii (pob)', '2 (pob)', '2 (pob.)', 'ii(pob)', 'ii(pob.)', 'pob. ii', 'pob. 2', 'barangay 2', 'barangay ii', '2', 'ii'].includes(lower)) {
+    return 'Poblacion II (Barangay II)';
+  }
+
+  // Poblacion 3 / III
+  if (/^(pob\.?|poblacion)?\s*(3|iii)\s*(\(pob\.?\)|\(poblacion\)|\(barangay\s*(3|iii)\))?$/i.test(clean) || 
+      /^(3|iii)\s*\(\s*(pob\.?|poblacion)\s*\)$/i.test(clean) ||
+      /^(pob\.?|poblacion)\s*(3|iii)$/i.test(clean) ||
+      ['poblacion 3', 'poblacion iii', 'pob 3', 'pob iii', 'brgy 3', 'brgy iii', 'iii (pob.)', 'iii (pob)', '3 (pob)', '3 (pob.)', 'iii(pob)', 'iii(pob.)', 'pob. iii', 'pob. 3', 'barangay 3', 'barangay iii', '3', 'iii'].includes(lower)) {
+    return 'Poblacion III (Barangay III)';
+  }
+
+  // Poblacion 4 / IV
+  if (/^(pob\.?|poblacion)?\s*(4|iv)\s*(\(pob\.?\)|\(poblacion\)|\(barangay\s*(4|iv)\))?$/i.test(clean) || 
+      /^(4|iv)\s*\(\s*(pob\.?|poblacion)\s*\)$/i.test(clean) ||
+      /^(pob\.?|poblacion)\s*(4|iv)$/i.test(clean) ||
+      ['poblacion 4', 'poblacion iv', 'pob 4', 'pob iv', 'brgy 4', 'brgy iv', 'iv (pob.)', 'iv (pob)', '4 (pob)', '4 (pob.)', 'iv(pob)', 'iv(pob.)', 'pob. iv', 'pob. 4', 'barangay 4', 'barangay iv', '4', 'iv'].includes(lower)) {
+    return 'Poblacion IV (Barangay IV)';
+  }
+
+  // Poblacion 5 / V
+  if (/^(pob\.?|poblacion)?\s*(5|v)\s*(\(pob\.?\)|\(poblacion\)|\(barangay\s*(5|v)\))?$/i.test(clean) || 
+      /^(5|v)\s*\(\s*(pob\.?|poblacion)\s*\)$/i.test(clean) ||
+      /^(pob\.?|poblacion)\s*(5|v)$/i.test(clean) ||
+      ['poblacion 5', 'poblacion v', 'pob 5', 'pob v', 'brgy 5', 'brgy v', 'v (pob.)', 'v (pob)', '5 (pob)', '5 (pob.)', 'v(pob)', 'v(pob.)', 'pob. v', 'pob. 5', 'barangay 5', 'barangay v', '5', 'v'].includes(lower)) {
+    return 'Poblacion V (Barangay V)';
+  }
+
+  // Santo Angel variations
+  if (lower.includes('sto') || lower.includes('santo')) {
+    if (lower.includes('central')) return 'Santo Angel Central';
+    if (lower.includes('norte')) return 'Santo Angel Norte';
+    if (lower.includes('sur')) return 'Santo Angel Sur';
+  }
+
+  // San Pablo variations
+  if (lower.includes('pablo')) {
+    if (lower.includes('norte')) return 'San Pablo Norte';
+    if (lower.includes('sur')) return 'San Pablo Sur';
+  }
+
+  // Santisima Cruz variations
+  if (lower.includes('santisima') || lower === 'sta. cruz' || lower === 'sta cruz') {
+    return 'Santisima Cruz';
+  }
+
+  // San Jose & San Juan
+  if (lower.includes('jose')) return 'San Jose';
+  if (lower.includes('juan')) return 'San Juan';
+
+  // 3. Fallback partial inclusion
+  const partial = VALID_BARANGAYS.find(b => 
+    b.toLowerCase().includes(lower) || lower.includes(b.toLowerCase())
+  );
+  if (partial) return partial;
+
+  return s;
+}
 
 // User FK Resolution & Audit Strategy
 let cachedValidUserIds = new Set<string>();
@@ -379,25 +518,7 @@ export const processAIExtraction = async (req: Request, res: Response) => {
     };
 
     const normalizeBarangay = (rawLoc: string): string => {
-      let normalizedBrgy = String(rawLoc || '').trim();
-      if (!normalizedBrgy) return 'Poblacion I (Barangay I)';
-      
-      if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-      if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-      if (normalizedBrgy.startsWith('brgy. ')) normalizedBrgy = normalizedBrgy.replace('brgy. ', '');
-      if (normalizedBrgy.startsWith('barangay ')) normalizedBrgy = normalizedBrgy.replace('barangay ', '');
-
-      const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-      if (exactMatch) {
-        return exactMatch;
-      }
-      
-      const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-      if (partialMatch) {
-        return partialMatch;
-      }
-      
-      return normalizedBrgy;
+      return normalizeSantaCruzBarangay(rawLoc);
     };
 
     if ((req as any).file) {
@@ -1136,17 +1257,7 @@ INPUT DATA STARTS BELOW:
           if (ws.records && Array.isArray(ws.records)) {
             ws.records.forEach((rec: any) => {
               const rawLoc = rec.Location || rec.location || rec.barangay || rec.Barangay || '';
-              let normalizedBrgy = String(rawLoc).trim();
-              if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-              if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-
-              const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-              if (exactMatch) {
-                normalizedBrgy = exactMatch;
-              } else {
-                const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-                if (partialMatch) normalizedBrgy = partialMatch;
-              }
+              const normalizedBrgy = normalizeSantaCruzBarangay(String(rawLoc));
 
               let rawOffense = rec.Offense || rec.offense || rec.incident_type || "Unknown Incident";
               let rawCategory = mappedCategory;
@@ -1190,17 +1301,7 @@ INPUT DATA STARTS BELOW:
       } else if (aiParsed.incidents && Array.isArray(aiParsed.incidents)) {
         aiParsed.incidents.forEach((inc: any) => {
           if (!inc.barangay) return;
-          let normalizedBrgy = String(inc.barangay).trim();
-          if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-          if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-
-          const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-          if (exactMatch) {
-            normalizedBrgy = exactMatch;
-          } else {
-            const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-            if (partialMatch) normalizedBrgy = partialMatch;
-          }
+          const normalizedBrgy = normalizeSantaCruzBarangay(String(inc.barangay));
 
           let rawOffense = inc.offense || inc.incident_type || "Unknown Incident";
           let rawCategory = inc.category;
@@ -1242,18 +1343,8 @@ INPUT DATA STARTS BELOW:
         for (const [brgy, incidents] of Object.entries(barangayData)) {
           if (Array.isArray(incidents)) {
             incidents.forEach((inc: any) => {
-              let normalizedBrgy = brgy.trim();
-              if (normalizedBrgy.startsWith('Brgy. ')) normalizedBrgy = normalizedBrgy.replace('Brgy. ', '');
-              if (normalizedBrgy.startsWith('Barangay ')) normalizedBrgy = normalizedBrgy.replace('Barangay ', '');
-  
-              const exactMatch = VALID_BARANGAYS.find(b => b.toLowerCase() === normalizedBrgy.toLowerCase());
-              if (exactMatch) {
-                normalizedBrgy = exactMatch;
-              } else {
-                const partialMatch = VALID_BARANGAYS.find(b => b.toLowerCase().includes(normalizedBrgy.toLowerCase()) || normalizedBrgy.toLowerCase().includes(b.toLowerCase()));
-                if (partialMatch) normalizedBrgy = partialMatch;
-              }
-  
+              const normalizedBrgy = normalizeSantaCruzBarangay(String(brgy));
+
               let rawOffense = inc.offense || inc.incident_type || "Unknown Incident";
               let rawCategory = inc.category;
 
@@ -1334,9 +1425,14 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     const entry = entries[i];
     const rowNum = i + 1;
 
-    const barangay = (entry.barangay || '').trim();
-    if (!barangay) {
+    let rawBarangay = (entry.barangay || '').trim();
+    if (!rawBarangay) {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Missing Barangay / Sector.` });
+    }
+
+    entry.barangay = normalizeSantaCruzBarangay(rawBarangay);
+    if (!VALID_BARANGAYS.includes(entry.barangay)) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: "${rawBarangay}" is not a recognized Santa Cruz Barangay.` });
     }
 
     const rawDate = (entry.date_committed || entry.incident_date || entry.date || '').trim();
@@ -1369,14 +1465,14 @@ export const saveReportBatch = async (req: Request, res: Response) => {
 
     // 1. Pre-calculate points and stats
     const pointsToCreate = entries.map(entry => {
-      const pin = MANUAL_PINS.find(p => p.name === entry.barangay);
+      const pin = MANUAL_PINS.find(p => p.name.toLowerCase() === (entry.barangay || '').toLowerCase()) || MANUAL_PINS.find(p => p.name === 'Alipit');
       const cat = entry.category || 'Non-Index';
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
 
       return {
         ref: db.collection('map_points').doc(),
         data: {
-          lat: pin ? pin.lat : 0, lng: pin ? pin.lng : 0,
+          lat: pin ? pin.lat : 14.223931, lng: pin ? pin.lng : 121.405213,
           incident_type: entry.incident_type || entry.offense,
           incident_date: entry.incident_date || entry.date || entry.date_committed,
           barangay: entry.barangay,
@@ -2731,11 +2827,12 @@ export const postUser = async (req: Request, res: Response) => {
 
     const approveUrl = `${baseUrl}/admin/users/${docRef.id}/approve`;
     const rejectUrl = `${baseUrl}/admin/users/${docRef.id}/reject`;
+    const chiefEmail = (process.env.CHIEF_EMAIL || process.env.EMAIL_USER || 'andreijavan05@gmail.com').trim();
 
-    const mailOptions = {
-      from: 'CPICRS System <andreijavan06@gmail.com>',
-      to: 'andreijavan05@gmail.com',
+    await sendEmailNotification({
+      to: chiefEmail,
       subject: `Action Required: New Admin Account Approval - ${full_name}`,
+      logContext: 'Approval Request Email to Chief',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
           <h2 style="color: #1a56db;">New Account Creation Request</h2>
@@ -2757,14 +2854,7 @@ export const postUser = async (req: Request, res: Response) => {
           </div>
         </div>
       `
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
-      console.log('Approval email successfully sent to Police Chief');
-    } catch (error) {
-      console.error('Error sending approval email:', error);
-    }
+    });
 
     res.redirect('/admin/users');
   } catch (err) {
@@ -2800,10 +2890,10 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     // Send email notification if user has an email
     if (userData.email) {
-      const mailOptions = {
-        from: 'CPICRS System <andreijavan06@gmail.com>',
+      await sendEmailNotification({
         to: userData.email,
-        subject: `Account Notice: Your CPICRS Access Has Been Revoked`,
+        subject: 'Account Notice: Your CPICRS Access Has Been Revoked',
+        logContext: 'Account Deletion Notice',
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
             <div style="text-align: center; margin-bottom: 20px;">
@@ -2820,14 +2910,7 @@ export const deleteUser = async (req: Request, res: Response) => {
             <p style="font-size: 12px; color: #666; margin-top: 30px; text-align: center;">This is an automated operational message from the CPICRS Database System.</p>
           </div>
         `
-      };
-
-      try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Deletion notice email successfully sent to ${userData.email}`);
-      } catch (emailErr) {
-        console.error('Failed to send deletion notice email:', emailErr);
-      }
+      });
     }
 
     await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username} | Reason: ${reasonText}`);
@@ -2996,14 +3079,16 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
     const reportId = reportRef.id;
 
     for (const entry of entries) {
-      const pin = MANUAL_PINS.find(p => p.name === entry.barangay);
+      let rawBarangay = (entry.barangay || '').trim();
+      entry.barangay = normalizeSantaCruzBarangay(rawBarangay);
+      const pin = MANUAL_PINS.find(p => p.name.toLowerCase() === (entry.barangay || '').toLowerCase()) || MANUAL_PINS.find(p => p.name === 'Alipit');
       const cat = entry.category || 'Non-Index';
       categoryStats[cat] = (categoryStats[cat] || 0) + 1;
 
       const pointRef = db.collection('map_points').doc();
       batch.set(pointRef, {
-        lat: pin ? pin.lat : 0,
-        lng: pin ? pin.lng : 0,
+        lat: pin ? pin.lat : 14.223931,
+        lng: pin ? pin.lng : 121.405213,
         incident_type: entry.offense || entry.incident_type,
         incident_date: entry.date_committed || entry.incident_date,
         barangay: entry.barangay,
@@ -3071,10 +3156,10 @@ export const approveUser = async (req: Request, res: Response) => {
 
     // Send approval email to the new user
     if (userData.email) {
-      const userMailOptions = {
-        from: 'CPICRS System <andreijavan05@gmail.com>',
+      await sendEmailNotification({
         to: userData.email,
         subject: 'Your CPICRS Account is Approved',
+        logContext: 'Welcome / Account Approval Notice',
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
             <h2 style="color: #059669;">Account Approved!</h2>
@@ -3085,13 +3170,7 @@ export const approveUser = async (req: Request, res: Response) => {
             <a href="https://pnp-sta-cruz-official.vercel.app/admin/login" style="padding: 12px 24px; background-color: #1a56db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px;">Go to Login</a>
           </div>
         `
-      };
-      try {
-        await transporter.sendMail(userMailOptions);
-        console.log('Welcome email successfully sent to new user');
-      } catch (err) {
-        console.error('Error sending welcome email to user:', err);
-      }
+      });
     }
 
     res.send(thankYouHtml('Approved Successfully', `You have approved the account for ${userData.full_name}.`, '#059669'));
@@ -3137,10 +3216,10 @@ export const rejectUser = async (req: Request, res: Response) => {
 
     // Send rejection email to the new user
     if (userData.email) {
-      const userMailOptions = {
-        from: 'CPICRS System <andreijavan05@gmail.com>',
+      await sendEmailNotification({
         to: userData.email,
         subject: 'CPICRS Account Request Update',
+        logContext: 'Account Rejection Notice',
         html: `
           <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
             <h2 style="color: #dc2626;">Account Not Approved</h2>
@@ -3149,13 +3228,7 @@ export const rejectUser = async (req: Request, res: Response) => {
             <p>If you believe this is a mistake, please contact your commanding officer.</p>
           </div>
         `
-      };
-      try {
-        await transporter.sendMail(userMailOptions);
-        console.log('Rejection email successfully sent to user');
-      } catch (err) {
-        console.error('Error sending rejection email to user:', err);
-      }
+      });
     }
 
     res.send(thankYouHtml('Rejected Successfully', `You have rejected the account request for ${userData.full_name}.`, '#dc2626'));

@@ -6,7 +6,7 @@ import {
   postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive
 } from '../controllers/adminController.js';
-import { isAuthenticated } from '../middleware/auth.js';
+import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
 import multer from 'multer';
 import rateLimit from 'express-rate-limit';
@@ -83,8 +83,8 @@ router.post('/hotlines/:id/edit', postEditHotline);
 router.post('/hotlines/:id/delete', deleteHotline);
 
 // Personnel Management
-router.get('/users', getUsers);
-router.post('/users/add', postUser);
-router.post('/users/:id/delete', deleteUser);
+router.get('/users', isSuperAdmin, getUsers);
+router.post('/users/add', isSuperAdmin, postUser);
+router.post('/users/:id/delete', isSuperAdmin, deleteUser);
 
 export default router;
