@@ -427,6 +427,72 @@ export const postSetLanguage = async (req: Request, res: Response) => {
     console.error('Error setting language:', err);
     return res.status(500).json({ success: false, error: 'Failed to update language' });
   }
+const getDatabaseSummaryCached = async (): Promise<string> => {
+  const cacheKey = 'ai:db_summary';
+  const cached = memoryCache.get<string>(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const mapSnap = await db.collection('map_points').get();
+    const mapPoints = mapSnap.docs.map((d: any) => d.data());
+
+    const totalIncidents = mapPoints.length;
+    const byType: Record<string, number> = {};
+    const byBarangay: Record<string, number> = {};
+
+    mapPoints.forEach((p: any) => {
+      const type = (p.incident_type || 'Unspecified').trim();
+      const brgy = (p.barangay || 'Unspecified').trim();
+      byType[type] = (byType[type] || 0) + 1;
+      byBarangay[brgy] = (byBarangay[brgy] || 0) + 1;
+    });
+
+    const topTypes = Object.entries(byType)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type, count]) => `• ${type}: ${count} reported case(s)`)
+      .join('\n');
+
+    const topBarangays = Object.entries(byBarangay)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([brgy, count]) => `• ${brgy}: ${count} case(s)`)
+      .join('\n');
+
+    const bulletins = await getRawBulletinsCached();
+    const activeBulletins = bulletins.filter((b: any) => !b.is_archived);
+    const bulletinList = activeBulletins.slice(0, 5).map((b: any) => `• [${b.category}] ${b.title}`).join('\n');
+
+    const hotlines = await getHotlinesCached();
+    const hotlineList = hotlines.map((h: any) => `• ${h.name || h.title || 'Emergency'}: ${h.number || h.phone || h.contact || 'N/A'}`).join('\n');
+
+    const personnel = await getPersonnelCached();
+    const personnelCount = personnel.length;
+
+    const summary = `
+=== READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
+• Total Logged Crime/Incident Cases: ${totalIncidents}
+• Active Station Personnel: ${personnelCount}
+• Active Bulletins/Advisories: ${activeBulletins.length}
+
+[Case Statistics by Category]
+${topTypes || '• No cases recorded'}
+
+[Top Incident Locations by Barangay]
+${topBarangays || '• No cases recorded'}
+
+[Active Bulletins & Announcements]
+${bulletinList || '• No active bulletins'}
+
+[Emergency Hotlines]
+${hotlineList || '• Station Desk: 911'}
+`.trim();
+
+    memoryCache.set(cacheKey, summary, 3 * 60 * 1000);
+    return summary;
+  } catch (err) {
+    console.warn('Error generating AI database summary:', err);
+    return 'Database context currently unavailable.';
+  }
 };
 
 export const chatWithArticle = async (req: Request, res: Response) => {
@@ -436,21 +502,30 @@ export const chatWithArticle = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
+    const dbContext = await getDatabaseSummaryCached();
+
     let historyContext = "";
     if (chatHistory && Array.isArray(chatHistory)) {
       historyContext = chatHistory.map((m: any) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n');
     }
 
-    const prompt = `You are a helpful public safety AI assistant for the Sta. Cruz Municipal Police Station. Your job is to answer questions about the article/bulletin provided below.
+    const prompt = `You are an official public safety AI assistant for the Sta. Cruz Municipal Police Station. You have READ-ONLY access to the station's official database context to answer questions about case statistics, incident counts, barangay data, hotlines, and advisories.
 
-=== ARTICLE DETAILS ===
+=== CURRENT ARTICLE / BULLETIN CONTEXT ===
 Title: ${articleTitle}
 Content: ${articleContent}
 
-=== CONSTRAINTS ===
-1. You must answer questions related ONLY to this specific article.
-2. If the user asks something outside the article's scope, content, or context (e.g. general knowledge, unrelated topics, personal questions, or other incidents), you must politely decline and state that you are only programmed to discuss this specific article.
-3. Keep your answers clear, concise, and helpful.
+${dbContext}
+
+=== CONSTRAINTS & FORMATTING INSTRUCTIONS ===
+1. READ-ONLY ACCESS: You can read data from the database context above. You CANNOT modify, add, or delete any records.
+2. ACCURATE STATISTICAL ANSWERS: When the user asks about case statistics, incident counts, barangay breakdowns, or hotline numbers, provide accurate details based on the READ-ONLY DATABASE CONTEXT above.
+3. CLEAN & STRUCTURED FORMATTING:
+   - Use bullet points (• or -) or numbered lists (1., 2.) for multiple items or statistics.
+   - Use bold text (**like this**) for key numbers, categories, and titles.
+   - Add clear line breaks between paragraphs and list items.
+   - NEVER clump multiple bullet points or statistics into a single dense block paragraph.
+4. SCOPE: If asked about topics completely unrelated to public safety or PNP Sta. Cruz, politely state your official scope.
 
 === CHAT HISTORY ===
 ${historyContext}

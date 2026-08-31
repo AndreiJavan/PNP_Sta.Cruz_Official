@@ -381,6 +381,18 @@
 
     let newsChatHistory = [];
     
+    function formatChatMessage(text) {
+        if (!text) return '';
+        let safe = String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        
+        safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold">$1</strong>');
+        safe = safe.replace(/\n/g, '<br>');
+        return safe;
+    }
+    
     function appendChatMessage(sender, text) {
         const chatBox = document.getElementById('news-chat-messages');
         if (!chatBox) return;
@@ -388,10 +400,10 @@
         const isUser = sender === 'user';
         const msgDiv = document.createElement('div');
         msgDiv.className = isUser 
-            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-bold"
-            : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal";
+            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-bold whitespace-pre-wrap leading-relaxed"
+            : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
         
-        msgDiv.textContent = text;
+        msgDiv.innerHTML = formatChatMessage(text);
         chatBox.appendChild(msgDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
