@@ -89,7 +89,7 @@
                                 <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
                             <% } %>
                             <div class="flex items-center space-x-3">
-                                <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
+                                <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="inline-flex items-center space-x-1.5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline hover:scale-105 transition-all focus:outline-none cursor-pointer select-none">
                                     <span>Read Details</span>
                                     <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
                                 </button>
@@ -215,6 +215,7 @@
 
 <script>
     const newsDatabase = <%- JSON.stringify(newsList) %>;
+    window.newsDatabase = newsDatabase;
 
     function filterNews() {
         const query = document.getElementById('news-search-input').value.toLowerCase().trim();
@@ -224,8 +225,8 @@
         let visibleCount = 0;
 
         cards.forEach(card => {
-            const title = card.getAttribute('data-title');
-            const content = card.getAttribute('data-content');
+            const title = card.getAttribute('data-title') || '';
+            const content = card.getAttribute('data-content') || '';
             if (title.includes(query) || content.includes(query)) {
                 card.classList.remove('hidden');
                 visibleCount++;
@@ -234,18 +235,158 @@
             }
         });
 
-        countLabel.textContent = `Showing ${visibleCount} Article${visibleCount === 1 ? '' : 's'}`;
+        if (countLabel) countLabel.textContent = `Showing ${visibleCount} Article${visibleCount === 1 ? '' : 's'}`;
 
-        if (visibleCount === 0) {
-            noResults.classList.remove('hidden');
-        } else {
-            noResults.classList.add('hidden');
+        if (noResults) {
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
         }
     }
 
     function openNewsModal(newsId) {
-        const article = newsDatabase.find(n => String(n.id) === String(newsId));
+        const db = window.newsDatabase || newsDatabase || [];
+        let article = db.find(n => n && String(n.id) === String(newsId));
+        if (!article && typeof newsId !== 'undefined') {
+            article = db.find((n, idx) => String(idx) === String(newsId));
+        }
+        if (!article && db.length > 0) {
+            article = db[0];
+        }
         if (!article) return;
+
+        const mediaContainer = document.getElementById('news-modal-media-container');
+        const prevBtn = document.getElementById('news-modal-prev-btn');
+        const nextBtn = document.getElementById('news-modal-next-btn');
+        const dotsContainer = document.getElementById('news-modal-dots-container');
+
+        if (mediaContainer) {
+            mediaContainer.innerHTML = '';
+            if (dotsContainer) dotsContainer.innerHTML = '';
+            
+            if (article.facebook_url) {
+                const isVideo = /video|watch|reel/i.test(article.facebook_url);
+                const pluginType = isVideo ? 'video.php' : 'post.php';
+                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(article.facebook_url)}&show_text=false&width=500`;
+                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[350px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:350px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
+                </div>`;
+                if (prevBtn) prevBtn.classList.add('hidden');
+                if (nextBtn) nextBtn.classList.add('hidden');
+                if (dotsContainer) dotsContainer.classList.add('hidden');
+            } else {
+                let mediaItems = [];
+                if (article.photo_paths && article.photo_paths.length > 0) {
+                    article.photo_paths.forEach(p => {
+                        if (p) mediaItems.push({ type: 'image', url: p });
+                    });
+                } else if (article.urlToImage) {
+                    mediaItems.push({ type: 'image', url: article.urlToImage });
+                }
+
+                if (article.video_paths && article.video_paths.length > 0) {
+                    article.video_paths.forEach(v => {
+                        if (v) mediaItems.push({ type: 'video', url: v });
+                    });
+                }
+
+                if (mediaItems.length === 0) {
+                    mediaItems.push({ type: 'image', url: '/images/PNP.jpg' });
+                }
+
+                mediaContainer.innerHTML = mediaItems.map((item, idx) => {
+                    const isVisible = idx === 0;
+                    const displayStyle = isVisible ? 'display: flex;' : 'display: none;';
+                    if (item.type === 'video') {
+                        return `
+                            <div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
+                                <video src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain" controls></video>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 p-2 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
+                                <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-xl" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                            </div>
+                        `;
+                    }
+                }).join('');
+                    
+                window.currentNewsModalSlide = 0;
+                window.totalNewsModalSlides = mediaItems.length;
+
+                if (mediaItems.length > 1) {
+                    if (prevBtn) prevBtn.classList.remove('hidden');
+                    if (nextBtn) nextBtn.classList.remove('hidden');
+                    if (dotsContainer) {
+                        dotsContainer.classList.remove('hidden');
+                        dotsContainer.innerHTML = mediaItems.map((_, idx) => `
+                            <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                        `).join('');
+                    }
+                } else {
+                    if (prevBtn) prevBtn.classList.add('hidden');
+                    if (nextBtn) nextBtn.classList.add('hidden');
+                    if (dotsContainer) dotsContainer.classList.add('hidden');
+                }
+            }
+        }
+
+        const authorEl = document.getElementById('news-modal-author');
+        if (authorEl) {
+            if (article.facebook_url || (article.author && (article.author.startsWith('http://') || article.author.startsWith('https://')))) {
+                const urlVal = article.facebook_url || article.author;
+                authorEl.innerHTML = `<a href="${urlVal}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-4 py-2 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm">
+                    <i class="fab fa-facebook text-sm"></i>
+                    <span>Open Official Facebook Post</span>
+                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
+                </a>`;
+            } else {
+                authorEl.innerHTML = `<span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 italic">By ${article.author || 'Station Desk'}</span>`;
+            }
+        }
+
+        const dateEl = document.getElementById('news-modal-date');
+        if (dateEl) {
+            const pubDate = article.publishedAt ? new Date(article.publishedAt) : new Date();
+            const dateStr = !isNaN(pubDate.getTime()) ? pubDate.toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) : '';
+            dateEl.innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${dateStr}`;
+        }
+
+        const titleEl = document.getElementById('news-modal-title');
+        if (titleEl) titleEl.textContent = article.headline || '';
+        
+        const contentEl = document.getElementById('news-modal-content');
+        if (contentEl) contentEl.textContent = article.fullContent || article.description || '';
+
+        const fbBox = document.getElementById('news-modal-fb-container');
+        if (fbBox) {
+            fbBox.classList.add('hidden');
+        }
+
+        if (typeof resetTranslationButton === 'function') {
+            resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline || '', article.fullContent || '', 'tts-news-modal-btn');
+        }
+
+        if (typeof clearNewsChat === 'function') {
+            clearNewsChat();
+        }
+
+        const modal = document.getElementById('news-modal');
+        if (modal) {
+            const content = modal.querySelector('.relative');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            }, 50);
+        }
+    }
 
         const mediaContainer = document.getElementById('news-modal-media-container');
         const prevBtn = document.getElementById('news-modal-prev-btn');

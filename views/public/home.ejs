@@ -490,9 +490,17 @@
 <script>
     const bulletinsDatabase = <%- JSON.stringify(locals.bulletins || []) %>;
     const newsDatabase = <%- JSON.stringify(locals.policeNewsList || []) %>;
+    window.newsDatabase = newsDatabase;
 
     function openNewsModal(newsId) {
-        const article = newsDatabase.find(n => String(n.id) === String(newsId));
+        const db = window.newsDatabase || newsDatabase || [];
+        let article = db.find(n => n && String(n.id) === String(newsId));
+        if (!article && typeof newsId !== 'undefined') {
+            article = db.find((n, idx) => String(idx) === String(newsId));
+        }
+        if (!article && db.length > 0) {
+            article = db[0];
+        }
         if (!article) return;
 
         const mediaContainer = document.getElementById('news-modal-media-container');
@@ -518,7 +526,7 @@
                 let mediaItems = [];
                 if (article.photo_paths && article.photo_paths.length > 0) {
                     article.photo_paths.forEach(p => {
-                        mediaItems.push({ type: 'image', url: p });
+                        if (p) mediaItems.push({ type: 'image', url: p });
                     });
                 } else if (article.urlToImage) {
                     mediaItems.push({ type: 'image', url: article.urlToImage });
@@ -526,7 +534,7 @@
 
                 if (article.video_paths && article.video_paths.length > 0) {
                     article.video_paths.forEach(v => {
-                        mediaItems.push({ type: 'video', url: v });
+                        if (v) mediaItems.push({ type: 'video', url: v });
                     });
                 }
 
@@ -558,9 +566,8 @@
                 if (mediaItems.length > 1) {
                     if (prevBtn) prevBtn.classList.remove('hidden');
                     if (nextBtn) nextBtn.classList.remove('hidden');
-                    if (dotsContainer) dotsContainer.classList.remove('hidden');
-                    
                     if (dotsContainer) {
+                        dotsContainer.classList.remove('hidden');
                         dotsContainer.innerHTML = mediaItems.map((_, idx) => `
                             <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
                         `).join('');
@@ -572,6 +579,7 @@
                 }
             }
         }
+
         const authorEl = document.getElementById('news-modal-author');
         if (authorEl) {
             if (article.facebook_url || (article.author && (article.author.startsWith('http://') || article.author.startsWith('https://')))) {
@@ -585,10 +593,19 @@
                 authorEl.innerHTML = `<span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 italic">By ${article.author || 'Station Desk'}</span>`;
             }
         }
-        document.getElementById('news-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(article.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
-        document.getElementById('news-modal-title').textContent = article.headline;
+
+        const dateEl = document.getElementById('news-modal-date');
+        if (dateEl) {
+            const pubDate = article.publishedAt ? new Date(article.publishedAt) : new Date();
+            const dateStr = !isNaN(pubDate.getTime()) ? pubDate.toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) : '';
+            dateEl.innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${dateStr}`;
+        }
+
+        const titleEl = document.getElementById('news-modal-title');
+        if (titleEl) titleEl.textContent = article.headline || '';
         
-        document.getElementById('news-modal-content').textContent = article.fullContent;
+        const contentEl = document.getElementById('news-modal-content');
+        if (contentEl) contentEl.textContent = article.fullContent || article.description || '';
 
         const fbBox = document.getElementById('news-modal-fb-container');
         if (fbBox) {
@@ -596,7 +613,7 @@
         }
 
         if (typeof resetTranslationButton === 'function') {
-            resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline, article.fullContent, 'tts-news-modal-btn');
+            resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline || '', article.fullContent || '', 'tts-news-modal-btn');
         }
 
         if (typeof clearNewsChat === 'function') {
@@ -606,7 +623,6 @@
         const modal = document.getElementById('news-modal');
         if (modal) {
             const content = modal.querySelector('.relative');
-
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
