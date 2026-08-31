@@ -56,7 +56,7 @@
                     <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
                         <% carouselNews.forEach((news, index) => { %>
                             <div class="w-full shrink-0 flex-none px-4 md:px-8 py-6 md:py-8">
-                                <div onclick="window.location.href='/news'" class="flex flex-col sm:flex-row items-stretch gap-5 sm:gap-6 md:gap-8 group cursor-pointer">
+                                <div onclick="openNewsModal('<%= news.id %>')" class="flex flex-col sm:flex-row items-stretch gap-5 sm:gap-6 md:gap-8 group cursor-pointer">
                                     <!-- Image / Facebook Container -->
                                     <div class="w-full sm:w-1/2 h-52 sm:h-64 md:h-72 lg:h-80 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50 flex items-center justify-center">
                                         <% if (news.facebook_url) { %>
@@ -102,9 +102,10 @@
                                         </p>
                                         
                                         <div class="mt-2">
-                                            <span class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest group-hover:translate-x-1 transition-transform">
-                                                See More <i class="fas fa-arrow-right ml-2.5 text-[9px]"></i>
-                                            </span>
+                                            <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
+                                                <span>Read Details</span>
+                                                <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -405,8 +406,365 @@
     </div>
 </div>
 
+<!-- INTERACTIVE NEWS DETAIL MODAL -->
+<div id="news-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeNewsModal()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
+        <!-- Left Side: Image Carousel -->
+        <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
+            <div id="news-modal-media-container" class="w-full h-full relative overflow-hidden flex items-center justify-center">
+                <!-- Media injected here -->
+            </div>
+            
+            <button id="news-modal-prev-btn" onclick="newsModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                <i class="fas fa-chevron-left text-sm"></i>
+            </button>
+            <button id="news-modal-next-btn" onclick="newsModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                <i class="fas fa-chevron-right text-sm"></i>
+            </button>
+            
+            <div id="news-modal-dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 hidden"></div>
+        </div>
+
+        <!-- Right Side: Text Content -->
+        <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none">
+            <button onclick="closeNewsModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300 z-10">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
+                <div id="news-modal-author" class="inline-block"></div>
+                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                    <select class="tts-voice-select text-[10px] px-2 py-1 max-w-[125px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none font-bold">
+                        <option value="google:fil-PH" selected>Tagalog / Filipino</option>
+                        <option value="google:en-US">English (US)</option>
+                    </select>
+                    <button id="tts-news-modal-btn" onclick="" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-volume-high text-xs"></i>
+                        <span>Listen</span>
+                    </button>
+                    <button id="translate-news-modal-btn" onclick="toggleTranslation('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', 'tts-news-modal-btn')" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-language text-xs"></i>
+                        <span>Translate</span>
+                    </button>
+                </div>
+            </div>
+            <div id="news-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center">
+            </div>
+            <h3 id="news-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight"></h3>
+            <div id="news-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-6"></div>
+            <div id="news-modal-fb-container" class="hidden mb-10"></div>
+
+            <!-- Chatbot Section -->
+            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
+                        <i class="fas fa-robot text-base animate-pulse"></i>
+                        <span>Ask AI Assistant</span>
+                    </h4>
+                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase tracking-wider">Gemini AI</span>
+                </div>
+                
+                <!-- Chat Window -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-gray-100 dark:border-slate-850 overflow-hidden flex flex-col h-[280px]">
+                    <!-- Messages Area -->
+                    <div id="news-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 custom-modal-scrollbar text-xs">
+                        <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-300 max-w-[85%] mr-auto">
+                            Hello! I am your AI assistant for this article. Feel free to ask me any questions about the information presented above.
+                        </div>
+                    </div>
+                    
+                    <!-- Input Area -->
+                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800/80 flex items-center gap-2 shrink-0">
+                        <input type="text" id="news-chat-input" placeholder="Ask about this article..." class="flex-grow bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100" onkeydown="if(event.key === 'Enter') sendNewsChat()">
+                        <button onclick="sendNewsChat()" class="bg-pnp-blue hover:bg-blue-700 text-white dark:bg-pnp-gold dark:hover:bg-yellow-600 dark:text-pnp-blue px-3.5 py-2 rounded-xl transition flex items-center justify-center shrink-0">
+                            <i class="fas fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     const bulletinsDatabase = <%- JSON.stringify(locals.bulletins || []) %>;
+    const newsDatabase = <%- JSON.stringify(locals.policeNewsList || []) %>;
+
+    function openNewsModal(newsId) {
+        const article = newsDatabase.find(n => String(n.id) === String(newsId));
+        if (!article) return;
+
+        const mediaContainer = document.getElementById('news-modal-media-container');
+        const prevBtn = document.getElementById('news-modal-prev-btn');
+        const nextBtn = document.getElementById('news-modal-next-btn');
+        const dotsContainer = document.getElementById('news-modal-dots-container');
+
+        if (mediaContainer) {
+            mediaContainer.innerHTML = '';
+            if (dotsContainer) dotsContainer.innerHTML = '';
+            
+            if (article.facebook_url) {
+                const isVideo = /video|watch|reel/i.test(article.facebook_url);
+                const pluginType = isVideo ? 'video.php' : 'post.php';
+                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(article.facebook_url)}&show_text=false&width=500`;
+                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[350px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
+                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:350px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
+                </div>`;
+                if (prevBtn) prevBtn.classList.add('hidden');
+                if (nextBtn) nextBtn.classList.add('hidden');
+                if (dotsContainer) dotsContainer.classList.add('hidden');
+            } else {
+                let mediaItems = [];
+                if (article.photo_paths && article.photo_paths.length > 0) {
+                    article.photo_paths.forEach(p => {
+                        mediaItems.push({ type: 'image', url: p });
+                    });
+                } else if (article.urlToImage) {
+                    mediaItems.push({ type: 'image', url: article.urlToImage });
+                }
+
+                if (article.video_paths && article.video_paths.length > 0) {
+                    article.video_paths.forEach(v => {
+                        mediaItems.push({ type: 'video', url: v });
+                    });
+                }
+
+                if (mediaItems.length === 0) {
+                    mediaItems.push({ type: 'image', url: '/images/PNP.jpg' });
+                }
+
+                mediaContainer.innerHTML = mediaItems.map((item, idx) => {
+                    const isVisible = idx === 0;
+                    const displayStyle = isVisible ? 'display: flex;' : 'display: none;';
+                    if (item.type === 'video') {
+                        return `
+                            <div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
+                                <video src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain" controls></video>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 p-2 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
+                                <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-xl" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                            </div>
+                        `;
+                    }
+                }).join('');
+                    
+                window.currentNewsModalSlide = 0;
+                window.totalNewsModalSlides = mediaItems.length;
+
+                if (mediaItems.length > 1) {
+                    if (prevBtn) prevBtn.classList.remove('hidden');
+                    if (nextBtn) nextBtn.classList.remove('hidden');
+                    if (dotsContainer) dotsContainer.classList.remove('hidden');
+                    
+                    if (dotsContainer) {
+                        dotsContainer.innerHTML = mediaItems.map((_, idx) => `
+                            <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                        `).join('');
+                    }
+                } else {
+                    if (prevBtn) prevBtn.classList.add('hidden');
+                    if (nextBtn) nextBtn.classList.add('hidden');
+                    if (dotsContainer) dotsContainer.classList.add('hidden');
+                }
+            }
+        }
+        const authorEl = document.getElementById('news-modal-author');
+        if (authorEl) {
+            if (article.facebook_url || (article.author && (article.author.startsWith('http://') || article.author.startsWith('https://')))) {
+                const urlVal = article.facebook_url || article.author;
+                authorEl.innerHTML = `<a href="${urlVal}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-4 py-2 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm">
+                    <i class="fab fa-facebook text-sm"></i>
+                    <span>Open Official Facebook Post</span>
+                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
+                </a>`;
+            } else {
+                authorEl.innerHTML = `<span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 italic">By ${article.author || 'Station Desk'}</span>`;
+            }
+        }
+        document.getElementById('news-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(article.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
+        document.getElementById('news-modal-title').textContent = article.headline;
+        
+        document.getElementById('news-modal-content').textContent = article.fullContent;
+
+        const fbBox = document.getElementById('news-modal-fb-container');
+        if (fbBox) {
+            fbBox.classList.add('hidden');
+        }
+
+        if (typeof resetTranslationButton === 'function') {
+            resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline, article.fullContent, 'tts-news-modal-btn');
+        }
+
+        if (typeof clearNewsChat === 'function') {
+            clearNewsChat();
+        }
+
+        const modal = document.getElementById('news-modal');
+        if (modal) {
+            const content = modal.querySelector('.relative');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            }, 50);
+        }
+    }
+
+    function closeNewsModal() {
+        if (typeof stopSpeech === 'function') stopSpeech();
+        if (typeof clearNewsChat === 'function') clearNewsChat();
+        const modal = document.getElementById('news-modal');
+        if (modal) {
+            const content = modal.querySelector('.relative');
+
+            modal.classList.add('opacity-0');
+            if (content) {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    }
+
+    function newsModalUpdate() {
+        const slides = document.querySelectorAll('#news-modal-media-container [data-slide]');
+        const dots = document.querySelectorAll('#news-modal-dots-container [data-dot]');
+        
+        slides.forEach((slide, idx) => {
+            if (idx === window.currentNewsModalSlide) {
+                slide.style.display = 'flex';
+                slide.classList.replace('opacity-0', 'opacity-100');
+                slide.classList.replace('z-0', 'z-10');
+                slide.classList.remove('pointer-events-none');
+            } else {
+                slide.style.display = 'none';
+                slide.classList.replace('opacity-100', 'opacity-0');
+                slide.classList.replace('z-10', 'z-0');
+                slide.classList.add('pointer-events-none');
+            }
+        });
+        
+        dots.forEach((dot, idx) => {
+            if (idx === window.currentNewsModalSlide) {
+                dot.classList.replace('bg-white/40', 'bg-white');
+                dot.classList.remove('hover:bg-white/80');
+                dot.classList.add('scale-125');
+            } else {
+                dot.classList.replace('bg-white', 'bg-white/40');
+                dot.classList.add('hover:bg-white/80');
+                dot.classList.remove('scale-125');
+            }
+        });
+    }
+
+    function newsModalNext() {
+        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
+        window.currentNewsModalSlide = (window.currentNewsModalSlide + 1) % window.totalNewsModalSlides;
+        newsModalUpdate();
+    }
+
+    function newsModalPrev() {
+        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
+        window.currentNewsModalSlide = (window.currentNewsModalSlide - 1 + window.totalNewsModalSlides) % window.totalNewsModalSlides;
+        newsModalUpdate();
+    }
+
+    function newsModalGoTo(idx) {
+        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
+        window.currentNewsModalSlide = idx;
+        newsModalUpdate();
+    }
+
+    let newsChatHistory = [];
+    
+    function sendNewsChat() {
+        const inputEl = document.getElementById('news-chat-input');
+        if (!inputEl) return;
+        
+        const text = inputEl.value.trim();
+        if (!text) return;
+        
+        inputEl.value = '';
+        inputEl.disabled = true;
+        
+        const chatBox = document.getElementById('news-chat-messages');
+        if (!chatBox) return;
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-bold whitespace-pre-wrap leading-relaxed";
+        msgDiv.textContent = text;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        const indicator = document.createElement('div');
+        indicator.id = 'news-chat-typing';
+        indicator.className = 'text-[10px] text-slate-400 dark:text-slate-400 italic p-1 mr-auto flex items-center gap-1.5';
+        indicator.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i><span>Assistant is thinking...</span>`;
+        chatBox.appendChild(indicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        fetch('/api/chat-article', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                articleTitle: (document.getElementById('news-modal-title')?.textContent || '').trim(),
+                articleContent: (document.getElementById('news-modal-content')?.textContent || '').trim(),
+                userMessage: text,
+                chatHistory: newsChatHistory
+            })
+        }).then(r => r.json()).then(res => {
+            const ind = document.getElementById('news-chat-typing');
+            if (ind) ind.remove();
+            
+            const replyDiv = document.createElement('div');
+            replyDiv.className = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
+            
+            if (res.success && res.reply) {
+                replyDiv.textContent = res.reply;
+                chatBox.appendChild(replyDiv);
+                newsChatHistory.push({ role: 'user', text });
+                newsChatHistory.push({ role: 'assistant', text: res.reply });
+            } else {
+                replyDiv.textContent = res.error || "Sorry, I encountered an issue generating a response.";
+                chatBox.appendChild(replyDiv);
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }).catch(e => {
+            console.error('Chat error:', e);
+            const ind = document.getElementById('news-chat-typing');
+            if (ind) ind.remove();
+            const errDiv = document.createElement('div');
+            errDiv.className = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
+            errDiv.textContent = "Failed to connect to assistant service.";
+            chatBox.appendChild(errDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }).finally(() => {
+            inputEl.disabled = false;
+            inputEl.focus();
+        });
+    }
+
+    function clearNewsChat() {
+        newsChatHistory = [];
+        const chatBox = document.getElementById('news-chat-messages');
+        if (chatBox) {
+            chatBox.innerHTML = `
+                <div class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto">
+                    Hello! I am your AI assistant for this article. Feel free to ask me any questions about the information presented above.
+                </div>
+            `;
+        }
+    }
 
     function openBulletinModal(bulletinId) {
         const bulletin = bulletinsDatabase.find(b => String(b.id) === String(bulletinId));
