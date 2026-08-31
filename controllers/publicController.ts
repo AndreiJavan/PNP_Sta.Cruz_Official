@@ -225,15 +225,19 @@ export const normalizeImageUrl = (url: string | undefined): string => {
     return clean;
   }
 
+  if (clean.startsWith('/images/')) {
+    return clean;
+  }
+
   const filename = clean.split('/').pop();
   const supabaseUrl = process.env.SUPABASE_URL;
 
-  if (supabaseUrl && filename) {
+  if (supabaseUrl && filename && filename.includes('.')) {
     const cleanSupabaseUrl = supabaseUrl.replace(/\/$/, '');
     return `${cleanSupabaseUrl}/storage/v1/object/public/bulletins/bulletins/${filename}`;
   }
 
-  return clean.startsWith('/') ? clean : `/${clean}`;
+  return '/images/PNP.jpg';
 };
 
 const parsePhotos = (path: string | undefined, existingPaths?: any): string[] => {

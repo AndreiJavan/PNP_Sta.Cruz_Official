@@ -370,6 +370,14 @@
             dotsContainer.innerHTML = '';
             
             // Collect all photos and videos
+            const sanitizeModalUrl = (url) => {
+                if (!url || typeof url !== 'string') return '/images/PNP.jpg';
+                let clean = url.trim();
+                if (!clean) return '/images/PNP.jpg';
+                if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('/images/')) return clean;
+                return '/images/PNP.jpg';
+            };
+
             const mediaItems = [];
             
             if (bulletin.video_paths && bulletin.video_paths.length > 0) {
@@ -382,10 +390,10 @@
 
             if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
                 bulletin.photo_paths.forEach(url => {
-                    if (url) mediaItems.push({ type: 'photo', url });
+                    if (url) mediaItems.push({ type: 'photo', url: sanitizeModalUrl(url) });
                 });
             } else if (bulletin.photo_path) {
-                mediaItems.push({ type: 'photo', url: bulletin.photo_path });
+                mediaItems.push({ type: 'photo', url: sanitizeModalUrl(bulletin.photo_path) });
             }
 
             if (mediaItems.length === 0) {
