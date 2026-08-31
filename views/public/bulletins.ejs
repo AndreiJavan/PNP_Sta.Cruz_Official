@@ -64,8 +64,8 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
         <% bulletins.forEach(bulletin=> { %>
             <div
-                class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col"
-                data-category="<%= bulletin.category %>">
+                class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col cursor-pointer"
+                data-category="<%= bulletin.category %>" onclick="openBulletinModal('<%= bulletin.id %>')">
                 <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
                     <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0">
                         <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-contain group-hover:scale-105 transition duration-700 pointer-events-none"></video>
@@ -161,7 +161,7 @@
                                 <% } %>
 
                                 <div class="mt-auto pt-6 border-t border-gray-50 dark:border-slate-700 flex items-center justify-end">
-                                    <button onclick="openBulletinModal('<%= bulletin.id %>')"
+                                    <button type="button" onclick="event.stopPropagation(); openBulletinModal('<%= bulletin.id %>')"
                                         class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest hover:text-pnp-gold dark:hover:text-white transition focus:outline-none">
                                         Read Details <i class="fas fa-arrow-right ml-2 text-[10px]"></i>
                                     </button>
