@@ -399,7 +399,6 @@ export const translateToTagalog = async (req: Request, res: Response) => {
   }
 };
 
-<<<<<<< HEAD
 export const postSetLanguage = async (req: Request, res: Response) => {
   try {
     const { lang } = req.body;
@@ -430,7 +429,6 @@ export const postSetLanguage = async (req: Request, res: Response) => {
   }
 };
 
-=======
 export const chatWithArticle = async (req: Request, res: Response) => {
   try {
     const { articleTitle, articleContent, userMessage, chatHistory } = req.body;
@@ -512,6 +510,3 @@ Assistant:`;
     return res.status(500).json({ error: err.message || 'An unexpected error occurred' });
   }
 };
-
-
->>>>>>> e8cf233dd2a920677212887eeb59fb9502f3098b
