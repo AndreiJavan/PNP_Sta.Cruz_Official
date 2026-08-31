@@ -427,6 +427,8 @@ export const postSetLanguage = async (req: Request, res: Response) => {
     console.error('Error setting language:', err);
     return res.status(500).json({ success: false, error: 'Failed to update language' });
   }
+};
+
 const getDatabaseSummaryCached = async (): Promise<string> => {
   const cacheKey = 'ai:db_summary';
   const cached = memoryCache.get<string>(cacheKey);
