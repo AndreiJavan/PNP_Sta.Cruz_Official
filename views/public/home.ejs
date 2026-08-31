@@ -327,8 +327,8 @@
     <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
         
         <!-- Left Side: Media Carousel -->
-        <div class="w-full lg:w-[50%] relative bg-black flex items-center justify-center min-h-[250px] md:min-h-[400px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
-            <div id="bulletin-modal-media-container" class="w-full h-full relative overflow-hidden flex">
+        <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
+            <div id="bulletin-modal-media-container" class="w-full h-full relative overflow-hidden flex items-center justify-center">
                 <!-- Media injected here -->
             </div>
             
@@ -455,13 +455,15 @@
                 }
 
                 const renderItemHtml = (item, idx) => {
+                    const isVisible = idx === 0;
+                    const displayStyle = isVisible ? 'display: flex;' : 'display: none;';
                     if (item.type === 'video') {
-                        return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                    <video src="${item.url}" controls class="w-full h-full object-contain"></video>
+                        return `<div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
+                                    <video src="${item.url}" controls class="max-w-full max-h-full w-auto h-auto object-contain"></video>
                                 </div>`;
                     } else {
-                        return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-slate-900 ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
-                                    <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain p-2 select-none" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                        return `<div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 p-2 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
+                                    <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-xl" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                                 </div>`;
                     }
                 };
@@ -653,10 +655,12 @@
         
         slides.forEach((slide, idx) => {
             if (idx === window.currentBulletinModalSlide) {
+                slide.style.display = 'flex';
                 slide.classList.replace('opacity-0', 'opacity-100');
                 slide.classList.replace('z-0', 'z-10');
                 slide.classList.remove('pointer-events-none');
             } else {
+                slide.style.display = 'none';
                 slide.classList.replace('opacity-100', 'opacity-0');
                 slide.classList.replace('z-10', 'z-0');
                 slide.classList.add('pointer-events-none');
