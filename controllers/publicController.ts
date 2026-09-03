@@ -378,6 +378,13 @@ export const translateToTagalog = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Text parameter required' });
     }
 
+    // 1. Check in-memory cache first to avoid redundant AI API calls
+    const cacheKey = `translation:${Buffer.from(text.substring(0, 500)).toString('base64')}`;
+    const cachedTranslation = memoryCache.get<string>(cacheKey);
+    if (cachedTranslation) {
+      return res.json({ success: true, tagalogText: cachedTranslation, cached: true });
+    }
+
     const openrouterKey = process.env.OPENROUTER_API_KEY;
     const prompt = `You are an official Filipino translator for Sta. Cruz Municipal Police Station. Translate the following report/bulletin into clear, natural, official Tagalog (Filipino) so it can be spoken out loud via text-to-speech for public accessibility. Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${text.substring(0, 3000)}`;
 
@@ -405,6 +412,7 @@ export const translateToTagalog = async (req: Request, res: Response) => {
         const data = await response.json() as any;
         if (data.choices && data.choices[0] && data.choices[0].message) {
           const tagalogText = data.choices[0].message.content.trim();
+          memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
           return res.json({ success: true, tagalogText });
         } else {
           console.warn('OpenRouter translation returned no choices, falling back to Gemini API:', data);
@@ -426,6 +434,9 @@ export const translateToTagalog = async (req: Request, res: Response) => {
         });
 
         const tagalogText = response.text ? response.text.trim() : text;
+        if (response.text) {
+          memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
+        }
         return res.json({ success: true, tagalogText });
       } catch (aiErr: any) {
         console.warn('Gemini translation error, falling back to original text:', aiErr?.message || aiErr);

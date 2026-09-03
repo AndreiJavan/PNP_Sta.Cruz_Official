@@ -5,6 +5,7 @@ interface CacheEntry<T> {
 
 class MemoryCache {
   private cache = new Map<string, CacheEntry<any>>();
+  private maxItems = 500;
 
   /**
    * Get cached data by key
@@ -25,6 +26,12 @@ class MemoryCache {
    * Set cache entry with custom TTL in milliseconds (default 5 minutes)
    */
   set<T>(key: string, data: T, ttlMs: number = 5 * 60 * 1000): void {
+    // Prevent unbounded memory growth by evicting oldest entries if capacity reached
+    if (this.cache.size >= this.maxItems) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey) this.cache.delete(firstKey);
+    }
+
     const expiresAt = Date.now() + ttlMs;
     this.cache.set(key, { data, expiresAt });
   }
@@ -40,11 +47,11 @@ class MemoryCache {
    * Clear all cache entries starting with a prefix/namespace
    */
   clearNamespace(prefix: string): void {
-    for (const key of this.cache.keys()) {
+    Array.from(this.cache.keys()).forEach((key) => {
       if (key.startsWith(prefix)) {
         this.cache.delete(key);
       }
-    }
+    });
   }
 
   /**
