@@ -392,7 +392,12 @@ export const translateToTagalog = async (req: Request, res: Response) => {
             "X-Title": "PNP Sta. Cruz System"
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            models: [
+              "google/gemini-2.5-flash",
+              "google/gemini-2.0-flash-lite-001",
+              "meta-llama/llama-3.3-70b-instruct:free",
+              "deepseek/deepseek-r1:free"
+            ],
             max_tokens: 1000,
             messages: [{ role: "user", content: prompt }]
           })
@@ -587,7 +592,12 @@ Assistant:`;
             "X-Title": "PNP Sta. Cruz System"
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            models: [
+              "google/gemini-2.5-flash",
+              "google/gemini-2.0-flash-lite-001",
+              "meta-llama/llama-3.3-70b-instruct:free",
+              "deepseek/deepseek-r1:free"
+            ],
             max_tokens: 1000,
             messages: [{ role: "user", content: prompt }]
           })
