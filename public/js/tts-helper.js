@@ -381,12 +381,22 @@
                     console.warn('Server translation failed, trying fallback:', e);
                 }
 
-                // 2. Try free client-side MyMemory API fallback (supports large requests & instant translation)
+                // 2. Try free client-side MyMemory API fallback (supports chunked requests for long news articles)
                 try {
-                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|tl`);
-                    const data = await response.json();
-                    if (data && data.responseData && data.responseData.translatedText) {
-                        return data.responseData.translatedText;
+                    const textChunks = splitTextIntoChunks(textToTranslate, 450);
+                    const translatedChunks = await Promise.all(textChunks.map(async (chunk) => {
+                        try {
+                            const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=en|tl`);
+                            const data = await response.json();
+                            if (data && data.responseData && data.responseData.translatedText && !data.responseData.translatedText.includes('QUERY LENGTH LIMIT EXCEEDED')) {
+                                return data.responseData.translatedText;
+                            }
+                        } catch (err) {}
+                        return chunk;
+                    }));
+                    const combined = translatedChunks.join(' ');
+                    if (combined.trim() !== textToTranslate.trim() && !combined.includes('QUERY LENGTH LIMIT EXCEEDED')) {
+                        return combined;
                     }
                 } catch (e) {
                     console.warn('MyMemory translation failed:', e);
