@@ -1,288 +1,419 @@
 <div class="max-w-7xl mx-auto w-full px-4 py-8">
-    <div
-        class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden w-full">
-        <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
-            <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">
-                <%= bulletin ? 'Edit Bulletin' : 'Create New Bulletin' %>
-            </h3>
+    <!-- Outer Card -->
+    <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-gray-150 dark:border-slate-800 overflow-hidden w-full transition-all">
+        
+        <!-- TOP HEADER -->
+        <div class="p-6 sm:p-8 border-b border-gray-150 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 dark:bg-slate-950/50">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-pnp-blue text-pnp-gold rounded-2xl flex items-center justify-center font-black text-xl shadow-md border border-pnp-gold/30 shrink-0">
+                    <i class="fas <%= bulletin ? 'fa-edit' : 'fa-bullhorn' %> text-base"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                            <%= bulletin ? 'Edit Bulletin Notice' : 'Publish Notice' %>
+                        </h3>
+                        <span id="activeTypeTag" class="px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold border border-pnp-blue/20">
+                            Public Advisory
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                        <%= bulletin ? 'Update bulletin details, publication category, or media attachments.' : 'Create and broadcast an official station bulletin.' %>
+                    </p>
+                </div>
+            </div>
             <a href="<%= typeof isPublic !== 'undefined' && isPublic ? '/bulletins' : '/admin/bulletins' %>"
-                class="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest">Cancel</a>
+                class="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-wider transition self-start sm:self-center">
+                <i class="fas fa-times text-xs"></i>
+                <span>Cancel</span>
+            </a>
         </div>
 
+        <!-- PUBLICATION TYPE SELECTOR (3 CARDS / TABS) -->
+        <div class="p-6 sm:p-8 border-b border-gray-150 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/40">
+            <div class="flex items-center justify-between mb-4">
+                <label class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                    Select Publication Type
+                </label>
+                <span class="text-[10px] text-slate-400 font-bold uppercase">Click to switch format</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+                <!-- Option 1: Public Advisory -->
+                <button type="button" id="typeBtnAdvisory" onclick="switchPublicationType('advisory')"
+                    class="pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-white dark:bg-slate-900 border-amber-500 shadow-md ring-2 ring-amber-500/20">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-bullhorn"></i>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">Safety Alert</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1">Public Advisory</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium line-clamp-2">Public safety advisories with text, photos, or video announcement clips.</p>
+                    </div>
+                    <div class="pub-type-indicator flex items-center text-[10px] font-bold text-amber-500 uppercase tracking-wider pt-1">
+                        <i class="fas fa-check-circle mr-1.5"></i>
+                        <span>Selected Format</span>
+                    </div>
+                </button>
+
+                <!-- Option 2: News & Release -->
+                <button type="button" id="typeBtnNews" onclick="switchPublicationType('news')"
+                    class="pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-gray-50/60 dark:bg-slate-800/40 border-gray-200 dark:border-slate-800 hover:border-pnp-blue dark:hover:border-pnp-gold">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="w-11 h-11 rounded-xl bg-pnp-blue/10 text-pnp-blue dark:text-blue-400 flex items-center justify-center text-xl shrink-0">
+                            <i class="fas fa-newspaper"></i>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-pnp-blue/10 text-pnp-blue dark:text-blue-300 border border-pnp-blue/20">Press Release</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1">News & Release</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium line-clamp-2">Official station news, general announcements, and press releases.</p>
+                    </div>
+                    <div class="pub-type-indicator hidden items-center text-[10px] font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-wider pt-1">
+                        <i class="fas fa-check-circle mr-1.5"></i>
+                        <span>Selected Format</span>
+                    </div>
+                </button>
+
+                <!-- Option 3: URL Post (Facebook Import) -->
+                <button type="button" id="typeBtnUrl" onclick="switchPublicationType('url')"
+                    class="pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-gray-50/60 dark:bg-slate-800/40 border-gray-200 dark:border-slate-800 hover:border-[#1877F2]">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="w-11 h-11 rounded-xl bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center text-xl shrink-0">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20">Facebook Import</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight mb-1">URL Post</h4>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium line-clamp-2">Official Facebook post or video link with live interactive embed.</p>
+                    </div>
+                    <div class="pub-type-indicator hidden items-center text-[10px] font-bold text-[#1877F2] uppercase tracking-wider pt-1">
+                        <i class="fas fa-check-circle mr-1.5"></i>
+                        <span>Selected Format</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN FORM -->
         <form id="bulletinForm"
             action="<%= bulletin ? '/admin/bulletins/' + bulletin.id + '/edit' : (typeof isPublic !== 'undefined' && isPublic ? '/bulletins/create' : '/admin/bulletins/create') %>"
-            method="POST" enctype="multipart/form-data" class="p-8 space-y-8"
-            onsubmit="handleBulletinSubmit(event); return false;">
+            method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 space-y-8"
+            onsubmit="handleBulletinFormSubmit(event); return false;">
 
-            <!-- 2 COLUMN MAIN LAYOUT -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+            <!-- Hidden Inputs -->
+            <input type="hidden" name="publish_type" id="publishTypeInput" value="advisory">
+            <input type="hidden" name="existing_photos" id="existing_photos_input" value="[]">
+            <input type="hidden" name="existing_videos" id="existing_videos_input" value="[]">
+            <input type="file" name="photos" id="photosInput" accept="image/*" multiple class="hidden">
+            <input type="file" name="videos" id="videosInput" accept="video/*" multiple class="hidden">
 
-                <!-- LEFT SIDE: UNIFIED MEDIA -->
-                <div id="leftPanel" class="space-y-4 flex flex-col transition-all duration-300">
+            <!-- FORMAT 1 & 2: 2-COLUMN LAYOUT FOR ADVISORY & NEWS -->
+            <div id="manualPublishPanel" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
 
-                    <label
-                        class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                        Upload Media (Images & Videos)
+                <!-- LEFT COLUMN: UNIFIED MEDIA PREVIEW & CAROUSEL -->
+                <div class="space-y-4 flex flex-col">
+                    <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
+                        Upload Media <span class="text-slate-400 font-normal">(Images & Videos, Max 10)</span>
                     </label>
 
-                    <!-- UNIFIED MEDIA PREVIEW BOX -->
-                    <div
-                        class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl p-4">
+                    <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-5">
+                        <!-- Dropzone Container -->
+                        <div id="mediaDropZone" onclick="if(mediaItems.length === 0) document.getElementById('mediaFileInput').click()"
+                            class="w-full min-h-[320px] lg:min-h-[360px] flex-1 rounded-xl bg-gray-100/80 dark:bg-slate-900 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-pnp-blue p-4 relative group overflow-hidden">
 
-                        <div id="dropZone" onclick="document.getElementById('mediaInput').click()"
-                            class="w-full min-h-[350px] flex-1 rounded-lg overflow-hidden bg-gray-100 dark:bg-slate-800 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-transparent hover:border-pnp-blue p-2 relative">
+                            <!-- Empty State Placeholder -->
+                            <div id="mediaPlaceholder" class="flex flex-col items-center justify-center text-center p-4">
+                                <div class="w-16 h-16 rounded-2xl bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Drag & Drop or Click to Browse</span>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">
+                                    Upload up to 10 photos or videos combined (JPG, PNG, WEBP, MP4). Max 5MB per image, max 25MB per video (up to 3 min).
+                                </p>
+                            </div>
 
-                            <!-- Existing media OR preview -->
-                            <div id="previewCarousel"
-                                class="relative w-full h-full min-h-[350px] flex items-center justify-center bg-gray-100 dark:bg-slate-800 group overflow-hidden rounded-md">
-                                <% let mediaItems=[]; if (bulletin) { if (bulletin.photo_paths &&
-                                    bulletin.photo_paths.length> 0) {
-                                    bulletin.photo_paths.forEach(p => mediaItems.push({ type: 'image', path: p }));
-                                    } else if (bulletin.photo_path && bulletin.photo_path !== '[]' && !bulletin.photo_path.startsWith('[')) {
-                                    mediaItems.push({ type: 'image', path: bulletin.photo_path });
-                                    }
-                                    if (bulletin.video_paths && bulletin.video_paths.length > 0) {
-                                    bulletin.video_paths.forEach(p => mediaItems.push({ type: 'video', path: p }));
-                                    } else if (bulletin.video_path && bulletin.video_path !== '[]' && !bulletin.video_path.startsWith('[')) {
-                                    mediaItems.push({ type: 'video', path: bulletin.video_path });
-                                    }
-                                    }
-                                    %>
-                                    <% if (mediaItems.length> 0) { %>
-                                        <% mediaItems.forEach(function(item, index) { %>
-                                            <% if (item.type==='image' ) { %>
-                                                <img src="<%= item.path %>"
-                                                    class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide"
-                                                    data-index="<%= index %>" onerror="this.style.display='none';">
-                                                <% } else { %>
-                                                    <video src="<%= item.path %>" controls
-                                                        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %> preview-slide"
-                                                        data-index="<%= index %>"></video>
-                                                    <% } %>
-                                                        <% }); %>
-                                                            <% if (mediaItems.length> 1) { %>
-                                                                <!-- Controls -->
-                                                                <button type="button"
-                                                                    onclick="event.stopPropagation(); movePreview(-1)"
-                                                                    class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                                                                    <i class="fas fa-chevron-left text-xs"></i>
-                                                                </button>
-                                                                <button type="button"
-                                                                    onclick="event.stopPropagation(); movePreview(1)"
-                                                                    class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                                                                    <i class="fas fa-chevron-right text-xs"></i>
-                                                                </button>
-                                                                <!-- Indicators -->
-                                                                <div
-                                                                    class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators">
-                                                                    <% mediaItems.forEach(function(_, index) { %>
-                                                                        <div class="w-1.5 h-1.5 rounded-full transition-colors <%= index === 0 ? 'bg-white' : 'bg-white/40' %>"
-                                                                            data-indicator="<%= index %>"></div>
-                                                                        <% }); %>
-                                                                </div>
-                                                                <% } %>
-                                                                    <% } else { %>
-                                                                        <div id="placeholderIconContainer"
-                                                                            class="flex flex-col items-center justify-center z-10 pointer-events-none">
-                                                                            <i
-                                                                                class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
-                                                                            <span
-                                                                                class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag
-                                                                                & Drop or Click<br>Up to 5 files (Images
-                                                                                & Videos combined)</span>
-                                                                        </div>
-                                                                        <% } %>
+                            <!-- Active Carousel Preview Box -->
+                            <div id="mediaPreviewBox" class="hidden w-full h-full min-h-[300px] flex flex-col justify-between items-center relative" onclick="event.stopPropagation()">
+                                <!-- Media Display Area -->
+                                <div class="relative w-full flex-1 flex items-center justify-center bg-black/40 dark:bg-slate-950/80 rounded-xl overflow-hidden min-h-[220px] p-2">
+                                    
+                                    <!-- Top Header Bar Overlay -->
+                                    <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-30 pointer-events-none">
+                                        <!-- Type Badge -->
+                                        <span id="carouselBadge" class="pointer-events-auto px-3 py-1 rounded-lg bg-slate-900/85 text-white backdrop-blur-md text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg flex items-center">
+                                            <i class="fas fa-image text-emerald-400 mr-1.5"></i>
+                                            <span>PHOTO (1/1)</span>
+                                        </span>
+
+                                        <div class="pointer-events-auto flex items-center space-x-2">
+                                            <!-- VIEW ALL IN GRID BUTTON -->
+                                            <button type="button" onclick="openMediaGalleryModal()" class="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-950 text-pnp-gold rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-pnp-gold/30" title="View all photos and videos in one container">
+                                                <i class="fas fa-th-large text-xs"></i>
+                                                <span>Grid View</span>
+                                            </button>
+
+                                            <!-- DIRECT IN-CAROUSEL TRASH BUTTON -->
+                                            <button type="button" id="trashCurrentItemBtn" onclick="trashCurrentMediaItem(event)"
+                                                class="px-3 py-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-red-500/30"
+                                                title="Delete this image/video from bulletin">
+                                                <i class="fas fa-trash-alt text-xs"></i>
+                                                <span>Trash</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image Slide -->
+                                    <img id="previewImg" onclick="openFullscreenMedia()" class="max-h-[250px] max-w-full object-contain rounded-lg shadow-md cursor-pointer hover:opacity-95 transition hidden" title="Click to view full screen">
+
+                                    <!-- Video Slide -->
+                                    <video id="previewVid" controls class="max-h-[250px] max-w-full object-contain rounded-lg shadow-md hidden"></video>
+
+                                    <!-- Prev Slide Chevron -->
+                                    <button type="button" id="prevSlideBtn" onclick="navigateCarousel(-1, event)"
+                                        class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden"
+                                        title="Previous Media">
+                                        <i class="fas fa-chevron-left text-xs"></i>
+                                    </button>
+
+                                    <!-- Next Slide Chevron -->
+                                    <button type="button" id="nextSlideBtn" onclick="navigateCarousel(1, event)"
+                                        class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden"
+                                        title="Next Media">
+                                        <i class="fas fa-chevron-right text-xs"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Dots & File Info Footer -->
+                                <div class="w-full mt-2.5 flex flex-col items-center space-y-1.5">
+                                    <div id="carouselDots" class="flex items-center space-x-1.5 min-h-[12px]"></div>
+                                    <p id="carouselInfo" class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate max-w-full px-2 text-center"></p>
+
+                                    <!-- Inline Thumbnails Strip: View All Uploaded Pictures & Videos directly on page -->
+                                    <div id="thumbnailsStrip" class="w-full pt-2 border-t border-gray-200/60 dark:border-slate-800/80 flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar hidden">
+                                        <!-- Injected thumbnail previews -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- FILE INPUTS -->
-                        <div class="mt-4">
-                            <!-- This input handles the click event and receives both images and videos -->
-                            <input type="file" id="mediaInput" accept="image/*,video/*" multiple class="hidden">
+                        <!-- Media Input Controls -->
+                        <div class="mt-4 space-y-2">
+                            <input type="file" id="mediaFileInput" accept="image/*,video/*" multiple class="hidden" onchange="handleMediaFileSelect(this.files)">
 
-                            <!-- These hidden inputs are submitted to the server -->
-                            <input type="file" name="photos" id="photos" accept="image/*" multiple class="hidden">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <button type="button" id="addMediaBtn" onclick="document.getElementById('mediaFileInput').click()"
+                                    class="w-full py-3.5 px-4 bg-pnp-blue hover:bg-blue-900 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                                    <i class="fas fa-plus-circle"></i>
+                                    <span id="addMediaBtnText">Add Media (0/10)</span>
+                                </button>
 
-                            <input type="file" name="videos" id="videos" accept="video/*" multiple class="hidden">
+                                <button type="button" id="viewGalleryBtn" onclick="openMediaGalleryModal()"
+                                    class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-pnp-gold rounded-xl text-xs font-bold uppercase tracking-wider transition border border-pnp-gold/20 flex items-center justify-center space-x-2 cursor-pointer hidden">
+                                    <i class="fas fa-th-large"></i>
+                                    <span>View All Media (<span id="galleryBtnCount">0</span>)</span>
+                                </button>
+                            </div>
 
-                            <!-- Hidden inputs to track existing media files when editing -->
-                            <input type="hidden" name="existing_photos" id="existing_photos_input">
-                            <input type="hidden" name="existing_videos" id="existing_videos_input">
-
-                            <button type="button" onclick="document.getElementById('mediaInput').click()"
-                                class="w-full bg-pnp-blue text-white py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-blue-900 transition mb-2">
-                                Choose / Add Media
+                            <button type="button" id="clearAllMediaBtn" onclick="clearAllMedia()"
+                                class="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hidden cursor-pointer flex items-center justify-center space-x-2">
+                                <i class="fas fa-trash"></i>
+                                <span>Clear All Attached Media</span>
                             </button>
 
-                            <button type="button" onclick="openMediaGalleryModal()" id="viewGalleryBtn"
-                                class="w-full bg-slate-800 text-pnp-gold py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-700 transition mb-2 hidden flex items-center justify-center space-x-2 border border-pnp-gold/20">
-                                <i class="fas fa-images text-xs"></i>
-                                <span id="viewGalleryBtnText">View & Manage Uploaded Media</span>
-                            </button>
-
-                            <button type="button" onclick="clearAllMedia()" id="clearAllMediaBtn"
-                                class="w-full bg-red-500/10 text-red-500 py-2 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-red-500 hover:text-white transition hidden">
-                                Remove All Media
-                            </button>
-
-                            <p class="mt-2 text-[10px] text-gray-400 dark:text-gray-500 uppercase text-center">
-                                Upload & preview media freely — Max 5 files allowed for final posting
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase text-center pt-1">
+                                JPG, PNG, WEBP, MP4 allowed • Up to 10 media files combined
                             </p>
                         </div>
-
                     </div>
-
                 </div>
 
-                <!-- RIGHT SIDE: FORM FIELDS -->
-                <div id="rightPanel" class="space-y-6 flex flex-col transition-all duration-300">
+                <!-- RIGHT COLUMN: FORM FIELDS (TITLE, CATEGORY, BODY) -->
+                <div class="space-y-6 flex flex-col">
 
-
-
-                    <!-- TITLE -->
-                    <div class="space-y-2">
+                    <!-- TITLE FIELD -->
+                    <div class="space-y-1.5">
                         <div class="flex justify-between items-center">
-                            <label for="title"
-                                class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Bulletin
-                                Title</label>
+                            <label for="titleInput" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                Bulletin Title <span class="text-red-500">*</span>
+                            </label>
                             <span id="titleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
                                 0 / 100 letters
                             </span>
                         </div>
-                        <input type="text" name="title" id="title" value="<%= bulletin ? bulletin.title : '' %>"
-                            required minlength="2" maxlength="100" placeholder="Enter title (3-15 words, max 100 characters)"
-                            oninput="validateForm()"
-                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white transition-all">
-                        <p id="titleInlineError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                        <input type="text" name="title" id="titleInput" value="<%= bulletin ? (bulletin.title || '') : '' %>"
+                            required maxlength="100" placeholder="e.g. Heavy Rainfall Warning Advisory (3-15 words)"
+                            oninput="updateValidationState()"
+                            class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-bold text-slate-800 dark:text-white transition">
+                        <p id="titleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                     </div>
 
-                    <!-- CATEGORY -->
-                    <div class="space-y-2">
-                        <label
-                            class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                            Category
+                    <!-- CATEGORY FIELD -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Category <span class="text-red-500">*</span>
                         </label>
 
+                        <!-- Advisory Category Dropdown -->
                         <% 
-                            const standardCategories=['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness', 'General Announcement']; 
-                            const isCustomCategory=bulletin && bulletin.category && !standardCategories.includes(bulletin.category);
-                            const currentCat = bulletin ? bulletin.category : (typeof defaultCategory !== 'undefined' ? defaultCategory : '');
-                            const isEditing = !!bulletin;
-                            const isPublicAdvisoryEdit = isEditing && currentCat !== 'General Announcement';
-                            const isGeneralAnnouncementEdit = isEditing && currentCat === 'General Announcement';
+                            const currentCategory = bulletin ? (bulletin.category || '') : '';
                         %>
+                        <select name="category" id="categorySelectAdvisory" onchange="updateValidationState()"
+                            class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-bold text-slate-800 dark:text-white transition cursor-pointer">
+                            <option value="Crime Advisory" <%= currentCategory === 'Crime Advisory' ? 'selected' : '' %>>Crime Advisory</option>
+                            <option value="Traffic Advisory" <%= currentCategory === 'Traffic Advisory' ? 'selected' : '' %>>Traffic Advisory</option>
+                            <option value="Cybercrime Advisory" <%= currentCategory === 'Cybercrime Advisory' ? 'selected' : '' %>>Cybercrime Advisory</option>
+                            <option value="Community Awareness" <%= currentCategory === 'Community Awareness' ? 'selected' : '' %>>Community Awareness</option>
+                        </select>
 
-                            <select name="category" id="category" required onchange="validateForm()"
-                                class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
-
-                                <option value="" disabled <%= !bulletin && !currentCat ? 'selected' : '' %>>Select Category</option>
-
-                                <% if (isPublicAdvisoryEdit) { %>
-                                    <!-- When editing a Public Advisory, show ONLY the 4 Public Advisory categories -->
-                                    <optgroup label="PUBLIC ADVISORIES" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                        <option value="Crime Advisory" <%= currentCat === 'Crime Advisory' ? 'selected' : '' %>>Crime Advisory</option>
-                                        <option value="Traffic Advisory" <%= currentCat === 'Traffic Advisory' ? 'selected' : '' %>>Traffic Advisory</option>
-                                        <option value="Cybercrime Advisory" <%= currentCat === 'Cybercrime Advisory' ? 'selected' : '' %>>Cybercrime Advisory</option>
-                                        <option value="Community Awareness" <%= currentCat === 'Community Awareness' ? 'selected' : '' %>>Community Awareness</option>
-                                    </optgroup>
-                                <% } else if (isGeneralAnnouncementEdit) { %>
-                                    <!-- When editing a General Announcement -->
-                                    <optgroup label="NEWS & RELEASES (Broadcast to News Feed)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                        <option value="General Announcement" selected>General Announcement (News / Press Release)</option>
-                                    </optgroup>
-                                    <optgroup label="PUBLIC ADVISORIES (Broadcast to Public Advisory Page)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                        <option value="Crime Advisory">Crime Advisory</option>
-                                        <option value="Traffic Advisory">Traffic Advisory</option>
-                                        <option value="Cybercrime Advisory">Cybercrime Advisory</option>
-                                        <option value="Community Awareness">Community Awareness</option>
-                                    </optgroup>
-                                <% } else { %>
-                                    <!-- When creating a new bulletin -->
-                                    <optgroup label="PUBLIC ADVISORIES (Broadcast to Public Advisory Page)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                        <option value="Crime Advisory" <%= currentCat === 'Crime Advisory' ? 'selected' : '' %>>Crime Advisory</option>
-                                        <option value="Traffic Advisory" <%= currentCat === 'Traffic Advisory' ? 'selected' : '' %>>Traffic Advisory</option>
-                                        <option value="Cybercrime Advisory" <%= currentCat === 'Cybercrime Advisory' ? 'selected' : '' %>>Cybercrime Advisory</option>
-                                        <option value="Community Awareness" <%= currentCat === 'Community Awareness' ? 'selected' : '' %>>Community Awareness</option>
-                                    </optgroup>
-
-                                    <optgroup label="NEWS & RELEASES (Broadcast to News Feed)" class="bg-slate-900 text-pnp-gold font-bold text-xs">
-                                        <option value="General Announcement" <%= currentCat === 'General Announcement' ? 'selected' : '' %>>General Announcement (News / Press Release)</option>
-                                    </optgroup>
-                                <% } %>
-
-                            </select>
+                        <!-- Locked Category Badge for News -->
+                        <div id="categoryNewsBadge" class="hidden w-full px-4 py-3.5 bg-pnp-blue/10 border border-pnp-blue/20 rounded-xl text-xs font-bold text-pnp-blue dark:text-pnp-gold flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-newspaper text-sm"></i>
+                                <span>General Announcement (News / Press Release)</span>
+                            </div>
+                            <span class="text-[10px] uppercase tracking-wider font-black px-2.5 py-0.5 rounded bg-pnp-blue/20">Locked</span>
+                        </div>
                     </div>
 
-                    <!-- FACEBOOK LINK / URL FIELD -->
-                    <div class="space-y-2 p-4 rounded-xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-150 dark:border-slate-800">
+                    <!-- BODY / CONTENT TEXTAREA -->
+                    <div class="flex-1 flex flex-col space-y-1.5">
                         <div class="flex justify-between items-center">
-                            <label for="facebook_url"
-                                class="block text-[10px] font-bold text-[#1877F2] uppercase tracking-widest flex items-center space-x-1.5">
-                                <i class="fab fa-facebook text-sm"></i>
-                                <span>Facebook Post / Video Link (News & General Announcements Only)</span>
-                            </label>
-                            <% if (bulletin && (bulletin.facebook_url || bulletin.facebook_post_url)) { %>
-                                <span class="text-[9px] font-black uppercase tracking-wider bg-[#1877F2]/10 text-[#1877F2] px-2.5 py-0.5 rounded-full border border-[#1877F2]/20">
-                                    Link Active
-                                </span>
-                            <% } %>
-                        </div>
-                        <div class="relative">
-                            <input type="url" name="facebook_url" id="facebook_url" 
-                                value="<%= bulletin ? (bulletin.facebook_url || bulletin.facebook_post_url || '') : '' %>"
-                                placeholder="https://www.facebook.com/..."
-                                oninput="handleFbUrlChange(this.value);"
-                                class="w-full px-4 py-3 bg-white dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-semibold dark:text-white transition-all">
-                        </div>
-                        <p id="fbUrlError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
-                        <p class="text-[10px] text-slate-400 font-medium">When a Facebook post / video link is provided, the official embedded Facebook post is rendered directly (no image attachments required).</p>
-                    </div>
-
-
-
-
-                    <!-- BODY -->
-                    <div class="flex-1 flex flex-col space-y-2">
-                        <div class="flex justify-between items-center">
-                            <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                                Bulletin Body
+                            <label for="bodyInput" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                Description / Content <span class="text-red-500">*</span>
                             </label>
                             <span id="bodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
                                 0 / 5,000 letters
                             </span>
                         </div>
-
-                        <textarea name="body" id="body" rows="12" required
-                            placeholder="Enter the full content of the bulletin (Min 10 letters, Max 5,000 letters)..."
-                            oninput="validateForm()"
-                            class="flex-1 w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-sm leading-relaxed dark:text-white transition-all"><%= bulletin ? bulletin.body : '' %></textarea>
-                        <p id="bodyInlineError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                        <textarea name="body" id="bodyInput" rows="10" required
+                            placeholder="Enter the full official announcement or advisory contents (min 5 words / 15 letters, max 5,000 letters)..."
+                            oninput="updateValidationState()"
+                            class="flex-1 w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"><%= bulletin ? (bulletin.body || '') : '' %></textarea>
+                        <p id="bodyError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                     </div>
 
                 </div>
 
             </div>
 
-            <!-- SUBMIT CONTAINER WITH REAL-TIME ERROR DETECTOR & SUBMIT CONTROL -->
-            <div class="pt-6 border-t border-gray-100 dark:border-slate-700 flex flex-col md:flex-row items-center justify-between gap-4">
-                <!-- ERROR DETECTOR STATUS BADGE/CARD -->
-                <div id="errorDetectorCard" class="w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300">
-                    <div id="errorDetectorIconContainer" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-red-500 text-white shadow-md animate-pulse">
-                        <i id="errorDetectorIcon" class="fas fa-exclamation-triangle"></i>
+            <!-- FORMAT 3: URL POST FLOW (FACEBOOK IMPORT) -->
+            <div id="urlPublishPanel" class="hidden space-y-6">
+                <!-- Header Banner -->
+                <div class="p-5 rounded-2xl bg-[#1877F2]/10 border border-[#1877F2]/20 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
+                        <i class="fab fa-facebook-f"></i>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Error Detector</span>
-                            <span id="errorDetectorStatusBadge" class="text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-500 text-white shadow-sm">UPDATE BLOCKED</span>
-                        </div>
-                        <p id="errorDetectorText" class="text-xs font-bold mt-0.5 leading-snug truncate">Validating bulletin parameters...</p>
+                    <div>
+                        <h4 class="text-sm font-black text-[#1877F2] uppercase tracking-wider">Facebook Official Post URL Import</h4>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">Link directly to an official post published on the PNP Sta. Cruz Facebook page.</p>
                     </div>
                 </div>
 
-                <!-- SUBMIT / UPDATE BUTTON -->
-                <div class="w-full md:w-auto shrink-0 flex items-center justify-end">
+                <!-- TITLE FIELD FOR URL POST -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Post Title / Headline <span class="text-red-500">*</span>
+                        </label>
+                        <span id="urlTitleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                            0 / 100 letters
+                        </span>
+                    </div>
+                    <input type="text" id="urlTitleInput" maxlength="100"
+                        value="<%= bulletin ? (bulletin.title || '') : '' %>"
+                        placeholder="e.g. Official Statement on Community Outreach Operation"
+                        oninput="updateValidationState()"
+                        class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-bold text-slate-800 dark:text-white transition">
+                    <p id="urlTitleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                </div>
+
+                <!-- CAPTION / DESCRIPTION FIELD FOR URL POST -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Post Description / First Paragraph <span class="text-slate-400 font-normal">(Optional)</span>
+                        </label>
+                        <span id="urlBodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                            0 / 5,000 letters
+                        </span>
+                    </div>
+                    <textarea id="urlBodyInput" rows="4"
+                        placeholder="Paste or enter the Facebook caption or brief summary..."
+                        oninput="updateValidationState()"
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"><%= bulletin ? (bulletin.body || '') : '' %></textarea>
+                </div>
+
+                <!-- FACEBOOK POST URL FIELD -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                        Facebook Post URL <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <i class="fab fa-facebook text-[#1877F2] absolute left-4 top-1/2 -translate-y-1/2 text-base"></i>
+                        <input type="url" name="facebook_url" id="facebookUrlInput"
+                            value="<%= bulletin ? (bulletin.facebook_url || bulletin.facebook_post_url || '') : '' %>"
+                            oninput="handleFacebookUrlInput(this.value); updateValidationState();"
+                            placeholder="https://www.facebook.com/..."
+                            class="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-semibold text-slate-800 dark:text-white transition">
+                    </div>
+                    <p id="facebookUrlError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                    <p class="text-[11px] text-slate-400 font-medium">Paste the exact link to a public post or video from the official PNP Facebook page.</p>
+
+                    <!-- Live Facebook Embedded Media Preview Container -->
+                    <div id="fbUrlPreviewBox" class="hidden mt-3 p-4 rounded-2xl bg-slate-950 border border-[#1877F2]/30 space-y-2.5 overflow-hidden">
+                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-[#1877F2]">
+                            <span class="flex items-center space-x-1.5">
+                                <i class="fab fa-facebook text-sm"></i>
+                                <span>Imported Facebook Media Preview</span>
+                            </span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-[#1877F2]/20 text-[#1877F2]">General Announcement</span>
+                        </div>
+                        <div id="fbIframeContainer" class="w-full h-[340px] rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center">
+                            <!-- Dynamic iframe injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info note & Default Category -->
+                <div class="p-3.5 rounded-xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-150 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center space-x-2">
+                    <i class="fab fa-facebook text-[#1877F2] text-sm"></i>
+                    <span>Facebook post URLs render the official embedded post directly without photo/video file attachments.</span>
+                </div>
+
+                <div class="p-4 rounded-xl bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 font-bold">
+                    <span class="uppercase tracking-wider text-[10px] text-slate-400">Default Category</span>
+                    <span class="px-3 py-1 rounded-full bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold text-[10px] uppercase font-black tracking-wider">General Announcement</span>
+                </div>
+            </div>
+
+            <!-- BOTTOM BAR: REAL-TIME ERROR DETECTOR & SUBMIT BUTTON -->
+            <div class="pt-6 border-t border-gray-150 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- ERROR DETECTOR STATUS BADGE/CARD -->
+                <div id="errorDetectorCard" class="w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200">
+                    <div id="errorDetectorIconContainer" class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-emerald-500 text-white shadow-md">
+                        <i id="errorDetectorIcon" class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">Validation Status</span>
+                            <span id="errorDetectorStatusBadge" class="text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm">READY TO UPDATE</span>
+                        </div>
+                        <p id="errorDetectorText" class="text-xs font-bold mt-0.5 leading-snug truncate">All parameters verified and compliant.</p>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <div class="w-full md:w-auto shrink-0 flex items-center space-x-3">
+                    <a href="<%= typeof isPublic !== 'undefined' && isPublic ? '/bulletins' : '/admin/bulletins' %>"
+                        class="w-full md:w-auto px-6 py-4 rounded-2xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-wider transition text-center">
+                        Cancel
+                    </a>
                     <button type="submit" id="submitBulletinBtn"
-                        class="w-full md:w-auto bg-pnp-blue text-white font-black py-4 px-12 rounded-2xl shadow-xl transition-all duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:shadow-none disabled:cursor-not-allowed disabled:pointer-events-none flex items-center justify-center space-x-2">
+                        class="w-full md:w-auto bg-pnp-blue text-white font-black py-4 px-10 rounded-2xl shadow-xl transition-all duration-300 hover:bg-blue-900 uppercase tracking-widest text-xs flex items-center justify-center space-x-2 cursor-pointer">
                         <i class="fas <%= bulletin ? 'fa-save' : 'fa-paper-plane' %>"></i>
                         <span><%= bulletin ? 'Update Bulletin' : 'Post Bulletin' %></span>
                     </button>
@@ -291,501 +422,442 @@
 
         </form>
 
-        <!-- ENHANCED FULLSCREEN MEDIA VIEWER MODAL -->
-        <div id="mediaModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center z-[99999] p-4 transition-all duration-300">
-            <div class="relative max-w-5xl w-full flex flex-col items-center">
-                <!-- MODAL HEADER / CONTROLS -->
-                <div class="w-full flex justify-between items-center mb-3 px-2">
-                    <span id="modalMediaTitle" class="text-xs font-black uppercase tracking-widest text-slate-300">Media Preview</span>
-                    <div class="flex items-center space-x-3">
-                        <button type="button" id="modalRemoveBtn" onclick="removeCurrentModalMedia()" class="px-4 py-2 bg-red-500/20 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-2 border border-red-500/30">
-                            <i class="fas fa-trash-alt"></i>
-                            <span>Remove This File</span>
-                        </button>
-                        <button type="button" onclick="closeMediaModal()" class="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition focus:outline-none">
-                            <i class="fas fa-times text-sm"></i>
-                        </button>
-                    </div>
-                </div>
+    </div>
+</div>
 
-                <!-- MEDIA CONTENT CONTAINER -->
-                <div class="w-full max-h-[82vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center p-2 relative">
-                    <img id="modalImage" class="max-w-full max-h-[78vh] object-contain rounded-lg hidden">
-                    <video id="modalVideo" controls class="max-w-full max-h-[78vh] object-contain rounded-lg hidden"></video>
+<!-- ALL UPLOADED MEDIA GALLERY GRID MODAL -->
+<div id="mediaGalleryModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center z-[99998] p-4 md:p-8 transition-all duration-300" onclick="closeMediaGalleryModal()">
+    <div class="relative max-w-6xl w-full h-[90vh] bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+        <!-- GALLERY MODAL HEADER -->
+        <div class="p-6 border-b border-gray-150 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50/80 dark:bg-slate-950 gap-4 shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-pnp-blue text-pnp-gold flex items-center justify-center border border-pnp-gold/20 shadow-md">
+                    <i class="fas fa-images text-sm"></i>
                 </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Attached Media Gallery</h3>
+                    <p id="mediaGalleryCount" class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Showing 0 of 10 attached files</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="document.getElementById('mediaFileInput').click()" class="px-4 py-2.5 bg-pnp-blue hover:bg-blue-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center space-x-2 cursor-pointer shadow-md">
+                    <i class="fas fa-plus-circle text-xs"></i>
+                    <span>+ Add More Files</span>
+                </button>
+                <button type="button" onclick="closeMediaGalleryModal()" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-600 dark:text-white rounded-xl flex items-center justify-center transition cursor-pointer">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
             </div>
         </div>
 
-        <!-- ALL UPLOADED MEDIA GALLERY GRID MODAL -->
-        <div id="mediaGalleryModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl hidden items-center justify-center z-[99998] p-4 md:p-8 transition-all duration-300">
-            <div class="relative max-w-6xl w-full h-[90vh] bg-slate-900 rounded-3xl border border-white/10 shadow-2xl flex flex-col overflow-hidden">
-                <!-- GALLERY MODAL HEADER -->
-                <div class="p-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between bg-slate-950 gap-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-2xl bg-pnp-blue text-pnp-gold flex items-center justify-center border border-pnp-gold/20 shadow-md">
-                            <i class="fas fa-images text-sm"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-base font-black text-white uppercase tracking-tight leading-none">Uploaded Media Gallery</h3>
-                            <p id="mediaGalleryCount" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Showing 0 attached files</p>
-                        </div>
-                    </div>
+        <!-- GALLERY GRID CONTAINER -->
+        <div id="mediaGalleryGrid" class="flex-1 p-6 overflow-y-auto custom-scrollbar grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 items-start">
+            <!-- Injected cards -->
+        </div>
 
-                    <!-- DYNAMIC GALLERY WARNING / STATUS ALERT -->
-                    <div id="galleryStatusAlert" class="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all hidden">
-                        <i id="galleryStatusIcon" class="fas fa-exclamation-triangle text-sm"></i>
-                        <span id="galleryStatusText">Status message</span>
-                    </div>
+        <!-- GALLERY MODAL FOOTER -->
+        <div class="p-5 border-t border-gray-150 dark:border-white/10 bg-gray-50/80 dark:bg-slate-950 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <i class="fas fa-info-circle text-pnp-blue dark:text-pnp-gold mr-1"></i>
+                Click the trash icon on any file to delete it. Maximum limit is 10 images/videos.
+            </span>
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="closeMediaGalleryModal()" class="px-8 py-2.5 bg-pnp-blue hover:bg-blue-900 text-white rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-md">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    <div class="flex items-center space-x-3">
-                        <button type="button" onclick="document.getElementById('mediaInput').click()" class="px-4 py-2 bg-pnp-blue text-white hover:bg-blue-900 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                            + Add More Files
-                        </button>
-                        <button type="button" onclick="closeMediaGalleryModal()" class="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition">
-                            <i class="fas fa-times text-sm"></i>
-                        </button>
-                    </div>
-                </div>
+<!-- FULLSCREEN ENLARGED MEDIA VIEWER MODAL -->
+<div id="fullscreenMediaModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center z-[99999] p-4 transition-all duration-300" onclick="closeFullscreenMedia()">
+    <div class="relative max-w-5xl w-full flex flex-col items-center" onclick="event.stopPropagation()">
+        <div class="w-full flex justify-between items-center mb-3 px-2">
+            <span id="fullscreenMediaTitle" class="text-xs font-black uppercase tracking-widest text-slate-300">Media Preview</span>
+            <button type="button" onclick="closeFullscreenMedia()" class="w-9 h-9 bg-white/10 hover:bg-white/20 text-white rounded-xl flex items-center justify-center transition">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+        <div class="w-full max-h-[82vh] bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center p-2">
+            <img id="fullscreenImg" class="max-w-full max-h-[78vh] object-contain rounded-lg">
+        </div>
+    </div>
+</div>
 
-                <!-- GALLERY GRID CONTAINER -->
-                <div id="mediaGalleryGrid" class="flex-1 p-6 overflow-y-auto custom-scrollbar grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
-                    <!-- Dynamic media card items will be injected here -->
-                </div>
-
-                <!-- GALLERY MODAL FOOTER -->
-                <div class="p-6 border-t border-white/10 bg-slate-950 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                        Note: Each item has a trash icon on top-right to delete individual pictures/videos. Max 5 allowed for final posting.
-                    </span>
-                    <button type="button" onclick="closeMediaGalleryModal()" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                        Close Gallery
-                    </button>
-                </div>
+<!-- CONFIRMATION DIALOG MODAL -->
+<div id="updateConfirmModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md transition-all duration-300 hidden opacity-0">
+    <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 overflow-hidden transform transition-all duration-300 scale-95 space-y-6">
+        <div class="flex items-center space-x-3 text-pnp-blue dark:text-pnp-gold">
+            <div class="w-12 h-12 rounded-2xl bg-pnp-blue/10 flex items-center justify-center text-2xl border border-pnp-blue/20">
+                <i class="fas fa-question-circle"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                    <%= bulletin ? 'Confirm Bulletin Update' : 'Confirm Notice Publication' %>
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    Please review details before saving updates to this bulletin.
+                </p>
             </div>
         </div>
 
+        <div class="bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-4 space-y-3 text-xs">
+            <div>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Bulletin Title</span>
+                <p id="confirmModalTitle" class="font-bold text-slate-800 dark:text-white text-sm mt-0.5"></p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-150 dark:border-slate-800">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Format</span>
+                    <p id="confirmModalType" class="font-bold text-slate-700 dark:text-slate-300 mt-0.5"></p>
+                </div>
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Category</span>
+                    <p id="confirmModalCategory" class="font-bold text-pnp-blue dark:text-pnp-gold mt-0.5"></p>
+                </div>
+            </div>
+            <div class="pt-2 border-t border-gray-150 dark:border-slate-800">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Attached Media</span>
+                <p id="confirmModalMedia" class="font-bold text-slate-700 dark:text-slate-300 mt-0.5"></p>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-2">
+            <button type="button" onclick="closeUpdateConfirmationModal()"
+                class="px-5 py-3 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-wider transition cursor-pointer">
+                Cancel
+            </button>
+            <button type="button" id="finalConfirmBtn" onclick="executeFinalSubmit()"
+                class="px-8 py-3 rounded-xl bg-pnp-blue hover:bg-pnp-gold text-white hover:text-pnp-blue text-xs font-black uppercase tracking-wider shadow-lg transition-all flex items-center space-x-2 cursor-pointer">
+                <i class="fas fa-check"></i>
+                <span id="finalConfirmBtnText"><%= bulletin ? 'Yes, Confirm & Update' : 'Yes, Confirm & Publish' %></span>
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
-    function toggleCustomCategory(value) {
-        const container = document.getElementById('customCategoryContainer');
-        const input = document.getElementById('custom_category');
-        if (value === 'Other') {
-            container.classList.remove('hidden');
-            input.required = true;
+    // State management
+    let currentPublishType = 'advisory';
+    let mediaItems = [];
+    let currentSlide = 0;
+
+    // Load bulletin data
+    const isEditMode = <%= bulletin ? 'true' : 'false' %>;
+    const initialFbUrl = '<%= bulletin ? (bulletin.facebook_url || bulletin.facebook_post_url || "") : "" %>';
+    const initialCategory = '<%= bulletin ? (bulletin.category || "") : "" %>';
+
+    // Parse initial media files
+    <% 
+        function resolveMediaList(pathsVal, singleVal) {
+            let list = [];
+            if (Array.isArray(pathsVal)) {
+                list = pathsVal;
+            } else if (singleVal) {
+                if (Array.isArray(singleVal)) {
+                    list = singleVal;
+                } else if (typeof singleVal === 'string') {
+                    const trimmed = singleVal.trim();
+                    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                        try {
+                            const parsed = JSON.parse(trimmed);
+                            if (Array.isArray(parsed)) list = parsed;
+                        } catch (e) {
+                            try {
+                                const sanitized = trimmed.replace(/'/g, '"');
+                                const parsed = JSON.parse(sanitized);
+                                if (Array.isArray(parsed)) list = parsed;
+                            } catch (e2) {}
+                        }
+                    }
+                    if (list.length === 0 && trimmed.length > 0 && trimmed !== '[]' && trimmed !== '""' && trimmed !== 'null') {
+                        list = [trimmed];
+                    }
+                }
+            }
+            return list.map(item => {
+                if (!item) return '';
+                let s = typeof item === 'string' ? item : (item.url || item.path || '');
+                s = s.trim().replace(/^["']|["']$/g, '');
+                return s;
+            }).filter(s => s && s.length > 0 && s !== '[]' && !s.startsWith('['));
+        }
+
+        let initPhotos = [];
+        let initVideos = [];
+        if (bulletin) {
+            initPhotos = resolveMediaList(bulletin.photo_paths, bulletin.photo_path);
+            initVideos = resolveMediaList(bulletin.video_paths, bulletin.video_path);
+        }
+    %>
+    const serverPhotos = <%- JSON.stringify(initPhotos) %>;
+    const serverVideos = <%- JSON.stringify(initVideos) %>;
+
+    function formatMediaUrl(rawPath) {
+        if (!rawPath) return '';
+        let clean = String(rawPath).trim().replace(/^["']|["']$/g, '');
+        if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('blob:') || clean.startsWith('data:')) {
+            return clean;
+        }
+        if (!clean.startsWith('/')) {
+            return '/' + clean;
+        }
+        return clean;
+    }
+
+    // Initialize media from server
+    serverPhotos.forEach((p, idx) => {
+        if (!p || p === '[]' || p.startsWith('[')) return;
+        const normalizedUrl = formatMediaUrl(p);
+        const filename = normalizedUrl.split('/').pop() || `Photo ${idx + 1}`;
+        mediaItems.push({
+            id: 'existing-photo-' + idx,
+            type: 'image',
+            url: normalizedUrl,
+            path: p,
+            name: filename,
+            size: 0,
+            isExisting: true
+        });
+    });
+
+    serverVideos.forEach((v, idx) => {
+        if (!v || v === '[]' || v.startsWith('[')) return;
+        const normalizedUrl = formatMediaUrl(v);
+        const filename = normalizedUrl.split('/').pop() || `Video ${idx + 1}`;
+        mediaItems.push({
+            id: 'existing-video-' + idx,
+            type: 'video',
+            url: normalizedUrl,
+            path: v,
+            name: filename,
+            size: 0,
+            isExisting: true
+        });
+    });
+
+    // Determine initial publication type
+    function detectInitialType() {
+        if (initialFbUrl && initialFbUrl.trim().length > 0) {
+            return 'url';
+        } else if (initialCategory === 'General Announcement') {
+            return 'news';
         } else {
-            container.classList.add('hidden');
-            input.required = false;
+            return 'advisory';
         }
     }
 
-    function validateForm() {
-        const titleInput = document.getElementById('title');
-        const bodyInput = document.getElementById('body');
-        const submitBtn = document.getElementById('submitBulletinBtn');
-        
-        const errorCard = document.getElementById('errorDetectorCard');
-        const errorIconContainer = document.getElementById('errorDetectorIconContainer');
-        const errorIcon = document.getElementById('errorDetectorIcon');
-        const errorBadge = document.getElementById('errorDetectorStatusBadge');
-        const errorText = document.getElementById('errorDetectorText');
+    // Switch publication type (Advisory, News, URL)
+    function switchPublicationType(type) {
+        currentPublishType = type;
+        const publishTypeInput = document.getElementById('publishTypeInput');
+        if (publishTypeInput) publishTypeInput.value = type;
 
-        const titleCounter = document.getElementById('titleCounter');
-        const bodyCounter = document.getElementById('bodyCounter');
+        const manualPanel = document.getElementById('manualPublishPanel');
+        const urlPanel = document.getElementById('urlPublishPanel');
+        const activeTypeTag = document.getElementById('activeTypeTag');
 
-        const titleInlineError = document.getElementById('titleInlineError');
-        const bodyInlineError = document.getElementById('bodyInlineError');
+        const btnAdvisory = document.getElementById('typeBtnAdvisory');
+        const btnNews = document.getElementById('typeBtnNews');
+        const btnUrl = document.getElementById('typeBtnUrl');
 
-        if (!titleInput || !bodyInput || !submitBtn) return true;
+        const advisorySelect = document.getElementById('categorySelectAdvisory');
+        const newsBadge = document.getElementById('categoryNewsBadge');
 
-        const cleanTitle = (titleInput.value || '').trim();
-        const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
-        const titleChars = cleanTitle.length;
+        // Reset all cards styling
+        [btnAdvisory, btnNews, btnUrl].forEach(btn => {
+            if (!btn) return;
+            btn.className = 'pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-gray-50/60 dark:bg-slate-800/40 border-gray-200 dark:border-slate-800';
+            const indicator = btn.querySelector('.pub-type-indicator');
+            if (indicator) indicator.classList.add('hidden');
+        });
 
-        if (titleCounter) {
-            titleCounter.textContent = `${titleWords.length} words / ${titleChars} letters`;
+        // Set active card styling
+        if (type === 'advisory') {
+            if (btnAdvisory) {
+                btnAdvisory.className = 'pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-white dark:bg-slate-900 border-amber-500 shadow-md ring-2 ring-amber-500/20';
+                const indicator = btnAdvisory.querySelector('.pub-type-indicator');
+                if (indicator) indicator.classList.remove('hidden');
+            }
+            if (activeTypeTag) {
+                activeTypeTag.textContent = 'Public Advisory';
+                activeTypeTag.className = 'px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20';
+            }
+            if (manualPanel) manualPanel.classList.remove('hidden');
+            if (urlPanel) urlPanel.classList.add('hidden');
+
+            if (advisorySelect) {
+                advisorySelect.classList.remove('hidden');
+                advisorySelect.name = 'category';
+                advisorySelect.disabled = false;
+            }
+            if (newsBadge) newsBadge.classList.add('hidden');
+            removeHiddenCategoryInput();
+
+            // Set input requirements
+            const titleInput = document.getElementById('titleInput');
+            const bodyInput = document.getElementById('bodyInput');
+            const fbInput = document.getElementById('facebookUrlInput');
+            if (titleInput) { titleInput.required = true; titleInput.name = 'title'; }
+            if (bodyInput) { bodyInput.required = true; bodyInput.name = 'body'; }
+            if (fbInput) { fbInput.required = false; }
+
+        } else if (type === 'news') {
+            if (btnNews) {
+                btnNews.className = 'pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-white dark:bg-slate-900 border-pnp-blue dark:border-pnp-gold shadow-md ring-2 ring-pnp-blue/20 dark:ring-pnp-gold/20';
+                const indicator = btnNews.querySelector('.pub-type-indicator');
+                if (indicator) indicator.classList.remove('hidden');
+            }
+            if (activeTypeTag) {
+                activeTypeTag.textContent = 'News & Release';
+                activeTypeTag.className = 'px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-pnp-blue/10 text-pnp-blue dark:text-blue-300 border border-pnp-blue/20';
+            }
+            if (manualPanel) manualPanel.classList.remove('hidden');
+            if (urlPanel) urlPanel.classList.add('hidden');
+
+            if (advisorySelect) {
+                advisorySelect.classList.add('hidden');
+                advisorySelect.name = 'category_inactive';
+                advisorySelect.disabled = true;
+            }
+            if (newsBadge) newsBadge.classList.remove('hidden');
+            setHiddenCategoryInput('General Announcement');
+
+            // Set input requirements
+            const titleInput = document.getElementById('titleInput');
+            const bodyInput = document.getElementById('bodyInput');
+            const fbInput = document.getElementById('facebookUrlInput');
+            if (titleInput) { titleInput.required = true; titleInput.name = 'title'; }
+            if (bodyInput) { bodyInput.required = true; bodyInput.name = 'body'; }
+            if (fbInput) { fbInput.required = false; }
+
+        } else if (type === 'url') {
+            if (btnUrl) {
+                btnUrl.className = 'pub-type-card text-left p-5 rounded-2xl border-2 transition-all duration-300 flex flex-col justify-between space-y-3 cursor-pointer bg-white dark:bg-slate-900 border-[#1877F2] shadow-md ring-2 ring-[#1877F2]/20';
+                const indicator = btnUrl.querySelector('.pub-type-indicator');
+                if (indicator) indicator.classList.remove('hidden');
+            }
+            if (activeTypeTag) {
+                activeTypeTag.textContent = 'URL Post';
+                activeTypeTag.className = 'px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20';
+            }
+            if (manualPanel) manualPanel.classList.add('hidden');
+            if (urlPanel) urlPanel.classList.remove('hidden');
+
+            if (advisorySelect) {
+                advisorySelect.classList.add('hidden');
+                advisorySelect.name = 'category_inactive';
+                advisorySelect.disabled = true;
+            }
+            if (newsBadge) newsBadge.classList.add('hidden');
+            setHiddenCategoryInput('General Announcement');
+
+            // Set input requirements
+            const titleInput = document.getElementById('titleInput');
+            const bodyInput = document.getElementById('bodyInput');
+            const fbInput = document.getElementById('facebookUrlInput');
+            if (titleInput) { titleInput.required = false; titleInput.name = 'title_inactive'; }
+            if (bodyInput) { bodyInput.required = false; bodyInput.name = 'body_inactive'; }
+            if (fbInput) { fbInput.required = true; }
+
+            // Sync URL fields from title/body if needed
+            const urlTitleInput = document.getElementById('urlTitleInput');
+            const urlBodyInput = document.getElementById('urlBodyInput');
+            if (urlTitleInput && !urlTitleInput.value && titleInput && titleInput.value) {
+                urlTitleInput.value = titleInput.value;
+            }
+            if (urlBodyInput && !urlBodyInput.value && bodyInput && bodyInput.value) {
+                urlBodyInput.value = bodyInput.value;
+            }
+
+            if (fbInput && fbInput.value) {
+                handleFacebookUrlInput(fbInput.value);
+            }
         }
 
-        if (titleChars === 0) {
-            if (titleInlineError) {
-                titleInlineError.textContent = 'Bulletin title is required (at least 3 words required).';
-                titleInlineError.classList.remove('hidden');
-                titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
-            }
-            titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
-            titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (titleWords.length < 3) {
-            if (titleInlineError) {
-                titleInlineError.textContent = `Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${titleChars} characters).`;
-                titleInlineError.classList.remove('hidden');
-                titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
-            }
-            titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
-            titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (titleChars > 100 || titleWords.length > 15) {
-            if (titleInlineError) {
-                titleInlineError.textContent = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleChars} characters).`;
-                titleInlineError.classList.remove('hidden');
-                titleInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
-            }
-            titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
-            titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else {
-            if (titleInlineError) {
-                titleInlineError.textContent = `✓ Title length is valid (${titleWords.length} words).`;
-                titleInlineError.classList.remove('hidden');
-                titleInlineError.className = 'text-[11px] font-bold text-emerald-500 mt-1';
-            }
-            titleInput.classList.remove('border-red-500', 'ring-red-500/20');
-            titleInput.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/20');
+        updateValidationState();
+    }
+
+    function setHiddenCategoryInput(cat) {
+        let el = document.getElementById('hiddenCategoryVal');
+        if (!el) {
+            el = document.createElement('input');
+            el.type = 'hidden';
+            el.id = 'hiddenCategoryVal';
+            document.getElementById('bulletinForm').appendChild(el);
         }
+        el.name = 'category';
+        el.value = cat;
+        el.disabled = false;
+    }
 
-        const cleanBody = (bodyInput.value || '').trim();
-        const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-        const bodyChars = cleanBody.length;
-
-        if (bodyCounter) {
-            bodyCounter.textContent = `${bodyWords.length} words / ${bodyChars} letters`;
-        }
-
-        if (bodyChars === 0) {
-            if (bodyInlineError) {
-                bodyInlineError.textContent = 'Description body is required (at least 5 words / 15 characters).';
-                bodyInlineError.classList.remove('hidden');
-                bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
-            }
-            bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
-            bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (bodyWords.length < 5 || bodyChars < 15) {
-            if (bodyInlineError) {
-                bodyInlineError.textContent = `Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyChars} characters).`;
-                bodyInlineError.classList.remove('hidden');
-                bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
-            }
-            bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
-            bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else if (bodyWords.length > 500 || bodyChars > 5000) {
-            if (bodyInlineError) {
-                bodyInlineError.textContent = `Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${bodyChars} characters).`;
-                bodyInlineError.classList.remove('hidden');
-                bodyInlineError.className = 'text-[11px] font-bold text-red-500 mt-1';
-            }
-            bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
-            bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
-        } else {
-            if (bodyInlineError) {
-                bodyInlineError.textContent = `✓ Description content length is valid (${bodyWords.length} words).`;
-                bodyInlineError.classList.remove('hidden');
-                bodyInlineError.className = 'text-[11px] font-bold text-emerald-500 mt-1';
-            }
-            bodyInput.classList.remove('border-red-500', 'ring-red-500/20');
-            bodyInput.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/20');
-        }
-
-        let errorMessage = '';
-        const totalMediaCount = (existingMedia ? existingMedia.length : 0) + (accumulatedFiles ? accumulatedFiles.length : 0) + (accumulatedVideos ? accumulatedVideos.length : 0);
-
-        let totalBytes = 0;
-        if (typeof accumulatedFiles !== 'undefined') accumulatedFiles.forEach(f => totalBytes += f.size);
-        if (typeof accumulatedVideos !== 'undefined') accumulatedVideos.forEach(v => totalBytes += v.size);
-        const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
-
-        const fbUrlInput = document.getElementById('facebook_url');
-        const rawFbUrl = fbUrlInput ? (fbUrlInput.value || '').trim() : '';
-        const hasFbUrl = rawFbUrl.length > 0;
-        const isValidFbUrl = !hasFbUrl || /^(https?:\/\/)?(www\.|m\.|web\.)?(facebook\.com|fb\.watch|fb\.me|fb\.gg)\/.+/i.test(rawFbUrl);
-
-        const catSelect = document.getElementById('category');
-        const selectedCat = catSelect ? catSelect.value : '';
-        const advisoryCats = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-        const isAdvisoryCat = advisoryCats.includes(selectedCat) || (selectedCat && selectedCat !== 'General Announcement' && selectedCat !== 'Wanted Person' && selectedCat !== 'Missing Person');
-
-        const fbUrlError = document.getElementById('fbUrlError');
-        if (isAdvisoryCat && hasFbUrl) {
-            if (fbUrlError) {
-                fbUrlError.textContent = `❌ Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL link or select "General Announcement".`;
-                fbUrlError.classList.remove('hidden');
-            }
-        } else if (hasFbUrl && !isValidFbUrl) {
-            if (fbUrlError) {
-                fbUrlError.textContent = `❌ Error: Invalid Facebook URL format. Please enter a valid Facebook link starting with http:// or https:// (e.g. https://www.facebook.com/...).`;
-                fbUrlError.classList.remove('hidden');
-            }
-        } else {
-            if (fbUrlError) fbUrlError.classList.add('hidden');
-        }
-
-        if (cleanTitle.length === 0) {
-            errorMessage = 'Please enter a bulletin title (at least 3 words required).';
-        } else if (titleWords.length < 3) {
-            errorMessage = `Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${titleChars} characters).`;
-        } else if (titleChars > 100 || titleWords.length > 15) {
-            errorMessage = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleChars} characters).`;
-        } else if (!selectedCat) {
-            errorMessage = 'Please select a Category for this bulletin.';
-        } else if (isAdvisoryCat && hasFbUrl) {
-            errorMessage = `Error: URLs / Facebook post links are NOT accepted for Public Advisory (${selectedCat || 'Public Advisory'}). Please clear the URL link or select "General Announcement".`;
-        } else if (hasFbUrl && !isValidFbUrl) {
-            errorMessage = 'Invalid Facebook URL format. Must be a valid Facebook post or video URL (e.g. https://www.facebook.com/...).';
-        } else if (cleanBody.length === 0) {
-            errorMessage = 'Please enter the bulletin body content (at least 5 words required).';
-        } else if (bodyWords.length < 5 || bodyChars < 15) {
-            errorMessage = `Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyChars} characters).`;
-        } else if (bodyWords.length > 500 || bodyChars > 5000) {
-            errorMessage = `Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${bodyChars} characters).`;
-        } else if (totalMediaCount === 0 && !hasFbUrl) {
-            errorMessage = 'At least 1 picture, video, or Facebook URL link must be provided before posting.';
-        } else if (totalMediaCount > 5) {
-            errorMessage = `Media limit exceeded: You have ${totalMediaCount} files attached. Please remove files so that 5 or fewer remain.`;
-        } else if (totalBytes > 25 * 1024 * 1024) {
-            errorMessage = `Payload Limit Exceeded: Combined upload (${totalMB} MB) exceeds maximum limit of 25MB. Please compress files or post fewer files.`;
-        }
-
-        const galleryStatusAlert = document.getElementById('galleryStatusAlert');
-        const galleryStatusText = document.getElementById('galleryStatusText');
-
-        if (errorMessage) {
-            if (errorCard) {
-                errorCard.className = 'w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300';
-            }
-            if (errorIconContainer) {
-                errorIconContainer.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-red-500 text-white shadow-md animate-pulse';
-            }
-            if (errorIcon) {
-                errorIcon.className = 'fas fa-exclamation-triangle';
-            }
-            if (errorBadge) {
-                errorBadge.textContent = 'UPDATE BLOCKED';
-                errorBadge.className = 'text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-500 text-white shadow-sm';
-            }
-            if (errorText) {
-                errorText.textContent = errorMessage;
-            }
-            if (galleryStatusAlert && galleryStatusText) {
-                galleryStatusText.textContent = errorMessage;
-                galleryStatusAlert.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse';
-                galleryStatusAlert.classList.remove('hidden');
-            }
-            submitBtn.disabled = false;
-            return false;
-        } else {
-            if (errorCard) {
-                errorCard.className = 'w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200';
-            }
-            if (errorIconContainer) {
-                errorIconContainer.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-emerald-500 text-white shadow-md';
-            }
-            if (errorIcon) {
-                errorIcon.className = 'fas fa-check-circle';
-            }
-            if (errorBadge) {
-                errorBadge.textContent = 'READY TO UPDATE';
-                errorBadge.className = 'text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm';
-            }
-            if (errorText) {
-                errorText.textContent = 'All validation checks passed. You can now save/update this bulletin.';
-            }
-            if (galleryStatusAlert && galleryStatusText) {
-                galleryStatusText.textContent = 'All media & inputs valid. Ready to post/update.';
-                galleryStatusAlert.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
-                galleryStatusAlert.classList.remove('hidden');
-            }
-            submitBtn.disabled = false;
-            return true;
+    function removeHiddenCategoryInput() {
+        const el = document.getElementById('hiddenCategoryVal');
+        if (el) {
+            el.disabled = true;
+            el.name = 'category_inactive';
         }
     }
 
-    async function handleBulletinSubmit(event) {
-        event.preventDefault();
-        const isValid = validateForm();
-        const isEdit = <%= bulletin ? 'true' : 'false' %>;
-        const action = isEdit ? 'update' : 'create';
-
-        if (!isValid) {
-            const activeError = document.getElementById('errorDetectorText')?.textContent || 'Validation Error: Bulletin parameters exceed safety thresholds.';
-            const confirmFn = window.strategicConfirm || (async (args) => {
-                alert(args?.message || activeError);
-                return false;
-            });
-
-            await confirmFn({
-                title: isEdit ? 'Update Blocked - Validation Error' : 'Post Blocked - Validation Error',
-                message: activeError,
-                confirmText: 'Understand & Fix',
-                cancelText: 'Dismiss',
-                type: 'danger'
-            });
-            return;
-        }
-
-        // Final payload pre-flight safety check for any oversized files
-        for (const file of accumulatedFiles) {
-            if (file.size > 5 * 1024 * 1024) {
-                const errorMsg = `Payload Protection Blocked Submit: Image "${file.name}" (${(file.size/(1024*1024)).toFixed(1)}MB) exceeds 5MB limit. Submit canceled.`;
-                const confirmFn = window.strategicConfirm || (async (args) => { alert(args.message); return false; });
-                await confirmFn({
-                    title: 'File Size Error',
-                    message: errorMsg,
-                    confirmText: 'Fix Files',
-                    type: 'danger'
-                });
-                return;
-            }
-        }
-        for (const video of accumulatedVideos) {
-            if (video.size > 100 * 1024 * 1024) {
-                const errorMsg = `Payload Protection Blocked Submit: Video "${video.name}" (${(video.size/(1024*1024)).toFixed(1)}MB) exceeds 100MB limit. Submit canceled.`;
-                const confirmFn = window.strategicConfirm || (async (args) => { alert(args.message); return false; });
-                await confirmFn({
-                    title: 'Video Size Error',
-                    message: errorMsg,
-                    confirmText: 'Fix Video',
-                    type: 'danger'
-                });
-                return;
-            }
-        }
-
-        const confirmFn = window.strategicConfirm || (async (args) => {
-            return confirm(args?.message || `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`);
-        });
-
-        const confirmed = await confirmFn({
-            title: isEdit ? 'Update Confirmation' : 'Post Confirmation',
-            message: `Confirm ${action} of this strategic bulletin. This will be visible to all monitoring terminals.`,
-            confirmText: isEdit ? 'Update Now' : 'Post Now',
-            type: 'info'
-        });
-
-        if (confirmed) {
-            document.getElementById('bulletinForm').submit();
-        }
-    }
-
-    const mediaInput = document.getElementById('mediaInput');
-    const fileInput = document.getElementById('photos');
-    const videoFileInput = document.getElementById('videos');
-    const dropZone = document.getElementById('dropZone');
-
-    let currentPreviewSlide = 0;
-
-    // Existing media from bulletin if editing
-    let existingMedia = [];
-    <% if (bulletin) { %>
-        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-            <% bulletin.photo_paths.forEach(function (path) { %>
-        existingMedia.push({ type: 'image', path: '<%= path %>', isExisting: true });
-            <% }); %>
-        <% } %>
-        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-            <% bulletin.video_paths.forEach(function (path) { %>
-            existingMedia.push({ type: 'video', path: '<%= path %>', isExisting: true });
-            <% }); %>
-        <% } %>
-    <% } %>
-
-        let previewTotalSlides = existingMedia.length;
-
-    let accumulatedFiles = []; // New images files
-    let accumulatedVideos = []; // New videos files
-
-    function movePreview(direction) {
-        if (previewTotalSlides <= 1) return;
-        currentPreviewSlide = (currentPreviewSlide + direction + previewTotalSlides) % previewTotalSlides;
-        updatePreviewCarousel();
-    }
-
-    function updatePreviewCarousel() {
-        const slides = document.querySelectorAll('.preview-slide');
-        const indicators = document.querySelectorAll('.preview-indicators div');
-
-        slides.forEach((slide, idx) => {
-            if (idx === currentPreviewSlide) {
-                slide.classList.remove('opacity-0', 'pointer-events-none');
-                slide.classList.add('opacity-100', 'z-10');
-            } else {
-                slide.classList.remove('opacity-100', 'z-10');
-                slide.classList.add('opacity-0', 'pointer-events-none');
-            }
-        });
-
-        indicators.forEach((ind, idx) => {
-            if (idx === currentPreviewSlide) {
-                ind.classList.add('bg-white');
-                ind.classList.remove('bg-white/40');
-            } else {
-                ind.classList.remove('bg-white');
-                ind.classList.add('bg-white/40');
-            }
-        });
-
-        const deleteBtns = document.querySelectorAll('.delete-slide-btn');
-        deleteBtns.forEach((btn, idx) => {
-            if (idx === currentPreviewSlide) {
-                btn.classList.remove('hidden');
-            } else {
-                btn.classList.add('hidden');
-            }
-        });
-    }
-
-    if (mediaInput) {
-        mediaInput.addEventListener('change', function () {
-            handleMediaFiles(this.files);
-        });
-    }
-
-    if (dropZone) {
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('ring-2', 'ring-pnp-blue');
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('ring-2', 'ring-pnp-blue');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('ring-2', 'ring-pnp-blue');
-            handleMediaFiles(e.dataTransfer.files);
-        });
-    }
-
-    function handleMediaFiles(files) {
+    // Media Handling (Drag & Drop, Selection, Client Validation, Max 10 Files)
+    function handleMediaFileSelect(files) {
         if (!files || files.length === 0) return;
 
-        let rejectedFiles = [];
+        let rejected = [];
         let videoPromises = [];
 
         Array.from(files).forEach(file => {
+            if (mediaItems.length + videoPromises.length >= 10) {
+                rejected.push(`"${file.name}" (Limit reached: Maximum 10 media files combined)`);
+                return;
+            }
+
             if (file.type.startsWith('image/')) {
                 if (file.size > 5 * 1024 * 1024) {
-                    rejectedFiles.push(`Picture "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 5MB limit)`);
+                    rejected.push(`Image "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB exceeds 5MB limit)`);
                 } else {
-                    accumulatedFiles.push(file);
+                    const url = URL.createObjectURL(file);
+                    mediaItems.push({
+                        id: Date.now() + Math.random(),
+                        file: file,
+                        type: 'image',
+                        url: url,
+                        name: file.name,
+                        size: file.size,
+                        isExisting: false
+                    });
                 }
             } else if (file.type.startsWith('video/')) {
                 if (file.size > 25 * 1024 * 1024) {
-                    rejectedFiles.push(`Video "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB > 25MB limit)`);
+                    rejected.push(`Video "${file.name}" (${(file.size / (1024 * 1024)).toFixed(1)}MB exceeds 25MB limit)`);
                 } else {
-                    // Check duration asynchronously to reject movie videos (> 3 minutes)
                     const p = new Promise(resolve => {
                         const tempVid = document.createElement('video');
                         tempVid.preload = 'metadata';
                         tempVid.src = URL.createObjectURL(file);
                         tempVid.onloadedmetadata = function() {
-                            URL.revokeObjectURL(tempVid.src);
-                            if (tempVid.duration > 180) { // > 3 minutes
-                                rejectedFiles.push(`Video "${file.name}" (${(tempVid.duration / 60).toFixed(1)} mins long - Movie videos exceeding 3 minutes are prohibited)`);
+                            if (tempVid.duration > 180) { // 3 minutes limit
+                                URL.revokeObjectURL(tempVid.src);
+                                rejected.push(`Video "${file.name}" (${(tempVid.duration / 60).toFixed(1)} mins long - Movie clips exceeding 3 minutes are prohibited)`);
                             } else {
-                                accumulatedVideos.push(file);
+                                mediaItems.push({
+                                    id: Date.now() + Math.random(),
+                                    file: file,
+                                    type: 'video',
+                                    url: tempVid.src,
+                                    name: file.name,
+                                    size: file.size,
+                                    duration: tempVid.duration,
+                                    isExisting: false
+                                });
                             }
                             resolve();
                         };
                         tempVid.onerror = function() {
-                            rejectedFiles.push(`Video "${file.name}" (Corrupted or unsupported video format)`);
+                            URL.revokeObjectURL(tempVid.src);
+                            rejected.push(`Video "${file.name}" (Corrupted or unsupported video format)`);
                             resolve();
                         };
                     });
@@ -795,556 +867,736 @@
         });
 
         Promise.all(videoPromises).then(() => {
-            if (rejectedFiles.length > 0) {
-                const warningBox = document.getElementById('validationWarning');
-                const warningText = document.getElementById('validationWarningText');
-                const msg = `Upload Limitation Notice:\nThe following files were rejected:\n• ` + rejectedFiles.join('\n• ');
-                if (warningBox && warningText) {
-                    warningText.textContent = `Upload Blocked: ${rejectedFiles[0]}`;
-                    warningBox.classList.remove('hidden');
-                }
-                alert(msg);
+            if (rejected.length > 0) {
+                alert(`Upload Notice:\n• ` + rejected.join('\n• '));
             }
 
-            syncFileInputs();
-            renderAllMedia();
+            if (mediaItems.length > 0) {
+                currentSlide = mediaItems.length - 1;
+            }
+
+            syncMediaInputs();
+            renderCarousel();
             renderMediaGalleryGrid();
-            validateForm();
+            updateValidationState();
+
+            const input = document.getElementById('mediaFileInput');
+            if (input) input.value = '';
         });
     }
 
-    function syncFileInputs() {
-        // Filter out any invalid file reference over 4MB to guarantee Vercel safety
-        const validPhotos = accumulatedFiles.filter(f => f.size <= 4 * 1024 * 1024);
-        const validVideos = accumulatedVideos.filter(f => f.size <= 4 * 1024 * 1024);
+    // Drag and Drop listeners
+    const dropZone = document.getElementById('mediaDropZone');
+    if (dropZone) {
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('ring-2', 'ring-pnp-blue');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('ring-2', 'ring-pnp-blue');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('ring-2', 'ring-pnp-blue');
+            handleMediaFileSelect(e.dataTransfer.files);
+        });
+    }
 
-        // Sync photos input
+    // Sync HTML inputs (DataTransfer for new files, JSON string for existing)
+    function syncMediaInputs() {
+        const photosInput = document.getElementById('photosInput');
+        const videosInput = document.getElementById('videosInput');
+        const existingPhotosInput = document.getElementById('existing_photos_input');
+        const existingVideosInput = document.getElementById('existing_videos_input');
+
         const dtPhotos = new DataTransfer();
-        validPhotos.forEach(f => dtPhotos.items.add(f));
-        fileInput.files = dtPhotos.files;
-
-        // Sync videos input
         const dtVideos = new DataTransfer();
-        validVideos.forEach(f => dtVideos.items.add(f));
-        videoFileInput.files = dtVideos.files;
-    }
+        const remainingExistingPhotos = [];
+        const remainingExistingVideos = [];
 
-    function removeMediaItem(item) {
-        if (item.isExisting) {
-            existingMedia.splice(item.index, 1);
-        } else {
-            if (item.type === 'image') {
-                accumulatedFiles.splice(item.index, 1);
-            } else {
-                accumulatedVideos.splice(item.index, 1);
+        mediaItems.forEach(item => {
+            if (item.isExisting) {
+                if (item.type === 'image') remainingExistingPhotos.push(item.path);
+                else if (item.type === 'video') remainingExistingVideos.push(item.path);
+            } else if (item.file) {
+                if (item.type === 'image') dtPhotos.items.add(item.file);
+                else if (item.type === 'video') dtVideos.items.add(item.file);
             }
-            syncFileInputs();
-        }
-
-        // Adjust slide index if it is out of bounds
-        const totalItems = existingMedia.length + accumulatedFiles.length + accumulatedVideos.length;
-        if (currentPreviewSlide >= totalItems) {
-            currentPreviewSlide = Math.max(0, totalItems - 1);
-        }
-
-        renderAllMedia();
-        renderMediaGalleryGrid();
-        validateForm();
-    }
-
-    function clearAllMedia() {
-        existingMedia = [];
-        accumulatedFiles = [];
-        accumulatedVideos = [];
-        syncFileInputs();
-        currentPreviewSlide = 0;
-        renderAllMedia();
-        renderMediaGalleryGrid();
-        validateForm();
-    }
-
-    function handleFbUrlChange(val) {
-        renderAllMedia();
-        validateForm();
-    }
-
-    function renderAllMedia() {
-        const previewCarousel = document.getElementById('previewCarousel');
-        if (!previewCarousel) return;
-
-        // Update hidden input fields for the form post
-        syncHiddenInputs();
-
-        // Build list of all items to display
-        const itemsToRender = [];
-
-        // 1. Existing media
-        existingMedia.forEach((item, index) => {
-            itemsToRender.push({
-                type: item.type,
-                src: item.path,
-                isExisting: true,
-                index: index
-            });
         });
 
-        // 2. Newly added photos
-        accumulatedFiles.forEach((file, index) => {
-            itemsToRender.push({
-                type: 'image',
-                file: file,
-                isExisting: false,
-                index: index
-            });
-        });
+        if (photosInput) photosInput.files = dtPhotos.files;
+        if (videosInput) videosInput.files = dtVideos.files;
+        if (existingPhotosInput) existingPhotosInput.value = JSON.stringify(remainingExistingPhotos);
+        if (existingVideosInput) existingVideosInput.value = JSON.stringify(remainingExistingVideos);
+    }
 
-        // 3. Newly added videos
-        accumulatedVideos.forEach((file, index) => {
-            itemsToRender.push({
-                type: 'video',
-                file: file,
-                isExisting: false,
-                index: index
-            });
-        });
-
-        previewTotalSlides = itemsToRender.length;
-
+    // Carousel Rendering & Navigation
+    function renderCarousel() {
+        const previewBox = document.getElementById('mediaPreviewBox');
+        const placeholder = document.getElementById('mediaPlaceholder');
+        const img = document.getElementById('previewImg');
+        const vid = document.getElementById('previewVid');
+        const badge = document.getElementById('carouselBadge');
+        const dotsContainer = document.getElementById('carouselDots');
+        const infoEl = document.getElementById('carouselInfo');
+        const prevBtn = document.getElementById('prevSlideBtn');
+        const nextBtn = document.getElementById('nextSlideBtn');
+        const clearBtn = document.getElementById('clearAllMediaBtn');
+        const addBtnText = document.getElementById('addMediaBtnText');
+        const addBtn = document.getElementById('addMediaBtn');
         const viewGalleryBtn = document.getElementById('viewGalleryBtn');
-        const viewGalleryBtnText = document.getElementById('viewGalleryBtnText');
-        if (viewGalleryBtn) {
-            if (previewTotalSlides > 0) {
-                viewGalleryBtn.classList.remove('hidden');
-                if (viewGalleryBtnText) viewGalleryBtnText.textContent = `View & Manage Uploaded Media (${previewTotalSlides})`;
-            } else {
-                viewGalleryBtn.classList.add('hidden');
-            }
-        }
+        const galleryBtnCount = document.getElementById('galleryBtnCount');
+        const quickGalleryLink = document.getElementById('quickGalleryLink');
 
-        const fbUrlInput = document.getElementById('facebook_url');
-        const fbUrlVal = fbUrlInput ? fbUrlInput.value.trim() : '';
-
-        if (previewTotalSlides === 0) {
-            if (fbUrlVal) {
-                const isVideo = /video|watch|reel/i.test(fbUrlVal);
-                const pluginType = isVideo ? 'video.php' : 'post.php';
-                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(fbUrlVal)}&show_text=true&width=500`;
-                previewCarousel.innerHTML = `
-                    <div class="w-full h-full min-h-[350px] bg-slate-950 rounded-lg p-2 flex flex-col items-center justify-center relative overflow-hidden">
-                        <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:330px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full rounded-md shadow-lg pointer-events-none"></iframe>
-                        <div class="absolute top-3 left-3 bg-[#1877F2] text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md flex items-center space-x-1 z-20">
-                            <i class="fab fa-facebook"></i>
-                            <span>Embedded Facebook Release Preview</span>
-                        </div>
-                    </div>
-                `;
-            } else {
-                previewCarousel.innerHTML = `
-                    <div id="placeholderIconContainer" class="flex flex-col items-center justify-center z-10 pointer-events-none">
-                        <i class="fas fa-photo-video text-gray-400 text-5xl mb-4"></i>
-                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest text-center">Drag & Drop or Click<br>Up to 5 images & 2 videos</span>
-                    </div>
-                `;
-            }
-            currentPreviewSlide = 0;
-            document.getElementById('clearAllMediaBtn').classList.add('hidden');
-            syncPanels();
+        if (mediaItems.length === 0) {
+            if (previewBox) previewBox.classList.add('hidden');
+            if (placeholder) placeholder.classList.remove('hidden');
+            if (clearBtn) clearBtn.classList.add('hidden');
+            if (viewGalleryBtn) viewGalleryBtn.classList.add('hidden');
+            if (quickGalleryLink) quickGalleryLink.classList.add('hidden');
+            if (addBtnText) addBtnText.textContent = 'Choose / Add Media Files';
+            if (addBtn) addBtn.disabled = false;
+            renderThumbnailsStrip();
             return;
         }
 
-        document.getElementById('clearAllMediaBtn').classList.remove('hidden');
-        previewCarousel.innerHTML = '';
-
-        let loadedCount = 0;
-
-        itemsToRender.forEach((item, slideIndex) => {
-            const isOversized = !item.isExisting && (
-                (item.type === 'image' && item.file && item.file.size > 5 * 1024 * 1024) ||
-                (item.type === 'video' && item.file && item.file.size > 100 * 1024 * 1024)
-            );
-
-            const slideWrapper = document.createElement('div');
-            slideWrapper.className = `absolute inset-0 w-full h-full transition-opacity duration-500 ease-in-out preview-slide ${
-                slideIndex === currentPreviewSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-            } ${
-                isOversized ? 'border-4 border-red-500 rounded-lg overflow-hidden' : ''
-            }`;
-            slideWrapper.dataset.index = slideIndex;
-
-            const delBtn = document.createElement('button');
-            delBtn.type = "button";
-            delBtn.className = `delete-slide-btn absolute top-3 right-3 z-30 bg-red-500/80 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center transition focus:outline-none shadow-lg ${slideIndex === currentPreviewSlide ? '' : 'hidden'}`;
-            delBtn.innerHTML = '<i class="fas fa-trash text-[10px]"></i>';
-            delBtn.onclick = (event) => {
-                event.stopPropagation();
-                removeMediaItem(item);
-            };
-
-            let carouselWarning = null;
-            if (isOversized) {
-                const limitText = item.type === 'image' ? '5MB' : '100MB';
-                const actualSize = item.file ? (item.file.size / (1024 * 1024)).toFixed(1) : '?';
-                carouselWarning = document.createElement('div');
-                carouselWarning.className = 'absolute top-3 left-3 z-30 bg-red-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider flex items-center space-x-1.5 shadow-xl border border-white/20';
-                carouselWarning.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>EXCEEDS PAYLOAD (${actualSize}MB / ${limitText})</span>`;
-                slideWrapper.appendChild(carouselWarning);
-            }
-
-            const mediaUrl = item.isExisting ? item.src : URL.createObjectURL(item.file);
-
-            if (item.type === 'image') {
-                const img = document.createElement('img');
-                img.src = mediaUrl;
-                img.className = `w-full h-full object-cover rounded-md cursor-pointer hover:opacity-90 transition`;
-                img.onclick = (e) => {
-                    e.stopPropagation();
-                    openMediaModal(item, mediaUrl);
-                };
-                slideWrapper.appendChild(img);
-            } else {
-                const video = document.createElement('video');
-                video.src = mediaUrl;
-                video.className = `w-full h-full object-cover rounded-md cursor-pointer`;
-                video.controls = true;
-                video.onclick = (e) => {
-                    e.stopPropagation();
-                    openMediaModal(item, mediaUrl);
-                };
-                slideWrapper.appendChild(video);
-            }
-            slideWrapper.appendChild(delBtn);
-            previewCarousel.appendChild(slideWrapper);
-            loadedCount++;
-            checkAndAddControls(loadedCount, itemsToRender.length);
-        });
-    }
-
-    function checkAndAddControls(loadedCount, totalCount) {
-        if (loadedCount === totalCount && totalCount > 1) {
-            const previewCarousel = document.getElementById('previewCarousel');
-            let controls = `
-                <button type="button" onclick="event.stopPropagation(); movePreview(-1)" class="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                    <i class="fas fa-chevron-left text-xs"></i>
-                </button>
-                <button type="button" onclick="event.stopPropagation(); movePreview(1)" class="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-pnp-blue transition focus:outline-none">
-                    <i class="fas fa-chevron-right text-xs"></i>
-                </button>
-                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex space-x-1.5 bg-black/40 px-3 py-1.5 rounded-full preview-indicators pointer-events-none">
-            `;
-            for (let i = 0; i < totalCount; i++) {
-                controls += `<div class="w-1.5 h-1.5 rounded-full transition-colors ${i === currentPreviewSlide ? 'bg-white' : 'bg-white/40'}" data-indicator="${i}"></div>`;
-            }
-            controls += `</div>`;
-            previewCarousel.insertAdjacentHTML('beforeend', controls);
+        if (placeholder) placeholder.classList.add('hidden');
+        if (previewBox) previewBox.classList.remove('hidden');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+        if (viewGalleryBtn) {
+            viewGalleryBtn.classList.remove('hidden');
+            if (galleryBtnCount) galleryBtnCount.textContent = mediaItems.length;
         }
-        syncPanels();
-    }
+        if (quickGalleryLink) quickGalleryLink.classList.remove('hidden');
 
-    function syncHiddenInputs() {
-        const existingPhotos = existingMedia.filter(m => m.type === 'image').map(m => m.path);
-        const existingVideos = existingMedia.filter(m => m.type === 'video').map(m => m.path);
+        if (currentSlide >= mediaItems.length) {
+            currentSlide = Math.max(0, mediaItems.length - 1);
+        }
 
-        document.getElementById('existing_photos_input').value = JSON.stringify(existingPhotos);
-        document.getElementById('existing_videos_input').value = JSON.stringify(existingVideos);
-    }
+        const currentItem = mediaItems[currentSlide];
 
-    let currentActiveModalItem = null;
-
-    function openMediaModal(item, src) {
-        const modal = document.getElementById('mediaModal');
-        const modalImg = document.getElementById('modalImage');
-        const modalVid = document.getElementById('modalVideo');
-        const modalTitle = document.getElementById('modalMediaTitle');
-
-        if (!modal || !modalImg || !modalVid) return;
-
-        currentActiveModalItem = item;
-
-        if (item.type === 'video') {
-            modalImg.classList.add('hidden');
-            modalVid.src = src;
-            modalVid.classList.remove('hidden');
-            if (modalTitle) modalTitle.textContent = `Video Preview: ${item.file ? item.file.name : 'Existing Video'}`;
+        if (currentItem.type === 'image') {
+            if (vid) { vid.classList.add('hidden'); vid.pause(); }
+            if (img) { img.src = currentItem.url; img.classList.remove('hidden'); }
         } else {
-            modalVid.classList.add('hidden');
-            modalVid.pause();
-            modalImg.src = src;
-            modalImg.classList.remove('hidden');
-            if (modalTitle) modalTitle.textContent = `Image Preview: ${item.file ? item.file.name : 'Existing Image'}`;
+            if (img) img.classList.add('hidden');
+            if (vid) { vid.src = currentItem.url; vid.classList.remove('hidden'); }
         }
 
+        if (badge) {
+            const icon = currentItem.type === 'image' ? '<i class="fas fa-image text-emerald-400 mr-1.5"></i>' : '<i class="fas fa-film text-amber-400 mr-1.5"></i>';
+            badge.innerHTML = `${icon}<span>${currentItem.type.toUpperCase()} (${currentSlide + 1}/${mediaItems.length})</span>`;
+        }
+
+        if (infoEl) {
+            if (currentItem.isExisting) {
+                infoEl.textContent = `${currentItem.name} (Attached Media)`;
+            } else {
+                const sizeMB = (currentItem.size / (1024 * 1024)).toFixed(1);
+                const durText = currentItem.duration ? ` • ${Math.round(currentItem.duration)}s clip` : '';
+                infoEl.textContent = `${currentItem.name} (${sizeMB} MB${durText})`;
+            }
+        }
+
+        if (mediaItems.length > 1) {
+            if (prevBtn) prevBtn.classList.remove('hidden');
+            if (nextBtn) nextBtn.classList.remove('hidden');
+        } else {
+            if (prevBtn) prevBtn.classList.add('hidden');
+            if (nextBtn) nextBtn.classList.add('hidden');
+        }
+
+        if (dotsContainer) {
+            if (mediaItems.length > 1) {
+                dotsContainer.innerHTML = mediaItems.map((_, idx) => `
+                    <button type="button" onclick="goToSlide(${idx}, event)" class="h-2 rounded-full transition-all cursor-pointer ${idx === currentSlide ? 'bg-pnp-blue dark:bg-pnp-gold w-6' : 'bg-gray-300 dark:bg-slate-700 hover:bg-gray-400 w-2'}" title="Slide ${idx + 1}"></button>
+                `).join('');
+                dotsContainer.classList.remove('hidden');
+            } else {
+                dotsContainer.innerHTML = '';
+                dotsContainer.classList.add('hidden');
+            }
+        }
+
+        if (addBtnText) {
+            if (mediaItems.length >= 10) {
+                addBtnText.textContent = 'Limit Reached (10/10 Files)';
+                if (addBtn) addBtn.disabled = true;
+            } else {
+                addBtnText.textContent = `Add Media (${mediaItems.length}/10)`;
+                if (addBtn) addBtn.disabled = false;
+            }
+        }
+
+        renderThumbnailsStrip();
+    }
+
+    // Render Inline Thumbnails Strip under carousel
+    function renderThumbnailsStrip() {
+        const strip = document.getElementById('thumbnailsStrip');
+        if (!strip) return;
+
+        if (mediaItems.length === 0) {
+            strip.innerHTML = '';
+            strip.classList.add('hidden');
+            return;
+        }
+
+        strip.classList.remove('hidden');
+        strip.innerHTML = mediaItems.map((item, idx) => `
+            <div onclick="goToSlide(${idx}, event)" class="relative shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer transition-all duration-200 group ${idx === currentSlide ? 'border-pnp-blue ring-2 ring-pnp-blue/30 scale-105' : 'border-gray-200 dark:border-slate-700 opacity-70 hover:opacity-100'}">
+                ${item.type === 'image' 
+                    ? `<img src="${item.url}" class="w-full h-full object-cover">` 
+                    : `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-play text-[10px]"></i></div>`}
+                <button type="button" onclick="removeMediaGalleryItem(${idx}, event)" class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-600 hover:bg-red-700 text-white rounded text-[8px] flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition" title="Delete file">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <span class="absolute bottom-0.5 left-0.5 px-1 py-0.2 bg-black/70 text-white text-[7px] font-bold uppercase rounded">
+                    ${idx + 1}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    function trashCurrentMediaItem(e) {
+        if (e) e.stopPropagation();
+        if (mediaItems.length === 0) return;
+
+        const removed = mediaItems[currentSlide];
+        if (removed && removed.url && !removed.isExisting && String(removed.url).startsWith('blob:')) {
+            URL.revokeObjectURL(removed.url);
+        }
+
+        mediaItems.splice(currentSlide, 1);
+        if (currentSlide >= mediaItems.length) {
+            currentSlide = Math.max(0, mediaItems.length - 1);
+        }
+
+        syncMediaInputs();
+        renderCarousel();
+        renderMediaGalleryGrid();
+        updateValidationState();
+    }
+
+    function removeMediaGalleryItem(idx, e) {
+        if (e) e.stopPropagation();
+        if (idx < 0 || idx >= mediaItems.length) return;
+
+        const removed = mediaItems[idx];
+        if (removed && removed.url && !removed.isExisting && String(removed.url).startsWith('blob:')) {
+            URL.revokeObjectURL(removed.url);
+        }
+
+        mediaItems.splice(idx, 1);
+        if (currentSlide >= mediaItems.length) {
+            currentSlide = Math.max(0, mediaItems.length - 1);
+        }
+
+        syncMediaInputs();
+        renderCarousel();
+        renderMediaGalleryGrid();
+        updateValidationState();
+    }
+
+    function navigateCarousel(dir, e) {
+        if (e) e.stopPropagation();
+        if (mediaItems.length <= 1) return;
+        currentSlide = (currentSlide + dir + mediaItems.length) % mediaItems.length;
+        renderCarousel();
+    }
+
+    function goToSlide(idx, e) {
+        if (e) e.stopPropagation();
+        currentSlide = idx;
+        renderCarousel();
+    }
+
+    function clearAllMedia() {
+        mediaItems.forEach(item => {
+            if (item.url && !item.isExisting && String(item.url).startsWith('blob:')) {
+                URL.revokeObjectURL(item.url);
+            }
+        });
+        mediaItems = [];
+        currentSlide = 0;
+
+        const photosInput = document.getElementById('photosInput');
+        const videosInput = document.getElementById('videosInput');
+        const mediaInput = document.getElementById('mediaFileInput');
+        const existingPhotosInput = document.getElementById('existing_photos_input');
+        const existingVideosInput = document.getElementById('existing_videos_input');
+
+        if (photosInput) photosInput.value = '';
+        if (videosInput) videosInput.value = '';
+        if (mediaInput) mediaInput.value = '';
+        if (existingPhotosInput) existingPhotosInput.value = '[]';
+        if (existingVideosInput) existingVideosInput.value = '[]';
+
+        renderCarousel();
+        renderMediaGalleryGrid();
+        updateValidationState();
+        closeMediaGalleryModal();
+    }
+
+    // Media Gallery Modal functions (View all pictures & videos in one container)
+    function openMediaGalleryModal() {
+        const modal = document.getElementById('mediaGalleryModal');
+        if (!modal) return;
+        renderMediaGalleryGrid();
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
 
-    function closeMediaModal() {
-        const modal = document.getElementById('mediaModal');
-        const modalVid = document.getElementById('modalVideo');
+    function closeMediaGalleryModal() {
+        const modal = document.getElementById('mediaGalleryModal');
         if (modal) {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
-        }
-        if (modalVid) {
-            modalVid.pause();
-            modalVid.src = '';
-        }
-        currentActiveModalItem = null;
-    }
-
-    function removeCurrentModalMedia() {
-        if (currentActiveModalItem) {
-            const itemToRemove = currentActiveModalItem;
-            closeMediaModal();
-            removeMediaItem(itemToRemove);
-            renderMediaGalleryGrid();
-        }
-    }
-
-    function openMediaGalleryModal() {
-        const galleryModal = document.getElementById('mediaGalleryModal');
-        if (!galleryModal) return;
-        renderMediaGalleryGrid();
-        galleryModal.classList.remove('hidden');
-        galleryModal.classList.add('flex');
-    }
-
-    function closeMediaGalleryModal() {
-        const galleryModal = document.getElementById('mediaGalleryModal');
-        if (galleryModal) {
-            galleryModal.classList.add('hidden');
-            galleryModal.classList.remove('flex');
         }
     }
 
     function renderMediaGalleryGrid() {
         const grid = document.getElementById('mediaGalleryGrid');
         const countText = document.getElementById('mediaGalleryCount');
-        const viewGalleryBtnText = document.getElementById('viewGalleryBtnText');
         if (!grid) return;
 
-        // Build list of all current items
-        const itemsToRender = [];
-        existingMedia.forEach((item, index) => {
-            itemsToRender.push({ type: item.type, src: item.path, isExisting: true, index: index });
-        });
-        accumulatedFiles.forEach((file, index) => {
-            itemsToRender.push({ type: 'image', file: file, isExisting: false, index: index });
-        });
-        accumulatedVideos.forEach((file, index) => {
-            itemsToRender.push({ type: 'video', file: file, isExisting: false, index: index });
-        });
+        if (countText) countText.textContent = `Showing ${mediaItems.length} of 10 attached files`;
 
-        if (countText) countText.textContent = `Showing ${itemsToRender.length} attached files`;
-        if (viewGalleryBtnText) viewGalleryBtnText.textContent = `Manage Uploaded Media (${itemsToRender.length})`;
-
-        const viewGalleryBtn = document.getElementById('viewGalleryBtn');
-        if (viewGalleryBtn) {
-            if (itemsToRender.length > 0) {
-                viewGalleryBtn.classList.remove('hidden');
-            } else {
-                viewGalleryBtn.classList.add('hidden');
-                closeMediaGalleryModal();
-            }
-        }
-
-        validateForm();
-
-        if (itemsToRender.length === 0) {
+        if (mediaItems.length === 0) {
             grid.innerHTML = `
-                <div class="col-span-full py-16 flex flex-col items-center justify-center opacity-40 text-white">
-                    <i class="fas fa-images text-5xl mb-3"></i>
-                    <p class="text-xs font-black uppercase tracking-widest">No Media Files Uploaded Yet</p>
+                <div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                    <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-3xl mb-3">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <p class="text-sm font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">No Media Files Attached</p>
+                    <p class="text-xs mt-1">Upload images or videos to view and manage them here.</p>
+                    <button type="button" onclick="document.getElementById('mediaFileInput').click()" class="mt-4 px-6 py-2.5 bg-pnp-blue hover:bg-blue-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition">
+                        + Add Media Files
+                    </button>
                 </div>
             `;
             return;
         }
 
-        grid.innerHTML = '';
+        grid.innerHTML = mediaItems.map((item, idx) => `
+            <div class="relative group bg-gray-100 dark:bg-slate-950 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-md aspect-square flex flex-col justify-between transition-all hover:shadow-xl">
+                <!-- Thumbnail Area -->
+                <div class="w-full h-full flex items-center justify-center overflow-hidden bg-black/40 cursor-pointer" onclick="openFullscreenMediaByIndex(${idx})">
+                    ${item.type === 'image' 
+                        ? `<img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
+                        : `<video src="${item.url}" class="w-full h-full object-cover"></video>`}
+                </div>
 
-        itemsToRender.forEach((item, idx) => {
-            const isOversized = !item.isExisting && (
-                (item.type === 'image' && item.file && item.file.size > 5 * 1024 * 1024) ||
-                (item.type === 'video' && item.file && item.file.size > 100 * 1024 * 1024)
-            );
+                <!-- TOP BAR OVERLAY: File Number & Trash Button -->
+                <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-20 pointer-events-none">
+                    <span class="pointer-events-auto px-2 py-0.5 bg-slate-950/80 backdrop-blur-md rounded-md text-[9px] font-black uppercase text-white shadow">
+                        #${idx + 1}
+                    </span>
+                    <!-- DELETE BUTTON -->
+                    <button type="button" onclick="removeMediaGalleryItem(${idx}, event)"
+                        class="pointer-events-auto w-8 h-8 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer border border-red-500/30"
+                        title="Delete this file from notice">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
 
-            const card = document.createElement('div');
-            card.className = `relative group bg-slate-950 rounded-2xl overflow-hidden shadow-lg aspect-square flex items-center justify-center transition-all ${
-                isOversized 
-                ? 'border-4 border-red-500 ring-4 ring-red-500/30' 
-                : 'border border-white/10'
-            }`;
+                <!-- BOTTOM BAR OVERLAY: Info & Type Badge -->
+                <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center z-20 pointer-events-none">
+                    <span class="pointer-events-auto px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider ${item.type === 'image' ? 'bg-emerald-500/90 text-white' : 'bg-amber-500/90 text-white'} shadow">
+                        <i class="${item.type === 'image' ? 'fas fa-image' : 'fas fa-film'} mr-1"></i>${item.type}
+                    </span>
+                    <span class="pointer-events-auto px-2 py-0.5 bg-black/70 backdrop-blur-md rounded-md text-[8px] font-bold text-slate-300 truncate max-w-[90px] shadow">
+                        ${item.isExisting ? 'Saved' : (item.size ? (item.size / (1024*1024)).toFixed(1) + 'MB' : '')}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    }
 
-            // Delete trashbin button on top-right of each image/video
-            const delBtn = document.createElement('button');
-            delBtn.type = 'button';
-            delBtn.className = 'absolute top-3 right-3 z-30 bg-red-500 hover:bg-red-600 text-white w-9 h-9 rounded-xl flex items-center justify-center transition shadow-xl border border-white/20';
-            delBtn.innerHTML = '<i class="fas fa-trash-alt text-xs"></i>';
-            delBtn.title = 'Delete this file';
-            delBtn.onclick = (e) => {
-                e.stopPropagation();
-                removeMediaItem(item);
-            };
+    function openFullscreenMediaByIndex(idx) {
+        if (idx < 0 || idx >= mediaItems.length) return;
+        const item = mediaItems[idx];
+        if (item.type === 'image') {
+            const modal = document.getElementById('fullscreenMediaModal');
+            const img = document.getElementById('fullscreenImg');
+            const title = document.getElementById('fullscreenMediaTitle');
+            if (img) img.src = item.url;
+            if (title) title.textContent = `Image Preview: ${item.name}`;
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        } else {
+            goToSlide(idx);
+            closeMediaGalleryModal();
+        }
+    }
 
-            const typeBadge = document.createElement('span');
-            typeBadge.className = 'absolute bottom-3 left-3 z-30 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-lg text-[9px] font-black uppercase tracking-widest text-white border border-white/10';
-            typeBadge.textContent = item.type === 'video' ? 'Video' : 'Picture';
+    // Fullscreen enlarged viewer
+    function openFullscreenMedia() {
+        if (mediaItems.length === 0) return;
+        const currentItem = mediaItems[currentSlide];
+        if (currentItem.type !== 'image') return;
 
-            let warningBadge = null;
-            if (isOversized) {
-                const limitText = item.type === 'image' ? '4MB' : '4MB';
-                const actualSize = item.file ? (item.file.size / (1024 * 1024)).toFixed(1) : '?';
-                warningBadge = document.createElement('div');
-                warningBadge.className = 'absolute inset-x-2 top-3 z-20 mr-12 bg-red-600/90 text-white px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider flex items-center space-x-1 shadow-lg border border-red-400';
-                warningBadge.innerHTML = `<i class="fas fa-exclamation-circle text-xs"></i><span>EXCEEDS PAYLOAD (${actualSize}MB / ${limitText})</span>`;
+        const modal = document.getElementById('fullscreenMediaModal');
+        const img = document.getElementById('fullscreenImg');
+        const title = document.getElementById('fullscreenMediaTitle');
+
+        if (img) img.src = currentItem.url;
+        if (title) title.textContent = `Image Preview: ${currentItem.name}`;
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    }
+
+    function closeFullscreenMedia() {
+        const modal = document.getElementById('fullscreenMediaModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    // Facebook URL Input & Embed Rendering
+    function handleFacebookUrlInput(url) {
+        const previewBox = document.getElementById('fbUrlPreviewBox');
+        const iframeContainer = document.getElementById('fbIframeContainer');
+        const urlTitleInput = document.getElementById('urlTitleInput');
+        const errorEl = document.getElementById('facebookUrlError');
+
+        if (!url || !url.trim() || (!url.includes('facebook.com') && !url.includes('fb.watch') && !url.includes('fb.me'))) {
+            if (previewBox) previewBox.classList.add('hidden');
+            return;
+        }
+
+        const cleanUrl = url.trim();
+        const isVideo = /video|watch|reel/i.test(cleanUrl);
+        const pluginType = isVideo ? 'video.php' : 'post.php';
+        const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(cleanUrl)}&show_text=true&width=500`;
+
+        if (iframeContainer) {
+            iframeContainer.innerHTML = `<iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:320px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full rounded-xl"></iframe>`;
+        }
+
+        if (previewBox) previewBox.classList.remove('hidden');
+        if (errorEl) errorEl.classList.add('hidden');
+
+        // Suggest title if currently empty
+        if (urlTitleInput && !urlTitleInput.value.trim()) {
+            urlTitleInput.value = 'Official PNP Facebook Advisory Update';
+        }
+    }
+
+    // Real-Time Counters & Validation
+    function updateValidationState() {
+        const isUrl = currentPublishType === 'url';
+
+        const titleInput = isUrl ? document.getElementById('urlTitleInput') : document.getElementById('titleInput');
+        const bodyInput = document.getElementById('bodyInput');
+        const urlBodyInput = document.getElementById('urlBodyInput');
+        const fbUrlInput = document.getElementById('facebookUrlInput');
+
+        const titleCounter = isUrl ? document.getElementById('urlTitleCounter') : document.getElementById('titleCounter');
+        const bodyCounter = document.getElementById('bodyCounter');
+        const urlBodyCounter = document.getElementById('urlBodyCounter');
+
+        const titleError = isUrl ? document.getElementById('urlTitleError') : document.getElementById('titleError');
+        const bodyError = document.getElementById('bodyError');
+        const fbUrlError = document.getElementById('facebookUrlError');
+
+        const errorCard = document.getElementById('errorDetectorCard');
+        const errorIconContainer = document.getElementById('errorDetectorIconContainer');
+        const errorIcon = document.getElementById('errorDetectorIcon');
+        const errorBadge = document.getElementById('errorDetectorStatusBadge');
+        const errorText = document.getElementById('errorDetectorText');
+        const submitBtn = document.getElementById('submitBulletinBtn');
+
+        let validationErrorMessage = '';
+
+        // 1. Validate Title
+        const titleVal = titleInput ? titleInput.value.trim() : '';
+        const titleWords = titleVal.split(/\s+/).filter(Boolean);
+        const titleChars = titleVal.length;
+
+        if (titleCounter) {
+            titleCounter.textContent = `${titleChars} / 100 letters`;
+        }
+
+        if (titleChars === 0) {
+            if (titleError) {
+                titleError.textContent = 'Bulletin title is required (at least 3 words required).';
+                titleError.classList.remove('hidden');
+            }
+            if (titleInput) {
+                titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+                titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+            }
+            if (titleCounter) {
+                titleCounter.classList.add('text-red-500');
+                titleCounter.classList.remove('text-emerald-500', 'text-slate-400');
+            }
+            validationErrorMessage = 'Please enter a bulletin title (at least 3 words required).';
+        } else if (titleWords.length < 3) {
+            if (titleError) {
+                titleError.textContent = `Validation Error: Title must be at least 3 words long (currently ${titleWords.length} words / ${titleChars} characters).`;
+                titleError.classList.remove('hidden');
+            }
+            if (titleInput) {
+                titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+                titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+            }
+            if (titleCounter) {
+                titleCounter.classList.add('text-red-500');
+                titleCounter.classList.remove('text-emerald-500', 'text-slate-400');
+            }
+            validationErrorMessage = `Title must be at least 3 words long (currently: ${titleWords.length} words).`;
+        } else if (titleChars > 100 || titleWords.length > 15) {
+            if (titleError) {
+                titleError.textContent = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleChars} characters).`;
+                titleError.classList.remove('hidden');
+            }
+            if (titleInput) {
+                titleInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+                titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+            }
+            if (titleCounter) {
+                titleCounter.classList.add('text-red-500');
+                titleCounter.classList.remove('text-emerald-500', 'text-slate-400');
+            }
+            validationErrorMessage = `Title is too long (maximum 15 words / 100 characters).`;
+        } else {
+            if (titleError) titleError.classList.add('hidden');
+            if (titleInput) {
+                titleInput.classList.remove('border-red-500', 'ring-red-500/20');
+                titleInput.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/20');
+            }
+            if (titleCounter) {
+                titleCounter.classList.remove('text-red-500', 'text-slate-400');
+                titleCounter.classList.add('text-emerald-500');
+            }
+        }
+
+        // 2. Validate Body / Content (for Advisory / News)
+        if (!isUrl) {
+            const bodyVal = bodyInput ? bodyInput.value.trim() : '';
+            const bodyWords = bodyVal.split(/\s+/).filter(Boolean);
+            const bodyChars = bodyVal.length;
+
+            if (bodyCounter) {
+                bodyCounter.textContent = `${bodyChars} / 5,000 letters`;
             }
 
-            const mediaUrl = item.isExisting ? item.src : URL.createObjectURL(item.file);
-
-            if (item.type === 'image') {
-                const img = document.createElement('img');
-                img.src = mediaUrl;
-                img.className = 'w-full h-full object-cover cursor-pointer group-hover:scale-105 transition duration-300';
-                img.onclick = () => openMediaModal(item, mediaUrl);
-                card.appendChild(img);
+            if (bodyChars === 0) {
+                if (bodyError) {
+                    bodyError.textContent = 'Description content is required (at least 5 words / 15 characters).';
+                    bodyError.classList.remove('hidden');
+                }
+                if (bodyInput) {
+                    bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+                    bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+                }
+                if (bodyCounter) {
+                    bodyCounter.classList.add('text-red-500');
+                    bodyCounter.classList.remove('text-emerald-500', 'text-slate-400');
+                }
+                if (!validationErrorMessage) validationErrorMessage = 'Description body content is required (at least 5 words required).';
+            } else if (bodyWords.length < 5 || bodyChars < 15) {
+                if (bodyError) {
+                    bodyError.textContent = `Validation Error: Description must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyChars} characters).`;
+                    bodyError.classList.remove('hidden');
+                }
+                if (bodyInput) {
+                    bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+                    bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+                }
+                if (bodyCounter) {
+                    bodyCounter.classList.add('text-red-500');
+                    bodyCounter.classList.remove('text-emerald-500', 'text-slate-400');
+                }
+                if (!validationErrorMessage) validationErrorMessage = `Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words).`;
+            } else if (bodyWords.length > 500 || bodyChars > 5000) {
+                if (bodyError) {
+                    bodyError.textContent = `Validation Error: Description exceeds 500 words / 5,000 characters limit (currently: ${bodyWords.length} words / ${bodyChars} characters).`;
+                    bodyError.classList.remove('hidden');
+                }
+                if (bodyInput) {
+                    bodyInput.classList.add('border-red-500', 'ring-2', 'ring-red-500/20');
+                    bodyInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
+                }
+                if (bodyCounter) {
+                    bodyCounter.classList.add('text-red-500');
+                    bodyCounter.classList.remove('text-emerald-500', 'text-slate-400');
+                }
+                if (!validationErrorMessage) validationErrorMessage = `Bulletin body is too long (maximum 500 words / 5,000 characters).`;
             } else {
-                const video = document.createElement('video');
-                video.src = mediaUrl;
-                video.className = 'w-full h-full object-cover cursor-pointer';
-                video.onclick = () => openMediaModal(item, mediaUrl);
-                card.appendChild(video);
+                if (bodyError) bodyError.classList.add('hidden');
+                if (bodyInput) {
+                    bodyInput.classList.remove('border-red-500', 'ring-red-500/20');
+                    bodyInput.classList.add('border-emerald-500', 'ring-2', 'ring-emerald-500/20');
+                }
+                if (bodyCounter) {
+                    bodyCounter.classList.remove('text-red-500', 'text-slate-400');
+                    bodyCounter.classList.add('text-emerald-500');
+                }
             }
-            card.appendChild(delBtn);
-            card.appendChild(typeBadge);
-            if (warningBadge) card.appendChild(warningBadge);
-            grid.appendChild(card);
-        });
-    }
 
-    const mediaModal = document.getElementById('mediaModal');
-    if (mediaModal) {
-        mediaModal.addEventListener('click', (e) => {
-            if (e.target === mediaModal) {
-                closeMediaModal();
+            // Media attachment requirement for advisory / news
+            if (mediaItems.length === 0) {
+                if (!validationErrorMessage) validationErrorMessage = 'At least 1 photo or video must be attached to the bulletin.';
+            } else if (mediaItems.length > 10) {
+                if (!validationErrorMessage) validationErrorMessage = `Maximum limit exceeded: You have ${mediaItems.length} files attached (limit is 10).`;
             }
-        });
-    }
+        } else {
+            // URL Post Validation
+            const rawFbUrl = fbUrlInput ? (fbUrlInput.value || '').trim() : '';
+            const isValidFbUrl = rawFbUrl.length > 0 && /^(https?:\/\/)?(www\.|m\.|web\.)?(facebook\.com|fb\.watch|fb\.me|fb\.gg)\/.+/i.test(rawFbUrl);
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "Escape") {
-            closeMediaModal();
+            if (urlBodyCounter && urlBodyInput) {
+                urlBodyCounter.textContent = `${urlBodyInput.value.length} / 5,000 letters`;
+            }
+
+            if (!rawFbUrl) {
+                if (fbUrlError) {
+                    fbUrlError.textContent = 'Facebook Post URL is required for URL Post format.';
+                    fbUrlError.classList.remove('hidden');
+                }
+                if (!validationErrorMessage) validationErrorMessage = 'Facebook Post URL link is required.';
+            } else if (!isValidFbUrl) {
+                if (fbUrlError) {
+                    fbUrlError.textContent = 'Invalid Facebook URL format. Please provide a valid Facebook post/video link (e.g. https://www.facebook.com/...).';
+                    fbUrlError.classList.remove('hidden');
+                }
+                if (!validationErrorMessage) validationErrorMessage = 'Invalid Facebook URL format. Must be a valid Facebook post or video URL.';
+            } else {
+                if (fbUrlError) fbUrlError.classList.add('hidden');
+            }
         }
-    });
 
-    function syncPanels() {
-        const rightPanel = document.getElementById('rightPanel');
-        const leftPanel = document.getElementById('leftPanel');
-        const dropZone = document.getElementById('dropZone');
-
-        if (!rightPanel || !leftPanel || !dropZone) return;
-
-        requestAnimationFrame(() => {
-            const rightHeight = rightPanel.offsetHeight;
-            if (rightHeight > 0) {
-                leftPanel.style.minHeight = rightHeight + "px";
+        // Update Error Detector Card UI
+        if (validationErrorMessage) {
+            if (errorCard) errorCard.className = 'w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300';
+            if (errorIconContainer) errorIconContainer.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-red-500 text-white shadow-md animate-pulse';
+            if (errorIcon) errorIcon.className = 'fas fa-exclamation-triangle';
+            if (errorBadge) {
+                errorBadge.textContent = isEditMode ? 'UPDATE BLOCKED' : 'POST BLOCKED';
+                errorBadge.className = 'text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-red-500 text-white shadow-sm';
             }
-        });
+            if (errorText) errorText.textContent = validationErrorMessage;
+            return false;
+        } else {
+            if (errorCard) errorCard.className = 'w-full md:w-auto flex-1 p-4 rounded-2xl transition-all duration-300 flex items-center space-x-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-200';
+            if (errorIconContainer) errorIconContainer.className = 'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-lg bg-emerald-500 text-white shadow-md';
+            if (errorIcon) errorIcon.className = 'fas fa-check-circle';
+            if (errorBadge) {
+                errorBadge.textContent = isEditMode ? 'READY TO UPDATE' : 'READY TO POST';
+                errorBadge.className = 'text-[9px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm';
+            }
+            if (errorText) errorText.textContent = 'All parameters verified and compliant. Ready to submit.';
+            return true;
+        }
     }
 
-    window.addEventListener('load', () => {
-        syncPanels();
-        setTimeout(syncPanels, 500);
-    });
-    window.addEventListener('resize', syncPanels);
+    // Submit & Confirmation Modal
+    function handleBulletinFormSubmit(event) {
+        event.preventDefault();
+        const isValid = updateValidationState();
+        if (!isValid) {
+            const activeError = document.getElementById('errorDetectorText')?.textContent || 'Please correct validation errors before submitting.';
+            alert('Submission Blocked:\n' + activeError);
+            return false;
+        }
 
-    // Auto-save form draft to localStorage to prevent data loss on refresh
-    const DRAFT_KEY = 'bulletin_form_draft_<%= bulletin ? bulletin.id : "new" %>';
+        // Prepare data for confirmation dialog
+        const isUrl = currentPublishType === 'url';
+        const titleInput = isUrl ? document.getElementById('urlTitleInput') : document.getElementById('titleInput');
+        const advisorySelect = document.getElementById('categorySelectAdvisory');
+        const titleVal = titleInput ? titleInput.value.trim() : '';
 
-    function saveFormDraft() {
-        const titleInput = document.getElementById('title');
-        const bodyInput = document.getElementById('body');
-        const categorySelect = document.getElementById('category');
+        // If URL mode, sync title and body inputs
+        if (isUrl) {
+            const urlTitle = document.getElementById('urlTitleInput')?.value.trim() || '';
+            const urlBody = document.getElementById('urlBodyInput')?.value.trim() || '';
+            const mainTitle = document.getElementById('titleInput');
+            const mainBody = document.getElementById('bodyInput');
+            if (mainTitle) mainTitle.value = urlTitle;
+            if (mainBody) mainBody.value = urlBody;
+        }
 
-        if (!titleInput || !bodyInput) return;
-
-        const draftData = {
-            title: titleInput.value || '',
-            body: bodyInput.value || '',
-            category: categorySelect ? categorySelect.value : ''
+        const typeLabels = {
+            'advisory': 'Public Advisory',
+            'news': 'News & Release',
+            'url': 'Facebook URL Post'
         };
-        try {
-            localStorage.setItem(DRAFT_KEY, JSON.stringify(draftData));
-        } catch (e) {}
+
+        const categoryVal = (currentPublishType === 'news' || currentPublishType === 'url') 
+            ? 'General Announcement' 
+            : (advisorySelect ? advisorySelect.value : 'Public Advisory');
+
+        const mediaSummary = isUrl 
+            ? 'Facebook URL Import (Live Embed)' 
+            : `${mediaItems.length} file(s) attached (${mediaItems.filter(i => i.type === 'image').length} photo(s), ${mediaItems.filter(i => i.type === 'video').length} video(s))`;
+
+        document.getElementById('confirmModalTitle').textContent = titleVal;
+        document.getElementById('confirmModalType').textContent = typeLabels[currentPublishType] || currentPublishType;
+        document.getElementById('confirmModalCategory').textContent = categoryVal;
+        document.getElementById('confirmModalMedia').textContent = mediaSummary;
+
+        openUpdateConfirmationModal();
+        return false;
     }
 
-    function restoreFormDraft() {
-        try {
-            const saved = localStorage.getItem(DRAFT_KEY);
-            if (!saved) return;
-            const draft = JSON.parse(saved);
-
-            const titleInput = document.getElementById('title');
-            const bodyInput = document.getElementById('body');
-            const categorySelect = document.getElementById('category');
-
-            const isEdit = <%= bulletin ? 'true' : 'false' %>;
-
-            // Only restore if fields are currently empty (or new creation)
-            if (!isEdit && titleInput && !titleInput.value && draft.title) {
-                titleInput.value = draft.title;
-            }
-            if (!isEdit && bodyInput && !bodyInput.value && draft.body) {
-                bodyInput.value = draft.body;
-            }
-            if (!isEdit && categorySelect && !categorySelect.value && draft.category) {
-                categorySelect.value = draft.category;
-            }
-        } catch (e) {}
+    function openUpdateConfirmationModal() {
+        const modal = document.getElementById('updateConfirmModal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.firstElementChild.classList.remove('scale-95');
+            modal.firstElementChild.classList.add('scale-100');
+        }, 20);
     }
 
-    function clearFormDraft() {
-        try {
-            localStorage.removeItem(DRAFT_KEY);
-        } catch (e) {}
+    function closeUpdateConfirmationModal() {
+        const modal = document.getElementById('updateConfirmModal');
+        if (!modal) return;
+        modal.classList.add('opacity-0');
+        modal.firstElementChild.classList.remove('scale-100');
+        modal.firstElementChild.classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
     }
 
-    // Real-time input listeners for automatic validation & draft saving
-    document.addEventListener('DOMContentLoaded', () => {
-        const titleInput = document.getElementById('title');
-        const bodyInput = document.getElementById('body');
-        const categorySelect = document.getElementById('category');
+    function executeFinalSubmit() {
+        const btn = document.getElementById('finalConfirmBtn');
+        const btnText = document.getElementById('finalConfirmBtnText');
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${isEditMode ? 'Updating...' : 'Publishing...'}`;
 
-        restoreFormDraft();
+        document.getElementById('bulletinForm').submit();
+    }
 
-        if (titleInput) {
-            titleInput.addEventListener('input', () => { validateForm(); saveFormDraft(); });
-            titleInput.addEventListener('keyup', () => { validateForm(); saveFormDraft(); });
+    // Keyboard & Escape listeners
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeFullscreenMedia();
+            closeMediaGalleryModal();
+            closeUpdateConfirmationModal();
         }
-        if (bodyInput) {
-            bodyInput.addEventListener('input', () => { validateForm(); saveFormDraft(); });
-            bodyInput.addEventListener('keyup', () => { validateForm(); saveFormDraft(); });
-        }
-        if (categorySelect) {
-            categorySelect.addEventListener('change', () => { validateForm(); saveFormDraft(); });
-        }
-        const fbUrlInput = document.getElementById('facebook_url');
-        if (fbUrlInput) {
-            fbUrlInput.addEventListener('input', () => { validateForm(); saveFormDraft(); });
-            fbUrlInput.addEventListener('keyup', () => { validateForm(); saveFormDraft(); });
-            fbUrlInput.addEventListener('change', () => { validateForm(); saveFormDraft(); });
-        }
-
-        validateForm();
     });
 
-    // Clear draft on successful form submit
-    const bulletinForm = document.getElementById('bulletinForm');
-    if (bulletinForm) {
-        bulletinForm.addEventListener('submit', () => {
-            clearFormDraft();
-        });
-    }
+    // Auto-initialize on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const detectedType = detectInitialType();
+        switchPublicationType(detectedType);
+        syncMediaInputs();
+        renderCarousel();
+        renderMediaGalleryGrid();
+        updateValidationState();
 
-    // Initial load
-    renderAllMedia();
-
+        if (detectedType === 'url' && initialFbUrl) {
+            handleFacebookUrlInput(initialFbUrl);
+        }
+    });
 </script>

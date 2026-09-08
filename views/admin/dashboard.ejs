@@ -223,19 +223,11 @@
                         <% }) %>
                     </select>
                 </div>
-                <!-- Open Full Strategic Modal Button -->
-                <button onclick="openCrimeTrendModal()" class="px-3 py-2 bg-pnp-blue/10 dark:bg-pnp-gold/20 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-pnp-blue dark:text-pnp-gold rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shrink-0 shadow-xs group/btn cursor-pointer" title="Open Full Screen Trend & Suggestions Modal">
-                    <i class="fas fa-expand-alt text-xs group-hover/btn:scale-110 transition-transform"></i>
-                    <span class="hidden md:inline">Modal View</span>
-                </button>
             </div>
             </div>
-            <div class="relative h-[240px] w-full mb-0 group/chart cursor-pointer" ondblclick="openCrimeTrendModal()" title="Double-click to open full analysis modal">
+            <!-- Clickable Bar Graph Container: Opens full modal on click without redundant buttons -->
+            <div id="bargraphMainContainer" onclick="openCrimeTrendModal()" class="relative h-[250px] w-full mb-0 rounded-2xl bg-gray-50/50 dark:bg-slate-900/30 p-2 cursor-pointer transition-all duration-200 hover:bg-pnp-blue/[0.03] dark:hover:bg-pnp-gold/[0.03] border border-dashed border-transparent hover:border-pnp-blue/20 dark:hover:border-pnp-gold/20 group/chart select-none" title="Click anywhere on graph to open full analysis modal">
                 <canvas id="crimeTrendChart"></canvas>
-                <button onclick="openCrimeTrendModal()" class="absolute top-2 right-2 opacity-0 group-hover/chart:opacity-100 transition-opacity bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold border border-pnp-blue/20 dark:border-pnp-gold/30 shadow-md flex items-center gap-1">
-                    <i class="fas fa-up-right-and-down-left-from-center text-[8px]"></i>
-                    <span>Expand Modal</span>
-                </button>
             </div>
         </div>
 
@@ -245,11 +237,7 @@
                 <span class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.12em]">
                     Trend and Pattern Analysis
                 </span>
-                <div class="flex items-center gap-1.5">
-                    <button onclick="openCrimeTrendModal()" class="px-2 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center gap-1 text-[9px] font-black uppercase tracking-wider cursor-pointer" title="Open Full Analysis Modal">
-                        <i class="fas fa-up-right-from-square text-[8px]"></i>
-                        <span>Modal</span>
-                    </button>
+                <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
                     <button onclick="generateAITrends()" id="aiGenerateBtn" class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700/50 text-pnp-blue hover:text-pnp-blue/80 dark:text-pnp-gold dark:hover:text-pnp-gold-300 transition-colors flex items-center justify-center w-6 h-6 shrink-0 cursor-pointer" title="Refresh Analysis">
                         <i class="fas fa-sync-alt text-[11px]"></i>
                     </button>
@@ -315,6 +303,30 @@
 <script>
     let distChart;
     const points = <%- JSON.stringify(safePoints) %>;
+    const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // High-performance incident pre-indexing for instantaneous filtering
+    const preprocessedPoints = points.map(p => {
+        const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+        let yr = -1;
+        let mo = -1;
+        if (rawDate) {
+            const d = new Date(rawDate);
+            if (!isNaN(d.getTime())) {
+                yr = d.getUTCFullYear();
+                mo = d.getUTCMonth();
+            }
+        }
+        return {
+            p,
+            year: yr,
+            month: mo,
+            barangay: p.barangay || '',
+            category: p.category || 'Non-Index',
+            incident_type: String(p.incident_type || p.offense || 'Unknown').trim().toUpperCase(),
+            isScanned: p.entry_type === 'scanned'
+        };
+    });
 
     const allColors = {
         'Murder': '#EF4444', 'Homicide': '#F87171', 'Physical Injuries': '#10B981', 'Rape': '#A855F7', 'Carnapping (Motorcycle)': '#F59E0B',
@@ -448,32 +460,14 @@
         // Logic to filter the dashboard or open map with filter
         window.location.href = `/admin/map?category=${category}`;
     };
-    function updateDistributionChart(selectedYear) {
+    function updateDistributionChartFromCounts(counts, selectedYear) {
         const ctx = document.getElementById('crimeDistributionChart').getContext('2d');
         const listContainer = document.getElementById('topSectorsList');
         
-        if (!selectedYear) {
-            const yrDropdown = document.getElementById('monthlyTrendYearFilter');
-            selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
-        }
-
         const subtitleEl = document.getElementById('distributionSubtitle');
         if (subtitleEl) {
             subtitleEl.textContent = `Top 5 Crime Distribution (${selectedYear})`;
         }
-
-        const filteredPoints = points.filter(p => {
-            const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
-            if (!rawDate) return false;
-            const d = new Date(rawDate);
-            return d.getUTCFullYear() === selectedYear;
-        });
-        
-        const counts = {};
-        filteredPoints.forEach(p => {
-            const sector = p.barangay || 'Unknown';
-            counts[sector] = (counts[sector] || 0) + 1;
-        });
 
         // Sorted sectors - Top 5 only
         const sortedSectors = Object.entries(counts)
@@ -504,7 +498,13 @@
             `;
         }).join('') || '<p class="text-[8px] text-center text-gray-400 font-bold uppercase italic py-4">No tactical data acquired</p>';
 
-        if (distChart) distChart.destroy();
+        if (distChart) {
+            distChart.data.labels = pieLabels;
+            distChart.data.datasets[0].data = pieData;
+            distChart.data.datasets[0].backgroundColor = pieColors;
+            distChart.update('none');
+            return;
+        }
 
         distChart = new Chart(ctx, {
             type: 'pie',
@@ -520,6 +520,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false,
                 layout: {
                     padding: 4
                 },
@@ -528,6 +529,22 @@
                 }
             }
         });
+    }
+
+    function updateDistributionChart(selectedYear) {
+        if (!selectedYear) {
+            const yrDropdown = document.getElementById('monthlyTrendYearFilter');
+            selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
+        }
+        const counts = {};
+        for (let i = 0; i < preprocessedPoints.length; i++) {
+            const item = preprocessedPoints[i];
+            if (item.year === selectedYear) {
+                const sector = item.barangay || 'Unknown';
+                counts[sector] = (counts[sector] || 0) + 1;
+            }
+        }
+        updateDistributionChartFromCounts(counts, selectedYear);
     }
 
     window.toggleTrendChartDataset = function(categoryIndex) {
@@ -543,7 +560,18 @@
             meta1.hidden = !isHidden ? true : null;
             meta2.hidden = !isHidden ? true : null;
             
-            window.trendChart.update();
+            window.trendChart.update('none');
+
+            // Toggle visual feedback on category card
+            const cardIds = ['card8Focus', 'cardNonIndex', 'cardPSI'];
+            const card = document.getElementById(cardIds[categoryIndex]);
+            if (card) {
+                if (meta1.hidden) {
+                    card.classList.add('opacity-40');
+                } else {
+                    card.classList.remove('opacity-40');
+                }
+            }
         }
     };
 
@@ -627,6 +655,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false, // Instant bar updates
                 layout: {
                     padding: {
                         top: 20,
@@ -639,10 +668,13 @@
                     if (elements.length > 0) {
                         const elementIndex = elements[0].index;
                         const datasetIndex = elements[0].datasetIndex;
-                        const monthLabel = trendsData[elementIndex].month;
+                        const monthLabel = window.trendChart.data.labels[elementIndex];
                         const categoryLabel = (datasetIndex === 0 || datasetIndex === 1) ? '8-Focus' :
                                               ((datasetIndex === 2 || datasetIndex === 3) ? 'Non-Index' : 'PSI');
                         showFeed(monthLabel, categoryLabel);
+                    } else {
+                        // Clicking empty graph space directly opens modal
+                        openCrimeTrendModal();
                     }
                 },
                 plugins: {
@@ -674,130 +706,8 @@
         // Initialize Distribution Chart
         updateDistributionChart(<%= defaultYearVal %>);
 
-        // Define bento details update function
-        window.updateBentoDetails = function(selectedBrgy, selectedYear) {
-            const overallCounts = {};
-            const categoryCounts = {
-                '8-Focus': {},
-                'Non-Index': {},
-                'PSI': {}
-            };
-
-            const filteredPoints = points.filter(p => {
-                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
-                if (!rawDate) return false;
-                if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
-                const d = new Date(rawDate);
-                if (d.getUTCFullYear() !== selectedYear) return false;
-                return true;
-            });
-
-            filteredPoints.forEach(p => {
-                const type = String(p.incident_type || p.offense || 'Unknown').trim().toUpperCase();
-                if (type && type !== 'UNKNOWN') {
-                    // Overall
-                    overallCounts[type] = (overallCounts[type] || 0) + 1;
-                    
-                    // By Category
-                    const cat = p.category || 'Non-Index';
-                    if (categoryCounts[cat]) {
-                        categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
-                    } else {
-                        categoryCounts['Non-Index'][type] = (categoryCounts['Non-Index'][type] || 0) + 1;
-                    }
-                }
-            });
-
-            // Helper to get top item from a counts object
-            function getTop(countsObj) {
-                let topName = 'NONE';
-                let topCount = 0;
-                for (const [name, count] of Object.entries(countsObj)) {
-                    if (count > topCount) {
-                        topCount = count;
-                        topName = name;
-                    }
-                }
-                return { name: topName, count: topCount };
-            }
-
-            const overallTop = getTop(overallCounts);
-            const top8Focus = getTop(categoryCounts['8-Focus']);
-            const topNonIndex = getTop(categoryCounts['Non-Index']);
-            const topPSI = getTop(categoryCounts['PSI']);
-
-            // Use standard trend incident colors: Red, Blue, and Gold!
-            const color8Focus = '#EF4444'; // Red
-            const colorNonIndex = '#3B82F6'; // Blue
-            const colorPSI = '#F59E0B'; // Gold
-
-            // Update DOM safely
-            const setDomSafe = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.textContent = value;
-                    if(el.hasAttribute('title')) el.setAttribute('title', value);
-                }
-            };
-
-            const textAnalysisContainer = document.querySelector('#municipalTextAnalysis p');
-            if (textAnalysisContainer) {
-                const targetLoc = selectedBrgy === 'ALL' ? 'Sta. Cruz, Laguna' : selectedBrgy.toUpperCase();
-                if (overallTop.count > 0) {
-                    textAnalysisContainer.innerHTML = `The most common incident in <span class="font-extrabold text-pnp-blue dark:text-pnp-gold">${targetLoc}</span> is currently <span id="overallTopCrime" class="font-black text-indigo-600 dark:text-indigo-400 uppercase px-1">${overallTop.name}</span> with <span id="overallTopCount" class="font-black text-indigo-600 dark:text-indigo-400">${overallTop.count}</span> recorded occurrences.`;
-                } else {
-                    textAnalysisContainer.innerHTML = `There are no active or recorded incidents currently registered in <span class="font-extrabold text-pnp-blue dark:text-pnp-gold">${targetLoc}</span>.`;
-                }
-            } else {
-                setDomSafe('overallTopCrime', overallTop.name);
-                setDomSafe('overallTopCount', overallTop.count);
-            }
-
-            setDomSafe('top8Focus', top8Focus.name);
-            setDomSafe('count8Focus', top8Focus.count);
-
-            setDomSafe('topNonIndex', topNonIndex.name);
-            setDomSafe('countNonIndex', topNonIndex.count);
-
-            setDomSafe('topPSI', topPSI.name);
-            setDomSafe('countPSI', topPSI.count);
-
-            // Dynamically update total crime count KPI card
-            setDomSafe('kpiTotalCrimes', filteredPoints.length);
-
-            // Dynamically update Trend Cards Left Borders
-            const card8 = document.getElementById('card8Focus');
-            if (card8) card8.style.borderLeftColor = color8Focus;
-            const cardNon = document.getElementById('cardNonIndex');
-            if (cardNon) cardNon.style.borderLeftColor = colorNonIndex;
-            const cardPSI = document.getElementById('cardPSI');
-            if (cardPSI) cardPSI.style.borderLeftColor = colorPSI;
-
-            // Dynamically update card category title text colors to match
-            const label8 = document.getElementById('label8Focus');
-            if (label8) label8.style.color = color8Focus;
-            const labelNon = document.getElementById('labelNonIndex');
-            if (labelNon) labelNon.style.color = colorNonIndex;
-            const labelPSI = document.getElementById('labelPSI');
-            if (labelPSI) labelPSI.style.color = colorPSI;
-
-            // Dynamically update Monthly Trend Chart bar colors based on highest incident colors!
-            if (window.trendChart) {
-                window.trendChart.data.datasets[0].backgroundColor = color8Focus;
-                window.trendChart.data.datasets[1].backgroundColor = color8Focus + '80';
-                window.trendChart.data.datasets[2].backgroundColor = colorNonIndex;
-                window.trendChart.data.datasets[3].backgroundColor = colorNonIndex + '80';
-                window.trendChart.data.datasets[4].backgroundColor = colorPSI;
-                window.trendChart.data.datasets[5].backgroundColor = colorPSI + '80';
-                window.trendChart.update();
-            }
-        };
-
         // Initialize bento details with overall (ALL) data
         window.updateBentoDetails('ALL', <%= defaultYearVal %>);
-
-        // --- Monthly Trend Barangay Filter Initialization ---
-        // (Pre-rendered on server-side using EJS to match map.ejs dropdown)
 
         // Instantly invoke AI Trend diagnostics on load
         if (typeof window.generateAITrends === 'function') {
@@ -805,64 +715,143 @@
         }
     });
 
-    // --- Monthly Crime Trends Filtering Logic ---
+    // High-performance direct bento DOM updates
+    function updateBentoDetailsFromCounts(overallCounts, categoryCounts, totalMatchedCount, selectedBrgy) {
+        function getTop(countsObj) {
+            let topName = 'NONE';
+            let topCount = 0;
+            for (const [name, count] of Object.entries(countsObj)) {
+                if (count > topCount) {
+                    topCount = count;
+                    topName = name;
+                }
+            }
+            return { name: topName, count: topCount };
+        }
+
+        const overallTop = getTop(overallCounts);
+        const top8Focus = getTop(categoryCounts['8-Focus']);
+        const topNonIndex = getTop(categoryCounts['Non-Index']);
+        const topPSI = getTop(categoryCounts['PSI']);
+
+        const setDomSafe = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+                if (el.hasAttribute('title')) el.setAttribute('title', value);
+            }
+        };
+
+        const textAnalysisContainer = document.querySelector('#municipalTextAnalysis p');
+        if (textAnalysisContainer) {
+            const targetLoc = selectedBrgy === 'ALL' ? 'Sta. Cruz, Laguna' : selectedBrgy.toUpperCase();
+            if (overallTop.count > 0) {
+                textAnalysisContainer.innerHTML = `The most common incident in <span class="font-extrabold text-pnp-blue dark:text-pnp-gold">${targetLoc}</span> is currently <span id="overallTopCrime" class="font-black text-indigo-600 dark:text-indigo-400 uppercase px-1">${overallTop.name}</span> with <span id="overallTopCount" class="font-black text-indigo-600 dark:text-indigo-400">${overallTop.count}</span> recorded occurrences.`;
+            } else {
+                textAnalysisContainer.innerHTML = `There are no active or recorded incidents currently registered in <span class="font-extrabold text-pnp-blue dark:text-pnp-gold">${targetLoc}</span>.`;
+            }
+        } else {
+            setDomSafe('overallTopCrime', overallTop.name);
+            setDomSafe('overallTopCount', overallTop.count);
+        }
+
+        setDomSafe('top8Focus', top8Focus.name);
+        setDomSafe('count8Focus', top8Focus.count);
+        setDomSafe('topNonIndex', topNonIndex.name);
+        setDomSafe('countNonIndex', topNonIndex.count);
+        setDomSafe('topPSI', topPSI.name);
+        setDomSafe('countPSI', topPSI.count);
+        setDomSafe('kpiTotalCrimes', totalMatchedCount);
+    }
+
+    // Define bento details update function
+    window.updateBentoDetails = function(selectedBrgy, selectedYear) {
+        const overallCounts = {};
+        const categoryCounts = { '8-Focus': {}, 'Non-Index': {}, 'PSI': {} };
+        let count = 0;
+
+        for (let i = 0; i < preprocessedPoints.length; i++) {
+            const item = preprocessedPoints[i];
+            if (item.year !== selectedYear) continue;
+            if (selectedBrgy !== 'ALL' && item.barangay !== selectedBrgy) continue;
+            count++;
+
+            const type = item.incident_type;
+            if (type && type !== 'UNKNOWN') {
+                overallCounts[type] = (overallCounts[type] || 0) + 1;
+                const cat = item.category === '8-Focus' || item.category === 'PSI' ? item.category : 'Non-Index';
+                categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
+            }
+        }
+
+        updateBentoDetailsFromCounts(overallCounts, categoryCounts, count, selectedBrgy);
+    };
+
+    // --- Ultra-Fast Monthly Crime Trends Filtering Logic ---
     window.filterMonthlyTrends = function() {
         const brgyDropdown = document.getElementById('monthlyTrendBarangayFilter');
         const yrDropdown = document.getElementById('monthlyTrendYearFilter');
         const selectedBrgy = brgyDropdown ? brgyDropdown.value : 'ALL';
         const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
 
-        // Update AI Trend Insights dynamically based on selected barangay and year
+        // 1. Single O(N) pass for instant 12-month buckets, bento details, and sector distribution (<1ms)
+        const buckets = Array.from({ length: 12 }, () => [0, 0, 0, 0, 0, 0]); // [focusM, focusS, nonIndexM, nonIndexS, psiM, psiS]
+        const sectorCounts = {};
+        const overallCounts = {};
+        const categoryCounts = { '8-Focus': {}, 'Non-Index': {}, 'PSI': {} };
+        let matchedCount = 0;
+
+        for (let i = 0; i < preprocessedPoints.length; i++) {
+            const item = preprocessedPoints[i];
+            if (item.year !== selectedYear) continue;
+
+            const sector = item.barangay || 'Unknown';
+            sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+
+            if (selectedBrgy !== 'ALL' && item.barangay !== selectedBrgy) continue;
+            matchedCount++;
+
+            const m = item.month;
+            if (m >= 0 && m < 12) {
+                const isScan = item.isScanned ? 1 : 0;
+                if (item.category === '8-Focus') {
+                    buckets[m][isScan]++;
+                } else if (item.category === 'PSI') {
+                    buckets[m][4 + isScan]++;
+                } else {
+                    buckets[m][2 + isScan]++;
+                }
+            }
+
+            const type = item.incident_type;
+            if (type && type !== 'UNKNOWN') {
+                overallCounts[type] = (overallCounts[type] || 0) + 1;
+                const cat = item.category === '8-Focus' || item.category === 'PSI' ? item.category : 'Non-Index';
+                categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
+            }
+        }
+
+        // STEP 1: INSTANT BARGRAPH UPDATE (0ms)
+        if (window.trendChart) {
+            window.trendChart.data.labels = MONTH_LABELS;
+            window.trendChart.data.datasets[0].data = buckets.map(b => b[0]);
+            window.trendChart.data.datasets[1].data = buckets.map(b => b[1]);
+            window.trendChart.data.datasets[2].data = buckets.map(b => b[2]);
+            window.trendChart.data.datasets[3].data = buckets.map(b => b[3]);
+            window.trendChart.data.datasets[4].data = buckets.map(b => b[4]);
+            window.trendChart.data.datasets[5].data = buckets.map(b => b[5]);
+            window.trendChart.update('none'); // Render immediately!
+        }
+
+        // STEP 2: INSTANT BENTO STATS UPDATE
+        updateBentoDetailsFromCounts(overallCounts, categoryCounts, matchedCount, selectedBrgy);
+
+        // STEP 3: INSTANT DISTRIBUTION PIE UPDATE
+        updateDistributionChartFromCounts(sectorCounts, selectedYear);
+
+        // STEP 4: BACKGROUND AI TRENDS (non-blocking)
         if (typeof window.generateAITrends === 'function') {
             window.generateAITrends(selectedBrgy, selectedYear);
-        }
-
-        // Update bento details dynamically
-        if (typeof window.updateBentoDetails === 'function') {
-            window.updateBentoDetails(selectedBrgy, selectedYear);
-        }
-
-        // Update crime distribution dynamically for the selected year
-        if (typeof updateDistributionChart === 'function') {
-            updateDistributionChart(selectedYear);
-        }
-
-        // Generate the 12 month buckets (Current Year Jan-Dec)
-        const monthlyTrends = [];
-        for (let i = 0; i <= 11; i++) {
-            const d = new Date(selectedYear, i, 1);
-            const monthLabel = d.toLocaleString('en-US', { month: 'short' });
-
-            const mPoints = points.filter(p => {
-                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
-                if (!rawDate) return false;
-                // Filter by barangay if not ALL
-                if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
-                
-                const pd = new Date(rawDate);
-                return pd.getUTCMonth() === i && pd.getUTCFullYear() === selectedYear;
-            });
-
-            monthlyTrends.push({
-                month: monthLabel,
-                focusManual: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'manual').length,
-                focusScanned: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'scanned').length,
-                nonIndexManual: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'manual').length,
-                nonIndexScanned: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
-                psiManual: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'manual').length,
-                psiScanned: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'scanned').length
-            });
-        }
-
-        if (window.trendChart) {
-            window.trendChart.data.labels = monthlyTrends.map(d => d.month);
-            window.trendChart.data.datasets[0].data = monthlyTrends.map(d => d.focusManual);
-            window.trendChart.data.datasets[1].data = monthlyTrends.map(d => d.focusScanned);
-            window.trendChart.data.datasets[2].data = monthlyTrends.map(d => d.nonIndexManual);
-            window.trendChart.data.datasets[3].data = monthlyTrends.map(d => d.nonIndexScanned);
-            window.trendChart.data.datasets[4].data = monthlyTrends.map(d => d.psiManual);
-            window.trendChart.data.datasets[5].data = monthlyTrends.map(d => d.psiScanned);
-            window.trendChart.update();
         }
     };
 
@@ -1165,33 +1154,39 @@
         const selectedYear = parseInt(document.getElementById('modalTrendYearFilter')?.value || '<%= defaultYearVal %>', 10);
         const selectedBrgy = document.getElementById('modalTrendBarangayFilter')?.value || 'ALL';
 
-        // 1. Compute 12-month data points for modal chart
-        const monthlyTrends = [];
-        for (let i = 0; i <= 11; i++) {
-            const d = new Date(selectedYear, i, 1);
-            const monthLabel = d.toLocaleString('en-US', { month: 'short' });
+        // Fast single-pass calculation for modal chart (<1ms)
+        const monthlyTrends = Array.from({ length: 12 }, (_, idx) => ({
+            month: MONTH_LABELS[idx],
+            monthIndex: idx,
+            points: [],
+            focusManual: 0,
+            focusScanned: 0,
+            nonIndexManual: 0,
+            nonIndexScanned: 0,
+            psiManual: 0,
+            psiScanned: 0,
+            total: 0
+        }));
 
-            const mPoints = points.filter(p => {
-                const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
-                if (!rawDate) return false;
-                if (selectedBrgy !== 'ALL' && p.barangay !== selectedBrgy) return false;
-                
-                const pd = new Date(rawDate);
-                return pd.getUTCMonth() === i && pd.getUTCFullYear() === selectedYear;
-            });
+        for (let i = 0; i < preprocessedPoints.length; i++) {
+            const item = preprocessedPoints[i];
+            if (item.year !== selectedYear) continue;
+            if (selectedBrgy !== 'ALL' && item.barangay !== selectedBrgy) continue;
 
-            monthlyTrends.push({
-                month: monthLabel,
-                monthIndex: i,
-                points: mPoints,
-                focusManual: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'manual').length,
-                focusScanned: mPoints.filter(p => p.category === '8-Focus' && p.entry_type === 'scanned').length,
-                nonIndexManual: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'manual').length,
-                nonIndexScanned: mPoints.filter(p => p.category === 'Non-Index' && p.entry_type === 'scanned').length,
-                psiManual: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'manual').length,
-                psiScanned: mPoints.filter(p => p.category === 'PSI' && p.entry_type === 'scanned').length,
-                total: mPoints.length
-            });
+            const m = item.month;
+            if (m >= 0 && m < 12) {
+                const target = monthlyTrends[m];
+                target.points.push(item.p);
+                target.total++;
+                const isScan = item.isScanned;
+                if (item.category === '8-Focus') {
+                    if (isScan) target.focusScanned++; else target.focusManual++;
+                } else if (item.category === 'PSI') {
+                    if (isScan) target.psiScanned++; else target.psiManual++;
+                } else {
+                    if (isScan) target.nonIndexScanned++; else target.nonIndexManual++;
+                }
+            }
         }
 
         // 2. Render or Update Modal Bar Graph
@@ -1286,7 +1281,7 @@
             });
             window.modalTrendChartInstance.options.scales.x.ticks.color = isDark ? '#94A3B8' : '#64748B';
             window.modalTrendChartInstance.options.scales.y.ticks.color = isDark ? '#94A3B8' : '#64748B';
-            window.modalTrendChartInstance.update();
+            window.modalTrendChartInstance.update('none');
             return;
         }
 
@@ -1296,6 +1291,7 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false,
                 interaction: {
                     mode: 'index',
                     intersect: false

@@ -160,7 +160,7 @@
 
                             <!-- Actions -->
                             <div class="flex items-center space-x-3 w-full lg:w-auto justify-end mt-4 lg:mt-0 shrink-0">
-                                <a href="/admin/bulletins/<%= bulletin.id %>/edit" class="w-11 h-11 rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-transparent hover:border-pnp-gold/20 shadow-sm" title="Edit Bulletin">
+                                <a href="/admin/bulletins/<%= bulletin.id %>/edit" onclick="event.preventDefault(); openEditNoticeModal('<%= bulletin.id %>');" class="w-11 h-11 rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-transparent hover:border-pnp-gold/20 shadow-sm cursor-pointer" title="Edit Bulletin">
                                     <i class="fas fa-edit text-xs"></i>
                                 </a>
                                 <form action="/admin/bulletins/<%= bulletin.id %>/delete" method="POST" onsubmit="handleBulletinDelete(event, '<%= bulletin.id %>'); return false;">
@@ -184,6 +184,14 @@
 </div>
 
 <script>
+    const adminBulletinsData = <%- JSON.stringify(bulletins || []).replace(/<\/script/gi, '<\\/script') %>;
+    const bulletinsMap = {};
+    if (Array.isArray(adminBulletinsData)) {
+        adminBulletinsData.forEach(b => {
+            if (b && b.id) bulletinsMap[b.id] = b;
+        });
+    }
+
     let currentPage = 1;
     const itemsPerPage = 5;
 
@@ -333,24 +341,212 @@
     });
 
     let currentPublishType = 'advisory';
+    let currentModalMode = 'create';
+    let currentEditBulletinId = null;
 
     function openPublishNoticeModal(presetType) {
+        currentModalMode = 'create';
+        currentEditBulletinId = null;
+
         const modal = document.getElementById('publishNoticeModal');
         const box = document.getElementById('publishNoticeModalBox');
         if (!modal || !box) return;
         
         // Reset form & error state
         const form = document.getElementById('publishNoticeForm');
-        if (form) form.reset();
+        if (form) {
+            form.reset();
+            form.action = '/admin/bulletins/create';
+        }
         clearModalMedia();
         const errorEl = document.getElementById('publishFormError');
         if (errorEl) errorEl.classList.add('hidden');
+
+        const mainTitle = document.getElementById('modalMainTitle');
+        const mainSubtitle = document.getElementById('modalMainSubtitle');
+        const submitBtnText = document.getElementById('publishSubmitBtnText');
+        const submitBtn = document.getElementById('publishSubmitBtn');
+        if (mainTitle) mainTitle.textContent = 'Publish Notice';
+        if (mainSubtitle) mainSubtitle.textContent = 'Choose how you would like to publish the bulletin.';
+        if (submitBtnText) submitBtnText.textContent = 'Publish Notice';
+        if (submitBtn) {
+            const icon = submitBtn.querySelector('i');
+            if (icon) icon.className = 'fas fa-paper-plane text-xs';
+        }
 
         if (presetType) {
             selectPublishType(presetType);
         } else {
             goToPublishStep(1);
         }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            box.classList.remove('scale-95');
+            box.classList.add('scale-100');
+        }, 20);
+    }
+
+    function openEditNoticeModal(id) {
+        const bulletin = bulletinsMap[id];
+        if (!bulletin) {
+            window.location.href = `/admin/bulletins/${id}/edit`;
+            return;
+        }
+
+        currentModalMode = 'edit';
+        currentEditBulletinId = id;
+
+        const modal = document.getElementById('publishNoticeModal');
+        const box = document.getElementById('publishNoticeModalBox');
+        const form = document.getElementById('publishNoticeForm');
+        const errorEl = document.getElementById('publishFormError');
+        const mainTitle = document.getElementById('modalMainTitle');
+        const mainSubtitle = document.getElementById('modalMainSubtitle');
+        const submitBtnText = document.getElementById('publishSubmitBtnText');
+        const submitBtn = document.getElementById('publishSubmitBtn');
+
+        if (!modal || !box) return;
+
+        if (form) {
+            form.reset();
+            form.action = `/admin/bulletins/${id}/edit`;
+        }
+        if (errorEl) errorEl.classList.add('hidden');
+        if (mainTitle) mainTitle.textContent = 'Edit Bulletin Notice';
+        if (mainSubtitle) mainSubtitle.textContent = 'Update bulletin details, category, or media attachments.';
+        if (submitBtnText) submitBtnText.textContent = 'Update Bulletin';
+        if (submitBtn) {
+            const icon = submitBtn.querySelector('i');
+            if (icon) icon.className = 'fas fa-save text-xs';
+        }
+
+        // Detect publication type
+        let pubType = 'advisory';
+        if (bulletin.facebook_url && bulletin.facebook_url.trim().length > 0) {
+            pubType = 'url';
+        } else if (bulletin.category === 'General Announcement') {
+            pubType = 'news';
+        } else {
+            pubType = 'advisory';
+        }
+
+        selectPublishType(pubType);
+
+        // Pre-fill values
+        if (pubType === 'url') {
+            const urlTitleInput = document.getElementById('urlTitleInput');
+            const urlBodyInput = document.getElementById('urlBodyInput');
+            const fbUrlInput = document.getElementById('publishFacebookUrl');
+
+            if (urlTitleInput) urlTitleInput.value = bulletin.title || '';
+            if (urlBodyInput) urlBodyInput.value = bulletin.body || '';
+            if (fbUrlInput) {
+                fbUrlInput.value = bulletin.facebook_url || '';
+                handleFacebookUrlInput(bulletin.facebook_url || '');
+            }
+        } else {
+            const titleInput = document.getElementById('publishTitle');
+            const bodyInput = document.getElementById('publishBody');
+            const categorySelect = document.getElementById('publishCategoryAdvisory');
+
+            if (titleInput) titleInput.value = bulletin.title || '';
+            if (bodyInput) bodyInput.value = bulletin.body || '';
+            if (pubType === 'advisory' && categorySelect && bulletin.category) {
+                categorySelect.value = bulletin.category;
+            }
+        }
+
+        // Load existing media items into carousel
+        clearModalMedia();
+
+        function resolveModalMediaList(pathsVal, singleVal) {
+            let list = [];
+            if (Array.isArray(pathsVal)) {
+                list = pathsVal;
+            } else if (singleVal) {
+                if (Array.isArray(singleVal)) {
+                    list = singleVal;
+                } else if (typeof singleVal === 'string') {
+                    const trimmed = singleVal.trim();
+                    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                        try {
+                            const parsed = JSON.parse(trimmed);
+                            if (Array.isArray(parsed)) list = parsed;
+                        } catch (e) {
+                            try {
+                                const sanitized = trimmed.replace(/'/g, '"');
+                                const parsed = JSON.parse(sanitized);
+                                if (Array.isArray(parsed)) list = parsed;
+                            } catch (e2) {}
+                        }
+                    }
+                    if (list.length === 0 && trimmed.length > 0 && trimmed !== '[]' && trimmed !== '""' && trimmed !== 'null') {
+                        list = [trimmed];
+                    }
+                }
+            }
+            return list.map(item => {
+                if (!item) return '';
+                let s = typeof item === 'string' ? item : (item.url || item.path || '');
+                s = s.trim().replace(/^["']|["']$/g, '');
+                return s;
+            }).filter(s => s && s.length > 0 && s !== '[]' && !s.startsWith('['));
+        }
+
+        function formatModalMediaUrl(rawPath) {
+            if (!rawPath) return '';
+            let clean = String(rawPath).trim().replace(/^["']|["']$/g, '');
+            if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('blob:') || clean.startsWith('data:')) {
+                return clean;
+            }
+            if (!clean.startsWith('/')) {
+                return '/' + clean;
+            }
+            return clean;
+        }
+
+        const existingPhotos = resolveModalMediaList(bulletin.photo_paths, bulletin.photo_path);
+        const existingVideos = resolveModalMediaList(bulletin.video_paths, bulletin.video_path);
+
+        existingPhotos.forEach((p, idx) => {
+            if (!p || p === '[]' || p.startsWith('[')) return;
+            const normalizedUrl = formatModalMediaUrl(p);
+            const filename = normalizedUrl.split('/').pop() || `Photo ${idx + 1}`;
+            modalMediaItems.push({
+                id: 'existing-photo-' + idx,
+                type: 'image',
+                url: normalizedUrl,
+                path: p,
+                name: filename,
+                size: 0,
+                isExisting: true
+            });
+        });
+
+        existingVideos.forEach((v, idx) => {
+            if (!v || v === '[]' || v.startsWith('[')) return;
+            const normalizedUrl = formatModalMediaUrl(v);
+            const filename = normalizedUrl.split('/').pop() || `Video ${idx + 1}`;
+            modalMediaItems.push({
+                id: 'existing-video-' + idx,
+                type: 'video',
+                url: normalizedUrl,
+                path: v,
+                name: filename,
+                size: 0,
+                isExisting: true
+            });
+        });
+
+        modalCurrentSlide = 0;
+        syncModalMediaInputs();
+        renderModalCarousel();
+        renderModalMediaGalleryGrid();
+        updateModalCounters();
+
+        goToPublishStep(2);
 
         modal.classList.remove('hidden');
         setTimeout(() => {
@@ -370,6 +566,8 @@
         box.classList.add('scale-95');
         setTimeout(() => {
             modal.classList.add('hidden');
+            currentModalMode = 'create';
+            currentEditBulletinId = null;
         }, 300);
     }
 
@@ -382,13 +580,13 @@
         if (step === 1) {
             if (step1) step1.classList.remove('hidden');
             if (step2) step2.classList.add('hidden');
-            if (mainTitle) mainTitle.textContent = 'Publish Notice';
+            if (mainTitle) mainTitle.textContent = currentModalMode === 'edit' ? 'Change Publication Type' : 'Publish Notice';
             if (mainSubtitle) mainSubtitle.textContent = 'Choose how you would like to publish the bulletin.';
         } else {
             if (step1) step1.classList.add('hidden');
             if (step2) step2.classList.remove('hidden');
-            if (mainTitle) mainTitle.textContent = 'Notice Details';
-            if (mainSubtitle) mainSubtitle.textContent = 'Provide notice details below to broadcast.';
+            if (mainTitle) mainTitle.textContent = currentModalMode === 'edit' ? 'Edit Bulletin Details' : 'Notice Details';
+            if (mainSubtitle) mainSubtitle.textContent = currentModalMode === 'edit' ? 'Update notice parameters and media attachments.' : 'Provide notice details below to broadcast.';
         }
     }
 
@@ -657,8 +855,8 @@
         let videoPromises = [];
 
         Array.from(files).forEach(file => {
-            if (modalMediaItems.length + videoPromises.length >= 5) {
-                rejected.push(`"${file.name}" (Limit exceeded: Maximum 5 media items allowed)`);
+            if (modalMediaItems.length + videoPromises.length >= 10) {
+                rejected.push(`"${file.name}" (Limit reached: Maximum 10 media files combined)`);
                 return;
             }
 
@@ -732,17 +930,28 @@
     function syncModalMediaInputs() {
         const photosInput = document.getElementById('modalPhotos');
         const videosInput = document.getElementById('modalVideos');
+        const existingPhotosInput = document.getElementById('modalExistingPhotos');
+        const existingVideosInput = document.getElementById('modalExistingVideos');
 
         const dtPhotos = new DataTransfer();
         const dtVideos = new DataTransfer();
+        const remainingExistingPhotos = [];
+        const remainingExistingVideos = [];
 
         modalMediaItems.forEach(item => {
-            if (item.type === 'image') dtPhotos.items.add(item.file);
-            else if (item.type === 'video') dtVideos.items.add(item.file);
+            if (item.isExisting) {
+                if (item.type === 'image') remainingExistingPhotos.push(item.path);
+                else if (item.type === 'video') remainingExistingVideos.push(item.path);
+            } else if (item.file) {
+                if (item.type === 'image') dtPhotos.items.add(item.file);
+                else if (item.type === 'video') dtVideos.items.add(item.file);
+            }
         });
 
         if (photosInput) photosInput.files = dtPhotos.files;
         if (videosInput) videosInput.files = dtVideos.files;
+        if (existingPhotosInput) existingPhotosInput.value = JSON.stringify(remainingExistingPhotos);
+        if (existingVideosInput) existingVideosInput.value = JSON.stringify(remainingExistingVideos);
     }
 
     function renderModalCarousel() {
@@ -792,9 +1001,13 @@
         }
 
         if (infoEl) {
-            const sizeMB = (currentItem.size / (1024 * 1024)).toFixed(1);
-            const durText = currentItem.duration ? ` • ${Math.round(currentItem.duration)}s clip` : '';
-            infoEl.textContent = `${currentItem.name} (${sizeMB} MB${durText})`;
+            if (currentItem.isExisting) {
+                infoEl.textContent = `${currentItem.name} (Attached Media)`;
+            } else {
+                const sizeMB = (currentItem.size / (1024 * 1024)).toFixed(1);
+                const durText = currentItem.duration ? ` • ${Math.round(currentItem.duration)}s clip` : '';
+                infoEl.textContent = `${currentItem.name} (${sizeMB} MB${durText})`;
+            }
         }
 
         if (modalMediaItems.length > 1) {
@@ -818,14 +1031,32 @@
         }
 
         if (addBtnText) {
-            if (modalMediaItems.length >= 5) {
-                addBtnText.textContent = 'Maximum Limit Reached (5/5 Files)';
+            if (modalMediaItems.length >= 10) {
+                addBtnText.textContent = 'Limit Reached (10/10 Files)';
                 if (addBtn) addBtn.disabled = true;
             } else {
-                addBtnText.textContent = `Add More Media Files (${modalMediaItems.length}/5)`;
+                addBtnText.textContent = `Add Media (${modalMediaItems.length}/10)`;
                 if (addBtn) addBtn.disabled = false;
             }
         }
+
+        const modalViewGalleryBtn = document.getElementById('modalViewGalleryBtn');
+        const modalGalleryBtnCount = document.getElementById('modalGalleryBtnCount');
+        const modalQuickGalleryLink = document.getElementById('modalQuickGalleryLink');
+        if (modalViewGalleryBtn) {
+            if (modalMediaItems.length > 0) {
+                modalViewGalleryBtn.classList.remove('hidden');
+                if (modalGalleryBtnCount) modalGalleryBtnCount.textContent = modalMediaItems.length;
+            } else {
+                modalViewGalleryBtn.classList.add('hidden');
+            }
+        }
+        if (modalQuickGalleryLink) {
+            if (modalMediaItems.length > 0) modalQuickGalleryLink.classList.remove('hidden');
+            else modalQuickGalleryLink.classList.add('hidden');
+        }
+
+        renderModalThumbnailsStrip();
 
         // Sync attached file list in urlPublishPanel if present
         const urlFilesContainer = document.getElementById('urlAttachedFilesContainer');
@@ -838,13 +1069,13 @@
                 if (urlAddBtnText) urlAddBtnText.textContent = 'Choose / Upload File';
             } else {
                 urlFilesContainer.classList.remove('hidden');
-                if (urlAddBtnText) urlAddBtnText.textContent = `Attached (${modalMediaItems.length}/5) - Add More`;
+                if (urlAddBtnText) urlAddBtnText.textContent = `Attached (${modalMediaItems.length}/10) - Add More`;
                 urlFilesList.innerHTML = modalMediaItems.map((item, idx) => `
                     <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-150 dark:border-slate-800 text-xs shadow-sm">
                         <div class="flex items-center space-x-2.5 truncate mr-2">
                             <i class="${item.type === 'image' ? 'fas fa-image text-emerald-500' : 'fas fa-film text-amber-500'} text-sm"></i>
                             <span class="font-bold text-slate-700 dark:text-slate-200 truncate">${item.name}</span>
-                            <span class="text-[10px] font-mono font-bold text-slate-400">(${(item.size/(1024*1024)).toFixed(1)}MB)</span>
+                            ${item.isExisting ? '<span class="text-[10px] font-bold text-pnp-blue dark:text-pnp-gold">(Saved)</span>' : `<span class="text-[10px] font-mono font-bold text-slate-400">(${(item.size/(1024*1024)).toFixed(1)}MB)</span>`}
                         </div>
                         <button type="button" onclick="removeUrlModalMediaItem(${idx})" class="text-red-500 hover:text-white hover:bg-red-500 text-xs px-2.5 py-1 rounded-lg transition flex items-center space-x-1 cursor-pointer" title="Remove file">
                             <i class="fas fa-trash-alt text-[10px]"></i>
@@ -859,7 +1090,9 @@
     function removeUrlModalMediaItem(idx) {
         if (idx >= 0 && idx < modalMediaItems.length) {
             const removed = modalMediaItems[idx];
-            if (removed && removed.url) URL.revokeObjectURL(removed.url);
+            if (removed && removed.url && !removed.isExisting && String(removed.url).startsWith('blob:')) {
+                URL.revokeObjectURL(removed.url);
+            }
             modalMediaItems.splice(idx, 1);
             if (modalCurrentSlide >= modalMediaItems.length) {
                 modalCurrentSlide = Math.max(0, modalMediaItems.length - 1);
@@ -875,7 +1108,7 @@
         if (modalMediaItems.length === 0) return;
 
         const removedItem = modalMediaItems[modalCurrentSlide];
-        if (removedItem && removedItem.url) {
+        if (removedItem && removedItem.url && !removedItem.isExisting && String(removedItem.url).startsWith('blob:')) {
             URL.revokeObjectURL(removedItem.url);
         }
 
@@ -905,7 +1138,9 @@
 
     function clearModalMedia() {
         modalMediaItems.forEach(item => {
-            if (item.url) URL.revokeObjectURL(item.url);
+            if (item.url && !item.isExisting && String(item.url).startsWith('blob:')) {
+                URL.revokeObjectURL(item.url);
+            }
         });
         modalMediaItems = [];
         modalCurrentSlide = 0;
@@ -913,11 +1148,146 @@
         const photosInput = document.getElementById('modalPhotos');
         const videosInput = document.getElementById('modalVideos');
         const mediaInput = document.getElementById('modalMediaInput');
+        const existingPhotosInput = document.getElementById('modalExistingPhotos');
+        const existingVideosInput = document.getElementById('modalExistingVideos');
+
         if (photosInput) photosInput.value = '';
         if (videosInput) videosInput.value = '';
         if (mediaInput) mediaInput.value = '';
+        if (existingPhotosInput) existingPhotosInput.value = '[]';
+        if (existingVideosInput) existingVideosInput.value = '[]';
 
         renderModalCarousel();
+        renderModalMediaGalleryGrid();
+        closeModalMediaGalleryModal();
+    }
+
+    // Render Inline Thumbnails Strip under carousel
+    function renderModalThumbnailsStrip() {
+        const strip = document.getElementById('modalThumbnailsStrip');
+        if (!strip) return;
+
+        if (modalMediaItems.length === 0) {
+            strip.innerHTML = '';
+            strip.classList.add('hidden');
+            return;
+        }
+
+        strip.classList.remove('hidden');
+        strip.innerHTML = modalMediaItems.map((item, idx) => `
+            <div onclick="goToModalSlide(${idx}, event)" class="relative shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 cursor-pointer transition-all duration-200 group ${idx === modalCurrentSlide ? 'border-pnp-blue ring-2 ring-pnp-blue/30 scale-105' : 'border-gray-200 dark:border-slate-700 opacity-70 hover:opacity-100'}">
+                ${item.type === 'image' 
+                    ? `<img src="${item.url}" class="w-full h-full object-cover">` 
+                    : `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-white"><i class="fas fa-play text-[9px]"></i></div>`}
+                <button type="button" onclick="removeModalGalleryItem(${idx}, event)" class="absolute top-0.5 right-0.5 w-4 h-4 bg-red-600 hover:bg-red-700 text-white rounded text-[8px] flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition" title="Delete file">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                <span class="absolute bottom-0.5 left-0.5 px-1 py-0.2 bg-black/70 text-white text-[7px] font-bold uppercase rounded">
+                    ${idx + 1}
+                </span>
+            </div>
+        `).join('');
+    }
+
+    // Media Gallery Modal for Publish/Edit Notice (View all in one container)
+    function openModalMediaGalleryModal() {
+        const modal = document.getElementById('publishMediaGalleryModal');
+        if (!modal) return;
+        renderModalMediaGalleryGrid();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModalMediaGalleryModal() {
+        const modal = document.getElementById('publishMediaGalleryModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+
+    function removeModalGalleryItem(idx, e) {
+        if (e) e.stopPropagation();
+        if (idx < 0 || idx >= modalMediaItems.length) return;
+
+        const removed = modalMediaItems[idx];
+        if (removed && removed.url && !removed.isExisting && String(removed.url).startsWith('blob:')) {
+            URL.revokeObjectURL(removed.url);
+        }
+
+        modalMediaItems.splice(idx, 1);
+        if (modalCurrentSlide >= modalMediaItems.length) {
+            modalCurrentSlide = Math.max(0, modalMediaItems.length - 1);
+        }
+
+        syncModalMediaInputs();
+        renderModalCarousel();
+        renderModalMediaGalleryGrid();
+        updateModalCounters();
+    }
+
+    function renderModalMediaGalleryGrid() {
+        const grid = document.getElementById('publishMediaGalleryGrid');
+        const countText = document.getElementById('publishMediaGalleryCount');
+        if (!grid) return;
+
+        if (countText) countText.textContent = `Showing ${modalMediaItems.length} of 10 attached files`;
+
+        if (modalMediaItems.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full py-16 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                    <div class="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center text-3xl mb-3">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <p class="text-sm font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">No Media Files Attached</p>
+                    <p class="text-xs mt-1">Upload images or videos to view and manage them here.</p>
+                    <button type="button" onclick="document.getElementById('modalMediaInput').click()" class="mt-4 px-6 py-2.5 bg-pnp-blue hover:bg-blue-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition">
+                        + Add Media Files
+                    </button>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = modalMediaItems.map((item, idx) => `
+            <div class="relative group bg-gray-100 dark:bg-slate-950 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-md aspect-square flex flex-col justify-between transition-all hover:shadow-xl">
+                <!-- Thumbnail -->
+                <div class="w-full h-full flex items-center justify-center overflow-hidden bg-black/40 cursor-pointer" onclick="openModalFullscreenMediaByIndex(${idx})">
+                    ${item.type === 'image' 
+                        ? `<img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
+                        : `<video src="${item.url}" class="w-full h-full object-cover"></video>`}
+                </div>
+
+                <!-- TOP BAR OVERLAY: File Number & Trash Button -->
+                <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-20 pointer-events-none">
+                    <span class="pointer-events-auto px-2 py-0.5 bg-slate-950/80 backdrop-blur-md rounded-md text-[9px] font-black uppercase text-white shadow">
+                        #${idx + 1}
+                    </span>
+                    <!-- DELETE BUTTON -->
+                    <button type="button" onclick="removeModalGalleryItem(${idx}, event)"
+                        class="pointer-events-auto w-8 h-8 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer border border-red-500/30"
+                        title="Delete this file from notice">
+                        <i class="fas fa-trash-alt text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- BOTTOM BAR OVERLAY: Info & Type Badge -->
+                <div class="absolute bottom-2 left-2 right-2 flex justify-between items-center z-20 pointer-events-none">
+                    <span class="pointer-events-auto px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-wider ${item.type === 'image' ? 'bg-emerald-500/90 text-white' : 'bg-amber-500/90 text-white'} shadow">
+                        <i class="${item.type === 'image' ? 'fas fa-image' : 'fas fa-film'} mr-1"></i>${item.type}
+                    </span>
+                    <span class="pointer-events-auto px-2 py-0.5 bg-black/70 backdrop-blur-md rounded-md text-[8px] font-bold text-slate-300 truncate max-w-[90px] shadow">
+                        ${item.isExisting ? 'Saved' : (item.size ? (item.size / (1024*1024)).toFixed(1) + 'MB' : '')}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openModalFullscreenMediaByIndex(idx) {
+        if (idx < 0 || idx >= modalMediaItems.length) return;
+        goToModalSlide(idx);
+        closeModalMediaGalleryModal();
     }
 
     let pendingNoticePublishForm = false;
@@ -981,6 +1351,11 @@
                 if (errorEl) errorEl.classList.remove('hidden');
                 return false;
             }
+            if (modalMediaItems.length > 10) {
+                if (errorText) errorText.textContent = `Media limit exceeded: Maximum 10 media files allowed (currently ${modalMediaItems.length} files attached).`;
+                if (errorEl) errorEl.classList.remove('hidden');
+                return false;
+            }
         }
 
         if (errorEl) errorEl.classList.add('hidden');
@@ -997,6 +1372,15 @@
     }
 
     function openPublishConfirmationModal(data) {
+        const isEdit = currentModalMode === 'edit';
+        const modalHeading = document.getElementById('confirmModalHeading');
+        const modalSubheading = document.getElementById('confirmModalSubheading');
+        const finalBtnText = document.getElementById('finalConfirmPublishBtnText');
+
+        if (modalHeading) modalHeading.textContent = isEdit ? 'Confirm Bulletin Update' : 'Confirm Notice Publication';
+        if (modalSubheading) modalSubheading.textContent = isEdit ? 'Please review details before saving updates to this bulletin.' : 'Please review details before broadcasting this bulletin.';
+        if (finalBtnText) finalBtnText.textContent = isEdit ? 'Yes, Confirm & Update' : 'Yes, Confirm & Publish';
+
         document.getElementById('confirmModalTitle').textContent = data.title;
         document.getElementById('confirmModalType').textContent = data.type;
         document.getElementById('confirmModalCategory').textContent = data.category;
@@ -1027,9 +1411,10 @@
 
     function confirmAndExecuteSubmit() {
         const btn = document.getElementById('finalConfirmPublishBtn');
+        const isEdit = currentModalMode === 'edit';
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Publishing Notice...</span>';
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>${isEdit ? 'Updating Bulletin...' : 'Publishing Notice...'}</span>`;
         }
         document.getElementById('publishNoticeForm').submit();
     }
@@ -1120,6 +1505,8 @@
             <!-- STEP 2: Publication Form -->
             <form id="publishNoticeForm" action="/admin/bulletins/create" method="POST" enctype="multipart/form-data" class="space-y-6 hidden" onsubmit="handlePublishNoticeSubmit(event)">
                 <input type="hidden" name="publish_type" id="publishTypeInput" value="advisory">
+                <input type="hidden" name="existing_photos" id="modalExistingPhotos" value="[]">
+                <input type="hidden" name="existing_videos" id="modalExistingVideos" value="[]">
 
                 <!-- Header navigation inside form -->
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800">
@@ -1143,7 +1530,7 @@
                     <!-- LEFT COLUMN: UNIFIED MEDIA DRAG & DROP BOX -->
                     <div class="space-y-4 flex flex-col">
                         <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
-                            Upload Media <span class="text-slate-400 font-normal">(Images & Videos Optional)</span>
+                            Upload Media <span class="text-slate-400 font-normal">(Images & Videos Optional, Max 10)</span>
                         </label>
 
                         <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-5">
@@ -1157,7 +1544,7 @@
                                         <i class="fas fa-cloud-upload-alt"></i>
                                     </div>
                                     <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Drag & Drop or Click to Browse</span>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">Upload up to 5 photos or videos combined (JPG, PNG, WEBP, MP4)</p>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">Upload up to 10 photos or videos combined (JPG, PNG, WEBP, MP4)</p>
                                 </div>
 
                                 <!-- Active Carousel Box -->
@@ -1172,11 +1559,19 @@
                                                 <span>PHOTO (1/1)</span>
                                             </span>
 
-                                            <!-- TRASH / DELETE ITEM BUTTON -->
-                                            <button type="button" id="modalTrashCurrentItemBtn" onclick="trashCurrentModalMediaItem(event)" class="pointer-events-auto px-3 py-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-red-500/30" title="Delete this image/video from notice">
-                                                <i class="fas fa-trash-alt text-xs"></i>
-                                                <span>Trash</span>
-                                            </button>
+                                            <div class="pointer-events-auto flex items-center space-x-2">
+                                                <!-- VIEW ALL IN GRID BUTTON -->
+                                                <button type="button" onclick="openModalMediaGalleryModal()" class="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-950 text-pnp-gold rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-pnp-gold/30" title="View all photos and videos in one container">
+                                                    <i class="fas fa-th-large text-xs"></i>
+                                                    <span>Grid View</span>
+                                                </button>
+
+                                                <!-- TRASH / DELETE ITEM BUTTON -->
+                                                <button type="button" id="modalTrashCurrentItemBtn" onclick="trashCurrentModalMediaItem(event)" class="px-3 py-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-red-500/30" title="Delete this image/video from notice">
+                                                    <i class="fas fa-trash-alt text-xs"></i>
+                                                    <span>Trash</span>
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <!-- Image Slide -->
@@ -1200,6 +1595,11 @@
                                     <div class="w-full mt-3 flex flex-col items-center space-y-1.5">
                                         <div id="modalCarouselDots" class="flex items-center space-x-1.5 min-h-[12px]"></div>
                                         <p id="modalCarouselInfo" class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate max-w-full px-2 text-center"></p>
+
+                                        <!-- Inline Thumbnails Strip: View All Uploaded Pictures & Videos directly on modal -->
+                                        <div id="modalThumbnailsStrip" class="w-full pt-2 border-t border-gray-200/60 dark:border-slate-800/80 flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar hidden">
+                                            <!-- Injected thumbnail previews -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1210,14 +1610,27 @@
                                 <input type="file" name="photos" id="modalPhotos" accept="image/*" multiple class="hidden">
                                 <input type="file" name="videos" id="modalVideos" accept="video/*" multiple class="hidden">
 
-                                <button type="button" id="modalAddMediaBtn" onclick="document.getElementById('modalMediaInput').click()" class="w-full py-3.5 px-4 bg-pnp-blue hover:bg-blue-900 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                                    <i class="fas fa-plus-circle"></i>
-                                    <span id="modalAddMediaBtnText">Choose / Add Media Files</span>
-                                </button>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <button type="button" id="modalAddMediaBtn" onclick="document.getElementById('modalMediaInput').click()" class="w-full py-3.5 px-4 bg-pnp-blue hover:bg-blue-900 disabled:bg-slate-300 dark:disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition shadow-sm cursor-pointer disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                                        <i class="fas fa-plus-circle"></i>
+                                        <span id="modalAddMediaBtnText">Add Media (0/10)</span>
+                                    </button>
+
+                                    <button type="button" id="modalViewGalleryBtn" onclick="openModalMediaGalleryModal()"
+                                        class="w-full py-3.5 px-4 bg-slate-800 hover:bg-slate-700 text-pnp-gold rounded-xl text-xs font-bold uppercase tracking-wider transition border border-pnp-gold/20 flex items-center justify-center space-x-2 cursor-pointer hidden">
+                                        <i class="fas fa-th-large"></i>
+                                        <span>View All (<span id="modalGalleryBtnCount">0</span>)</span>
+                                    </button>
+                                </div>
+
                                 <button type="button" id="modalClearMediaBtn" onclick="clearModalMedia()" class="w-full py-2.5 px-4 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl text-xs font-bold uppercase tracking-wider transition hidden cursor-pointer flex items-center justify-center space-x-2">
                                     <i class="fas fa-trash"></i>
                                     <span>Clear All Media</span>
                                 </button>
+
+                                <p class="text-[10px] text-slate-400 dark:text-slate-500 uppercase text-center pt-1">
+                                    JPG, PNG, WEBP, MP4 allowed • Up to 10 media files combined
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -1385,8 +1798,8 @@
                 <i class="fas fa-question-circle"></i>
             </div>
             <div>
-                <h3 class="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">Confirm Notice Publication</h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Please review details before broadcasting this bulletin.</p>
+                <h3 id="confirmModalHeading" class="text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white">Confirm Notice Publication</h3>
+                <p id="confirmModalSubheading" class="text-xs text-slate-500 dark:text-slate-400 font-medium">Please review details before broadcasting this bulletin.</p>
             </div>
         </div>
 
@@ -1417,8 +1830,54 @@
             </button>
             <button type="button" onclick="confirmAndExecuteSubmit()" id="finalConfirmPublishBtn" class="px-6 py-3 rounded-xl bg-pnp-blue hover:bg-pnp-gold text-white hover:text-pnp-blue text-xs font-black uppercase tracking-wider shadow-lg transition-all flex items-center space-x-2 cursor-pointer">
                 <i class="fas fa-paper-plane"></i>
-                <span>Yes, Confirm & Publish</span>
+                <span id="finalConfirmPublishBtnText">Yes, Confirm & Publish</span>
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- ALL UPLOADED MEDIA GALLERY GRID MODAL (FOR PUBLISH / EDIT MODAL) -->
+<div id="publishMediaGalleryModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden items-center justify-center z-[110] p-4 md:p-8 transition-all duration-300" onclick="closeModalMediaGalleryModal()">
+    <div class="relative max-w-6xl w-full h-[90vh] bg-white dark:bg-slate-900 rounded-3xl border border-gray-200 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden" onclick="event.stopPropagation()">
+        <!-- GALLERY MODAL HEADER -->
+        <div class="p-6 border-b border-gray-150 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50/80 dark:bg-slate-950 gap-4 shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-pnp-blue text-pnp-gold flex items-center justify-center border border-pnp-gold/20 shadow-md">
+                    <i class="fas fa-images text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Attached Media Gallery</h3>
+                    <p id="publishMediaGalleryCount" class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-1">Showing 0 of 10 attached files</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="document.getElementById('modalMediaInput').click()" class="px-4 py-2.5 bg-pnp-blue hover:bg-blue-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider transition flex items-center space-x-2 cursor-pointer shadow-md">
+                    <i class="fas fa-plus-circle text-xs"></i>
+                    <span>+ Add More Files</span>
+                </button>
+                <button type="button" onclick="closeModalMediaGalleryModal()" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-600 dark:text-white rounded-xl flex items-center justify-center transition cursor-pointer">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- GALLERY GRID CONTAINER -->
+        <div id="publishMediaGalleryGrid" class="flex-1 p-6 overflow-y-auto custom-scrollbar grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 items-start">
+            <!-- Injected cards -->
+        </div>
+
+        <!-- GALLERY MODAL FOOTER -->
+        <div class="p-5 border-t border-gray-150 dark:border-white/10 bg-gray-50/80 dark:bg-slate-950 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+            <span class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                <i class="fas fa-info-circle text-pnp-blue dark:text-pnp-gold mr-1"></i>
+                Click the trash icon on any file to delete it. Maximum limit is 10 images/videos.
+            </span>
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="closeModalMediaGalleryModal()" class="px-8 py-2.5 bg-pnp-blue hover:bg-blue-900 text-white rounded-xl text-xs font-black uppercase tracking-wider transition cursor-pointer shadow-md">
+                    Done
+                </button>
+            </div>
         </div>
     </div>
 </div>

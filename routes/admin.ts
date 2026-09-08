@@ -4,7 +4,8 @@ import {
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
   postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
-  getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive
+  getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive,
+  getHeartbeat
 } from '../controllers/adminController.js';
 import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -39,6 +40,7 @@ router.get('/users/:id/reject', rejectUser);
 router.use(isAuthenticated);
 
 router.get('/dashboard', getDashboard);
+router.get('/api/heartbeat', getHeartbeat);
 router.get('/api/ai-trends', getAITrendsAnalysis);
 router.get('/audit-logs', getAuditLogs);
 router.post('/api/toggle-sidebar', (req: any, res) => {
@@ -51,9 +53,9 @@ router.post('/api/toggle-sidebar', (req: any, res) => {
 // Bulletins
 router.get('/bulletins', getBulletins);
 router.get('/bulletins/create', getCreateBulletin);
-router.post('/bulletins/create', upload.fields([{ name: 'photos', maxCount: 5 }, { name: 'videos', maxCount: 5 }]), postCreateBulletin);
+router.post('/bulletins/create', upload.fields([{ name: 'photos', maxCount: 10 }, { name: 'videos', maxCount: 10 }]), postCreateBulletin);
 router.get('/bulletins/:id/edit', getEditBulletin);
-router.post('/bulletins/:id/edit', upload.fields([{ name: 'photos', maxCount: 5 }, { name: 'videos', maxCount: 5 }]), postEditBulletin);
+router.post('/bulletins/:id/edit', upload.fields([{ name: 'photos', maxCount: 10 }, { name: 'videos', maxCount: 10 }]), postEditBulletin);
 router.post('/bulletins/:id/delete', deleteBulletin);
 
 // Map

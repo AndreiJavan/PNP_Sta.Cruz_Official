@@ -161,6 +161,14 @@
 </head>
 
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
+    <!-- Global Network Resilience Banner -->
+    <div id="networkStatusBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden transition-all duration-300 transform -translate-y-4 opacity-0 pointer-events-none">
+        <div id="networkStatusContent" class="flex items-center gap-3 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl backdrop-blur-md border">
+            <span id="networkStatusIcon"></span>
+            <span id="networkStatusText"></span>
+        </div>
+    </div>
+
     <!-- Sidebar -->
     <aside id="sidebar"
         class="w-72 pnp-gradient-blue text-white flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'sidebar-hidden' : '' %>">
@@ -466,6 +474,117 @@
                 }
             }
         });
+
+        // ==========================================
+        // Robust Network & Session Resilience System
+        // ==========================================
+        const networkBanner = document.getElementById('networkStatusBanner');
+        const networkStatusContent = document.getElementById('networkStatusContent');
+        const networkStatusIcon = document.getElementById('networkStatusIcon');
+        const networkStatusText = document.getElementById('networkStatusText');
+        let networkBannerTimeout = null;
+
+        function showNetworkBanner(status, message) {
+            if (!networkBanner || !networkStatusContent || !networkStatusIcon || !networkStatusText) return;
+            if (networkBannerTimeout) clearTimeout(networkBannerTimeout);
+
+            networkBanner.classList.remove('hidden');
+            // Force reflow for transition
+            void networkBanner.offsetWidth;
+
+            if (status === 'offline') {
+                networkStatusContent.className = 'flex items-center gap-3 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl backdrop-blur-md border bg-amber-500/90 dark:bg-amber-600/90 text-white border-amber-400/50';
+                networkStatusIcon.innerHTML = '<i class="fas fa-wifi-slash animate-pulse text-sm"></i>';
+                networkStatusText.textContent = message || 'Connection lost. Reconnecting...';
+                networkBanner.classList.remove('-translate-y-4', 'opacity-0');
+                networkBanner.classList.add('translate-y-0', 'opacity-100');
+            } else if (status === 'online') {
+                networkStatusContent.className = 'flex items-center gap-3 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl backdrop-blur-md border bg-emerald-600/90 text-white border-emerald-400/50';
+                networkStatusIcon.innerHTML = '<i class="fas fa-check-circle text-sm"></i>';
+                networkStatusText.textContent = message || 'Connection restored. Synchronized.';
+                networkBanner.classList.remove('-translate-y-4', 'opacity-0');
+                networkBanner.classList.add('translate-y-0', 'opacity-100');
+
+                networkBannerTimeout = setTimeout(() => {
+                    networkBanner.classList.remove('translate-y-0', 'opacity-100');
+                    networkBanner.classList.add('-translate-y-4', 'opacity-0');
+                    setTimeout(() => networkBanner.classList.add('hidden'), 300);
+                }, 3000);
+            }
+        }
+
+        // Window online / offline listeners
+        window.addEventListener('offline', () => {
+            showNetworkBanner('offline', 'Connection lost. Reconnecting when connection is restored...');
+        });
+
+        window.addEventListener('online', () => {
+            showNetworkBanner('online', 'Connection restored. All systems synchronized.');
+        });
+
+        // Global Fetch Interceptor
+        const _originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            try {
+                const response = await _originalFetch.apply(this, args);
+
+                // Only genuine 401 with expired flag should trigger login redirect
+                if (response.status === 401) {
+                    const clone = response.clone();
+                    try {
+                        const data = await clone.json();
+                        if (data && data.expired) {
+                            console.warn('[AUTH] Admin session expired. Directing to login.');
+                            window.location.href = '/admin/login?expired=1';
+                            return response;
+                        }
+                    } catch (_) {
+                        // Non-JSON response or parse failure, do not redirect
+                    }
+                }
+
+                return response;
+            } catch (networkError) {
+                // Network failures (slow network aborts, temporary dropouts, offline)
+                // MUST NOT redirect to login! Keep current view and notify admin.
+                console.warn('[NETWORK WARNING] Fetch failed due to network conditions:', networkError);
+                if (!navigator.onLine) {
+                    showNetworkBanner('offline', 'Connection lost. Reconnecting...');
+                } else {
+                    showNetworkBanner('offline', 'Network slow or unstable. Reconnecting...');
+                    if (networkBannerTimeout) clearTimeout(networkBannerTimeout);
+                    networkBannerTimeout = setTimeout(() => {
+                        if (navigator.onLine && networkBanner) {
+                            networkBanner.classList.remove('translate-y-0', 'opacity-100');
+                            networkBanner.classList.add('-translate-y-4', 'opacity-0');
+                            setTimeout(() => networkBanner.classList.add('hidden'), 300);
+                        }
+                    }, 4000);
+                }
+                throw networkError;
+            }
+        };
+
+        // Periodic Session Keepalive Heartbeat (every 5 minutes when tab is active and online)
+        setInterval(() => {
+            if (document.visibilityState === 'visible' && navigator.onLine) {
+                _originalFetch('/admin/api/heartbeat', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                }).then(res => {
+                    if (res.status === 401) {
+                        res.json().then(data => {
+                            if (data && data.expired) {
+                                window.location.href = '/admin/login?expired=1';
+                            }
+                        }).catch(() => {});
+                    }
+                }).catch(err => {
+                    // Silently ignore network errors in heartbeat
+                    console.debug('[HEARTBEAT] Connection check skipped due to network conditions:', err.message);
+                });
+            }
+        }, 5 * 60 * 1000);
 
     </script>
 

@@ -1,645 +1,775 @@
-<!-- Hero Section -->
-<section id="hero-section" class="relative min-h-[40vh] py-16 md:py-24 flex items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat"
-    style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)), url('/images/directory-pnp-2.jpg');">
-    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950/40 to-slate-950/80"></div>
+    <!-- Hero Section -->
+    <section id="hero-section" class="relative min-h-[40vh] py-16 md:py-24 flex items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat"
+        style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92)), url('/images/directory-pnp-2.jpg');">
+        <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950/40 to-slate-950/80"></div>
 
-    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
-        <div
-            class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-5 py-2 rounded-full mb-4 border border-white/20 animate-fade-in-up">
-            <i class="fas fa-shield-halved text-sm"></i>
-            <span class="text-xs font-bold uppercase tracking-widest">Official Portal &bull; PNP Sta. Cruz</span>
+        <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
+            <div
+                class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-5 py-2 rounded-full mb-4 border border-white/20 animate-fade-in-up">
+                <i class="fas fa-shield-halved text-sm"></i>
+                <span class="text-xs font-bold uppercase tracking-widest">Official Portal &bull; PNP Sta. Cruz</span>
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight tracking-tight drop-shadow-lg animate-fade-in-up"
+                style="animation-delay: 0.1s;">
+                Welcome to the <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-pnp-gold to-yellow-300">Public
+                    Bulletin</span>
+            </h1>
+
+            <p class="text-base md:text-lg text-blue-100 font-light max-w-3xl mx-auto mb-6 leading-relaxed drop-shadow-md animate-fade-in-up"
+                style="animation-delay: 0.2s;">
+                Stay informed with the latest updates, advisories, missing persons, and wanted persons alerts from the Sta.
+                Cruz PNP Station.
+            </p>
         </div>
+    </section>
 
-        <h1 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight tracking-tight drop-shadow-lg animate-fade-in-up"
-            style="animation-delay: 0.1s;">
-            Welcome to the <span
-                class="text-transparent bg-clip-text bg-gradient-to-r from-pnp-gold to-yellow-300">Community Safety Portal</span>
-        </h1>
-
-        <p class="text-base md:text-lg text-blue-100 font-light max-w-3xl mx-auto mb-6 leading-relaxed drop-shadow-md animate-fade-in-up"
-            style="animation-delay: 0.2s;">
-            Stay connected with official advisories, incident updates, crime prevention campaigns, and important community announcements from the Sta. Cruz Municipal Police Station.
-        </p>
-    </div>
-</section>
-
-<!-- Bulletins Section -->
-<section id="bulletins-section" class="py-8 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[40vh]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <% if (locals.policeNewsList && policeNewsList.length > 0) { %>
-            <% const carouselNews = policeNewsList.slice(0, 5); %>
-            <!-- Carousel Container -->
-            <div class="mb-10">
-                <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-                    <div>
-                        <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
-                            <i class="fas fa-newspaper text-[10px]"></i>
-                            <span class="text-[9px] font-black uppercase tracking-widest">Official News</span>
+    <!-- Bulletins Section -->
+    <section id="bulletins-section" class="py-8 bg-slate-50 dark:bg-slate-950 transition-colors duration-300 relative min-h-[40vh]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <% if (locals.policeNewsList && policeNewsList.length > 0) { %>
+                <% const carouselNews = policeNewsList.slice(0, 5); %>
+                <!-- Carousel Container -->
+                <div class="mb-10">
+                    <div class="mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                        <div>
+                            <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
+                                <i class="fas fa-newspaper text-[10px]"></i>
+                                <span class="text-[9px] font-black uppercase tracking-widest">Official News</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Police News</h2>
                         </div>
-                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Police News</h2>
                     </div>
-                </div>
 
-                <!-- Carousel Wrapper (Outer Relative Wrapper) -->
-                <div class="relative w-full">
-                    <!-- Floating Navigation Controls -->
-                    <button id="carousel-prev" class="absolute left-2 lg:-left-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-pnp-blue flex items-center justify-center transition-all shadow-lg border border-gray-150 dark:border-slate-800 focus:outline-none transform hover:scale-110 active:scale-95">
-                        <i class="fas fa-chevron-left text-sm"></i>
-                    </button>
-                    <button id="carousel-next" class="absolute right-2 lg:-right-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-pnp-blue flex items-center justify-center transition-all shadow-lg border border-gray-150 dark:border-slate-800 focus:outline-none transform hover:scale-110 active:scale-95">
-                        <i class="fas fa-chevron-right text-sm"></i>
-                    </button>
+                    <!-- Carousel Wrapper (Outer Relative Wrapper) -->
+                    <div class="relative w-full">
+                        <!-- Floating Navigation Controls -->
+                        <button id="carousel-prev" class="absolute left-2 lg:-left-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-pnp-blue flex items-center justify-center transition-all shadow-lg border border-gray-150 dark:border-slate-800 focus:outline-none transform hover:scale-110 active:scale-95">
+                            <i class="fas fa-chevron-left text-sm"></i>
+                        </button>
+                        <button id="carousel-next" class="absolute right-2 lg:-right-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 rounded-full bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-pnp-blue flex items-center justify-center transition-all shadow-lg border border-gray-150 dark:border-slate-800 focus:outline-none transform hover:scale-110 active:scale-95">
+                            <i class="fas fa-chevron-right text-sm"></i>
+                        </button>
 
-                    <!-- Carousel Inner (Overflow Mask) -->
-                    <div class="overflow-hidden w-full rounded-[2.5rem] border border-gray-100 dark:border-slate-800/60 shadow-xl bg-white dark:bg-slate-900">
-                    <!-- Inner Track -->
-                    <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
-                        <% carouselNews.forEach((news, index) => { %>
-                            <div class="w-full shrink-0 flex-none px-4 md:px-8 py-6 md:py-8">
-                                <div onclick="openNewsModal('<%= news.id %>')" class="flex flex-col sm:flex-row items-stretch gap-5 sm:gap-6 md:gap-8 group cursor-pointer">
-                                    <!-- Image / Facebook Container -->
-                                    <div class="w-full sm:w-1/2 h-52 sm:h-64 md:h-72 lg:h-80 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50 flex items-center justify-center">
-                                        <% if (news.facebook_url) { %>
-                                            <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=false&width=500" 
-                                                width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
-                                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
-                                        <% } else if (news.urlToImage) { %>
-                                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                                        <% } else { %>
-                                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-850">
-                                                <i class="fas fa-newspaper text-5xl text-slate-300 dark:text-slate-700"></i>
-                                            </div>
-                                        <% } %>
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
-                                        <div class="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 text-white font-black text-[9px] uppercase tracking-widest bg-pnp-blue/80 dark:bg-slate-950/80 backdrop-blur-md px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-white/10 z-10">
-                                            <i class="fas fa-clock mr-1.5 text-pnp-gold"></i>
-                                            <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Content Info -->
-                                    <div class="w-full sm:w-1/2 flex flex-col justify-center text-left py-2">
-                                        <div class="mb-4">
-                                            <% if (news.facebook_url || (news.author && (news.author.startsWith('http://') || news.author.startsWith('https://')))) { %>
-                                                <a href="<%= news.facebook_url || news.author %>" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest text-[#1877F2] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition shadow-sm" title="Open Official Facebook Post">
-                                                    <i class="fab fa-facebook text-xs"></i>
-                                                    <span>Official Facebook Post</span>
-                                                    <i class="fas fa-external-link-alt text-[8px] ml-1 opacity-70"></i>
-                                                </a>
+                        <!-- Carousel Inner (Overflow Mask) -->
+                        <div class="overflow-hidden w-full rounded-[2.5rem] border border-gray-100 dark:border-slate-800/60 shadow-xl bg-white dark:bg-slate-900">
+                        <!-- Inner Track -->
+                        <div id="carousel-track" class="flex transition-transform duration-700 ease-in-out">
+                            <% carouselNews.forEach((news, index) => { %>
+                                <div class="w-full shrink-0 flex-none px-4 md:px-8 py-6 md:py-8">
+                                    <a href="/news" class="flex flex-col lg:flex-row items-stretch gap-6 hover:no-underline group">
+                                        <!-- Image Container -->
+                                        <div class="w-full lg:w-1/2 h-48 md:h-64 rounded-[1.5rem] overflow-hidden relative shadow-md shrink-0 bg-slate-100 dark:bg-slate-950 border border-gray-100 dark:border-slate-800/50">
+                                            <% if (news.urlToImage) { %>
+                                                <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
                                             <% } else { %>
+                                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-850">
+                                                    <i class="fas fa-newspaper text-5xl text-slate-300 dark:text-slate-700"></i>
+                                                </div>
+                                            <% } %>
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300"></div>
+                                            <div class="absolute bottom-6 left-6 text-white font-black text-[9px] uppercase tracking-widest bg-pnp-blue/80 dark:bg-slate-950/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                                                <i class="fas fa-clock mr-1.5 text-pnp-gold"></i>
+                                                <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Content Info -->
+                                        <div class="w-full lg:w-1/2 flex flex-col justify-center text-left py-2">
+                                            <div class="mb-4">
                                                 <span class="px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-gray-200 dark:border-slate-700">
                                                     By <%= news.author || 'Station Desk' %>
                                                 </span>
-                                            <% } %>
+                                            </div>
+                                            
+                                            <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-5 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors tracking-tight line-clamp-2">
+                                                <%= news.headline %>
+                                            </h3>
+                                            
+                                            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
+                                                <%= news.description || 'Click to read full article...' %>
+                                            </p>
+                                            
+                                            <div class="mt-2">
+                                                <span class="inline-flex items-center text-pnp-blue dark:text-pnp-gold font-black text-xs uppercase tracking-widest group-hover:translate-x-1 transition-transform">
+                                                    See More <i class="fas fa-arrow-right ml-2.5 text-[9px]"></i>
+                                                </span>
+                                            </div>
                                         </div>
-                                        
-                                        <h3 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight mb-5 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors tracking-tight line-clamp-2">
-                                            <%= news.headline %>
-                                        </h3>
-                                        
-                                        <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
-                                            <%= news.description || 'Click to read full article...' %>
-                                        </p>
-                                        
-                                        <div class="mt-2">
-                                            <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline flex items-center focus:outline-none">
-                                                <span>Read Details</span>
-                                                <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
-                                            </button>
+                                    </a>
+                                </div>
+                            <% }) %>
+                        </div>
+
+                        <!-- Slide Dots/Indicators -->
+                        <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-30">
+                            <% carouselNews.forEach((_, index) => { %>
+                                <button class="carousel-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-pnp-gold transition-all duration-300 focus:outline-none" data-slide="<%= index %>"></button>
+                            <% }) %>
+                        </div>
+                    </div> <!-- Closes Carousel Inner -->
+                </div> <!-- Closes Carousel Wrapper (Outer) -->
+            </div> <!-- Closes Carousel Container -->
+            <% } %>
+
+            <!-- Bulletins Content -->
+            <div class="mt-16">
+                <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                    <div>
+                        <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
+                            <i class="fas fa-bullhorn text-[10px]"></i>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Public Advisory</span>
+                        </div>
+                        <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Public Advisories & Updates</h2>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <% if (locals.bulletins && bulletins.length > 0) { %>
+                        <% bulletins.slice(0, 3).forEach(bulletin => { %>
+                            <div class="bulletin-card group bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-category="<%= bulletin.category %>" onclick="openBulletinModal('<%= bulletin.id %>')">
+                                <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+                                    <div class="h-48 overflow-hidden relative bg-black">
+                                        <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-105 transition duration-700 pointer-events-none"></video>
+                                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                                            <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg">
+                                                <i class="fas fa-images"></i>
+                                                <span>+<%= bulletin.photo_paths.length %></span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
+                                    <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+                                        <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                        <% if (bulletin.photo_paths.length > 1) { %>
+                                            <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg">
+                                                <i class="fas fa-images"></i>
+                                                <span>+<%= bulletin.photo_paths.length - 1 %></span>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                <% } else if (bulletin.photo_path) { %>
+                                    <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+                                        <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                    </div>
+                                <% } else if (bulletin.facebook_url) { %>
+                                    <div class="h-48 bg-blue-950/20 dark:bg-slate-900 border-b border-blue-500/10 flex flex-col items-center justify-center p-4 text-center">
+                                        <div class="w-12 h-12 rounded-xl bg-[#1877F2]/10 border border-[#1877F2]/20 flex items-center justify-center text-[#1877F2] text-2xl mb-2 group-hover:scale-110 transition duration-300">
+                                            <i class="fab fa-facebook"></i>
                                         </div>
+                                        <span class="text-[10px] font-black uppercase text-[#1877F2] tracking-wider">Official Facebook Notice</span>
+                                    </div>
+                                <% } else { %>
+                                    <div class="h-48 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border-b border-gray-100 dark:border-slate-800/50">
+                                        <i class="fas fa-bullhorn text-4xl text-slate-300 dark:text-slate-700 group-hover:text-pnp-blue transition-colors"></i>
+                                    </div>
+                                <% } %>
+
+                                <div class="p-6 flex-grow flex flex-col">
+                                    <div class="flex justify-between items-start mb-4">
+                                        <% const badgeColors = { 'Wanted Person': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800', 'Missing Person': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800', 'Crime Advisory': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800', 'Recovered Property': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800', 'General Announcement': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800' }; %>
+                                        <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm <%= badgeColors[bulletin.category] || 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700' %>">
+                                            <%= bulletin.category %>
+                                        </span>
+                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded-md">
+                                            <%= new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
+                                        </span>
+                                    </div>
+
+                                    <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2">
+                                        <%= bulletin.title %>
+                                    </h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
+                                        <%= bulletin.body %>
+                                    </p>
+
+                                    <div class="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
+                                        <button type="button" onclick="event.stopPropagation(); openBulletinModal('<%= bulletin.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest group-hover:underline flex items-center focus:outline-none">
+                                            See More <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         <% }) %>
-                    </div>
-
-                    <!-- Slide Dots/Indicators -->
-                    <div class="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center space-x-2 z-30">
-                        <% carouselNews.forEach((_, index) => { %>
-                            <button class="carousel-dot w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-pnp-gold transition-all duration-300 focus:outline-none" data-slide="<%= index %>"></button>
-                        <% }) %>
-                    </div>
-                </div> <!-- Closes Carousel Inner -->
-            </div> <!-- Closes Carousel Wrapper (Outer) -->
-        </div> <!-- Closes Carousel Container -->
-        <% } %>
-
-        <!-- Bulletins Content -->
-        <div class="mt-16">
-            <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-                <div>
-                    <div class="inline-flex items-center space-x-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold px-3.5 py-1.5 rounded-full mb-2 border border-pnp-blue/10 dark:border-pnp-gold/25">
-                        <i class="fas fa-bullhorn text-[10px]"></i>
-                        <span class="text-[9px] font-black uppercase tracking-widest">Public Advisory</span>
-                    </div>
-                    <h2 class="text-xl font-bold text-pnp-blue dark:text-white uppercase tracking-tight leading-none">Public Advisories & Updates</h2>
+                    <% } %>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <% if (locals.bulletins && bulletins.length > 0) { %>
-                    <% bulletins.slice(0, 3).forEach(bulletin => { %>
-                        <div class="bulletin-card group bg-white dark:bg-slate-900 rounded-[2rem] shadow-sm hover:shadow-2xl border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-category="<%= bulletin.category %>" onclick="openBulletinModal('<%= bulletin.id %>')">
-                            <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-                                <div class="h-48 overflow-hidden relative bg-black">
-                                    <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-105 transition duration-700 pointer-events-none"></video>
-                                    <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg">
-                                            <i class="fas fa-images"></i>
-                                            <span>+<%= bulletin.photo_paths.length %></span>
-                                        </div>
-                                    <% } %>
-                                </div>
-                            <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                                <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
-                                    <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                                    <% if (bulletin.photo_paths.length > 1) { %>
-                                        <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg">
-                                            <i class="fas fa-images"></i>
-                                            <span>+<%= bulletin.photo_paths.length - 1 %></span>
-                                        </div>
-                                    <% } %>
-                                </div>
-                            <% } else if (bulletin.photo_path) { %>
-                                <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
-                                    <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                                </div>
-                            <% } else if (bulletin.facebook_url) { %>
-                                <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center border-b border-slate-800">
-                                    <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(bulletin.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(bulletin.facebook_url) %>&show_text=false&width=500" 
-                                        width="100%" height="100%" style="border:none;overflow:hidden;min-height:240px;" scrolling="no" frameborder="0" allowfullscreen="true" 
-                                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full"></iframe>
-                                </div>
-                            <% } else { %>
-                                <div class="h-48 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center border-b border-gray-100 dark:border-slate-800/50">
-                                    <i class="fas fa-bullhorn text-4xl text-slate-300 dark:text-slate-700 group-hover:text-pnp-blue transition-colors"></i>
-                                </div>
-                            <% } %>
-
-                            <div class="p-6 flex-grow flex flex-col">
-                                <div class="flex justify-between items-start mb-4">
-                                    <% const badgeColors = { 'Wanted Person': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border-rose-200 dark:border-rose-800', 'Missing Person': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800', 'Crime Advisory': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800', 'Recovered Property': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800', 'General Announcement': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800' }; %>
-                                    <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border shadow-sm <%= badgeColors[bulletin.category] || 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700' %>">
-                                        <%= bulletin.category %>
-                                    </span>
-                                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded-md">
-                                        <%= new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'}) %>
-                                    </span>
-                                </div>
-
-                                <h3 class="text-lg font-black text-slate-800 dark:text-white leading-tight mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2">
-                                    <%= bulletin.title %>
-                                </h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6 line-clamp-3">
-                                    <%= bulletin.body %>
-                                </p>
-
-                                <div class="mt-auto pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-between">
-                                    <button type="button" onclick="event.stopPropagation(); openBulletinModal('<%= bulletin.id %>')" class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest group-hover:underline flex items-center focus:outline-none">
-                                        Read Details <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    <% }) %>
+                    <div class="mt-12 text-center">
+                        <a href="/bulletins" class="inline-flex items-center space-x-2 bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue dark:bg-pnp-gold dark:text-pnp-blue dark:hover:bg-white text-white font-bold px-8 py-4 rounded-xl transition duration-300 shadow-md uppercase tracking-widest text-xs">
+                            <span>See More Bulletins</span>
+                            <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
                 <% } %>
-            </div>
 
-            <% if (locals.bulletins && bulletins.length > 0) { %>
-                <div class="mt-12 text-center">
-                    <a href="/bulletins" class="inline-flex items-center space-x-2 bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue dark:bg-pnp-gold dark:text-pnp-blue dark:hover:bg-white text-white font-bold px-8 py-4 rounded-xl transition duration-300 shadow-md uppercase tracking-widest text-xs">
-                        <span>See More Bulletins</span>
-                        <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
-            <% } %>
-
-            <div id="bulletins-empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
-                <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-folder-open text-2xl text-slate-300 dark:text-slate-600"></i>
-                </div>
-                <h3 class="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">No Bulletins Found</h3>
-                <p class="text-xs text-slate-500 mt-2">No records match the selected category.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Directory Section -->
-<section id="directory-section" class="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 relative border-t border-gray-50 dark:border-slate-800/50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <div class="flex flex-col lg:flex-row gap-12 items-center">
-            <!-- Left Side: Image -->
-            <div class="w-full lg:w-[45%] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700/60 group relative bg-gray-50 dark:bg-slate-800 flex items-center justify-center p-2 shrink-0">
-                <img src="/images/directory-pnp.jpg" alt="Sta Cruz Municipal Police Station Directory" class="w-full h-auto object-contain rounded-[1.5rem] group-hover:scale-[1.02] transition-transform duration-500">
-            </div>
-
-            <!-- Right Side: Text Directory -->
-            <div class="w-full lg:w-[55%] space-y-8 pl-0 lg:pl-4">
-                <div class="border-l-4 border-pnp-gold pl-6 py-2 inline-block w-full bg-gradient-to-r from-gray-50 to-transparent dark:from-slate-800/50 dark:to-transparent rounded-r-2xl">
-                    <h2 class="text-3xl md:text-4xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-2">Sta Cruz</h2>
-                    <h2 class="text-2xl md:text-3xl font-black text-slate-700 dark:text-slate-300 uppercase tracking-tighter leading-none mb-2">Municipal Police Station</h2>
-                    <h2 class="text-xl md:text-2xl font-black text-pnp-gold uppercase tracking-[0.2em] leading-none">Directory</h2>
-                </div>
-
-                <div class="space-y-6">
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PGEN JOSE MELENCIO C NARTATE JR</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief PNP</p>
+                <div id="bulletins-empty-state" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-100 dark:border-slate-800 shadow-sm">
+                    <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-folder-open text-2xl text-slate-300 dark:text-slate-600"></i>
                     </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PBGEN HANSEL M MARANTAN</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Regional Director</p>
-                    </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCOL SANDRO JAY DC TAPALLA</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Provincial Director, Laguna PPO</p>
-                    </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT COL JOJO J SABENIANO</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief of Police</p>
-                    </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT GADY R MABANTO</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Deputy Chief of Police</p>
-                    </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT ANDY O MESANA</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief Operation PCO</p>
-                    </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT ARIEL T GENTOLEO</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Cadmin and Intelligence Section</p>
-                    </div>
-
-                    <!-- Item -->
-                    <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                        <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PEMS MANOLITO M BINALAY</h4>
-                        <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Mespo</p>
-                    </div>
+                    <h3 class="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">No Bulletins Found</h3>
+                    <p class="text-xs text-slate-500 mt-2">No records match the selected category.</p>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Jurisdiction Disclaimer Modal -->
-<div id="jurisdiction-modal"
-    class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-500">
-    <div class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm" id="modal-backdrop"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-11/12 max-w-lg rounded-[2rem] p-8 md:p-10 shadow-2xl border border-gray-100 dark:border-slate-800 transform scale-95 transition-transform duration-500"
-        id="modal-content">
-        <div
-            class="flex items-center justify-center w-16 h-16 bg-pnp-blue text-white rounded-full mb-6 mx-auto shadow-lg">
-            <i class="fas fa-info-circle text-2xl"></i>
-        </div>
-        <h3 class="text-2xl font-black text-center text-slate-900 dark:text-white mb-4">Important Notice</h3>
-        <div class="text-slate-600 dark:text-slate-300 text-sm md:text-base leading-relaxed text-center space-y-4 mb-8">
-            <p>Welcome to the Sta. Cruz Municipal Police Station Portal.</p>
-            <p>Please be advised that this platform <strong>exclusively provides data and bulletins managed by the Sta.
-                    Cruz Laguna PNP</strong>.</p>
-            <p>We do not provide or handle data outside of our station's jurisdiction, such as fire incidents, which are
-                covered by the Bureau of Fire Protection (BFP) and local fire stations.</p>
-        </div>
-        <button id="accept-disclaimer"
-            class="w-full bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-bold py-4 rounded-xl transition-colors duration-300 uppercase tracking-widest text-sm shadow-md">
-            I Understand
-        </button>
-    </div>
-</div>
-
-<!-- INTERACTIVE BULLETIN DETAIL MODAL -->
-<div id="bulletin-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeBulletinModal()"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
-        
-        <!-- Left Side: Media Carousel -->
-        <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
-            <div id="bulletin-modal-media-container" class="w-full h-full relative overflow-hidden flex items-center justify-center">
-                <!-- Media injected here -->
-            </div>
+    <!-- Directory Section -->
+    <section id="directory-section" class="py-16 bg-white dark:bg-slate-900 transition-colors duration-300 relative border-t border-gray-50 dark:border-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <button id="modal-prev-btn" onclick="bulletinModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
-                <i class="fas fa-chevron-left text-sm"></i>
-            </button>
-            <button id="modal-next-btn" onclick="bulletinModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
-                <i class="fas fa-chevron-right text-sm"></i>
-            </button>
-            
-            <div id="modal-dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 hidden"></div>
-        </div>
-
-        <!-- Right Side: Text Content -->
-        <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none">
-            <button onclick="closeBulletinModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300 z-10">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
-                <div class="flex items-center space-x-2 flex-wrap gap-y-2">
-                    <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700"></span>
-                    <div id="bulletin-modal-fb-btn" class="inline-block"></div>
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <!-- Left Side: Image -->
+                <div class="w-full lg:w-[45%] rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-700/60 group relative bg-gray-50 dark:bg-slate-800 flex items-center justify-center p-2 shrink-0">
+                    <img src="/images/directory-pnp.jpg" alt="Sta Cruz Municipal Police Station Directory" class="w-full h-auto object-contain rounded-[1.5rem] group-hover:scale-[1.02] transition-transform duration-500">
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                    <select class="tts-voice-select text-[10px] px-2 py-1 max-w-[125px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none font-bold">
-                        <option value="google:fil-PH" selected>Tagalog / Filipino</option>
-                        <option value="google:en-US">English (US)</option>
-                    </select>
-                    <button id="tts-bulletin-modal-btn" onclick="" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        <i class="fas fa-volume-high text-xs"></i>
-                        <span>Listen</span>
-                    </button>
-                    <button id="translate-bulletin-modal-btn" onclick="toggleTranslation('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', 'tts-bulletin-modal-btn')" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        <i class="fas fa-language text-xs"></i>
-                        <span>Translate</span>
-                    </button>
-                </div>
-            </div>
-            <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
-            <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
-            
-            <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
 
-            <!-- Chatbot Section -->
-            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
-                        <i class="fas fa-robot text-base animate-pulse"></i>
-                        <span>Ask AI Assistant</span>
-                    </h4>
-                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase tracking-wider">Gemini AI</span>
-                </div>
-                
-                <!-- Chat Window -->
-                <div class="bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-gray-100 dark:border-slate-850 overflow-hidden flex flex-col h-[280px]">
-                    <!-- Messages Area -->
-                    <div id="bulletin-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 custom-modal-scrollbar text-xs">
-                        <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-300 max-w-[85%] mr-auto">
-                            Hello! I am your AI assistant for this bulletin. Feel free to ask me any questions about the information presented above.
+                <!-- Right Side: Text Directory -->
+                <div class="w-full lg:w-[55%] space-y-8 pl-0 lg:pl-4">
+                    <div class="border-l-4 border-pnp-gold pl-6 py-2 inline-block w-full bg-gradient-to-r from-gray-50 to-transparent dark:from-slate-800/50 dark:to-transparent rounded-r-2xl">
+                        <h2 class="text-3xl md:text-4xl font-black text-pnp-blue dark:text-white uppercase tracking-tight leading-none mb-2">Sta Cruz</h2>
+                        <h2 class="text-2xl md:text-3xl font-black text-slate-700 dark:text-slate-300 uppercase tracking-tighter leading-none mb-2">Municipal Police Station</h2>
+                        <h2 class="text-xl md:text-2xl font-black text-pnp-gold uppercase tracking-[0.2em] leading-none">Directory</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PGEN JOSE MELENCIO C NARTATE JR</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief PNP</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PBGEN HANSEL M MARANTAN</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Regional Director</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCOL SANDRO JAY DC TAPALLA</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Provincial Director, Laguna PPO</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT COL JOJO J SABENIANO</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief of Police</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT GADY R MABANTO</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Deputy Chief of Police</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT ANDY O MESANA</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief Operation PCO</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT ARIEL T GENTOLEO</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Cadmin and Intelligence Section</p>
+                        </div>
+
+                        <!-- Item -->
+                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PEMS MANOLITO M BINALAY</h4>
+                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Mespo</p>
                         </div>
                     </div>
-                    
-                    <!-- Input Area -->
-                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800/80 flex items-center gap-2 shrink-0">
-                        <input type="text" id="bulletin-chat-input" placeholder="Ask about this bulletin..." class="flex-grow bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100" onkeydown="if(event.key === 'Enter') sendBulletinChat()">
-                        <button onclick="sendBulletinChat()" class="bg-pnp-blue hover:bg-blue-700 text-white dark:bg-pnp-gold dark:hover:bg-yellow-600 dark:text-pnp-blue px-3.5 py-2 rounded-xl transition flex items-center justify-center shrink-0">
-                            <i class="fas fa-paper-plane text-xs"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<!-- INTERACTIVE NEWS DETAIL MODAL -->
-<div id="news-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeNewsModal()"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
-        <!-- Left Side: Image Carousel -->
-        <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
-            <div id="news-modal-media-container" class="w-full h-full relative overflow-hidden flex items-center justify-center">
-                <!-- Media injected here -->
-            </div>
-            
-            <button id="news-modal-prev-btn" onclick="newsModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
-                <i class="fas fa-chevron-left text-sm"></i>
-            </button>
-            <button id="news-modal-next-btn" onclick="newsModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
-                <i class="fas fa-chevron-right text-sm"></i>
-            </button>
-            
-            <div id="news-modal-dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 hidden"></div>
-        </div>
-
-        <!-- Right Side: Text Content -->
-        <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none">
-            <button onclick="closeNewsModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300 z-10">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
-                <div id="news-modal-author" class="inline-block"></div>
-                <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                    <select class="tts-voice-select text-[10px] px-2 py-1 max-w-[125px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none font-bold">
-                        <option value="google:fil-PH" selected>Tagalog / Filipino</option>
-                        <option value="google:en-US">English (US)</option>
-                    </select>
-                    <button id="tts-news-modal-btn" onclick="" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        <i class="fas fa-volume-high text-xs"></i>
-                        <span>Listen</span>
-                    </button>
-                    <button id="translate-news-modal-btn" onclick="toggleTranslation('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', 'tts-news-modal-btn')" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        <i class="fas fa-language text-xs"></i>
-                        <span>Translate</span>
-                    </button>
+    <!-- Jurisdiction & Policy Agreement Modal -->
+    <div id="jurisdiction-modal"
+        class="fixed inset-0 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-500 p-3 sm:p-4 md:p-6">
+        <div class="absolute inset-0 bg-slate-950/85 backdrop-blur-md" id="modal-backdrop"></div>
+        <div class="relative bg-white dark:bg-slate-900 w-full max-w-3xl sm:max-w-4xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-transform duration-500 max-h-[88vh] sm:max-h-[85vh] flex flex-col overflow-hidden text-left"
+            id="modal-content">
+            <!-- Modal Header -->
+            <div class="flex items-center space-x-3 sm:space-x-3.5 mb-3 pb-3 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 flex items-center justify-center font-black shadow-md shrink-0">
+                    <i class="fas fa-file-contract text-lg sm:text-xl"></i>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight">Terms and Conditions</h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-snug">Sta. Cruz Municipal Police Station Public Information and Crime Mapping System</p>
                 </div>
             </div>
-            <div id="news-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center">
-            </div>
-            <h3 id="news-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight"></h3>
-            <div id="news-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-6"></div>
-            <div id="news-modal-fb-container" class="hidden mb-10"></div>
 
-            <!-- Chatbot Section -->
-            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
-                        <i class="fas fa-robot text-base animate-pulse"></i>
-                        <span>Ask AI Assistant</span>
+            <!-- Terms and Conditions Content Container (Scrollable) -->
+            <div class="flex-1 overflow-y-auto custom-modal-scrollbar pr-2 sm:pr-3 min-h-0 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 p-4 sm:p-5 md:p-6 space-y-5 text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+                <!-- Welcome & Introduction -->
+                <div class="bg-white dark:bg-slate-800/80 rounded-xl p-4 border border-slate-200 dark:border-slate-700/80 shadow-xs space-y-2">
+                    <p>
+                        Welcome to the <strong class="text-slate-900 dark:text-white">Sta. Cruz Municipal Police Station Public Information and Crime Mapping System</strong> ("System"). This System is intended to provide the public with accessible information regarding police-related public advisories, bulletins, news and releases, incident information, crime mapping, and statistical or analytical information concerning Sta. Cruz, Laguna.
+                    </p>
+                    <p class="font-medium text-slate-800 dark:text-slate-200">
+                        By accessing or using this System, you acknowledge that you have read, understood, and agreed to these Terms and Conditions.
+                    </p>
+                </div>
+
+                <!-- 1. Purpose of the System -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 1. Purpose of the System
                     </h4>
-                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase tracking-wider">Gemini AI</span>
+                    <p>The System is designed to:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                        <li>Provide public access to official or authorized public advisories, bulletins, news, and releases;</li>
+                        <li>Present recorded incident information through geographic and barangay-based crime mapping;</li>
+                        <li>Provide statistical summaries and visualizations of recorded incidents;</li>
+                        <li>Organize recorded incidents according to applicable classifications, including <strong class="text-slate-800 dark:text-slate-200">8-Focus, Non-Index, and PSI</strong> categories;</li>
+                        <li>Present crime trends and distributions by date, year, barangay, and incident category;</li>
+                        <li>Support public awareness and transparency regarding reported incidents and public safety information; and</li>
+                        <li>Provide analytical information that may assist in understanding general incident patterns and trends.</li>
+                    </ul>
+                    <p class="mt-2 text-slate-600 dark:text-slate-400 italic">
+                        The System is an information and analytical platform and should not be interpreted as a replacement for official police procedures, investigations, court proceedings, or emergency services.
+                    </p>
                 </div>
-                
-                <!-- Chat Window -->
-                <div class="bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-gray-100 dark:border-slate-850 overflow-hidden flex flex-col h-[280px]">
-                    <!-- Messages Area -->
-                    <div id="news-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 custom-modal-scrollbar text-xs">
-                        <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-300 max-w-[85%] mr-auto">
-                            Hello! I am your AI assistant for this article. Feel free to ask me any questions about the information presented above.
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 2. Nature of Incident and Crime Information -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 2. Nature of Incident and Crime Information
+                    </h4>
+                    <p>Information displayed on the System may include recorded or reported incidents, incident types, dates, barangays or locations, classifications, statistical counts, and related analytical information.</p>
+                    <p>The presence of an incident on the System does <strong class="text-slate-900 dark:text-white underline">not</strong> establish that a person is guilty of a crime.</p>
+                    <p>An incident record may represent a reported, recorded, encoded, or otherwise documented occurrence and should not be interpreted as a final judicial determination.</p>
+                    <p class="font-semibold text-slate-800 dark:text-slate-200">All persons are presumed innocent unless and until proven guilty in accordance with applicable law.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 3. Crime Mapping Information -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 3. Crime Mapping Information
+                    </h4>
+                    <p>The crime map is provided primarily for public information, situational awareness, statistical visualization, and general understanding of incident distribution.</p>
+                    <p>Mapped locations may represent an approximate area, barangay, or administrative location associated with an incident. A map marker should not automatically be interpreted as the exact location where an offense occurred or where a person resides.</p>
+                    <p class="text-rose-600 dark:text-rose-400 font-medium">The System should not be used to identify, target, harass, threaten, or discriminate against individuals associated with a reported incident.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 4. Crime Classification and Categories -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 4. Crime Classification and Categories
+                    </h4>
+                    <p>Recorded incidents may be grouped into classifications such as:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                        <li><strong class="text-slate-800 dark:text-slate-200">8-Focus</strong></li>
+                        <li><strong class="text-slate-800 dark:text-slate-200">Non-Index</strong></li>
+                        <li><strong class="text-slate-800 dark:text-slate-200">PSI</strong></li>
+                    </ul>
+                    <p>These classifications are used for organizational, statistical, reporting, or analytical purposes within the System.</p>
+                    <p>A classification displayed by the System should not be interpreted as a legal conclusion, determination of culpability, or indication of the seriousness of an individual person's circumstances unless expressly stated by an authorized official source.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 5. Crime Statistics and Trend Analysis -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 5. Crime Statistics and Trend Analysis
+                    </h4>
+                    <p>The System may display crime counts, monthly trends, barangay distributions, leading incident types, and other statistical summaries.</p>
+                    <p>These statistics are based on records available to the System at the time of display and may change as records are added, corrected, updated, reclassified, or removed.</p>
+                    <p>Statistical or automated analytical outputs are provided for informational and planning purposes only. They should not be treated as a definitive prediction of future criminal activity or as a substitute for professional police assessment and investigation.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 6. News, Bulletins, and Public Advisories -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 6. News, Bulletins, and Public Advisories
+                    </h4>
+                    <p>The System may display public bulletins, news, releases, and advisories issued or authorized for public dissemination.</p>
+                    <p>Information obtained from linked or external sources may be subject to the terms, availability, and accuracy of those respective sources.</p>
+                    <p>Users should verify important or urgent information through the appropriate official police or government channels.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 7. Accuracy and Timeliness -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 7. Accuracy and Timeliness
+                    </h4>
+                    <p>Reasonable efforts may be made to maintain accurate and updated information. However, the System does not guarantee that every record is complete, current, error-free, or continuously available.</p>
+                    <p>Records may be updated to correct errors, reflect new information, or comply with applicable policies and legal requirements.</p>
+                    <p>The absence of an incident from the System does not necessarily mean that no incident occurred.</p>
+                    <p>Likewise, the presence of an incident record does not necessarily mean that an investigation has been completed or that criminal liability has been established.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 8. Public Use of Information -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 8. Public Use of Information
+                    </h4>
+                    <p>Information provided through the System may be used for legitimate purposes such as:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                        <li>Public awareness;</li>
+                        <li>Community safety awareness;</li>
+                        <li>General research and educational purposes;</li>
+                        <li>Understanding incident trends and distributions; and</li>
+                        <li>Accessing publicly disseminated police information.</li>
+                    </ul>
+                    <p class="text-rose-600 dark:text-rose-400">Users must not use information from the System to harass, threaten, intimidate, stalk, discriminate against, or otherwise harm any individual or organization.</p>
+                    <p>Users must not misrepresent System information as an official finding, court decision, warrant, conviction, or final investigative conclusion when it is not expressly identified as such.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 9. Personal and Sensitive Information -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 9. Personal and Sensitive Information
+                    </h4>
+                    <p>Users should not submit unnecessary personal, confidential, or sensitive information through any public-facing feature of the System.</p>
+                    <p>The System may limit the publication or display of information that could unnecessarily expose personal information, compromise an investigation, endanger individuals, or violate applicable privacy requirements.</p>
+                    <p>Information displayed publicly should be limited to information considered appropriate and authorized for public dissemination.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 10. Prohibited Activities -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 10. Prohibited Activities
+                    </h4>
+                    <p>Users shall not:</p>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                        <li>Attempt to gain unauthorized access to administrative or restricted areas of the System;</li>
+                        <li>Modify, manipulate, delete, or interfere with System records without authorization;</li>
+                        <li>Circumvent authentication or security mechanisms;</li>
+                        <li>Upload malicious code, files, or content;</li>
+                        <li>Use the System to harass, threaten, stalk, or identify individuals for harmful purposes;</li>
+                        <li>Intentionally submit false or misleading information;</li>
+                        <li>Misrepresent System information as a judicial finding or official determination when it is not;</li>
+                        <li>Attempt to interfere with the availability or operation of the System; or</li>
+                        <li>Use the System for any unlawful purpose.</li>
+                    </ul>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 11. Administrative and Restricted Functions -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 11. Administrative and Restricted Functions
+                    </h4>
+                    <p>Certain functions of the System may be restricted to authorized personnel.</p>
+                    <p>Administrative functions may include management of incident records, public bulletins, news or releases, mapping information, and other system records.</p>
+                    <p>Unauthorized access, modification, deletion, or manipulation of administrative records is prohibited.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 12. Automated and Analytical Features -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 12. Automated and Analytical Features
+                    </h4>
+                    <p>The System may provide automated calculations, statistical summaries, trend analysis, pattern identification, or analytical suggestions.</p>
+                    <p>Such outputs are intended to assist information review and situational analysis. Automated results may contain limitations or inaccuracies and should be reviewed and interpreted by appropriately authorized personnel before being used for operational, investigative, or administrative decisions.</p>
+                    <p>Automated analysis does not independently establish facts, criminal liability, or investigative conclusions.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 13. Emergency Situations -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 13. Emergency Situations
+                    </h4>
+                    <p class="font-semibold text-rose-600 dark:text-rose-400">This System should not be relied upon as an emergency communication or emergency response service.</p>
+                    <p>For emergencies, crimes in progress, immediate threats to life or safety, or situations requiring urgent police assistance, users should contact the appropriate emergency or law-enforcement authorities directly.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 14. External Links and Third-Party Content -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 14. External Links and Third-Party Content
+                    </h4>
+                    <p>The System may provide links to external websites or platforms for news, announcements, public information, or other related resources.</p>
+                    <p>The Sta. Cruz Municipal Police Station is not necessarily responsible for the content, availability, security, or privacy practices of external websites.</p>
+                    <p>Users should review the terms and privacy policies of external websites before providing information or interacting with them.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 15. Intellectual Property -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 15. Intellectual Property
+                    </h4>
+                    <p>Unless otherwise stated, the System's software, interface, design, graphics, logos, and other original materials may be protected by applicable intellectual property laws.</p>
+                    <p>Public information may be subject to separate government, copyright, attribution, or other applicable requirements.</p>
+                    <p>Nothing in these Terms grants users ownership of the System or its protected materials.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 16. System Availability -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 16. System Availability
+                    </h4>
+                    <p>The System may occasionally become unavailable due to maintenance, updates, technical problems, network interruptions, security measures, or other circumstances.</p>
+                    <p>No guarantee is made that the System will remain continuously available or uninterrupted.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 17. Limitation of Reliance -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 17. Limitation of Reliance
+                    </h4>
+                    <p>Information provided by the System is intended primarily for public information, awareness, statistical visualization, and general analytical purposes.</p>
+                    <p>Users should not make critical legal, investigative, medical, financial, security, or personal decisions solely on the basis of information presented by the System.</p>
+                    <p>Where appropriate, users should consult the relevant authorized government agency or official source for confirmation.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 18. Changes to These Terms -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 18. Changes to These Terms
+                    </h4>
+                    <p>These Terms and Conditions may be updated when necessary to reflect changes in the System, applicable laws, policies, security requirements, or operational procedures.</p>
+                    <p>The updated version shall become effective when published through the System unless otherwise stated.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 19. Acceptance of Terms -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 19. Acceptance of Terms
+                    </h4>
+                    <p>By continuing to access or use the System, you acknowledge that you have read and understood these Terms and Conditions and agree to comply with them.</p>
+                    <p class="font-medium text-slate-800 dark:text-slate-200">If you do not agree with these Terms, you should discontinue use of the System.</p>
+                </div>
+
+                <hr class="border-slate-200 dark:border-slate-800">
+
+                <!-- 20. Contact and Official Verification -->
+                <div class="space-y-2">
+                    <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                        <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 20. Contact and Official Verification
+                    </h4>
+                    <p>For questions regarding information displayed by the System, users should contact the appropriate authorized office of the <strong class="text-slate-900 dark:text-white">Sta. Cruz Municipal Police Station</strong>.</p>
+                    <p>For matters involving an active investigation, confidential information, personal records, or other restricted information, users should follow the appropriate official request and verification procedures.</p>
+                </div>
+
+                <!-- Important Notice Banner -->
+                <div class="rounded-xl p-3.5 sm:p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200">
+                    <div class="flex items-start space-x-2.5">
+                        <i class="fas fa-exclamation-triangle text-amber-600 dark:text-amber-400 mt-0.5 text-sm sm:text-base shrink-0"></i>
+                        <div>
+                            <span class="font-black uppercase tracking-wider text-xs sm:text-sm block text-amber-800 dark:text-amber-300 mb-1">Important Notice:</span>
+                            <p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                                This System is intended to improve public access to information and promote public awareness. Information presented through crime maps, incident records, statistical dashboards, classifications, and analytical features should be interpreted within their intended informational context and should not be treated as a determination of guilt or as a substitute for official investigation, law-enforcement action, or judicial proceedings.
+                            </p>
                         </div>
                     </div>
-                    
-                    <!-- Input Area -->
-                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800/80 flex items-center gap-2 shrink-0">
-                        <input type="text" id="news-chat-input" placeholder="Ask about this article..." class="flex-grow bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100" onkeydown="if(event.key === 'Enter') sendNewsChat()">
-                        <button onclick="sendNewsChat()" class="bg-pnp-blue hover:bg-blue-700 text-white dark:bg-pnp-gold dark:hover:bg-yellow-600 dark:text-pnp-blue px-3.5 py-2 rounded-xl transition flex items-center justify-center shrink-0">
-                            <i class="fas fa-paper-plane text-xs"></i>
-                        </button>
-                    </div>
                 </div>
+            </div>
+
+            <!-- Footer Action Area -->
+            <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col space-y-2.5">
+                <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-800/90 rounded-xl px-4 py-2.5 border border-slate-200 dark:border-slate-700 shadow-xs">
+                    <label class="flex items-center space-x-2.5 cursor-pointer select-none">
+                        <input type="checkbox" id="agree-terms" class="w-4 h-4 sm:w-5 sm:h-5 rounded text-pnp-blue focus:ring-2 focus:ring-pnp-blue dark:bg-slate-700 border-slate-300 dark:border-slate-600 cursor-pointer shrink-0">
+                        <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">I have read, understood, and agree to these Terms and Conditions</span>
+                    </label>
+                </div>
+
+                <div id="policy-validation-msg" class="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center space-x-2">
+                    <i class="fas fa-exclamation-circle text-amber-500 text-sm sm:text-base"></i>
+                    <span>Please agree to the Terms and Conditions to proceed to the portal.</span>
+                </div>
+
+                <button id="accept-disclaimer" disabled
+                    class="w-full bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed font-black py-3 sm:py-3.5 rounded-xl transition-all duration-300 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm">
+                    <i class="fas fa-lock text-xs sm:text-sm"></i>
+                    <span>Proceed to Public Home</span>
+                </button>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    const bulletinsDatabase = <%- JSON.stringify(locals.bulletins || []) %>;
-    const newsDatabase = <%- JSON.stringify(locals.policeNewsList || []) %>;
-    window.newsDatabase = newsDatabase;
-
-    function openNewsModal(newsId) {
-        const db = window.newsDatabase || newsDatabase || [];
-        let article = db.find(n => n && String(n.id) === String(newsId));
-        if (!article && typeof newsId !== 'undefined') {
-            article = db.find((n, idx) => String(idx) === String(newsId));
-        }
-        if (!article && db.length > 0) {
-            article = db[0];
-        }
-        if (!article) return;
-
-        const mediaContainer = document.getElementById('news-modal-media-container');
-        const prevBtn = document.getElementById('news-modal-prev-btn');
-        const nextBtn = document.getElementById('news-modal-next-btn');
-        const dotsContainer = document.getElementById('news-modal-dots-container');
-
-        if (mediaContainer) {
-            mediaContainer.innerHTML = '';
-            if (dotsContainer) dotsContainer.innerHTML = '';
+    <!-- INTERACTIVE BULLETIN DETAIL MODAL -->
+    <div id="bulletin-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeBulletinModal()"></div>
+        <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
             
-            if (article.facebook_url) {
-                const isVideo = /video|watch|reel/i.test(article.facebook_url);
-                const pluginType = isVideo ? 'video.php' : 'post.php';
-                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(article.facebook_url)}&show_text=false&width=500`;
-                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[350px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
-                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:350px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
-                </div>`;
-                if (prevBtn) prevBtn.classList.add('hidden');
-                if (nextBtn) nextBtn.classList.add('hidden');
-                if (dotsContainer) dotsContainer.classList.add('hidden');
-            } else {
-                let mediaItems = [];
-                if (article.photo_paths && article.photo_paths.length > 0) {
-                    article.photo_paths.forEach(p => {
-                        if (p) mediaItems.push({ type: 'image', url: p });
+            <!-- Left Side: Media Carousel -->
+            <div class="w-full lg:w-[50%] relative bg-black flex items-center justify-center min-h-[250px] md:min-h-[400px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
+                <div id="bulletin-modal-media-container" class="w-full h-full relative overflow-hidden flex">
+                    <!-- Media injected here -->
+                </div>
+                
+                <button id="modal-prev-btn" onclick="bulletinModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                    <i class="fas fa-chevron-left text-sm"></i>
+                </button>
+                <button id="modal-next-btn" onclick="bulletinModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+                    <i class="fas fa-chevron-right text-sm"></i>
+                </button>
+                
+                <div id="modal-dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 hidden"></div>
+            </div>
+
+            <!-- Right Side: Text Content -->
+            <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none">
+                <button onclick="closeBulletinModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300 z-10">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
+                    <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-pnp-blue dark:text-pnp-gold bg-pnp-blue/10 dark:bg-pnp-gold/10 px-4 py-2 rounded-xl"></span>
+                    <button id="tts-bulletin-modal-btn" onclick="" class="text-xs font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-widest flex items-center space-x-2 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                        <i class="fas fa-volume-high text-xs"></i>
+                        <span>Read Advisory</span>
+                    </button>
+                </div>
+                <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
+                <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
+                
+                <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const bulletinsDatabase = <%- JSON.stringify(locals.bulletins || []) %>;
+
+        function openBulletinModal(bulletinId) {
+            const bulletin = bulletinsDatabase.find(b => b.id === bulletinId);
+            if (!bulletin) return;
+
+            const mediaContainer = document.getElementById('bulletin-modal-media-container');
+            const prevBtn = document.getElementById('modal-prev-btn');
+            const nextBtn = document.getElementById('modal-next-btn');
+            const dotsContainer = document.getElementById('modal-dots-container');
+
+            if (mediaContainer) {
+                mediaContainer.innerHTML = '';
+                dotsContainer.innerHTML = '';
+                
+                const mediaItems = [];
+                
+                if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                    bulletin.video_paths.forEach(url => {
+                        if (url) mediaItems.push({ type: 'video', url });
                     });
-                } else if (article.urlToImage) {
-                    mediaItems.push({ type: 'image', url: article.urlToImage });
+                } else if (bulletin.video_path) {
+                    mediaItems.push({ type: 'video', url: bulletin.video_path });
                 }
 
-                if (article.video_paths && article.video_paths.length > 0) {
-                    article.video_paths.forEach(v => {
-                        if (v) mediaItems.push({ type: 'video', url: v });
+                if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
+                    bulletin.photo_paths.forEach(url => {
+                        if (url) mediaItems.push({ type: 'photo', url });
                     });
+                } else if (bulletin.photo_path) {
+                    mediaItems.push({ type: 'photo', url: bulletin.photo_path });
                 }
 
-                if (mediaItems.length === 0) {
-                    mediaItems.push({ type: 'image', url: '/images/PNP.jpg' });
-                }
-
-                mediaContainer.innerHTML = mediaItems.map((item, idx) => {
-                    const isVisible = idx === 0;
-                    const displayStyle = isVisible ? 'display: flex;' : 'display: none;';
-                    if (item.type === 'video') {
-                        return `
-                            <div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
-                                <video src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain" controls></video>
-                            </div>
-                        `;
-                    } else {
-                        return `
-                            <div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 p-2 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
-                                <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-xl" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                            </div>
-                        `;
-                    }
-                }).join('');
+                if (mediaItems.length > 0) {
+                    const renderItemHtml = (item, idx) => {
+                        if (item.type === 'video') {
+                            return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                        <video src="${item.url}" controls class="w-full h-full object-contain"></video>
+                                    </div>`;
+                        } else {
+                            return `<div class="absolute inset-0 w-full h-full transition-opacity duration-500 flex items-center justify-center bg-black ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" data-slide="${idx}">
+                                        <img src="${item.url}" class="w-full h-full object-contain" alt="Media ${idx + 1}">
+                                    </div>`;
+                        }
+                    };
                     
-                window.currentNewsModalSlide = 0;
-                window.totalNewsModalSlides = mediaItems.length;
+                    mediaContainer.innerHTML = mediaItems.map((item, idx) => renderItemHtml(item, idx)).join('');
+                    
+                    window.currentBulletinModalSlide = 0;
+                    window.totalBulletinModalSlides = mediaItems.length;
 
-                if (mediaItems.length > 1) {
-                    if (prevBtn) prevBtn.classList.remove('hidden');
-                    if (nextBtn) nextBtn.classList.remove('hidden');
-                    if (dotsContainer) {
+                    if (mediaItems.length > 1) {
+                        prevBtn.classList.remove('hidden');
+                        nextBtn.classList.remove('hidden');
                         dotsContainer.classList.remove('hidden');
+                        
                         dotsContainer.innerHTML = mediaItems.map((_, idx) => `
-                            <button onclick="newsModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
+                            <button onclick="bulletinModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
                         `).join('');
+                    } else {
+                        prevBtn.classList.add('hidden');
+                        nextBtn.classList.add('hidden');
+                        dotsContainer.classList.add('hidden');
                     }
                 } else {
-                    if (prevBtn) prevBtn.classList.add('hidden');
-                    if (nextBtn) nextBtn.classList.add('hidden');
-                    if (dotsContainer) dotsContainer.classList.add('hidden');
+                    mediaContainer.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-700">
+                        <i class="fas fa-image text-5xl"></i>
+                    </div>`;
+                    prevBtn.classList.add('hidden');
+                    nextBtn.classList.add('hidden');
+                    dotsContainer.classList.add('hidden');
                 }
             }
-        }
 
-        const authorEl = document.getElementById('news-modal-author');
-        if (authorEl) {
-            if (article.facebook_url || (article.author && (article.author.startsWith('http://') || article.author.startsWith('https://')))) {
-                const urlVal = article.facebook_url || article.author;
-                authorEl.innerHTML = `<a href="${urlVal}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-4 py-2 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider transition shadow-sm">
-                    <i class="fab fa-facebook text-sm"></i>
-                    <span>Open Official Facebook Post</span>
-                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
-                </a>`;
-            } else {
-                authorEl.innerHTML = `<span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 italic">By ${article.author || 'Station Desk'}</span>`;
+            document.getElementById('bulletin-modal-category').textContent = bulletin.category;
+            document.getElementById('bulletin-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
+            document.getElementById('bulletin-modal-title').textContent = bulletin.title;
+            document.getElementById('bulletin-modal-content').textContent = bulletin.body;
+
+            const ttsBtn = document.getElementById('tts-bulletin-modal-btn');
+            if (ttsBtn) {
+                const speechText = `${bulletin.title}. ${bulletin.body}`;
+                ttsBtn.onclick = () => speakReport('tts-bulletin-modal-btn', speechText);
             }
-        }
 
-        const dateEl = document.getElementById('news-modal-date');
-        if (dateEl) {
-            const pubDate = article.publishedAt ? new Date(article.publishedAt) : new Date();
-            const dateStr = !isNaN(pubDate.getTime()) ? pubDate.toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) : '';
-            dateEl.innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${dateStr}`;
-        }
-
-        const titleEl = document.getElementById('news-modal-title');
-        if (titleEl) titleEl.textContent = article.headline || '';
-        
-        const contentEl = document.getElementById('news-modal-content');
-        if (contentEl) contentEl.textContent = article.fullContent || article.description || '';
-
-        const fbBox = document.getElementById('news-modal-fb-container');
-        if (fbBox) {
-            fbBox.classList.add('hidden');
-        }
-
-        if (typeof resetTranslationButton === 'function') {
-            resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline || '', article.fullContent || '', 'tts-news-modal-btn');
-        }
-
-        if (typeof clearNewsChat === 'function') {
-            clearNewsChat();
-        }
-
-        const modal = document.getElementById('news-modal');
-        if (modal) {
+            const modal = document.getElementById('bulletin-modal');
             const content = modal.querySelector('.relative');
+
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
-                if (content) {
-                    content.classList.remove('scale-95');
-                    content.classList.add('scale-100');
-                }
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
             }, 50);
         }
-    }
 
-    function closeNewsModal() {
-        if (typeof stopSpeech === 'function') stopSpeech();
-        if (typeof clearNewsChat === 'function') clearNewsChat();
-        const modal = document.getElementById('news-modal');
-        if (modal) {
+        function closeBulletinModal() {
+            if (typeof stopSpeech === 'function') stopSpeech();
+            const modal = document.getElementById('bulletin-modal');
+            if (!modal) return;
             const content = modal.querySelector('.relative');
+            
+            const videos = modal.querySelectorAll('video');
+            videos.forEach(v => {
+                try {
+                    v.pause();
+                } catch (e) {}
+            });
 
             modal.classList.add('opacity-0');
             if (content) {
@@ -650,778 +780,485 @@
                 modal.classList.add('hidden');
             }, 300);
         }
-    }
 
-    function newsModalUpdate() {
-        const slides = document.querySelectorAll('#news-modal-media-container [data-slide]');
-        const dots = document.querySelectorAll('#news-modal-dots-container [data-dot]');
-        
-        slides.forEach((slide, idx) => {
-            if (idx === window.currentNewsModalSlide) {
-                slide.style.display = 'flex';
-                slide.classList.replace('opacity-0', 'opacity-100');
-                slide.classList.replace('z-0', 'z-10');
-                slide.classList.remove('pointer-events-none');
-            } else {
-                slide.style.display = 'none';
-                slide.classList.replace('opacity-100', 'opacity-0');
-                slide.classList.replace('z-10', 'z-0');
-                slide.classList.add('pointer-events-none');
-            }
-        });
-        
-        dots.forEach((dot, idx) => {
-            if (idx === window.currentNewsModalSlide) {
-                dot.classList.replace('bg-white/40', 'bg-white');
-                dot.classList.remove('hover:bg-white/80');
-                dot.classList.add('scale-125');
-            } else {
-                dot.classList.replace('bg-white', 'bg-white/40');
-                dot.classList.add('hover:bg-white/80');
-                dot.classList.remove('scale-125');
-            }
-        });
-    }
-
-    function newsModalNext() {
-        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
-        window.currentNewsModalSlide = (window.currentNewsModalSlide + 1) % window.totalNewsModalSlides;
-        newsModalUpdate();
-    }
-
-    function newsModalPrev() {
-        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
-        window.currentNewsModalSlide = (window.currentNewsModalSlide - 1 + window.totalNewsModalSlides) % window.totalNewsModalSlides;
-        newsModalUpdate();
-    }
-
-    function newsModalGoTo(idx) {
-        if (!window.totalNewsModalSlides || window.totalNewsModalSlides <= 1) return;
-        window.currentNewsModalSlide = idx;
-        newsModalUpdate();
-    }
-
-    let newsChatHistory = [];
-    
-    function sendNewsChat() {
-        const inputEl = document.getElementById('news-chat-input');
-        if (!inputEl) return;
-        
-        const text = inputEl.value.trim();
-        if (!text) return;
-        
-        inputEl.value = '';
-        inputEl.disabled = true;
-        
-        const chatBox = document.getElementById('news-chat-messages');
-        if (!chatBox) return;
-        
-        const msgDiv = document.createElement('div');
-        msgDiv.className = "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-bold whitespace-pre-wrap leading-relaxed";
-        msgDiv.textContent = text;
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        
-        const indicator = document.createElement('div');
-        indicator.id = 'news-chat-typing';
-        indicator.className = 'text-[10px] text-slate-400 dark:text-slate-400 italic p-1 mr-auto flex items-center gap-1.5';
-        indicator.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i><span>Assistant is thinking...</span>`;
-        chatBox.appendChild(indicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        
-        fetch('/api/chat-article', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                articleTitle: (document.getElementById('news-modal-title')?.textContent || '').trim(),
-                articleContent: (document.getElementById('news-modal-content')?.textContent || '').trim(),
-                userMessage: text,
-                chatHistory: newsChatHistory
-            })
-        }).then(r => r.json()).then(res => {
-            const ind = document.getElementById('news-chat-typing');
-            if (ind) ind.remove();
+        function bulletinModalUpdate() {
+            const slides = document.querySelectorAll('#bulletin-modal-media-container [data-slide]');
+            const dots = document.querySelectorAll('#modal-dots-container [data-dot]');
             
-            const replyDiv = document.createElement('div');
-            replyDiv.className = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
-            
-            if (res.success && res.reply) {
-                replyDiv.textContent = res.reply;
-                chatBox.appendChild(replyDiv);
-                newsChatHistory.push({ role: 'user', text });
-                newsChatHistory.push({ role: 'assistant', text: res.reply });
-            } else {
-                replyDiv.textContent = res.error || "Sorry, I encountered an issue generating a response.";
-                chatBox.appendChild(replyDiv);
-            }
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }).catch(e => {
-            console.error('Chat error:', e);
-            const ind = document.getElementById('news-chat-typing');
-            if (ind) ind.remove();
-            const errDiv = document.createElement('div');
-            errDiv.className = "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
-            errDiv.textContent = "Failed to connect to assistant service.";
-            chatBox.appendChild(errDiv);
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }).finally(() => {
-            inputEl.disabled = false;
-            inputEl.focus();
-        });
-    }
-
-    function clearNewsChat() {
-        newsChatHistory = [];
-        const chatBox = document.getElementById('news-chat-messages');
-        if (chatBox) {
-            chatBox.innerHTML = `
-                <div class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto">
-                    Hello! I am your AI assistant for this article. Feel free to ask me any questions about the information presented above.
-                </div>
-            `;
-        }
-    }
-
-    function openBulletinModal(bulletinId) {
-        const bulletin = bulletinsDatabase.find(b => String(b.id) === String(bulletinId));
-        if (!bulletin) return;
-
-        const mediaContainer = document.getElementById('bulletin-modal-media-container');
-        const prevBtn = document.getElementById('modal-prev-btn');
-        const nextBtn = document.getElementById('modal-next-btn');
-        const dotsContainer = document.getElementById('modal-dots-container');
-
-        if (mediaContainer) {
-            mediaContainer.innerHTML = '';
-            if (dotsContainer) dotsContainer.innerHTML = '';
-
-            const mediaItems = [];
-            
-            if (bulletin.video_paths && bulletin.video_paths.length > 0) {
-                bulletin.video_paths.forEach(url => {
-                    if (url) mediaItems.push({ type: 'video', url });
-                });
-            } else if (bulletin.video_path) {
-                mediaItems.push({ type: 'video', url: bulletin.video_path });
-            }
-
-            if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
-                bulletin.photo_paths.forEach(url => {
-                    if (url) mediaItems.push({ type: 'photo', url });
-                });
-            } else if (bulletin.photo_path) {
-                mediaItems.push({ type: 'photo', url: bulletin.photo_path });
-            }
-
-            if (bulletin.facebook_url && mediaItems.length === 0) {
-                const isVideo = /video|watch|reel/i.test(bulletin.facebook_url);
-                const pluginType = isVideo ? 'video.php' : 'post.php';
-                const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(bulletin.facebook_url)}&show_text=true&width=500`;
-                mediaContainer.innerHTML = `<div class="w-full h-full min-h-[380px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
-                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:380px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
-                </div>`;
-                if (prevBtn) prevBtn.classList.add('hidden');
-                if (nextBtn) nextBtn.classList.add('hidden');
-                if (dotsContainer) dotsContainer.classList.add('hidden');
-            } else {
-                if (mediaItems.length === 0) {
-                    mediaItems.push({ type: 'photo', url: '/images/PNP.jpg' });
-                }
-
-                const renderItemHtml = (item, idx) => {
-                    const isVisible = idx === 0;
-                    const displayStyle = isVisible ? 'display: flex;' : 'display: none;';
-                    if (item.type === 'video') {
-                        return `<div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
-                                    <video src="${item.url}" controls class="max-w-full max-h-full w-auto h-auto object-contain"></video>
-                                </div>`;
-                    } else {
-                        return `<div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 p-2 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
-                                    <img src="${item.url}" class="max-w-full max-h-full w-auto h-auto object-contain select-none rounded-xl" alt="Media ${idx + 1}" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                                </div>`;
-                    }
-                };
-                
-                mediaContainer.innerHTML = mediaItems.map((item, idx) => renderItemHtml(item, idx)).join('');
-                window.currentBulletinModalSlide = 0;
-                window.totalBulletinModalSlides = mediaItems.length;
-
-                if (mediaItems.length > 1) {
-                    if (prevBtn) prevBtn.classList.remove('hidden');
-                    if (nextBtn) nextBtn.classList.remove('hidden');
-                    if (dotsContainer) {
-                        dotsContainer.classList.remove('hidden');
-                        dotsContainer.innerHTML = mediaItems.map((_, idx) => `
-                            <button onclick="bulletinModalGoTo(${idx})" class="w-2 h-2 rounded-full transition-all ${idx === 0 ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/80'}" data-dot="${idx}"></button>
-                        `).join('');
-                    }
+            slides.forEach((slide, idx) => {
+                if (idx === window.currentBulletinModalSlide) {
+                    slide.classList.replace('opacity-0', 'opacity-100');
+                    slide.classList.replace('z-0', 'z-10');
+                    slide.classList.remove('pointer-events-none');
                 } else {
-                    if (prevBtn) prevBtn.classList.add('hidden');
-                    if (nextBtn) nextBtn.classList.add('hidden');
-                    if (dotsContainer) dotsContainer.classList.add('hidden');
-                }
-            }
-        }
-
-        document.getElementById('bulletin-modal-category').textContent = bulletin.category;
-        document.getElementById('bulletin-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
-        document.getElementById('bulletin-modal-title').textContent = bulletin.title;
-        document.getElementById('bulletin-modal-content').textContent = bulletin.body;
-
-        const fbBtn = document.getElementById('bulletin-modal-fb-btn');
-        if (fbBtn) {
-            if (bulletin.facebook_url) {
-                fbBtn.innerHTML = `<a href="${bulletin.facebook_url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 px-3.5 py-1.5 bg-[#1877F2] hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider transition shadow-sm">
-                    <i class="fab fa-facebook text-xs"></i>
-                    <span>Open Official Facebook Post</span>
-                    <i class="fas fa-external-link-alt text-[9px] ml-1 opacity-80"></i>
-                </a>`;
-            } else {
-                fbBtn.innerHTML = '';
-            }
-        }
-
-        if (typeof resetTranslationButton === 'function') {
-            resetTranslationButton('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', bulletin.title, bulletin.body, 'tts-bulletin-modal-btn');
-        }
-
-        if (typeof clearBulletinChat === 'function') {
-            clearBulletinChat();
-        }
-
-        const modal = document.getElementById('bulletin-modal');
-        const content = modal.querySelector('.relative');
-
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            content.classList.remove('scale-95');
-            content.classList.add('scale-100');
-        }, 50);
-    }
-
-    function closeBulletinModal() {
-        if (typeof stopSpeech === 'function') stopSpeech();
-        if (typeof clearBulletinChat === 'function') clearBulletinChat();
-        const modal = document.getElementById('bulletin-modal');
-        if (!modal) return;
-        const content = modal.querySelector('.relative');
-        
-        const videos = modal.querySelectorAll('video');
-        videos.forEach(v => {
-            try {
-                v.pause();
-            } catch (e) {}
-        });
-
-        modal.classList.add('opacity-0');
-        if (content) {
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-        }
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
-
-    let bulletinChatHistory = [];
-    
-    function formatChatMessage(text) {
-        if (!text) return '';
-        let safe = String(text)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-        
-        safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold">$1</strong>');
-        safe = safe.replace(/\n/g, '<br>');
-        return safe;
-    }
-
-    function appendBulletinChatMessage(sender, text) {
-        const chatBox = document.getElementById('bulletin-chat-messages');
-        if (!chatBox) return;
-        
-        const isUser = sender === 'user';
-        const msgDiv = document.createElement('div');
-        msgDiv.className = isUser 
-            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-bold whitespace-pre-wrap leading-relaxed"
-            : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
-        
-        msgDiv.innerHTML = formatChatMessage(text);
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-    
-    async function sendBulletinChat() {
-        const inputEl = document.getElementById('bulletin-chat-input');
-        if (!inputEl) return;
-        
-        const text = inputEl.value.trim();
-        if (!text) return;
-        
-        inputEl.value = '';
-        inputEl.disabled = true;
-        
-        appendBulletinChatMessage('user', text);
-        
-        const chatBox = document.getElementById('bulletin-chat-messages');
-        const indicator = document.createElement('div');
-        indicator.id = 'bulletin-chat-typing';
-        indicator.className = 'text-[10px] text-slate-400 dark:text-slate-400 italic p-1 mr-auto flex items-center gap-1.5';
-        indicator.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i><span>Assistant is thinking...</span>`;
-        chatBox.appendChild(indicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        
-        try {
-            const titleEl = document.getElementById('bulletin-modal-title') || document.getElementById('news-modal-title');
-            const contentEl = document.getElementById('bulletin-modal-content') || document.getElementById('news-modal-content');
-            const articleTitle = (titleEl?.textContent || '').trim() || 'Bulletin';
-            const articleContent = (contentEl?.textContent || '').trim() || 'Bulletin details';
-            
-            const res = await fetch('/api/chat-article', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    articleTitle,
-                    articleContent,
-                    userMessage: text,
-                    chatHistory: bulletinChatHistory
-                })
-            }).then(r => r.json());
-            
-            const ind = document.getElementById('bulletin-chat-typing');
-            if (ind) ind.remove();
-            
-            if (res.success && res.reply) {
-                appendBulletinChatMessage('assistant', res.reply);
-                bulletinChatHistory.push({ role: 'user', text });
-                bulletinChatHistory.push({ role: 'assistant', text: res.reply });
-            } else {
-                appendBulletinChatMessage('assistant', res.error || "Sorry, I encountered an issue generating a response.");
-            }
-        } catch (e) {
-            console.error('Chat error:', e);
-            const ind = document.getElementById('bulletin-chat-typing');
-            if (ind) ind.remove();
-            appendBulletinChatMessage('assistant', "Failed to connect to assistant service.");
-        } finally {
-            inputEl.disabled = false;
-            inputEl.focus();
-        }
-    }
-    
-    function clearBulletinChat() {
-        bulletinChatHistory = [];
-        const chatBox = document.getElementById('bulletin-chat-messages');
-        if (chatBox) {
-            chatBox.innerHTML = `
-                <div class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto">
-                    Hello! I am your AI assistant for this bulletin. Feel free to ask me any questions about the information presented above.
-                </div>
-            `;
-        }
-    }
-
-    function bulletinModalUpdate() {
-        const slides = document.querySelectorAll('#bulletin-modal-media-container [data-slide]');
-        const dots = document.querySelectorAll('#modal-dots-container [data-dot]');
-        
-        slides.forEach((slide, idx) => {
-            if (idx === window.currentBulletinModalSlide) {
-                slide.style.display = 'flex';
-                slide.classList.replace('opacity-0', 'opacity-100');
-                slide.classList.replace('z-0', 'z-10');
-                slide.classList.remove('pointer-events-none');
-            } else {
-                slide.style.display = 'none';
-                slide.classList.replace('opacity-100', 'opacity-0');
-                slide.classList.replace('z-10', 'z-0');
-                slide.classList.add('pointer-events-none');
-                
-                const vid = slide.querySelector('video');
-                if (vid) { try { vid.pause(); } catch(e){} }
-            }
-        });
-        
-        dots.forEach((dot, idx) => {
-            if (idx === window.currentBulletinModalSlide) {
-                dot.classList.replace('bg-white/40', 'bg-white');
-                dot.classList.remove('hover:bg-white/80');
-                dot.classList.add('scale-125');
-            } else {
-                dot.classList.replace('bg-white', 'bg-white/40');
-                dot.classList.add('hover:bg-white/80');
-                dot.classList.remove('scale-125');
-            }
-        });
-    }
-
-    function bulletinModalNext() {
-        if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
-        window.currentBulletinModalSlide = (window.currentBulletinModalSlide + 1) % window.totalBulletinModalSlides;
-        bulletinModalUpdate();
-    }
-
-    function bulletinModalPrev() {
-        if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
-        window.currentBulletinModalSlide = (window.currentBulletinModalSlide - 1 + window.totalBulletinModalSlides) % window.totalBulletinModalSlides;
-        bulletinModalUpdate();
-    }
-
-    function bulletinModalGoTo(idx) {
-        if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
-        window.currentBulletinModalSlide = idx;
-        bulletinModalUpdate();
-    }
-
-    document.addEventListener('keydown', (e) => {
-        const modal = document.getElementById('bulletin-modal');
-        if (modal && !modal.classList.contains('hidden')) {
-            if (e.key === 'ArrowLeft') {
-                bulletinModalPrev();
-            } else if (e.key === 'ArrowRight') {
-                bulletinModalNext();
-            } else if (e.key === 'Escape') {
-                closeBulletinModal();
-            }
-        }
-    });
-
-    async function generateTrendsReport() {
-        const btn = document.querySelector('button[onclick="generateTrendsReport()"]');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
-        btn.disabled = true;
-
-        try {
-            const response = await fetch('/api/map-points');
-            const currentPoints = await response.json();
-            
-            if (!currentPoints || currentPoints.length === 0) {
-                alert('No crime data available to generate a report.');
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                return;
-            }
-
-            let totalCrimes = currentPoints.length;
-            
-            const typeCounts = {};
-            const barangayCounts = {};
-            const monthCounts = {};
-
-            currentPoints.forEach(p => {
-                const type = p.incident_type || 'Unknown';
-                const brgy = p.barangay || 'Unknown';
-                typeCounts[type] = (typeCounts[type] || 0) + 1;
-                barangayCounts[brgy] = (barangayCounts[brgy] || 0) + 1;
-                
-                const pDate = new Date(p.incident_date || p.date || p.created_at);
-                if (!isNaN(pDate.getTime())) {
-                    const month = pDate.toLocaleString('default', { month: 'long' });
-                    monthCounts[month] = (monthCounts[month] || 0) + 1;
+                    slide.classList.replace('opacity-100', 'opacity-0');
+                    slide.classList.replace('z-10', 'z-0');
+                    slide.classList.add('pointer-events-none');
+                    
+                    const vid = slide.querySelector('video');
+                    if (vid) { try { vid.pause(); } catch(e){} }
                 }
             });
-
-            const sortedTypes = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
-            const sortedBarangays = Object.entries(barangayCounts).sort((a, b) => b[1] - a[1]);
-            const sortedMonths = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]);
-
-            // Calculate time scope
-            const dates = currentPoints
-                .map(p => new Date(p.incident_date || p.date || p.created_at).getTime())
-                .filter(t => !isNaN(t));
-            let timeScope = "";
-            if (dates.length > 0) {
-                const minDate = new Date(Math.min(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                const maxDate = new Date(Math.max(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                timeScope = minDate === maxDate ? `on ${minDate}` : `for the period between ${minDate} and ${maxDate}`;
-            } else {
-                timeScope = "for the selected period";
-            }
-
-            const mostCommonCrime = sortedTypes.length > 0 ? sortedTypes[0] : ['N/A', 0];
-            const mostAffectedBrgy = sortedBarangays.length > 0 ? sortedBarangays[0] : ['N/A', 0];
-            const peakMonth = sortedMonths.length > 0 ? sortedMonths[0] : ['N/A', 0];
             
-            const crimePercentage = totalCrimes > 0 ? ((mostCommonCrime[1]/totalCrimes)*100).toFixed(1) : 0;
+            dots.forEach((dot, idx) => {
+                if (idx === window.currentBulletinModalSlide) {
+                    dot.classList.replace('bg-white/40', 'bg-white');
+                    dot.classList.remove('hover:bg-white/80');
+                    dot.classList.add('scale-125');
+                } else {
+                    dot.classList.replace('bg-white', 'bg-white/40');
+                    dot.classList.add('hover:bg-white/80');
+                    dot.classList.remove('scale-125');
+                }
+            });
+        }
 
-            const reportHtml = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Incidents</p>
-                        <p class="text-3xl font-black text-pnp-blue dark:text-pnp-gold">${totalCrimes}</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Peak Month</p>
-                        <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${peakMonth[0]} <span class="text-sm text-gray-500">(${peakMonth[1]} cases)</span></p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Most Prevalent Crime</p>
-                        <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${mostCommonCrime[0]} <span class="text-sm text-gray-500">(${mostCommonCrime[1]} cases)</span></p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
-                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Most Affected Barangay</p>
-                        <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${mostAffectedBrgy[0]} <span class="text-sm text-gray-500">(${mostAffectedBrgy[1]} cases)</span></p>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Executive Summary</h4>
-                    <p>Based on the system's recorded data, a total of <strong>${totalCrimes}</strong> incidents have been logged <strong>${timeScope}</strong>. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
-                </div>
-            `;
+        function bulletinModalNext() {
+            if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
+            window.currentBulletinModalSlide = (window.currentBulletinModalSlide + 1) % window.totalBulletinModalSlides;
+            bulletinModalUpdate();
+        }
 
-            document.getElementById('trends-report-content').innerHTML = reportHtml;
+        function bulletinModalPrev() {
+            if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
+            window.currentBulletinModalSlide = (window.currentBulletinModalSlide - 1 + window.totalBulletinModalSlides) % window.totalBulletinModalSlides;
+            bulletinModalUpdate();
+        }
 
+        function bulletinModalGoTo(idx) {
+            if (!window.totalBulletinModalSlides || window.totalBulletinModalSlides <= 1) return;
+            window.currentBulletinModalSlide = idx;
+            bulletinModalUpdate();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('bulletin-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                if (e.key === 'ArrowLeft') {
+                    bulletinModalPrev();
+                } else if (e.key === 'ArrowRight') {
+                    bulletinModalNext();
+                } else if (e.key === 'Escape') {
+                    closeBulletinModal();
+                }
+            }
+        });
+
+        async function generateTrendsReport() {
+            const btn = document.querySelector('button[onclick="generateTrendsReport()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Loading...</span>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/api/map-points');
+                const currentPoints = await response.json();
+                
+                if (!currentPoints || currentPoints.length === 0) {
+                    alert('No crime data available to generate a report.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                let totalCrimes = currentPoints.length;
+                
+                const typeCounts = {};
+                const barangayCounts = {};
+                const monthCounts = {};
+
+                currentPoints.forEach(p => {
+                    const type = p.incident_type || 'Unknown';
+                    const brgy = p.barangay || 'Unknown';
+                    typeCounts[type] = (typeCounts[type] || 0) + 1;
+                    barangayCounts[brgy] = (barangayCounts[brgy] || 0) + 1;
+                    
+                    const pDate = new Date(p.incident_date || p.date || p.created_at);
+                    if (!isNaN(pDate.getTime())) {
+                        const month = pDate.toLocaleString('default', { month: 'long' });
+                        monthCounts[month] = (monthCounts[month] || 0) + 1;
+                    }
+                });
+
+                const sortedTypes = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
+                const sortedBarangays = Object.entries(barangayCounts).sort((a, b) => b[1] - a[1]);
+                const sortedMonths = Object.entries(monthCounts).sort((a, b) => b[1] - a[1]);
+
+                // Calculate time scope
+                const dates = currentPoints
+                    .map(p => new Date(p.incident_date || p.date || p.created_at).getTime())
+                    .filter(t => !isNaN(t));
+                let timeScope = "";
+                if (dates.length > 0) {
+                    const minDate = new Date(Math.min(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    const maxDate = new Date(Math.max(...dates)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                    timeScope = minDate === maxDate ? `on ${minDate}` : `for the period between ${minDate} and ${maxDate}`;
+                } else {
+                    timeScope = "for the selected period";
+                }
+
+                const mostCommonCrime = sortedTypes.length > 0 ? sortedTypes[0] : ['N/A', 0];
+                const mostAffectedBrgy = sortedBarangays.length > 0 ? sortedBarangays[0] : ['N/A', 0];
+                const peakMonth = sortedMonths.length > 0 ? sortedMonths[0] : ['N/A', 0];
+                
+                const crimePercentage = totalCrimes > 0 ? ((mostCommonCrime[1]/totalCrimes)*100).toFixed(1) : 0;
+
+                const reportHtml = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Incidents</p>
+                            <p class="text-3xl font-black text-pnp-blue dark:text-pnp-gold">${totalCrimes}</p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Peak Month</p>
+                            <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${peakMonth[0]} <span class="text-sm text-gray-500">(${peakMonth[1]} cases)</span></p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Most Prevalent Crime</p>
+                            <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${mostCommonCrime[0]} <span class="text-sm text-gray-500">(${mostCommonCrime[1]} cases)</span></p>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Most Affected Barangay</p>
+                            <p class="text-xl font-black text-pnp-blue dark:text-pnp-gold">${mostAffectedBrgy[0]} <span class="text-sm text-gray-500">(${mostAffectedBrgy[1]} cases)</span></p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 dark:text-white mb-2">Executive Summary</h4>
+                        <p>Based on the system's recorded data, a total of <strong>${totalCrimes}</strong> incidents have been logged <strong>${timeScope}</strong>. The most frequent classification is <strong>${mostCommonCrime[0]}</strong>, accounting for <strong>${crimePercentage}%</strong> of total crimes. The area with the highest concentration of reported incidents is <strong>${mostAffectedBrgy[0]}</strong>. Incident frequency peaked during the month of <strong>${peakMonth[0]}</strong>.</p>
+                    </div>
+                `;
+
+                document.getElementById('trends-report-content').innerHTML = reportHtml;
+
+                const modal = document.getElementById('trends-modal');
+                const content = document.getElementById('trends-modal-content');
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred while generating the report.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function closeTrendsModal() {
             const modal = document.getElementById('trends-modal');
             const content = document.getElementById('trends-modal-content');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 10);
-            
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        } catch (err) {
-            console.error(err);
-            alert('An error occurred while generating the report.');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    function closeTrendsModal() {
-        const modal = document.getElementById('trends-modal');
-        const content = document.getElementById('trends-modal-content');
-        modal.classList.add('opacity-0');
-        content.classList.remove('scale-100');
-        content.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 500);
-    }
-
-
-    function switchTab(tabId) {
-        const bulletinsBtn = document.getElementById('tab-btn-bulletins');
-        const incidentsBtn = document.getElementById('tab-btn-incidents');
-        const bulletinsContent = document.getElementById('tab-content-bulletins');
-        const incidentsContent = document.getElementById('tab-content-incidents');
-
-        if (!bulletinsBtn || !incidentsBtn || !bulletinsContent || !incidentsContent) return;
-
-        if (tabId === 'bulletins') {
-            bulletinsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-md';
-            incidentsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold';
-            
-            bulletinsContent.classList.remove('hidden', 'opacity-0');
-            bulletinsContent.classList.add('block', 'opacity-100');
-            
-            incidentsContent.classList.add('hidden', 'opacity-0');
-            incidentsContent.classList.remove('block', 'opacity-100');
-        } else {
-            incidentsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-md';
-            bulletinsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold';
-            
-            incidentsContent.classList.remove('hidden', 'opacity-0');
-            incidentsContent.classList.add('block', 'opacity-100');
-            
-            bulletinsContent.classList.add('hidden', 'opacity-0');
-            bulletinsContent.classList.remove('block', 'opacity-100');
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Disclaimer Modal Logic
-        const modal = document.getElementById('jurisdiction-modal');
-        const content = document.getElementById('modal-content');
-        const acceptBtn = document.getElementById('accept-disclaimer');
-
-        if (!sessionStorage.getItem('staCruzDisclaimerAccepted')) {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 100);
-        }
-
-        acceptBtn.addEventListener('click', () => {
             modal.classList.add('opacity-0');
             content.classList.remove('scale-100');
             content.classList.add('scale-95');
             setTimeout(() => {
                 modal.classList.add('hidden');
             }, 500);
-            sessionStorage.setItem('staCruzDisclaimerAccepted', 'true');
-        });
+        }
 
-        // Carousel Slider Logic
-        const track = document.getElementById('carousel-track');
-        const prevBtn = document.getElementById('carousel-prev');
-        const nextBtn = document.getElementById('carousel-next');
-        const dots = document.querySelectorAll('.carousel-dot');
-        
-        if (track) {
-            const slides = track.children;
-            const totalSlides = slides.length;
-            let currentSlide = 0;
-            let autoplayTimer = null;
 
-            if (totalSlides > 0) {
-                function updateCarousel() {
-                    track.style.transform = `translateX(-${currentSlide * 100}%)`;
-                    dots.forEach((dot, index) => {
-                        if (index === currentSlide) {
-                            dot.classList.add('bg-pnp-gold', 'w-8');
-                            dot.classList.remove('bg-slate-300', 'dark:bg-slate-700');
-                        } else {
-                            dot.classList.remove('bg-pnp-gold', 'w-8');
-                            dot.classList.add('bg-slate-300', 'dark:bg-slate-700');
-                        }
-                    });
+        function switchTab(tabId) {
+            const bulletinsBtn = document.getElementById('tab-btn-bulletins');
+            const incidentsBtn = document.getElementById('tab-btn-incidents');
+            const bulletinsContent = document.getElementById('tab-content-bulletins');
+            const incidentsContent = document.getElementById('tab-content-incidents');
+
+            if (!bulletinsBtn || !incidentsBtn || !bulletinsContent || !incidentsContent) return;
+
+            if (tabId === 'bulletins') {
+                bulletinsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-md';
+                incidentsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold';
+                
+                bulletinsContent.classList.remove('hidden', 'opacity-0');
+                bulletinsContent.classList.add('block', 'opacity-100');
+                
+                incidentsContent.classList.add('hidden', 'opacity-0');
+                incidentsContent.classList.remove('block', 'opacity-100');
+            } else {
+                incidentsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-md';
+                bulletinsBtn.className = 'flex items-center space-x-2 px-6 py-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-300 text-slate-500 dark:text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold';
+                
+                incidentsContent.classList.remove('hidden', 'opacity-0');
+                incidentsContent.classList.add('block', 'opacity-100');
+                
+                bulletinsContent.classList.add('hidden', 'opacity-0');
+                bulletinsContent.classList.remove('block', 'opacity-100');
+            }
+        }
+
+        // Toggle Policy Details Accordions
+        window.togglePolicyDetails = function(key) {
+            const detailsEl = document.getElementById(`details-${key}`);
+            const labelEl = document.getElementById(`label-details-${key}`);
+            const iconEl = document.getElementById(`icon-details-${key}`);
+            if (!detailsEl) return;
+
+            const isHidden = detailsEl.classList.contains('hidden');
+            if (isHidden) {
+                detailsEl.classList.remove('hidden');
+                if (labelEl) labelEl.textContent = 'Hide';
+                if (iconEl) {
+                    iconEl.classList.remove('fa-chevron-down');
+                    iconEl.classList.add('fa-chevron-up');
                 }
-
-                function nextSlide() {
-                    currentSlide = (currentSlide + 1) % totalSlides;
-                    updateCarousel();
+            } else {
+                detailsEl.classList.add('hidden');
+                if (labelEl) labelEl.textContent = 'Details';
+                if (iconEl) {
+                    iconEl.classList.remove('fa-chevron-up');
+                    iconEl.classList.add('fa-chevron-down');
                 }
+            }
+        };
 
-                function prevSlide() {
-                    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-                    updateCarousel();
-                }
+        document.addEventListener('DOMContentLoaded', () => {
+            // Terms and Conditions Modal Logic
+            const modal = document.getElementById('jurisdiction-modal');
+            const content = document.getElementById('modal-content');
+            const acceptBtn = document.getElementById('accept-disclaimer');
+            const agreeTermsCb = document.getElementById('agree-terms');
+            const validationMsg = document.getElementById('policy-validation-msg');
 
-                function startAutoplay() {
-                    stopAutoplay();
-                    autoplayTimer = setInterval(nextSlide, 6000);
-                }
+            function updatePolicyState() {
+                const isAccepted = agreeTermsCb && agreeTermsCb.checked;
 
-                function stopAutoplay() {
-                    if (autoplayTimer) {
-                        clearInterval(autoplayTimer);
-                        autoplayTimer = null;
+                if (isAccepted) {
+                    if (validationMsg) {
+                        validationMsg.innerHTML = `
+                            <i class="fas fa-check-circle text-emerald-500 text-sm sm:text-base"></i>
+                            <span class="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400">Terms and Conditions accepted. You may now proceed to the portal.</span>
+                        `;
+                    }
+                    if (acceptBtn) {
+                        acceptBtn.disabled = false;
+                        acceptBtn.className = 'w-full bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-black py-3 sm:py-3.5 rounded-xl transition-all duration-300 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg cursor-pointer transform active:scale-[0.99]';
+                        acceptBtn.innerHTML = `
+                            <span>Proceed to Public Home</span>
+                            <i class="fas fa-arrow-right text-xs sm:text-sm"></i>
+                        `;
+                    }
+                } else {
+                    if (validationMsg) {
+                        validationMsg.innerHTML = `
+                            <i class="fas fa-exclamation-circle text-amber-500 text-sm sm:text-base"></i>
+                            <span class="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">Please agree to the Terms and Conditions to proceed to the portal.</span>
+                        `;
+                    }
+                    if (acceptBtn) {
+                        acceptBtn.disabled = true;
+                        acceptBtn.className = 'w-full bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed font-black py-3 sm:py-3.5 rounded-xl transition-all duration-300 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm';
+                        acceptBtn.innerHTML = `
+                            <i class="fas fa-lock text-xs sm:text-sm"></i>
+                            <span>Proceed to Public Home</span>
+                        `;
                     }
                 }
+            }
 
-                if (prevBtn) {
-                    prevBtn.addEventListener('click', () => {
-                        prevSlide();
-                        startAutoplay();
-                    });
+            if (agreeTermsCb) {
+                agreeTermsCb.addEventListener('change', updatePolicyState);
+            }
+
+            if (!sessionStorage.getItem('staCruzDisclaimerAccepted')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 100);
+            }
+
+            acceptBtn.addEventListener('click', (e) => {
+                if (!agreeTermsCb || !agreeTermsCb.checked) {
+                    e.preventDefault();
+                    if (agreeTermsCb) {
+                        const container = agreeTermsCb.closest('label');
+                        if (container) {
+                            container.classList.add('ring-2', 'ring-amber-500', 'p-1', 'rounded-lg');
+                            setTimeout(() => {
+                                container.classList.remove('ring-2', 'ring-amber-500', 'p-1', 'rounded-lg');
+                            }, 1200);
+                        }
+                    }
+                    return;
                 }
 
-                if (nextBtn) {
-                    nextBtn.addEventListener('click', () => {
-                        nextSlide();
-                        startAutoplay();
-                    });
-                }
+                modal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 500);
+                sessionStorage.setItem('staCruzDisclaimerAccepted', 'true');
+            });
 
-                dots.forEach((dot, index) => {
-                    dot.addEventListener('click', () => {
-                        currentSlide = index;
+            // Carousel Slider Logic
+            const track = document.getElementById('carousel-track');
+            const prevBtn = document.getElementById('carousel-prev');
+            const nextBtn = document.getElementById('carousel-next');
+            const dots = document.querySelectorAll('.carousel-dot');
+            
+            if (track) {
+                const slides = track.children;
+                const totalSlides = slides.length;
+                let currentSlide = 0;
+                let autoplayTimer = null;
+
+                if (totalSlides > 0) {
+                    function updateCarousel() {
+                        track.style.transform = `translateX(-${currentSlide * 100}%)`;
+                        dots.forEach((dot, index) => {
+                            if (index === currentSlide) {
+                                dot.classList.add('bg-pnp-gold', 'w-8');
+                                dot.classList.remove('bg-slate-300', 'dark:bg-slate-700');
+                            } else {
+                                dot.classList.remove('bg-pnp-gold', 'w-8');
+                                dot.classList.add('bg-slate-300', 'dark:bg-slate-700');
+                            }
+                        });
+                    }
+
+                    function nextSlide() {
+                        currentSlide = (currentSlide + 1) % totalSlides;
                         updateCarousel();
-                        startAutoplay();
+                    }
+
+                    function prevSlide() {
+                        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                        updateCarousel();
+                    }
+
+                    function startAutoplay() {
+                        stopAutoplay();
+                        autoplayTimer = setInterval(nextSlide, 6000);
+                    }
+
+                    function stopAutoplay() {
+                        if (autoplayTimer) {
+                            clearInterval(autoplayTimer);
+                            autoplayTimer = null;
+                        }
+                    }
+
+                    if (prevBtn) {
+                        prevBtn.addEventListener('click', () => {
+                            prevSlide();
+                            startAutoplay();
+                        });
+                    }
+
+                    if (nextBtn) {
+                        nextBtn.addEventListener('click', () => {
+                            nextSlide();
+                            startAutoplay();
+                        });
+                    }
+
+                    dots.forEach((dot, index) => {
+                        dot.addEventListener('click', () => {
+                            currentSlide = index;
+                            updateCarousel();
+                            startAutoplay();
+                        });
                     });
-                });
 
-                const wrapper = track.parentElement;
-                if (wrapper) {
-                    wrapper.addEventListener('mouseenter', stopAutoplay);
-                    wrapper.addEventListener('mouseleave', startAutoplay);
+                    const wrapper = track.parentElement;
+                    if (wrapper) {
+                        wrapper.addEventListener('mouseenter', stopAutoplay);
+                        wrapper.addEventListener('mouseleave', startAutoplay);
+                    }
+
+                    // Initialize
+                    updateCarousel();
+                    startAutoplay();
                 }
+            }
 
-                // Initialize
-                updateCarousel();
-                startAutoplay();
+            // Tab and Category from query string check
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            const categoryParam = urlParams.get('category');
+            
+            if (tab === 'incidents') {
+                switchTab('incidents');
+                const feedEl = document.getElementById('tab-btn-incidents');
+                if (feedEl) {
+                    setTimeout(() => {
+                        feedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            } else if (tab === 'bulletins' || categoryParam) {
+                switchTab('bulletins');
+                const feedEl = document.getElementById('tab-btn-bulletins');
+                if (feedEl) {
+                    setTimeout(() => {
+                        feedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            }
+        });
+    </script>
+
+    <!-- Additional Styles for Micro-animations -->
+    <style>
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        // Tab and Category from query string check
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = urlParams.get('tab');
-        const categoryParam = urlParams.get('category');
-        
-        if (tab === 'incidents') {
-            switchTab('incidents');
-            const feedEl = document.getElementById('tab-btn-incidents');
-            if (feedEl) {
-                setTimeout(() => {
-                    feedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            }
-        } else if (tab === 'bulletins' || categoryParam) {
-            switchTab('bulletins');
-            const feedEl = document.getElementById('tab-btn-bulletins');
-            if (feedEl) {
-                setTimeout(() => {
-                    feedEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300);
-            }
-        }
-    });
-</script>
-
-<!-- Additional Styles for Micro-animations -->
-<style>
-    @keyframes fade-in-up {
-        from {
+        .animate-fade-in-up {
+            animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             opacity: 0;
-            transform: translateY(30px);
         }
 
-        to {
-            opacity: 1;
-            transform: translateY(0);
+        .home-barangay-label-tooltip {
+            background: rgba(15, 23, 42, 0.75) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            font-size: 8px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+            white-space: pre-wrap;
+            line-height: 1.2;
+            padding: 3px 6px !important;
+            z-index: 1000 !important;
         }
-    }
+        .home-barangay-label-tooltip::before,
+        .home-barangay-label-tooltip::after {
+            display: none !important;
+        }
 
-    .animate-fade-in-up {
-        animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        opacity: 0;
-    }
-
-    .home-barangay-label-tooltip {
-        background: rgba(15, 23, 42, 0.75) !important;
-        backdrop-filter: blur(4px) !important;
-        -webkit-backdrop-filter: blur(4px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
-        color: #ffffff !important;
-        font-weight: 800 !important;
-        font-size: 8px !important;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        text-align: center;
-        white-space: pre-wrap;
-        line-height: 1.2;
-        padding: 3px 6px !important;
-        z-index: 1000 !important;
-    }
-    .home-barangay-label-tooltip::before,
-    .home-barangay-label-tooltip::after {
-        display: none !important;
-    }
-
-    .custom-modal-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(148, 163, 184, 0.5);
-        border-radius: 20px;
-    }
-    .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(71, 85, 105, 0.5);
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(148, 163, 184, 0.8);
-    }
-</style>    
+        .custom-modal-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 0.5);
+            border-radius: 20px;
+        }
+        .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(71, 85, 105, 0.5);
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(148, 163, 184, 0.8);
+        }
+    </style>    

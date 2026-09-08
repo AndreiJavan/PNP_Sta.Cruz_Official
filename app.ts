@@ -10,6 +10,7 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { i18nMiddleware } from './middleware/i18n.js';
+import { FileSessionStore } from './utils/sessionStore.js';
 
 // Routes
 import publicRoutes from './routes/public.js';
@@ -28,48 +29,73 @@ app.get(['/favicon.ico', '/favicon.png'], (req, res) => res.status(204).end());
 // Trust proxy for Vercel/Cloud Run
 app.set('trust proxy', 1);
 
-// Middleware
+// Security Headers
 app.use(helmet({
   contentSecurityPolicy: false, // Disabled to prevent blocking external CDNs like Leaflet/Mapbox/Supabase
   crossOriginEmbedderPolicy: false
 }));
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // Limit each IP to 200 requests per window
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use(limiter);
-
+// Logger, Cookie Parser, CORS
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(cors({
   origin: true,
   credentials: true
 }));
+
+// Serve static assets BEFORE rate limiter so that assets never consume rate-limit quota
 app.use(express.static(path.join(process.cwd(), 'public'), {
   maxAge: '1d',
   etag: true,
   lastModified: true
 }));
+
+// Body Parsers
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Session
+// Persistent Session Store (survives restarts, memory pressure, and worker recycles)
+const sessionStore = new FileSessionStore();
+
 app.use(session({
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'stacruz-mapping-secure-session-key',
-  resave: true,
-  saveUninitialized: true,
+  resave: false,
+  saveUninitialized: false,
   rolling: true,
   name: 'stacruz_sid',
   proxy: true,
   cookie: {
-    secure: false,
+    secure: false, // Set to false to allow HTTP in local dev / behind proxy without SSL termination issues
+    httpOnly: true,
     sameSite: 'lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   }
 }));
+
+// General Rate Limiter - Applied AFTER static files & session parsing
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Increased to 1000 requests per 15 minutes for public routes
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip static assets
+    if (req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|geojson)$/i)) {
+      return true;
+    }
+    // Skip health checks
+    if (req.path === '/api/health') {
+      return true;
+    }
+    // Skip authenticated admin sessions so active admin workflows are never blocked
+    if (req.session && (req.session as any).user) {
+      return true;
+    }
+    return false;
+  }
+});
+app.use(limiter);
 
 // i18n Internationalization Middleware
 app.use(i18nMiddleware);

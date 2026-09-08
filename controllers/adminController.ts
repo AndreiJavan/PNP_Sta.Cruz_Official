@@ -350,7 +350,11 @@ export const getLogin = async (req: Request, res: Response) => {
   if (req.session && req.session.user) {
     return res.redirect('/admin/dashboard');
   }
-  return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: null });
+  let error_msg = null;
+  if (req.query.expired === '1') {
+    error_msg = 'Your session has expired. Please sign in again.';
+  }
+  return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg });
 };
 
 export const postLogin = async (req: Request, res: Response) => {
@@ -420,8 +424,29 @@ export const postLogin = async (req: Request, res: Response) => {
 };
 
 export const getLogout = (req: Request, res: Response) => {
-  req.session.destroy(() => {
+  if (req.session) {
+    req.session.destroy(() => {
+      res.clearCookie('stacruz_sid', { path: '/' });
+      res.redirect('/admin/login');
+    });
+  } else {
+    res.clearCookie('stacruz_sid', { path: '/' });
     res.redirect('/admin/login');
+  }
+};
+
+export const getHeartbeat = async (req: Request, res: Response) => {
+  if (req.session && req.session.user) {
+    return res.json({
+      success: true,
+      user: req.session.user.username,
+      timestamp: Date.now()
+    });
+  }
+  return res.status(401).json({
+    success: false,
+    error: 'Unauthorized or session expired',
+    expired: true
   });
 };
 
@@ -2199,7 +2224,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       let totalUploaded = 0;
       if (files.photos && files.photos.length > 0) {
         for (const file of files.photos) {
-          if (totalUploaded >= 5) break;
+          if (totalUploaded >= 10) break;
           if (file.size > 5 * 1024 * 1024) {
             return res.status(400).send(`Validation Error: Picture "${file.originalname}" exceeds maximum limit of 5MB.`);
           }
@@ -2218,7 +2243,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
 
       if (files.videos && files.videos.length > 0) {
         for (const file of files.videos) {
-          if (totalUploaded >= 5) break;
+          if (totalUploaded >= 10) break;
           if (file.size > 100 * 1024 * 1024) {
             return res.status(400).send(`Validation Error: Video "${file.originalname}" exceeds maximum limit of 100MB.`);
           }
@@ -2388,7 +2413,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       if (files.photos && files.photos.length > 0) {
         const uploadedPaths: string[] = [];
         for (const file of files.photos) {
-          if (finalPhotos.length + finalVideos.length + uploadedPaths.length >= 5) break;
+          if (finalPhotos.length + finalVideos.length + uploadedPaths.length >= 10) break;
           const fileExt = file.originalname.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const path = `bulletins/${fileName}`;
@@ -2406,7 +2431,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       if (files.videos && files.videos.length > 0) {
         const uploadedVideoPaths: string[] = [];
         for (const file of files.videos) {
-          if (finalPhotos.length + finalVideos.length + uploadedVideoPaths.length >= 5) break;
+          if (finalPhotos.length + finalVideos.length + uploadedVideoPaths.length >= 10) break;
           const fileExt = file.originalname.split('.').pop();
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const path = `bulletins/${fileName}`;
