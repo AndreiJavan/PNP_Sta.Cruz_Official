@@ -236,13 +236,19 @@
 
                     <!-- TITLE FIELD -->
                     <div class="space-y-1.5">
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-2">
                             <label for="titleInput" class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                 Bulletin Title <span class="text-red-500">*</span>
                             </label>
-                            <span id="titleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                0 / 100 letters
-                            </span>
+                            <div class="flex items-center space-x-2">
+                                <button type="button" id="autoTranslateBtn" onclick="autoTranslateFormWithOpenRouter()" class="px-3 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider shadow transition flex items-center space-x-1.5 cursor-pointer">
+                                    <i class="fas fa-magic text-xs text-amber-300"></i>
+                                    <span>Auto-Translate (OpenRouter AI)</span>
+                                </button>
+                                <span id="titleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                    0 / 100 letters
+                                </span>
+                            </div>
                         </div>
                         <input type="text" name="title" id="titleInput" value="<%= bulletin ? (bulletin.title || '') : '' %>"
                             required maxlength="100" placeholder="e.g. Heavy Rainfall Warning Advisory (3-15 words)"
@@ -1575,6 +1581,63 @@
         if (btnText) btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${isEditMode ? 'Updating...' : 'Publishing...'}`;
 
         document.getElementById('bulletinForm').submit();
+    }
+
+    async function autoTranslateFormWithOpenRouter() {
+        const titleEl = document.getElementById('titleInput');
+        const bodyEl = document.getElementById('bodyInput');
+        const btn = document.getElementById('autoTranslateBtn');
+
+        const titleText = titleEl ? titleEl.value.trim() : '';
+        const bodyText = bodyEl ? bodyEl.value.trim() : '';
+
+        if (!titleText && !bodyText) {
+            alert('Please enter a title or description first before translating.');
+            return;
+        }
+
+        const originalBtnHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin text-xs"></i> <span>Translating AI...</span>`;
+
+        try {
+            const combinedText = `[TITLE]: ${titleText}\n\n[BODY]:\n${bodyText}`;
+            const res = await fetch('/api/translate-tagalog', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: combinedText })
+            });
+
+            const data = await res.json();
+            if (data.success && data.tagalogText) {
+                const translated = data.tagalogText;
+                const titleMatch = translated.match(/\[TITLE\]:\s*(.*)/i);
+                const bodyMatch = translated.match(/\[BODY\]:\s*([\s\S]*)/i);
+
+                if (titleMatch && titleMatch[1] && titleEl) {
+                    titleEl.value = titleMatch[1].trim().substring(0, 100);
+                } else if (titleEl) {
+                    titleEl.value = translated.split('\n')[0].substring(0, 100);
+                }
+
+                if (bodyMatch && bodyMatch[1] && bodyEl) {
+                    bodyEl.value = bodyMatch[1].trim();
+                } else if (bodyEl) {
+                    bodyEl.value = translated;
+                }
+
+                updateValidationState();
+                alert('✨ Successfully translated content into Tagalog via OpenRouter AI!');
+            } else {
+                alert('Translation failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            console.error('Auto-translate error:', err);
+            alert('Error connecting to translation service.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHTML;
+        }
     }
 
     // Keyboard & Escape listeners

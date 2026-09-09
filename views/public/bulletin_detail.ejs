@@ -119,17 +119,110 @@
                     <i class="far fa-calendar-alt mr-2"></i>
                     <%= new Date(bulletin.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }) %>
                 </span>
+
+                <button type="button" id="translateArticleBtn" onclick="toggleArticleTranslation()" class="ml-auto px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md transition flex items-center space-x-2 cursor-pointer">
+                    <i class="fas fa-language text-sm text-amber-300"></i>
+                    <span id="translateBtnLabel">Isalin sa Tagalog (OpenRouter AI)</span>
+                </button>
             </div>
             
-            <h1 class="text-3xl md:text-5xl font-extrabold text-pnp-blue dark:text-pnp-gold mb-8 leading-tight"><%= bulletin.title %></h1>
+            <h1 id="articleTitle" class="text-3xl md:text-5xl font-extrabold text-pnp-blue dark:text-pnp-gold mb-8 leading-tight"><%= bulletin.title %></h1>
             
-            <div class="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-6">
+            <div id="articleBody" class="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-6">
                 <% bulletin.body.split('\n').forEach(para => { %>
                     <p><%= para %></p>
                 <% }) %>
             </div>
 
+            <script>
+                let originalTitle = <%- JSON.stringify(bulletin.title) %>;
+                let originalBody = <%- JSON.stringify(bulletin.body) %>;
+                let translatedTitle = '';
+                let translatedBody = '';
+                let isTranslated = false;
 
+                async function toggleArticleTranslation() {
+                    const btn = document.getElementById('translateArticleBtn');
+                    const label = document.getElementById('translateBtnLabel');
+                    const titleEl = document.getElementById('articleTitle');
+                    const bodyEl = document.getElementById('articleBody');
+
+                    if (isTranslated) {
+                        // Revert to original
+                        titleEl.innerText = originalTitle;
+                        renderParagraphs(originalBody);
+                        label.innerText = 'Isalin sa Tagalog (OpenRouter AI)';
+                        isTranslated = false;
+                        return;
+                    }
+
+                    if (translatedTitle && translatedBody) {
+                        // Use already fetched translation
+                        titleEl.innerText = translatedTitle;
+                        renderParagraphs(translatedBody);
+                        label.innerText = 'Show Original (English)';
+                        isTranslated = true;
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    label.innerText = 'Isinasalin sa Tagalog...';
+
+                    try {
+                        const fullText = `[TITLE]: ${originalTitle}\n\n[BODY]:\n${originalBody}`;
+                        const res = await fetch('/api/translate-tagalog', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: fullText })
+                        });
+                        const data = await res.json();
+
+                        if (data.success && data.tagalogText) {
+                            const resText = data.tagalogText;
+                            const titleMatch = resText.match(/\[TITLE\]:\s*(.*)/i);
+                            const bodyMatch = resText.match(/\[BODY\]:\s*([\s\S]*)/i);
+
+                            if (titleMatch && titleMatch[1]) {
+                                translatedTitle = titleMatch[1].trim();
+                            } else {
+                                translatedTitle = resText.split('\n')[0];
+                            }
+
+                            if (bodyMatch && bodyMatch[1]) {
+                                translatedBody = bodyMatch[1].trim();
+                            } else {
+                                translatedBody = resText;
+                            }
+
+                            titleEl.innerText = translatedTitle;
+                            renderParagraphs(translatedBody);
+                            label.innerText = 'Show Original (English)';
+                            isTranslated = true;
+                        } else {
+                            alert('Translation failed. Please try again.');
+                            label.innerText = 'Isalin sa Tagalog (OpenRouter AI)';
+                        }
+                    } catch (err) {
+                        console.error('Translation error:', err);
+                        alert('Error requesting AI translation.');
+                        label.innerText = 'Isalin sa Tagalog (OpenRouter AI)';
+                    } finally {
+                        btn.disabled = false;
+                    }
+                }
+
+                function renderParagraphs(text) {
+                    const bodyEl = document.getElementById('articleBody');
+                    bodyEl.innerHTML = '';
+                    text.split('\n').forEach(para => {
+                        if (para.trim()) {
+                            const p = document.createElement('p');
+                            p.innerText = para;
+                            bodyEl.appendChild(p);
+                        }
+                    });
+                }
+            </script>
             
             <div class="mt-12 pt-12 border-t border-gray-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center space-x-4">
