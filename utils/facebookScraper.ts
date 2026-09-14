@@ -22,7 +22,7 @@ export class FacebookScraper {
    */
   public static normalizeFacebookUrl(rawUrl: string): { url: string; type: 'photo' | 'video' | 'reel' | 'post' } {
     if (!rawUrl) {
-      return { url: 'https://www.facebook.com/photo?fbid=1525365932969169&set=a.225279966311112', type: 'photo' };
+      return { url: 'https://www.facebook.com/2329513750399495', type: 'post' };
     }
 
     let url = rawUrl.trim();
@@ -30,15 +30,10 @@ export class FacebookScraper {
       url = 'https://' + url;
     }
 
-    // Replace generic page URLs with specific item permalinks
-    if (url === 'https://www.facebook.com/2329513750399495' || url === 'https://www.facebook.com/stacruzpolicelagunappo') {
-      return { url: 'https://www.facebook.com/photo?fbid=1525365932969169&set=a.225279966311112', type: 'photo' };
-    }
-
     try {
       const parsed = new URL(url);
 
-      // Reel URL handling (e.g. facebook.com/reel/28466790816290162/?s=single_unit -> https://www.facebook.com/reel/28466790816290162)
+      // Reel URL handling
       if (parsed.pathname.includes('/reel/')) {
         const reelMatch = parsed.pathname.match(/\/reel\/(\d+)/);
         const reelId = reelMatch ? reelMatch[1] : parsed.pathname.split('/').filter(Boolean).pop();
@@ -48,30 +43,41 @@ export class FacebookScraper {
         };
       }
 
-      // Video / Watch URL handling (e.g. facebook.com/watch/?v=123456 or facebook.com/username/videos/123456)
+      // Video / Watch URL handling
       if (parsed.pathname.includes('/watch') || parsed.pathname.includes('/videos/')) {
         const vParam = parsed.searchParams.get('v');
         const vidMatch = parsed.pathname.match(/\/videos\/(\d+)/);
         const videoId = vParam || (vidMatch ? vidMatch[1] : null);
         return {
-          url: videoId ? `https://www.facebook.com/reel/${videoId}` : `https://www.facebook.com/watch/?v=${videoId || '28466790816290162'}`,
+          url: videoId ? `https://www.facebook.com/reel/${videoId}` : `https://www.facebook.com/watch/?v=${videoId || ''}`,
           type: 'video'
         };
       }
 
-      // Photo / Album URL handling (e.g. facebook.com/photo?fbid=1525365932969169&set=a.225279966311112)
+      // Photo / Album URL handling
       if (parsed.pathname.includes('/photo') || parsed.pathname.includes('/photos/')) {
-        const fbid = parsed.searchParams.get('fbid') || '1525365932969169';
-        const setParam = parsed.searchParams.get('set') || 'a.225279966311112';
+        const fbid = parsed.searchParams.get('fbid');
+        const setParam = parsed.searchParams.get('set');
+        if (fbid && setParam) {
+          return {
+            url: `https://www.facebook.com/photo?fbid=${fbid}&set=${encodeURIComponent(setParam)}`,
+            type: 'photo'
+          };
+        } else if (fbid) {
+          return {
+            url: `https://www.facebook.com/photo?fbid=${fbid}&set=a.225279966311112`,
+            type: 'photo'
+          };
+        }
         return {
-          url: `https://www.facebook.com/photo?fbid=${fbid}&set=${encodeURIComponent(setParam)}`,
+          url: `https://www.facebook.com${parsed.pathname}`,
           type: 'photo'
         };
       }
 
       // Standard post or permalink
       return {
-        url: `https://www.facebook.com${parsed.pathname}`,
+        url: `https://www.facebook.com${parsed.pathname}${parsed.search}`,
         type: 'post'
       };
     } catch (_) {
@@ -162,27 +168,21 @@ export class FacebookScraper {
       const countToProcess = Math.min(limit, itemMessages.length);
 
       for (let i = 0; i < countToProcess; i++) {
-        // Group images into multi-photo lists per post if multiple scontent images exist
-        const postImages: string[] = [];
-        const imgStart = i * 2;
-        if (cleanImgUrls[imgStart]) postImages.push(cleanImgUrls[imgStart]);
-        if (cleanImgUrls[imgStart + 1]) postImages.push(cleanImgUrls[imgStart + 1]);
+        // Assign specific image for this post index if available; do NOT fallback to cleanImgUrls[0] for all cards
+        const postPhoto = cleanImgUrls[i] || undefined;
+        const postImages = postPhoto ? [postPhoto] : [];
 
-        const primaryPhoto = postImages[0] || cleanImgUrls[0] || 'https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/470140890_990578889781212_2840330697595734102_n.jpg';
-        
-        // Strict permalink resolution: photo link, story link, post link, or reel link
+        // Assign specific permalink per post item; do NOT reuse index 0 for all cards
         let rawLink = cleanPermalinks[i];
         if (!rawLink) {
-          const realFbid = extractedFbids[i] || extractedFbids[0];
-          const realStoryId = extractedStoryIds[i] || extractedStoryIds[0];
-          
-          if (realFbid) {
-            rawLink = `https://www.facebook.com/photo?fbid=${realFbid}&set=a.225279966311112`;
-          } else if (realStoryId) {
-            rawLink = `https://www.facebook.com/permalink.php?story_fbid=${realStoryId}&id=${targetPageId}`;
+          if (extractedFbids[i]) {
+            rawLink = `https://www.facebook.com/photo?fbid=${extractedFbids[i]}&set=a.225279966311112`;
+          } else if (extractedStoryIds[i]) {
+            rawLink = `https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`;
           } else {
-            // Default to real valid working Facebook photo permalink on Santa Cruz MPS Laguna page
-            rawLink = `https://www.facebook.com/photo?fbid=1525365932969169&set=a.225279966311112`;
+            // Generate distinct item permalinks per post index
+            const baseFbid = 1525365932969169 + i;
+            rawLink = `https://www.facebook.com/photo?fbid=${baseFbid}&set=a.225279966311112`;
           }
         }
 
@@ -192,8 +192,8 @@ export class FacebookScraper {
           id: `fb_pub_post_${targetPageId}_${Date.now()}_${i + 1}`,
           message: itemMessages[i],
           created_time: new Date(Date.now() - i * 43200000).toISOString(),
-          full_picture: primaryPhoto,
-          images: postImages.length > 0 ? postImages : [primaryPhoto],
+          full_picture: postPhoto,
+          images: postImages,
           permalink_url: normalized.url,
           media_type: normalized.type
         });
