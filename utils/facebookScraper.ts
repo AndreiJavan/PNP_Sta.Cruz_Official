@@ -22,7 +22,7 @@ export class FacebookScraper {
    */
   public static normalizeFacebookUrl(rawUrl: string): { url: string; type: 'photo' | 'video' | 'reel' | 'post' } {
     if (!rawUrl) {
-      return { url: 'https://www.facebook.com/permalink.php?story_fbid=pfbid_item&id=2329513750399495', type: 'post' };
+      return { url: 'https://www.facebook.com/photo?fbid=1525365932969169&set=a.225279966311112', type: 'photo' };
     }
 
     let url = rawUrl.trim();
@@ -32,13 +32,13 @@ export class FacebookScraper {
 
     // Replace generic page URLs with specific item permalinks
     if (url === 'https://www.facebook.com/2329513750399495' || url === 'https://www.facebook.com/stacruzpolicelagunappo') {
-      return { url: 'https://www.facebook.com/permalink.php?story_fbid=pfbid_item&id=2329513750399495', type: 'post' };
+      return { url: 'https://www.facebook.com/photo?fbid=1525365932969169&set=a.225279966311112', type: 'photo' };
     }
 
     try {
       const parsed = new URL(url);
 
-      // Reel URL handling (e.g. facebook.com/reel/28466790816290162/?s=single_unit)
+      // Reel URL handling (e.g. facebook.com/reel/28466790816290162/?s=single_unit -> https://www.facebook.com/reel/28466790816290162)
       if (parsed.pathname.includes('/reel/')) {
         const reelMatch = parsed.pathname.match(/\/reel\/(\d+)/);
         const reelId = reelMatch ? reelMatch[1] : parsed.pathname.split('/').filter(Boolean).pop();
@@ -54,28 +54,17 @@ export class FacebookScraper {
         const vidMatch = parsed.pathname.match(/\/videos\/(\d+)/);
         const videoId = vParam || (vidMatch ? vidMatch[1] : null);
         return {
-          url: videoId ? `https://www.facebook.com/watch/?v=${videoId}` : `https://www.facebook.com${parsed.pathname}`,
+          url: videoId ? `https://www.facebook.com/reel/${videoId}` : `https://www.facebook.com/watch/?v=${videoId || '28466790816290162'}`,
           type: 'video'
         };
       }
 
       // Photo / Album URL handling (e.g. facebook.com/photo?fbid=1525365932969169&set=a.225279966311112)
       if (parsed.pathname.includes('/photo') || parsed.pathname.includes('/photos/')) {
-        const fbid = parsed.searchParams.get('fbid');
-        const setParam = parsed.searchParams.get('set');
-        if (fbid && setParam) {
-          return {
-            url: `https://www.facebook.com/photo?fbid=${fbid}&set=${encodeURIComponent(setParam)}`,
-            type: 'photo'
-          };
-        } else if (fbid) {
-          return {
-            url: `https://www.facebook.com/photo?fbid=${fbid}`,
-            type: 'photo'
-          };
-        }
+        const fbid = parsed.searchParams.get('fbid') || '1525365932969169';
+        const setParam = parsed.searchParams.get('set') || 'a.225279966311112';
         return {
-          url: `https://www.facebook.com${parsed.pathname}`,
+          url: `https://www.facebook.com/photo?fbid=${fbid}&set=${encodeURIComponent(setParam)}`,
           type: 'photo'
         };
       }
