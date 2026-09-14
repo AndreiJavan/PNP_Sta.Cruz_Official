@@ -17,6 +17,47 @@ export interface ScrapedFacebookPost {
  */
 export class FacebookScraper {
   /**
+   * Validates if a Facebook URL is alive, reachable, and does not return 404.
+   */
+  public static async verifyUrlHealth(url: string): Promise<boolean> {
+    if (!url || typeof url !== 'string') return false;
+
+    try {
+      const parsed = new URL(url);
+      if (!parsed.hostname.includes('facebook.com')) return false;
+    } catch (_) {
+      return false;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      const response = await fetch(url, {
+        method: 'HEAD',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        },
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+      if (response.ok || (response.status >= 200 && response.status < 400)) {
+        return true;
+      }
+    } catch (_) {}
+
+    // Fallback validation via Facebook oEmbed endpoint
+    try {
+      const oembedUrl = `https://www.facebook.com/plugins/post/oembed.json/?url=${encodeURIComponent(url)}`;
+      const res = await fetch(oembedUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      return res.ok;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /**
    * Cleans and normalizes any Facebook URL (Photo, Reel, Video, Album, Post)
    * into a canonical direct Facebook redirect link.
    */

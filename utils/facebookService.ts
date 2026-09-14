@@ -157,6 +157,14 @@ export class FacebookService {
             continue;
           }
 
+          // Live URL Health Detector: verify that the Facebook URL is accessible and not 404/broken
+          const isUrlAlive = await FacebookScraper.verifyUrlHealth(fbPermalink);
+          if (!isUrlAlive) {
+            console.warn(`[FACEBOOK SYNC] Skipping broken or unreachable URL link: ${fbPermalink}`);
+            skippedCount++;
+            continue;
+          }
+
           seenBatchUrls.add(fbPermalink);
 
           // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
