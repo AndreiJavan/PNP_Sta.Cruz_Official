@@ -38,8 +38,24 @@ export class FacebookService {
       return [];
     }
 
-    const fields = 'id,message,created_time,full_picture,attachments{media,subattachments},permalink_url';
+    // Resolve exact numeric Page ID from Meta Graph API using access token
+    let numericPageId = pageId;
+    try {
+      const meRes = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${accessToken}`);
+      if (meRes.ok) {
+        const meData = await meRes.json();
+        if (meData && meData.id) {
+          numericPageId = meData.id;
+          console.log(`[FACEBOOK SYNC] Resolved Page Name: "${meData.name}", Numeric ID: ${numericPageId}`);
+        }
+      }
+    } catch (_) {}
+
+    const fields = 'id,message,story,caption,created_time,full_picture,attachments{media,subattachments,description,title},permalink_url';
     const endpoints = [
+      `https://graph.facebook.com/v19.0/${numericPageId}/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${numericPageId}/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${numericPageId}/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
       `https://graph.facebook.com/v19.0/me/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
       `https://graph.facebook.com/v19.0/me/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
       `https://graph.facebook.com/v19.0/me/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
@@ -113,8 +129,9 @@ export class FacebookService {
           continue;
         }
 
-        const messageText = post.message?.trim() || 'Official Facebook Announcement from PNP Sta. Cruz';
-        const title = messageText.split('\n')[0].substring(0, 120) || 'Facebook Post';
+        const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
+        const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
+        const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
 
         // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
         const autoCategory = classifyCategory(messageText);
