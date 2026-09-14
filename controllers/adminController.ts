@@ -3384,9 +3384,14 @@ export const syncFacebookPosts = async (req: Request, res: Response) => {
     await logAction(req, 'FACEBOOK_SYNC', `Synced ${result.added} new Facebook posts (Skipped ${result.skipped} existing).`);
     memoryCache.flush();
 
+    let msg = `Successfully synchronized Facebook page! ${result.added} new bulletins added, ${result.skipped} existing skipped.`;
+    if (result.total === 0) {
+      msg = `Facebook connected successfully, but 0 posts were returned by Meta. Verify that FB_PAGE_ACCESS_TOKEN in Vercel Environment Variables is set to your Page Access Token with pages_read_user_content / pages_read_engagement permissions.`;
+    }
+
     res.json({
       success: true,
-      message: `Successfully synchronized Facebook page! ${result.added} new bulletins added, ${result.skipped} existing skipped.`,
+      message: msg,
       stats: result
     });
   } catch (err: any) {
