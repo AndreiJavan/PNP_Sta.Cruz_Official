@@ -1910,13 +1910,23 @@ async function triggerFacebookSync() {
     setLoading(true);
 
     try {
-        const response = await fetch('/admin/api/sync-facebook', {
+        let response = await fetch('/admin/api/sync-facebook', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         });
+
+        if (response.status === 404) {
+            response = await fetch('/api/sync-facebook', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+        }
 
         const data = await response.json();
 

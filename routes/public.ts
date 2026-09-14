@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import * as publicController from '../controllers/publicController.js';
+import { syncFacebookPosts } from '../controllers/adminController.js';
+import { isAuthenticated } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -17,5 +19,6 @@ router.get('/news', publicController.getNews);
 router.post('/api/translate-tagalog', publicController.translateToTagalog);
 router.post('/api/user/language', publicController.postSetLanguage);
 router.post('/api/chat-article', publicController.chatWithArticle);
+router.post('/api/sync-facebook', isAuthenticated, syncFacebookPosts);
 
 export default router;
