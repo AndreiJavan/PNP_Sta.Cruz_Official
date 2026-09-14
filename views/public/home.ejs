@@ -175,7 +175,7 @@
                                     </div>
                                 <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
                                     <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
-                                        <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                        <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                                         <% if (bulletin.photo_paths.length > 1) { %>
                                             <div class="absolute bottom-3 right-3 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg">
                                                 <i class="fas fa-images"></i>
@@ -185,7 +185,7 @@
                                     </div>
                                 <% } else if (bulletin.photo_path) { %>
                                     <div class="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
-                                        <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+                                        <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                                     </div>
                                 <% } else if (bulletin.facebook_url) { %>
                                     <div class="h-48 bg-blue-950/20 dark:bg-slate-900 border-b border-blue-500/10 flex flex-col items-center justify-center p-4 text-center">

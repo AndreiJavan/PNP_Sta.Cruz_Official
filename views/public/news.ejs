@@ -43,14 +43,36 @@
                     
                     <!-- Image / Facebook Wrapper -->
                     <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
-                        <% if (news.facebook_url) { %>
+                        <% if (news.video_paths && news.video_paths.length > 0) { %>
+                            <video src="<%= news.video_paths[0] %>" muted class="w-full h-full object-contain pointer-events-none"></video>
+                            <div class="absolute inset-0 bg-black/25 flex items-center justify-center pointer-events-none">
+                                <i class="fas fa-play text-white text-3xl opacity-90 group-hover:scale-110 transition duration-300"></i>
+                            </div>
+                            <% if (news.photo_paths && news.photo_paths.length > 0) { %>
+                                <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5 z-10">
+                                    <i class="fas fa-images"></i>
+                                    <span>+<%= news.photo_paths.length %></span>
+                                </div>
+                            <% } %>
+                        <% } else if (news.photo_paths && news.photo_paths.length > 0) { %>
+                            <img src="<%= news.photo_paths[0] %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                            <% if (news.photo_paths.length > 1) { %>
+                                <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5 z-10">
+                                    <i class="fas fa-images"></i>
+                                    <span>+<%= news.photo_paths.length - 1 %></span>
+                                </div>
+                            <% } %>
+                        <% } else if (news.urlToImage && news.urlToImage !== '/images/PNP.jpg') { %>
+                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <% } else if (news.facebook_url) { %>
                             <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=false&width=500" 
                                 width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
                                 allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; unload" class="w-full h-full pointer-events-none"></iframe>
                             <div class="absolute inset-0 bg-transparent cursor-pointer" onclick="openNewsModal('<%= news.id %>')"></div>
                         <% } else { %>
-                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                            <img src="/images/PNP.jpg" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy">
                         <% } %>
                         <div class="absolute top-4 left-4 bg-pnp-blue/90 dark:bg-pnp-gold/90 text-white dark:text-pnp-blue text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-md z-10 flex items-center space-x-1">
                             <% if (news.facebook_url) { %>
@@ -266,7 +288,21 @@
             mediaContainer.innerHTML = '';
             if (dotsContainer) dotsContainer.innerHTML = '';
             
-            if (article.facebook_url) {
+            let mediaItems = [];
+            if (article.video_paths && article.video_paths.length > 0) {
+                article.video_paths.forEach(v => {
+                    if (v) mediaItems.push({ type: 'video', url: v });
+                });
+            }
+            if (article.photo_paths && article.photo_paths.length > 0) {
+                article.photo_paths.forEach(p => {
+                    if (p) mediaItems.push({ type: 'image', url: p });
+                });
+            } else if (article.urlToImage && article.urlToImage !== '/images/PNP.jpg') {
+                mediaItems.push({ type: 'image', url: article.urlToImage });
+            }
+
+            if (article.facebook_url && mediaItems.length === 0) {
                 const isVideo = /video|watch|reel/i.test(article.facebook_url);
                 const pluginType = isVideo ? 'video.php' : 'post.php';
                 const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(article.facebook_url)}&show_text=false&width=500`;
@@ -277,21 +313,6 @@
                 if (nextBtn) nextBtn.classList.add('hidden');
                 if (dotsContainer) dotsContainer.classList.add('hidden');
             } else {
-                let mediaItems = [];
-                if (article.photo_paths && article.photo_paths.length > 0) {
-                    article.photo_paths.forEach(p => {
-                        if (p) mediaItems.push({ type: 'image', url: p });
-                    });
-                } else if (article.urlToImage) {
-                    mediaItems.push({ type: 'image', url: article.urlToImage });
-                }
-
-                if (article.video_paths && article.video_paths.length > 0) {
-                    article.video_paths.forEach(v => {
-                        if (v) mediaItems.push({ type: 'video', url: v });
-                    });
-                }
-
                 if (mediaItems.length === 0) {
                     mediaItems.push({ type: 'image', url: '/images/PNP.jpg' });
                 }

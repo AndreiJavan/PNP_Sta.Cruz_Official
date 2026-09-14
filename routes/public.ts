@@ -16,6 +16,7 @@ router.get('/bulletins/:id', publicController.getBulletinDetail);
 router.get('/about', publicController.getAbout);
 router.get('/hotlines', publicController.getHotlines);
 router.get('/news', publicController.getNews);
+router.get('/api/media-proxy', publicController.proxyMedia);
 router.post('/api/translate-tagalog', publicController.translateToTagalog);
 router.post('/api/user/language', publicController.postSetLanguage);
 router.post('/api/chat-article', publicController.chatWithArticle);

@@ -83,7 +83,7 @@ export class FacebookService {
       }
     } catch (_) {}
 
-    const fields = 'id,message,story,caption,created_time,full_picture,attachments{media,media_type,target,type,url,subattachments{media,media_type,target,type,url}},permalink_url';
+    const fields = 'id,message,story,caption,created_time,full_picture,picture,source,attachments{description,media,media_type,target,title,type,url,subattachments{description,media,media_type,target,title,type,url}},permalink_url';
     const batchLimit = Math.min(25, limit);
     const initialEndpoints = [
       `https://graph.facebook.com/v19.0/${numericPageId}/published_posts?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`,
@@ -152,15 +152,31 @@ export class FacebookService {
     const photos: string[] = [];
     const videos: string[] = [];
 
+    const toProxyUrl = (url: string) => {
+      if (!url) return '';
+      const clean = url.trim();
+      if (clean.startsWith('/api/media-proxy')) return clean;
+      if (clean.includes('lookaside.fbsbx.com') || clean.includes('.fbcdn.net')) {
+        return `/api/media-proxy?url=${encodeURIComponent(clean)}`;
+      }
+      return clean;
+    };
+
     const addPhoto = (src?: string) => {
-      if (src && typeof src === 'string' && src.startsWith('http') && !photos.includes(src)) {
-        photos.push(src);
+      if (src && typeof src === 'string' && (src.startsWith('http') || src.startsWith('/api/media-proxy'))) {
+        const proxied = toProxyUrl(src);
+        if (!photos.includes(proxied)) {
+          photos.push(proxied);
+        }
       }
     };
 
     const addVideo = (src?: string) => {
-      if (src && typeof src === 'string' && src.startsWith('http') && !videos.includes(src)) {
-        videos.push(src);
+      if (src && typeof src === 'string' && (src.startsWith('http') || src.startsWith('/api/media-proxy'))) {
+        const proxied = toProxyUrl(src);
+        if (!videos.includes(proxied)) {
+          videos.push(proxied);
+        }
       }
     };
 
@@ -168,13 +184,25 @@ export class FacebookService {
     if (post.images && Array.isArray(post.images)) {
       post.images.forEach(addPhoto);
     }
+    if ((post as any).photos && Array.isArray((post as any).photos)) {
+      (post as any).photos.forEach(addPhoto);
+    }
     if (post.video_url) {
       addVideo(post.video_url);
     }
+    if ((post as any).videos && Array.isArray((post as any).videos)) {
+      (post as any).videos.forEach(addVideo);
+    }
 
-    // Direct Graph API full_picture
+    // Direct Graph API full_picture, picture, and video source
+    if ((post as any).source) {
+      addVideo((post as any).source);
+    }
     if (post.full_picture) {
       addPhoto(post.full_picture);
+    }
+    if ((post as any).picture) {
+      addPhoto((post as any).picture);
     }
 
     // Inspect Graph API attachments strictly belonging to THIS post

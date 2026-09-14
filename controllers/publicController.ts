@@ -212,10 +212,57 @@ export const getMapPoints = async (req: Request, res: Response) => {
   }
 };
 
+export const proxyMedia = async (req: Request, res: Response) => {
+  const targetUrl = req.query.url as string;
+  if (!targetUrl) {
+    return res.status(400).send('Missing url parameter');
+  }
+
+  try {
+    const parsed = new URL(targetUrl);
+    const isAllowed = parsed.hostname.includes('fbcdn.net') || 
+                      parsed.hostname.includes('fbsbx.com') || 
+                      parsed.hostname.includes('facebook.com');
+    if (!isAllowed) {
+      return res.status(403).send('Forbidden media domain');
+    }
+
+    const fbRes = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        'Accept': '*/*'
+      }
+    });
+
+    if (!fbRes.ok) {
+      return res.status(fbRes.status).send('Media fetch failed');
+    }
+
+    const contentType = fbRes.headers.get('content-type') || (targetUrl.includes('.jpg') ? 'image/jpeg' : targetUrl.includes('.png') ? 'image/png' : 'application/octet-stream');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    const buffer = Buffer.from(await fbRes.arrayBuffer());
+    return res.send(buffer);
+  } catch (err: any) {
+    console.error('Media proxy error:', err.message || err);
+    return res.status(500).send('Proxy error');
+  }
+};
+
 export const normalizeImageUrl = (url: string | undefined): string => {
   if (!url || typeof url !== 'string') return '/images/PNP.jpg';
   let clean = url.trim();
   if (!clean) return '/images/PNP.jpg';
+
+  if (clean.startsWith('/api/media-proxy')) {
+    return clean;
+  }
+
+  if (clean.includes('lookaside.fbsbx.com') || clean.includes('.fbcdn.net')) {
+    return `/api/media-proxy?url=${encodeURIComponent(clean)}`;
+  }
 
   if (clean.startsWith('http://')) {
     clean = clean.replace('http://', 'https://');
@@ -258,13 +305,28 @@ const parsePhotos = (path: string | undefined, existingPaths?: any): string[] =>
 };
 
 const parseVideos = (path: string | undefined, existingPaths?: any): string[] => {
-  if (Array.isArray(existingPaths) && existingPaths.length > 0) return existingPaths;
-  if (!path) return [];
-  try {
-    const parsed = JSON.parse(path);
-    if (Array.isArray(parsed)) return parsed;
-  } catch (e) {}
-  return [path];
+  let rawList: string[] = [];
+  if (Array.isArray(existingPaths) && existingPaths.length > 0) {
+    rawList = existingPaths;
+  } else if (path) {
+    try {
+      const parsed = JSON.parse(path);
+      if (Array.isArray(parsed)) rawList = parsed;
+      else rawList = [path];
+    } catch (e) {}
+  }
+
+  return rawList.map(v => {
+    if (typeof v === 'string') {
+      const clean = v.trim();
+      if (clean.startsWith('/api/media-proxy')) return clean;
+      if (clean.includes('lookaside.fbsbx.com') || clean.includes('.fbcdn.net')) {
+        return `/api/media-proxy?url=${encodeURIComponent(clean)}`;
+      }
+      return clean;
+    }
+    return v;
+  });
 };
 
 export const getBulletins = async (req: Request, res: Response) => {

@@ -128,126 +128,132 @@ export class FacebookScraper {
 
   /**
    * Fetches public posts from a Facebook Page without requiring Meta App Review or tokens.
+   * Uses direct crawler emulation to extract real captions, high-res photos, and videos.
    */
-  public static async fetchPublicPagePosts(pageHandle: string = '2329513750399495', limit = 15): Promise<ScrapedFacebookPost[]> {
+  public static async fetchPublicPagePosts(pageHandle: string = 'stacruzpolicelagunappo', limit = 25): Promise<ScrapedFacebookPost[]> {
     console.log(`[PUBLIC FB SCRAPER] Fetching public page feed for: ${pageHandle}`);
     
+    const cleanHandle = pageHandle.replace(/^https?:\/\/(www\.)?facebook\.com\//, '').replace(/\/$/, '') || 'stacruzpolicelagunappo';
+
     try {
-      const embedUrl = `https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2F${encodeURIComponent(pageHandle)}&tabs=timeline&width=500&height=1000`;
-      const response = await fetch(embedUrl, {
+      // 1. PRIMARY STRATEGY: Direct Crawler Fetch (Googlebot UA receives full public timeline with all media)
+      const res = await fetch(`https://www.facebook.com/${cleanHandle}`, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9'
+          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
         }
       });
 
-      if (!response.ok) {
-        console.warn(`[PUBLIC FB SCRAPER] Embed page returned status ${response.status}`);
-        return [];
-      }
+      if (res.ok) {
+        const html = await res.text();
+        if (html.includes('"__typename":"Story"')) {
+          const storyChunks = html.split(/"__typename":"Story"/);
+          const parsedPosts: ScrapedFacebookPost[] = [];
+          const seenIds = new Set<string>();
 
-      const html = await response.text();
-      const posts: ScrapedFacebookPost[] = [];
+          for (let i = 1; i < storyChunks.length; i++) {
+            if (parsedPosts.length >= limit) break;
+            const chunk = storyChunks[i];
 
-      // Unescape HTML entities & Unicode escapes in payload
-      const unescapedHtml = html
-        .replace(/\\\/|\\/g, '/')
-        .replace(/&amp;/g, '&')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&quot;/g, '"');
+            // Post ID
+            const idMatch = chunk.match(/"post_id":"(\d+)"/) || chunk.match(/story_fbid=(\d+)/);
+            if (!idMatch) continue;
+            const postId = idMatch[1];
+            if (seenIds.has(postId)) continue;
+            seenIds.add(postId);
 
-      // Extract all high-res scontent image URLs from embed payload
-      const imgMatches = unescapedHtml.match(/https:\/\/scontent[^\s"'\\]+/g) || [];
-      const cleanImgUrls = Array.from(new Set(imgMatches.filter(u => u.includes('.jpg') || u.includes('.png'))));
+            // Creation time
+            const timeMatch = chunk.match(/"creation_time":(\d+)/);
+            const creationTime = timeMatch 
+              ? new Date(parseInt(timeMatch[1], 10) * 1000).toISOString() 
+              : new Date(Date.now() - parsedPosts.length * 3600000).toISOString();
 
-      // Extract post text matches (from divs, title attributes, aria-labels, or JSON strings)
-      const textSnippets: string[] = [];
-      const divMatches = html.match(/class="_5lv6"[^>]*>([\s\S]*?)<\/div>/g) || [];
-      divMatches.forEach(m => {
-        const cleanText = m.replace(/<[^>]*>/g, '').trim();
-        if (cleanText && cleanText.length > 15 && !textSnippets.includes(cleanText)) {
-          textSnippets.push(cleanText);
-        }
-      });
+            // Message text / Caption
+            let message = '';
+            const msgMatch = chunk.match(/"message":\{"text":"([\s\S]*?)"\}/);
+            if (msgMatch) {
+              try {
+                message = JSON.parse(`"${msgMatch[1]}"`);
+              } catch (_) {
+                message = msgMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+              }
+            }
 
-      if (textSnippets.length === 0) {
-        const jsonMsgMatches = unescapedHtml.match(/"text":"([^"]{20,500})"/g) || [];
-        jsonMsgMatches.forEach(m => {
-          const txt = m.replace(/^"text":"/, '').replace(/"$/, '').trim();
-          if (txt && !txt.includes('http') && !textSnippets.includes(txt)) {
-            textSnippets.push(txt);
+            // Permalink URL
+            const urlMatch = chunk.match(/"url":"(https:[^"]+)"/);
+            let permalink = urlMatch 
+              ? urlMatch[1].replace(/\\\/|\\/g, '/') 
+              : `https://www.facebook.com/${cleanHandle}/posts/${postId}`;
+            if (permalink.includes('photo.php?fbid=')) {
+              permalink = `https://www.facebook.com/photo/?fbid=${postId}&set=a.225279966311112`;
+            }
+
+            // Photos extraction
+            const photos: string[] = [];
+            const lookasideMatches = chunk.match(/https:\\\/\\\/lookaside\.fbsbx\.com\\\/lookaside\\\/crawler\\\/media\\\/[^"\s]+/g) || [];
+            for (const m of lookasideMatches) {
+              const clean = m.replace(/\\\/|\\/g, '/');
+              // Filter out system icons or profile images
+              if (!clean.includes('100064873290430') && !clean.includes('100000807064695') && !photos.includes(clean)) {
+                photos.push(clean);
+              }
+            }
+
+            const scontentMatches = chunk.match(/https:\\\/\\\/scontent[^"\s]+/g) || [];
+            for (const m of scontentMatches) {
+              const clean = m.replace(/\\\/|\\/g, '/');
+              if (!clean.includes('.srt') && !clean.includes('s50x50') && !clean.includes('p50x50') && !photos.includes(clean)) {
+                photos.push(clean);
+              }
+            }
+
+            // Videos extraction
+            const videos: string[] = [];
+            const videoMatches = chunk.match(/"(playable_url|browser_native_hd_url|browser_native_sd_url)":"([^"]+)"/g) || [];
+            for (const vm of videoMatches) {
+              const vUrl = vm.replace(/^"[^"]+":"/, '').replace(/"$/, '').replace(/\\\/|\\/g, '/');
+              if (vUrl && !videos.includes(vUrl)) {
+                videos.push(vUrl);
+              }
+            }
+
+            // If permalink is video / reel, resolve video crawler media ID
+            if (permalink.includes('/videos/') || permalink.includes('/reel/') || permalink.includes('/watch')) {
+              const vidIdMatch = permalink.match(/\/videos\/(\d+)/) || permalink.match(/\/reel\/(\d+)/);
+              if (vidIdMatch) {
+                const lookasideVid = `https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=${vidIdMatch[1]}`;
+                if (!videos.includes(lookasideVid)) {
+                  videos.unshift(lookasideVid);
+                }
+              }
+            }
+
+            if (!message && photos.length === 0 && videos.length === 0) continue;
+
+            parsedPosts.push({
+              id: postId,
+              message: message || 'Official Facebook Announcement from PNP Sta. Cruz',
+              created_time: creationTime,
+              full_picture: photos[0] || undefined,
+              images: photos,
+              video_url: videos[0] || undefined,
+              permalink_url: permalink,
+              media_type: videos.length > 0 ? 'video' : 'photo'
+            });
           }
-        });
-      }
 
-      // Extract permalinks, photo URLs, reels, video URLs, and story_fbids from stream
-      const permalinkMatches = unescapedHtml.match(/https:\/\/www\.facebook\.com\/[^\s"'\\]+\/(posts|photos|videos|reel|watch|permalink\.php|photo)[^\s"'\\]+/g) || [];
-      const cleanPermalinks = Array.from(new Set(permalinkMatches));
-
-      // Extract specific story & photo IDs from HTML payload
-      const storyIdMatches = unescapedHtml.match(/"story_fbid":"(\d+|pfbid[a-zA-Z0-9]+)"/g) || unescapedHtml.match(/story_fbid=(\d+|pfbid[a-zA-Z0-9]+)/g) || [];
-      const extractedStoryIds = storyIdMatches.map(s => s.replace(/.*[:=]"?/, '').replace(/"$/, ''));
-
-      const fbidMatches = unescapedHtml.match(/fbid=(\d+)/g) || unescapedHtml.match(/"fbid":"(\d+)"/g) || [];
-      const extractedFbids = fbidMatches.map(f => f.replace(/.*[:=]"?/, '').replace(/"$/, ''));
-
-      const pageIdMatch = html.match(/"pageID":"(\d+)"/);
-      const targetPageId = pageIdMatch ? pageIdMatch[1] : '2329513750399495';
-
-      const defaultBulletins = [
-        'OFFICIAL ANNOUNCEMENT: PNP Sta. Cruz Police Station is actively conducting community awareness, law enforcement, and public safety operations across all barangays.',
-        'CRIME & SAFETY ADVISORY: Please remain vigilant, secure your properties, and immediately report any suspicious activities or emergency situations to the Sta. Cruz PNP Hotlines.',
-        'TRAFFIC & PUBLIC NOTICE: Motorists and commuters are advised to observe traffic rules, road safety guidelines, and speed limits within the Sta. Cruz Municipal area.',
-        'COMMUNITY AWARENESS: PNP Sta. Cruz conducts continuous police presence, mobile patrols, and barangay visitation for peaceful and orderly surroundings.',
-        'CYBERCRIME ADVISORY: Stay vigilant online. Never share sensitive OTPs, passwords, or personal financial information with unverified callers or message links.',
-        'RECOVERED PROPERTY & INQUIRY NOTICE: Citizens requesting assistance or claiming lost items are advised to visit the PNP Sta. Cruz Police Station with valid ID.'
-      ];
-
-      const itemMessages = textSnippets.length > 0 ? textSnippets : defaultBulletins;
-      const countToProcess = Math.min(limit, itemMessages.length);
-
-      const usedUrls = new Set<string>();
-
-      for (let i = 0; i < countToProcess; i++) {
-        // Assign specific image for this post index if available; do NOT fallback to cleanImgUrls[0] for all cards
-        const postPhoto = cleanImgUrls[i] || undefined;
-        const postImages = postPhoto ? [postPhoto] : [];
-
-        // Unique URL Detector: resolve permalink and enforce uniqueness across all items
-        let rawLink = cleanPermalinks[i];
-        if (!rawLink || usedUrls.has(this.normalizeFacebookUrl(rawLink).url)) {
-          if (extractedFbids[i] && !usedUrls.has(`https://www.facebook.com/photo?fbid=${extractedFbids[i]}`)) {
-            rawLink = `https://www.facebook.com/photo?fbid=${extractedFbids[i]}`;
-          } else if (extractedStoryIds[i] && !usedUrls.has(`https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`)) {
-            rawLink = `https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`;
-          } else {
-            // Generate clean unique story permalink per post item
-            rawLink = `https://www.facebook.com/permalink.php?story_fbid=${targetPageId}_post_${i + 1}&id=${targetPageId}`;
+          if (parsedPosts.length > 0) {
+            console.log(`[PUBLIC FB SCRAPER] Successfully extracted ${parsedPosts.length} real posts via Crawler Engine.`);
+            return parsedPosts;
           }
         }
-
-        const normalized = this.normalizeFacebookUrl(rawLink);
-        usedUrls.add(normalized.url);
-
-        posts.push({
-          id: `fb_pub_post_${targetPageId}_${Date.now()}_${i + 1}`,
-          message: itemMessages[i],
-          created_time: new Date(Date.now() - i * 43200000).toISOString(),
-          full_picture: postPhoto,
-          images: postImages,
-          permalink_url: normalized.url,
-          media_type: normalized.type
-        });
       }
-
-      console.log(`[PUBLIC FB SCRAPER] Successfully extracted ${posts.length} public posts for Page ID: ${targetPageId}`);
-      return posts;
-    } catch (err: any) {
-      console.error('[PUBLIC FB SCRAPER ERROR]', err.message || err);
-      return [];
+    } catch (crawlerErr: any) {
+      console.warn('[PUBLIC FB SCRAPER] Crawler fetch warning:', crawlerErr.message || crawlerErr);
     }
+
+    return [];
   }
 
   /**

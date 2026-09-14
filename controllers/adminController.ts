@@ -2084,27 +2084,47 @@ export const getDashboard = async (req: Request, res: Response) => {
 const parsePhotos = (path: string | undefined): string[] => {
   if (!path) return [];
   if (path === '[]' || path === '""' || path === 'null') return [];
+  let list: string[] = [];
   try {
     const parsed = JSON.parse(path);
     if (Array.isArray(parsed)) {
-      return parsed.filter((p: any) => typeof p === 'string' && p.trim().length > 0 && p !== '[]' && !p.startsWith('['));
+      list = parsed.filter((p: any) => typeof p === 'string' && p.trim().length > 0 && p !== '[]' && !p.startsWith('['));
     }
   } catch (e) { }
-  if (path.startsWith('[') || path.startsWith('{') || path.startsWith('"')) return [];
-  return [path];
+  if (list.length === 0 && !path.startsWith('[') && !path.startsWith('{') && !path.startsWith('"')) {
+    list = [path];
+  }
+  return list.map(url => {
+    const clean = String(url).trim();
+    if (clean.startsWith('/api/media-proxy')) return clean;
+    if (clean.includes('lookaside.fbsbx.com') || clean.includes('.fbcdn.net')) {
+      return `/api/media-proxy?url=${encodeURIComponent(clean)}`;
+    }
+    return clean;
+  });
 };
 
 const parseVideos = (path: string | undefined): string[] => {
   if (!path) return [];
   if (path === '[]' || path === '""' || path === 'null') return [];
+  let list: string[] = [];
   try {
     const parsed = JSON.parse(path);
     if (Array.isArray(parsed)) {
-      return parsed.filter((p: any) => typeof p === 'string' && p.trim().length > 0 && p !== '[]' && !p.startsWith('['));
+      list = parsed.filter((p: any) => typeof p === 'string' && p.trim().length > 0 && p !== '[]' && !p.startsWith('['));
     }
   } catch (e) { }
-  if (path.startsWith('[') || path.startsWith('{') || path.startsWith('"')) return [];
-  return [path];
+  if (list.length === 0 && !path.startsWith('[') && !path.startsWith('{') && !path.startsWith('"')) {
+    list = [path];
+  }
+  return list.map(v => {
+    const clean = String(v).trim();
+    if (clean.startsWith('/api/media-proxy')) return clean;
+    if (clean.includes('lookaside.fbsbx.com') || clean.includes('.fbcdn.net')) {
+      return `/api/media-proxy?url=${encodeURIComponent(clean)}`;
+    }
+    return clean;
+  });
 };
 
 export const getBulletins = async (req: Request, res: Response) => {
