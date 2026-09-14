@@ -7,6 +7,8 @@ import { GoogleGenAI } from '@google/genai';
 import { createRequire } from 'module';
 import nodemailer from 'nodemailer';
 import { memoryCache } from '../utils/cache.js';
+import { FacebookService } from '../utils/facebookService.js';
+import { classifyCategory } from '../utils/categoryClassifier.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -2154,6 +2156,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     rawCategory = String(category === 'Other' ? custom_category : (category || ''));
   }
   rawCategory = rawCategory.trim();
+
+  // Auto-Segregation fallback if category is not explicitly chosen
+  if (!rawCategory || rawCategory === 'Public Advisory') {
+    rawCategory = classifyCategory(`${title || ''} ${body || ''}`);
+  }
 
   // If publish_type is 'url', the intent is explicitly to import a Facebook URL as a General Announcement
   if (publish_type === 'url') {
