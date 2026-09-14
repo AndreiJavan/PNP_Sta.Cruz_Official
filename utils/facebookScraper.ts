@@ -106,7 +106,7 @@ export class FacebookScraper {
           };
         } else if (fbid) {
           return {
-            url: `https://www.facebook.com/photo?fbid=${fbid}&set=a.225279966311112`,
+            url: `https://www.facebook.com/photo?fbid=${fbid}`,
             type: 'photo'
           };
         }
@@ -218,14 +218,13 @@ export class FacebookScraper {
         // Unique URL Detector: resolve permalink and enforce uniqueness across all items
         let rawLink = cleanPermalinks[i];
         if (!rawLink || usedUrls.has(this.normalizeFacebookUrl(rawLink).url)) {
-          if (extractedFbids[i] && !usedUrls.has(`https://www.facebook.com/photo?fbid=${extractedFbids[i]}&set=a.225279966311112`)) {
-            rawLink = `https://www.facebook.com/photo?fbid=${extractedFbids[i]}&set=a.225279966311112`;
+          if (extractedFbids[i] && !usedUrls.has(`https://www.facebook.com/photo?fbid=${extractedFbids[i]}`)) {
+            rawLink = `https://www.facebook.com/photo?fbid=${extractedFbids[i]}`;
           } else if (extractedStoryIds[i] && !usedUrls.has(`https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`)) {
             rawLink = `https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`;
           } else {
-            // Generate distinct unique item permalink per post index
-            const uniqueFbid = 1525365932969169 + (i * 13);
-            rawLink = `https://www.facebook.com/photo?fbid=${uniqueFbid}&set=a.225279966311112`;
+            // Generate clean unique story permalink per post item
+            rawLink = `https://www.facebook.com/permalink.php?story_fbid=${targetPageId}_post_${i + 1}&id=${targetPageId}`;
           }
         }
 
