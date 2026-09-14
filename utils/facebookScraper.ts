@@ -218,8 +218,8 @@ export class FacebookScraper {
               }
             }
 
-            // If permalink is video / reel, resolve video crawler media ID
-            if (permalink.includes('/videos/') || permalink.includes('/reel/') || permalink.includes('/watch')) {
+            // If permalink is an official page video / reel, resolve video crawler media ID
+            if (permalink.includes(`/${cleanHandle}/videos/`) || permalink.includes(`/${cleanHandle}/reel/`)) {
               const vidIdMatch = permalink.match(/\/videos\/(\d+)/) || permalink.match(/\/reel\/(\d+)/);
               if (vidIdMatch) {
                 const lookasideVid = `https://lookaside.fbsbx.com/lookaside/crawler/media/?media_id=${vidIdMatch[1]}`;

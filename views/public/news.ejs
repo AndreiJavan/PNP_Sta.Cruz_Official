@@ -66,10 +66,10 @@
                         <% } else if (news.urlToImage && news.urlToImage !== '/images/PNP.jpg') { %>
                             <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                        <% } else if (news.facebook_url) { %>
+                        <% } else if (news.facebook_url && !news.facebook_url.includes('post_') && !news.facebook_url.includes('undefined')) { %>
                             <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=false&width=500" 
                                 width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
-                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; unload" class="w-full h-full pointer-events-none"></iframe>
+                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
                             <div class="absolute inset-0 bg-transparent cursor-pointer" onclick="openNewsModal('<%= news.id %>')"></div>
                         <% } else { %>
                             <img src="/images/PNP.jpg" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy">
@@ -302,12 +302,12 @@
                 mediaItems.push({ type: 'image', url: article.urlToImage });
             }
 
-            if (article.facebook_url && mediaItems.length === 0) {
+            if (article.facebook_url && !article.facebook_url.includes('post_') && !article.facebook_url.includes('undefined') && mediaItems.length === 0) {
                 const isVideo = /video|watch|reel/i.test(article.facebook_url);
                 const pluginType = isVideo ? 'video.php' : 'post.php';
                 const embedSrc = `https://www.facebook.com/plugins/${pluginType}?href=${encodeURIComponent(article.facebook_url)}&show_text=false&width=500`;
                 mediaContainer.innerHTML = `<div class="w-full h-full min-h-[350px] bg-slate-950 flex flex-col items-center justify-center p-2 relative overflow-hidden">
-                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:350px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; unload" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
+                    <iframe src="${embedSrc}" width="100%" height="100%" style="border:none;overflow:hidden;min-height:350px;" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="rounded-2xl w-full max-w-xl shadow-2xl"></iframe>
                 </div>`;
                 if (prevBtn) prevBtn.classList.add('hidden');
                 if (nextBtn) nextBtn.classList.add('hidden');

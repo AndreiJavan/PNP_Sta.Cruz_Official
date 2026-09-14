@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import path from 'path';
+import fs from 'fs';
 import { db } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
@@ -218,6 +220,18 @@ export const proxyMedia = async (req: Request, res: Response) => {
     return res.status(400).send('Missing url parameter');
   }
 
+  const sendDefaultPlaceholder = () => {
+    try {
+      const fallbackPath = path.join(process.cwd(), 'public', 'images', 'PNP.jpg');
+      if (fs.existsSync(fallbackPath)) {
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        return res.sendFile(fallbackPath);
+      }
+    } catch (_) {}
+    return res.redirect(302, '/images/PNP.jpg');
+  };
+
   try {
     const parsed = new URL(targetUrl);
     const isAllowed = parsed.hostname.includes('fbcdn.net') || 
@@ -231,14 +245,22 @@ export const proxyMedia = async (req: Request, res: Response) => {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
         'Accept': '*/*'
-      }
+      },
+      redirect: 'follow'
     });
 
     if (!fbRes.ok) {
-      return res.status(fbRes.status).send('Media fetch failed');
+      return sendDefaultPlaceholder();
     }
 
-    const contentType = fbRes.headers.get('content-type') || (targetUrl.includes('.jpg') ? 'image/jpeg' : targetUrl.includes('.png') ? 'image/png' : 'application/octet-stream');
+    const rawContentType = fbRes.headers.get('content-type') || '';
+    
+    // If Facebook returned an HTML error page or login wall instead of actual binary media
+    if (rawContentType.includes('text/html')) {
+      return sendDefaultPlaceholder();
+    }
+
+    const contentType = rawContentType || (targetUrl.includes('.jpg') ? 'image/jpeg' : targetUrl.includes('.png') ? 'image/png' : targetUrl.includes('.mp4') ? 'video/mp4' : 'application/octet-stream');
     res.setHeader('Content-Type', contentType);
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800');
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -246,8 +268,8 @@ export const proxyMedia = async (req: Request, res: Response) => {
     const buffer = Buffer.from(await fbRes.arrayBuffer());
     return res.send(buffer);
   } catch (err: any) {
-    console.error('Media proxy error:', err.message || err);
-    return res.status(500).send('Proxy error');
+    console.warn('Media proxy non-fatal error:', err?.message || err);
+    return sendDefaultPlaceholder();
   }
 };
 
