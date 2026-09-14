@@ -72,6 +72,12 @@
                     <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 text-xs"></i>
                     <input type="text" id="bulletinSearchInput" onkeyup="filterBulletins()" placeholder="Search mission labels..." class="w-full pl-10 pr-4 py-4 bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 rounded-2xl outline-none text-[10px] font-black text-slate-600 dark:text-white uppercase tracking-widest focus:ring-2 focus:ring-pnp-blue/20 transition-all placeholder:text-gray-300">
                 </div>
+
+                <!-- Sync Facebook Action Button -->
+                <button type="button" id="syncFbToolbarBtn" onclick="triggerFacebookSync()" class="w-full sm:w-auto px-5 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] shadow-md transition-all transform hover:scale-[1.03] active:scale-95 flex items-center justify-center space-x-2 shrink-0 cursor-pointer">
+                    <i class="fab fa-facebook text-sm" id="syncFbToolbarIcon"></i>
+                    <span id="syncFbToolbarText">Sync Facebook</span>
+                </button>
             </div>
         </div>
 
@@ -1888,15 +1894,20 @@
 
 <script>
 async function triggerFacebookSync() {
-    const btn = document.getElementById('syncFbBtn');
-    const icon = document.getElementById('syncFbIcon');
-    const text = document.getElementById('syncFbText');
+    const btn1 = document.getElementById('syncFbBtn');
+    const icon1 = document.getElementById('syncFbIcon');
+    const text1 = document.getElementById('syncFbText');
 
-    if (!btn || btn.disabled) return;
+    const btn2 = document.getElementById('syncFbToolbarBtn');
+    const icon2 = document.getElementById('syncFbToolbarIcon');
+    const text2 = document.getElementById('syncFbToolbarText');
 
-    btn.disabled = true;
-    icon.className = 'fas fa-spinner fa-spin text-sm';
-    text.textContent = 'Syncing...';
+    const setLoading = (loading) => {
+        if (btn1) { btn1.disabled = loading; if (icon1) icon1.className = loading ? 'fas fa-spinner fa-spin text-sm' : 'fab fa-facebook text-sm'; if (text1) text1.textContent = loading ? 'Syncing...' : 'Sync Facebook'; }
+        if (btn2) { btn2.disabled = loading; if (icon2) icon2.className = loading ? 'fas fa-spinner fa-spin text-sm' : 'fab fa-facebook text-sm'; if (text2) text2.textContent = loading ? 'Syncing...' : 'Sync Facebook'; }
+    };
+
+    setLoading(true);
 
     try {
         const response = await fetch('/admin/api/sync-facebook', {
@@ -1919,9 +1930,7 @@ async function triggerFacebookSync() {
         console.error('Facebook sync error:', err);
         alert('Network or server error during Facebook sync. Check console logs.');
     } finally {
-        btn.disabled = false;
-        icon.className = 'fab fa-facebook text-sm';
-        text.textContent = 'Sync Facebook';
+        setLoading(false);
     }
 }
 </script>
