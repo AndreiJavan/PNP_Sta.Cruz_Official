@@ -5,7 +5,10 @@ export interface ScrapedFacebookPost {
   message: string;
   created_time: string;
   full_picture?: string;
+  images?: string[];
+  video_url?: string;
   permalink_url: string;
+  media_type?: 'photo' | 'video' | 'reel' | 'post';
 }
 
 /**
@@ -13,6 +16,75 @@ export interface ScrapedFacebookPost {
  * Bypasses Meta App Publishing / Business Verification by reading public page OpenGraph metadata & oEmbed streams.
  */
 export class FacebookScraper {
+  /**
+   * Cleans and normalizes any Facebook URL (Photo, Reel, Video, Album, Post)
+   * into a canonical direct Facebook redirect link.
+   */
+  public static normalizeFacebookUrl(rawUrl: string): { url: string; type: 'photo' | 'video' | 'reel' | 'post' } {
+    if (!rawUrl) {
+      return { url: 'https://www.facebook.com/2329513750399495', type: 'post' };
+    }
+
+    let url = rawUrl.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+
+    try {
+      const parsed = new URL(url);
+
+      // Reel URL handling (e.g. facebook.com/reel/28466790816290162/?s=single_unit)
+      if (parsed.pathname.includes('/reel/')) {
+        const reelMatch = parsed.pathname.match(/\/reel\/(\d+)/);
+        const reelId = reelMatch ? reelMatch[1] : parsed.pathname.split('/').filter(Boolean).pop();
+        return {
+          url: `https://www.facebook.com/reel/${reelId}`,
+          type: 'reel'
+        };
+      }
+
+      // Video / Watch URL handling (e.g. facebook.com/watch/?v=123456 or facebook.com/username/videos/123456)
+      if (parsed.pathname.includes('/watch') || parsed.pathname.includes('/videos/')) {
+        const vParam = parsed.searchParams.get('v');
+        const vidMatch = parsed.pathname.match(/\/videos\/(\d+)/);
+        const videoId = vParam || (vidMatch ? vidMatch[1] : null);
+        return {
+          url: videoId ? `https://www.facebook.com/watch/?v=${videoId}` : `https://www.facebook.com${parsed.pathname}`,
+          type: 'video'
+        };
+      }
+
+      // Photo / Album URL handling (e.g. facebook.com/photo?fbid=1525365932969169&set=a.225279966311112)
+      if (parsed.pathname.includes('/photo') || parsed.pathname.includes('/photos/')) {
+        const fbid = parsed.searchParams.get('fbid');
+        const setParam = parsed.searchParams.get('set');
+        if (fbid && setParam) {
+          return {
+            url: `https://www.facebook.com/photo?fbid=${fbid}&set=${encodeURIComponent(setParam)}`,
+            type: 'photo'
+          };
+        } else if (fbid) {
+          return {
+            url: `https://www.facebook.com/photo?fbid=${fbid}`,
+            type: 'photo'
+          };
+        }
+        return {
+          url: `https://www.facebook.com${parsed.pathname}`,
+          type: 'photo'
+        };
+      }
+
+      // Standard post or permalink
+      return {
+        url: `https://www.facebook.com${parsed.pathname}`,
+        type: 'post'
+      };
+    } catch (_) {
+      return { url, type: 'post' };
+    }
+  }
+
   /**
    * Fetches public posts from a Facebook Page without requiring Meta App Review or tokens.
    */
@@ -45,7 +117,7 @@ export class FacebookScraper {
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"');
 
-      // Extract raw image URLs from embed payload
+      // Extract all high-res scontent image URLs from embed payload
       const imgMatches = unescapedHtml.match(/https:\/\/scontent[^\s"'\\]+/g) || [];
       const cleanImgUrls = Array.from(new Set(imgMatches.filter(u => u.includes('.jpg') || u.includes('.png'))));
 
@@ -59,7 +131,6 @@ export class FacebookScraper {
         }
       });
 
-      // Extract titles or JSON message strings if class _5lv6 isn't matched directly
       if (textSnippets.length === 0) {
         const jsonMsgMatches = unescapedHtml.match(/"text":"([^"]{20,500})"/g) || [];
         jsonMsgMatches.forEach(m => {
@@ -70,15 +141,13 @@ export class FacebookScraper {
         });
       }
 
-      // Extract permalinks or post IDs
-      const permalinkMatches = unescapedHtml.match(/https:\/\/www\.facebook\.com\/[^\s"'\\]+\/(posts|photos|videos)\/[^\s"'\\]+/g) || [];
+      // Extract permalinks, reels, watch, and photo URLs
+      const permalinkMatches = unescapedHtml.match(/https:\/\/www\.facebook\.com\/[^\s"'\\]+\/(posts|photos|videos|reel|watch)[^\s"'\\]+/g) || [];
       const cleanPermalinks = Array.from(new Set(permalinkMatches));
 
-      // Look for pageID & story IDs
       const pageIdMatch = html.match(/"pageID":"(\d+)"/);
       const targetPageId = pageIdMatch ? pageIdMatch[1] : '2329513750399495';
 
-      // Build fallback messages if fewer text snippets were isolated
       const defaultBulletins = [
         'OFFICIAL ANNOUNCEMENT: PNP Sta. Cruz Police Station is actively conducting community awareness, law enforcement, and public safety operations across all barangays.',
         'CRIME & SAFETY ADVISORY: Please remain vigilant, secure your properties, and immediately report any suspicious activities or emergency situations to the Sta. Cruz PNP Hotlines.',
@@ -92,15 +161,24 @@ export class FacebookScraper {
       const countToProcess = Math.min(limit, itemMessages.length);
 
       for (let i = 0; i < countToProcess; i++) {
-        const photoUrl = cleanImgUrls[i % cleanImgUrls.length] || 'https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/470140890_990578889781212_2840330697595734102_n.jpg';
-        const postPermalink = cleanPermalinks[i] || `https://www.facebook.com/2329513750399495`;
-        
+        // Group images into multi-photo lists per post if multiple scontent images exist
+        const postImages: string[] = [];
+        const imgStart = i * 2;
+        if (cleanImgUrls[imgStart]) postImages.push(cleanImgUrls[imgStart]);
+        if (cleanImgUrls[imgStart + 1]) postImages.push(cleanImgUrls[imgStart + 1]);
+
+        const primaryPhoto = postImages[0] || cleanImgUrls[0] || 'https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/470140890_990578889781212_2840330697595734102_n.jpg';
+        const rawLink = cleanPermalinks[i] || `https://www.facebook.com/2329513750399495`;
+        const normalized = this.normalizeFacebookUrl(rawLink);
+
         posts.push({
           id: `fb_pub_post_${targetPageId}_${Date.now()}_${i + 1}`,
           message: itemMessages[i],
-          created_time: new Date(Date.now() - i * 43200000).toISOString(), // spaced out by 12 hours
-          full_picture: photoUrl,
-          permalink_url: postPermalink
+          created_time: new Date(Date.now() - i * 43200000).toISOString(),
+          full_picture: primaryPhoto,
+          images: postImages.length > 0 ? postImages : [primaryPhoto],
+          permalink_url: normalized.url,
+          media_type: normalized.type
         });
       }
 
@@ -113,14 +191,17 @@ export class FacebookScraper {
   }
 
   /**
-   * Fetches metadata for an individual Facebook Post URL (e.g. pasted by admin).
+   * Fetches metadata for an individual Facebook Photo, Reel, Video, or Post URL.
    */
   public static async parsePostUrl(postUrl: string): Promise<ScrapedFacebookPost | null> {
+    const normalized = this.normalizeFacebookUrl(postUrl);
+
     try {
-      const cleanUrl = postUrl.trim();
-      const oembedUrl = `https://www.facebook.com/plugins/post/oembed.json/?url=${encodeURIComponent(cleanUrl)}`;
-      
-      const response = await fetch(oembedUrl, {
+      const oembedEndpoint = normalized.type === 'video' || normalized.type === 'reel'
+        ? `https://www.facebook.com/plugins/video/oembed.json/?url=${encodeURIComponent(normalized.url)}`
+        : `https://www.facebook.com/plugins/post/oembed.json/?url=${encodeURIComponent(normalized.url)}`;
+
+      const response = await fetch(oembedEndpoint, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -130,15 +211,19 @@ export class FacebookScraper {
         const data = await response.json();
         const html = data.html || '';
         const authorName = data.author_name || 'PNP Sta. Cruz';
-        
-        // Strip HTML from oEmbed response
-        const messageText = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || `Official Announcement from ${authorName}`;
+        const extractedTitle = data.title || '';
+
+        const messageText = extractedTitle || html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() || `Official Announcement from ${authorName}`;
+        const thumbnail = data.thumbnail_url || data.author_url || undefined;
 
         return {
           id: `fb_url_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
           message: messageText,
           created_time: new Date().toISOString(),
-          permalink_url: cleanUrl
+          full_picture: thumbnail,
+          images: thumbnail ? [thumbnail] : [],
+          permalink_url: normalized.url,
+          media_type: normalized.type
         };
       }
     } catch (err) {
@@ -147,9 +232,11 @@ export class FacebookScraper {
 
     return {
       id: `fb_url_${Date.now()}`,
-      message: `Official PNP Sta. Cruz Facebook Announcement`,
+      message: `Official PNP Sta. Cruz Facebook ${normalized.type.toUpperCase()}`,
       created_time: new Date().toISOString(),
-      permalink_url: postUrl
+      permalink_url: normalized.url,
+      media_type: normalized.type
     };
   }
 }
+

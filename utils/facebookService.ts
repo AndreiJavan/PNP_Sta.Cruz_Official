@@ -136,7 +136,9 @@ export class FacebookService {
           const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
           const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
           const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
-          const fbPermalink = post.permalink_url || `https://www.facebook.com/stacruzpolicelagunappo/posts/${post.id}`;
+          const rawPermalink = post.permalink_url || `https://www.facebook.com/stacruzpolicelagunappo/posts/${post.id}`;
+          const normalizedMeta = FacebookScraper.normalizeFacebookUrl(rawPermalink);
+          const fbPermalink = normalizedMeta.url;
           const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
 
           // Skip if already imported by checking title / body signatures
@@ -148,9 +150,12 @@ export class FacebookService {
           // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
           const autoCategory = classifyCategory(messageText);
 
-          // Extract pictures
+          // Extract multiple pictures / photo sets
           let photoPaths: string[] = [];
-          if (post.full_picture) {
+          if ((post as any).images && Array.isArray((post as any).images)) {
+            photoPaths = [...(post as any).images];
+          }
+          if (post.full_picture && !photoPaths.includes(post.full_picture)) {
             photoPaths.push(post.full_picture);
           }
 
