@@ -39,14 +39,22 @@ export class FacebookService {
     }
 
     try {
-      const url = `https://graph.facebook.com/v19.0/${pageId}/posts?fields=id,message,created_time,full_picture,attachments{media,subattachments},permalink_url&limit=${limit}&access_token=${accessToken}`;
+      let url = `https://graph.facebook.com/v19.0/${pageId}/posts?fields=id,message,created_time,full_picture,attachments{media,subattachments},permalink_url&limit=${limit}&access_token=${accessToken}`;
       console.log(`[FACEBOOK SYNC] Fetching posts from page: ${pageId}`);
 
-      const response = await fetch(url);
+      let response = await fetch(url);
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('[FACEBOOK SYNC API ERROR]', errorData);
-        throw new Error(`Facebook API responded with status ${response.status}: ${JSON.stringify(errorData)}`);
+        // Fallback to /me/posts (standard for Page Access Tokens)
+        console.warn(`[FACEBOOK SYNC] Primary endpoint failed with status ${response.status}. Attempting /me/posts fallback...`);
+        const fallbackUrl = `https://graph.facebook.com/v19.0/me/posts?fields=id,message,created_time,full_picture,attachments{media,subattachments},permalink_url&limit=${limit}&access_token=${accessToken}`;
+        const fallbackRes = await fetch(fallbackUrl);
+        if (fallbackRes.ok) {
+          response = fallbackRes;
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('[FACEBOOK SYNC API ERROR]', errorData);
+          throw new Error(`Facebook API responded with status ${response.status}: ${JSON.stringify(errorData)}`);
+        }
       }
 
       const result = await response.json();
