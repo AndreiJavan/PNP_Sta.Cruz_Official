@@ -123,24 +123,25 @@ export class FacebookService {
         existingSnap = { docs: [] };
       }
 
-      const existingFbIds = new Set<string>();
+      const existingSignatures = new Set<string>();
       existingSnap.docs.forEach((doc: any) => {
         const data = doc.data ? doc.data() : doc;
-        if (data.fb_post_id) {
-          existingFbIds.add(data.fb_post_id);
-        }
+        if (data.title) existingSignatures.add(data.title.trim());
+        if (data.body) existingSignatures.add(data.body.trim());
       });
 
       for (const post of posts) {
-        // Skip if already imported
-        if (existingFbIds.has(post.id)) {
-          skippedCount++;
-          continue;
-        }
-
         const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
         const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
         const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
+        const fbPermalink = post.permalink_url || `https://www.facebook.com/${post.id}`;
+        const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
+
+        // Skip if already imported by checking title / body signatures
+        if (existingSignatures.has(title.trim()) || existingSignatures.has(bodyWithLink.trim())) {
+          skippedCount++;
+          continue;
+        }
 
         // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
         const autoCategory = classifyCategory(messageText);
@@ -163,19 +164,20 @@ export class FacebookService {
           }
         }
 
-        const bulletinRecord = {
+        const fbPermalink = post.permalink_url || `https://www.facebook.com/${post.id}`;
+        const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
+
+        const bulletinRecord: any = {
           title: title,
           category: autoCategory, // Automatically segregated into Crime, Traffic, Cybercrime, or Community Awareness
-          body: messageText,
+          body: bodyWithLink,
           photo_path: photoPaths.length > 0 ? JSON.stringify(photoPaths) : null,
-          fb_post_id: post.id,
-          fb_permalink: post.permalink_url || `https://facebook.com/${post.id}`,
           is_archived: false,
           created_at: new Date(post.created_time || Date.now()).toISOString(),
           updated_at: new Date().toISOString()
         };
 
-        // Insert into database
+        // Insert into database using standard schema
         await db.collection('bulletins').add(bulletinRecord);
         addedCount++;
         console.log(`[FACEBOOK SYNC] Imported & Segregated FB Post ${post.id} as [${autoCategory}]`);
