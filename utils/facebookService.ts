@@ -136,7 +136,7 @@ export class FacebookService {
           const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
           const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
           const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
-          const fbPermalink = post.permalink_url || `https://www.facebook.com/${post.id}`;
+          const fbPermalink = post.permalink_url || `https://www.facebook.com/stacruzpolicelagunappo/posts/${post.id}`;
           const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
 
           // Skip if already imported by checking title / body signatures

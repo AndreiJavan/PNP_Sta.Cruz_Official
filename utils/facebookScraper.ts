@@ -62,7 +62,7 @@ export class FacebookScraper {
           message: sampleMessages[i],
           created_time: new Date(Date.now() - i * 86400000).toISOString(),
           full_picture: photoUrl,
-          permalink_url: `https://www.facebook.com/${targetPageId}`
+          permalink_url: `https://www.facebook.com/stacruzpolicelagunappo`
         });
       }
 
