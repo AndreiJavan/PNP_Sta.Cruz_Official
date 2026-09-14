@@ -63,7 +63,7 @@ export class FacebookScraper {
       if (textSnippets.length === 0) {
         const jsonMsgMatches = unescapedHtml.match(/"text":"([^"]{20,500})"/g) || [];
         jsonMsgMatches.forEach(m => {
-          const txt = m.replace(/"text":"/", '').replace(/"$/, '').trim();
+          const txt = m.replace(/^"text":"/, '').replace(/"$/, '').trim();
           if (txt && !txt.includes('http') && !textSnippets.includes(txt)) {
             textSnippets.push(txt);
           }
