@@ -275,6 +275,13 @@ export const decodeCustomCategory = (item: any) => {
         item.body = item.body.replace(/\n?<!--FACEBOOK_URL:.*?-->/g, '');
       }
     }
+    if (item.body.includes('<!--FACEBOOK_POST_ID:')) {
+      const match = item.body.match(/<!--FACEBOOK_POST_ID:(.*?)-->/);
+      if (match) {
+        item.facebook_post_id = match[1];
+        item.body = item.body.replace(/\n?<!--FACEBOOK_POST_ID:.*?-->/g, '');
+      }
+    }
   }
   if (!item.facebook_url && item.facebook_post_url) {
     item.facebook_url = item.facebook_post_url;

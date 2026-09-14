@@ -193,3 +193,13 @@ NOTIFY pgrst, 'reload schema';
 -- "violates check constraint 'bulletins_category_check'" error.
 -- =====================================================
 ALTER TABLE public.bulletins DROP CONSTRAINT IF EXISTS bulletins_category_check;
+
+-- =====================================================
+-- OPTIONAL: FACEBOOK POST ID & VIDEO COLUMNS FOR BULLETINS
+-- If you wish to add dedicated database columns in Supabase:
+-- =====================================================
+ALTER TABLE public.bulletins ADD COLUMN IF NOT EXISTS facebook_post_id TEXT;
+ALTER TABLE public.bulletins ADD COLUMN IF NOT EXISTS video_paths TEXT;
+ALTER TABLE public.bulletins ADD COLUMN IF NOT EXISTS video_path TEXT;
+NOTIFY pgrst, 'reload schema';
+

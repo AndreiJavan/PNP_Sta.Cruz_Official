@@ -264,6 +264,11 @@ export class FacebookService {
             existingUrlsSet.add(cleanUrl);
             existingPostsMap.set(cleanUrl, { id: docId, docData: data });
           }
+
+          const fbIdMatch = data.body.match(/<!--FACEBOOK_POST_ID:(.*?)-->/);
+          if (fbIdMatch && fbIdMatch[1]) {
+            existingPostsMap.set(fbIdMatch[1].trim(), { id: docId, docData: data });
+          }
         }
 
         if (data.facebook_post_id) {
@@ -298,6 +303,14 @@ export class FacebookService {
           let dbCategory = autoCategory;
           let finalBody = `${messageText}\n<!--FACEBOOK_URL:${fbPermalink}-->`;
 
+          if (post.id) {
+            finalBody = `${finalBody}\n<!--FACEBOOK_POST_ID:${post.id}-->`;
+          }
+
+          if (videos.length > 0) {
+            finalBody = `${finalBody}\n<!--VIDEO_PATHS:${JSON.stringify(videos)}-->`;
+          }
+
           if (!STANDARD_CATS.includes(autoCategory)) {
             dbCategory = 'General Announcement';
             finalBody = `${finalBody}\n<!--CUSTOM_CATEGORY:${autoCategory}-->`;
@@ -306,14 +319,12 @@ export class FacebookService {
           // Use original Facebook creation date for created_at
           const originalDate = post.created_time ? new Date(post.created_time).toISOString() : new Date().toISOString();
 
+          // Compatible with Supabase public.bulletins schema cache (no missing column rejection)
           const bulletinRecord: any = {
             title: title,
             category: dbCategory,
             body: finalBody,
-            facebook_post_id: post.id,
             photo_path: photos.length > 0 ? JSON.stringify(photos) : null,
-            video_paths: videos.length > 0 ? JSON.stringify(videos) : null,
-            video_path: videos.length > 0 ? videos[0] : null,
             is_archived: false,
             created_at: originalDate,
             updated_at: new Date().toISOString()
@@ -325,8 +336,6 @@ export class FacebookService {
           if (existingEntry) {
             await db.collection('bulletins').doc(existingEntry.id).update({
               photo_path: bulletinRecord.photo_path,
-              video_paths: bulletinRecord.video_paths,
-              video_path: bulletinRecord.video_path,
               body: bulletinRecord.body,
               category: bulletinRecord.category,
               updated_at: new Date().toISOString()
