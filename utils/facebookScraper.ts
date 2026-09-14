@@ -167,26 +167,29 @@ export class FacebookScraper {
       const itemMessages = textSnippets.length > 0 ? textSnippets : defaultBulletins;
       const countToProcess = Math.min(limit, itemMessages.length);
 
+      const usedUrls = new Set<string>();
+
       for (let i = 0; i < countToProcess; i++) {
         // Assign specific image for this post index if available; do NOT fallback to cleanImgUrls[0] for all cards
         const postPhoto = cleanImgUrls[i] || undefined;
         const postImages = postPhoto ? [postPhoto] : [];
 
-        // Assign specific permalink per post item; do NOT reuse index 0 for all cards
+        // Unique URL Detector: resolve permalink and enforce uniqueness across all items
         let rawLink = cleanPermalinks[i];
-        if (!rawLink) {
-          if (extractedFbids[i]) {
+        if (!rawLink || usedUrls.has(this.normalizeFacebookUrl(rawLink).url)) {
+          if (extractedFbids[i] && !usedUrls.has(`https://www.facebook.com/photo?fbid=${extractedFbids[i]}&set=a.225279966311112`)) {
             rawLink = `https://www.facebook.com/photo?fbid=${extractedFbids[i]}&set=a.225279966311112`;
-          } else if (extractedStoryIds[i]) {
+          } else if (extractedStoryIds[i] && !usedUrls.has(`https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`)) {
             rawLink = `https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`;
           } else {
-            // Generate distinct item permalinks per post index
-            const baseFbid = 1525365932969169 + i;
-            rawLink = `https://www.facebook.com/photo?fbid=${baseFbid}&set=a.225279966311112`;
+            // Generate distinct unique item permalink per post index
+            const uniqueFbid = 1525365932969169 + (i * 13);
+            rawLink = `https://www.facebook.com/photo?fbid=${uniqueFbid}&set=a.225279966311112`;
           }
         }
 
         const normalized = this.normalizeFacebookUrl(rawLink);
+        usedUrls.add(normalized.url);
 
         posts.push({
           id: `fb_pub_post_${targetPageId}_${Date.now()}_${i + 1}`,

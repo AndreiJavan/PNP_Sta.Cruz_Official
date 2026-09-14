@@ -125,11 +125,21 @@ export class FacebookService {
       }
 
       const existingSignatures = new Set<string>();
+      const existingUrls = new Set<string>();
+
       existingSnap.docs.forEach((doc: any) => {
         const data = doc.data ? doc.data() : doc;
         if (data.title) existingSignatures.add(data.title.trim());
-        if (data.body) existingSignatures.add(data.body.trim());
+        if (data.body) {
+          existingSignatures.add(data.body.trim());
+          const fbUrlMatch = data.body.match(/<!--FACEBOOK_URL:(.*?)-->/) || data.body.match(/\[View Official Facebook Post\]\((.*?)\)/);
+          if (fbUrlMatch && fbUrlMatch[1]) {
+            existingUrls.add(fbUrlMatch[1].trim());
+          }
+        }
       });
+
+      const seenBatchUrls = new Set<string>();
 
       for (const post of posts) {
         try {
@@ -141,11 +151,13 @@ export class FacebookService {
           const fbPermalink = normalizedMeta.url;
           const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
 
-          // Skip if already imported by checking title / body signatures
-          if (existingSignatures.has(title.trim()) || existingSignatures.has(bodyWithLink.trim())) {
+          // Unique URL & Signature Detector: skip if title or URL was already stored in database or seen in batch
+          if (existingSignatures.has(title.trim()) || existingSignatures.has(bodyWithLink.trim()) || existingUrls.has(fbPermalink) || seenBatchUrls.has(fbPermalink)) {
             skippedCount++;
             continue;
           }
+
+          seenBatchUrls.add(fbPermalink);
 
           // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
           const autoCategory = classifyCategory(messageText);
