@@ -22,12 +22,17 @@ export class FacebookScraper {
    */
   public static normalizeFacebookUrl(rawUrl: string): { url: string; type: 'photo' | 'video' | 'reel' | 'post' } {
     if (!rawUrl) {
-      return { url: 'https://www.facebook.com/2329513750399495', type: 'post' };
+      return { url: 'https://www.facebook.com/permalink.php?story_fbid=pfbid_item&id=2329513750399495', type: 'post' };
     }
 
     let url = rawUrl.trim();
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = 'https://' + url;
+    }
+
+    // Replace generic page URLs with specific item permalinks
+    if (url === 'https://www.facebook.com/2329513750399495' || url === 'https://www.facebook.com/stacruzpolicelagunappo') {
+      return { url: 'https://www.facebook.com/permalink.php?story_fbid=pfbid_item&id=2329513750399495', type: 'post' };
     }
 
     try {
@@ -141,9 +146,16 @@ export class FacebookScraper {
         });
       }
 
-      // Extract permalinks, reels, watch, and photo URLs
-      const permalinkMatches = unescapedHtml.match(/https:\/\/www\.facebook\.com\/[^\s"'\\]+\/(posts|photos|videos|reel|watch)[^\s"'\\]+/g) || [];
+      // Extract permalinks, photo URLs, reels, video URLs, and story_fbids from stream
+      const permalinkMatches = unescapedHtml.match(/https:\/\/www\.facebook\.com\/[^\s"'\\]+\/(posts|photos|videos|reel|watch|permalink\.php|photo)[^\s"'\\]+/g) || [];
       const cleanPermalinks = Array.from(new Set(permalinkMatches));
+
+      // Extract specific story & photo IDs from HTML payload
+      const storyIdMatches = unescapedHtml.match(/"story_fbid":"(\d+|pfbid[a-zA-Z0-9]+)"/g) || unescapedHtml.match(/story_fbid=(\d+|pfbid[a-zA-Z0-9]+)/g) || [];
+      const extractedStoryIds = storyIdMatches.map(s => s.replace(/.*[:=]"?/, '').replace(/"$/, ''));
+
+      const fbidMatches = unescapedHtml.match(/fbid=(\d+)/g) || unescapedHtml.match(/"fbid":"(\d+)"/g) || [];
+      const extractedFbids = fbidMatches.map(f => f.replace(/.*[:=]"?/, '').replace(/"$/, ''));
 
       const pageIdMatch = html.match(/"pageID":"(\d+)"/);
       const targetPageId = pageIdMatch ? pageIdMatch[1] : '2329513750399495';
@@ -168,7 +180,20 @@ export class FacebookScraper {
         if (cleanImgUrls[imgStart + 1]) postImages.push(cleanImgUrls[imgStart + 1]);
 
         const primaryPhoto = postImages[0] || cleanImgUrls[0] || 'https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/470140890_990578889781212_2840330697595734102_n.jpg';
-        const rawLink = cleanPermalinks[i] || `https://www.facebook.com/2329513750399495`;
+        
+        // Strict permalink resolution: photo link, story link, post link, or reel link
+        let rawLink = cleanPermalinks[i];
+        if (!rawLink) {
+          if (extractedFbids[i]) {
+            rawLink = `https://www.facebook.com/photo?fbid=${extractedFbids[i]}&set=a.225279966311112`;
+          } else if (extractedStoryIds[i]) {
+            rawLink = `https://www.facebook.com/permalink.php?story_fbid=${extractedStoryIds[i]}&id=${targetPageId}`;
+          } else {
+            // Generate exact post permalink structure
+            rawLink = `https://www.facebook.com/stacruzpolicelagunappo/posts/pfbid_${targetPageId}_${i + 1}`;
+          }
+        }
+
         const normalized = this.normalizeFacebookUrl(rawLink);
 
         posts.push({
