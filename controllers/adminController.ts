@@ -3377,3 +3377,24 @@ export const permanentlyDeleteArchiveItem = async (req: Request, res: Response) 
 
 export const permanentDeleteArchive = permanentlyDeleteArchiveItem;
 
+export const syncFacebookPosts = async (req: Request, res: Response) => {
+  try {
+    console.log('[ADMIN CONTROLLER] Triggering Facebook sync...');
+    const result = await FacebookService.syncPostsToBulletins(25);
+    await logAction(req, 'FACEBOOK_SYNC', `Synced ${result.added} new Facebook posts (Skipped ${result.skipped} existing).`);
+    memoryCache.flush();
+
+    res.json({
+      success: true,
+      message: `Successfully synchronized Facebook page! ${result.added} new bulletins added, ${result.skipped} existing skipped.`,
+      stats: result
+    });
+  } catch (err: any) {
+    console.error('[ADMIN CONTROLLER] Facebook sync failed:', err);
+    res.status(500).json({
+      success: false,
+      error: err.message || 'Failed to sync Facebook posts. Check credentials in .env.'
+    });
+  }
+};
+
