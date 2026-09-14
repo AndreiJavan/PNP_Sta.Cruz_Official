@@ -166,10 +166,10 @@ export class FacebookService {
             }
           }
 
-          // Encode category using system custom category encoder to pass Supabase check constraint
+          // Encode category and facebook_url using system comment tags
           const STANDARD_CATS = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
           let dbCategory = autoCategory;
-          let finalBody = bodyWithLink;
+          let finalBody = `${messageText}\n<!--FACEBOOK_URL:${fbPermalink}-->`;
 
           if (!STANDARD_CATS.includes(autoCategory)) {
             dbCategory = 'General Announcement';
