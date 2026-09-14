@@ -38,33 +38,42 @@ export class FacebookService {
       return [];
     }
 
-    try {
-      let url = `https://graph.facebook.com/v19.0/${pageId}/posts?fields=id,message,created_time,full_picture,attachments{media,subattachments},permalink_url&limit=${limit}&access_token=${accessToken}`;
-      console.log(`[FACEBOOK SYNC] Fetching posts from page: ${pageId}`);
+    const fields = 'id,message,created_time,full_picture,attachments{media,subattachments},permalink_url';
+    const endpoints = [
+      `https://graph.facebook.com/v19.0/me/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/me/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/me/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${pageId}/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${pageId}/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${pageId}/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`
+    ];
 
-      let response = await fetch(url);
-      if (!response.ok) {
-        // Fallback to /me/posts (standard for Page Access Tokens)
-        console.warn(`[FACEBOOK SYNC] Primary endpoint failed with status ${response.status}. Attempting /me/posts fallback...`);
-        const fallbackUrl = `https://graph.facebook.com/v19.0/me/posts?fields=id,message,created_time,full_picture,attachments{media,subattachments},permalink_url&limit=${limit}&access_token=${accessToken}`;
-        const fallbackRes = await fetch(fallbackUrl);
-        if (fallbackRes.ok) {
-          response = fallbackRes;
+    let lastError: any = null;
+
+    for (const url of endpoints) {
+      try {
+        console.log(`[FACEBOOK SYNC] Attempting fetch endpoint: ${url.split('?')[0]}`);
+        const response = await fetch(url);
+        if (response.ok) {
+          const result = await response.json();
+          const posts: FacebookPost[] = result.data || [];
+          if (posts.length > 0) {
+            console.log(`[FACEBOOK SYNC SUCCESS] Retreived ${posts.length} posts from endpoint: ${url.split('?')[0]}`);
+            return posts;
+          }
         } else {
-          const errorData = await response.json().catch(() => ({}));
-          console.error('[FACEBOOK SYNC API ERROR]', errorData);
-          throw new Error(`Facebook API responded with status ${response.status}: ${JSON.stringify(errorData)}`);
+          const errData = await response.json().catch(() => ({}));
+          lastError = errData;
         }
+      } catch (err: any) {
+        lastError = err;
       }
-
-      const result = await response.json();
-      const posts: FacebookPost[] = result.data || [];
-      console.log(`[FACEBOOK SYNC] Successfully fetched ${posts.length} posts from Facebook Graph API.`);
-      return posts;
-    } catch (err: any) {
-      console.error('[FACEBOOK SYNC EXCEPTION]', err.message || err);
-      throw err;
     }
+
+    if (lastError) {
+      console.warn('[FACEBOOK SYNC] All endpoint attempts returned empty or error:', lastError);
+    }
+    return [];
   }
 
   /**
