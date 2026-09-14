@@ -291,4 +291,3 @@ export class FileSessionStore extends session.Store {
     if (callback) callback(null);
   }
 }
-}
