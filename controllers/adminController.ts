@@ -3380,15 +3380,15 @@ export const permanentDeleteArchive = permanentlyDeleteArchiveItem;
 export const syncFacebookPosts = async (req: Request, res: Response) => {
   try {
     console.log('[ADMIN CONTROLLER] Triggering Facebook sync...');
-    const result = await FacebookService.syncPostsToBulletins(25);
-    await logAction(req, 'FACEBOOK_SYNC', `Synced ${result.added} new Facebook posts (Skipped ${result.skipped} existing).`);
+    const result = await FacebookService.syncPostsToBulletins(50);
+    await logAction(req, 'FACEBOOK_SYNC', `Synced FB posts: ${result.added} added, ${result.updated} updated, ${result.skipped} skipped, ${result.failed} failed.`);
     memoryCache.flush();
 
-    let msg = `Successfully synchronized Facebook page! ${result.added} new bulletins added, ${result.skipped} existing skipped.`;
+    let msg = `Synchronization complete! Retreived: ${result.retrieved} | Newly Added: ${result.added} | Updated: ${result.updated} | Skipped: ${result.skipped} | Failed: ${result.failed}`;
     if (result.errors && result.errors.length > 0) {
-      msg += `\n\nNotices / Errors encountered (${result.errors.length}):\n` + result.errors.join('\n');
-    } else if (result.total === 0) {
-      msg = `Facebook connected successfully, but 0 posts were returned by Meta. Verify that FB_PAGE_ACCESS_TOKEN in Vercel Environment Variables is set to your Page Access Token with pages_read_user_content / pages_read_engagement permissions.`;
+      msg += `\n\nErrors encountered:\n` + result.errors.join('\n');
+    } else if (result.retrieved === 0) {
+      msg = `Facebook sync connected successfully, but 0 posts were returned by Meta. Verify that FB_PAGE_ACCESS_TOKEN is valid and has pages_read_user_content permissions.`;
     }
 
     res.json({
@@ -3404,4 +3404,41 @@ export const syncFacebookPosts = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Temporary Debug Endpoint: Safe inspection of raw vs normalized media for a single Facebook post
+ */
+export const debugSingleFacebookPost = async (req: Request, res: Response) => {
+  try {
+    const limit = parseInt(req.query.limit as string, 10) || 5;
+    const posts = await FacebookService.fetchLatestPosts(limit);
+    if (!posts || posts.length === 0) {
+      return res.json({ success: false, message: 'No posts retrieved from Graph API.' });
+    }
+
+    const inspected = posts.map(post => {
+      const media = FacebookService.extractPostMedia(post);
+      return {
+        facebookPostId: post.id,
+        createdTime: post.created_time,
+        permalinkUrl: post.permalink_url,
+        messageSnippet: post.message ? post.message.substring(0, 100) : '',
+        photosCount: media.photos.length,
+        photos: media.photos,
+        videosCount: media.videos.length,
+        videos: media.videos,
+        hasAttachments: !!post.attachments?.data
+      };
+    });
+
+    res.json({
+      success: true,
+      totalInspected: inspected.length,
+      inspectedPosts: inspected
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || err });
+  }
+};
+
 

@@ -5,7 +5,7 @@ import {
   getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
   postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive,
-  getHeartbeat
+  getHeartbeat, debugSingleFacebookPost
 } from '../controllers/adminController.js';
 import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -51,6 +51,7 @@ router.post('/api/toggle-sidebar', (req: any, res) => {
 });
 
 // Bulletins
+router.get('/api/sync-facebook/debug', debugSingleFacebookPost);
 router.get('/bulletins', getBulletins);
 router.get('/bulletins/create', getCreateBulletin);
 router.post('/bulletins/create', upload.fields([{ name: 'photos', maxCount: 10 }, { name: 'videos', maxCount: 10 }]), postCreateBulletin);

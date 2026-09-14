@@ -5,33 +5,64 @@ import { FacebookScraper } from './facebookScraper.js';
 
 dotenv.config();
 
+export interface FacebookAttachmentMedia {
+  image?: { src: string; height?: number; width?: number };
+  source?: string; // Video playable source URL
+}
+
+export interface FacebookAttachmentTarget {
+  id?: string;
+  url?: string;
+}
+
+export interface FacebookAttachmentItem {
+  description?: string;
+  media?: FacebookAttachmentMedia;
+  media_type?: string; // 'photo', 'video', 'album', 'link'
+  target?: FacebookAttachmentTarget;
+  title?: string;
+  type?: string;
+  url?: string;
+  subattachments?: {
+    data: FacebookAttachmentItem[];
+  };
+}
+
 export interface FacebookPost {
   id: string;
   message?: string;
+  story?: string;
+  caption?: string;
   created_time: string;
   full_picture?: string;
   attachments?: {
-    data: Array<{
-      media?: { image?: { src: string } };
-      subattachments?: {
-        data: Array<{ media?: { image?: { src: string } } }>;
-      };
-    }>;
+    data: FacebookAttachmentItem[];
   };
   permalink_url?: string;
+  images?: string[];
+  video_url?: string;
+}
+
+export interface SyncStats {
+  retrieved: number;
+  added: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+  errors: string[];
 }
 
 export class FacebookService {
   private static getCredentials() {
     const pageId = process.env.FB_PAGE_ID || 'stacruzpolicelagunappo';
-    const accessToken = process.env.FB_PAGE_ACCESS_TOKEN || process.env.FB_APP_ID + '|' + process.env.FB_APP_SECRET;
+    const accessToken = process.env.FB_PAGE_ACCESS_TOKEN || (process.env.FB_APP_ID && process.env.FB_APP_SECRET ? `${process.env.FB_APP_ID}|${process.env.FB_APP_SECRET}` : '');
     return { pageId, accessToken };
   }
 
   /**
-   * Fetches latest posts directly from Facebook Graph API
+   * Resolves Page ID and fetches latest posts directly from Meta Graph API using pagination cursors
    */
-  public static async fetchLatestPosts(limit = 25): Promise<FacebookPost[]> {
+  public static async fetchLatestPosts(limit = 50): Promise<FacebookPost[]> {
     const { pageId, accessToken } = this.getCredentials();
 
     if (!pageId || !accessToken) {
@@ -39,7 +70,7 @@ export class FacebookService {
       return [];
     }
 
-    // Resolve exact numeric Page ID from Meta Graph API using access token
+    // Resolve exact numeric Page ID from Meta Graph API
     let numericPageId = pageId;
     try {
       const meRes = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${accessToken}`);
@@ -47,95 +78,196 @@ export class FacebookService {
         const meData = await meRes.json();
         if (meData && meData.id) {
           numericPageId = meData.id;
-          console.log(`[FACEBOOK SYNC] Resolved Page Name: "${meData.name}", Numeric ID: ${numericPageId}`);
+          console.log(`[FACEBOOK SYNC] Resolved Meta Page Name: "${meData.name}", Numeric ID: ${numericPageId}`);
         }
       }
     } catch (_) {}
 
-    const fields = 'id,message,story,caption,created_time,full_picture,attachments{media,subattachments,description,title},permalink_url';
-    const endpoints = [
-      `https://graph.facebook.com/v19.0/${numericPageId}/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/${numericPageId}/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/${numericPageId}/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/me/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/me/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/me/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/${pageId}/published_posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/${pageId}/feed?fields=${fields}&limit=${limit}&access_token=${accessToken}`,
-      `https://graph.facebook.com/v19.0/${pageId}/posts?fields=${fields}&limit=${limit}&access_token=${accessToken}`
+    const fields = 'id,message,story,caption,created_time,full_picture,attachments{media,media_type,target,type,url,subattachments{media,media_type,target,type,url}},permalink_url';
+    const batchLimit = Math.min(25, limit);
+    const initialEndpoints = [
+      `https://graph.facebook.com/v19.0/${numericPageId}/published_posts?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${numericPageId}/feed?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${numericPageId}/posts?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`,
+      `https://graph.facebook.com/v19.0/${pageId}/published_posts?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`
     ];
 
-    let lastError: any = null;
+    const allPosts: FacebookPost[] = [];
+    const seenPostIds = new Set<string>();
 
-    for (const url of endpoints) {
-      try {
-        console.log(`[FACEBOOK SYNC] Attempting fetch endpoint: ${url.split('?')[0]}`);
-        const response = await fetch(url);
-        if (response.ok) {
-          const result = await response.json();
-          const posts: FacebookPost[] = result.data || [];
-          if (posts.length > 0) {
-            console.log(`[FACEBOOK SYNC SUCCESS] Retreived ${posts.length} posts from endpoint: ${url.split('?')[0]}`);
-            return posts;
+    for (const startUrl of initialEndpoints) {
+      if (allPosts.length >= limit) break;
+
+      let currentUrl: string | null = startUrl;
+      let pageCount = 0;
+      const MAX_PAGES = 4; // Safety limit for pagination loop
+
+      while (currentUrl && pageCount < MAX_PAGES && allPosts.length < limit) {
+        pageCount++;
+        try {
+          console.log(`[FACEBOOK SYNC API] Fetching page ${pageCount}: ${currentUrl.split('?')[0]}`);
+          const response = await fetch(currentUrl);
+          if (!response.ok) {
+            const errBody = await response.json().catch(() => ({}));
+            console.warn(`[FACEBOOK SYNC API NOTICE] Endpoint returned HTTP ${response.status}:`, errBody);
+            break;
           }
-        } else {
-          const errData = await response.json().catch(() => ({}));
-          lastError = errData;
+
+          const result = await response.json();
+          const batch: FacebookPost[] = result.data || [];
+          let newInBatch = 0;
+
+          for (const post of batch) {
+            if (post.id && !seenPostIds.has(post.id)) {
+              seenPostIds.add(post.id);
+              allPosts.push(post);
+              newInBatch++;
+            }
+          }
+
+          console.log(`[FACEBOOK SYNC PAGINATION] Page ${pageCount}: Retrieved ${batch.length} posts (${newInBatch} new unique). Total collected: ${allPosts.length}`);
+
+          // Meta Graph API Cursor Pagination check
+          if (result.paging && result.paging.next && allPosts.length < limit) {
+            currentUrl = result.paging.next;
+          } else {
+            currentUrl = null;
+          }
+        } catch (err: any) {
+          console.error(`[FACEBOOK SYNC API ERROR] Page ${pageCount} fetch failed:`, err.message || err);
+          break;
         }
-      } catch (err: any) {
-        lastError = err;
       }
+
+      if (allPosts.length > 0) break;
     }
 
-    if (lastError) {
-      console.warn('[FACEBOOK SYNC] All endpoint attempts returned empty or error:', lastError);
-    }
-    return [];
+    return allPosts;
   }
 
   /**
-   * Synchronizes Facebook posts into local database / bulletins table with Auto-Segregation
+   * Helper: Extracts ONLY photos and videos belonging to THIS exact post.
    */
-  public static async syncPostsToBulletins(limit = 25): Promise<{ total: number; added: number; skipped: number; errors: string[] }> {
+  public static extractPostMedia(post: FacebookPost): { photos: string[]; videos: string[] } {
+    const photos: string[] = [];
+    const videos: string[] = [];
+
+    const addPhoto = (src?: string) => {
+      if (src && typeof src === 'string' && src.startsWith('http') && !photos.includes(src)) {
+        photos.push(src);
+      }
+    };
+
+    const addVideo = (src?: string) => {
+      if (src && typeof src === 'string' && src.startsWith('http') && !videos.includes(src)) {
+        videos.push(src);
+      }
+    };
+
+    // Scraped / custom format pre-assigned array
+    if (post.images && Array.isArray(post.images)) {
+      post.images.forEach(addPhoto);
+    }
+    if (post.video_url) {
+      addVideo(post.video_url);
+    }
+
+    // Direct Graph API full_picture
+    if (post.full_picture) {
+      addPhoto(post.full_picture);
+    }
+
+    // Inspect Graph API attachments strictly belonging to THIS post
+    if (post.attachments?.data && Array.isArray(post.attachments.data)) {
+      for (const att of post.attachments.data) {
+        // Video attachment check
+        if (att.media_type === 'video' || att.type === 'video_inline' || att.type === 'video') {
+          if (att.media?.source) {
+            addVideo(att.media.source);
+          } else if (att.url && (att.url.includes('/videos/') || att.url.includes('/reel/') || att.url.includes('/watch'))) {
+            addVideo(att.url);
+          }
+          if (att.media?.image?.src) {
+            addPhoto(att.media.image.src); // Keep video thumbnail as photo preview fallback
+          }
+        } else {
+          // Photo attachment check
+          if (att.media?.image?.src) {
+            addPhoto(att.media.image.src);
+          }
+        }
+
+        // Subattachments check (Multi-photo album / Carousel)
+        if (att.subattachments?.data && Array.isArray(att.subattachments.data)) {
+          for (const sub of att.subattachments.data) {
+            if (sub.media_type === 'video' || sub.type === 'video_inline' || sub.type === 'video') {
+              if (sub.media?.source) addVideo(sub.media.source);
+              if (sub.media?.image?.src) addPhoto(sub.media.image.src);
+            } else if (sub.media?.image?.src) {
+              addPhoto(sub.media.image.src);
+            }
+          }
+        }
+      }
+    }
+
+    return { photos, videos };
+  }
+
+  /**
+   * Synchronizes Facebook posts into database with auto-segregation and exact post-media association
+   */
+  public static async syncPostsToBulletins(limit = 50): Promise<SyncStats> {
     let posts = await this.fetchLatestPosts(limit);
 
-    // If Graph API returns empty array (e.g. Meta app is unpublished), fall back to Public Facebook Scraper
+    // Fallback to Public Scraper if Graph API returns 0 posts (e.g. unpublished Meta App)
     if (!posts || posts.length === 0) {
-      console.log('[FACEBOOK SYNC] Graph API returned 0 posts. Switching to Public Facebook Scraper fallback...');
+      console.log('[FACEBOOK SYNC] Meta Graph API returned 0 posts. Executing Public Page Scraper fallback...');
       const scraped = await FacebookScraper.fetchPublicPagePosts('stacruzpolicelagunappo', limit);
       posts = scraped as FacebookPost[];
     }
 
+    const stats: SyncStats = {
+      retrieved: posts ? posts.length : 0,
+      added: 0,
+      updated: 0,
+      skipped: 0,
+      failed: 0,
+      errors: []
+    };
+
     if (!posts || posts.length === 0) {
-      return { total: 0, added: 0, skipped: 0, errors: [] };
+      return stats;
     }
 
-    let addedCount = 0;
-    let skippedCount = 0;
-    const errors: string[] = [];
-
     try {
-      // 1. Fetch existing bulletins to avoid duplicate insertion
+      // Fetch existing bulletins snapshot for duplicate detection and upsert mapping
       let existingSnap;
       try {
         existingSnap = await db.collection('bulletins').get();
       } catch (dbErr) {
-        console.warn('[FACEBOOK SYNC] Database fetch fallback check:', dbErr);
+        console.warn('[FACEBOOK SYNC] Database snapshot warning:', dbErr);
         existingSnap = { docs: [] };
       }
 
-      const existingSignatures = new Set<string>();
-      const existingUrls = new Set<string>();
+      const existingPostsMap = new Map<string, { id: string; docData: any }>();
+      const existingUrlsSet = new Set<string>();
 
       existingSnap.docs.forEach((doc: any) => {
+        const docId = doc.id;
         const data = doc.data ? doc.data() : doc;
-        if (data.title) existingSignatures.add(data.title.trim());
+        
         if (data.body) {
-          existingSignatures.add(data.body.trim());
           const fbUrlMatch = data.body.match(/<!--FACEBOOK_URL:(.*?)-->/) || data.body.match(/\[View Official Facebook Post\]\((.*?)\)/);
           if (fbUrlMatch && fbUrlMatch[1]) {
-            existingUrls.add(fbUrlMatch[1].trim());
+            const cleanUrl = fbUrlMatch[1].trim();
+            existingUrlsSet.add(cleanUrl);
+            existingPostsMap.set(cleanUrl, { id: docId, docData: data });
           }
+        }
+
+        if (data.facebook_post_id) {
+          existingPostsMap.set(data.facebook_post_id, { id: docId, docData: data });
         }
       });
 
@@ -143,55 +275,25 @@ export class FacebookService {
 
       for (const post of posts) {
         try {
-          const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
+          const rawMessage = post.message?.trim() || post.story?.trim() || post.caption?.trim() || '';
           const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
           const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
           const rawPermalink = post.permalink_url || `https://www.facebook.com/stacruzpolicelagunappo/posts/${post.id}`;
           const normalizedMeta = FacebookScraper.normalizeFacebookUrl(rawPermalink);
           const fbPermalink = normalizedMeta.url;
-          const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
 
-          // Unique URL & Signature Detector: skip if title or URL was already stored in database or seen in batch
-          if (existingSignatures.has(title.trim()) || existingSignatures.has(bodyWithLink.trim()) || existingUrls.has(fbPermalink) || seenBatchUrls.has(fbPermalink)) {
-            skippedCount++;
+          if (seenBatchUrls.has(fbPermalink)) {
+            stats.skipped++;
             continue;
           }
-
-          // Live URL Health Detector: verify that the Facebook URL is accessible and not 404/broken
-          const isUrlAlive = await FacebookScraper.verifyUrlHealth(fbPermalink);
-          if (!isUrlAlive) {
-            console.warn(`[FACEBOOK SYNC] Skipping broken or unreachable URL link: ${fbPermalink}`);
-            skippedCount++;
-            continue;
-          }
-
           seenBatchUrls.add(fbPermalink);
 
-          // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
+          // Extract strictly associated media for THIS post
+          const { photos, videos } = this.extractPostMedia(post);
+
+          // Auto-Segregate into system categories
           const autoCategory = classifyCategory(messageText);
 
-          // Extract multiple pictures / photo sets
-          let photoPaths: string[] = [];
-          if ((post as any).images && Array.isArray((post as any).images)) {
-            photoPaths = [...(post as any).images];
-          }
-          if (post.full_picture && !photoPaths.includes(post.full_picture)) {
-            photoPaths.push(post.full_picture);
-          }
-
-          if (post.attachments?.data) {
-            for (const att of post.attachments.data) {
-              if (att.subattachments?.data) {
-                for (const sub of att.subattachments.data) {
-                  if (sub.media?.image?.src && !photoPaths.includes(sub.media.image.src)) {
-                    photoPaths.push(sub.media.image.src);
-                  }
-                }
-              }
-            }
-          }
-
-          // Encode category and facebook_url using system comment tags
           const STANDARD_CATS = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
           let dbCategory = autoCategory;
           let finalBody = `${messageText}\n<!--FACEBOOK_URL:${fbPermalink}-->`;
@@ -201,31 +303,63 @@ export class FacebookService {
             finalBody = `${finalBody}\n<!--CUSTOM_CATEGORY:${autoCategory}-->`;
           }
 
+          // Use original Facebook creation date for created_at
+          const originalDate = post.created_time ? new Date(post.created_time).toISOString() : new Date().toISOString();
+
           const bulletinRecord: any = {
             title: title,
             category: dbCategory,
             body: finalBody,
-            photo_path: photoPaths.length > 0 ? JSON.stringify(photoPaths) : null,
+            facebook_post_id: post.id,
+            photo_path: photos.length > 0 ? JSON.stringify(photos) : null,
+            video_paths: videos.length > 0 ? JSON.stringify(videos) : null,
+            video_path: videos.length > 0 ? videos[0] : null,
             is_archived: false,
-            created_at: new Date(post.created_time || Date.now()).toISOString(),
+            created_at: originalDate,
             updated_at: new Date().toISOString()
           };
 
-          // Insert into database using standard schema
-          await db.collection('bulletins').add(bulletinRecord);
-          addedCount++;
-          console.log(`[FACEBOOK SYNC] Imported & Segregated FB Post ${post.id} as [${autoCategory}]`);
+          // Upsert check: update if already exists in database, otherwise insert
+          const existingEntry = existingPostsMap.get(fbPermalink) || existingPostsMap.get(post.id);
+
+          if (existingEntry) {
+            await db.collection('bulletins').doc(existingEntry.id).update({
+              photo_path: bulletinRecord.photo_path,
+              video_paths: bulletinRecord.video_paths,
+              video_path: bulletinRecord.video_path,
+              body: bulletinRecord.body,
+              category: bulletinRecord.category,
+              updated_at: new Date().toISOString()
+            });
+            stats.updated++;
+            console.log(`[FACEBOOK SYNC UPSERT] Updated FB Post ${post.id} (${fbPermalink})`);
+          } else {
+            // Live URL Health Verification for new posts
+            const isUrlAlive = await FacebookScraper.verifyUrlHealth(fbPermalink);
+            if (!isUrlAlive) {
+              console.warn(`[FACEBOOK SYNC] Skipping broken/unreachable URL: ${fbPermalink}`);
+              stats.skipped++;
+              continue;
+            }
+
+            await db.collection('bulletins').add(bulletinRecord);
+            stats.added++;
+            console.log(`[FACEBOOK SYNC INSERT] Inserted FB Post ${post.id} as [${autoCategory}] with ${photos.length} photos and ${videos.length} videos`);
+          }
         } catch (postErr: any) {
-          console.error(`[FACEBOOK SYNC POST ERROR] Post ${post.id}:`, postErr);
-          errors.push(`Post ${post.id}: ${postErr.message || postErr}`);
+          stats.failed++;
+          const errMsg = `Post ${post.id}: ${postErr.message || postErr}`;
+          console.error(`[FACEBOOK SYNC POST ERROR] ${errMsg}`);
+          stats.errors.push(errMsg);
         }
       }
 
-      console.log(`[FACEBOOK SYNC COMPLETED] Total: ${posts.length}, Added: ${addedCount}, Skipped: ${skippedCount}, Errors: ${errors.length}`);
-      return { total: posts.length, added: addedCount, skipped: skippedCount, errors };
+      console.log(`[FACEBOOK SYNC COMPLETED] Retrieved: ${stats.retrieved}, Added: ${stats.added}, Updated: ${stats.updated}, Skipped: ${stats.skipped}, Failed: ${stats.failed}`);
+      return stats;
     } catch (err: any) {
-      console.error('[FACEBOOK SYNC FAILED]', err);
+      console.error('[FACEBOOK SYNC FATAL ERROR]', err);
       throw err;
     }
   }
 }
+
