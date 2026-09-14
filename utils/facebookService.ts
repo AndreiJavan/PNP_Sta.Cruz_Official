@@ -164,9 +164,6 @@ export class FacebookService {
           }
         }
 
-        const fbPermalink = post.permalink_url || `https://www.facebook.com/${post.id}`;
-        const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
-
         const bulletinRecord: any = {
           title: title,
           category: autoCategory, // Automatically segregated into Crime, Traffic, Cybercrime, or Community Awareness
