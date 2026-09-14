@@ -1559,9 +1559,28 @@
 
             window.map = map;
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // High performance CartoDB tile layer matching theme perfectly and preventing OSM policy blocks
+            const isDarkTheme = document.documentElement.classList.contains('dark');
+            const tileSubdomains = 'abcd';
+            const baseTileUrl = isDarkTheme 
+                ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+            const basemapTileLayer = L.tileLayer(baseTileUrl, {
+                subdomains: tileSubdomains,
                 maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
             }).addTo(map);
+
+            // Update tiles when theme changes
+            const themeObserver = new MutationObserver(() => {
+                const dark = document.documentElement.classList.contains('dark');
+                const newUrl = dark 
+                    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+                basemapTileLayer.setUrl(newUrl);
+            });
+            themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
