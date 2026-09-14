@@ -1559,8 +1559,15 @@
 
             window.map = map;
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const cartoDarkUrl = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+            const cartoLightUrl = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
+            const baseTileLayer = L.tileLayer(isDarkMode ? cartoDarkUrl : cartoLightUrl, {
+                subdomains: 'abcd',
+                maxZoom: 20,
+                errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             }).addTo(map);
 
             // Initialize incident markers layer
@@ -1620,6 +1627,9 @@
                     const observer = new MutationObserver(() => {
                         const dark = document.documentElement.classList.contains('dark');
                         document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
+                        if (baseTileLayer) {
+                            baseTileLayer.setUrl(dark ? cartoDarkUrl : cartoLightUrl);
+                        }
                     });
                     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
                     // ---------------------------------------------------------
