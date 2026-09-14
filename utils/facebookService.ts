@@ -96,7 +96,7 @@ export class FacebookService {
   /**
    * Synchronizes Facebook posts into local database / bulletins table with Auto-Segregation
    */
-  public static async syncPostsToBulletins(limit = 25): Promise<{ total: number; added: number; skipped: number }> {
+  public static async syncPostsToBulletins(limit = 25): Promise<{ total: number; added: number; skipped: number; errors: string[] }> {
     let posts = await this.fetchLatestPosts(limit);
 
     // If Graph API returns empty array (e.g. Meta app is unpublished), fall back to Public Facebook Scraper
@@ -107,11 +107,12 @@ export class FacebookService {
     }
 
     if (!posts || posts.length === 0) {
-      return { total: 0, added: 0, skipped: 0 };
+      return { total: 0, added: 0, skipped: 0, errors: [] };
     }
 
     let addedCount = 0;
     let skippedCount = 0;
+    const errors: string[] = [];
 
     try {
       // 1. Fetch existing bulletins to avoid duplicate insertion
@@ -131,57 +132,72 @@ export class FacebookService {
       });
 
       for (const post of posts) {
-        const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
-        const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
-        const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
-        const fbPermalink = post.permalink_url || `https://www.facebook.com/${post.id}`;
-        const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
+        try {
+          const rawMessage = post.message?.trim() || (post as any).story?.trim() || (post as any).caption?.trim() || '';
+          const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
+          const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
+          const fbPermalink = post.permalink_url || `https://www.facebook.com/${post.id}`;
+          const bodyWithLink = `${messageText}\n\n[View Official Facebook Post](${fbPermalink})`;
 
-        // Skip if already imported by checking title / body signatures
-        if (existingSignatures.has(title.trim()) || existingSignatures.has(bodyWithLink.trim())) {
-          skippedCount++;
-          continue;
-        }
+          // Skip if already imported by checking title / body signatures
+          if (existingSignatures.has(title.trim()) || existingSignatures.has(bodyWithLink.trim())) {
+            skippedCount++;
+            continue;
+          }
 
-        // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
-        const autoCategory = classifyCategory(messageText);
+          // Auto-Segregation: classify post text into Crime, Traffic, Cybercrime, or Community Awareness
+          const autoCategory = classifyCategory(messageText);
 
-        // Extract pictures
-        let photoPaths: string[] = [];
-        if (post.full_picture) {
-          photoPaths.push(post.full_picture);
-        }
+          // Extract pictures
+          let photoPaths: string[] = [];
+          if (post.full_picture) {
+            photoPaths.push(post.full_picture);
+          }
 
-        if (post.attachments?.data) {
-          for (const att of post.attachments.data) {
-            if (att.subattachments?.data) {
-              for (const sub of att.subattachments.data) {
-                if (sub.media?.image?.src && !photoPaths.includes(sub.media.image.src)) {
-                  photoPaths.push(sub.media.image.src);
+          if (post.attachments?.data) {
+            for (const att of post.attachments.data) {
+              if (att.subattachments?.data) {
+                for (const sub of att.subattachments.data) {
+                  if (sub.media?.image?.src && !photoPaths.includes(sub.media.image.src)) {
+                    photoPaths.push(sub.media.image.src);
+                  }
                 }
               }
             }
           }
+
+          // Encode category using system custom category encoder to pass Supabase check constraint
+          const STANDARD_CATS = ['Wanted Person', 'Missing Person', 'Crime Advisory', 'Recovered Property', 'General Announcement'];
+          let dbCategory = autoCategory;
+          let finalBody = bodyWithLink;
+
+          if (!STANDARD_CATS.includes(autoCategory)) {
+            dbCategory = 'General Announcement';
+            finalBody = `${finalBody}\n<!--CUSTOM_CATEGORY:${autoCategory}-->`;
+          }
+
+          const bulletinRecord: any = {
+            title: title,
+            category: dbCategory,
+            body: finalBody,
+            photo_path: photoPaths.length > 0 ? JSON.stringify(photoPaths) : null,
+            is_archived: false,
+            created_at: new Date(post.created_time || Date.now()).toISOString(),
+            updated_at: new Date().toISOString()
+          };
+
+          // Insert into database using standard schema
+          await db.collection('bulletins').add(bulletinRecord);
+          addedCount++;
+          console.log(`[FACEBOOK SYNC] Imported & Segregated FB Post ${post.id} as [${autoCategory}]`);
+        } catch (postErr: any) {
+          console.error(`[FACEBOOK SYNC POST ERROR] Post ${post.id}:`, postErr);
+          errors.push(`Post ${post.id}: ${postErr.message || postErr}`);
         }
-
-        const bulletinRecord: any = {
-          title: title,
-          category: autoCategory, // Automatically segregated into Crime, Traffic, Cybercrime, or Community Awareness
-          body: bodyWithLink,
-          photo_path: photoPaths.length > 0 ? JSON.stringify(photoPaths) : null,
-          is_archived: false,
-          created_at: new Date(post.created_time || Date.now()).toISOString(),
-          updated_at: new Date().toISOString()
-        };
-
-        // Insert into database using standard schema
-        await db.collection('bulletins').add(bulletinRecord);
-        addedCount++;
-        console.log(`[FACEBOOK SYNC] Imported & Segregated FB Post ${post.id} as [${autoCategory}]`);
       }
 
-      console.log(`[FACEBOOK SYNC COMPLETED] Total: ${posts.length}, Added: ${addedCount}, Skipped: ${skippedCount}`);
-      return { total: posts.length, added: addedCount, skipped: skippedCount };
+      console.log(`[FACEBOOK SYNC COMPLETED] Total: ${posts.length}, Added: ${addedCount}, Skipped: ${skippedCount}, Errors: ${errors.length}`);
+      return { total: posts.length, added: addedCount, skipped: skippedCount, errors };
     } catch (err: any) {
       console.error('[FACEBOOK SYNC FAILED]', err);
       throw err;
