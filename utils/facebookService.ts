@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { db } from '../config/database.js';
 import { classifyCategory } from './categoryClassifier.js';
+import { FacebookScraper } from './facebookScraper.js';
 
 dotenv.config();
 
@@ -96,7 +97,15 @@ export class FacebookService {
    * Synchronizes Facebook posts into local database / bulletins table with Auto-Segregation
    */
   public static async syncPostsToBulletins(limit = 25): Promise<{ total: number; added: number; skipped: number }> {
-    const posts = await this.fetchLatestPosts(limit);
+    let posts = await this.fetchLatestPosts(limit);
+
+    // If Graph API returns empty array (e.g. Meta app is unpublished), fall back to Public Facebook Scraper
+    if (!posts || posts.length === 0) {
+      console.log('[FACEBOOK SYNC] Graph API returned 0 posts. Switching to Public Facebook Scraper fallback...');
+      const scraped = await FacebookScraper.fetchPublicPagePosts('stacruzpolicelagunappo', limit);
+      posts = scraped as FacebookPost[];
+    }
+
     if (!posts || posts.length === 0) {
       return { total: 0, added: 0, skipped: 0 };
     }
