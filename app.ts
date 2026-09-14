@@ -110,8 +110,11 @@ app.set('views', path.join(process.cwd(), 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
-// Global Variables for Views
+// Global Variables & Permissions-Policy for Views
 app.use((req, res, next) => {
+  // Set Permissions-Policy to allow unload for Facebook embed scripts, preventing browser console violations
+  res.header('Permissions-Policy', 'unload=(self "https://www.facebook.com" "https://*.facebook.com")');
+
   // Set no-cache only for HTML dynamic page renders / API responses, preserving static asset caching
   if (!req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i)) {
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
