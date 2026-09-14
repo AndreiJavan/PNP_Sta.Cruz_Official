@@ -5,7 +5,7 @@
     <!-- Loading Overlay -->
     <div id="mapLoading"
         class="absolute inset-0 bg-pnp-blue bg-cover bg-center bg-no-repeat z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500"
-        style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.94)), url('/images/stacruz_police_station_front.jpg');">
+        style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.94)), url('/images/home-hero.jpg');">
         <div class="w-20 h-20 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-6"></div>
         <p class="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
     </div>
@@ -24,7 +24,7 @@
     <div id="filterSidebar"
         class="absolute top-4 left-4 md:top-8 md:left-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-left sidebar-visible">
         <div class="bg-pnp-blue p-6 pr-16 text-white relative bg-cover bg-center bg-no-repeat"
-            style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_station.jpg');">
+            style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/home-pnp.jpg');">
             <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Location Overview</h3>
             <h4 class="text-xl font-black tracking-tighter">Sta. Cruz Map</h4>
 
@@ -189,7 +189,7 @@
     <div id="incidentsSidebar"
         class="absolute top-4 right-4 md:top-8 md:right-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-right sidebar-visible">
         <div class="bg-pnp-blue p-6 pr-16 text-white relative bg-cover bg-center bg-no-repeat"
-            style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_patrol.jpg');">
+            style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/directory-pnp-2.jpg');">
             <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Crime Data</h3>
             <h4 class="text-xl font-black tracking-tighter">Incident Breakdown</h4>
 
@@ -1559,8 +1559,10 @@
 
             window.map = map;
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                subdomains: 'abcd',
                 maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             }).addTo(map);
 
             // Initialize incident markers layer
