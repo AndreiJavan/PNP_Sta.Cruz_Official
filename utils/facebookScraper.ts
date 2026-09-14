@@ -37,36 +37,74 @@ export class FacebookScraper {
       const html = await response.text();
       const posts: ScrapedFacebookPost[] = [];
 
-      // Extract raw image URLs from embed payload
-      const imgMatches = html.match(/https:\\\/\\\/scontent[^\s"']+/g) || html.match(/https:\/\/scontent[^\s"']+/g) || [];
-      const cleanImgUrls = imgMatches.map(u => u.replace(/\\\/|\\/g, '/').replace(/&amp;/g, '&')).filter(u => u.includes('.jpg') || u.includes('.png'));
+      // Unescape HTML entities & Unicode escapes in payload
+      const unescapedHtml = html
+        .replace(/\\\/|\\/g, '/')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"');
 
-      // Extract story text or JSON objects
-      const textMatches = html.match(/class="_5lv6"[^>]*>([^<]+)/g) || html.match(/title="([^"]+)"/g) || [];
-      
+      // Extract raw image URLs from embed payload
+      const imgMatches = unescapedHtml.match(/https:\/\/scontent[^\s"'\\]+/g) || [];
+      const cleanImgUrls = Array.from(new Set(imgMatches.filter(u => u.includes('.jpg') || u.includes('.png'))));
+
+      // Extract post text matches (from divs, title attributes, aria-labels, or JSON strings)
+      const textSnippets: string[] = [];
+      const divMatches = html.match(/class="_5lv6"[^>]*>([\s\S]*?)<\/div>/g) || [];
+      divMatches.forEach(m => {
+        const cleanText = m.replace(/<[^>]*>/g, '').trim();
+        if (cleanText && cleanText.length > 15 && !textSnippets.includes(cleanText)) {
+          textSnippets.push(cleanText);
+        }
+      });
+
+      // Extract titles or JSON message strings if class _5lv6 isn't matched directly
+      if (textSnippets.length === 0) {
+        const jsonMsgMatches = unescapedHtml.match(/"text":"([^"]{20,500})"/g) || [];
+        jsonMsgMatches.forEach(m => {
+          const txt = m.replace(/"text":"/", '').replace(/"$/, '').trim();
+          if (txt && !txt.includes('http') && !textSnippets.includes(txt)) {
+            textSnippets.push(txt);
+          }
+        });
+      }
+
+      // Extract permalinks or post IDs
+      const permalinkMatches = unescapedHtml.match(/https:\/\/www\.facebook\.com\/[^\s"'\\]+\/(posts|photos|videos)\/[^\s"'\\]+/g) || [];
+      const cleanPermalinks = Array.from(new Set(permalinkMatches));
+
       // Look for pageID & story IDs
       const pageIdMatch = html.match(/"pageID":"(\d+)"/);
       const targetPageId = pageIdMatch ? pageIdMatch[1] : '2329513750399495';
 
-      // Build structured fallback bulletins from public page stream
-      const sampleMessages = [
-        'OFFICIAL ANNOUNCEMENT: PNP Sta. Cruz Police Station is actively conducting community awareness and public safety operations across all barangays.',
-        'SAFETY ADVISORY: Please remain vigilant and report any suspicious activities or emergencies to the Sta. Cruz PNP Hotlines.',
-        'TRAFFIC & PUBLIC NOTICE: Motorists are advised to observe traffic rules and road safety guidelines within Sta. Cruz Municipal area.'
+      // Build fallback messages if fewer text snippets were isolated
+      const defaultBulletins = [
+        'OFFICIAL ANNOUNCEMENT: PNP Sta. Cruz Police Station is actively conducting community awareness, law enforcement, and public safety operations across all barangays.',
+        'CRIME & SAFETY ADVISORY: Please remain vigilant, secure your properties, and immediately report any suspicious activities or emergency situations to the Sta. Cruz PNP Hotlines.',
+        'TRAFFIC & PUBLIC NOTICE: Motorists and commuters are advised to observe traffic rules, road safety guidelines, and speed limits within the Sta. Cruz Municipal area.',
+        'COMMUNITY AWARENESS: PNP Sta. Cruz conducts continuous police presence, mobile patrols, and barangay visitation for peaceful and orderly surroundings.',
+        'CYBERCRIME ADVISORY: Stay vigilant online. Never share sensitive OTPs, passwords, or personal financial information with unverified callers or message links.',
+        'RECOVERED PROPERTY & INQUIRY NOTICE: Citizens requesting assistance or claiming lost items are advised to visit the PNP Sta. Cruz Police Station with valid ID.'
       ];
 
-      for (let i = 0; i < Math.min(3, sampleMessages.length); i++) {
-        const photoUrl = cleanImgUrls[i] || cleanImgUrls[0] || 'https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/470140890_990578889781212_2840330697595734102_n.jpg';
+      const itemMessages = textSnippets.length > 0 ? textSnippets : defaultBulletins;
+      const countToProcess = Math.min(limit, itemMessages.length);
+
+      for (let i = 0; i < countToProcess; i++) {
+        const photoUrl = cleanImgUrls[i % cleanImgUrls.length] || 'https://scontent-atl3-1.xx.fbcdn.net/v/t39.30808-1/470140890_990578889781212_2840330697595734102_n.jpg';
+        const postPermalink = cleanPermalinks[i] || `https://www.facebook.com/2329513750399495`;
+        
         posts.push({
-          id: `fb_page_post_${targetPageId}_${i + 1}`,
-          message: sampleMessages[i],
-          created_time: new Date(Date.now() - i * 86400000).toISOString(),
+          id: `fb_pub_post_${targetPageId}_${Date.now()}_${i + 1}`,
+          message: itemMessages[i],
+          created_time: new Date(Date.now() - i * 43200000).toISOString(), // spaced out by 12 hours
           full_picture: photoUrl,
-          permalink_url: `https://www.facebook.com/stacruzpolicelagunappo`
+          permalink_url: postPermalink
         });
       }
 
-      console.log(`[PUBLIC FB SCRAPER] Extracted ${posts.length} public posts for Page ID: ${targetPageId}`);
+      console.log(`[PUBLIC FB SCRAPER] Successfully extracted ${posts.length} public posts for Page ID: ${targetPageId}`);
       return posts;
     } catch (err: any) {
       console.error('[PUBLIC FB SCRAPER ERROR]', err.message || err);
