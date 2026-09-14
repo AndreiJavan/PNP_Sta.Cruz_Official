@@ -81,7 +81,7 @@ export class FacebookService {
           console.log(`[FACEBOOK SYNC] Resolved Meta Page Name: "${meData.name}", Numeric ID: ${numericPageId}`);
         }
       }
-    } catch (_) {}
+    } catch (_) { }
 
     const fields = 'id,message,story,caption,created_time,full_picture,picture,source,attachments{description,media,media_type,target,title,type,url,subattachments{description,media,media_type,target,title,type,url}},permalink_url';
     const batchLimit = Math.min(25, limit);
@@ -284,7 +284,7 @@ export class FacebookService {
       existingSnap.docs.forEach((doc: any) => {
         const docId = doc.id;
         const data = doc.data ? doc.data() : doc;
-        
+
         if (data.body) {
           const fbUrlMatch = data.body.match(/<!--FACEBOOK_URL:(.*?)-->/) || data.body.match(/\[View Official Facebook Post\]\((.*?)\)/);
           if (fbUrlMatch && fbUrlMatch[1]) {
