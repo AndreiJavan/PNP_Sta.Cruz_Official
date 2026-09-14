@@ -1292,6 +1292,12 @@
 
             const newLabel = getBarangayLabel(name, currentZoom);
             layer.setTooltipContent(newLabel);
+            if (name.toLowerCase() === 'jasaan') {
+                const tooltip = layer.getTooltip();
+                if (tooltip) {
+                    tooltip.setLatLng(L.latLng(14.2215, 121.3885));
+                }
+            }
         });
     }
 
@@ -1301,10 +1307,21 @@
         const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
         const boxes = [];
 
+        // Prioritize Jasaan so its label is evaluated first and never suppressed
+        tooltips.sort((a, b) => {
+            const aIsJasaan = (a.textContent || '').toUpperCase().includes('JASAAN');
+            const bIsJasaan = (b.textContent || '').toUpperCase().includes('JASAAN');
+            if (aIsJasaan) return -1;
+            if (bIsJasaan) return 1;
+            return 0;
+        });
+
         tooltips.forEach(t => {
             const rect = t.getBoundingClientRect();
             // Skip unrendered elements
             if (rect.width === 0 && rect.height === 0) return;
+
+            const isJasaan = (t.textContent || '').toUpperCase().includes('JASAAN');
 
             let isColliding = false;
             const pad = 2; // Extra padding
@@ -1320,11 +1337,12 @@
                 }
             }
 
-            if (isColliding) {
+            if (isColliding && !isJasaan) {
                 t.style.opacity = '0';
                 t.style.pointerEvents = 'none';
             } else {
                 t.style.opacity = '1';
+                t.style.pointerEvents = 'auto';
                 boxes.push(rect);
             }
         });
@@ -1434,7 +1452,7 @@
         { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
         { name: 'Calios', lat: 14.2750, lng: 121.4050 },
         { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
-        { name: 'Jasaan', lat: 14.223577, lng: 121.394827 },
+        { name: 'Jasaan', lat: 14.2215, lng: 121.3885 },
         { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
         { name: 'Malinao', lat: 14.232833, lng: 121.396823 },
         { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
@@ -1639,6 +1657,13 @@
                                 name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
                             }
 
+                            // Anchor Jasaan explicitly inside its spacious polygon area
+                            if (name.toLowerCase() === 'jasaan') {
+                                layer.getCenter = function () {
+                                    return L.latLng(14.2215, 121.3885);
+                                };
+                            }
+
                             const displayName = getBarangayLabel(name, map.getZoom());
 
                             layer.bindTooltip(displayName, {
@@ -1648,6 +1673,13 @@
                                 opacity: 1,
                                 interactive: false
                             });
+
+                            if (name.toLowerCase() === 'jasaan') {
+                                const tooltip = layer.getTooltip();
+                                if (tooltip) {
+                                    tooltip.setLatLng(L.latLng(14.2215, 121.3885));
+                                }
+                            }
 
                             layer.on({
                                 mouseover: function (e) {
@@ -1682,7 +1714,9 @@
 
                             // Add marker for each barangay at true geographic center
                             try {
-                                const centroid = layer.getBounds().getCenter();
+                                const centroid = (layer.getCenter && typeof layer.getCenter === 'function')
+                                    ? layer.getCenter()
+                                    : layer.getBounds().getCenter();
 
                                 // Update dynamic reference for search/locate system
                                 const pinIndex = manualPins.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
