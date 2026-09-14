@@ -57,6 +57,42 @@ export class FileSessionStore extends session.Store {
     return path.join(this.sessionsDir, `${this.sanitizeSid(sid)}.json`);
   }
 
+  private safeWriteFile(filePath: string, content: string, callback?: (err?: any) => void): void {
+    const tmpPath = `${filePath}.${Date.now()}.${Math.random().toString(36).substring(2)}.tmp`;
+    fs.writeFile(tmpPath, content, 'utf-8', (writeErr) => {
+      if (writeErr) {
+        console.error('[SESSION STORE] Error writing temp session file:', writeErr);
+        if (callback) callback(writeErr);
+        return;
+      }
+      fs.rename(tmpPath, filePath, (renameErr) => {
+        if (renameErr) {
+          // If rename fails, clean up temp file
+          try { fs.unlinkSync(tmpPath); } catch {}
+          console.error('[SESSION STORE] Error replacing session file:', renameErr);
+        }
+        if (callback) callback(renameErr);
+      });
+    });
+  }
+
+  private calculateExpiration(sessionData: session.SessionData): number {
+    const defaultMaxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+    let expires = Date.now() + defaultMaxAge;
+
+    if (sessionData && sessionData.cookie) {
+      if (sessionData.cookie.expires) {
+        const parsed = new Date(sessionData.cookie.expires).getTime();
+        if (!isNaN(parsed) && parsed > Date.now()) {
+          expires = parsed;
+        }
+      } else if (typeof sessionData.cookie.maxAge === 'number' && sessionData.cookie.maxAge > 0) {
+        expires = Date.now() + sessionData.cookie.maxAge;
+      }
+    }
+    return expires;
+  }
+
   private preloadFromDisk(): void {
     try {
       if (!fs.existsSync(this.sessionsDir)) return;
@@ -75,14 +111,13 @@ export class FileSessionStore extends session.Store {
 
           if (entry.expires && entry.expires < now) {
             // Expired on disk, clean it up
-            fs.unlinkSync(filePath);
+            try { fs.unlinkSync(filePath); } catch {}
           } else {
             this.cache.set(sid, entry);
             loaded++;
           }
         } catch {
-          // Bad JSON or corrupted file, remove it
-          try { fs.unlinkSync(filePath); } catch {}
+          // Ignore corrupt file during preload
         }
       }
 
@@ -143,7 +178,12 @@ export class FileSessionStore extends session.Store {
       this.cache.set(sanitized, entry);
       return callback(null, entry.data);
     } catch (err) {
-      console.error(`[SESSION STORE] Error reading session ${sid}:`, err);
+      console.error(`[SESSION STORE] Warning reading session ${sid} from disk, falling back to cache if present:`, err);
+      const sanitized = this.sanitizeSid(sid);
+      const cached = this.cache.get(sanitized);
+      if (cached && (!cached.expires || cached.expires >= Date.now())) {
+        return callback(null, cached.data);
+      }
       return callback(null, null);
     }
   }
@@ -151,31 +191,19 @@ export class FileSessionStore extends session.Store {
   set(sid: string, sessionData: session.SessionData, callback?: (err?: any) => void): void {
     try {
       const sanitized = this.sanitizeSid(sid);
-      const defaultMaxAge = 30 * 24 * 60 * 60 * 1000; // 30 days default
-      let expires = Date.now() + defaultMaxAge;
-
-      if (sessionData.cookie) {
-        if (sessionData.cookie.expires) {
-          expires = new Date(sessionData.cookie.expires).getTime();
-        } else if (typeof sessionData.cookie.maxAge === 'number') {
-          expires = Date.now() + sessionData.cookie.maxAge;
-        }
-      }
+      const expires = this.calculateExpiration(sessionData);
 
       const entry: SessionDataEntry = {
         data: sessionData,
         expires
       };
 
-      // Update memory cache
+      // Update memory cache immediately
       this.cache.set(sanitized, entry);
 
-      // Persist to disk
+      // Persist to disk atomically
       const filePath = this.getFilePath(sid);
-      fs.writeFile(filePath, JSON.stringify(entry), 'utf-8', (err) => {
-        if (err) {
-          console.error(`[SESSION STORE] Failed to write session ${sid} to disk:`, err);
-        }
+      this.safeWriteFile(filePath, JSON.stringify(entry), (err) => {
         if (callback) callback(null);
       });
     } catch (err) {
@@ -187,16 +215,7 @@ export class FileSessionStore extends session.Store {
   touch(sid: string, sessionData: session.SessionData, callback?: (err?: any) => void): void {
     try {
       const sanitized = this.sanitizeSid(sid);
-      const defaultMaxAge = 30 * 24 * 60 * 60 * 1000;
-      let expires = Date.now() + defaultMaxAge;
-
-      if (sessionData.cookie) {
-        if (sessionData.cookie.expires) {
-          expires = new Date(sessionData.cookie.expires).getTime();
-        } else if (typeof sessionData.cookie.maxAge === 'number') {
-          expires = Date.now() + sessionData.cookie.maxAge;
-        }
-      }
+      const expires = this.calculateExpiration(sessionData);
 
       const cached = this.cache.get(sanitized);
       if (cached) {
@@ -206,9 +225,9 @@ export class FileSessionStore extends session.Store {
         this.cache.set(sanitized, { data: sessionData, expires });
       }
 
-      // Update file on disk asynchronously
+      // Update file on disk atomically
       const filePath = this.getFilePath(sid);
-      fs.writeFile(filePath, JSON.stringify({ data: sessionData, expires }), 'utf-8', () => {
+      this.safeWriteFile(filePath, JSON.stringify({ data: sessionData, expires }), () => {
         if (callback) callback(null);
       });
     } catch (err) {
@@ -263,7 +282,7 @@ export class FileSessionStore extends session.Store {
       if (fs.existsSync(this.sessionsDir)) {
         const files = fs.readdirSync(this.sessionsDir);
         for (const file of files) {
-          if (file.endsWith('.json')) {
+          if (file.endsWith('.json') || file.endsWith('.tmp')) {
             fs.unlinkSync(path.join(this.sessionsDir, file));
           }
         }
@@ -271,4 +290,5 @@ export class FileSessionStore extends session.Store {
     } catch {}
     if (callback) callback(null);
   }
+}
 }

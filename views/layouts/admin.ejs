@@ -524,18 +524,42 @@
 
         // Global Fetch Interceptor
         const _originalFetch = window.fetch;
+        let isRedirectingToLogin = false;
+
+        async function verifySessionExpired() {
+            if (isRedirectingToLogin) return;
+            try {
+                // Wait 2 seconds and double-check heartbeat to prevent false-positive logout on slow connection
+                await new Promise(r => setTimeout(r, 2000));
+                const res = await _originalFetch('/admin/api/heartbeat', {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (res.status === 401) {
+                    const data = await res.json().catch(() => null);
+                    if (data && data.expired) {
+                        isRedirectingToLogin = true;
+                        console.warn('[AUTH] Session confirmed expired after double-check. Redirecting to login.');
+                        window.location.href = '/admin/login?expired=1';
+                    }
+                }
+            } catch (err) {
+                // Network error during retry - do NOT logout, keep admin on current page
+                console.warn('[AUTH] Retry check failed due to network latency:', err);
+            }
+        }
+
         window.fetch = async function(...args) {
             try {
                 const response = await _originalFetch.apply(this, args);
 
-                // Only genuine 401 with expired flag should trigger login redirect
-                if (response.status === 401) {
+                // Only genuine 401 with expired flag should trigger double-check verification
+                if (response.status === 401 && !isRedirectingToLogin) {
                     const clone = response.clone();
                     try {
                         const data = await clone.json();
                         if (data && data.expired) {
-                            console.warn('[AUTH] Admin session expired. Directing to login.');
-                            window.location.href = '/admin/login?expired=1';
+                            verifySessionExpired();
                             return response;
                         }
                     } catch (_) {
@@ -567,7 +591,7 @@
 
         // Periodic Session Keepalive Heartbeat (every 5 minutes when tab is active and online)
         setInterval(() => {
-            if (document.visibilityState === 'visible' && navigator.onLine) {
+            if (document.visibilityState === 'visible' && navigator.onLine && !isRedirectingToLogin) {
                 _originalFetch('/admin/api/heartbeat', {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
@@ -575,7 +599,7 @@
                     if (res.status === 401) {
                         res.json().then(data => {
                             if (data && data.expired) {
-                                window.location.href = '/admin/login?expired=1';
+                                verifySessionExpired();
                             }
                         }).catch(() => {});
                     }
