@@ -23,9 +23,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Favicon handler
-app.get(['/favicon.ico', '/favicon.png'], (req, res) => res.status(204).end());
-
 // Trust proxy for Vercel/Cloud Run
 app.set('trust proxy', 1);
 
