@@ -11,13 +11,15 @@ interface SessionDataEntry {
 export class FileSessionStore extends session.Store {
   private sessionsDir: string;
   private cache = new Map<string, SessionDataEntry>();
+  private lastTouchDiskSync = new Map<string, number>();
+  private writeQueues = new Map<string, Promise<void>>();
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor(customDir?: string) {
     super();
 
-    // Default to .sessions in cwd, fallback to os.tmpdir() if not writable (e.g., serverless)
-    const primaryDir = customDir || path.join(process.cwd(), '.sessions');
+    // Resolve absolute path to .sessions directory
+    const primaryDir = customDir ? path.resolve(customDir) : path.resolve(process.cwd(), '.sessions');
     this.sessionsDir = primaryDir;
 
     try {
@@ -57,23 +59,49 @@ export class FileSessionStore extends session.Store {
     return path.join(this.sessionsDir, `${this.sanitizeSid(sid)}.json`);
   }
 
-  private safeWriteFile(filePath: string, content: string, callback?: (err?: any) => void): void {
-    const tmpPath = `${filePath}.${Date.now()}.${Math.random().toString(36).substring(2)}.tmp`;
-    fs.writeFile(tmpPath, content, 'utf-8', (writeErr) => {
-      if (writeErr) {
-        console.error('[SESSION STORE] Error writing temp session file:', writeErr);
-        if (callback) callback(writeErr);
-        return;
-      }
-      fs.rename(tmpPath, filePath, (renameErr) => {
-        if (renameErr) {
-          // If rename fails, clean up temp file
-          try { fs.unlinkSync(tmpPath); } catch {}
-          console.error('[SESSION STORE] Error replacing session file:', renameErr);
+  /**
+   * Serializes writes per session ID to prevent concurrent file lock clashes on Windows.
+   */
+  private queueFileWrite(sid: string, task: () => Promise<void>): Promise<void> {
+    const sanitized = this.sanitizeSid(sid);
+    const previous = this.writeQueues.get(sanitized) || Promise.resolve();
+    const next = previous
+      .catch(() => {}) // Ignore errors in previous task
+      .then(task)
+      .finally(() => {
+        if (this.writeQueues.get(sanitized) === next) {
+          this.writeQueues.delete(sanitized);
         }
-        if (callback) callback(renameErr);
       });
-    });
+    this.writeQueues.set(sanitized, next);
+    return next;
+  }
+
+  /**
+   * Windows-resilient atomic file write with direct fallback.
+   */
+  private async safeWriteFileAsync(filePath: string, content: string): Promise<void> {
+    const tmpPath = `${filePath}.${Date.now()}.${Math.random().toString(36).substring(2)}.tmp`;
+    try {
+      await fs.promises.writeFile(tmpPath, content, 'utf-8');
+      try {
+        await fs.promises.rename(tmpPath, filePath);
+      } catch (renameErr: any) {
+        // On Windows (EPERM, EBUSY, EXDEV), fall back to direct file write
+        try { await fs.promises.unlink(tmpPath); } catch {}
+        await fs.promises.writeFile(filePath, content, 'utf-8');
+      }
+    } catch (err) {
+      // Clean up tmpPath if it still exists
+      try { await fs.promises.unlink(tmpPath); } catch {}
+      // Final fallback attempt: direct write
+      try {
+        await fs.promises.writeFile(filePath, content, 'utf-8');
+      } catch (fallbackErr) {
+        console.error('[SESSION STORE] Critical error writing session file:', fallbackErr);
+        throw fallbackErr;
+      }
+    }
   }
 
   private calculateExpiration(sessionData: session.SessionData): number {
@@ -134,6 +162,7 @@ export class FileSessionStore extends session.Store {
     for (const [sid, entry] of this.cache.entries()) {
       if (entry.expires && entry.expires < now) {
         this.cache.delete(sid);
+        this.lastTouchDiskSync.delete(sid);
         try {
           const filePath = this.getFilePath(sid);
           if (fs.existsSync(filePath)) {
@@ -154,6 +183,7 @@ export class FileSessionStore extends session.Store {
       if (cached) {
         if (cached.expires && cached.expires < now) {
           this.cache.delete(sanitized);
+          this.lastTouchDiskSync.delete(sanitized);
           const filePath = this.getFilePath(sid);
           try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch {}
           return callback(null, null);
@@ -200,11 +230,18 @@ export class FileSessionStore extends session.Store {
 
       // Update memory cache immediately
       this.cache.set(sanitized, entry);
+      this.lastTouchDiskSync.set(sanitized, Date.now());
 
-      // Persist to disk atomically
+      // Persist to disk serialized via queue
       const filePath = this.getFilePath(sid);
-      this.safeWriteFile(filePath, JSON.stringify(entry), (err) => {
+      const content = JSON.stringify(entry);
+
+      this.queueFileWrite(sid, async () => {
+        await this.safeWriteFileAsync(filePath, content);
+      }).then(() => {
         if (callback) callback(null);
+      }).catch((err) => {
+        if (callback) callback(null); // Do not crash session on background disk write warning
       });
     } catch (err) {
       console.error(`[SESSION STORE] Error saving session ${sid}:`, err);
@@ -225,9 +262,24 @@ export class FileSessionStore extends session.Store {
         this.cache.set(sanitized, { data: sessionData, expires });
       }
 
-      // Update file on disk atomically
+      // Throttle disk writes for touch: at most once per 60 seconds per session
+      // This prevents high-frequency disk I/O lock contention on Windows during rapid page navigation
+      const lastSync = this.lastTouchDiskSync.get(sanitized) || 0;
+      const now = Date.now();
+      if (now - lastSync < 60 * 1000) {
+        if (callback) callback(null);
+        return;
+      }
+      this.lastTouchDiskSync.set(sanitized, now);
+
       const filePath = this.getFilePath(sid);
-      this.safeWriteFile(filePath, JSON.stringify({ data: sessionData, expires }), () => {
+      const content = JSON.stringify({ data: sessionData, expires });
+
+      this.queueFileWrite(sid, async () => {
+        await this.safeWriteFileAsync(filePath, content);
+      }).then(() => {
+        if (callback) callback(null);
+      }).catch(() => {
         if (callback) callback(null);
       });
     } catch (err) {
@@ -239,15 +291,20 @@ export class FileSessionStore extends session.Store {
     try {
       const sanitized = this.sanitizeSid(sid);
       this.cache.delete(sanitized);
+      this.lastTouchDiskSync.delete(sanitized);
 
       const filePath = this.getFilePath(sid);
-      if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, () => {
-          if (callback) callback(null);
-        });
-      } else {
+      this.queueFileWrite(sid, async () => {
+        try {
+          if (fs.existsSync(filePath)) {
+            await fs.promises.unlink(filePath);
+          }
+        } catch {}
+      }).then(() => {
         if (callback) callback(null);
-      }
+      }).catch(() => {
+        if (callback) callback(null);
+      });
     } catch (err) {
       console.error(`[SESSION STORE] Error destroying session ${sid}:`, err);
       if (callback) callback(null);
@@ -278,12 +335,13 @@ export class FileSessionStore extends session.Store {
 
   clear(callback?: (err?: any) => void): void {
     this.cache.clear();
+    this.lastTouchDiskSync.clear();
     try {
       if (fs.existsSync(this.sessionsDir)) {
         const files = fs.readdirSync(this.sessionsDir);
         for (const file of files) {
           if (file.endsWith('.json') || file.endsWith('.tmp')) {
-            fs.unlinkSync(path.join(this.sessionsDir, file));
+            try { fs.unlinkSync(path.join(this.sessionsDir, file)); } catch {}
           }
         }
       }

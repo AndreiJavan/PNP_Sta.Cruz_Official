@@ -59,13 +59,14 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'stacruz-mapping-secure-session-key',
   resave: false,
   saveUninitialized: false,
-  rolling: true,
+  rolling: false,
   name: 'stacruz_sid',
   proxy: true,
   cookie: {
     secure: false, // Set to false to allow HTTP in local dev / behind proxy without SSL termination issues
     httpOnly: true,
     sameSite: 'lax',
+    path: '/',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   }
 }));

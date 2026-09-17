@@ -5,15 +5,14 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     return next();
   }
 
-  // Detect if request is an AJAX/API/JSON request
+  // Detect if request is genuinely an AJAX/API/JSON request
   const isApiRequest = 
     req.xhr ||
     req.headers['x-requested-with'] === 'XMLHttpRequest' ||
-    req.headers.accept?.includes('application/json') ||
+    Boolean(req.headers.accept && req.headers.accept.includes('application/json')) ||
     req.path.startsWith('/api') ||
     req.originalUrl.includes('/api/') ||
-    req.originalUrl.startsWith('/admin/api') ||
-    req.headers['sec-fetch-dest'] === 'empty';
+    req.originalUrl.startsWith('/admin/api');
 
   console.warn(`[AUTH PROTECT] Session invalid/missing. URL: ${req.originalUrl || req.url}, Method: ${req.method}, IsAPI: ${isApiRequest}`);
 
@@ -36,11 +35,10 @@ export const isSuperAdmin = (req: Request, res: Response, next: NextFunction) =>
   const isApiRequest = 
     req.xhr ||
     req.headers['x-requested-with'] === 'XMLHttpRequest' ||
-    req.headers.accept?.includes('application/json') ||
+    Boolean(req.headers.accept && req.headers.accept.includes('application/json')) ||
     req.path.startsWith('/api') ||
     req.originalUrl.includes('/api/') ||
-    req.originalUrl.startsWith('/admin/api') ||
-    req.headers['sec-fetch-dest'] === 'empty';
+    req.originalUrl.startsWith('/admin/api');
 
   if (isApiRequest) {
     return res.status(403).json({

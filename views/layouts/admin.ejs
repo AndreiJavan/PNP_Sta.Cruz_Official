@@ -537,22 +537,49 @@
         // Global Fetch Interceptor
         const _originalFetch = window.fetch;
         let isRedirectingToLogin = false;
+        let consecutiveExpiredFailures = 0;
 
         async function verifySessionExpired() {
             if (isRedirectingToLogin) return;
+            if (!navigator.onLine) return; // Do not redirect if user is temporarily offline
+
             try {
-                // Wait 2 seconds and double-check heartbeat to prevent false-positive logout on slow connection
-                await new Promise(r => setTimeout(r, 2000));
-                const res = await _originalFetch('/admin/api/heartbeat', {
+                // Wait 1.5 seconds and check heartbeat
+                await new Promise(r => setTimeout(r, 1500));
+                const res1 = await _originalFetch('/admin/api/heartbeat', {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 });
-                if (res.status === 401) {
-                    const data = await res.json().catch(() => null);
-                    if (data && data.expired) {
-                        isRedirectingToLogin = true;
-                        console.warn('[AUTH] Session confirmed expired after double-check. Redirecting to login.');
-                        window.location.href = '/admin/login?expired=1';
+
+                if (res1.status === 401) {
+                    const data1 = await res1.json().catch(() => null);
+                    if (data1 && data1.expired) {
+                        consecutiveExpiredFailures++;
+                    }
+                } else if (res1.ok) {
+                    consecutiveExpiredFailures = 0;
+                    return;
+                }
+
+                // If first check failed, wait another 2 seconds and re-verify before forcing redirect
+                if (consecutiveExpiredFailures >= 1) {
+                    await new Promise(r => setTimeout(r, 2000));
+                    const res2 = await _originalFetch('/admin/api/heartbeat', {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (res2.status === 401) {
+                        const data2 = await res2.json().catch(() => null);
+                        if (data2 && data2.expired) {
+                            isRedirectingToLogin = true;
+                            console.warn('[AUTH] Session confirmed expired after multiple checks. Redirecting to login.');
+                            window.location.href = '/admin/login?expired=1';
+                            return;
+                        }
+                    } else if (res2.ok) {
+                        consecutiveExpiredFailures = 0;
+                        return;
                     }
                 }
             } catch (err) {
@@ -565,8 +592,12 @@
             try {
                 const response = await _originalFetch.apply(this, args);
 
-                // Only genuine 401 with expired flag should trigger double-check verification
-                if (response.status === 401 && !isRedirectingToLogin) {
+                // Ignore background non-critical routes (like toggle-sidebar) from triggering session expiration
+                const url = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url ? args[0].url : '');
+                const isNonCritical = url.includes('/api/toggle-sidebar') || url.includes('/api/sync-facebook');
+
+                // Only genuine 401 with expired flag on critical requests should trigger double-check verification
+                if (response.status === 401 && !isRedirectingToLogin && !isNonCritical) {
                     const clone = response.clone();
                     try {
                         const data = await clone.json();
