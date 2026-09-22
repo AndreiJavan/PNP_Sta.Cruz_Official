@@ -143,6 +143,14 @@ app.use((req, res, next) => {
 // Health Check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
+// Local development fallback for Vercel Web Analytics (on Vercel, intercepted at the edge)
+app.get('/_vercel/insights/script.js', (req, res) => {
+  res.type('application/javascript').send('/* Vercel Analytics local development placeholder */');
+});
+app.all('/_vercel/insights/*', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Routes
 app.use('/', publicRoutes);
 app.use('/admin', adminRoutes);
