@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import pathModule from 'path';
+import { deepSanitizeUnicode } from '../utils/unicodeHelper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = pathModule.dirname(__filename);
@@ -52,9 +53,10 @@ class Collection {
 
   async add(data: any) {
     const sb = getSupabase();
+    const cleanData = deepSanitizeUnicode(data);
     const { data: inserted, error } = await sb
       .from(this.name)
-      .insert([data])
+      .insert([cleanData])
       .select()
       .single();
 
@@ -365,18 +367,20 @@ class Doc {
 
   async set(data: any) {
     const sb = getSupabase();
+    const cleanData = deepSanitizeUnicode(data);
     const { error } = await sb
       .from(this.table)
-      .upsert({ ...data, id: this.id });
+      .upsert({ ...cleanData, id: this.id });
 
     if (error) throw error;
   }
 
   async update(data: any) {
     const sb = getSupabase();
+    const cleanData = deepSanitizeUnicode(data);
     const { error } = await sb
       .from(this.table)
-      .update(data)
+      .update(cleanData)
       .eq('id', this.id);
 
     if (error) throw error;

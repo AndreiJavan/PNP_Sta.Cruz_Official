@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { db } from '../config/database.js';
 import { classifyCategory } from './categoryClassifier.js';
 import { FacebookScraper } from './facebookScraper.js';
+import { sanitizeUnicode } from './unicodeHelper.js';
 
 dotenv.config();
 
@@ -309,8 +310,9 @@ export class FacebookService {
       for (const post of posts) {
         try {
           const rawMessage = post.message?.trim() || post.story?.trim() || post.caption?.trim() || '';
-          const messageText = rawMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
-          const title = rawMessage ? rawMessage.split('\n')[0].substring(0, 120) : 'Official Facebook Post';
+          const cleanMessage = sanitizeUnicode(rawMessage);
+          const messageText = cleanMessage || 'Official Facebook Announcement from PNP Sta. Cruz';
+          const title = cleanMessage ? sanitizeUnicode(cleanMessage.split('\n')[0], 120) : 'Official Facebook Post';
           const rawPermalink = post.permalink_url || `https://www.facebook.com/stacruzpolicelagunappo/posts/${post.id}`;
           const normalizedMeta = FacebookScraper.normalizeFacebookUrl(rawPermalink);
           const fbPermalink = normalizedMeta.url;
@@ -343,6 +345,8 @@ export class FacebookService {
             dbCategory = 'General Announcement';
             finalBody = `${finalBody}\n<!--CUSTOM_CATEGORY:${autoCategory}-->`;
           }
+
+          finalBody = sanitizeUnicode(finalBody);
 
           // Use original Facebook creation date for created_at
           const originalDate = post.created_time ? new Date(post.created_time).toISOString() : new Date().toISOString();
