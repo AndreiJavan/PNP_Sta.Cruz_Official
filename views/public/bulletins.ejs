@@ -111,10 +111,44 @@
     <% } %>
 
     <!-- Bulletin Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-        <% bulletins.forEach(bulletin=> { %>
+    <div id="bulletin-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <% 
+            const activeCategoryInitial = (category && category !== 'All') ? category : 'Crime Advisory';
+            let initialAdvisoryCount = 0;
+            let totalMatchingInitial = 0;
+            bulletins.forEach(b => {
+                if (category === 'Wanted Person' || category === 'Missing Person') {
+                    totalMatchingInitial++;
+                } else {
+                    const normB = (b.category || '').toLowerCase().trim();
+                    const normA = activeCategoryInitial.toLowerCase().trim();
+                    if (normA === 'crime advisory' && (normB === 'crime advisory' || normB === 'crime advisories')) totalMatchingInitial++;
+                    else if (normA === 'traffic advisory' && (normB === 'traffic advisory' || normB === 'traffic advisories')) totalMatchingInitial++;
+                    else if (normA === 'cybercrime advisory' && (normB === 'cybercrime advisory' || normB === 'cybercrime advisories' || normB.includes('cyber'))) totalMatchingInitial++;
+                    else if (normA === 'community awareness' && (normB === 'community awareness' || normB.includes('community') || normB.includes('awareness'))) totalMatchingInitial++;
+                    else if (normA === normB) totalMatchingInitial++;
+                }
+            });
+        %>
+        <% bulletins.forEach(bulletin=> { 
+            let isCategoryMatch = false;
+            if (category === 'Wanted Person' || category === 'Missing Person') {
+                isCategoryMatch = true;
+            } else {
+                const normB = (bulletin.category || '').toLowerCase().trim();
+                const normA = activeCategoryInitial.toLowerCase().trim();
+                if (normA === 'crime advisory' && (normB === 'crime advisory' || normB === 'crime advisories')) isCategoryMatch = true;
+                else if (normA === 'traffic advisory' && (normB === 'traffic advisory' || normB === 'traffic advisories')) isCategoryMatch = true;
+                else if (normA === 'cybercrime advisory' && (normB === 'cybercrime advisory' || normB === 'cybercrime advisories' || normB.includes('cyber'))) isCategoryMatch = true;
+                else if (normA === 'community awareness' && (normB === 'community awareness' || normB.includes('community') || normB.includes('awareness'))) isCategoryMatch = true;
+                else if (normA === normB) isCategoryMatch = true;
+            }
+            const initiallyShow = isCategoryMatch && (initialAdvisoryCount < 10);
+            if (initiallyShow) initialAdvisoryCount++;
+        %>
             <div
-                class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col cursor-pointer"
+                class="bulletin-card group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col cursor-pointer"
+                style="<%= initiallyShow ? '' : 'display: none !important;' %>"
                 data-category="<%= bulletin.category %>" data-date="<%= bulletin.created_at %>" onclick="openBulletinModal('<%= bulletin.id %>')">
                 <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
                     <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0">
@@ -222,15 +256,16 @@
     </div>
 
     <!-- Load More / Older Posts Pagination Button -->
-    <div id="bulletin-load-more-container" class="mt-12 text-center">
+    <div id="bulletin-load-more-container" class="mt-12 text-center" style="<%= totalMatchingInitial > 0 ? '' : 'display: none;' %>">
         <button id="bulletin-load-more-btn" onclick="loadMoreBulletins()"
+            style="<%= totalMatchingInitial > 10 ? 'display: inline-flex;' : 'display: none;' %>"
             class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
             <i class="fas fa-history text-sm"></i>
             <span id="bulletin-load-more-text">Load Older Advisories</span>
             <i class="fas fa-chevron-down text-xs"></i>
         </button>
         <p id="bulletin-load-more-info" class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-3">
-            Showing <span id="bulletin-visible-count">10</span> of <span id="bulletin-total-count">0</span> advisories
+            Showing <span id="bulletin-visible-count"><%= Math.min(10, totalMatchingInitial) %></span> of <span id="bulletin-total-count"><%= totalMatchingInitial %></span> advisories
         </p>
     </div>
 
@@ -411,7 +446,7 @@
     function filterPublicBulletins(isLoadMore = false) {
         const searchInputEl = document.getElementById('publicSearchInput');
         const searchInput = searchInputEl ? searchInputEl.value.toLowerCase().trim() : '';
-        const cards = document.querySelectorAll('.grid > .group');
+        const cards = document.querySelectorAll('.bulletin-card');
         const pageCategory = '<%= category %>';
 
         const dateMode = document.getElementById('bulletinDateMode')?.value || 'all';
@@ -484,16 +519,17 @@
             if (matchesSearch && matchesCategory && matchesDate) {
                 matchingCards.push(card);
             } else {
-                card.style.display = 'none';
+                card.style.setProperty('display', 'none', 'important');
             }
         });
 
         // Apply display styling & pagination (10 per page on all devices)
         matchingCards.forEach((card, index) => {
             if (index < bulletinPageLimit) {
+                card.style.removeProperty('display');
                 card.style.display = 'flex';
             } else {
-                card.style.display = 'none';
+                card.style.setProperty('display', 'none', 'important');
             }
         });
         
@@ -773,10 +809,14 @@
         }
     }
 
-    // Trigger initial filter on DOMContentLoaded
-    window.addEventListener('DOMContentLoaded', () => {
-        filterPublicBulletins();
-    });
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => filterPublicBulletins(false));
+    } else {
+        filterPublicBulletins(false);
+    }
+    try {
+        filterPublicBulletins(false);
+    } catch(e) {}
     function bulletinModalUpdate() {
         const slides = document.querySelectorAll('#bulletin-modal-media-container [data-slide]');
         const dots = document.querySelectorAll('#modal-dots-container [data-dot]');

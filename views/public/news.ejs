@@ -79,8 +79,8 @@
 
         <!-- News Grid -->
         <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <% newsList.forEach((news) => { %>
-                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" data-date="<%= news.publishedAt %>" onclick="openNewsModal('<%= news.id %>')">
+            <% newsList.forEach((news, idx) => { %>
+                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" style="<%= idx >= 10 ? 'display: none !important;' : '' %>" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" data-date="<%= news.publishedAt %>" onclick="openNewsModal('<%= news.id %>')">
                     
                     <!-- Image / Facebook Wrapper -->
                     <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
@@ -165,15 +165,16 @@
         </div>
 
         <!-- Load More / Older Posts Pagination Button -->
-        <div id="news-load-more-container" class="mt-12 text-center">
+        <div id="news-load-more-container" class="mt-12 text-center" style="<%= newsList.length > 0 ? '' : 'display: none;' %>">
             <button id="news-load-more-btn" onclick="loadMoreNews()"
+                style="<%= newsList.length > 10 ? 'display: inline-flex;' : 'display: none;' %>"
                 class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
                 <i class="fas fa-history text-sm"></i>
                 <span id="news-load-more-text">Load Older News</span>
                 <i class="fas fa-chevron-down text-xs"></i>
             </button>
             <p id="news-load-more-info" class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-3">
-                Showing <span id="news-visible-count">10</span> of <span id="news-total-count">0</span> news posts
+                Showing <span id="news-visible-count"><%= Math.min(10, newsList.length) %></span> of <span id="news-total-count"><%= newsList.length %></span> news posts
             </p>
         </div>
 
@@ -385,6 +386,7 @@
             if (matchesSearch && matchesDate) {
                 matchingCards.push(card);
             } else {
+                card.style.setProperty('display', 'none', 'important');
                 card.classList.add('hidden');
             }
         });
@@ -392,8 +394,10 @@
         // Apply display & pagination (10 per page on all devices)
         matchingCards.forEach((card, index) => {
             if (index < newsPageLimit) {
+                card.style.removeProperty('display');
                 card.classList.remove('hidden');
             } else {
+                card.style.setProperty('display', 'none', 'important');
                 card.classList.add('hidden');
             }
         });
@@ -439,9 +443,16 @@
     window.addEventListener('resize', () => {
         filterNews(true);
     });
-    window.addEventListener('DOMContentLoaded', () => {
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => filterNews(false));
+    } else {
         filterNews(false);
-    });
+    }
+    // Also trigger synchronously now
+    try {
+        filterNews(false);
+    } catch(e) {}
 
     function openNewsModal(newsId) {
         const db = window.newsDatabase || newsDatabase || [];
