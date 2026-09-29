@@ -279,24 +279,21 @@
 
 <style>
     .barangay-label-tooltip {
-        background: rgba(15, 23, 42, 0.75) !important;
-        backdrop-filter: blur(4px) !important;
-        -webkit-backdrop-filter: blur(4px) !important;
+        background: rgba(15, 23, 42, 0.88) !important;
         border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        border-radius: 6px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
         color: #ffffff !important;
-        font-weight: 900 !important;
-        font-size: 9px !important;
+        font-weight: 800 !important;
+        font-size: 8.5px !important;
         text-transform: uppercase;
-        letter-spacing: 0.1em;
-        text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8) !important;
+        letter-spacing: 0.05em;
         text-align: center;
         white-space: pre-wrap;
-        line-height: 1.2;
-        padding: 5px 8px !important;
+        line-height: 1.15;
+        padding: 3px 6px !important;
         z-index: 1000 !important;
-        transition: opacity 0.3s ease-in-out !important;
+        pointer-events: none !important;
     }
 
     .barangay-label-tooltip::before,
@@ -822,9 +819,8 @@
         policeStations.forEach(station => {
             const iconHtml = `
                 <div class="relative group flex flex-col items-center">
-                    <div class="absolute w-7 h-7 bg-blue-500/20 rounded-full animate-ping"></div>
-                    <div class="relative w-8 h-8 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center shadow-xl border-2 border-white dark:border-slate-900 transform hover:scale-110 transition-all duration-300">
-                        <i class="fas fa-building-shield text-white text-xs"></i>
+                    <div class="relative w-7 h-7 bg-blue-600 dark:bg-blue-700 rounded-full flex items-center justify-center shadow-md border-2 border-white dark:border-slate-900">
+                        <i class="fas fa-building-shield text-white text-[10px]"></i>
                     </div>
                 </div>
             `;
@@ -1656,6 +1652,7 @@
             const initialPadding = isMobile ? [16, 16] : [40, 40];
 
             map = L.map('leafletMap', {
+                preferCanvas: true, // Hardware-accelerated HTML5 canvas rendering for maximum mobile performance
                 zoomControl: false,
                 dragging: true,
                 touchZoom: true,
@@ -1666,8 +1663,14 @@
                 attributionControl: false,
                 minZoom: isMobile ? 11 : 12,
                 maxZoom: 18,
-                maxBounds: STA_CRUZ_MAX_BOUNDS,
-                maxBoundsViscosity: 0.8
+                // On mobile, eliminate viscous boundary resistance so finger panning is instantaneous and fluid
+                maxBounds: isMobile ? null : STA_CRUZ_MAX_BOUNDS,
+                maxBoundsViscosity: isMobile ? 0 : 0.5,
+                inertia: true,
+                inertiaDeceleration: 3000,
+                inertiaMaxSpeed: 1800,
+                fadeAnimation: true,
+                zoomAnimation: true
             }).fitBounds(STA_CRUZ_BOUNDS, { padding: initialPadding, maxZoom: isMobile ? 13 : 14 });
 
             window.map = map;
@@ -1696,33 +1699,35 @@
                 .then(data => {
                     santaCruzGeoJSON = data;
 
-                    // --- APPLY INVERTED MASK TO HIDE OUTSIDE MUNICIPALITIES ---
-                    const worldRing = [[180, 90], [180, -90], [-180, -90], [-180, 90], [180, 90]];
-                    let maskCoords = [worldRing];
-                    data.features.forEach(f => {
-                        if (f.geometry && f.geometry.type === 'Polygon') {
-                            maskCoords.push(f.geometry.coordinates[0]);
-                        } else if (f.geometry && f.geometry.type === 'MultiPolygon') {
-                            f.geometry.coordinates.forEach(poly => maskCoords.push(poly[0]));
-                        }
-                    });
+                    // --- APPLY INVERTED MASK ON DESKTOP ONLY (Disabled on mobile to ensure fluid 60fps touch panning) ---
+                    if (!isMobile) {
+                        const worldRing = [[180, 90], [180, -90], [-180, -90], [-180, 90], [180, 90]];
+                        let maskCoords = [worldRing];
+                        data.features.forEach(f => {
+                            if (f.geometry && f.geometry.type === 'Polygon') {
+                                maskCoords.push(f.geometry.coordinates[0]);
+                            } else if (f.geometry && f.geometry.type === 'MultiPolygon') {
+                                f.geometry.coordinates.forEach(poly => maskCoords.push(poly[0]));
+                            }
+                        });
 
-                    const isDark = document.documentElement.classList.contains('dark');
-                    L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
-                        style: {
-                            fillColor: isDark ? '#0f172a' : '#f8fafc',
-                            fillOpacity: 1, // Completely opaque!
-                            color: 'transparent',
-                            weight: 0,
-                            className: 'map-outside-mask-solid'
-                        }, interactive: false
-                    }).addTo(map);
+                        const isDark = document.documentElement.classList.contains('dark');
+                        L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
+                            style: {
+                                fillColor: isDark ? '#0f172a' : '#f8fafc',
+                                fillOpacity: 1,
+                                color: 'transparent',
+                                weight: 0,
+                                className: 'map-outside-mask-solid'
+                            }, interactive: false
+                        }).addTo(map);
 
-                    const observer = new MutationObserver(() => {
-                        const dark = document.documentElement.classList.contains('dark');
-                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
-                    });
-                    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                        const observer = new MutationObserver(() => {
+                            const dark = document.documentElement.classList.contains('dark');
+                            document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
+                        });
+                        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+                    }
                     // ---------------------------------------------------------
 
                     boundaryLayerGroup = L.geoJSON(data, {

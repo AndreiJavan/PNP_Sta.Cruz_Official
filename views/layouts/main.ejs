@@ -121,9 +121,27 @@
             border-color: #475569;
         }
 
-        /* Leaflet Dark Mode Support */
+        /* Leaflet Dark Mode Support & Mobile Touch Acceleration */
         .dark .leaflet-tile {
             filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
+        .leaflet-tile {
+            will-change: transform;
+            transform: translate3d(0, 0, 0);
+            -webkit-transform: translate3d(0, 0, 0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .leaflet-map-pane,
+        .leaflet-tile-pane {
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+        }
+
+        #leafletMap {
+            touch-action: pan-x pan-y pinch-zoom;
         }
 
         .dark .leaflet-container {
