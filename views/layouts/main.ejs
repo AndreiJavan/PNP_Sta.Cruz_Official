@@ -122,6 +122,10 @@
         }
 
         /* Leaflet Dark Mode Support */
+        .dark .leaflet-tile {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
         .dark .leaflet-container {
             background: #0f172a;
         }
