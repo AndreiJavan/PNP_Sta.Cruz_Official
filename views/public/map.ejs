@@ -1,4 +1,4 @@
-<div class="h-[calc(100vh-80px)] md:h-[calc(100vh-96px)] relative z-0 overflow-hidden">
+<div class="h-[calc(100dvh-80px)] md:h-[calc(100vh-96px)] relative z-0 overflow-hidden">
     <!-- Map Container -->
     <div id="leafletMap" class="h-full w-full transition-all duration-500"></div>
 
@@ -22,19 +22,18 @@
         <span>Show Crime Data</span>
     </button>
 
-    <!-- Left Sidebar: Location Overview -->
+    <!-- Left Sidebar: Location Overview & Filters -->
     <div id="filterSidebar"
-        class="absolute top-4 left-4 md:top-8 md:left-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-left sidebar-visible">
-        <div class="bg-pnp-blue p-6 pr-16 text-white relative bg-cover bg-center bg-no-repeat"
+        class="absolute top-3 left-3 right-3 sm:right-auto md:top-8 md:left-8 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[52dvh] sm:max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-left sidebar-visible">
+        <div class="bg-pnp-blue p-4 sm:p-6 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_station.jpg');">
-            <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Location Overview</h3>
-            <h4 class="text-xl font-black tracking-tighter">Sta. Cruz Map</h4>
-
+            <h3 class="text-[10px] sm:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-1 sm:mb-2">Location Overview</h3>
+            <h4 class="text-lg sm:text-xl font-black tracking-tighter">Sta. Cruz Map & Filters</h4>
 
             <!-- Close button inside sidebar for better UX -->
             <button onclick="toggleSidebar()"
-                class="absolute top-6 right-8 text-pnp-gold/50 hover:text-pnp-gold transition">
-                <i class="fas fa-times text-xl"></i>
+                class="absolute top-4 right-5 sm:top-6 sm:right-8 text-pnp-gold/50 hover:text-pnp-gold transition p-1">
+                <i class="fas fa-times text-lg sm:text-xl"></i>
             </button>
         </div>
 
@@ -189,16 +188,16 @@
 
     <!-- Right Sidebar: Crime Data (Aligned exactly like Location Overview) -->
     <div id="incidentsSidebar"
-        class="absolute top-4 right-4 md:top-8 md:right-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-right sidebar-visible">
-        <div class="bg-pnp-blue p-6 pr-16 text-white relative bg-cover bg-center bg-no-repeat"
+        class="absolute top-3 right-3 left-3 sm:left-auto md:top-8 md:right-8 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[52dvh] sm:max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-right sidebar-hidden md:sidebar-visible">
+        <div class="bg-pnp-blue p-4 sm:p-6 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_patrol.jpg');">
-            <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Crime Data</h3>
-            <h4 class="text-xl font-black tracking-tighter">Incident Breakdown</h4>
+            <h3 class="text-[10px] sm:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-1 sm:mb-2">Crime Data</h3>
+            <h4 class="text-lg sm:text-xl font-black tracking-tighter">Incident Breakdown</h4>
 
             <!-- Close button inside sidebar for better UX -->
             <button onclick="toggleIncidentsSidebar()"
-                class="absolute top-6 right-8 text-pnp-gold/50 hover:text-pnp-gold transition">
-                <i class="fas fa-times text-xl"></i>
+                class="absolute top-4 right-5 sm:top-6 sm:right-8 text-pnp-gold/50 hover:text-pnp-gold transition p-1">
+                <i class="fas fa-times text-lg sm:text-xl"></i>
             </button>
         </div>
 
@@ -231,50 +230,29 @@
 
 
     <!-- Dedicated Mobile Bottom Navigation Dock (Phone Screens Only) -->
-    <div class="absolute bottom-5 left-4 right-4 z-[1000] flex md:hidden items-center justify-between pointer-events-none">
+    <div class="fixed md:hidden bottom-4 left-3 right-3 z-[1100] flex items-center justify-between pointer-events-none pb-[env(safe-area-inset-bottom)]">
         <!-- Recenter Map Floating Button -->
         <button id="mobileRecenterBtn" onclick="recenterStaCruzMap()"
-            class="pointer-events-auto h-12 w-12 bg-white/95 dark:bg-slate-800/95 text-pnp-blue dark:text-pnp-gold rounded-full shadow-2xl flex items-center justify-center border border-gray-200 dark:border-slate-700 active:scale-90 transition-all duration-200"
+            class="pointer-events-auto h-11 w-11 bg-white/95 dark:bg-slate-800/95 text-pnp-blue dark:text-pnp-gold rounded-2xl shadow-2xl flex items-center justify-center border border-gray-200 dark:border-slate-700 active:scale-90 transition-all duration-200"
             title="Recenter Map to Sta. Cruz">
             <i class="fas fa-crosshairs text-base"></i>
         </button>
 
         <!-- Drawer Toggles Pill Dock -->
-        <div class="pointer-events-auto flex items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700">
+        <div class="pointer-events-auto flex items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 p-1 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 backdrop-blur-md">
             <button id="mobileOverviewBtn" onclick="toggleSidebar()"
-                class="px-3.5 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md">
-                <i class="fas fa-layer-group text-pnp-gold text-xs"></i>
-                <span>Overview</span>
+                class="px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold">
+                <i class="fas fa-sliders-h text-pnp-gold text-xs"></i>
+                <span>Filters & Options</span>
             </button>
             <button id="mobileStatsBtn" onclick="toggleIncidentsSidebar()"
-                class="px-3.5 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-gray-100 dark:bg-slate-900 text-gray-700 dark:text-gray-300">
+                class="px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700">
                 <i class="fas fa-chart-bar text-pnp-blue dark:text-pnp-gold text-xs"></i>
-                <span>Crime Data</span>
+                <span>Crime Stats</span>
             </button>
         </div>
     </div>
 
-    <!-- Desktop Map Controls Dock (PC Screens: Centered bottom between sidebars) -->
-    <div id="desktopMapControls"
-        class="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 z-[1000] items-center gap-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md p-1.5 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700">
-        <button onclick="if(map) map.zoomIn();"
-            class="w-9 h-9 rounded-xl bg-gray-50 dark:bg-slate-900 text-gray-700 dark:text-gray-300 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center transition active:scale-95 font-black text-xs"
-            title="Zoom In">
-            <i class="fas fa-plus"></i>
-        </button>
-        <button onclick="if(map) map.zoomOut();"
-            class="w-9 h-9 rounded-xl bg-gray-50 dark:bg-slate-900 text-gray-700 dark:text-gray-300 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-gray-100 dark:hover:bg-slate-800 flex items-center justify-center transition active:scale-95 font-black text-xs"
-            title="Zoom Out">
-            <i class="fas fa-minus"></i>
-        </button>
-        <div class="w-px h-5 bg-gray-200 dark:bg-slate-700 my-auto"></div>
-        <button onclick="recenterStaCruzMap()"
-            class="px-3.5 h-9 rounded-xl bg-pnp-blue dark:bg-slate-900 text-white dark:text-pnp-gold hover:bg-pnp-blue/90 flex items-center gap-2 transition active:scale-95 font-bold text-xs"
-            title="Recenter to Santa Cruz, Laguna">
-            <i class="fas fa-crosshairs text-pnp-gold text-xs"></i>
-            <span>Recenter Sta. Cruz</span>
-        </button>
-    </div>
 </div>
 
 <style>
@@ -462,10 +440,10 @@
 
         if (!isMobile && isWideDesktop) {
             paddingTopLeft = [isLeftOpen ? 340 : 40, 40];
-            paddingBottomRight = [isRightOpen ? 340 : 40, 70];
+            paddingBottomRight = [isRightOpen ? 340 : 40, 40];
         } else if (!isMobile) {
             paddingTopLeft = [isLeftOpen ? 260 : 30, 30];
-            paddingBottomRight = [isRightOpen ? 260 : 30, 70];
+            paddingBottomRight = [isRightOpen ? 260 : 30, 30];
         }
 
         const targetBounds = (boundaryLayerGroup && boundaryLayerGroup.getLayers().length > 0)
@@ -1318,7 +1296,7 @@
             if (totalIncidentsLocal === 0) {
                 fillColor = 'transparent';
                 fillOpacity = 0;
-                weight = 0.5;
+                weight = 1.75;
             } else {
                 const ratio = totalIncidentsLocal / max;
                 if (targetCategory) {
@@ -1343,7 +1321,7 @@
             }
         } else {
             // Clear / No overlay
-            weight = 1;
+            weight = 1.75;
             fillOpacity = 0.1;
             fillColor = '#1A3A5C';
         }
@@ -1351,13 +1329,19 @@
         const selected = document.getElementById('filterBarangay').value;
         if (selected && selected !== brgyName) {
             fillOpacity = fillOpacity > 0 ? 0.05 : 0;
-            weight = 1;
+            weight = 1.25;
             if (fillColor !== 'transparent') {
                 fillColor = 'rgba(15, 23, 42, 0.5)';
             }
         }
 
-        return { color: '#C8A415', weight: weight, fillOpacity: fillOpacity, fillColor: fillColor };
+        return {
+            color: '#C8A415',
+            opacity: 1,
+            weight: weight,
+            fillOpacity: fillOpacity,
+            fillColor: fillColor
+        };
     }
 
     function updateBarangayLabels() {
@@ -1652,7 +1636,6 @@
             const initialPadding = isMobile ? [16, 16] : [40, 40];
 
             map = L.map('leafletMap', {
-                preferCanvas: true, // Hardware-accelerated HTML5 canvas rendering for maximum mobile performance
                 zoomControl: false,
                 dragging: true,
                 touchZoom: true,
@@ -1663,9 +1646,8 @@
                 attributionControl: false,
                 minZoom: isMobile ? 11 : 12,
                 maxZoom: 18,
-                // On mobile, eliminate viscous boundary resistance so finger panning is instantaneous and fluid
-                maxBounds: isMobile ? null : STA_CRUZ_MAX_BOUNDS,
-                maxBoundsViscosity: isMobile ? 0 : 0.5,
+                maxBounds: STA_CRUZ_MAX_BOUNDS,
+                maxBoundsViscosity: isMobile ? 0.2 : 0.5,
                 inertia: true,
                 inertiaDeceleration: 3000,
                 inertiaMaxSpeed: 1800,
@@ -1699,35 +1681,33 @@
                 .then(data => {
                     santaCruzGeoJSON = data;
 
-                    // --- APPLY INVERTED MASK ON DESKTOP ONLY (Disabled on mobile to ensure fluid 60fps touch panning) ---
-                    if (!isMobile) {
-                        const worldRing = [[180, 90], [180, -90], [-180, -90], [-180, 90], [180, 90]];
-                        let maskCoords = [worldRing];
-                        data.features.forEach(f => {
-                            if (f.geometry && f.geometry.type === 'Polygon') {
-                                maskCoords.push(f.geometry.coordinates[0]);
-                            } else if (f.geometry && f.geometry.type === 'MultiPolygon') {
-                                f.geometry.coordinates.forEach(poly => maskCoords.push(poly[0]));
-                            }
-                        });
+                    // --- APPLY INVERTED MASK SO ONLY STA. CRUZ LAGUNA IS VISIBLE ---
+                    const worldRing = [[180, 90], [180, -90], [-180, -90], [-180, 90], [180, 90]];
+                    let maskCoords = [worldRing];
+                    data.features.forEach(f => {
+                        if (f.geometry && f.geometry.type === 'Polygon') {
+                            maskCoords.push(f.geometry.coordinates[0]);
+                        } else if (f.geometry && f.geometry.type === 'MultiPolygon') {
+                            f.geometry.coordinates.forEach(poly => maskCoords.push(poly[0]));
+                        }
+                    });
 
-                        const isDark = document.documentElement.classList.contains('dark');
-                        L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
-                            style: {
-                                fillColor: isDark ? '#0f172a' : '#f8fafc',
-                                fillOpacity: 1,
-                                color: 'transparent',
-                                weight: 0,
-                                className: 'map-outside-mask-solid'
-                            }, interactive: false
-                        }).addTo(map);
+                    const isDark = document.documentElement.classList.contains('dark');
+                    L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
+                        style: {
+                            fillColor: isDark ? '#0f172a' : '#f8fafc',
+                            fillOpacity: 1,
+                            color: 'transparent',
+                            weight: 0,
+                            className: 'map-outside-mask-solid'
+                        }, interactive: false
+                    }).addTo(map);
 
-                        const observer = new MutationObserver(() => {
-                            const dark = document.documentElement.classList.contains('dark');
-                            document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
-                        });
-                        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-                    }
+                    const observer = new MutationObserver(() => {
+                        const dark = document.documentElement.classList.contains('dark');
+                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
+                    });
+                    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
                     // ---------------------------------------------------------
 
                     boundaryLayerGroup = L.geoJSON(data, {
@@ -1849,17 +1829,17 @@
 
         if (overviewBtn) {
             if (isOverviewOpen) {
-                overviewBtn.className = "px-3.5 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md";
+                overviewBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold";
             } else {
-                overviewBtn.className = "px-3.5 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-gray-100 dark:bg-slate-900 text-gray-700 dark:text-gray-300";
+                overviewBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700";
             }
         }
 
         if (statsBtn) {
             if (isStatsOpen) {
-                statsBtn.className = "px-3.5 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md";
+                statsBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold";
             } else {
-                statsBtn.className = "px-3.5 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-gray-100 dark:bg-slate-900 text-gray-700 dark:text-gray-300";
+                statsBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700";
             }
         }
     }
@@ -1978,10 +1958,10 @@
             const incidentsToggle = document.getElementById('incidentsToggle');
 
             if (isMobile) {
-                // On mobile, collapse sidebars by default unless user has interacted
+                // On mobile, keep the Filter/Location Overview layout visible by default so user can filter data immediately
                 if (!filterSidebar?.dataset.userToggled) {
-                    filterSidebar?.classList.add('sidebar-hidden');
-                    filterSidebar?.classList.remove('sidebar-visible');
+                    filterSidebar?.classList.remove('sidebar-hidden');
+                    filterSidebar?.classList.add('sidebar-visible');
                 }
                 if (!incidentsSidebar?.dataset.userToggled) {
                     incidentsSidebar?.classList.add('sidebar-hidden');
