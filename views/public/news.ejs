@@ -25,21 +25,62 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Search and Filter Section -->
-        <div class="mb-12 bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col md:flex-row items-center justify-between gap-4 -mt-24 relative z-20">
-            <div class="relative w-full md:max-w-md">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-slate-400"></i>
+        <div class="mb-12 bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col gap-4 -mt-24 relative z-20">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- Search input -->
+                <div class="relative w-full md:flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                        <i class="fas fa-search text-sm"></i>
+                    </div>
+                    <input type="text" id="news-search-input" oninput="filterNews()" placeholder="Search articles by title or content..."
+                        class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100 transition">
                 </div>
-                <input type="text" id="news-search-input" oninput="filterNews()" placeholder="Search articles by title or content..." class="w-full pl-11 pr-4 py-3.5 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100 transition">
-            </div>
-            
 
+                <!-- Date Filter Presets and Controls -->
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-48">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-pnp-gold">
+                            <i class="fas fa-calendar-alt text-xs"></i>
+                        </div>
+                        <select id="newsDateMode" onchange="onNewsDateModeChange()"
+                            class="w-full pl-9 pr-8 py-3 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold appearance-none cursor-pointer">
+                            <option value="all">All Dates</option>
+                            <option value="thisMonth">This Month</option>
+                            <option value="thisYear">This Year</option>
+                            <option value="custom">Custom Date Range</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fas fa-chevron-down text-[10px]"></i>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="resetNewsFilters()" title="Reset Filters"
+                        class="h-11 px-4 bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shrink-0">
+                        <i class="fas fa-rotate-left text-xs"></i>
+                        <span class="hidden sm:inline">Reset</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Date Range Row (Hidden unless 'custom' is selected) -->
+            <div id="newsCustomDateRow" class="hidden flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-gray-100 dark:border-slate-800/80">
+                <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 shrink-0">From Date:</span>
+                    <input type="date" id="newsFromDate" onchange="filterNews()"
+                        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue">
+                </div>
+                <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                    <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 shrink-0">To Date:</span>
+                    <input type="date" id="newsToDate" onchange="filterNews()"
+                        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue">
+                </div>
+            </div>
         </div>
 
         <!-- News Grid -->
         <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <% newsList.forEach((news) => { %>
-                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" onclick="openNewsModal('<%= news.id %>')">
+                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-gray-150 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" data-date="<%= news.publishedAt %>" onclick="openNewsModal('<%= news.id %>')">
                     
                     <!-- Image / Facebook Wrapper -->
                     <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
@@ -121,6 +162,19 @@
 
                 </div>
             <% }) %>
+        </div>
+
+        <!-- Mobile Load More / Older Posts Pagination Button -->
+        <div id="news-load-more-container" class="mt-12 text-center md:hidden">
+            <button id="news-load-more-btn" onclick="loadMoreNews()"
+                class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
+                <i class="fas fa-history text-sm"></i>
+                <span id="news-load-more-text">Load Older News</span>
+                <i class="fas fa-chevron-down text-xs"></i>
+            </button>
+            <p id="news-load-more-info" class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-3">
+                Showing <span id="news-visible-count">10</span> of <span id="news-total-count">0</span> news posts
+            </p>
         </div>
 
         <!-- No Results -->
@@ -238,35 +292,161 @@
 <script>
     const newsDatabase = <%- JSON.stringify(newsList) %>;
     window.newsDatabase = newsDatabase;
+    let mobileNewsLimit = 10;
 
-    function filterNews() {
-        const query = document.getElementById('news-search-input').value.toLowerCase().trim();
+    function onNewsDateModeChange() {
+        const mode = document.getElementById('newsDateMode')?.value || 'all';
+        const customRow = document.getElementById('newsCustomDateRow');
+        if (customRow) {
+            if (mode === 'custom') {
+                customRow.classList.remove('hidden');
+                customRow.classList.add('flex');
+            } else {
+                customRow.classList.add('hidden');
+                customRow.classList.remove('flex');
+            }
+        }
+        filterNews(false);
+    }
+
+    function resetNewsFilters() {
+        const searchInputEl = document.getElementById('news-search-input');
+        if (searchInputEl) searchInputEl.value = '';
+
+        const dateModeEl = document.getElementById('newsDateMode');
+        if (dateModeEl) dateModeEl.value = 'all';
+
+        const customRow = document.getElementById('newsCustomDateRow');
+        if (customRow) {
+            customRow.classList.add('hidden');
+            customRow.classList.remove('flex');
+        }
+
+        const fromDateEl = document.getElementById('newsFromDate');
+        if (fromDateEl) fromDateEl.value = '';
+        const toDateEl = document.getElementById('newsToDate');
+        if (toDateEl) toDateEl.value = '';
+
+        filterNews(false);
+    }
+
+    function loadMoreNews() {
+        mobileNewsLimit += 10;
+        filterNews(true);
+    }
+
+    function filterNews(isLoadMore = false) {
+        const query = (document.getElementById('news-search-input')?.value || '').toLowerCase().trim();
         const cards = document.querySelectorAll('.news-card');
         const noResults = document.getElementById('no-news-results');
         const countLabel = document.getElementById('news-count-label');
-        let visibleCount = 0;
+
+        const dateMode = document.getElementById('newsDateMode')?.value || 'all';
+        const fromDateVal = document.getElementById('newsFromDate')?.value || '';
+        const toDateVal = document.getElementById('newsToDate')?.value || '';
+        const now = new Date();
+
+        const isMobile = window.innerWidth < 768;
+        if (!isLoadMore) {
+            mobileNewsLimit = 10;
+        }
+
+        const matchingCards = [];
 
         cards.forEach(card => {
-            const title = card.getAttribute('data-title') || '';
-            const content = card.getAttribute('data-content') || '';
-            if (title.includes(query) || content.includes(query)) {
-                card.classList.remove('hidden');
-                visibleCount++;
+            const title = (card.getAttribute('data-title') || '').toLowerCase();
+            const content = (card.getAttribute('data-content') || '').toLowerCase();
+            const rawDate = card.getAttribute('data-date') || '';
+
+            // Search query match
+            const matchesSearch = query === '' || title.includes(query) || content.includes(query);
+
+            // Date match
+            let matchesDate = true;
+            if (dateMode !== 'all' && rawDate) {
+                const d = new Date(rawDate);
+                if (!isNaN(d.getTime())) {
+                    if (dateMode === 'thisMonth') {
+                        matchesDate = (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth());
+                    } else if (dateMode === 'thisYear') {
+                        matchesDate = (d.getFullYear() === now.getFullYear());
+                    } else if (dateMode === 'custom') {
+                        if (fromDateVal) {
+                            const fromD = new Date(fromDateVal + 'T00:00:00');
+                            if (d < fromD) matchesDate = false;
+                        }
+                        if (toDateVal) {
+                            const toD = new Date(toDateVal + 'T23:59:59.999');
+                            if (d > toD) matchesDate = false;
+                        }
+                    }
+                }
+            }
+
+            if (matchesSearch && matchesDate) {
+                matchingCards.push(card);
             } else {
                 card.classList.add('hidden');
             }
         });
 
-        if (countLabel) countLabel.textContent = `Showing ${visibleCount} Article${visibleCount === 1 ? '' : 's'}`;
+        // Apply display & mobile pagination
+        matchingCards.forEach((card, index) => {
+            if (isMobile) {
+                if (index < mobileNewsLimit) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            } else {
+                card.classList.remove('hidden');
+            }
+        });
+
+        if (countLabel) {
+            countLabel.textContent = `Showing ${matchingCards.length} Article${matchingCards.length === 1 ? '' : 's'}`;
+        }
 
         if (noResults) {
-            if (visibleCount === 0) {
+            if (matchingCards.length === 0) {
                 noResults.classList.remove('hidden');
             } else {
                 noResults.classList.add('hidden');
             }
         }
+
+        // Update mobile pagination container
+        const loadMoreContainer = document.getElementById('news-load-more-container');
+        const loadMoreBtn = document.getElementById('news-load-more-btn');
+        const visibleCountSpan = document.getElementById('news-visible-count');
+        const totalCountSpan = document.getElementById('news-total-count');
+        const loadMoreInfo = document.getElementById('news-load-more-info');
+
+        if (loadMoreContainer) {
+            if (isMobile && matchingCards.length > 0) {
+                loadMoreContainer.style.display = 'block';
+                if (totalCountSpan) totalCountSpan.textContent = matchingCards.length;
+                if (visibleCountSpan) visibleCountSpan.textContent = Math.min(mobileNewsLimit, matchingCards.length);
+
+                if (matchingCards.length > mobileNewsLimit) {
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'inline-flex';
+                    if (loadMoreInfo) loadMoreInfo.textContent = `Showing ${Math.min(mobileNewsLimit, matchingCards.length)} of ${matchingCards.length} news posts`;
+                } else {
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+                    if (loadMoreInfo) loadMoreInfo.textContent = `All ${matchingCards.length} news posts loaded`;
+                }
+            } else {
+                loadMoreContainer.style.display = 'none';
+            }
+        }
     }
+
+    window.addEventListener('resize', () => {
+        filterNews(true);
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+        filterNews(false);
+    });
 
     function openNewsModal(newsId) {
         const db = window.newsDatabase || newsDatabase || [];

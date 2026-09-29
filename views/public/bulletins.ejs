@@ -35,10 +35,10 @@
 </style>
 
 <div class="container mx-auto px-4 py-20 <%= (category === 'Wanted Person' || category === 'Missing Person') ? 'pt-24' : '' %>">
-    <!-- Category Pills & TTS Language Selector -->
+    <!-- Category Pills & Date Filter Toolbar -->
     <% if (category !== 'Wanted Person' && category !== 'Missing Person') { %>
-    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-4xl mx-auto flex flex-col items-center gap-6">
-        <div class="flex flex-wrap gap-3 justify-center">
+    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-5xl mx-auto flex flex-col gap-6">
+        <div class="flex flex-wrap gap-2.5 justify-center">
             <% 
                 const activeCat = category && category !== 'All' ? category : 'Crime Advisory';
             %>
@@ -56,7 +56,57 @@
             </button>
         </div>
 
+        <!-- Search & Date Filter Bar -->
+        <div class="w-full pt-4 border-t border-gray-150 dark:border-slate-700/80 flex flex-col md:flex-row items-center gap-3">
+            <!-- Search input -->
+            <div class="relative flex-1 w-full">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
+                    <i class="fas fa-search text-xs"></i>
+                </div>
+                <input type="text" id="publicSearchInput" oninput="filterPublicBulletins()" placeholder="Search advisories by title or content..."
+                    class="w-full pl-9 pr-4 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100 outline-none transition">
+            </div>
 
+            <!-- Date Filter Presets -->
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative flex-1 md:w-44">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-pnp-gold">
+                        <i class="fas fa-calendar-alt text-xs"></i>
+                    </div>
+                    <select id="bulletinDateMode" onchange="onBulletinDateModeChange()"
+                        class="w-full pl-8 pr-7 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold appearance-none cursor-pointer">
+                        <option value="all">All Dates</option>
+                        <option value="thisMonth">This Month</option>
+                        <option value="thisYear">This Year</option>
+                        <option value="custom">Custom Date Range</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-gray-400">
+                        <i class="fas fa-chevron-down text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Reset button -->
+                <button type="button" onclick="resetBulletinFilters()" title="Reset Filters"
+                    class="h-10 px-3 bg-gray-100 dark:bg-slate-900 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-gray-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shrink-0">
+                    <i class="fas fa-rotate-left text-xs"></i>
+                    <span class="hidden sm:inline">Reset</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Custom Date Range Inputs (Hidden unless 'custom' is selected) -->
+        <div id="bulletinCustomDateRow" class="hidden w-full flex-col sm:flex-row items-center gap-3 pt-1 border-t border-gray-100 dark:border-slate-750">
+            <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 shrink-0">From:</span>
+                <input type="date" id="bulletinFromDate" onchange="filterPublicBulletins()"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue">
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 shrink-0">To:</span>
+                <input type="date" id="bulletinToDate" onchange="filterPublicBulletins()"
+                    class="w-full px-3 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue">
+            </div>
+        </div>
     </div>
     <% } %>
 
@@ -65,7 +115,7 @@
         <% bulletins.forEach(bulletin=> { %>
             <div
                 class="group bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition duration-500 flex flex-col cursor-pointer"
-                data-category="<%= bulletin.category %>" onclick="openBulletinModal('<%= bulletin.id %>')">
+                data-category="<%= bulletin.category %>" data-date="<%= bulletin.created_at %>" onclick="openBulletinModal('<%= bulletin.id %>')">
                 <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
                     <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0">
                         <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-contain group-hover:scale-105 transition duration-700 pointer-events-none"></video>
@@ -169,6 +219,19 @@
                             </div>
             </div>
             <% }) %>
+    </div>
+
+    <!-- Mobile Load More / Older Posts Pagination Button -->
+    <div id="bulletin-load-more-container" class="mt-12 text-center md:hidden">
+        <button id="bulletin-load-more-btn" onclick="loadMoreBulletins()"
+            class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
+            <i class="fas fa-history text-sm"></i>
+            <span id="bulletin-load-more-text">Load Older Advisories</span>
+            <i class="fas fa-chevron-down text-xs"></i>
+        </button>
+        <p id="bulletin-load-more-info" class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-3">
+            Showing <span id="bulletin-visible-count">10</span> of <span id="bulletin-total-count">0</span> advisories
+        </p>
     </div>
 
     <div id="noResultsDiv" class="text-center py-20" style="<%= bulletins.length === 0 ? 'display: block;' : 'display: none;' %>">
@@ -287,6 +350,7 @@
 <script>
     const bulletinsDatabase = <%- JSON.stringify(bulletins) %>;
     let currentCategory = '<%= category && category !== "All" ? category : "Crime Advisory" %>';
+    let mobileBulletinLimit = 10;
 
     function setCategoryFilter(category, btnElement) {
         currentCategory = category;
@@ -300,31 +364,85 @@
         // Mark the clicked one as active
         btnElement.className = 'category-pill-btn px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-md transition duration-300';
         
-        filterPublicBulletins();
+        filterPublicBulletins(false);
     }
 
-    function filterPublicBulletins() {
+    function onBulletinDateModeChange() {
+        const mode = document.getElementById('bulletinDateMode')?.value || 'all';
+        const customRow = document.getElementById('bulletinCustomDateRow');
+        if (customRow) {
+            if (mode === 'custom') {
+                customRow.classList.remove('hidden');
+                customRow.classList.add('flex');
+            } else {
+                customRow.classList.add('hidden');
+                customRow.classList.remove('flex');
+            }
+        }
+        filterPublicBulletins(false);
+    }
+
+    function resetBulletinFilters() {
         const searchInputEl = document.getElementById('publicSearchInput');
-        const searchInput = searchInputEl ? searchInputEl.value.toLowerCase() : '';
+        if (searchInputEl) searchInputEl.value = '';
+
+        const dateModeEl = document.getElementById('bulletinDateMode');
+        if (dateModeEl) dateModeEl.value = 'all';
+
+        const customRow = document.getElementById('bulletinCustomDateRow');
+        if (customRow) {
+            customRow.classList.add('hidden');
+            customRow.classList.remove('flex');
+        }
+
+        const fromDateEl = document.getElementById('bulletinFromDate');
+        if (fromDateEl) fromDateEl.value = '';
+        const toDateEl = document.getElementById('bulletinToDate');
+        if (toDateEl) toDateEl.value = '';
+
+        filterPublicBulletins(false);
+    }
+
+    function loadMoreBulletins() {
+        mobileBulletinLimit += 10;
+        filterPublicBulletins(true);
+    }
+
+    function filterPublicBulletins(isLoadMore = false) {
+        const searchInputEl = document.getElementById('publicSearchInput');
+        const searchInput = searchInputEl ? searchInputEl.value.toLowerCase().trim() : '';
         const cards = document.querySelectorAll('.grid > .group');
-        
-        let anyVisible = false;
         const pageCategory = '<%= category %>';
-        
+
+        const dateMode = document.getElementById('bulletinDateMode')?.value || 'all';
+        const fromDateVal = document.getElementById('bulletinFromDate')?.value || '';
+        const toDateVal = document.getElementById('bulletinToDate')?.value || '';
+        const now = new Date();
+
+        const isMobile = window.innerWidth < 768;
+        if (!isLoadMore) {
+            mobileBulletinLimit = 10;
+        }
+
+        const matchingCards = [];
+
         cards.forEach(card => {
             const h3 = card.querySelector('h3');
             const p = card.querySelector('p');
             const cat = card.getAttribute('data-category') || '';
+            const rawDate = card.getAttribute('data-date') || '';
             if (!h3 || !p) return;
             
             const title = h3.textContent.toLowerCase();
             const body = p.textContent.toLowerCase();
             
+            // Search text match
             const matchesSearch = searchInput === '' || title.includes(searchInput) || body.includes(searchInput);
             
+            // Category match
             let matchesCategory = false;
             if (pageCategory === 'Wanted Person' || pageCategory === 'Missing Person') {
-                matchesCategory = true; // No filter buttons shown, so allow all matching the page's category
+                matchesCategory = true;
             } else {
                 const normCat = cat.toLowerCase().trim();
                 const normCur = currentCategory.toLowerCase().trim();
@@ -341,20 +459,83 @@
                     matchesCategory = true;
                 }
             }
+
+            // Date match
+            let matchesDate = true;
+            if (dateMode !== 'all' && rawDate) {
+                const d = new Date(rawDate);
+                if (!isNaN(d.getTime())) {
+                    if (dateMode === 'thisMonth') {
+                        matchesDate = (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth());
+                    } else if (dateMode === 'thisYear') {
+                        matchesDate = (d.getFullYear() === now.getFullYear());
+                    } else if (dateMode === 'custom') {
+                        if (fromDateVal) {
+                            const fromD = new Date(fromDateVal + 'T00:00:00');
+                            if (d < fromD) matchesDate = false;
+                        }
+                        if (toDateVal) {
+                            const toD = new Date(toDateVal + 'T23:59:59.999');
+                            if (d > toD) matchesDate = false;
+                        }
+                    }
+                }
+            }
             
-            if (matchesSearch && matchesCategory) {
-                card.style.display = 'flex';
-                anyVisible = true;
+            if (matchesSearch && matchesCategory && matchesDate) {
+                matchingCards.push(card);
             } else {
                 card.style.display = 'none';
+            }
+        });
+
+        // Apply display styling & mobile pagination
+        matchingCards.forEach((card, index) => {
+            if (isMobile) {
+                if (index < mobileBulletinLimit) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            } else {
+                card.style.display = 'flex';
             }
         });
         
         const noResultsDiv = document.getElementById('noResultsDiv');
         if (noResultsDiv) {
-            noResultsDiv.style.display = anyVisible ? 'none' : 'block';
+            noResultsDiv.style.display = matchingCards.length === 0 ? 'block' : 'none';
+        }
+
+        // Update mobile pagination container
+        const loadMoreContainer = document.getElementById('bulletin-load-more-container');
+        const loadMoreBtn = document.getElementById('bulletin-load-more-btn');
+        const visibleCountSpan = document.getElementById('bulletin-visible-count');
+        const totalCountSpan = document.getElementById('bulletin-total-count');
+        const loadMoreInfo = document.getElementById('bulletin-load-more-info');
+
+        if (loadMoreContainer) {
+            if (isMobile && matchingCards.length > 0) {
+                loadMoreContainer.style.display = 'block';
+                if (totalCountSpan) totalCountSpan.textContent = matchingCards.length;
+                if (visibleCountSpan) visibleCountSpan.textContent = Math.min(mobileBulletinLimit, matchingCards.length);
+
+                if (matchingCards.length > mobileBulletinLimit) {
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'inline-flex';
+                    if (loadMoreInfo) loadMoreInfo.textContent = `Showing ${Math.min(mobileBulletinLimit, matchingCards.length)} of ${matchingCards.length} advisories`;
+                } else {
+                    if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+                    if (loadMoreInfo) loadMoreInfo.textContent = `All ${matchingCards.length} advisories loaded`;
+                }
+            } else {
+                loadMoreContainer.style.display = 'none';
+            }
         }
     }
+
+    window.addEventListener('resize', () => {
+        filterPublicBulletins(true);
+    });
 
     function openBulletinModal(bulletinId) {
         const bulletin = bulletinsDatabase.find(b => String(b.id) === String(bulletinId));
