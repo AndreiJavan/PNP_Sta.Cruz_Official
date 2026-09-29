@@ -438,30 +438,37 @@
         let paddingTopLeft = [16, 16];
         let paddingBottomRight = [16, 16];
 
-        if (!isMobile && isWideDesktop) {
-            paddingTopLeft = [isLeftOpen ? 340 : 40, 40];
-            paddingBottomRight = [isRightOpen ? 340 : 40, 40];
-        } else if (!isMobile) {
-            paddingTopLeft = [isLeftOpen ? 260 : 30, 30];
-            paddingBottomRight = [isRightOpen ? 260 : 30, 30];
+        if (isMobile) {
+            // Keep mobile exactly as-is ("keep the same size in the mobile")
+            paddingTopLeft = [16, 16];
+            paddingBottomRight = [16, 16];
+        } else if (isWideDesktop) {
+            // On desktop, allow Santa Cruz to expand significantly closer to sidebars so it appears much bigger and fills the gaps
+            paddingTopLeft = [isLeftOpen ? 160 : 30, 10];
+            paddingBottomRight = [isRightOpen ? 160 : 30, 10];
+        } else {
+            paddingTopLeft = [isLeftOpen ? 120 : 20, 10];
+            paddingBottomRight = [isRightOpen ? 120 : 20, 10];
         }
 
         const targetBounds = (boundaryLayerGroup && boundaryLayerGroup.getLayers().length > 0)
             ? boundaryLayerGroup.getBounds()
             : STA_CRUZ_BOUNDS;
 
+        const maxZoomAllowed = isMobile ? 13 : 15;
+
         if (animate) {
             map.flyToBounds(targetBounds, {
                 paddingTopLeft: paddingTopLeft,
                 paddingBottomRight: paddingBottomRight,
-                maxZoom: isMobile ? 13 : 14,
+                maxZoom: maxZoomAllowed,
                 duration: 0.8
             });
         } else {
             map.fitBounds(targetBounds, {
                 paddingTopLeft: paddingTopLeft,
                 paddingBottomRight: paddingBottomRight,
-                maxZoom: isMobile ? 13 : 14
+                maxZoom: maxZoomAllowed
             });
         }
     }
@@ -1633,7 +1640,7 @@
     function initMap() {
         try {
             const isMobile = window.innerWidth < 768;
-            const initialPadding = isMobile ? [16, 16] : [40, 40];
+            const initialPadding = [16, 16];
 
             map = L.map('leafletMap', {
                 zoomControl: false,
@@ -1644,6 +1651,8 @@
                 boxZoom: true,
                 keyboard: true,
                 attributionControl: false,
+                zoomSnap: isMobile ? 1 : 0.1, // Smooth fractional zoom on PC so Santa Cruz scales up to fill the screen
+                zoomDelta: isMobile ? 1 : 0.5,
                 minZoom: isMobile ? 11 : 12,
                 maxZoom: 18,
                 maxBounds: STA_CRUZ_MAX_BOUNDS,
@@ -1653,7 +1662,7 @@
                 inertiaMaxSpeed: 1800,
                 fadeAnimation: true,
                 zoomAnimation: true
-            }).fitBounds(STA_CRUZ_BOUNDS, { padding: initialPadding, maxZoom: isMobile ? 13 : 14 });
+            }).fitBounds(STA_CRUZ_BOUNDS, { padding: initialPadding, maxZoom: isMobile ? 13 : 15 });
 
             window.map = map;
 
