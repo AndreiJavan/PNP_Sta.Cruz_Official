@@ -59,6 +59,32 @@ function getFirstParagraph(text: string): string {
   return lines[0] || text;
 }
 
+export const getAllMapPointsCached = async (): Promise<any[]> => {
+  const mapPointsCacheKey = 'map_points:all_unfiltered';
+  let incidents = memoryCache.get<any[]>(mapPointsCacheKey);
+  if (!incidents) {
+    const mapPointsSnap = await db.collection('map_points').get();
+    incidents = mapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
+      .filter((p: any) => {
+        const dateStr = String(p.incident_date || '');
+        const isPlaceholder = dateStr === 'N/A' ||
+          dateStr === '' ||
+          dateStr === '2026-04-27T09:22:14.910Z' ||
+          p.description === 'Strategic placeholder data';
+        return !isPlaceholder;
+      });
+
+    // Sort by incident_date descending
+    incidents.sort((a: any, b: any) => {
+      const dateA = new Date(a.incident_date).getTime();
+      const dateB = new Date(b.incident_date).getTime();
+      return dateB - dateA;
+    });
+    memoryCache.set(mapPointsCacheKey, incidents, 5 * 60 * 1000);
+  }
+  return incidents;
+};
+
 export const getHome = async (req: Request, res: Response) => {
   try {
     const allHotlines = await getHotlinesCached();
@@ -92,28 +118,7 @@ export const getHome = async (req: Request, res: Response) => {
       });
 
     // Fetch police incidents (map points) to show on home feed
-    const mapPointsCacheKey = 'map_points:all_unfiltered';
-    let incidents = memoryCache.get<any[]>(mapPointsCacheKey);
-    if (!incidents) {
-      const mapPointsSnap = await db.collection('map_points').get();
-      incidents = mapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
-        .filter((p: any) => {
-          const dateStr = String(p.incident_date || '');
-          const isPlaceholder = dateStr === 'N/A' ||
-            dateStr === '' ||
-            dateStr === '2026-04-27T09:22:14.910Z' ||
-            p.description === 'Strategic placeholder data';
-          return !isPlaceholder;
-        });
-
-      // Sort by incident_date descending
-      incidents.sort((a: any, b: any) => {
-        const dateA = new Date(a.incident_date).getTime();
-        const dateB = new Date(b.incident_date).getTime();
-        return dateB - dateA;
-      });
-      memoryCache.set(mapPointsCacheKey, incidents, 3 * 60 * 1000);
-    }
+    const incidents = await getAllMapPointsCached();
 
     // Fetch active personnel/officers
     let personnel: any[] = [];
@@ -159,8 +164,26 @@ export const getNews = async (req: Request, res: Response) => {
   }
 };
 
-export const getMap = (req: Request, res: Response) => {
-  res.render('public/map', { title: 'Crime Map', hideFooter: true, layout: 'layouts/main' });
+export const getMap = async (req: Request, res: Response) => {
+  try {
+    const points = await getAllMapPointsCached();
+    // Only pass necessary fields for map rendering to minimize payload transfer
+    const lightPoints = points.map((p: any) => ({
+      id: p.id,
+      incident_type: p.incident_type,
+      category: p.category,
+      barangay: p.barangay,
+      incident_date: p.incident_date,
+      date: p.date,
+      created_at: p.created_at,
+      latitude: p.latitude,
+      longitude: p.longitude
+    }));
+    res.render('public/map', { title: 'Crime Map', hideFooter: true, initialMapPoints: lightPoints, layout: 'layouts/main' });
+  } catch (err) {
+    console.error('Error in getMap:', err);
+    res.render('public/map', { title: 'Crime Map', hideFooter: true, initialMapPoints: [], layout: 'layouts/main' });
+  }
 };
 
 export const getMapPoints = async (req: Request, res: Response) => {

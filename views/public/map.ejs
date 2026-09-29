@@ -10,19 +10,28 @@
         <p class="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
     </div>
 
-    <!-- Toggle Buttons (Always Visible on Desktop when sidebars are closed) -->
+    <!-- Toggle Buttons (Visible on mobile or when desktop sidebars are closed) -->
     <button id="sidebarToggle" onclick="toggleSidebar()"
-        class="absolute top-8 left-8 z-[1100] w-12 h-12 bg-pnp-blue text-pnp-gold rounded-2xl shadow-2xl hidden md:flex items-center justify-center text-xl hover:bg-pnp-blue/90 transition-all duration-300 group opacity-0 pointer-events-none">
-        <i class="fas fa-info group-hover:scale-110 transition"></i>
+        class="absolute top-4 left-4 md:top-8 md:left-8 z-[1100] h-10 md:h-12 px-3 md:px-0 md:w-12 bg-pnp-blue dark:bg-slate-800 text-pnp-gold rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-xs md:text-xl hover:bg-pnp-blue/90 transition-all duration-300 group opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none border border-pnp-gold/30">
+        <i class="fas fa-layer-group md:text-lg mr-1.5 md:mr-0 group-hover:scale-110 transition"></i>
+        <span class="font-black uppercase tracking-wider text-[10px] md:hidden">Filter</span>
     </button>
     <button id="incidentsToggle" onclick="toggleIncidentsSidebar()"
-        class="absolute top-8 right-8 z-[1100] w-12 h-12 bg-pnp-blue text-pnp-gold rounded-2xl shadow-2xl hidden md:flex items-center justify-center text-xl hover:bg-pnp-blue/90 transition-all duration-300 group opacity-0 pointer-events-none">
-        <i class="fas fa-chart-bar group-hover:scale-110 transition"></i>
+        class="absolute top-4 right-4 md:top-8 md:right-8 z-[1100] h-10 md:h-12 px-3 md:px-0 md:w-12 bg-pnp-blue dark:bg-slate-800 text-pnp-gold rounded-xl md:rounded-2xl shadow-2xl flex items-center justify-center text-xs md:text-xl hover:bg-pnp-blue/90 transition-all duration-300 group opacity-100 pointer-events-auto md:opacity-0 md:pointer-events-none border border-pnp-gold/30">
+        <span class="font-black uppercase tracking-wider text-[10px] md:hidden mr-1.5 md:mr-0">Stats</span>
+        <i class="fas fa-chart-bar md:text-lg group-hover:scale-110 transition"></i>
+    </button>
+
+    <!-- Quick Recenter Map Button (Float Bottom Left) -->
+    <button id="recenterMapBtn" onclick="recenterStaCruzMap()"
+        class="absolute bottom-6 left-6 z-[1100] h-11 w-11 md:h-12 md:w-12 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold rounded-full shadow-2xl flex items-center justify-center text-sm md:text-base hover:scale-110 active:scale-95 transition-all duration-300 border border-gray-200 dark:border-slate-700"
+        title="Recenter Map to Sta. Cruz">
+        <i class="fas fa-crosshairs"></i>
     </button>
 
     <!-- Left Sidebar: Location Overview -->
     <div id="filterSidebar"
-        class="absolute top-4 left-4 md:top-8 md:left-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-left sidebar-visible">
+        class="absolute top-4 left-4 md:top-8 md:left-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-left sidebar-hidden md:sidebar-visible">
         <div class="bg-pnp-blue p-6 pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_station.jpg');">
             <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Location Overview</h3>
@@ -187,7 +196,7 @@
 
     <!-- Right Sidebar: Crime Data (Aligned exactly like Location Overview) -->
     <div id="incidentsSidebar"
-        class="absolute top-4 right-4 md:top-8 md:right-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-right sidebar-visible">
+        class="absolute top-4 right-4 md:top-8 md:right-8 z-[1000] w-[calc(100vw-2rem)] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-[2rem] md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-right sidebar-hidden md:sidebar-visible">
         <div class="bg-pnp-blue p-6 pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_patrol.jpg');">
             <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-2">Crime Data</h3>
@@ -376,7 +385,7 @@
         if (typeof locateBarangay === 'function' && select.value !== "") {
             locateBarangay();
         } else if (select.value === "" && map) {
-            map.setView([14.2800, 121.4150], 13);
+            recenterStaCruzMap();
         }
     }
 
@@ -392,6 +401,11 @@
         }
     });
 
+    // Exact Sta. Cruz Bounding Box and Center coordinates (Derived from authoritative boundary data)
+    const STA_CRUZ_BOUNDS = [[14.2161, 121.3671], [14.3037, 121.4336]];
+    const STA_CRUZ_MAX_BOUNDS = [[14.1800, 121.3200], [14.3400, 121.4800]];
+    const STA_CRUZ_CENTER = [14.2599, 121.4003];
+
     let map;
     let santaCruzGeoJSON;
     let incidentMarkers = L.layerGroup();
@@ -399,6 +413,7 @@
     let policeStationsLayer = L.layerGroup();
     let boundaryLayerGroup;
     let currentPoints = [];
+    let currentTileLayer = null;
     const barangayGeoJsonUrl = '/data/santa_cruz_boundaries.json';
 
     // Custom Crime Date Filter State & Functions
@@ -407,7 +422,27 @@
     let crimeDateSelectedYear = new Date().getFullYear();
     let crimeDateCustomFrom = '';
     let crimeDateCustomTo = '';
-    let allMapPointsCached = [];
+    // Use preloaded server-side data directly to avoid client-side network round-trip
+    let allMapPointsCached = <%- JSON.stringify(locals.initialMapPoints || []) %>;
+
+    function recenterStaCruzMap() {
+        if (!map) return;
+        const isMobile = window.innerWidth < 768;
+        const padding = isMobile ? [16, 16] : [40, 40];
+        if (boundaryLayerGroup && boundaryLayerGroup.getLayers().length > 0) {
+            map.flyToBounds(boundaryLayerGroup.getBounds(), {
+                padding: padding,
+                maxZoom: isMobile ? 13 : 14,
+                duration: 1.0
+            });
+        } else {
+            map.flyToBounds(STA_CRUZ_BOUNDS, {
+                padding: padding,
+                maxZoom: isMobile ? 13 : 14,
+                duration: 1.0
+            });
+        }
+    }
 
     function populateYearDropdowns(points) {
         const years = new Set();
@@ -473,6 +508,11 @@
             toDateInput.setAttribute('min', `${minYear}-01-01`);
             toDateInput.setAttribute('max', todayStr);
         }
+    }
+
+    // Auto populate dropdowns from preloaded points if available
+    if (Array.isArray(allMapPointsCached) && allMapPointsCached.length > 0) {
+        populateYearDropdowns(allMapPointsCached);
     }
 
     function toggleCrimeDatePopover(event) {
@@ -845,47 +885,36 @@
         selectedPinsLayer.clearLayers();
 
         if (!selectedName) {
-            // Reset to default view if "All Barangays" is selected
-            const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-            map.flyToBounds(bounds, {
-                padding: [50, 50],
-                duration: 1.5
-            });
-            // Disable interaction when in summary view
-            map.dragging.disable();
-            map.touchZoom.disable();
-            map.doubleClickZoom.disable();
-            map.scrollWheelZoom.disable();
-            map.boxZoom.disable();
-            map.keyboard.disable();
+            recenterStaCruzMap();
             return;
         }
 
         const pin = manualPins.find(p => p.name.toLowerCase() === selectedName.toLowerCase());
         if (pin && map) {
-            // Enable interaction when a barangay is selected
-            map.dragging.enable();
-            map.touchZoom.enable();
-            map.doubleClickZoom.enable();
-            map.scrollWheelZoom.enable();
-            map.boxZoom.enable();
-            map.keyboard.enable();
+            // Always hide sidebars on mobile when locating a barangay so user sees the pin
+            const isMobile = window.innerWidth < 768;
+            if (isMobile) {
+                const sidebar = document.getElementById('filterSidebar');
+                if (sidebar) {
+                    sidebar.classList.add('sidebar-hidden');
+                    sidebar.classList.remove('sidebar-visible');
+                    const toggleBtn = document.getElementById('sidebarToggle');
+                    if (toggleBtn) {
+                        toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+                        toggleBtn.classList.add('opacity-100', 'pointer-events-auto');
+                    }
+                }
 
-            // Always hide both Location Overview (#filterSidebar) and Crime Data (#incidentsSidebar) when selecting a barangay
-            const sidebar = document.getElementById('filterSidebar');
-            if (sidebar && sidebar.classList.contains('sidebar-visible')) {
-                sidebar.classList.add('sidebar-hidden');
-                sidebar.classList.remove('sidebar-visible');
-                const toggleBtn = document.getElementById('sidebarToggle');
-                if (toggleBtn) toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
-            }
-
-            const incidentsSidebar = document.getElementById('incidentsSidebar');
-            if (incidentsSidebar && incidentsSidebar.classList.contains('sidebar-visible')) {
-                incidentsSidebar.classList.add('sidebar-hidden');
-                incidentsSidebar.classList.remove('sidebar-visible');
-                const iToggle = document.getElementById('incidentsToggle');
-                if (iToggle) iToggle.classList.remove('opacity-0', 'pointer-events-none');
+                const incidentsSidebar = document.getElementById('incidentsSidebar');
+                if (incidentsSidebar) {
+                    incidentsSidebar.classList.add('sidebar-hidden');
+                    incidentsSidebar.classList.remove('sidebar-visible');
+                    const iToggle = document.getElementById('incidentsToggle');
+                    if (iToggle) {
+                        iToggle.classList.remove('opacity-0', 'pointer-events-none');
+                        iToggle.classList.add('opacity-100', 'pointer-events-auto');
+                    }
+                }
             }
 
             const popover = document.getElementById('crimeDatePopover');
@@ -893,7 +922,7 @@
 
             map.flyTo([pin.lat, pin.lng], 16, {
                 animate: true,
-                duration: 1.5
+                duration: 1.2
             });
 
             // Create and show the beautiful gold Tactical Pin for the selected barangay!
@@ -991,26 +1020,35 @@
                 </div>
             `);
 
-            // Open popup and re-show sidebars after flyTo animation completes
+            // Open popup and re-show sidebars on desktop after flyTo animation completes
             setTimeout(() => {
                 tacticalPin.openPopup();
 
-                const sidebar = document.getElementById('filterSidebar');
-                if (sidebar && sidebar.classList.contains('sidebar-hidden')) {
-                    sidebar.classList.remove('sidebar-hidden');
-                    sidebar.classList.add('sidebar-visible');
-                    const toggleBtn = document.getElementById('sidebarToggle');
-                    if (toggleBtn) toggleBtn.classList.add('opacity-0', 'pointer-events-none');
-                }
+                const isMobile = window.innerWidth < 768;
+                if (!isMobile) {
+                    const sidebar = document.getElementById('filterSidebar');
+                    if (sidebar && sidebar.classList.contains('sidebar-hidden')) {
+                        sidebar.classList.remove('sidebar-hidden');
+                        sidebar.classList.add('sidebar-visible');
+                        const toggleBtn = document.getElementById('sidebarToggle');
+                        if (toggleBtn) {
+                            toggleBtn.classList.add('opacity-0', 'pointer-events-none');
+                            toggleBtn.classList.remove('opacity-100', 'pointer-events-auto');
+                        }
+                    }
 
-                const incidentsSidebar = document.getElementById('incidentsSidebar');
-                if (incidentsSidebar && incidentsSidebar.classList.contains('sidebar-hidden')) {
-                    incidentsSidebar.classList.remove('sidebar-hidden');
-                    incidentsSidebar.classList.add('sidebar-visible');
-                    const iToggle = document.getElementById('incidentsToggle');
-                    if (iToggle) iToggle.classList.add('opacity-0', 'pointer-events-none');
+                    const incidentsSidebar = document.getElementById('incidentsSidebar');
+                    if (incidentsSidebar && incidentsSidebar.classList.contains('sidebar-hidden')) {
+                        incidentsSidebar.classList.remove('sidebar-hidden');
+                        incidentsSidebar.classList.add('sidebar-visible');
+                        const iToggle = document.getElementById('incidentsToggle');
+                        if (iToggle) {
+                            iToggle.classList.add('opacity-0', 'pointer-events-none');
+                            iToggle.classList.remove('opacity-100', 'pointer-events-auto');
+                        }
+                    }
                 }
-            }, 1500);
+            }, 1200);
         }
     }
 
@@ -1021,9 +1059,8 @@
         if (barangay && shouldLocate) {
             locateBarangay();
         } else if (!barangay && shouldLocate) {
-            // Optional: reset view when "All Barangays" is selected
-            const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-            map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            // Reset view to Santa Cruz center when "All Barangays" is selected
+            recenterStaCruzMap();
         }
 
         const topIncidentsSection = document.getElementById('topIncidentsSection');
@@ -1044,8 +1081,8 @@
         }
 
         try {
-            // Fetch ALL points once (All Time) and cache them
-            if (allMapPointsCached.length === 0) {
+            // Use preloaded cached points if available, otherwise fetch from API
+            if (!Array.isArray(allMapPointsCached) || allMapPointsCached.length === 0) {
                 const url = `/api/map-points`;
                 const response = await fetch(url);
                 const points = await response.json();
@@ -1301,50 +1338,61 @@
         });
     }
 
+    let tooltipVisibilityRaf = null;
     function manageTooltipVisibility() {
         if (!map) return;
-        // Sorting tooltips to ensure consistent behavior
-        const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
-        const boxes = [];
+        if (tooltipVisibilityRaf) cancelAnimationFrame(tooltipVisibilityRaf);
+        tooltipVisibilityRaf = requestAnimationFrame(() => {
+            const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
+            if (tooltips.length === 0) return;
+            const boxes = [];
 
-        // Prioritize Jasaan so its label is evaluated first and never suppressed
-        tooltips.sort((a, b) => {
-            const aIsJasaan = (a.textContent || '').toUpperCase().includes('JASAAN');
-            const bIsJasaan = (b.textContent || '').toUpperCase().includes('JASAAN');
-            if (aIsJasaan) return -1;
-            if (bIsJasaan) return 1;
-            return 0;
-        });
+            // Prioritize Jasaan so its label is evaluated first and never suppressed
+            tooltips.sort((a, b) => {
+                const aIsJasaan = (a.textContent || '').toUpperCase().includes('JASAAN');
+                const bIsJasaan = (b.textContent || '').toUpperCase().includes('JASAAN');
+                if (aIsJasaan) return -1;
+                if (bIsJasaan) return 1;
+                return 0;
+            });
 
-        tooltips.forEach(t => {
-            const rect = t.getBoundingClientRect();
-            // Skip unrendered elements
-            if (rect.width === 0 && rect.height === 0) return;
+            // 1. Batch read bounding client rects (prevents layout thrashing)
+            const items = tooltips.map(t => ({
+                el: t,
+                rect: t.getBoundingClientRect(),
+                isJasaan: (t.textContent || '').toUpperCase().includes('JASAAN')
+            }));
 
-            const isJasaan = (t.textContent || '').toUpperCase().includes('JASAAN');
+            // 2. Batch write styles
+            items.forEach(({ el, rect, isJasaan }) => {
+                if (rect.width === 0 && rect.height === 0) return;
+                let isColliding = false;
+                const pad = 2;
 
-            let isColliding = false;
-            const pad = 2; // Extra padding
-
-            for (let i = 0; i < boxes.length; i++) {
-                const b = boxes[i];
-                if (!(rect.right + pad < b.left ||
-                    rect.left - pad > b.right ||
-                    rect.bottom + pad < b.top ||
-                    rect.top - pad > b.bottom)) {
-                    isColliding = true;
-                    break;
+                for (let i = 0; i < boxes.length; i++) {
+                    const b = boxes[i];
+                    if (!(rect.right + pad < b.left ||
+                        rect.left - pad > b.right ||
+                        rect.bottom + pad < b.top ||
+                        rect.top - pad > b.bottom)) {
+                        isColliding = true;
+                        break;
+                    }
                 }
-            }
 
-            if (isColliding && !isJasaan) {
-                t.style.opacity = '0';
-                t.style.pointerEvents = 'none';
-            } else {
-                t.style.opacity = '1';
-                t.style.pointerEvents = 'auto';
-                boxes.push(rect);
-            }
+                if (isColliding && !isJasaan) {
+                    if (el.style.opacity !== '0') {
+                        el.style.opacity = '0';
+                        el.style.pointerEvents = 'none';
+                    }
+                } else {
+                    if (el.style.opacity !== '1') {
+                        el.style.opacity = '1';
+                        el.style.pointerEvents = 'auto';
+                    }
+                    boxes.push(rect);
+                }
+            });
         });
     }
 
@@ -1557,55 +1605,41 @@
 
     function initMap() {
         try {
-            // Shifted bounds slightly north and west to center Sta. Cruz
-            const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+            const isMobile = window.innerWidth < 768;
+            const initialPadding = isMobile ? [16, 16] : [40, 40];
 
             map = L.map('leafletMap', {
                 zoomControl: false,
-                dragging: false,
-                touchZoom: false,
-                doubleClickZoom: false,
-                scrollWheelZoom: false,
-                boxZoom: false,
-                keyboard: false,
+                dragging: true,
+                touchZoom: true,
+                doubleClickZoom: true,
+                scrollWheelZoom: true,
+                boxZoom: true,
+                keyboard: true,
                 attributionControl: false,
-                minZoom: 13,
+                minZoom: isMobile ? 11 : 12,
                 maxZoom: 18,
-                maxBounds: bounds,
-                maxBoundsViscosity: 1.0
-            }).fitBounds(bounds);
+                maxBounds: STA_CRUZ_MAX_BOUNDS,
+                maxBoundsViscosity: 0.8
+            }).fitBounds(STA_CRUZ_BOUNDS, { padding: initialPadding, maxZoom: isMobile ? 13 : 14 });
 
             window.map = map;
 
-            L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-                maxZoom: 20,
-                subdomains: 'abc',
-                errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
-                attribution: '&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            // Natively dark or light tile theme without GPU-intensive CSS filter math
+            updateMapTileTheme();
+
+            const darkModeObserver = new MutationObserver(() => {
+                updateMapTileTheme();
+            });
+            darkModeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
             // Initialize incident markers layer
             incidentMarkers.addTo(map);
             selectedPinsLayer.addTo(map);
             policeStationsLayer.addTo(map);
-            // Initial markers are now handled dynamically by GeoJSON load to ensure precision
-            // addManualPins();
+
             loadMapPoints();
             addPoliceStations();
-
-            // Track mouse movement for live coordinates
-            /* 
-            // Removing live mouse coord tracking to avoid clutter, will use click instead
-            map.on('mousemove', (e) => {
-                document.getElementById('liveLat').textContent = e.latlng.lat.toFixed(6);
-                document.getElementById('liveLng').textContent = e.latlng.lng.toFixed(6);
-            });
-            */
-
-
-
-            // Hide loading as soon as map is initialized
-            hideLoading();
 
             // Load Barangay GeoJSON
             fetch(barangayGeoJsonUrl)
@@ -1695,14 +1729,6 @@
                                     layer.setStyle(getThematicStyleForFeature(feature));
                                 },
                                 click: function (e) {
-                                    if (map) {
-                                        map.dragging.enable();
-                                        map.touchZoom.enable();
-                                        map.doubleClickZoom.enable();
-                                        map.scrollWheelZoom.enable();
-                                        map.boxZoom.enable();
-                                        map.keyboard.enable();
-                                    }
                                     const barangaySelect = document.getElementById('filterBarangay');
                                     if (barangaySelect) {
                                         barangaySelect.value = name;
@@ -1729,42 +1755,72 @@
                             }
                         }
                     }).addTo(map);
+
+                    // Perfectly center Sta. Cruz once true boundary polygons have loaded
+                    if (boundaryLayerGroup && boundaryLayerGroup.getLayers().length > 0) {
+                        const preciseBounds = boundaryLayerGroup.getBounds();
+                        map.fitBounds(preciseBounds, { padding: isMobile ? [16, 16] : [40, 40], maxZoom: isMobile ? 13 : 14 });
+                    }
+
+                    // Seamlessly hide loading overlay once map and boundaries are ready
+                    hideLoading();
                     setTimeout(manageTooltipVisibility, 100);
                 })
                 .catch(err => {
                     console.error('Error loading GeoJSON:', err);
+                    hideLoading();
                 });
 
             map.on('zoomend', () => {
                 updateBarangayLabels();
                 setTimeout(manageTooltipVisibility, 50);
             });
-            map.on('resize', () => setTimeout(manageTooltipVisibility, 50));
+            map.on('resize', () => {
+                setTimeout(manageTooltipVisibility, 50);
+            });
         } catch (err) {
             console.error('Error initializing map:', err);
             hideLoading();
         }
     }
 
-
     function toggleSidebar() {
         const sidebar = document.getElementById('filterSidebar');
         const toggleBtn = document.getElementById('sidebarToggle');
+        const isMobile = window.innerWidth < 768;
 
         if (sidebar.classList.contains('sidebar-hidden')) {
+            // Close other sidebar on mobile so they never overlap
+            if (isMobile) {
+                const incSidebar = document.getElementById('incidentsSidebar');
+                const incToggle = document.getElementById('incidentsToggle');
+                if (incSidebar && incSidebar.classList.contains('sidebar-visible')) {
+                    incSidebar.classList.add('sidebar-hidden');
+                    incSidebar.classList.remove('sidebar-visible');
+                    if (incToggle) {
+                        incToggle.classList.remove('opacity-0', 'pointer-events-none');
+                        incToggle.classList.add('opacity-100', 'pointer-events-auto');
+                    }
+                }
+            }
             sidebar.classList.remove('sidebar-hidden');
             sidebar.classList.add('sidebar-visible');
-            if (toggleBtn) toggleBtn.classList.add('opacity-0', 'pointer-events-none');
+            if (toggleBtn) {
+                toggleBtn.classList.add('opacity-0', 'pointer-events-none');
+                toggleBtn.classList.remove('opacity-100', 'pointer-events-auto');
+            }
 
             // Re-render data when sidebar opens
             loadMapPoints(false);
         } else {
             sidebar.classList.add('sidebar-hidden');
             sidebar.classList.remove('sidebar-visible');
-            if (toggleBtn) toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+            if (toggleBtn) {
+                toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+                toggleBtn.classList.add('opacity-100', 'pointer-events-auto');
+            }
         }
 
-        // Prevent rendering errors (grey tiles) and keep map static
         setTimeout(() => {
             if (window.map) {
                 window.map.invalidateSize({ pan: false });
@@ -1775,20 +1831,39 @@
     function toggleIncidentsSidebar() {
         const sidebar = document.getElementById('incidentsSidebar');
         const toggleBtn = document.getElementById('incidentsToggle');
+        const isMobile = window.innerWidth < 768;
 
         if (sidebar) {
             if (sidebar.classList.contains('sidebar-hidden')) {
+                // Close other sidebar on mobile so they never overlap
+                if (isMobile) {
+                    const filterSidebar = document.getElementById('filterSidebar');
+                    const sidebarToggle = document.getElementById('sidebarToggle');
+                    if (filterSidebar && filterSidebar.classList.contains('sidebar-visible')) {
+                        filterSidebar.classList.add('sidebar-hidden');
+                        filterSidebar.classList.remove('sidebar-visible');
+                        if (sidebarToggle) {
+                            sidebarToggle.classList.remove('opacity-0', 'pointer-events-none');
+                            sidebarToggle.classList.add('opacity-100', 'pointer-events-auto');
+                        }
+                    }
+                }
                 sidebar.classList.remove('sidebar-hidden');
                 sidebar.classList.add('sidebar-visible');
-                if (toggleBtn) toggleBtn.classList.add('opacity-0', 'pointer-events-none');
+                if (toggleBtn) {
+                    toggleBtn.classList.add('opacity-0', 'pointer-events-none');
+                    toggleBtn.classList.remove('opacity-100', 'pointer-events-auto');
+                }
             } else {
                 sidebar.classList.add('sidebar-hidden');
                 sidebar.classList.remove('sidebar-visible');
-                if (toggleBtn) toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+                if (toggleBtn) {
+                    toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+                    toggleBtn.classList.add('opacity-100', 'pointer-events-auto');
+                }
             }
         }
 
-        // Prevent rendering errors (grey tiles) and keep map static
         setTimeout(() => {
             if (window.map) {
                 window.map.invalidateSize({ pan: false });
@@ -1815,6 +1890,44 @@
 
         // Initialize display badge text
         updateActivePeriodDisplay();
+
+        // Sync sidebar and toggle buttons according to screen width
+        function syncResponsiveSidebarState() {
+            const isMobile = window.innerWidth < 768;
+            const filterSidebar = document.getElementById('filterSidebar');
+            const incidentsSidebar = document.getElementById('incidentsSidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const incidentsToggle = document.getElementById('incidentsToggle');
+
+            if (isMobile) {
+                // On mobile, keep sidebars hidden unless user intentionally opened one
+                if (!filterSidebar?.classList.contains('sidebar-visible')) {
+                    filterSidebar?.classList.add('sidebar-hidden');
+                    sidebarToggle?.classList.remove('opacity-0', 'pointer-events-none');
+                    sidebarToggle?.classList.add('opacity-100', 'pointer-events-auto');
+                }
+                if (!incidentsSidebar?.classList.contains('sidebar-visible')) {
+                    incidentsSidebar?.classList.add('sidebar-hidden');
+                    incidentsToggle?.classList.remove('opacity-0', 'pointer-events-none');
+                    incidentsToggle?.classList.add('opacity-100', 'pointer-events-auto');
+                }
+            } else {
+                // On desktop, sidebars default to visible
+                filterSidebar?.classList.remove('sidebar-hidden');
+                filterSidebar?.classList.add('sidebar-visible');
+                incidentsSidebar?.classList.remove('sidebar-hidden');
+                incidentsSidebar?.classList.add('sidebar-visible');
+                sidebarToggle?.classList.add('opacity-0', 'pointer-events-none');
+                sidebarToggle?.classList.remove('opacity-100', 'pointer-events-auto');
+                incidentsToggle?.classList.add('opacity-0', 'pointer-events-none');
+                incidentsToggle?.classList.remove('opacity-100', 'pointer-events-auto');
+            }
+        }
+
+        syncResponsiveSidebarState();
+        window.addEventListener('resize', () => {
+            syncResponsiveSidebarState();
+        });
 
         // Robust event listeners for all map filters
         const setupListener = (id, callback) => {
@@ -1855,10 +1968,40 @@
         pointer-events: none;
     }
 
+    #incidentsSidebar.sidebar-hidden {
+        transform: scale(0.9) translateX(20px);
+    }
+
     .sidebar-visible {
         opacity: 1;
         transform: scale(1) translateX(0);
         pointer-events: auto;
+    }
+
+    @media (max-width: 767px) {
+        .sidebar-hidden {
+            opacity: 0 !important;
+            transform: scale(0.95) translateY(-10px) !important;
+            pointer-events: none !important;
+        }
+
+        #incidentsSidebar.sidebar-hidden {
+            transform: scale(0.95) translateY(-10px) !important;
+        }
+
+        .sidebar-visible {
+            opacity: 1 !important;
+            transform: scale(1) translateY(0) !important;
+            pointer-events: auto !important;
+        }
+    }
+
+    @media (min-width: 768px) {
+        .md\:sidebar-visible {
+            opacity: 1 !important;
+            transform: scale(1) translateX(0) !important;
+            pointer-events: auto !important;
+        }
     }
 
     /* Hide scrollbar for Sidebar */

@@ -8,6 +8,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { i18nMiddleware } from './middleware/i18n.js';
 import { FileSessionStore } from './utils/sessionStore.js';
@@ -31,6 +32,9 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disabled to prevent blocking external CDNs like Leaflet/Mapbox/Supabase
   crossOriginEmbedderPolicy: false
 }));
+
+// Enable Gzip/Deflate compression for fast mobile transfers
+app.use(compression());
 
 // Logger, Cookie Parser, CORS
 app.use(morgan('dev'));
