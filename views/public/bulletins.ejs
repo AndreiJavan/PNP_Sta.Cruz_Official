@@ -221,8 +221,8 @@
             <% }) %>
     </div>
 
-    <!-- Mobile Load More / Older Posts Pagination Button -->
-    <div id="bulletin-load-more-container" class="mt-12 text-center md:hidden">
+    <!-- Load More / Older Posts Pagination Button -->
+    <div id="bulletin-load-more-container" class="mt-12 text-center">
         <button id="bulletin-load-more-btn" onclick="loadMoreBulletins()"
             class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
             <i class="fas fa-history text-sm"></i>
@@ -350,7 +350,7 @@
 <script>
     const bulletinsDatabase = <%- JSON.stringify(bulletins) %>;
     let currentCategory = '<%= category && category !== "All" ? category : "Crime Advisory" %>';
-    let mobileBulletinLimit = 10;
+    let bulletinPageLimit = 10;
 
     function setCategoryFilter(category, btnElement) {
         currentCategory = category;
@@ -404,7 +404,7 @@
     }
 
     function loadMoreBulletins() {
-        mobileBulletinLimit += 10;
+        bulletinPageLimit += 10;
         filterPublicBulletins(true);
     }
 
@@ -419,9 +419,8 @@
         const toDateVal = document.getElementById('bulletinToDate')?.value || '';
         const now = new Date();
 
-        const isMobile = window.innerWidth < 768;
         if (!isLoadMore) {
-            mobileBulletinLimit = 10;
+            bulletinPageLimit = 10;
         }
 
         const matchingCards = [];
@@ -489,16 +488,12 @@
             }
         });
 
-        // Apply display styling & mobile pagination
+        // Apply display styling & pagination (10 per page on all devices)
         matchingCards.forEach((card, index) => {
-            if (isMobile) {
-                if (index < mobileBulletinLimit) {
-                    card.style.display = 'flex';
-                } else {
-                    card.style.display = 'none';
-                }
-            } else {
+            if (index < bulletinPageLimit) {
                 card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
             }
         });
         
@@ -507,7 +502,7 @@
             noResultsDiv.style.display = matchingCards.length === 0 ? 'block' : 'none';
         }
 
-        // Update mobile pagination container
+        // Update pagination container (active on PC and mobile)
         const loadMoreContainer = document.getElementById('bulletin-load-more-container');
         const loadMoreBtn = document.getElementById('bulletin-load-more-btn');
         const visibleCountSpan = document.getElementById('bulletin-visible-count');
@@ -515,14 +510,14 @@
         const loadMoreInfo = document.getElementById('bulletin-load-more-info');
 
         if (loadMoreContainer) {
-            if (isMobile && matchingCards.length > 0) {
+            if (matchingCards.length > 0) {
                 loadMoreContainer.style.display = 'block';
                 if (totalCountSpan) totalCountSpan.textContent = matchingCards.length;
-                if (visibleCountSpan) visibleCountSpan.textContent = Math.min(mobileBulletinLimit, matchingCards.length);
+                if (visibleCountSpan) visibleCountSpan.textContent = Math.min(bulletinPageLimit, matchingCards.length);
 
-                if (matchingCards.length > mobileBulletinLimit) {
+                if (matchingCards.length > bulletinPageLimit) {
                     if (loadMoreBtn) loadMoreBtn.style.display = 'inline-flex';
-                    if (loadMoreInfo) loadMoreInfo.textContent = `Showing ${Math.min(mobileBulletinLimit, matchingCards.length)} of ${matchingCards.length} advisories`;
+                    if (loadMoreInfo) loadMoreInfo.textContent = `Showing ${Math.min(bulletinPageLimit, matchingCards.length)} of ${matchingCards.length} advisories`;
                 } else {
                     if (loadMoreBtn) loadMoreBtn.style.display = 'none';
                     if (loadMoreInfo) loadMoreInfo.textContent = `All ${matchingCards.length} advisories loaded`;

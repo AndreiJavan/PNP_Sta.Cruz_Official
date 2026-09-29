@@ -164,8 +164,8 @@
             <% }) %>
         </div>
 
-        <!-- Mobile Load More / Older Posts Pagination Button -->
-        <div id="news-load-more-container" class="mt-12 text-center md:hidden">
+        <!-- Load More / Older Posts Pagination Button -->
+        <div id="news-load-more-container" class="mt-12 text-center">
             <button id="news-load-more-btn" onclick="loadMoreNews()"
                 class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
                 <i class="fas fa-history text-sm"></i>
@@ -292,7 +292,7 @@
 <script>
     const newsDatabase = <%- JSON.stringify(newsList) %>;
     window.newsDatabase = newsDatabase;
-    let mobileNewsLimit = 10;
+    let newsPageLimit = 10;
 
     function onNewsDateModeChange() {
         const mode = document.getElementById('newsDateMode')?.value || 'all';
@@ -331,7 +331,7 @@
     }
 
     function loadMoreNews() {
-        mobileNewsLimit += 10;
+        newsPageLimit += 10;
         filterNews(true);
     }
 
@@ -346,9 +346,8 @@
         const toDateVal = document.getElementById('newsToDate')?.value || '';
         const now = new Date();
 
-        const isMobile = window.innerWidth < 768;
         if (!isLoadMore) {
-            mobileNewsLimit = 10;
+            newsPageLimit = 10;
         }
 
         const matchingCards = [];
@@ -390,21 +389,17 @@
             }
         });
 
-        // Apply display & mobile pagination
+        // Apply display & pagination (10 per page on all devices)
         matchingCards.forEach((card, index) => {
-            if (isMobile) {
-                if (index < mobileNewsLimit) {
-                    card.classList.remove('hidden');
-                } else {
-                    card.classList.add('hidden');
-                }
-            } else {
+            if (index < newsPageLimit) {
                 card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
             }
         });
 
         if (countLabel) {
-            countLabel.textContent = `Showing ${matchingCards.length} Article${matchingCards.length === 1 ? '' : 's'}`;
+            countLabel.textContent = `Showing ${Math.min(newsPageLimit, matchingCards.length)} of ${matchingCards.length} Article${matchingCards.length === 1 ? '' : 's'}`;
         }
 
         if (noResults) {
@@ -415,7 +410,7 @@
             }
         }
 
-        // Update mobile pagination container
+        // Update pagination container (active on PC and mobile)
         const loadMoreContainer = document.getElementById('news-load-more-container');
         const loadMoreBtn = document.getElementById('news-load-more-btn');
         const visibleCountSpan = document.getElementById('news-visible-count');
@@ -423,14 +418,14 @@
         const loadMoreInfo = document.getElementById('news-load-more-info');
 
         if (loadMoreContainer) {
-            if (isMobile && matchingCards.length > 0) {
+            if (matchingCards.length > 0) {
                 loadMoreContainer.style.display = 'block';
                 if (totalCountSpan) totalCountSpan.textContent = matchingCards.length;
-                if (visibleCountSpan) visibleCountSpan.textContent = Math.min(mobileNewsLimit, matchingCards.length);
+                if (visibleCountSpan) visibleCountSpan.textContent = Math.min(newsPageLimit, matchingCards.length);
 
-                if (matchingCards.length > mobileNewsLimit) {
+                if (matchingCards.length > newsPageLimit) {
                     if (loadMoreBtn) loadMoreBtn.style.display = 'inline-flex';
-                    if (loadMoreInfo) loadMoreInfo.textContent = `Showing ${Math.min(mobileNewsLimit, matchingCards.length)} of ${matchingCards.length} news posts`;
+                    if (loadMoreInfo) loadMoreInfo.textContent = `Showing ${Math.min(newsPageLimit, matchingCards.length)} of ${matchingCards.length} news posts`;
                 } else {
                     if (loadMoreBtn) loadMoreBtn.style.display = 'none';
                     if (loadMoreInfo) loadMoreInfo.textContent = `All ${matchingCards.length} news posts loaded`;
