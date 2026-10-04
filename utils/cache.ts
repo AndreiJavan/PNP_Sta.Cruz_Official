@@ -94,19 +94,6 @@ class HybridCache {
   }
 
   /**
-   * Get cached entry or execute fetcher function and cache the result
-   */
-  async getOrSet<T>(key: string, fetcher: () => Promise<T>, ttlMs: number = 5 * 60 * 1000): Promise<T> {
-    const cached = await this.get<T>(key);
-    if (cached !== null && cached !== undefined) {
-      return cached;
-    }
-    const fresh = await fetcher();
-    await this.set(key, fresh, ttlMs);
-    return fresh;
-  }
-
-  /**
    * Set cache entry in both L1 (Memory) and L2 (Redis)
    */
   async set<T>(key: string, data: T, ttlMs: number = 5 * 60 * 1000): Promise<void> {

@@ -133,18 +133,11 @@ app.use((req, res, next) => {
   // Set Permissions-Policy to allow unload for Facebook embed scripts, preventing browser console violations
   res.header('Permissions-Policy', 'unload=(self "https://www.facebook.com" "https://*.facebook.com")');
 
-  // Cache & Indexing Policy
-  const hasUserSession = req.session && (req.session.user || (req.session as any).error_msg || (req.session as any).success_msg);
-  if (req.path.startsWith('/admin') || hasUserSession) {
-    if (req.path.startsWith('/admin')) {
-      res.header('X-Robots-Tag', 'noindex, nofollow, noarchive');
-    }
+  // Set no-cache only for HTML dynamic page renders / API responses, preserving static asset caching
+  if (!req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i)) {
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.header('Expires', '-1');
     res.header('Pragma', 'no-cache');
-  } else if (!req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|xml|txt)$/i) && !req.path.startsWith('/api/')) {
-    // Public dynamic content: allow short edge caching with stale-while-revalidate for fast rendering
-    res.header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   }
 
   res.locals.sessionId = req.sessionID;

@@ -1,6 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAuthToken } from '../utils/authToken.js';
 
+declare module 'express-session' {
+  interface SessionData {
+    user?: any;
+    error_msg?: string;
+    success_msg?: string;
+    hideSidebar?: boolean;
+  }
+}
+
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   // 1. Direct session check
   if (req.session && req.session.user) {

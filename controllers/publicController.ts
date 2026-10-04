@@ -9,34 +9,46 @@ import { memoryCache } from '../utils/cache.js';
 
 // Cached Data Helpers
 const getRawBulletinsCached = async (): Promise<any[]> => {
-  return memoryCache.getOrSet('bulletins:all', async () => {
-    const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
-    return snap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({
-        id: doc.id,
-        ...d,
-        photo_paths: parsePhotos(d.photo_path, d.photo_paths),
-        video_paths: parseVideos(d.video_path, d.video_paths)
-      });
+  const cacheKey = 'bulletins:all';
+  const cached = await memoryCache.get<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
+  const bulletins = snap.docs.map((doc: any) => {
+    const d = doc.data();
+    return decodeCustomCategory({
+      id: doc.id,
+      ...d,
+      photo_paths: parsePhotos(d.photo_path, d.photo_paths),
+      video_paths: parseVideos(d.video_path, d.video_paths)
     });
-  }, 3 * 60 * 1000); // 3 minutes cache
+  });
+  await memoryCache.set(cacheKey, bulletins, 3 * 60 * 1000); // 3 minutes cache
+  return bulletins;
 };
 
 const getHotlinesCached = async (): Promise<any[]> => {
-  return memoryCache.getOrSet('hotlines:all', async () => {
-    const snap = await db.collection('hotlines').orderBy('category').get();
-    return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-  }, 5 * 60 * 1000); // 5 minutes cache
+  const cacheKey = 'hotlines:all';
+  const cached = await memoryCache.get<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const snap = await db.collection('hotlines').orderBy('category').get();
+  const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+  await memoryCache.set(cacheKey, hotlines, 5 * 60 * 1000); // 5 minutes cache
+  return hotlines;
 };
 
 const getPersonnelCached = async (): Promise<any[]> => {
-  return memoryCache.getOrSet('personnel:active', async () => {
-    const usersSnap = await db.collection('users').get();
-    return usersSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((u: any) => u.status === 'active');
-  }, 5 * 60 * 1000);
+  const cacheKey = 'personnel:active';
+  const cached = await memoryCache.get<any[]>(cacheKey);
+  if (cached) return cached;
+
+  const usersSnap = await db.collection('users').get();
+  const personnel = usersSnap.docs
+    .map((doc: any) => ({ id: doc.id, ...doc.data() }))
+    .filter((u: any) => u.status === 'active');
+  await memoryCache.set(cacheKey, personnel, 5 * 60 * 1000);
+  return personnel;
 };
 
 function getFirstParagraph(text: string): string {
