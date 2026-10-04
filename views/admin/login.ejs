@@ -181,6 +181,12 @@
 
         // Initial icon state
         updateIcon();
+
+        // Clean expired query from URL so refreshing does not retain stale expired state
+        if (window.location.search.includes('expired=')) {
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+        }
     </script>
 </body>
 

@@ -12,6 +12,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { i18nMiddleware } from './middleware/i18n.js';
 import { FileSessionStore } from './utils/sessionStore.js';
+import { verifyAuthToken } from './utils/authToken.js';
 
 // Routes
 import publicRoutes from './routes/public.js';
@@ -74,6 +75,21 @@ app.use(session({
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   }
 }));
+
+// Stateless Auth Token Restoration Middleware: Bridges multi-instance & serverless cold-starts
+app.use((req, res, next) => {
+  if (req.session && !req.session.user) {
+    const token = req.cookies?.stacruz_auth;
+    if (token) {
+      const verified = verifyAuthToken(token);
+      if (verified) {
+        req.session.user = verified;
+        (req.session as any).hideSidebar = (req.session as any).hideSidebar ?? true;
+      }
+    }
+  }
+  next();
+});
 
 // General Rate Limiter - Applied AFTER static files & session parsing
 const limiter = rateLimit({
@@ -146,6 +162,7 @@ app.use((req, res, next) => {
 
 // Health Check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/login', (req, res) => res.redirect('/admin/login'));
 
 // Local development fallback for Vercel Web Analytics (on Vercel, intercepted at the edge)
 app.get('/_vercel/insights/script.js', (req, res) => {

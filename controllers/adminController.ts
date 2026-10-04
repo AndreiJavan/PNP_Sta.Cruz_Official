@@ -9,6 +9,7 @@ import nodemailer from 'nodemailer';
 import { memoryCache } from '../utils/cache.js';
 import { FacebookService } from '../utils/facebookService.js';
 import { classifyCategory } from '../utils/categoryClassifier.js';
+import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -356,9 +357,23 @@ function cleanAndParseJSON(text: string) {
 }
 
 export const getLogin = async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
+  // If user is already authenticated (via session or durable auth token), DO NOT return to login!
+  let user = req.session?.user;
+  if (!user && req.cookies?.stacruz_auth) {
+    const verified = verifyAuthToken(req.cookies.stacruz_auth);
+    if (verified) {
+      user = verified;
+      if (req.session) {
+        req.session.user = verified;
+        (req.session as any).hideSidebar = (req.session as any).hideSidebar ?? true;
+      }
+    }
+  }
+
+  if (user) {
     return res.redirect('/admin/dashboard');
   }
+
   let error_msg = null;
   if (req.query.expired === '1') {
     error_msg = 'Your session has expired. Please sign in again.';
@@ -412,12 +427,21 @@ export const postLogin = async (req: Request, res: Response) => {
       };
       (req.session as any).hideSidebar = true;
 
+      // Issue durable stateless auth cookie (30 days) to persist across serverless instances and restarts
+      const authToken = createAuthToken(req.session.user);
+      res.cookie('stacruz_auth', authToken, {
+        httpOnly: true,
+        secure: false, // Compatible with both HTTP and HTTPS behind reverse proxies
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      });
+
       await logAction(req, 'LOGIN', `Personnel ${user.username} authenticated successfully.`);
 
       return req.session.save((err) => {
         if (err) {
-          console.error('[LOGIN ERROR] Session save failed:', err);
-          return res.status(500).send('Error saving session');
+          console.error('[LOGIN WARNING] Session save had error, proceeding with auth cookie:', err);
         }
         console.log('[LOGIN SUCCESS] Redirecting to dashboard');
         res.redirect('/admin/dashboard');
@@ -433,22 +457,33 @@ export const postLogin = async (req: Request, res: Response) => {
 };
 
 export const getLogout = (req: Request, res: Response) => {
+  res.clearCookie('stacruz_auth', { path: '/' });
+  res.clearCookie('stacruz_sid', { path: '/' });
   if (req.session) {
     req.session.destroy(() => {
-      res.clearCookie('stacruz_sid', { path: '/' });
       res.redirect('/admin/login');
     });
   } else {
-    res.clearCookie('stacruz_sid', { path: '/' });
     res.redirect('/admin/login');
   }
 };
 
 export const getHeartbeat = async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
+  let user = req.session?.user;
+  if (!user && req.cookies?.stacruz_auth) {
+    const verified = verifyAuthToken(req.cookies.stacruz_auth);
+    if (verified) {
+      user = verified;
+      if (req.session) {
+        req.session.user = verified;
+      }
+    }
+  }
+
+  if (user) {
     return res.json({
       success: true,
-      user: req.session.user.username,
+      user: user.username,
       timestamp: Date.now()
     });
   }
