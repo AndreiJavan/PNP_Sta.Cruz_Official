@@ -91,3 +91,4 @@ export const isSuperAdmin = (req: Request, res: Response, next: NextFunction) =>
   }
   res.redirect('/admin/dashboard');
 };
+
