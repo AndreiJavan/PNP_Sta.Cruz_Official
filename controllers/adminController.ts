@@ -1535,7 +1535,8 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     }
 
     await batch.commit();
-    memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('scans');
     await logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`);
     res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
@@ -1894,34 +1895,54 @@ This report summarizes **${rawData.length} crime and public safety records** sca
 - **Frequent Offenses**: The most recurrent security signals detected are ${topCrimeText || 'N/A'}. Highly concentrated incident types require dedicated community resources or traffic/patrol checkpoints to actively discourage ongoing patterns.`;
 }
 
+const getAdminMapPointsCached = async (): Promise<any[]> => {
+  const cacheKey = 'map_points:admin_raw';
+  let cached = await memoryCache.get<any[]>(cacheKey);
+  if (!cached) {
+    const snap = await db.collection('map_points').get();
+    cached = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    await memoryCache.set(cacheKey, cached, 3 * 60 * 1000);
+  }
+  return cached;
+};
+
+const getAdminReportsCached = async (): Promise<any[]> => {
+  const cacheKey = 'scans:all';
+  let cached = await memoryCache.get<any[]>(cacheKey);
+  if (!cached) {
+    const snap = await db.collection('intelligence_scans').get();
+    cached = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    await memoryCache.set(cacheKey, cached, 5 * 60 * 1000);
+  }
+  return cached;
+};
+
 export const getDashboard = async (req: Request, res: Response) => {
   try {
     const [
-      allMapPointsSnap,
+      allMapPointsData,
       anonymousTipsSnap,
       totalTipsSnap,
       notificationsSnap,
       totalBulletinsSnap,
-      allReportsSnap
+      allReportsData
     ] = await Promise.all([
-      db.collection('map_points').get(),
+      getAdminMapPointsCached(),
       db.collection('anonymous_tips').orderBy('created_at', 'desc').limit(10).get(),
       db.collection('anonymous_tips').count().get(),
       db.collection('admin_notifications').where('is_read', '==', false).orderBy('created_at', 'desc').limit(5).get(),
       db.collection('bulletins').count().get(),
-      db.collection('intelligence_scans').get()
+      getAdminReportsCached()
     ]);
 
     const scansMap: { [key: string]: string } = {};
-    allReportsSnap.docs.forEach((doc: any) => {
-      const data = doc.data();
+    allReportsData.forEach((data: any) => {
       const stats = data.category_stats || {};
-      scansMap[doc.id] = stats.entry_type || 'scanned';
+      scansMap[data.id] = stats.entry_type || 'scanned';
     });
 
-    const allPoints = allMapPointsSnap.docs
-      .map((doc: any) => {
-        const data = doc.data();
+    const allPoints = allMapPointsData
+      .map((data: any) => {
         let entryType = data.entry_type;
         if (!entryType) {
           if (data.report_id) {
@@ -1934,7 +1955,7 @@ export const getDashboard = async (req: Request, res: Response) => {
         if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
           cat = 'PSI';
         }
-        return { id: doc.id, ...data, category: cat, entry_type: entryType };
+        return { id: data.id, ...data, category: cat, entry_type: entryType };
       })
       .filter((p: any) => {
         const dateStr = String(p.incident_date || '');
@@ -1945,8 +1966,7 @@ export const getDashboard = async (req: Request, res: Response) => {
         return !isPlaceholder;
       });
 
-    const filteredReports = allReportsSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const filteredReports = allReportsData;
 
     const totalTipsCount = totalTipsSnap.data().count;
     const totalBulletinsCount = totalBulletinsSnap.data().count;
@@ -3114,6 +3134,8 @@ export const deleteReport = async (req: Request, res: Response) => {
     // 4. Delete map points & scan document safely
     await db.collection('map_points').where('report_id', '==', reportId).delete();
     await db.collection('intelligence_scans').doc(reportId).delete();
+    await memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('scans');
 
     await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
     res.redirect('/admin/reports');
@@ -3171,6 +3193,8 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
     });
 
     await batch.commit();
+    await memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('scans');
     await logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`);
     res.json({ success: true, count: entries.length });
   } catch (err) {

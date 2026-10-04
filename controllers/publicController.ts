@@ -10,7 +10,7 @@ import { memoryCache } from '../utils/cache.js';
 // Cached Data Helpers
 const getRawBulletinsCached = async (): Promise<any[]> => {
   const cacheKey = 'bulletins:all';
-  const cached = memoryCache.get<any[]>(cacheKey);
+  const cached = await memoryCache.get<any[]>(cacheKey);
   if (cached) return cached;
 
   const snap = await db.collection('bulletins').orderBy('created_at', 'desc').get();
@@ -23,31 +23,31 @@ const getRawBulletinsCached = async (): Promise<any[]> => {
       video_paths: parseVideos(d.video_path, d.video_paths)
     });
   });
-  memoryCache.set(cacheKey, bulletins, 3 * 60 * 1000); // 3 minutes cache
+  await memoryCache.set(cacheKey, bulletins, 3 * 60 * 1000); // 3 minutes cache
   return bulletins;
 };
 
 const getHotlinesCached = async (): Promise<any[]> => {
   const cacheKey = 'hotlines:all';
-  const cached = memoryCache.get<any[]>(cacheKey);
+  const cached = await memoryCache.get<any[]>(cacheKey);
   if (cached) return cached;
 
   const snap = await db.collection('hotlines').orderBy('category').get();
   const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-  memoryCache.set(cacheKey, hotlines, 5 * 60 * 1000); // 5 minutes cache
+  await memoryCache.set(cacheKey, hotlines, 5 * 60 * 1000); // 5 minutes cache
   return hotlines;
 };
 
 const getPersonnelCached = async (): Promise<any[]> => {
   const cacheKey = 'personnel:active';
-  const cached = memoryCache.get<any[]>(cacheKey);
+  const cached = await memoryCache.get<any[]>(cacheKey);
   if (cached) return cached;
 
   const usersSnap = await db.collection('users').get();
   const personnel = usersSnap.docs
     .map((doc: any) => ({ id: doc.id, ...doc.data() }))
     .filter((u: any) => u.status === 'active');
-  memoryCache.set(cacheKey, personnel, 5 * 60 * 1000);
+  await memoryCache.set(cacheKey, personnel, 5 * 60 * 1000);
   return personnel;
 };
 
@@ -61,7 +61,7 @@ function getFirstParagraph(text: string): string {
 
 export const getAllMapPointsCached = async (): Promise<any[]> => {
   const mapPointsCacheKey = 'map_points:all_unfiltered';
-  let incidents = memoryCache.get<any[]>(mapPointsCacheKey);
+  let incidents = await memoryCache.get<any[]>(mapPointsCacheKey);
   if (!incidents) {
     const mapPointsSnap = await db.collection('map_points').get();
     incidents = mapPointsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }))
@@ -80,7 +80,7 @@ export const getAllMapPointsCached = async (): Promise<any[]> => {
       const dateB = new Date(b.incident_date).getTime();
       return dateB - dateA;
     });
-    memoryCache.set(mapPointsCacheKey, incidents, 5 * 60 * 1000);
+    await memoryCache.set(mapPointsCacheKey, incidents, 5 * 60 * 1000);
   }
   return incidents;
 };
@@ -190,8 +190,9 @@ export const getMapPoints = async (req: Request, res: Response) => {
   const { type, range, barangay } = req.query;
   const cacheKey = `map_points:${type || ''}:${range || ''}:${barangay || ''}`;
 
-  const cachedPoints = memoryCache.get<any[]>(cacheKey);
+  const cachedPoints = await memoryCache.get<any[]>(cacheKey);
   if (cachedPoints) {
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     return res.json(cachedPoints);
   }
 
@@ -229,7 +230,8 @@ export const getMapPoints = async (req: Request, res: Response) => {
   try {
     const snap = await query.get();
     const points = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    memoryCache.set(cacheKey, points, 3 * 60 * 1000); // 3 minutes cache
+    await memoryCache.set(cacheKey, points, 3 * 60 * 1000); // 3 minutes cache
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
     res.json(points);
   } catch (err) {
     console.error(err);
@@ -445,13 +447,13 @@ export const getMissingPersons = async (req: Request, res: Response) => {
 export const getBulletinDetail = async (req: Request, res: Response) => {
   try {
     const cacheKey = `bulletin_detail:${req.params.id}`;
-    let bulletin = memoryCache.get<any>(cacheKey);
+    let bulletin = await memoryCache.get<any>(cacheKey);
     if (!bulletin) {
       const doc = await db.collection('bulletins').doc(req.params.id).get();
       if (!doc.exists) return res.status(404).send('Bulletin not found');
       const d = doc.data();
       bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path, d.photo_paths), video_paths: parseVideos(d.video_path, d.video_paths) });
-      memoryCache.set(cacheKey, bulletin, 5 * 60 * 1000);
+      await memoryCache.set(cacheKey, bulletin, 5 * 60 * 1000);
     }
     res.render('public/bulletin_detail', { title: bulletin.title, bulletin, layout: 'layouts/main' });
   } catch (err) {
@@ -485,9 +487,9 @@ export const translateToTagalog = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Text parameter required' });
     }
 
-    // 1. Check in-memory cache first to avoid redundant AI API calls
+    // 1. Check cache first to avoid redundant AI API calls
     const cacheKey = `translation:${Buffer.from(text.substring(0, 500)).toString('base64')}`;
-    const cachedTranslation = memoryCache.get<string>(cacheKey);
+    const cachedTranslation = await memoryCache.get<string>(cacheKey);
     if (cachedTranslation) {
       return res.json({ success: true, tagalogText: cachedTranslation, cached: true });
     }
@@ -519,7 +521,7 @@ export const translateToTagalog = async (req: Request, res: Response) => {
         const data = await response.json() as any;
         if (data.choices && data.choices[0] && data.choices[0].message) {
           const tagalogText = data.choices[0].message.content.trim();
-          memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
+          await memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
           return res.json({ success: true, tagalogText });
         } else {
           console.warn('OpenRouter translation returned no choices, falling back to Gemini API:', data);
@@ -542,7 +544,7 @@ export const translateToTagalog = async (req: Request, res: Response) => {
 
         const tagalogText = response.text ? response.text.trim() : text;
         if (response.text) {
-          memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
+          await memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
         }
         return res.json({ success: true, tagalogText });
       } catch (aiErr: any) {
@@ -589,7 +591,7 @@ export const postSetLanguage = async (req: Request, res: Response) => {
 
 const getDatabaseSummaryCached = async (): Promise<string> => {
   const cacheKey = 'ai:db_summary';
-  const cached = memoryCache.get<string>(cacheKey);
+  const cached = await memoryCache.get<string>(cacheKey);
   if (cached) return cached;
 
   try {
@@ -647,7 +649,7 @@ ${bulletinList || '• No active bulletins'}
 ${hotlineList || '• Station Desk: 911'}
 `.trim();
 
-    memoryCache.set(cacheKey, summary, 3 * 60 * 1000);
+    await memoryCache.set(cacheKey, summary, 3 * 60 * 1000);
     return summary;
   } catch (err) {
     console.warn('Error generating AI database summary:', err);

@@ -17,7 +17,7 @@ export async function translateWithOpenRouter(options: TranslationOptions): Prom
   const cacheKey = `openrouter_trans_${normalizedLang}_${Buffer.from(text.trim()).toString('base64').substring(0, 100)}`;
 
   // Check cache first
-  const cached = memoryCache.get<string>(cacheKey);
+  const cached = await memoryCache.get<string>(cacheKey);
   if (cached) {
     return cached;
   }
@@ -64,7 +64,7 @@ ${text.trim()}`;
 
     if (translatedText) {
       // Cache for 24 hours (24 * 60 * 60 * 1000 ms)
-      memoryCache.set(cacheKey, translatedText, 24 * 60 * 60 * 1000);
+      await memoryCache.set(cacheKey, translatedText, 24 * 60 * 60 * 1000);
       return translatedText;
     }
 

@@ -23,5 +23,6 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["**/*.ts", "types/**/*.d.ts"]
+  "include": ["**/*.ts", "types/**/*.d.ts"],
+  "exclude": ["node_modules", "temp_*.ts", "tmp", "fetch_data.ts"]
 }
