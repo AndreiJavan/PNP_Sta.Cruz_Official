@@ -1,6 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAuthToken } from '../utils/authToken.js';
 
+declare module 'express-session' {
+  interface SessionData {
+    user?: any;
+    error_msg?: string;
+    success_msg?: string;
+    hideSidebar?: boolean;
+  }
+}
+
 export const isAuthenticated = (req: Request, res: Response, next: NextFunction) => {
   // 1. Direct session check
   if (req.session && req.session.user) {
@@ -46,7 +55,6 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
 };
 
 export const isSuperAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.session && req.session.user && req.session.user.role === 'superadmin') {
   let user = req.session?.user;
 
   if (!user && req.cookies?.stacruz_auth) {
@@ -78,7 +86,6 @@ export const isSuperAdmin = (req: Request, res: Response, next: NextFunction) =>
     });
   }
 
-  req.session.error_msg = 'Access denied. Superadmin only.';
   if (req.session) {
     req.session.error_msg = 'Access denied. Superadmin only.';
   }
