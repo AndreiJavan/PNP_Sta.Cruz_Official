@@ -272,11 +272,11 @@
         </nav>
 
         <div class="p-6 border-t border-white/10">
-            <button type="button" onclick="openLogoutModal()"
-                class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition duration-300 group cursor-pointer">
+            <a href="/admin/logout"
+                class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition duration-300 group">
                 <i class="fas fa-sign-out-alt text-[10px] group-hover:scale-110 transition"></i>
                 <span class="text-[10px] font-bold uppercase tracking-widest">Logout</span>
-            </button>
+            </a>
         </div>
     </aside>
 
@@ -658,64 +658,6 @@
 
     </script>
 
-    <!-- Logout Confirmation Modal -->
-    <div id="logoutConfirmModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity duration-300" onclick="closeLogoutModal()"></div>
-
-        <!-- Modal Box -->
-        <div class="relative bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl z-10 transform transition-all duration-300 scale-95 opacity-0 text-center" id="logoutModalCard">
-            <!-- Icon -->
-            <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center border border-red-500/20 shadow-inner">
-                <i class="fas fa-arrow-right-from-bracket text-xl"></i>
-            </div>
-
-            <!-- Title & Description -->
-            <h3 class="text-base font-black text-slate-800 dark:text-white uppercase tracking-tight mb-2">Confirm Logout</h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6 font-medium">Are you sure you want to end your administrative session? Any unsaved changes will be lost.</p>
-
-            <!-- Buttons -->
-            <div class="flex items-center space-x-3">
-                <button type="button" onclick="closeLogoutModal()"
-                    class="flex-1 py-3 px-4 rounded-xl border border-gray-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 text-xs font-black uppercase tracking-wider transition cursor-pointer">
-                    Cancel
-                </button>
-                <a href="/admin/logout"
-                    class="flex-1 py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-wider transition shadow-lg shadow-red-600/30 flex items-center justify-center space-x-2 cursor-pointer">
-                    <i class="fas fa-sign-out-alt text-[11px]"></i>
-                    <span>Log Out</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function openLogoutModal() {
-            const modal = document.getElementById('logoutConfirmModal');
-            const card = document.getElementById('logoutModalCard');
-            if (!modal || !card) return;
-            modal.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                card.classList.remove('scale-95', 'opacity-0');
-                card.classList.add('scale-100', 'opacity-100');
-            });
-        }
-
-        function closeLogoutModal() {
-            const modal = document.getElementById('logoutConfirmModal');
-            const card = document.getElementById('logoutModalCard');
-            if (!modal || !card) return;
-            card.classList.remove('scale-100', 'opacity-100');
-            card.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeLogoutModal();
-        });
-    </script>
 
     <%- include('../partials/notifications') %>
     <%- include('../partials/help_modal') %>
