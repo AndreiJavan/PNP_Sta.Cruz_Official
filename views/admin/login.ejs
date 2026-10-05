@@ -65,7 +65,42 @@
         </div>
     </div>
 
-    <div class="max-w-md w-full relative z-10">
+    <!-- Mobile Device & Small Screen Access Blocker -->
+    <div id="desktopOnlyGuard" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-slate-950/95 backdrop-blur-xl text-white text-center lg:hidden">
+        <div class="max-w-sm w-full p-8 rounded-[2.5rem] bg-slate-900/90 border border-slate-800 shadow-2xl relative overflow-hidden">
+            <div class="w-20 h-20 mx-auto mb-6 rounded-3xl bg-amber-500/10 text-pnp-gold border border-pnp-gold/30 flex items-center justify-center text-3xl shadow-inner">
+                <i class="fas fa-desktop"></i>
+            </div>
+            
+            <span class="inline-block px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-widest mb-3">
+                Desktop Access Only
+            </span>
+
+            <h2 class="text-xl font-black uppercase tracking-tight text-white mb-2">
+                Mobile Access Disabled
+            </h2>
+
+            <p class="text-xs text-slate-400 leading-relaxed font-medium mb-6">
+                The CPICRS Administration Portal is strictly restricted to desktop and laptop computers (screens 1024px or wider). Administrative operations and crime record management are disabled on mobile phones.
+            </p>
+
+            <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/50 mb-6 flex items-center space-x-3 text-left">
+                <i class="fas fa-shield-halved text-pnp-gold text-lg shrink-0"></i>
+                <div class="text-[11px] text-slate-300">
+                    <p class="font-bold text-white">Security Protocol</p>
+                    <p class="text-slate-400 text-[10px]">Please access this system from an authorized station workstation or PC.</p>
+                </div>
+            </div>
+
+            <a href="/"
+                class="w-full py-3.5 px-6 rounded-xl bg-pnp-blue hover:bg-blue-900 text-white text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-lg flex items-center justify-center space-x-2">
+                <i class="fas fa-arrow-left text-xs"></i>
+                <span>Return to Public Portal</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="max-w-md w-full relative z-10 hidden lg:block">
         <!-- Theme Toggle -->
         <div class="flex justify-end mb-4">
             <button onclick="toggleTheme()"
@@ -188,6 +223,17 @@
             const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
             window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
         }
+
+        // Desktop-only enforcement helper for body scroll locks
+        const syncDesktopOnlyGuard = () => {
+            if (window.innerWidth < 1024) {
+                document.body.classList.add('overflow-hidden');
+            } else {
+                document.body.classList.remove('overflow-hidden');
+            }
+        };
+        window.addEventListener('resize', syncDesktopOnlyGuard);
+        syncDesktopOnlyGuard();
     </script>
 </body>
 
