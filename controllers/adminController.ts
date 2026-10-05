@@ -1572,6 +1572,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     await batch.commit();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
+    await memoryCache.clearNamespace('reports');
     await logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`);
     res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
@@ -1582,17 +1583,19 @@ export const saveReportBatch = async (req: Request, res: Response) => {
 
 export const getAuditLogs = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(100).get();
-    const logs = snap.docs.map((doc: any) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        admin_name: data.username || data.admin_id || 'System',
-        action: data.action,
-        details: data.details,
-        timestamp: data.timestamp
-      };
-    });
+    const logs = await memoryCache.getOrSet('audit_logs:latest', async () => {
+      const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(100).get();
+      return snap.docs.map((doc: any) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          admin_name: data.username || data.admin_id || 'System',
+          action: data.action,
+          details: data.details,
+          timestamp: data.timestamp
+        };
+      });
+    }, 60 * 1000);
     res.render('admin/audit_log', { title: 'System Audit Logs', logs, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -2185,18 +2188,21 @@ const parseVideos = (path: string | undefined): string[] => {
 export const getBulletins = async (req: Request, res: Response) => {
   try {
     const category = req.query.category as string;
+    const cacheKey = `bulletin:admin:${category || 'All'}`;
 
-    let query: any = db.collection('bulletins');
-    if (category && category !== 'All') {
-      query = query.where('category', '==', category);
-    }
-    
-    const snap = await query.orderBy('created_at', 'desc').get();
+    const bulletins = await memoryCache.getOrSet(cacheKey, async () => {
+      let query: any = db.collection('bulletins');
+      if (category && category !== 'All') {
+        query = query.where('category', '==', category);
+      }
+      
+      const snap = await query.orderBy('created_at', 'desc').get();
 
-    const bulletins = snap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
-    });
+      return snap.docs.map((doc: any) => {
+        const d = doc.data();
+        return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
+      });
+    }, 2 * 60 * 1000);
 
     const title = category === 'Wanted Person' ? 'Wanted Persons' : 
                   category === 'Missing Person' ? 'Missing Persons' : 'Bulletins';
@@ -2601,7 +2607,9 @@ export const deleteBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_ARCHIVED', `Archived bulletin ID: ${req.params.id}`);
     await docRef.delete();
-    memoryCache.clearNamespace('bulletin');
+    await memoryCache.clearNamespace('bulletin');
+    await memoryCache.clearNamespace('bulletins');
+    await memoryCache.clearNamespace('archive');
     res.redirect(redirectUrl);
   } catch (err) {
     console.error('Error archiving bulletin:', err);
@@ -2615,12 +2623,16 @@ export const getTips = async (req: Request, res: Response) => {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    const [snap, countSnap] = await Promise.all([
-      db.collection('anonymous_tips').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
-      db.collection('anonymous_tips').count().get()
-    ]);
-    const tips = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    const totalPages = Math.ceil(countSnap.data().count / limit);
+    const cacheKey = `tips:admin_p${page}`;
+    const { tips, totalPages } = await memoryCache.getOrSet(cacheKey, async () => {
+      const [snap, countSnap] = await Promise.all([
+        db.collection('anonymous_tips').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
+        db.collection('anonymous_tips').count().get()
+      ]);
+      const tipsList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      const pages = Math.ceil(countSnap.data().count / limit);
+      return { tips: tipsList, totalPages: pages };
+    }, 60 * 1000);
 
     // Mark tip-related notifications as read when viewed
     const unreadNotifs = await db.collection('admin_notifications')
@@ -2798,8 +2810,11 @@ export const purgePlaceholders = async (req: Request, res: Response) => {
 
 export const getHotlines = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('hotlines').orderBy('category').get();
-    const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const cacheKey = 'hotlines:admin';
+    const hotlines = await memoryCache.getOrSet(cacheKey, async () => {
+      const snap = await db.collection('hotlines').orderBy('category').get();
+      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    }, 5 * 60 * 1000);
     res.render('admin/hotlines', { title: 'Hotlines', hotlines, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -2885,13 +2900,16 @@ export const deleteHotline = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const [usersSnap, logsSnap] = await Promise.all([
-      db.collection('users').get(),
-      db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get()
-    ]);
+    const { users, logs } = await memoryCache.getOrSet('users:admin_view', async () => {
+      const [usersSnap, logsSnap] = await Promise.all([
+        db.collection('users').get(),
+        db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get()
+      ]);
 
-    const users = (usersSnap && usersSnap.docs) ? usersSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
-    const logs = (logsSnap && logsSnap.docs) ? logsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
+      const usersList = (usersSnap && usersSnap.docs) ? usersSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
+      const logsList = (logsSnap && logsSnap.docs) ? logsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
+      return { users: usersList, logs: logsList };
+    }, 2 * 60 * 1000);
 
     res.render('admin/users', {
       title: 'Users',
@@ -2970,6 +2988,8 @@ export const postUser = async (req: Request, res: Response) => {
       `
     });
 
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
@@ -3029,6 +3049,8 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username} | Reason: ${reasonText}`);
     await docRef.delete();
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
@@ -3040,46 +3062,51 @@ export const getReports = async (req: Request, res: Response) => {
   try {
     const currentYear = new Date().getFullYear();
     const currentYearStartStr = `${currentYear}-01-01`;
+    const cacheKey = `reports:admin_view_${currentYear}`;
 
-    const [reportsSnap, allPointsSnap] = await Promise.all([
-      db.collection('intelligence_scans').where('timestamp', '>=', currentYearStartStr).orderBy('timestamp', 'desc').get(),
-      db.collection('map_points').where('incident_date', '>=', currentYearStartStr).orderBy('incident_date', 'desc').get()
-    ]);
+    const { reports, allPoints } = await memoryCache.getOrSet(cacheKey, async () => {
+      const [reportsSnap, allPointsSnap] = await Promise.all([
+        db.collection('intelligence_scans').where('timestamp', '>=', currentYearStartStr).orderBy('timestamp', 'desc').get(),
+        db.collection('map_points').where('incident_date', '>=', currentYearStartStr).orderBy('incident_date', 'desc').get()
+      ]);
 
-    const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      const reportsList = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
-    const scansMap: { [key: string]: string } = {};
-    reportsSnap.docs.forEach((doc: any) => {
-      const data = doc.data();
-      const stats = data.category_stats || {};
-      scansMap[doc.id] = stats.entry_type || 'scanned';
-    });
-
-    const allPoints = allPointsSnap.docs
-      .map((doc: any) => {
+      const scansMap: { [key: string]: string } = {};
+      reportsSnap.docs.forEach((doc: any) => {
         const data = doc.data();
-        let entryType = data.entry_type;
-        if (!entryType) {
-          if (data.report_id) {
-            entryType = scansMap[data.report_id] || 'scanned';
-          } else {
-            entryType = 'manual';
-          }
-        }
-        let cat = data.category || 'Non-Index';
-        if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
-          cat = 'PSI';
-        }
-        return { id: doc.id, ...data, category: cat, entry_type: entryType };
-      })
-      .filter((p: any) => {
-        const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' ||
-          dateStr === '' ||
-          dateStr === '2026-04-27T09:22:14.910Z' ||
-          p.description === 'Strategic placeholder data';
-        return !isPlaceholder;
+        const stats = data.category_stats || {};
+        scansMap[doc.id] = stats.entry_type || 'scanned';
       });
+
+      const pointsList = allPointsSnap.docs
+        .map((doc: any) => {
+          const data = doc.data();
+          let entryType = data.entry_type;
+          if (!entryType) {
+            if (data.report_id) {
+              entryType = scansMap[data.report_id] || 'scanned';
+            } else {
+              entryType = 'manual';
+            }
+          }
+          let cat = data.category || 'Non-Index';
+          if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
+            cat = 'PSI';
+          }
+          return { id: doc.id, ...data, category: cat, entry_type: entryType };
+        })
+        .filter((p: any) => {
+          const dateStr = String(p.incident_date || '');
+          const isPlaceholder = dateStr === 'N/A' ||
+            dateStr === '' ||
+            dateStr === '2026-04-27T09:22:14.910Z' ||
+            p.description === 'Strategic placeholder data';
+          return !isPlaceholder;
+        });
+
+      return { reports: reportsList, allPoints: pointsList };
+    }, 3 * 60 * 1000);
 
     const stats = {
       '8-Focus': allPoints.filter((p: any) => p.category === '8-Focus').length,
@@ -3171,6 +3198,8 @@ export const deleteReport = async (req: Request, res: Response) => {
     await db.collection('intelligence_scans').doc(reportId).delete();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
+    await memoryCache.clearNamespace('reports');
+    await memoryCache.clearNamespace('archive');
 
     await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
     res.redirect('/admin/reports');
@@ -3271,6 +3300,8 @@ export const approveUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'active' });
     await logAction(req, 'USER_APPROVE', `Approved administrative credentials for: ${userData.username}`);
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
 
     // Send approval email to the new user
     if (userData.email) {
@@ -3331,6 +3362,8 @@ export const rejectUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'rejected' });
     await logAction(req, 'USER_REJECT', `Rejected administrative credentials for: ${userData.username}`);
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
 
     // Send rejection email to the new user
     if (userData.email) {
@@ -3359,8 +3392,14 @@ export const rejectUser = async (req: Request, res: Response) => {
 export const getArchive = async (req: Request, res: Response) => {
   try {
     const selectedCategory = (req.query.category as string) || 'All';
-    const snap = await db.collection('recycle_bin').orderBy('deleted_at', 'desc').get();
-    const items = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const allItems = await memoryCache.getOrSet('archive:all', async () => {
+      const snap = await db.collection('recycle_bin').orderBy('deleted_at', 'desc').get();
+      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    }, 2 * 60 * 1000);
+
+    const items = selectedCategory && selectedCategory !== 'All' 
+      ? allItems.filter((doc: any) => doc.category === selectedCategory) 
+      : allItems;
 
     res.render('admin/archive', {
       title: 'Archive',
@@ -3391,6 +3430,7 @@ export const clearAllArchive = async (req: Request, res: Response) => {
       await logAction(req, 'ARCHIVE_CLEAR_ALL', `Cleared ${docsToDelete.length} items from recycle bin (Category: ${selectedCategory})`);
     }
 
+    await memoryCache.clearNamespace('archive');
     res.redirect(`/admin/archive?category=${encodeURIComponent(selectedCategory)}`);
   } catch (err) {
     console.error('Error clearing archive:', err);
@@ -3431,6 +3471,7 @@ export const restoreArchiveItem = async (req: Request, res: Response) => {
 
     await logAction(req, 'ARCHIVE_RESTORE', `Restored ${category} item: ${item.title}`);
     await docRef.delete();
+    await memoryCache.clearNamespace('archive');
     memoryCache.flush();
 
     res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
@@ -3454,6 +3495,7 @@ export const permanentlyDeleteArchiveItem = async (req: Request, res: Response) 
       await docRef.delete();
     }
 
+    await memoryCache.clearNamespace('archive');
     res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
   } catch (err) {
     console.error('Error permanently deleting archive item:', err);
