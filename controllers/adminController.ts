@@ -3216,6 +3216,119 @@ export const deleteReport = async (req: Request, res: Response) => {
     res.status(500).send(`Error archiving report: ${errorMsg}`);
   }
 };
+
+export const updateReportBatch = async (req: Request, res: Response) => {
+  const reportId = req.params.id;
+  const { entries, filename } = req.body;
+
+  if (!entries || !Array.isArray(entries) || entries.length === 0) {
+    return res.status(400).json({ success: false, message: 'Invalid or empty entries dataset provided.' });
+  }
+
+  // 1. Strict server-side validation
+  const todayStr = new Date().toISOString().split('T')[0];
+  const validCategories = ['8-Focus', 'Non-Index', 'PSI'];
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const rowNum = i + 1;
+
+    let rawBarangay = (entry.barangay || '').trim();
+    if (!rawBarangay) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Missing Barangay / Sector.` });
+    }
+
+    entry.barangay = normalizeSantaCruzBarangay(rawBarangay);
+    if (!VALID_BARANGAYS.includes(entry.barangay)) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: "${rawBarangay}" is not a recognized Santa Cruz Barangay.` });
+    }
+
+    const rawDate = (entry.date_committed || entry.incident_date || entry.date || '').trim();
+    if (!rawDate || !/^\d{4}-\d{2}-\d{2}$/.test(rawDate) || isNaN(new Date(rawDate).getTime())) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Invalid Timeline Date format (YYYY-MM-DD required).` });
+    }
+
+    if (rawDate < '2024-01-01' || rawDate > todayStr) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Timeline Date (${rawDate}) must be between 2024-01-01 and today.` });
+    }
+
+    const offense = (entry.incident_type || entry.offense || '').trim();
+    if (!offense || offense.length < 2) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
+    }
+
+    const category = entry.category || 'Non-Index';
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Invalid category.` });
+    }
+  }
+
+  try {
+    const reportRef = db.collection('intelligence_scans').doc(reportId);
+    const reportDoc = await reportRef.get();
+    if (!reportDoc.exists) {
+      return res.status(404).json({ success: false, message: 'Report batch not found.' });
+    }
+
+    const existingReport = reportDoc.data();
+    const entryType = existingReport.category_stats?.entry_type || (existingReport.filename?.includes('Manual') ? 'manual' : 'scanned');
+    const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0, entry_type: entryType };
+
+    // Prepare replacement points
+    const pointsToCreate = entries.map(entry => {
+      const pin = MANUAL_PINS.find(p => p.name.toLowerCase() === (entry.barangay || '').toLowerCase()) || MANUAL_PINS.find(p => p.name === 'Alipit');
+      const cat = entry.category || 'Non-Index';
+      categoryStats[cat] = (categoryStats[cat] || 0) + 1;
+
+      return {
+        lat: pin ? pin.lat : 14.223931,
+        lng: pin ? pin.lng : 121.405213,
+        incident_type: entry.incident_type || entry.offense,
+        incident_date: entry.incident_date || entry.date || entry.date_committed,
+        barangay: entry.barangay,
+        description: entry.description || (entryType === 'manual' ? 'Manual entry' : 'Intel extracted'),
+        category: cat,
+        report_id: reportId,
+        created_at: new Date().toISOString()
+      };
+    });
+
+    // Update parent report
+    const updatedReportData = {
+      filename: filename || existingReport.filename,
+      total_records: entries.length,
+      category_stats: categoryStats,
+      raw_data: entries,
+      updated_at: new Date().toISOString()
+    };
+    await reportRef.update(updatedReportData);
+
+    // Delete existing child map points safely
+    const existingPointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
+    if (existingPointsSnap.docs && existingPointsSnap.docs.length > 0) {
+      for (const ptDoc of existingPointsSnap.docs) {
+        await ptDoc.ref.delete().catch(() => {});
+      }
+    }
+    await db.collection('map_points').where('report_id', '==', reportId).delete().catch(() => {});
+
+    // Bulk insert updated map points in 1 fast query using bulk batching
+    await db.collection('map_points').insertMany(pointsToCreate);
+
+    // Clear caches
+    await memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('scans');
+    await memoryCache.clearNamespace('reports');
+
+    logAction(req, 'REPORT_EDIT', `Updated intelligence report batch: ${filename || existingReport.filename} (${entries.length} records)`).catch(e => console.warn('[AUDIT]', e.message));
+
+    res.json({ success: true, count: entries.length, message: 'Report updated successfully.' });
+  } catch (err: any) {
+    console.error('Error updating report batch:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error during report update' });
+  }
+};
+
 export const bulkAddMapPoints = async (req: Request, res: Response) => {
   const { entries } = req.body;
   if (!entries || !Array.isArray(entries)) {
