@@ -1797,7 +1797,8 @@
                              <span class="text-[11px] font-black uppercase text-slate-700 dark:text-slate-200 tracking-tight leading-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-300">${report.filename || 'Manual Transmission'}</span>
                              <div class="flex items-center space-x-2 mt-1">
                                  <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest italic opacity-70">${report.admin_name || 'Sys Admin'}</span>
-                             </div>
+
+                                 </div>
                          </div>
                      </td>
                      <td class="w-24 px-2 py-6 text-center">
@@ -1946,10 +1947,7 @@
      }
 
     window.confirmDeleteReport = async function(event, reportId) {
-        if (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
+        if (event) event.preventDefault();
         
         const btn = document.querySelector(`#deleteReportForm_${reportId} button`);
         if (btn && btn.disabled) return false;
@@ -1964,31 +1962,13 @@
         if (confirmed) {
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             }
-            try {
-                const res = await fetch(`/admin/reports/${reportId}/delete`, {
-                    method: 'POST',
-                    headers: { 'Accept': 'application/json' }
-                });
-                const data = await res.json().catch(() => ({ success: res.ok }));
-                if (data.success) {
-                    await window.strategicAlert({
-                        title: "Archived Successfully",
-                        message: "The record batch has been transferred to the Archive.",
-                        type: "success"
-                    });
-                    window.location.reload();
-                } else {
-                    throw new Error(data.message || 'Failed to archive report.');
-                }
-            } catch (err) {
-                const form = document.getElementById(`deleteReportForm_${reportId}`);
-                if (form) form.submit();
-            }
+            const form = document.getElementById(`deleteReportForm_${reportId}`);
+            if (form) form.submit();
         }
         return false;
-    };
+    }
 
     window.filterReports = function() {
         currentReportPage = 1;

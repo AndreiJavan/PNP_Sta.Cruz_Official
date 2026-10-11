@@ -3181,45 +3181,38 @@ export const deleteReport = async (req: Request, res: Response) => {
     const pointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
     const mapPointsData = (pointsSnap.docs || []).map((d: any) => ({ id: d.id, ...d.data() }));
 
-    // 3 & 4. Parallel execution: Store into recycle_bin archive and bulk delete map points in parallel
-    await Promise.all([
-      db.collection('recycle_bin').add({
-        category: 'Crime Reports',
-        title: reportData.filename || `Report ${reportId.slice(-6)}`,
-        original_id: reportId,
-        payload: {
-          report: reportData,
-          map_points: mapPointsData
-        },
-        deleted_by: adminName,
-        deleted_at: new Date().toISOString()
-      }),
-      db.collection('map_points').where('report_id', '==', reportId).delete()
-    ]);
+    // 3. Store into recycle_bin collection
+    await db.collection('recycle_bin').add({
+      category: 'Crime Reports',
+      title: reportData.filename || `Report ${reportId.slice(-6)}`,
+      original_id: reportId,
+      payload: {
+        report: reportData,
+        map_points: mapPointsData
+      },
+      deleted_by: adminName,
+      deleted_at: new Date().toISOString()
+    });
 
-    // 5. Delete the parent scan document
-    await db.collection('intelligence_scans').doc(reportId).delete();
-
-    // 6. Clear caches
-    await Promise.all([
-      memoryCache.clearNamespace('map_points'),
-      memoryCache.clearNamespace('scans'),
-      memoryCache.clearNamespace('reports'),
-      memoryCache.clearNamespace('archive')
-    ]);
-
-    logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`).catch(e => console.warn('[AUDIT]', e.message));
-
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      return res.json({ success: true, message: 'Report transferred to archive successfully.' });
+    // 4. Delete map points & scan document safely
+    // Delete individual map points by ID first to guarantee removal
+    if (pointsSnap.docs && pointsSnap.docs.length > 0) {
+      for (const ptDoc of pointsSnap.docs) {
+        await ptDoc.ref.delete().catch((e: any) => console.warn(`[DELETE REPORT] Map point ${ptDoc.id} delete warning:`, e.message));
+      }
     }
+    await db.collection('map_points').where('report_id', '==', reportId).delete().catch((e: any) => console.warn(`[DELETE REPORT] Bulk map points delete warning:`, e.message));
+    await db.collection('intelligence_scans').doc(reportId).delete();
+    await memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('scans');
+    await memoryCache.clearNamespace('reports');
+    await memoryCache.clearNamespace('archive');
+
+    await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
     res.redirect('/admin/reports');
   } catch (err: any) {
     console.error('Error archiving report:', err);
     const errorMsg = err.message || JSON.stringify(err);
-    if (req.xhr || req.headers.accept?.includes('application/json')) {
-      return res.status(500).json({ success: false, message: `Error archiving report: ${errorMsg}` });
-    }
     res.status(500).send(`Error archiving report: ${errorMsg}`);
   }
 };
