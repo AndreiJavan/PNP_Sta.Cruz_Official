@@ -25,33 +25,25 @@
             <p class="text-[10px] text-slate-400 font-bold uppercase mt-4 tracking-wider leading-tight">Safety Operations</p>
         </div>
 
-        <button onclick="openManualEntry()" class="bg-white dark:bg-slate-900 border border-gray-150 dark:border-slate-800/60 shadow-sm hover:shadow-2xl p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:scale-105 hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden">
-            <div class="absolute inset-0 bg-pnp-blue/5 dark:bg-pnp-gold/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-            <div class="flex justify-between items-start w-full relative z-10">
-                <span class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Direct Entry</span>
-                <div class="w-8 h-8 bg-pnp-blue/10 dark:bg-white/5 rounded-xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border border-pnp-blue/10 dark:border-white/10">
-                    <i class="fas fa-keyboard text-xs"></i>
-                </div>
+        <button onclick="openManualEntry()" class="bg-white dark:bg-slate-900 border-2 border-dashed border-gray-200 dark:border-slate-700/60 p-6 rounded-[2rem] flex flex-col justify-center text-left group hover:border-pnp-blue dark:hover:border-pnp-gold transition-all relative overflow-hidden">
+            <div class="absolute -right-4 -top-4 w-12 h-12 bg-pnp-blue/5 dark:bg-pnp-gold/5 rounded-full blur-xl group-hover:bg-pnp-blue/10 dark:group-hover:bg-pnp-gold/10 transition-all"></div>
+            <div class="w-10 h-10 bg-pnp-blue/10 dark:bg-white/5 rounded-xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold mb-4 group-hover:scale-110 transition-all border border-pnp-blue/10 dark:border-white/10">
+                <i class="fas fa-keyboard"></i>
             </div>
-            <div class="text-xl font-black text-slate-800 dark:text-white leading-none uppercase tracking-tighter relative z-10">Manual Input</div>
-            <p class="text-[10px] text-slate-400 dark:text-white/40 font-bold uppercase mt-3 tracking-widest relative z-10">Direct Grid Recording</p>
+            <div class="text-lg font-black text-slate-800 dark:text-white leading-none uppercase tracking-widest">Manual Input</div>
+            <p class="text-[10px] text-slate-400 dark:text-white/30 font-bold uppercase mt-3 tracking-widest">Manual Entry</p>
         </button>
 
-        <button onclick="document.getElementById('fileConverterInput').click()" class="pnp-card pnp-gradient-blue p-6 rounded-[2rem] shadow-sm hover:shadow-2xl flex flex-col justify-center border-2 border-white/10 text-left group hover:scale-105 hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden">
-            <div class="absolute inset-0 bg-pnp-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+        <button onclick="document.getElementById('fileConverterInput').click()" class="pnp-card pnp-gradient-blue p-6 rounded-[2rem] shadow-2xl flex flex-col justify-center border-2 border-white/10 text-left group hover:-translate-y-2 relative overflow-hidden">
+            <div class="absolute inset-0 bg-pnp-gold/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
             <div class="flex justify-between items-start w-full relative z-10">
                 <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Active Scanner</span>
-                <div class="flex items-center space-x-2">
-                    <span onclick="event.stopPropagation(); purgeTacticalData()" title="Purge System Placeholders" class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
-                        <i class="fas fa-microchip"></i>
-                    </span>
-                    <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center text-pnp-gold group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border border-white/20">
-                        <i class="fas fa-file-invoice text-xs"></i>
-                    </div>
-                </div>
+                <span onclick="event.stopPropagation(); purgeTacticalData()" title="Purge System Placeholders" class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
+                    <i class="fas fa-microchip"></i>
+                </span>
             </div>
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
-            <p class="text-[10px] text-white/50 font-bold uppercase mt-3 tracking-widest relative z-10">Automated File Intake</p>
+            <p class="text-[10px] text-white/40 font-bold uppercase mt-3 italic tracking-widest relative z-10">GPT-OSS 120B Scanner</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
     </div>
@@ -438,9 +430,9 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            statusText.textContent = `Scanned File: ${file.name} - Extracting tactical records...`;
+            statusText.textContent = `Scanned File: ${file.name} - Extracting via GPT-OSS 120B...`;
 
-            // ✅ Targeted route for document processing
+            // ✅ Targeted route for AI processing
             const res = await fetch('/admin/process-ai', {
                 method: 'POST',
                 body: formData
@@ -454,14 +446,14 @@
             const result = await res.json();
 
             if (!result.success) {
-                throw new Error(result.error || "Document extraction processing failed");
+                throw new Error(result.error || "GPT-OSS 120B processing failed");
             }
 
             const flattened = result.data;
 
             if (flattened.length === 0) {
                 window.strategicAlert({
-                    title: "Scan Complete - No Data",
+                    title: "Neural Scan Negative",
                     message: "No incident records detected in this document. Please verify source data.",
                     type: "warning"
                 });
@@ -472,7 +464,7 @@
             showIntelReview(flattened, file.name);
 
         } catch (error) {
-            console.error("Document Scanner Error:", error);
+            console.error("GPT-OSS 120B Error:", error);
             window.strategicAlert({
                 title: "Extraction Failure",
                 message: error.message,
@@ -1802,8 +1794,8 @@
                 <span class="loading-dots-tactical text-left w-16"></span>
             </h4>
             <div class="h-px w-64 bg-gradient-to-r from-transparent via-pnp-gold/20 to-transparent mx-auto mt-6"></div>
-            <p id="intelLoadingText" class="mt-6 text-[10px] text-white/40 uppercase font-black tracking-[0.4em] animate-pulse max-w-xs leading-relaxed italic mx-auto">
-                Analyzing tactical crime datasets...
+            <p id="intelLoadingText" class="mt-6 text-[10px] text-white/30 uppercase font-black tracking-[0.4em] animate-pulse max-w-xs leading-relaxed italic mx-auto">
+                Analyzing tactical datasets via GPT-OSS 120B...
             </p>
         </div>
     </div>
