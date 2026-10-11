@@ -41,8 +41,13 @@
             <div class="absolute inset-0 bg-pnp-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             <div class="flex justify-between items-start w-full relative z-10">
                 <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Active Scanner</span>
-                <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center text-pnp-gold group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border border-white/20">
-                    <i class="fas fa-file-invoice text-xs"></i>
+                <div class="flex items-center space-x-2">
+                    <span onclick="event.stopPropagation(); purgeTacticalData()" title="Purge System Placeholders" class="text-[11px] text-white/20 hover:text-red-400 transition-colors cursor-help">
+                        <i class="fas fa-microchip"></i>
+                    </span>
+                    <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center text-pnp-gold group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border border-white/20">
+                        <i class="fas fa-file-invoice text-xs"></i>
+                    </div>
                 </div>
             </div>
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
@@ -76,8 +81,8 @@
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">8-Focus</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Non-Index</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Safety</th>
-                            <th class="w-28 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
-                            <th class="w-40 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Actions</th>
+                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
+                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-800">
@@ -133,13 +138,13 @@
                                             <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 group-hover:bg-pnp-blue/15 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10 transition-all inline-block shadow-sm">SCANNED</span>
                                         <% } %>
                                     </td>
-                                    <td class="w-40 px-4 py-6 text-center">
-                                        <div class="flex items-center justify-center space-x-2">
-                                            <button onclick="editReportBatch(event, '<%= report.id %>')" type="button" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Edit Record Batch">
+                                    <td class="w-40 px-3 py-6 text-center">
+                                        <div class="flex items-center justify-center space-x-2.5">
+                                            <button onclick="editReportBatch(event, '<%= report.id %>')" type="button" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Edit Record Batch">
                                                 <i class="fas fa-edit text-xs"></i>
                                             </button>
                                             <form id="deleteReportForm_<%= report.id %>" action="/admin/reports/<%= report.id %>/delete" method="POST" class="inline-block flex-shrink-0" onsubmit="confirmDeleteReport(event, '<%= report.id %>'); return false;">
-                                                <button type="submit" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Delete Record Batch">
+                                                <button type="submit" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Delete Record Batch">
                                                     <i class="fas fa-trash-alt text-xs"></i>
                                                 </button>
                                             </form>
@@ -321,6 +326,51 @@
             </div>
         </div>
 
+        <!-- Shared Datalists for instant autocompletion without DOM bloat -->
+        <datalist id="editCrimes_8Focus">
+            <option value="Murder">
+            <option value="Homicide">
+            <option value="Physical Injuries">
+            <option value="Rape">
+            <option value="Robbery">
+            <option value="Theft">
+            <option value="Carnapping (Motorcycle)">
+            <option value="Carnapping (Motor Vehicle)">
+        </datalist>
+        <datalist id="editCrimes_NonIndex">
+            <option value="Violence Against Women and Children (VAWC)">
+            <option value="Cybercrime">
+            <option value="Estafa">
+            <option value="Swindling / Fraud">
+            <option value="Drug Possession">
+            <option value="Drug Sale">
+            <option value="Drug Use">
+            <option value="Illegal Gambling">
+            <option value="Illegal Possession of Firearms">
+            <option value="Human Trafficking">
+            <option value="Child Abuse (RA 7610)">
+            <option value="Damage to Property">
+            <option value="Malicious Mischief">
+            <option value="Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)">
+            <option value="Illegal Recruitment">
+            <option value="Ordinance Violations">
+            <option value="Grave Threats">
+            <option value="Alarm and Scandal">
+        </datalist>
+        <datalist id="editCrimes_PSI">
+            <option value="Vehicular Accident">
+            <option value="Road Accident / Traffic Incident">
+            <option value="Fire Incident">
+            <option value="Flood Incident">
+            <option value="Earthquake Incident">
+            <option value="Landslide Incident">
+            <option value="Disaster Incident Reports">
+            <option value="Public Disturbance Incident">
+            <option value="Emergency Response Incident">
+            <option value="Missing Person Report">
+            <option value="Rescue Operation Cases">
+        </datalist>
+
         <!-- Table View -->
         <div class="flex-grow overflow-auto p-6 bg-gray-50/50 dark:bg-slate-900/30 custom-scrollbar min-h-0">
             <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-xl overflow-hidden">
@@ -355,6 +405,18 @@
                 </button>
                 <span id="editTotalRowIndicator" class="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">0 Total Rows</span>
             </div>
+            
+            <!-- Ultra Fast Pagination Controls for Large Intelligence Batches -->
+            <div id="editPaginationContainer" class="flex items-center space-x-3 bg-gray-50 dark:bg-slate-800/80 px-4 py-2 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm">
+                <button type="button" id="btnEditPrev" onclick="changeEditPage(-1)" class="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-200 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-sm" title="Previous Page">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </button>
+                <span id="editPaginationPageText" class="text-xs font-black text-slate-700 dark:text-white uppercase tracking-wider px-2">Page 1 of 1</span>
+                <button type="button" id="btnEditNext" onclick="changeEditPage(1)" class="w-8 h-8 rounded-xl bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-200 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed shadow-sm" title="Next Page">
+                    <i class="fas fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+
             <div class="flex items-center space-x-4">
                 <button onclick="closeEditReportModal()" class="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:text-red-500 transition-all">Cancel</button>
                 <button id="btnSaveEditReport" onclick="saveEditReport()" class="px-12 py-5 bg-pnp-blue hover:bg-black text-white rounded-2xl text-xs font-black uppercase tracking-[0.3em] shadow-2xl shadow-pnp-blue/30 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center space-x-3">
@@ -1125,14 +1187,23 @@
          }
      };
 
-     // --- EDIT REPORT BATCH PROTOCOL ---
+     // --- EDIT REPORT BATCH PROTOCOL (HIGH PERFORMANCE / INSTANT) ---
      window.editingReportId = null;
      window.editReportData = [];
+     window.editCurrentPage = 1;
+     window.editPageSize = 50;
 
      window.editReportBatch = function(event, reportId) {
          if (event) {
              event.stopPropagation();
              event.preventDefault();
+         }
+
+         const modal = document.getElementById('editReportModal');
+         // Instantly display modal immediately (< 1ms UI feedback)
+         if (modal) {
+             modal.classList.remove('hidden');
+             modal.classList.add('flex');
          }
 
          const reportsList = window.reports || (typeof reports !== 'undefined' ? reports : []);
@@ -1143,10 +1214,15 @@
                  message: `Unable to locate report with ID: ${reportId}`,
                  type: "warning"
              });
+             if (modal) {
+                 modal.classList.add('hidden');
+                 modal.classList.remove('flex');
+             }
              return;
          }
 
          window.editingReportId = reportId;
+         window.editCurrentPage = 1;
 
          // Extract raw entries: check raw_data first, then fallback to incidents matching report_id
          let entries = [];
@@ -1176,7 +1252,6 @@
 
          window.editReportData = entries;
 
-         const modal = document.getElementById('editReportModal');
          const filenameInput = document.getElementById('editBatchFilename');
          const typeBadge = document.getElementById('editBatchTypeBadge');
 
@@ -1200,11 +1275,6 @@
          if (filterSelect) filterSelect.value = 'All';
 
          window.renderEditTable();
-
-         if (modal) {
-             modal.classList.remove('hidden');
-             modal.classList.add('flex');
-         }
      };
 
      window.closeEditReportModal = function() {
@@ -1215,6 +1285,15 @@
          }
          window.editingReportId = null;
          window.editReportData = [];
+         window.editCurrentPage = 1;
+     };
+
+     window.changeEditPage = function(delta) {
+         window.editCurrentPage = (window.editCurrentPage || 1) + delta;
+         window.renderEditTable();
+         const tbody = document.getElementById('editTableBody');
+         const container = tbody ? tbody.closest('.overflow-auto') : null;
+         if (container) container.scrollTop = 0;
      };
 
      window.renderEditTable = function() {
@@ -1222,32 +1301,79 @@
          if (!tbody) return;
 
          const filter = (document.getElementById('editCategoryFilter')?.value) || 'All';
-         tbody.innerHTML = '';
+         const data = window.editReportData || [];
+         const totalRows = data.length;
 
-         let stats = { '8-Focus': 0, 'Non-Index': 0, 'PSI': 0 };
-         let displayIndex = 1;
+         // 1. Instant stats calculation
+         let count8 = 0, countNon = 0, countPsi = 0;
+         const filteredItems = [];
 
-         const CRIMES_BY_PILLAR = {
-             '8-Focus': ['Murder', 'Homicide', 'Physical Injuries', 'Rape', 'Robbery', 'Theft', 'Carnapping (Motorcycle)', 'Carnapping (Motor Vehicle)'],
-             'Non-Index': ['Violence Against Women and Children (VAWC)', 'Cybercrime', 'Estafa', 'Swindling / Fraud', 'Drug Possession', 'Drug Sale', 'Drug Use', 'Illegal Gambling', 'Illegal Possession of Firearms', 'Human Trafficking', 'Child Abuse (RA 7610)', 'Damage to Property', 'Malicious Mischief', 'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)', 'Illegal Recruitment', 'Ordinance Violations', 'Grave Threats', 'Alarm and Scandal'],
-             'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Fire Incident', 'Flood Incident', 'Earthquake Incident', 'Landslide Incident', 'Disaster Incident Reports', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report', 'Rescue Operation Cases']
-         };
-
-         window.editReportData.forEach((item, index) => {
+         for (let i = 0; i < totalRows; i++) {
+             const item = data[i];
              const cat = item.category || 'Non-Index';
-             stats[cat] = (stats[cat] || 0) + 1;
+             if (cat === '8-Focus') count8++;
+             else if (cat === 'PSI') countPsi++;
+             else countNon++;
 
-             if (filter !== 'All' && cat !== filter) return;
+             if (filter === 'All' || cat === filter) {
+                 filteredItems.push({ item, origIndex: i });
+             }
+         }
 
-             const tr = document.createElement('tr');
-             tr.className = 'bg-white dark:bg-slate-900 transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 group border-b border-gray-100 dark:border-slate-800';
+         // Update header and footer indicators
+         const rowCountSubtitle = document.getElementById('editRowCountSubtitle');
+         if (rowCountSubtitle) rowCountSubtitle.textContent = `${totalRows} Records In Batch`;
 
+         const totalRowIndicator = document.getElementById('editTotalRowIndicator');
+         if (totalRowIndicator) totalRowIndicator.textContent = `${totalRows} Total Rows`;
+
+         const elCount8 = document.getElementById('editCount8Focus');
+         if (elCount8) elCount8.textContent = count8;
+
+         const elCountNon = document.getElementById('editCountNonIndex');
+         if (elCountNon) elCountNon.textContent = countNon;
+
+         const elCountPsi = document.getElementById('editCountPSI');
+         if (elCountPsi) elCountPsi.textContent = countPsi;
+
+         // 2. Pagination calculation (50 rows/page for smooth 60fps rendering)
+         const pageSize = window.editPageSize || 50;
+         const totalPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
+         if (window.editCurrentPage > totalPages) window.editCurrentPage = totalPages;
+         if (window.editCurrentPage < 1) window.editCurrentPage = 1;
+
+         const btnPrev = document.getElementById('btnEditPrev');
+         const btnNext = document.getElementById('btnEditNext');
+         const pageText = document.getElementById('editPaginationPageText');
+
+         if (btnPrev) btnPrev.disabled = (window.editCurrentPage <= 1);
+         if (btnNext) btnNext.disabled = (window.editCurrentPage >= totalPages);
+         if (pageText) {
+             pageText.textContent = `Page ${window.editCurrentPage} of ${totalPages} (${filteredItems.length} rows)`;
+         }
+
+         // 3. Current page slice
+         const startIndex = (window.editCurrentPage - 1) * pageSize;
+         const pageSlice = filteredItems.slice(startIndex, startIndex + pageSize);
+
+         if (pageSlice.length === 0) {
+             tbody.innerHTML = `<tr><td colspan="7" class="py-12 text-center text-slate-400 font-bold uppercase tracking-wider text-xs">No records matching classification "${filter}"</td></tr>`;
+             return;
+         }
+
+         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+         const years = ['2026', '2025', '2024', '2023', '2022'];
+
+         let rowsHtml = '';
+         for (let p = 0; p < pageSlice.length; p++) {
+             const { item, origIndex } = pageSlice[p];
+             const displayNum = startIndex + p + 1;
+             const cat = item.category || 'Non-Index';
              const isFocus = cat === '8-Focus';
              const isPSI = cat === 'PSI';
              const badgeClass = isFocus ? 'bg-red-500/10 text-red-500' : isPSI ? 'bg-blue-500/10 text-blue-500' : 'bg-slate-500/10 text-slate-500';
-
-             const offenseValue = item.offense || item.incident_type || '';
-             const crimeOptions = CRIMES_BY_PILLAR[cat] || [];
+             const offenseValue = (item.offense || item.incident_type || '').replace(/"/g, '&quot;');
+             const datalistId = isFocus ? 'editCrimes_8Focus' : (isPSI ? 'editCrimes_PSI' : 'editCrimes_NonIndex');
 
              const rawDateStr = item.date_committed || item.incident_date || item.date || new Date().toISOString().split('T')[0];
              const dateParts = rawDateStr.split('-');
@@ -1255,78 +1381,83 @@
              const itemMonth = dateParts[1] || '01';
              const itemDay = dateParts[2] || '01';
 
-             tr.innerHTML = `
-                 <td class="px-2 py-4 text-center border-r border-gray-100 dark:border-slate-800 w-14">
-                     <button onclick="insertEditRowAt(${index + 1})" title="Insert Row Below" class="w-7 h-7 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition flex items-center justify-center mx-auto">
-                         <i class="fas fa-plus text-[10px]"></i>
-                     </button>
-                 </td>
-                 <td class="px-4 py-4 text-[10px] font-black text-gray-400 border-r border-gray-100 dark:border-slate-800 w-16 text-center tabular-nums">${displayIndex++}</td>
-                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-48">
-                     <select onchange="updateEditItem(${index}, 'barangay', this.value)" class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-700 dark:text-white uppercase outline-none focus:ring-0 p-4 cursor-pointer">
-                         ${VALID_BARANGAYS.map(b => `<option value="${b}" ${b === item.barangay ? 'selected' : ''} class="dark:bg-slate-900">${b}</option>`).join('')}
-                     </select>
-                 </td>
-                 <td class="px-2 py-2 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-56">
-                     <div class="flex items-center space-x-1 justify-center">
-                         <select onchange="updateEditItemDate(${index}, 'day', this.value)" title="Day (DD)" class="w-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                             ${[...Array(31)].map((_, i) => {
-                                 const d = String(i + 1).padStart(2, '0');
-                                 return `<option value="${d}" ${d === itemDay ? 'selected' : ''} class="dark:bg-slate-900">${d}</option>`;
-                             }).join('')}
+             // Barangay options
+             let brgyOpts = '';
+             for (let b = 0; b < VALID_BARANGAYS.length; b++) {
+                 const bName = VALID_BARANGAYS[b];
+                 brgyOpts += `<option value="${bName}" ${bName === item.barangay ? 'selected' : ''} class="dark:bg-slate-900">${bName}</option>`;
+             }
+
+             // Day options (1-31)
+             let dayOpts = '';
+             for (let d = 1; d <= 31; d++) {
+                 const dStr = String(d).padStart(2, '0');
+                 dayOpts += `<option value="${dStr}" ${dStr === itemDay ? 'selected' : ''} class="dark:bg-slate-900">${dStr}</option>`;
+             }
+
+             // Month options
+             let monthOpts = '';
+             for (let m = 0; m < 12; m++) {
+                 const mStr = String(m + 1).padStart(2, '0');
+                 monthOpts += `<option value="${mStr}" ${mStr === itemMonth ? 'selected' : ''} class="dark:bg-slate-900">${months[m]}</option>`;
+             }
+
+             // Year options
+             let yearOpts = '';
+             for (let y = 0; y < years.length; y++) {
+                 const yStr = years[y];
+                 yearOpts += `<option value="${yStr}" ${yStr === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${yStr}</option>`;
+             }
+
+             rowsHtml += `
+                 <tr class="bg-white dark:bg-slate-900 transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 group border-b border-gray-100 dark:border-slate-800">
+                     <td class="px-2 py-4 text-center border-r border-gray-100 dark:border-slate-800 w-14">
+                         <button type="button" onclick="insertEditRowAt(${origIndex + 1})" title="Insert Row Below" class="w-7 h-7 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition flex items-center justify-center mx-auto">
+                             <i class="fas fa-plus text-[10px]"></i>
+                         </button>
+                     </td>
+                     <td class="px-4 py-4 text-[10px] font-black text-gray-400 border-r border-gray-100 dark:border-slate-800 w-16 text-center tabular-nums">${displayNum}</td>
+                     <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-48">
+                         <select onchange="updateEditItem(${origIndex}, 'barangay', this.value)" class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-700 dark:text-white uppercase outline-none focus:ring-0 p-4 cursor-pointer">
+                             ${brgyOpts}
                          </select>
-                         <span class="text-slate-400 font-bold text-[10px]">/</span>
-                         <select onchange="updateEditItemDate(${index}, 'month', this.value)" title="Month" class="w-16 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                             ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((mName, idx) => {
-                                 const m = String(idx + 1).padStart(2, '0');
-                                 return `<option value="${m}" ${m === itemMonth ? 'selected' : ''} class="dark:bg-slate-900">${mName}</option>`;
-                             }).join('')}
+                     </td>
+                     <td class="px-2 py-2 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-56">
+                         <div class="flex items-center space-x-1 justify-center">
+                             <select onchange="updateEditItemDate(${origIndex}, 'day', this.value)" title="Day (DD)" class="w-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                                 ${dayOpts}
+                             </select>
+                             <span class="text-slate-400 font-bold text-[10px]">/</span>
+                             <select onchange="updateEditItemDate(${origIndex}, 'month', this.value)" title="Month" class="w-16 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                                 ${monthOpts}
+                             </select>
+                             <span class="text-slate-400 font-bold text-[10px]">/</span>
+                             <select onchange="updateEditItemDate(${origIndex}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                                 ${yearOpts}
+                             </select>
+                         </div>
+                     </td>
+                     <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64">
+                         <input type="text" list="${datalistId}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="100" oninput="if(this.value.length>100)this.value=this.value.slice(0,100);updateEditItem(${origIndex}, 'offense', this.value)" 
+                             class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none">
+                     </td>
+                     <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-36">
+                         <select onchange="updateEditItem(${origIndex}, 'category', this.value)" class="w-full h-full bg-transparent border-none text-[10px] font-black uppercase tracking-widest ${badgeClass} outline-none focus:ring-0 p-4 cursor-pointer">
+                             <option value="8-Focus" ${cat === '8-Focus' ? 'selected' : ''} class="text-red-500">8-Focus</option>
+                             <option value="Non-Index" ${cat === 'Non-Index' ? 'selected' : ''} class="text-slate-500">Non-Index</option>
+                             <option value="PSI" ${cat === 'PSI' ? 'selected' : ''} class="text-blue-500">PSI</option>
                          </select>
-                         <span class="text-slate-400 font-bold text-[10px]">/</span>
-                         <select onchange="updateEditItemDate(${index}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                             ${['2026', '2025', '2024', '2023', '2022'].map(y => {
-                                 return `<option value="${y}" ${y === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${y}</option>`;
-                             }).join('')}
-                         </select>
-                     </div>
-                 </td>
-                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64">
-                     <input type="text" list="editCrimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="100" oninput="if(this.value.length>100)this.value=this.value.slice(0,100);updateEditItem(${index}, 'offense', this.value)" 
-                         class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none">
-                     <datalist id="editCrimesList_${index}">
-                         ${crimeOptions.map(o => `<option value="${o}">`).join('')}
-                     </datalist>
-                 </td>
-                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-36">
-                     <select onchange="updateEditItem(${index}, 'category', this.value)" class="w-full h-full bg-transparent border-none text-[10px] font-black uppercase tracking-widest ${badgeClass} outline-none focus:ring-0 p-4 cursor-pointer">
-                         <option value="8-Focus" ${cat === '8-Focus' ? 'selected' : ''} class="text-red-500">8-Focus</option>
-                         <option value="Non-Index" ${cat === 'Non-Index' ? 'selected' : ''} class="text-slate-500">Non-Index</option>
-                         <option value="PSI" ${cat === 'PSI' ? 'selected' : ''} class="text-blue-500">PSI</option>
-                     </select>
-                 </td>
-                 <td class="px-2 py-0 text-center w-16">
-                     <button onclick="deleteEditRow(${index})" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto opacity-70 hover:opacity-100 scale-90 hover:scale-100" title="Delete Row">
-                         <i class="fas fa-trash-alt text-[10px]"></i>
-                     </button>
-                 </td>
+                     </td>
+                     <td class="px-2 py-0 text-center w-16">
+                         <button type="button" onclick="deleteEditRow(${origIndex})" class="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto opacity-70 hover:opacity-100 scale-90 hover:scale-100" title="Delete Row">
+                             <i class="fas fa-trash-alt text-[10px]"></i>
+                         </button>
+                     </td>
+                 </tr>
              `;
-             tbody.appendChild(tr);
-         });
+         }
 
-         const rowCountSubtitle = document.getElementById('editRowCountSubtitle');
-         if (rowCountSubtitle) rowCountSubtitle.textContent = `${window.editReportData.length} Records In Batch`;
-
-         const totalRowIndicator = document.getElementById('editTotalRowIndicator');
-         if (totalRowIndicator) totalRowIndicator.textContent = `${window.editReportData.length} Total Rows`;
-
-         const count8 = document.getElementById('editCount8Focus');
-         if (count8) count8.textContent = stats['8-Focus'] || 0;
-
-         const countNon = document.getElementById('editCountNonIndex');
-         if (countNon) countNon.textContent = stats['Non-Index'] || 0;
-
-         const countPsi = document.getElementById('editCountPSI');
-         if (countPsi) countPsi.textContent = stats['PSI'] || 0;
+         tbody.innerHTML = rowsHtml;
      };
 
      window.addNewEditSingleRow = function(insertIndex = null) {
@@ -1338,10 +1469,13 @@
              category: 'Non-Index',
              description: ''
          };
+         const pageSize = window.editPageSize || 50;
          if (insertIndex !== null && typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= window.editReportData.length) {
              window.editReportData.splice(insertIndex, 0, newRow);
+             window.editCurrentPage = Math.max(1, Math.ceil((insertIndex + 1) / pageSize));
          } else {
              window.editReportData.push(newRow);
+             window.editCurrentPage = Math.max(1, Math.ceil(window.editReportData.length / pageSize));
          }
          window.renderEditTable();
          setTimeout(() => {
@@ -1694,13 +1828,13 @@
                              <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 group-hover:bg-pnp-blue/15 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10 transition-all inline-block shadow-sm">SCANNED</span>
                          `}
                      </td>
-                     <td class="w-40 px-4 py-6 text-center">
-                         <div class="flex items-center justify-center space-x-2">
-                             <button onclick="editReportBatch(event, '${report.id}')" type="button" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Edit Record Batch">
+                     <td class="w-40 px-3 py-6 text-center">
+                         <div class="flex items-center justify-center space-x-2.5">
+                             <button onclick="editReportBatch(event, '${report.id}')" type="button" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Edit Record Batch">
                                  <i class="fas fa-edit text-xs"></i>
                              </button>
                              <form id="deleteReportForm_${report.id}" action="/admin/reports/${report.id}/delete" method="POST" class="inline-block flex-shrink-0" onsubmit="confirmDeleteReport(event, '${report.id}'); return false;">
-                                 <button type="submit" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Delete Record Batch">
+                                 <button type="submit" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-2xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Delete Record Batch">
                                      <i class="fas fa-trash-alt text-xs"></i>
                                  </button>
                              </form>
