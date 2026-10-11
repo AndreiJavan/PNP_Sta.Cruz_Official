@@ -209,6 +209,9 @@ REFERENCES public.intelligence_scans(id)
 ON DELETE CASCADE
 ON UPDATE CASCADE;
 
+-- Ensure intelligence_scans has updated_at column if referenced
+ALTER TABLE public.intelligence_scans ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
 -- =====================================================
 -- OPTIONAL: FACEBOOK POST ID & VIDEO COLUMNS FOR BULLETINS
 -- If you wish to add dedicated database columns in Supabase:
