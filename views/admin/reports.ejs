@@ -1946,7 +1946,10 @@
      }
 
     window.confirmDeleteReport = async function(event, reportId) {
-        if (event) event.preventDefault();
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
         
         const btn = document.querySelector(`#deleteReportForm_${reportId} button`);
         if (btn && btn.disabled) return false;
@@ -1961,13 +1964,31 @@
         if (confirmed) {
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
             }
-            const form = document.getElementById(`deleteReportForm_${reportId}`);
-            if (form) form.submit();
+            try {
+                const res = await fetch(`/admin/reports/${reportId}/delete`, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const data = await res.json().catch(() => ({ success: res.ok }));
+                if (data.success) {
+                    await window.strategicAlert({
+                        title: "Archived Successfully",
+                        message: "The record batch has been transferred to the Archive.",
+                        type: "success"
+                    });
+                    window.location.reload();
+                } else {
+                    throw new Error(data.message || 'Failed to archive report.');
+                }
+            } catch (err) {
+                const form = document.getElementById(`deleteReportForm_${reportId}`);
+                if (form) form.submit();
+            }
         }
         return false;
-    }
+    };
 
     window.filterReports = function() {
         currentReportPage = 1;

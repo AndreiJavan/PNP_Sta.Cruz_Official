@@ -68,20 +68,15 @@ class Collection {
     if (!records || records.length === 0) return [];
     const sb = getSupabase();
     const cleanRecords = records.map(r => deepSanitizeUnicode(r));
-    const chunks: any[][] = [];
 
     for (let i = 0; i < cleanRecords.length; i += chunkSize) {
-      chunks.push(cleanRecords.slice(i, i + chunkSize));
-    }
-
-    await Promise.all(chunks.map(async (chunk) => {
+      const chunk = cleanRecords.slice(i, i + chunkSize);
       const { error } = await sb.from(this.name).insert(chunk);
       if (error) {
         console.error(`Bulk insert into ${this.name} failed:`, error);
         throw error;
       }
-    }));
-
+    }
     return cleanRecords;
   }
 

@@ -3181,38 +3181,45 @@ export const deleteReport = async (req: Request, res: Response) => {
     const pointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
     const mapPointsData = (pointsSnap.docs || []).map((d: any) => ({ id: d.id, ...d.data() }));
 
-    // 3. Store into recycle_bin collection
-    await db.collection('recycle_bin').add({
-      category: 'Crime Reports',
-      title: reportData.filename || `Report ${reportId.slice(-6)}`,
-      original_id: reportId,
-      payload: {
-        report: reportData,
-        map_points: mapPointsData
-      },
-      deleted_by: adminName,
-      deleted_at: new Date().toISOString()
-    });
+    // 3 & 4. Parallel execution: Store into recycle_bin archive and bulk delete map points in parallel
+    await Promise.all([
+      db.collection('recycle_bin').add({
+        category: 'Crime Reports',
+        title: reportData.filename || `Report ${reportId.slice(-6)}`,
+        original_id: reportId,
+        payload: {
+          report: reportData,
+          map_points: mapPointsData
+        },
+        deleted_by: adminName,
+        deleted_at: new Date().toISOString()
+      }),
+      db.collection('map_points').where('report_id', '==', reportId).delete()
+    ]);
 
-    // 4. Delete map points & scan document safely
-    // Delete individual map points by ID first to guarantee removal
-    if (pointsSnap.docs && pointsSnap.docs.length > 0) {
-      for (const ptDoc of pointsSnap.docs) {
-        await ptDoc.ref.delete().catch((e: any) => console.warn(`[DELETE REPORT] Map point ${ptDoc.id} delete warning:`, e.message));
-      }
-    }
-    await db.collection('map_points').where('report_id', '==', reportId).delete().catch((e: any) => console.warn(`[DELETE REPORT] Bulk map points delete warning:`, e.message));
+    // 5. Delete the parent scan document
     await db.collection('intelligence_scans').doc(reportId).delete();
-    await memoryCache.clearNamespace('map_points');
-    await memoryCache.clearNamespace('scans');
-    await memoryCache.clearNamespace('reports');
-    await memoryCache.clearNamespace('archive');
 
-    await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
+    // 6. Clear caches
+    await Promise.all([
+      memoryCache.clearNamespace('map_points'),
+      memoryCache.clearNamespace('scans'),
+      memoryCache.clearNamespace('reports'),
+      memoryCache.clearNamespace('archive')
+    ]);
+
+    logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`).catch(e => console.warn('[AUDIT]', e.message));
+
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.json({ success: true, message: 'Report transferred to archive successfully.' });
+    }
     res.redirect('/admin/reports');
   } catch (err: any) {
     console.error('Error archiving report:', err);
     const errorMsg = err.message || JSON.stringify(err);
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(500).json({ success: false, message: `Error archiving report: ${errorMsg}` });
+    }
     res.status(500).send(`Error archiving report: ${errorMsg}`);
   }
 };
@@ -3300,14 +3307,18 @@ export const updateReportBatch = async (req: Request, res: Response) => {
       category_stats: categoryStats,
       raw_data: entries
     };
+    await reportRef.update(updatedReportData);
 
-    // Parallel high-speed execution: update parent and delete child points simultaneously in 1 network roundtrip
-    await Promise.all([
-      reportRef.update(updatedReportData),
-      db.collection('map_points').where('report_id', '==', reportId).delete()
-    ]);
+    // Delete existing child map points safely
+    const existingPointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
+    if (existingPointsSnap.docs && existingPointsSnap.docs.length > 0) {
+      for (const ptDoc of existingPointsSnap.docs) {
+        await ptDoc.ref.delete().catch(() => {});
+      }
+    }
+    await db.collection('map_points').where('report_id', '==', reportId).delete().catch(() => {});
 
-    // Bulk insert updated map points in fast parallel chunks
+    // Bulk insert updated map points in 1 fast query using bulk batching
     await db.collection('map_points').insertMany(pointsToCreate);
 
     // Clear caches
