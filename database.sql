@@ -80,7 +80,7 @@ CREATE TABLE public.bulletins (
 -- =====================================================
 CREATE TABLE public.map_points (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  report_id UUID REFERENCES public.intelligence_scans(id),
+  report_id UUID REFERENCES public.intelligence_scans(id) ON DELETE CASCADE ON UPDATE CASCADE,
 
   lat DECIMAL(10, 8) NOT NULL,
   lng DECIMAL(11, 8) NOT NULL,
@@ -193,6 +193,21 @@ NOTIFY pgrst, 'reload schema';
 -- "violates check constraint 'bulletins_category_check'" error.
 -- =====================================================
 ALTER TABLE public.bulletins DROP CONSTRAINT IF EXISTS bulletins_category_check;
+
+-- =====================================================
+-- FIX FOR MAP_POINTS FOREIGN KEY CONSTRAINT (INTELLIGENCE_SCANS)
+-- Run this block in your Supabase SQL Editor to fix:
+-- "update or delete on table 'intelligence_scans' violates foreign key constraint 'map_points_report_id_fkey' on table 'map_points'"
+-- =====================================================
+ALTER TABLE public.map_points
+DROP CONSTRAINT IF EXISTS map_points_report_id_fkey;
+
+ALTER TABLE public.map_points
+ADD CONSTRAINT map_points_report_id_fkey
+FOREIGN KEY (report_id)
+REFERENCES public.intelligence_scans(id)
+ON DELETE CASCADE
+ON UPDATE CASCADE;
 
 -- =====================================================
 -- OPTIONAL: FACEBOOK POST ID & VIDEO COLUMNS FOR BULLETINS

@@ -2782,6 +2782,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
     console.error(err);
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       return res.status(500).json({ success: false, message: 'Neutralization sequence failed' });
+
     }
     res.status(500).send('Error deleting map point');
   }
@@ -3194,7 +3195,13 @@ export const deleteReport = async (req: Request, res: Response) => {
     });
 
     // 4. Delete map points & scan document safely
-    await db.collection('map_points').where('report_id', '==', reportId).delete();
+    // Delete individual map points by ID first to guarantee removal
+    if (pointsSnap.docs && pointsSnap.docs.length > 0) {
+      for (const ptDoc of pointsSnap.docs) {
+        await ptDoc.ref.delete().catch((e: any) => console.warn(`[DELETE REPORT] Map point ${ptDoc.id} delete warning:`, e.message));
+      }
+    }
+    await db.collection('map_points').where('report_id', '==', reportId).delete().catch((e: any) => console.warn(`[DELETE REPORT] Bulk map points delete warning:`, e.message));
     await db.collection('intelligence_scans').doc(reportId).delete();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
