@@ -308,7 +308,7 @@
         </nav>
 
         <div class="p-6 border-t border-white/10">
-            <a href="javascript:void(0)" onclick="confirmLogout(event); return false;"
+            <a href="/admin/logout" onclick="confirmLogout(event); return false;"
                 class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition duration-300 group cursor-pointer"
                 title="End Administrative Session">
                 <i class="fas fa-sign-out-alt text-[10px] group-hover:scale-110 transition"></i>
@@ -710,21 +710,17 @@
                 event.preventDefault();
                 event.stopPropagation();
             }
-            if (typeof window.strategicConfirm === 'function') {
-                const confirmed = await window.strategicConfirm({
-                    title: "Sign Out Confirmation",
-                    message: "Are you sure you want to terminate your active administrative session? Any unsaved edits will be lost.",
-                    confirmText: "Sign Out",
-                    cancelText: "Stay Logged In",
-                    type: "danger"
-                });
-                if (confirmed) {
-                    window.location.href = "/admin/logout";
-                }
-            } else {
-                if (window.confirm("Are you sure you want to end your administrative session and log out?")) {
-                    window.location.href = "/admin/logout";
-                }
+            const confirmFn = window.strategicConfirm || (async () => confirm("Are you sure you want to end your administrative session and log out?"));
+            const confirmed = await confirmFn({
+                title: "Sign Out Confirmation",
+                message: "Are you sure you want to terminate your active administrative session? Any unsaved edits will be lost.",
+                confirmText: "Sign Out",
+                cancelText: "Stay Logged In",
+                type: "danger"
+            });
+
+            if (confirmed) {
+                window.location.href = "/admin/logout";
             }
             return false;
         };
