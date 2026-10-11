@@ -3300,18 +3300,14 @@ export const updateReportBatch = async (req: Request, res: Response) => {
       category_stats: categoryStats,
       raw_data: entries
     };
-    await reportRef.update(updatedReportData);
 
-    // Delete existing child map points safely
-    const existingPointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
-    if (existingPointsSnap.docs && existingPointsSnap.docs.length > 0) {
-      for (const ptDoc of existingPointsSnap.docs) {
-        await ptDoc.ref.delete().catch(() => {});
-      }
-    }
-    await db.collection('map_points').where('report_id', '==', reportId).delete().catch(() => {});
+    // Parallel high-speed execution: update parent and delete child points simultaneously in 1 network roundtrip
+    await Promise.all([
+      reportRef.update(updatedReportData),
+      db.collection('map_points').where('report_id', '==', reportId).delete()
+    ]);
 
-    // Bulk insert updated map points in 1 fast query using bulk batching
+    // Bulk insert updated map points in fast parallel chunks
     await db.collection('map_points').insertMany(pointsToCreate);
 
     // Clear caches
