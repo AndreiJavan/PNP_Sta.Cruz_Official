@@ -1573,7 +1573,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
     await memoryCache.clearNamespace('reports');
-    await logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`);
+    logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`).catch(e => console.warn('[AUDIT]', e.message));
     res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
     console.error(err);
@@ -3230,6 +3230,18 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
     const reportRef = db.collection('intelligence_scans').doc();
     const reportId = reportRef.id;
 
+    // Save parent report FIRST to ensure foreign key integrity
+    const validMapAdminId = await getValidUserId(req.session?.user?.id);
+    batch.set(reportRef, {
+      admin_id: validMapAdminId,
+      admin_name: req.session?.user?.full_name || 'System Admin',
+      timestamp: new Date().toISOString(),
+      total_records: entries.length,
+      category_stats: categoryStats,
+      raw_data: entries,
+      filename: 'Manual Intelligence Session'
+    });
+
     for (const entry of entries) {
       let rawBarangay = (entry.barangay || '').trim();
       entry.barangay = normalizeSantaCruzBarangay(rawBarangay);
@@ -3251,22 +3263,11 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
       });
     }
 
-    // Save a report of this scan
-    const validMapAdminId = await getValidUserId(req.session?.user?.id);
-    batch.set(reportRef, {
-      admin_id: validMapAdminId,
-      admin_name: req.session?.user?.full_name || 'System Admin',
-      timestamp: new Date().toISOString(),
-      total_records: entries.length,
-      category_stats: categoryStats,
-      raw_data: entries,
-      filename: 'Manual Intelligence Session'
-    });
-
     await batch.commit();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
-    await logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`);
+    await memoryCache.clearNamespace('reports');
+    logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`).catch(e => console.warn('[AUDIT]', e.message));
     res.json({ success: true, count: entries.length });
   } catch (err) {
     console.error('Bulk add error:', err);
