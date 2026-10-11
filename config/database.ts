@@ -409,11 +409,27 @@ class Doc {
 
   async update(data: any) {
     const sb = getSupabase();
-    const cleanData = deepSanitizeUnicode(data);
-    const { error } = await sb
+    let cleanData = deepSanitizeUnicode(data);
+    let { error } = await sb
       .from(this.table)
       .update(cleanData)
       .eq('id', this.id);
+
+    // Auto-recover if schema cache does not contain a requested column (e.g. updated_at)
+    while (error && error.message && error.message.includes('in the schema cache')) {
+      const match = error.message.match(/Could not find the '([^']+)' column/i);
+      if (match && match[1] && cleanData[match[1]] !== undefined) {
+        console.warn(`[Database Notice] Column "${match[1]}" not found in table "${this.table}". Auto-recovering without it.`);
+        delete cleanData[match[1]];
+        const retryResult = await sb
+          .from(this.table)
+          .update(cleanData)
+          .eq('id', this.id);
+        error = retryResult.error;
+      } else {
+        break;
+      }
+    }
 
     if (error) throw error;
   }
@@ -489,8 +505,19 @@ export const db: any = {
               }
             }
           } else if (item.type === 'update') {
-            const cleanData = deepSanitizeUnicode(item.data);
-            const { error } = await sb.from(item.table).update(cleanData).eq('id', item.id);
+            let cleanData = deepSanitizeUnicode(item.data);
+            let { error } = await sb.from(item.table).update(cleanData).eq('id', item.id);
+            while (error && error.message && error.message.includes('in the schema cache')) {
+              const match = error.message.match(/Could not find the '([^']+)' column/i);
+              if (match && match[1] && cleanData[match[1]] !== undefined) {
+                console.warn(`[Database Notice] Column "${match[1]}" not found in table "${item.table}". Auto-recovering without it.`);
+                delete cleanData[match[1]];
+                const retryResult = await sb.from(item.table).update(cleanData).eq('id', item.id);
+                error = retryResult.error;
+              } else {
+                break;
+              }
+            }
             if (error) throw error;
             i++;
           } else {

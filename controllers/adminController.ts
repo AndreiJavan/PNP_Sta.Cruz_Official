@@ -3294,12 +3294,11 @@ export const updateReportBatch = async (req: Request, res: Response) => {
     });
 
     // Update parent report
-    const updatedReportData = {
+    const updatedReportData: any = {
       filename: filename || existingReport.filename,
       total_records: entries.length,
       category_stats: categoryStats,
-      raw_data: entries,
-      updated_at: new Date().toISOString()
+      raw_data: entries
     };
     await reportRef.update(updatedReportData);
 
