@@ -76,8 +76,8 @@
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">8-Focus</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Non-Index</th>
                             <th class="w-24 px-2 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Safety</th>
-                            <th class="w-32 px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
-                            <th class="w-36 px-6 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-right">Actions</th>
+                            <th class="w-28 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Signal</th>
+                            <th class="w-40 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-gray-100 dark:border-slate-800 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-800">
@@ -126,20 +126,20 @@
                                             <%= (report.category_stats && report.category_stats['PSI']) || 0 %>
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-center">
+                                    <td class="w-28 px-4 py-6 text-center">
                                         <% if (report.category_stats?.entry_type === 'manual' || report.filename?.includes('Manual')) { %>
                                             <span class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 group-hover:bg-emerald-500/15 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10 transition-all inline-block shadow-sm">MANUAL</span>
                                         <% } else { %>
                                             <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 group-hover:bg-pnp-blue/15 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10 transition-all inline-block shadow-sm">SCANNED</span>
                                         <% } %>
                                     </td>
-                                    <td class="px-6 py-6 text-right">
-                                        <div class="flex items-center justify-end space-x-2">
-                                            <button onclick="editReportBatch(event, '<%= report.id %>')" type="button" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/50 hover:border-pnp-blue/20 dark:hover:border-pnp-gold/20 shadow-sm" title="Edit Record Batch">
+                                    <td class="w-40 px-4 py-6 text-center">
+                                        <div class="flex items-center justify-center space-x-2">
+                                            <button onclick="editReportBatch(event, '<%= report.id %>')" type="button" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Edit Record Batch">
                                                 <i class="fas fa-edit text-xs"></i>
                                             </button>
                                             <form id="deleteReportForm_<%= report.id %>" action="/admin/reports/<%= report.id %>/delete" method="POST" class="inline-block flex-shrink-0" onsubmit="confirmDeleteReport(event, '<%= report.id %>'); return false;">
-                                                <button type="submit" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/50 hover:border-red-500/20 shadow-sm" title="Delete Record Batch">
+                                                <button type="submit" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Delete Record Batch">
                                                     <i class="fas fa-trash-alt text-xs"></i>
                                                 </button>
                                             </form>
@@ -1687,20 +1687,20 @@
                              ${(report.category_stats && report.category_stats['PSI']) || 0}
                          </span>
                      </td>
-                     <td class="px-8 py-6 text-center">
+                     <td class="w-28 px-4 py-6 text-center">
                          ${(report.category_stats?.entry_type === 'manual' || report.filename === 'Manual Intelligence Session' || report.filename === 'Manual Entry Session' || report.filename?.includes('Manual')) ? `
                              <span class="px-4 py-2 rounded-2xl bg-emerald-500/5 text-emerald-500 group-hover:bg-emerald-500/15 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/10 transition-all inline-block shadow-sm">MANUAL</span>
                          ` : `
                              <span class="px-4 py-2 rounded-2xl bg-pnp-blue/5 text-pnp-blue-300 group-hover:bg-pnp-blue/15 text-[10px] font-black uppercase tracking-[0.2em] border border-pnp-blue/10 transition-all inline-block shadow-sm">SCANNED</span>
                          `}
                      </td>
-                     <td class="px-6 py-6 text-right">
-                         <div class="flex items-center justify-end space-x-2">
-                             <button onclick="editReportBatch(event, '${report.id}')" type="button" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/50 hover:border-pnp-blue/20 dark:hover:border-pnp-gold/20 shadow-sm" title="Edit Record Batch">
+                     <td class="w-40 px-4 py-6 text-center">
+                         <div class="flex items-center justify-center space-x-2">
+                             <button onclick="editReportBatch(event, '${report.id}')" type="button" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-pnp-blue dark:hover:text-pnp-gold hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Edit Record Batch">
                                  <i class="fas fa-edit text-xs"></i>
                              </button>
                              <form id="deleteReportForm_${report.id}" action="/admin/reports/${report.id}/delete" method="POST" class="inline-block flex-shrink-0" onsubmit="confirmDeleteReport(event, '${report.id}'); return false;">
-                                 <button type="submit" class="w-10 h-10 min-w-[2.5rem] min-h-[2.5rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/50 hover:border-red-500/20 shadow-sm" title="Delete Record Batch">
+                                 <button type="submit" class="w-9 h-9 min-w-[2.25rem] min-h-[2.25rem] flex-shrink-0 aspect-square rounded-xl bg-gray-50 dark:bg-slate-800 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-700 transition-all flex items-center justify-center border border-gray-200/50 dark:border-slate-700/60 shadow-sm" title="Delete Record Batch">
                                      <i class="fas fa-trash-alt text-xs"></i>
                                  </button>
                              </form>
