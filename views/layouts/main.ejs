@@ -256,7 +256,7 @@
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <!-- Header Theme Toggle (Always accessible on desktop & mobile) -->
+                    <!-- Topbar Theme Toggle (Single light/dark mode button for both desktop and mobile) -->
                     <button class="theme-toggle-btn w-10 h-10 sm:w-11 sm:h-11 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition duration-200 border border-white/20 shrink-0"
                         title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
                         <i class="fas fa-moon text-base theme-icon-moon dark:hidden"></i>
@@ -281,9 +281,9 @@
     <!-- Mobile Menu Drawer -->
     <div id="mobileMenu"
         class="fixed top-0 right-0 bottom-0 w-[85%] sm:w-1/2 md:w-1/3 lg:w-1/4 bg-pnp-blue z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col p-6 sm:p-8 inset-y-0 shadow-2xl">
-        <div class="flex justify-between items-center mb-8 sm:mb-12">
+        <div class="flex justify-between items-center mb-6 sm:mb-10">
             <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl flex items-center justify-center p-2 shrink-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl flex items-center justify-center p-2 shrink-0 shadow-md">
                     <img src="/images/PNP.jpg" alt="PNP Logo" class="w-full h-full object-contain">
                 </div>
                 <h1 class="text-white text-base sm:text-lg font-black tracking-tighter truncate">CRIME MAPPING SYSTEM</h1>
@@ -302,22 +302,17 @@
             <a href="/about" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
 
             <% if (locals.user) { %>
-                <a href="/admin/dashboard" class="text-xl sm:text-2xl font-black text-pnp-gold pt-4 border-t border-white/10">Admin Dashboard</a>
+                <a href="/admin/dashboard" class="text-xl sm:text-2xl font-black text-pnp-gold pt-3 border-t border-white/10 flex items-center gap-2">
+                    <i class="fas fa-shield-halved text-lg"></i>
+                    <span>Admin Dashboard</span>
+                </a>
             <% } %>
         </nav>
 
-        <!-- Mobile Drawer Theme Switcher -->
-        <div class="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
-            <div class="flex items-center space-x-2 text-white">
-                <i class="fas fa-circle-half-stroke text-pnp-gold text-sm"></i>
-                <span class="text-xs font-black uppercase tracking-wider">Appearance</span>
-            </div>
-            <button class="theme-toggle-btn px-4 py-2 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center gap-2 text-white border border-white/20 transition">
-                <i class="fas fa-moon theme-icon-moon dark:hidden text-xs"></i>
-                <i class="fas fa-sun theme-icon-sun hidden dark:block text-pnp-gold text-xs"></i>
-                <span class="text-xs font-bold uppercase tracking-wider dark:hidden">Dark Mode</span>
-                <span class="text-xs font-bold uppercase tracking-wider hidden dark:inline text-pnp-gold">Light Mode</span>
-            </button>
+        <!-- Mobile Drawer Footer Info -->
+        <div class="mt-auto pt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-blue-200/60 font-bold uppercase tracking-wider">
+            <span>Sta. Cruz Police Station</span>
+            <span>Laguna PPO</span>
         </div>
     </div>
 
@@ -455,17 +450,10 @@
         </footer>
         <% } %>
 
-            <!-- Floating Dark Mode Toggle (Desktop only, never overlaps mobile controls) -->
-            <button class="theme-toggle-btn hidden md:flex fixed bottom-6 right-6 z-40 w-12 h-12 bg-white dark:bg-slate-800 shadow-2xl rounded-full items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 active:scale-95 border border-gray-200 dark:border-slate-700"
-                title="Toggle Theme" aria-label="Toggle Theme">
-                <i class="fas fa-moon text-lg theme-icon-moon dark:hidden"></i>
-                <i class="fas fa-sun text-lg theme-icon-sun hidden dark:block text-pnp-gold"></i>
-            </button>
-
             <% if (locals.user) { %>
             <!-- Floating Admin Dashboard Button (Desktop only) -->
             <a href="/admin/dashboard" title="Admin Dashboard"
-                class="hidden md:flex fixed bottom-6 right-20 z-40 w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold">
+                class="hidden md:flex fixed bottom-6 right-6 z-40 w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold">
                 <i class="fas fa-shield-halved text-lg"></i>
             </a>
             <% } %>

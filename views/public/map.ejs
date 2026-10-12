@@ -24,7 +24,7 @@
 
     <!-- Left Sidebar: Location Overview & Filters -->
     <div id="filterSidebar"
-        class="absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 rounded-2xl md:rounded-[2rem] shadow-2xl border border-gray-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col max-h-[50dvh] sm:max-h-[calc(100%-110px)] md:max-h-[calc(100%-48px)] transition-transform duration-300 ease-out origin-top-left sidebar-visible">
+        class="absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 rounded-2xl md:rounded-[2rem] shadow-2xl border border-gray-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col max-h-[50dvh] sm:max-h-[calc(100%-110px)] md:max-h-[calc(100%-48px)] transition-all duration-300 ease-out origin-top-left sidebar-visible">
         <div class="bg-pnp-blue p-4 sm:p-5 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_station.jpg');">
             <h3 class="text-[10px] sm:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-1 sm:mb-2">Location Overview</h3>
@@ -188,7 +188,7 @@
 
     <!-- Right Sidebar: Crime Data (Aligned exactly like Location Overview) -->
     <div id="incidentsSidebar"
-        class="absolute top-3 right-3 left-3 sm:left-auto md:top-6 md:right-6 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 rounded-2xl md:rounded-[2rem] shadow-2xl border border-gray-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col max-h-[50dvh] sm:max-h-[calc(100%-110px)] md:max-h-[calc(100%-48px)] transition-transform duration-300 ease-out origin-top-right sidebar-hidden md:sidebar-visible">
+        class="absolute top-3 right-3 left-3 sm:left-auto md:top-6 md:right-6 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 rounded-2xl md:rounded-[2rem] shadow-2xl border border-gray-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col max-h-[50dvh] sm:max-h-[calc(100%-110px)] md:max-h-[calc(100%-48px)] transition-all duration-300 ease-out origin-top-right sidebar-hidden">
         <div class="bg-pnp-blue p-4 sm:p-5 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_patrol.jpg');">
             <h3 class="text-[10px] sm:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-1 sm:mb-2">Crime Data</h3>
@@ -241,14 +241,14 @@
         <!-- Drawer Toggles Pill Dock -->
         <div class="pointer-events-auto flex items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-xl border border-gray-200/80 dark:border-slate-700">
             <button id="mobileOverviewBtn" onclick="toggleSidebar()"
-                class="px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold">
-                <i class="fas fa-sliders-h text-pnp-gold text-xs"></i>
-                <span>Filters & Options</span>
+                class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold">
+                <i class="fas fa-sliders-h text-pnp-gold text-xs shrink-0"></i>
+                <span class="truncate">Filters & Options</span>
             </button>
             <button id="mobileStatsBtn" onclick="toggleIncidentsSidebar()"
-                class="px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700">
-                <i class="fas fa-chart-bar text-pnp-blue dark:text-pnp-gold text-xs"></i>
-                <span>Crime Stats</span>
+                class="px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700">
+                <i class="fas fa-chart-bar text-pnp-blue dark:text-pnp-gold text-xs shrink-0"></i>
+                <span class="truncate">Crime Stats</span>
             </button>
         </div>
     </div>
@@ -1054,7 +1054,7 @@
                 const isMobile = window.innerWidth < 768;
                 if (!isMobile) {
                     const sidebar = document.getElementById('filterSidebar');
-                    if (sidebar && sidebar.classList.contains('sidebar-hidden')) {
+                    if (sidebar && !sidebar.dataset.userToggled && sidebar.classList.contains('sidebar-hidden')) {
                         sidebar.classList.remove('sidebar-hidden');
                         sidebar.classList.add('sidebar-visible');
                         const toggleBtn = document.getElementById('sidebarToggle');
@@ -1065,7 +1065,7 @@
                     }
 
                     const incidentsSidebar = document.getElementById('incidentsSidebar');
-                    if (incidentsSidebar && incidentsSidebar.classList.contains('sidebar-hidden')) {
+                    if (incidentsSidebar && !incidentsSidebar.dataset.userToggled && incidentsSidebar.classList.contains('sidebar-hidden')) {
                         incidentsSidebar.classList.remove('sidebar-hidden');
                         incidentsSidebar.classList.add('sidebar-visible');
                         const iToggle = document.getElementById('incidentsToggle');
@@ -1889,11 +1889,13 @@
         if (!sidebar) return;
         sidebar.dataset.userToggled = 'true';
 
-        if (sidebar.classList.contains('sidebar-hidden')) {
+        const isCurrentlyHidden = sidebar.classList.contains('sidebar-hidden') || !sidebar.classList.contains('sidebar-visible');
+
+        if (isCurrentlyHidden) {
             // Close other sidebar on mobile so they never overlap
             if (isMobile) {
                 const incSidebar = document.getElementById('incidentsSidebar');
-                if (incSidebar && incSidebar.classList.contains('sidebar-visible')) {
+                if (incSidebar) {
                     incSidebar.classList.add('sidebar-hidden');
                     incSidebar.classList.remove('sidebar-visible');
                 }
@@ -1933,11 +1935,13 @@
         if (!sidebar) return;
         sidebar.dataset.userToggled = 'true';
 
-        if (sidebar.classList.contains('sidebar-hidden')) {
+        const isCurrentlyHidden = sidebar.classList.contains('sidebar-hidden') || !sidebar.classList.contains('sidebar-visible');
+
+        if (isCurrentlyHidden) {
             // Close other sidebar on mobile so they never overlap
             if (isMobile) {
                 const filterSidebar = document.getElementById('filterSidebar');
-                if (filterSidebar && filterSidebar.classList.contains('sidebar-visible')) {
+                if (filterSidebar) {
                     filterSidebar.classList.add('sidebar-hidden');
                     filterSidebar.classList.remove('sidebar-visible');
                 }
@@ -2065,20 +2069,22 @@
 
 <style>
     .sidebar-hidden {
-        opacity: 0;
-        transform: translate3d(-20px, 0, 0) scale(0.95);
-        pointer-events: none;
+        opacity: 0 !important;
+        transform: translate3d(-20px, 0, 0) scale(0.95) !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
         will-change: transform, opacity;
     }
 
     #incidentsSidebar.sidebar-hidden {
-        transform: translate3d(20px, 0, 0) scale(0.95);
+        transform: translate3d(20px, 0, 0) scale(0.95) !important;
     }
 
     .sidebar-visible {
-        opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
-        pointer-events: auto;
+        opacity: 1 !important;
+        transform: translate3d(0, 0, 0) scale(1) !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
         will-change: transform, opacity;
     }
 
@@ -2087,6 +2093,7 @@
             opacity: 0 !important;
             transform: translate3d(0, -10px, 0) scale(0.96) !important;
             pointer-events: none !important;
+            visibility: hidden !important;
         }
 
         #incidentsSidebar.sidebar-hidden {
@@ -2097,14 +2104,7 @@
             opacity: 1 !important;
             transform: translate3d(0, 0, 0) scale(1) !important;
             pointer-events: auto !important;
-        }
-    }
-
-    @media (min-width: 768px) {
-        .md\:sidebar-visible {
-            opacity: 1 !important;
-            transform: translate3d(0, 0, 0) scale(1) !important;
-            pointer-events: auto !important;
+            visibility: visible !important;
         }
     }
 
