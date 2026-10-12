@@ -1,13 +1,13 @@
-<div class="h-[calc(100dvh-80px)] md:h-[calc(100vh-96px)] relative z-0 overflow-hidden">
+<div class="h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)] md:h-[calc(100dvh-96px)] relative z-0 overflow-hidden">
     <!-- Map Container -->
-    <div id="leafletMap" class="h-full w-full transition-all duration-500"></div>
+    <div id="leafletMap" class="h-full w-full"></div>
 
     <!-- Loading Overlay -->
     <div id="mapLoading"
-        class="absolute inset-0 bg-pnp-blue bg-cover bg-center bg-no-repeat z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500"
+        class="absolute inset-0 bg-pnp-blue bg-cover bg-center bg-no-repeat z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-300"
         style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.94)), url('/images/stacruz_police_station_front.jpg');">
-        <div class="w-20 h-20 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p class="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
+        <div class="w-16 h-16 sm:w-20 sm:h-20 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-6"></div>
+        <p class="text-[10px] sm:text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
     </div>
 
     <!-- Desktop Show/Hide Sidebar Toggles (Visible only on PC when sidebars are closed) -->
@@ -24,8 +24,8 @@
 
     <!-- Left Sidebar: Location Overview & Filters -->
     <div id="filterSidebar"
-        class="absolute top-3 left-3 right-3 sm:right-auto md:top-8 md:left-8 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[52dvh] sm:max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-left sidebar-visible">
-        <div class="bg-pnp-blue p-4 sm:p-6 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
+        class="absolute top-3 left-3 right-3 sm:right-auto md:top-6 md:left-6 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 rounded-2xl md:rounded-[2rem] shadow-2xl border border-gray-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col max-h-[50dvh] sm:max-h-[calc(100%-110px)] md:max-h-[calc(100%-48px)] transition-transform duration-300 ease-out origin-top-left sidebar-visible">
+        <div class="bg-pnp-blue p-4 sm:p-5 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_station.jpg');">
             <h3 class="text-[10px] sm:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-1 sm:mb-2">Location Overview</h3>
             <h4 class="text-lg sm:text-xl font-black tracking-tighter">Sta. Cruz Map & Filters</h4>
@@ -188,8 +188,8 @@
 
     <!-- Right Sidebar: Crime Data (Aligned exactly like Location Overview) -->
     <div id="incidentsSidebar"
-        class="absolute top-3 right-3 left-3 sm:left-auto md:top-8 md:right-8 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 sm:backdrop-blur-md rounded-2xl md:rounded-[2.5rem] shadow-2xl border border-white/30 dark:border-slate-700/30 overflow-hidden flex flex-col max-h-[52dvh] sm:max-h-[calc(100%-120px)] md:max-h-[calc(100%-64px)] transition-all duration-500 origin-top-right sidebar-hidden md:sidebar-visible">
-        <div class="bg-pnp-blue p-4 sm:p-6 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
+        class="absolute top-3 right-3 left-3 sm:left-auto md:top-6 md:right-6 z-[1000] sm:w-80 bg-white/95 dark:bg-slate-800/95 rounded-2xl md:rounded-[2rem] shadow-2xl border border-gray-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col max-h-[50dvh] sm:max-h-[calc(100%-110px)] md:max-h-[calc(100%-48px)] transition-transform duration-300 ease-out origin-top-right sidebar-hidden md:sidebar-visible">
+        <div class="bg-pnp-blue p-4 sm:p-5 pr-14 sm:pr-16 text-white relative bg-cover bg-center bg-no-repeat"
             style="background-image: linear-gradient(to right, rgba(26, 58, 92, 0.88), rgba(26, 58, 92, 0.95)), url('/images/stacruz_police_patrol.jpg');">
             <h3 class="text-[10px] sm:text-xs font-black text-pnp-gold uppercase tracking-[0.3em] mb-1 sm:mb-2">Crime Data</h3>
             <h4 class="text-lg sm:text-xl font-black tracking-tighter">Incident Breakdown</h4>
@@ -229,24 +229,24 @@
     </div>
 
 
-    <!-- Dedicated Mobile Bottom Navigation Dock (Phone Screens Only) -->
+    <!-- Dedicated Mobile Bottom Navigation Dock (Phone Screens Only - Free from Floating Overlaps) -->
     <div class="fixed md:hidden bottom-4 left-3 right-3 z-[1100] flex items-center justify-between pointer-events-none pb-[env(safe-area-inset-bottom)]">
         <!-- Recenter Map Floating Button -->
         <button id="mobileRecenterBtn" onclick="recenterStaCruzMap()"
-            class="pointer-events-auto h-11 w-11 bg-white/95 dark:bg-slate-800/95 text-pnp-blue dark:text-pnp-gold rounded-2xl shadow-2xl flex items-center justify-center border border-gray-200 dark:border-slate-700 active:scale-90 transition-all duration-200"
+            class="pointer-events-auto h-12 w-12 bg-white/95 dark:bg-slate-800/95 text-pnp-blue dark:text-pnp-gold rounded-2xl shadow-xl flex items-center justify-center border border-gray-200/80 dark:border-slate-700 active:scale-95 transition-transform duration-150"
             title="Recenter Map to Sta. Cruz">
             <i class="fas fa-crosshairs text-base"></i>
         </button>
 
         <!-- Drawer Toggles Pill Dock -->
-        <div class="pointer-events-auto flex items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 p-1 rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700 backdrop-blur-md">
+        <div class="pointer-events-auto flex items-center gap-1.5 bg-white/95 dark:bg-slate-800/95 p-1.5 rounded-2xl shadow-xl border border-gray-200/80 dark:border-slate-700">
             <button id="mobileOverviewBtn" onclick="toggleSidebar()"
-                class="px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold">
+                class="px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold">
                 <i class="fas fa-sliders-h text-pnp-gold text-xs"></i>
                 <span>Filters & Options</span>
             </button>
             <button id="mobileStatsBtn" onclick="toggleIncidentsSidebar()"
-                class="px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700">
+                class="px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700">
                 <i class="fas fa-chart-bar text-pnp-blue dark:text-pnp-gold text-xs"></i>
                 <span>Crime Stats</span>
             </button>
@@ -280,8 +280,7 @@
     }
 
     .map-outside-mask {
-        backdrop-filter: blur(20px) saturate(100%);
-        -webkit-backdrop-filter: blur(20px) saturate(100%);
+        /* High performance solid mask rendering without GPU-heavy blur */
     }
 </style>
 
@@ -1825,6 +1824,26 @@
             map.on('resize', () => {
                 setTimeout(manageTooltipVisibility, 50);
             });
+
+            // Tap map to dismiss active mobile drawer for seamless navigation
+            map.on('click', () => {
+                if (window.innerWidth < 768) {
+                    const filterSidebar = document.getElementById('filterSidebar');
+                    const incidentsSidebar = document.getElementById('incidentsSidebar');
+                    let changed = false;
+                    if (filterSidebar && filterSidebar.classList.contains('sidebar-visible')) {
+                        filterSidebar.classList.add('sidebar-hidden');
+                        filterSidebar.classList.remove('sidebar-visible');
+                        changed = true;
+                    }
+                    if (incidentsSidebar && incidentsSidebar.classList.contains('sidebar-visible')) {
+                        incidentsSidebar.classList.add('sidebar-hidden');
+                        incidentsSidebar.classList.remove('sidebar-visible');
+                        changed = true;
+                    }
+                    if (changed) updateMobileNavButtons();
+                }
+            });
         } catch (err) {
             console.error('Error initializing map:', err);
             hideLoading();
@@ -1832,7 +1851,7 @@
     }
 
     function updateMapTileTheme() {
-        // Handled cleanly via CSS in views/layouts/main.ejs
+        // Native ArcGIS Dark Gray Canvas and Street Map are dynamically loaded
     }
 
     function updateMobileNavButtons() {
@@ -1848,17 +1867,17 @@
 
         if (overviewBtn) {
             if (isOverviewOpen) {
-                overviewBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold";
+                overviewBtn.className = "px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold";
             } else {
-                overviewBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700";
+                overviewBtn.className = "px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700";
             }
         }
 
         if (statsBtn) {
             if (isStatsOpen) {
-                statsBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold";
+                statsBtn.className = "px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-pnp-blue text-white shadow-md ring-2 ring-pnp-gold";
             } else {
-                statsBtn.className = "px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-all duration-200 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700";
+                statsBtn.className = "px-4 py-2.5 rounded-xl font-black text-xs flex items-center gap-1.5 active:scale-95 transition-transform duration-150 bg-white/95 dark:bg-slate-800/95 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700";
             }
         }
     }
@@ -2047,34 +2066,36 @@
 <style>
     .sidebar-hidden {
         opacity: 0;
-        transform: scale(0.9) translateX(-20px);
+        transform: translate3d(-20px, 0, 0) scale(0.95);
         pointer-events: none;
+        will-change: transform, opacity;
     }
 
     #incidentsSidebar.sidebar-hidden {
-        transform: scale(0.9) translateX(20px);
+        transform: translate3d(20px, 0, 0) scale(0.95);
     }
 
     .sidebar-visible {
         opacity: 1;
-        transform: scale(1) translateX(0);
+        transform: translate3d(0, 0, 0) scale(1);
         pointer-events: auto;
+        will-change: transform, opacity;
     }
 
     @media (max-width: 767px) {
         .sidebar-hidden {
             opacity: 0 !important;
-            transform: scale(0.95) translateY(-10px) !important;
+            transform: translate3d(0, -10px, 0) scale(0.96) !important;
             pointer-events: none !important;
         }
 
         #incidentsSidebar.sidebar-hidden {
-            transform: scale(0.95) translateY(-10px) !important;
+            transform: translate3d(0, -10px, 0) scale(0.96) !important;
         }
 
         .sidebar-visible {
             opacity: 1 !important;
-            transform: scale(1) translateY(0) !important;
+            transform: translate3d(0, 0, 0) scale(1) !important;
             pointer-events: auto !important;
         }
     }
@@ -2082,7 +2103,7 @@
     @media (min-width: 768px) {
         .md\:sidebar-visible {
             opacity: 1 !important;
-            transform: scale(1) translateX(0) !important;
+            transform: translate3d(0, 0, 0) scale(1) !important;
             pointer-events: auto !important;
         }
     }

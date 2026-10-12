@@ -124,8 +124,19 @@
         }
 
         /* Leaflet Dark Mode Support & Mobile Touch Acceleration */
-        .dark .leaflet-tile {
-            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        /* Native dark tiles from ArcGIS Canvas are dynamically loaded without expensive CSS raster filters */
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a, select, input, textarea, [role="button"] {
+            touch-action: manipulation;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
         }
 
         .leaflet-tile {
@@ -198,24 +209,30 @@
         .custom-pnp-popup .leaflet-popup-tip {
             background: #C8A415;
         }
+
+        #mobileMenu {
+            will-change: transform;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 flex flex-col min-h-screen transition-colors duration-300">
+<body class="bg-gray-50 dark:bg-slate-900 flex flex-col min-h-screen">
     <!-- Header -->
     <header class="bg-pnp-blue text-white sticky top-0 z-50 shadow-2xl border-b-4 border-pnp-gold">
         <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-20 md:h-24">
+            <div class="flex items-center justify-between h-16 sm:h-20 md:h-24">
                 <!-- Logo -->
-                <a href="/" class="flex items-center space-x-4 group">
+                <a href="/" class="flex items-center space-x-3 sm:space-x-4 group min-w-0">
                     <div
-                        class="w-12 h-12 md:w-16 md:h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300 p-2">
+                        class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300 p-1.5 sm:p-2 shrink-0">
                         <img src="/images/PNP.jpg" alt="PNP Logo" class="w-full h-full object-contain">
                     </div>
-                    <div class="hidden sm:block">
-                        <h1 class="text-lg md:text-xl font-black tracking-tighter leading-none">CRIME MAP <span
+                    <div class="min-w-0">
+                        <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tighter leading-none truncate">CRIME MAP <span
                                 class="text-pnp-gold">STA. CRUZ</span></h1>
-                        <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-bold mt-1">
+                        <p class="text-[9px] sm:text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-bold mt-1 truncate">
                             Incident Visualization System</p>
                     </div>
                 </a>
@@ -223,25 +240,32 @@
                 <!-- Desktop Nav -->
                 <nav class="hidden lg:flex items-center space-x-1">
                     <a href="/#hero-section"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
+                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
                     <a href="/map"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Crime
+                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Crime
                         Map</a>
                     <a href="/bulletins"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Public Advisory</a>
+                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Public Advisory</a>
                     <a href="/news"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">News</a>
+                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">News</a>
                     <a href="/hotlines"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
+                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
                     <a href="/about"
-                        class="px-5 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
+                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
                 </nav>
 
                 <!-- Action Buttons -->
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <!-- Header Theme Toggle (Always accessible on desktop & mobile) -->
+                    <button class="theme-toggle-btn w-10 h-10 sm:w-11 sm:h-11 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition duration-200 border border-white/20 shrink-0"
+                        title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
+                        <i class="fas fa-moon text-base theme-icon-moon dark:hidden"></i>
+                        <i class="fas fa-sun text-base theme-icon-sun hidden dark:block text-pnp-gold"></i>
+                    </button>
+
                     <!-- Mobile Menu Toggle -->
-                    <button id="mobileMenuBtn"
-                        class="lg:hidden w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-xl">
+                    <button id="mobileMenuBtn" aria-label="Open Navigation Menu"
+                        class="lg:hidden w-10 h-10 sm:w-11 sm:h-11 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-lg sm:text-xl text-white transition shrink-0 border border-white/20">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
@@ -256,31 +280,45 @@
 
     <!-- Mobile Menu Drawer -->
     <div id="mobileMenu"
-        class="fixed top-0 right-0 bottom-0 w-3/4 sm:w-1/2 md:w-1/3 lg:w-1/4 bg-pnp-blue z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col p-8 inset-y-0 shadow-2xl">
-        <div class="flex justify-between items-center mb-12">
-            <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center p-2">
+        class="fixed top-0 right-0 bottom-0 w-[85%] sm:w-1/2 md:w-1/3 lg:w-1/4 bg-pnp-blue z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col p-6 sm:p-8 inset-y-0 shadow-2xl">
+        <div class="flex justify-between items-center mb-8 sm:mb-12">
+            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl flex items-center justify-center p-2 shrink-0">
                     <img src="/images/PNP.jpg" alt="PNP Logo" class="w-full h-full object-contain">
                 </div>
-                <h1 class="text-white text-xl font-black tracking-tighter text-wrap">CRIME MAPPING SYSTEM</h1>
+                <h1 class="text-white text-base sm:text-lg font-black tracking-tighter truncate">CRIME MAPPING SYSTEM</h1>
             </div>
-            <button id="closeMenuBtn"
-                class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-white text-xl">
+            <button id="closeMenuBtn" aria-label="Close Menu"
+                class="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center text-white text-lg sm:text-xl active:scale-95 transition shrink-0 border border-white/20">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <nav class="flex flex-col space-y-4">
-            <a href="/#hero-section" class="text-2xl font-black text-white hover:text-pnp-gold transition">Home</a>
-            <a href="/map" class="text-2xl font-black text-white hover:text-pnp-gold transition">Crime Map</a>
-            <a href="/bulletins" class="text-2xl font-black text-white hover:text-pnp-gold transition">Public Advisory</a>
-            <a href="/news" class="text-2xl font-black text-white hover:text-pnp-gold transition">News</a>
-            <a href="/hotlines" class="text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
-            <a href="/about" class="text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
+        <nav class="flex flex-col space-y-3 sm:space-y-4">
+            <a href="/#hero-section" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Home</a>
+            <a href="/map" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Crime Map</a>
+            <a href="/bulletins" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Public Advisory</a>
+            <a href="/news" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">News</a>
+            <a href="/hotlines" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
+            <a href="/about" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
 
             <% if (locals.user) { %>
-                <a href="/admin/dashboard" class="text-2xl font-black text-pnp-gold pt-8">Admin Dashboard</a>
+                <a href="/admin/dashboard" class="text-xl sm:text-2xl font-black text-pnp-gold pt-4 border-t border-white/10">Admin Dashboard</a>
             <% } %>
         </nav>
+
+        <!-- Mobile Drawer Theme Switcher -->
+        <div class="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
+            <div class="flex items-center space-x-2 text-white">
+                <i class="fas fa-circle-half-stroke text-pnp-gold text-sm"></i>
+                <span class="text-xs font-black uppercase tracking-wider">Appearance</span>
+            </div>
+            <button class="theme-toggle-btn px-4 py-2 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center gap-2 text-white border border-white/20 transition">
+                <i class="fas fa-moon theme-icon-moon dark:hidden text-xs"></i>
+                <i class="fas fa-sun theme-icon-sun hidden dark:block text-pnp-gold text-xs"></i>
+                <span class="text-xs font-bold uppercase tracking-wider dark:hidden">Dark Mode</span>
+                <span class="text-xs font-bold uppercase tracking-wider hidden dark:inline text-pnp-gold">Light Mode</span>
+            </button>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -417,17 +455,17 @@
         </footer>
         <% } %>
 
-            <!-- Floating Dark Mode Toggle -->
-            <button id="darkModeToggle"
-                class="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white dark:bg-slate-800 shadow-2xl rounded-full flex items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 border border-gray-200 dark:border-slate-700">
-                <i class="fas fa-moon text-lg dark:hidden"></i>
-                <i class="fas fa-sun text-lg hidden dark:block"></i>
+            <!-- Floating Dark Mode Toggle (Desktop only, never overlaps mobile controls) -->
+            <button class="theme-toggle-btn hidden md:flex fixed bottom-6 right-6 z-40 w-12 h-12 bg-white dark:bg-slate-800 shadow-2xl rounded-full items-center justify-center text-pnp-blue dark:text-pnp-gold transition-all duration-300 hover:scale-110 active:scale-95 border border-gray-200 dark:border-slate-700"
+                title="Toggle Theme" aria-label="Toggle Theme">
+                <i class="fas fa-moon text-lg theme-icon-moon dark:hidden"></i>
+                <i class="fas fa-sun text-lg theme-icon-sun hidden dark:block text-pnp-gold"></i>
             </button>
 
             <% if (locals.user) { %>
-            <!-- Floating Admin Dashboard Button -->
+            <!-- Floating Admin Dashboard Button (Desktop only) -->
             <a href="/admin/dashboard" title="Admin Dashboard"
-                class="fixed bottom-6 right-20 z-50 w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full flex items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 border border-pnp-blue dark:border-pnp-gold">
+                class="hidden md:flex fixed bottom-6 right-20 z-40 w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold">
                 <i class="fas fa-shield-halved text-lg"></i>
             </a>
             <% } %>
@@ -437,13 +475,26 @@
                 const closeMenuBtn = document.getElementById('closeMenuBtn');
                 const mobileMenu = document.getElementById('mobileMenu');
                 const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
-                const darkModeToggle = document.getElementById('darkModeToggle');
 
-                // Dark Mode Logic
-                darkModeToggle.addEventListener('click', () => {
+                // Unified Dark Mode Sync and Logic
+                const syncThemeUI = () => {
+                    const isDark = document.documentElement.classList.contains('dark');
+                    document.querySelectorAll('.theme-icon-moon').forEach(el => el.classList.toggle('hidden', isDark));
+                    document.querySelectorAll('.theme-icon-sun').forEach(el => el.classList.toggle('hidden', !isDark));
+                };
+
+                const toggleTheme = () => {
                     document.documentElement.classList.toggle('dark');
-                    localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+                    const isDark = document.documentElement.classList.contains('dark');
+                    localStorage.setItem('darkMode', isDark);
+                    syncThemeUI();
+                };
+
+                document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+                    btn.addEventListener('click', toggleTheme);
                 });
+
+                syncThemeUI();
 
                 // Active Navigation Link Highlighting
                 const currentPath = window.location.pathname;
@@ -474,24 +525,29 @@
                 });
 
                 const closeMenu = () => {
-                    mobileMenu.classList.add('translate-x-full');
-                    mobileMenuBackdrop.classList.add('opacity-0');
-                    setTimeout(() => {
-                        mobileMenuBackdrop.classList.add('hidden');
-                    }, 300);
-                    document.body.style.overflow = 'auto';
+                    if (mobileMenu) mobileMenu.classList.add('translate-x-full');
+                    if (mobileMenuBackdrop) {
+                        mobileMenuBackdrop.classList.add('opacity-0');
+                        setTimeout(() => {
+                            mobileMenuBackdrop.classList.add('hidden');
+                        }, 300);
+                    }
+                    document.body.style.overflow = '';
                 };
 
-                mobileMenuBtn.addEventListener('click', () => {
-                    mobileMenuBackdrop.classList.remove('hidden');
-                    // Small delay to allow display block to apply before opacity
-                    setTimeout(() => mobileMenuBackdrop.classList.remove('opacity-0'), 10);
-                    mobileMenu.classList.remove('translate-x-full');
-                    document.body.style.overflow = 'hidden';
-                });
+                if (mobileMenuBtn) {
+                    mobileMenuBtn.addEventListener('click', () => {
+                        if (mobileMenuBackdrop) {
+                            mobileMenuBackdrop.classList.remove('hidden');
+                            setTimeout(() => mobileMenuBackdrop.classList.remove('opacity-0'), 10);
+                        }
+                        if (mobileMenu) mobileMenu.classList.remove('translate-x-full');
+                        document.body.style.overflow = 'hidden';
+                    });
+                }
 
-                closeMenuBtn.addEventListener('click', closeMenu);
-                mobileMenuBackdrop.addEventListener('click', closeMenu);
+                if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+                if (mobileMenuBackdrop) mobileMenuBackdrop.addEventListener('click', closeMenu);
 
                 // Smooth Scroll Logic for Hash Anchors
                 const initSmoothScroll = () => {
@@ -500,25 +556,27 @@
                         if (href && (href.startsWith('/#') || href.startsWith('#'))) {
                             const hashIndex = href.indexOf('#');
                             const targetId = href.substring(hashIndex);
-                            try {
-                                const targetEl = document.querySelector(targetId);
-                                if (targetEl) {
-                                    e.preventDefault();
-                                    closeMenu();
-                                    
-                                    const headerHeight = document.querySelector('header')?.offsetHeight || 96;
-                                    const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - headerHeight - 16;
-                                    
-                                    window.scrollTo({
-                                        top: targetPosition,
-                                        behavior: 'smooth'
-                                    });
-                                    
-                                    // Update URL hash without scroll jumping
-                                    history.pushState(null, '', href);
+                            if (targetId && targetId.length > 1 && targetId.startsWith('#')) {
+                                try {
+                                    const targetEl = document.querySelector(targetId);
+                                    if (targetEl) {
+                                        e.preventDefault();
+                                        closeMenu();
+                                        
+                                        const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                        const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - headerHeight - 16;
+                                        
+                                        window.scrollTo({
+                                            top: targetPosition,
+                                            behavior: 'smooth'
+                                        });
+                                        
+                                        // Update URL hash without scroll jumping
+                                        history.pushState(null, '', href);
+                                    }
+                                } catch (err) {
+                                    console.error('Error in selector query:', err);
                                 }
-                            } catch (err) {
-                                console.error('Error in selector query:', err);
                             }
                         }
                     };
@@ -529,12 +587,12 @@
                     });
 
                     // On-load smooth scroll if hash is present
-                    if (window.location.hash) {
+                    if (window.location.hash && window.location.hash.length > 1) {
                         setTimeout(() => {
                             try {
                                 const targetEl = document.querySelector(window.location.hash);
                                 if (targetEl) {
-                                    const headerHeight = document.querySelector('header')?.offsetHeight || 96;
+                                    const headerHeight = document.querySelector('header')?.offsetHeight || 80;
                                     const targetPosition = targetEl.getBoundingClientRect().top + window.pageYOffset - headerHeight - 16;
                                     window.scrollTo({
                                         top: targetPosition,

@@ -37,11 +37,11 @@
                 
                 <% if (mediaItems.length > 1) { %>
                     <!-- Carousel Controls -->
-                    <button onclick="moveCarousel(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-pnp-blue text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-0 group-hover:opacity-100 focus:outline-none">
-                        <i class="fas fa-chevron-left"></i>
+                    <button onclick="moveCarousel(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-pnp-blue text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100 active:scale-90 focus:outline-none cursor-pointer" aria-label="Previous image">
+                        <i class="fas fa-chevron-left text-xs sm:text-base"></i>
                     </button>
-                    <button onclick="moveCarousel(1)" class="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-black/50 hover:bg-pnp-blue text-white w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-0 group-hover:opacity-100 focus:outline-none">
-                        <i class="fas fa-chevron-right"></i>
+                    <button onclick="moveCarousel(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-pnp-blue text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100 active:scale-90 focus:outline-none cursor-pointer" aria-label="Next image">
+                        <i class="fas fa-chevron-right text-xs sm:text-base"></i>
                     </button>
                     <!-- Indicators -->
                     <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full">
@@ -97,6 +97,32 @@
                     currentSlide = index;
                     updateCarousel();
                 }
+
+                // Touch Swipe Support
+                (function initCarouselSwipe() {
+                    const carousel = document.getElementById('bulletinCarousel');
+                    if (!carousel) return;
+                    let startX = 0, startY = 0;
+                    carousel.addEventListener('touchstart', (e) => {
+                        if (e.touches && e.touches.length > 0) {
+                            startX = e.touches[0].clientX;
+                            startY = e.touches[0].clientY;
+                        }
+                    }, { passive: true });
+                    carousel.addEventListener('touchend', (e) => {
+                        if (e.changedTouches && e.changedTouches.length > 0) {
+                            const diffX = e.changedTouches[0].clientX - startX;
+                            const diffY = e.changedTouches[0].clientY - startY;
+                            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                                if (diffX < 0) {
+                                    moveCarousel(1);
+                                } else {
+                                    moveCarousel(-1);
+                                }
+                            }
+                        }
+                    }, { passive: true });
+                })();
             </script>
             <% } %>
         <% } %>

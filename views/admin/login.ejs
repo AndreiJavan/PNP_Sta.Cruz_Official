@@ -51,6 +51,11 @@
 
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a, input, select {
+            touch-action: manipulation;
         }
     </style>
 </head>
@@ -93,7 +98,7 @@
             </div>
 
             <a href="/"
-                class="w-full py-3.5 px-6 rounded-xl bg-pnp-blue hover:bg-blue-900 text-white text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-lg flex items-center justify-center space-x-2">
+                class="w-full py-3.5 px-6 rounded-xl bg-pnp-blue hover:bg-blue-900 active:scale-95 text-white text-xs font-black uppercase tracking-wider transition border border-white/10 shadow-lg flex items-center justify-center space-x-2">
                 <i class="fas fa-arrow-left text-xs"></i>
                 <span>Return to Public Portal</span>
             </a>
