@@ -72,7 +72,7 @@
                             <div class="space-y-1">
                                 <label class="text-[9px] font-bold text-gray-400 uppercase">Category</label>
                                 <select id="mapDisplayMode"
-                                    onchange="const fc = document.getElementById('filterClassification'); if (fc) fc.value = 'All'; updateHeatmap(); updateLegend();"
+                                    onchange="const fc = document.getElementById('filterClassification'); if (fc) { fc.value = 'All'; if (typeof updateCustomClassificationTriggerUI === 'function') updateCustomClassificationTriggerUI('All'); } updateHeatmap(); updateLegend(); populateClassificationDropdown();"
                                     class="w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none cursor-pointer">
                                     <option value="density">All Crimes</option>
                                     <option value="density_focus">Major Crimes</option>
@@ -204,15 +204,47 @@
         <div class="flex-grow overflow-y-auto sidebar-scroll">
             <div class="p-5 space-y-4">
                 <!-- Classification Filter Dropdown within the Crime Data Container -->
-                <div class="space-y-1 w-full max-w-full overflow-hidden">
-                    <label
-                        class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
-                        <i class="fas fa-filter mr-2 text-pnp-blue dark:text-pnp-gold"></i> Classification Filter
-                    </label>
-                    <select id="filterClassification"
-                        class="w-full max-w-full px-4 py-2 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 dark:text-white appearance-none cursor-pointer truncate">
+                <div class="space-y-1.5 w-full max-w-full" id="classificationDropdownContainer">
+                    <div class="flex items-center justify-between">
+                        <label
+                            class="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
+                            <i class="fas fa-filter mr-2 text-pnp-blue dark:text-pnp-gold"></i> Classification Filter
+                        </label>
+                        <span id="classificationCountBadge" class="text-[9px] font-bold text-pnp-gold uppercase tracking-wider"></span>
+                    </div>
+
+                    <!-- Hidden native select maintaining 100% JavaScript compatibility -->
+                    <select id="filterClassification" class="hidden">
                         <option value="All">All Classifications</option>
                     </select>
+
+                    <!-- Custom Dropdown Trigger Button (Two-line display) -->
+                    <button id="classificationTriggerBtn" type="button" onclick="toggleClassificationDropdown()"
+                        class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-150 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-200 dark:text-white flex items-center justify-between shadow-sm cursor-pointer group hover:border-pnp-gold/50 text-left">
+                        <div class="min-w-0 pr-2 flex-1">
+                            <div id="classificationTriggerTitle" class="truncate font-black text-gray-800 dark:text-white text-xs leading-snug">All Classifications</div>
+                            <div id="classificationTriggerSubtitle" class="truncate text-[10px] font-medium text-gray-400 dark:text-gray-400 leading-tight">All recorded crime incidents</div>
+                        </div>
+                        <i id="classificationDropdownArrow" class="fas fa-chevron-down text-[10px] text-gray-400 group-hover:text-pnp-gold transition-transform duration-200 shrink-0"></i>
+                    </button>
+
+                    <!-- Custom Dropdown Inline Panel (Constrained strictly to sidebar width, never overflows across map) -->
+                    <div id="classificationDropdownPopover"
+                        class="hidden mt-2 bg-gray-50/95 dark:bg-slate-900/95 p-2.5 rounded-2xl border border-gray-200/80 dark:border-slate-700 space-y-2 transition-all duration-200 shadow-md">
+                        
+                        <!-- Search Bar -->
+                        <div class="relative flex items-center">
+                            <i class="fas fa-search absolute left-3 text-[10px] text-gray-400"></i>
+                            <input type="text" id="classificationSearchInput" oninput="filterClassificationSearch(this.value)"
+                                placeholder="Search crime or statute..."
+                                class="w-full pl-7 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none dark:text-white focus:border-pnp-blue dark:focus:border-pnp-gold transition text-left">
+                        </div>
+
+                        <!-- Scrollable list of 2-line options -->
+                        <div id="customClassificationList" class="overflow-y-auto max-h-[220px] pr-1 space-y-1 sidebar-scroll">
+                            <!-- Populated dynamically via populateClassificationDropdown() -->
+                        </div>
+                    </div>
                 </div>
 
                 <hr class="border-gray-100 dark:border-slate-700/50">
@@ -1166,13 +1198,17 @@
                     ? sortedIncidents.map(([type, count]) => {
                         const cat = incidentCategoryMap[type];
                         const catColor = getCategoryColor(type, cat);
+                        const formatted = formatCrimeClassification(type);
                         return `
-                        <div class="flex items-center justify-between p-3.5 bg-gray-50 dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700">
-                            <div class="flex items-center space-x-3 min-w-0 pr-2 flex-1">
-                                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${catColor}"></span>
-                                <span class="text-[10px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider break-words whitespace-normal leading-tight">${type}</span>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-700 hover:border-gray-200 dark:hover:border-slate-600 transition">
+                            <div class="flex items-start space-x-2.5 min-w-0 pr-2 flex-1">
+                                <span class="w-2.5 h-2.5 rounded-full shrink-0 mt-1" style="background-color: ${catColor}"></span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="text-[11px] font-black text-gray-800 dark:text-gray-200 leading-tight">${escapeHtml(formatted.shortTitle)}</div>
+                                    ${formatted.subtitle ? `<div class="text-[9px] font-medium text-gray-400 dark:text-gray-400 leading-tight mt-0.5 truncate">${escapeHtml(formatted.subtitle)}</div>` : ''}
+                                </div>
                             </div>
-                            <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold shrink-0 ml-2">${count}</span>
+                            <span class="text-xs font-black text-pnp-blue dark:text-pnp-gold shrink-0 ml-2 bg-pnp-blue/5 dark:bg-pnp-gold/10 px-2 py-1 rounded-lg">${count}</span>
                         </div>
                     `}).join('')
                     : `<p class="text-[10px] text-gray-400 font-bold uppercase text-center py-4">No incidents recorded</p>`;
@@ -1219,6 +1255,213 @@
         return isInside;
     }
 
+    // Helper to format long statutory crime classifications into concise, two-line structures
+    function formatCrimeClassification(raw) {
+        if (!raw || raw === 'All') {
+            return { shortTitle: 'All Classifications', subtitle: 'All recorded crime incidents', full: 'All' };
+        }
+
+        let title = raw;
+        let subtitle = '';
+
+        if (raw.includes(' - ')) {
+            const parts = raw.split(' - ');
+            title = parts[0].trim();
+            subtitle = parts.slice(1).join(' - ').trim();
+        } else if (raw.includes(' – ')) {
+            const parts = raw.split(' – ');
+            title = parts[0].trim();
+            subtitle = parts.slice(1).join(' – ').trim();
+        }
+
+        const upper = title.toUpperCase();
+
+        if (upper.includes('ILLEGAL NUMBERS GAMES')) {
+            title = 'Illegal Numbers Games (Anti-Gambling)';
+            if (!subtitle) subtitle = 'PD 1602 / RA 9287';
+        } else if (upper.includes('ANTI-ELECTRICITY') || upper.includes('TRANSMISSION LINES') || upper.includes('PILFERAGE')) {
+            title = 'Electricity & Wire Pilferage Act';
+            if (!subtitle) subtitle = 'RA 7832';
+        } else if (upper.includes('VIOLENCE AGAINST WOMEN') || upper.includes('VAWC')) {
+            title = 'Violence Against Women & Children (VAWC)';
+            if (!subtitle) subtitle = 'RA 9262';
+        } else if (upper.includes('DANGEROUS DRUGS')) {
+            title = 'Comprehensive Dangerous Drugs';
+            if (!subtitle) subtitle = 'RA 9165';
+        } else if (upper.includes('FIREARMS AND AMMUNITION')) {
+            title = 'Firearms & Ammunition Law';
+            if (!subtitle) subtitle = 'RA 10591';
+        } else if (upper.includes('ANTI-CARNAPPING')) {
+            title = 'Anti-Carnapping Act';
+            if (!subtitle) subtitle = 'RA 10883';
+        } else if (upper.includes('ANTI-RAPE')) {
+            title = 'Anti-Rape Law';
+            if (!subtitle) subtitle = 'RA 8353';
+        } else if (upper.includes('BOUNCING CHECK')) {
+            title = 'Bouncing Check Law';
+            if (!subtitle) subtitle = 'BP 22';
+        } else if (upper.includes('CYBERCRIME PREVENTION')) {
+            title = 'Cybercrime Prevention Act';
+            if (!subtitle) subtitle = 'RA 10175';
+        } else if (upper.includes('ANTI-CHILD PORNOGRAPHY')) {
+            title = 'Anti-Child Pornography Act';
+            if (!subtitle) subtitle = 'RA 9775';
+        } else if (upper.includes('SPECIAL PROTECTION OF CHILDREN')) {
+            title = 'Child Abuse & Exploitation';
+            if (!subtitle) subtitle = 'RA 7610';
+        } else if (title.length > 36 && !subtitle) {
+            const words = title.split(' ');
+            let line1 = '';
+            let line2 = '';
+            for (const w of words) {
+                if ((line1 + ' ' + w).trim().length <= 32) {
+                    line1 = (line1 + ' ' + w).trim();
+                } else {
+                    line2 = (line2 + ' ' + w).trim();
+                }
+            }
+            title = line1 || title;
+            subtitle = line2;
+        }
+
+        const toTitleCase = (str) => {
+            return str.toLowerCase().replace(/(?:^|\s|\/|-)\w/g, (match) => match.toUpperCase());
+        };
+
+        return {
+            shortTitle: toTitleCase(title),
+            subtitle: subtitle,
+            full: raw
+        };
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    let cachedClassificationOffenses = [];
+
+    function renderCustomClassificationItems(sortedOffenses, selectedVal) {
+        if (sortedOffenses) {
+            cachedClassificationOffenses = sortedOffenses;
+        } else {
+            sortedOffenses = cachedClassificationOffenses;
+        }
+        if (!selectedVal) {
+            const sel = document.getElementById('filterClassification');
+            selectedVal = sel ? sel.value : 'All';
+        }
+
+        const listContainer = document.getElementById('customClassificationList');
+        const countBadge = document.getElementById('classificationCountBadge');
+        if (countBadge) {
+            countBadge.textContent = sortedOffenses.length ? `${sortedOffenses.length} classifications` : '';
+        }
+
+        if (!listContainer) return;
+
+        const items = [{
+            full: 'All',
+            shortTitle: 'All Classifications',
+            subtitle: 'All recorded crime incidents'
+        }];
+
+        sortedOffenses.forEach(off => {
+            items.push(formatCrimeClassification(off));
+        });
+
+        let listHtml = '';
+        items.forEach(item => {
+            const isSelected = item.full === selectedVal;
+            listHtml += `
+                <button type="button" onclick="selectClassificationOption('${encodeURIComponent(item.full)}')"
+                    class="classification-option-item w-full text-left p-2.5 rounded-xl transition duration-150 flex items-start gap-2.5 ${isSelected ? 'bg-pnp-blue text-white shadow-md ring-1 ring-pnp-gold' : 'hover:bg-white dark:hover:bg-slate-800 text-gray-800 dark:text-gray-200 border border-transparent hover:border-gray-200 dark:hover:border-slate-700'}"
+                    data-search="${(item.shortTitle + ' ' + (item.subtitle || '') + ' ' + item.full).toLowerCase()}">
+                    <div class="mt-1 w-2 h-2 rounded-full shrink-0 ${isSelected ? 'bg-pnp-gold ring-2 ring-white/50' : 'bg-gray-300 dark:bg-slate-600'}"></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-black truncate leading-snug ${isSelected ? 'text-white' : 'text-gray-900 dark:text-white'}">
+                            ${escapeHtml(item.shortTitle)}
+                        </div>
+                        ${item.subtitle ? `
+                            <div class="text-[10px] font-medium truncate leading-tight mt-0.5 ${isSelected ? 'text-blue-100' : 'text-gray-400 dark:text-gray-400'}">
+                                ${escapeHtml(item.subtitle)}
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${isSelected ? '<i class="fas fa-check text-pnp-gold text-xs shrink-0 self-center"></i>' : ''}
+                </button>
+            `;
+        });
+
+        listContainer.innerHTML = listHtml;
+        updateCustomClassificationTriggerUI(selectedVal);
+    }
+
+    function selectClassificationOption(encodedVal) {
+        const val = decodeURIComponent(encodedVal);
+        const sel = document.getElementById('filterClassification');
+        if (sel) {
+            sel.value = val;
+            sel.dispatchEvent(new Event('change'));
+        }
+        updateCustomClassificationTriggerUI(val);
+        toggleClassificationDropdown(false);
+    }
+
+    function updateCustomClassificationTriggerUI(val) {
+        if (!val) {
+            const sel = document.getElementById('filterClassification');
+            val = sel ? sel.value : 'All';
+        }
+        const formatted = formatCrimeClassification(val);
+        const titleEl = document.getElementById('classificationTriggerTitle');
+        const subEl = document.getElementById('classificationTriggerSubtitle');
+        if (titleEl) titleEl.textContent = formatted.shortTitle;
+        if (subEl) subEl.textContent = formatted.subtitle || (val === 'All' ? 'All recorded crime incidents' : 'Filtered classification');
+    }
+
+    function toggleClassificationDropdown(force) {
+        const popover = document.getElementById('classificationDropdownPopover');
+        const arrow = document.getElementById('classificationDropdownArrow');
+        if (!popover) return;
+
+        const isCurrentlyOpen = !popover.classList.contains('hidden');
+        const shouldOpen = typeof force === 'boolean' ? force : !isCurrentlyOpen;
+
+        if (shouldOpen) {
+            popover.classList.remove('hidden');
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+            const searchInput = document.getElementById('classificationSearchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                filterClassificationSearch('');
+                setTimeout(() => searchInput.focus(), 60);
+            }
+        } else {
+            popover.classList.add('hidden');
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function filterClassificationSearch(query) {
+        const q = (query || '').toLowerCase().trim();
+        const items = document.querySelectorAll('.classification-option-item');
+        items.forEach(el => {
+            const text = el.getAttribute('data-search') || '';
+            if (!q || text.includes(q)) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+    }
+
     function populateClassificationDropdown() {
         const modeSelect = document.getElementById('mapDisplayMode');
         const mode = modeSelect ? modeSelect.value : 'density';
@@ -1246,15 +1489,18 @@
 
         let html = `<option value="All">All Classifications</option>`;
         sorted.forEach(off => {
-            html += `<option value="${off}" title="${off}" ${off === currentVal ? 'selected' : ''}>${off}</option>`;
+            const formatted = formatCrimeClassification(off);
+            html += `<option value="${off}" title="${off}" ${off === currentVal ? 'selected' : ''}>${escapeHtml(formatted.shortTitle)}${formatted.subtitle ? ' (' + escapeHtml(formatted.subtitle) + ')' : ''}</option>`;
         });
 
         dropdown.innerHTML = html;
-        dropdown.title = currentVal !== 'All' ? currentVal : 'All Classifications';
+        dropdown.value = currentVal;
 
         if (currentVal !== 'All' && !offenses.has(currentVal)) {
             dropdown.value = 'All';
         }
+
+        renderCustomClassificationItems(sorted, dropdown.value);
     }
 
     function getThematicStyleForFeature(feature) {
@@ -2064,6 +2310,14 @@
         });
 
         setupListener('filterBarangay', () => loadMapPoints());
+
+        // Close classification popover when clicking outside
+        document.addEventListener('click', (e) => {
+            const container = document.getElementById('classificationDropdownContainer');
+            if (container && !container.contains(e.target)) {
+                toggleClassificationDropdown(false);
+            }
+        });
     });
 </script>
 
