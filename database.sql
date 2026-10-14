@@ -170,17 +170,15 @@ BEGIN
 END $$;
 
 -- =====================================================
--- SEED USERS
+-- INITIAL SUPERADMIN ACCOUNT SETUP
 -- =====================================================
-INSERT INTO public.users (id, username, full_name, password_hash, role)
-VALUES
-  ('00000000-0000-0000-0000-000000000001',
-   'superadmin',
-   'Super Administrator',
-   '$2a$10$DMpQH4fGsPrzMYMTWe/pIeOUF2eID.ay62ZxVAkvsF24VjNgO5h3y',
-   'superadmin'
-  )
-ON CONFLICT DO NOTHING;
+-- For maximum security against web scraping and credential leaks,
+-- hardcoded administrative credentials have been removed.
+-- 
+-- The initial Super Administrator is registered dynamically
+-- on first launch via the one-time web setup wizard at:
+-- /admin/setup
+-- =====================================================
 
 -- =====================================================
 -- REFRESH SCHEMA CACHE
