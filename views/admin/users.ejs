@@ -5,40 +5,63 @@
             <div
                 class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
                 <div
-                    class="p-8 border-b border-gray-50 dark:border-slate-700 bg-gradient-to-r from-pnp-blue/5 to-transparent">
-                    <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] text-[11px]">
-                        Create Account</h3>
-                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Account Credentials
-                    </p>
+                    class="p-8 border-b border-gray-50 dark:border-slate-700 bg-gradient-to-r from-pnp-blue/5 to-transparent flex justify-between items-center">
+                    <div>
+                        <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] text-[11px]">
+                            Create Account</h3>
+                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Personnel Credentials</p>
+                    </div>
+                    <% const isUserQuotaFull = (typeof users !== 'undefined' && users && users.length >= 10); %>
+                    <div class="<%= isUserQuotaFull ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold' %> px-3 py-1.5 rounded-xl font-mono font-black text-[10px] tracking-wider uppercase">
+                        <%= (typeof users !== 'undefined' && users ? users.length : 0) %> / 10 Accounts
+                    </div>
                 </div>
                 <% if (user && user.role==='superadmin' ) { %>
-                    <form action="/admin/users/add" method="POST" class="p-8 space-y-6" onsubmit="confirmOperationalAction(event, { title: 'Account Creation Pending', message: 'An email will be sent to the Police Chief for approval. The new personnel will NOT be able to log in until the account is approved. Proceed?', type: 'info', confirmText: 'Create Account' })">
+                    <% if (isUserQuotaFull) { %>
+                        <div class="p-8 space-y-6">
+                            <div class="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-700 dark:text-amber-300 space-y-2">
+                                <div class="flex items-center space-x-2 font-black text-xs uppercase tracking-wider">
+                                    <i class="fas fa-exclamation-triangle text-amber-500"></i>
+                                    <span>Account Quota Limit Reached (10/10)</span>
+                                </div>
+                                <p class="text-[11px] font-medium leading-relaxed opacity-90">
+                                    The Personnel Registry has reached the maximum capacity limit of 10 authorized administrative accounts. To create a new personnel account, an existing account must first be neutralized or removed.
+                                </p>
+                            </div>
+                            <button type="button" onclick="alertPersonnelAccountLimit()"
+                                class="w-full bg-gray-200 dark:bg-slate-700 text-gray-400 dark:text-gray-500 font-black py-5 rounded-2xl uppercase tracking-[0.3em] text-[10px] cursor-not-allowed flex items-center justify-center space-x-2">
+                                <i class="fas fa-ban"></i>
+                                <span>Capacity Limit Reached (10/10)</span>
+                            </button>
+                        </div>
+                    <% } else { %>
+                    <form id="createAccountForm" action="/admin/users/add" method="POST" class="p-8 space-y-6" onsubmit="confirmCreateAccount(event)">
 
                         <div class="space-y-2">
                             <div class="flex justify-between items-center">
                                 <label for="full_name"
                                     class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
-                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">2 - 60 chars / max 6 words</span>
+                                <span id="create_fullname_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 60 letters • 0 / 6 words</span>
                             </div>
-                            <input type="text" name="full_name" id="full_name" required minlength="2" maxlength="60" placeholder="User Full Name"
+                            <input type="text" name="full_name" id="full_name" required minlength="2" maxlength="60" placeholder="User Full Name" oninput="updateCreateUserCounters()"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <div class="space-y-2">
                             <div class="flex justify-between items-center">
                                 <label for="email"
                                     class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
-                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">max 100 chars</span>
+                                <span id="create_email_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 100 letters</span>
                             </div>
-                            <input type="email" name="email" id="email" required maxlength="100" placeholder="user@example.com"
+                            <input type="email" name="email" id="email" required maxlength="100" placeholder="user@example.com" oninput="updateCreateUserCounters()"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <div class="space-y-2">
                             <div class="flex justify-between items-center">
                                 <label for="password"
                                     class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Password</label>
-                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">8 - 64 chars</span>
+                                <span id="create_password_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 64 letters</span>
                             </div>
-                            <input type="password" name="password" id="password" required minlength="8" maxlength="64" placeholder="••••••••"
+                            <input type="password" name="password" id="password" required minlength="8" maxlength="64" placeholder="••••••••" oninput="updateCreateUserCounters()"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <!-- Personnel are always created with 'staff' role by default -->
@@ -47,6 +70,7 @@
                             Create Account
                         </button>
                     </form>
+                    <% } %>
                     <% } else { %>
                         <div class="p-8 py-20 text-center">
                             <div
@@ -74,7 +98,7 @@
                     </div>
                     <div class="bg-pnp-blue/10 px-3 py-1.5 rounded-xl">
                         <span class="text-[10px] font-black text-pnp-blue tracking-widest uppercase">
-                            <%= users.length %> Users
+                            <%= users.length %> / 10 Accounts
                         </span>
                     </div>
                 </div>
@@ -386,7 +410,7 @@
 <div id="deleteUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
         
-        <form id="deleteUserForm" method="POST" action="">
+        <form id="deleteUserForm" method="POST" action="" onsubmit="confirmDeleteUser(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-red-50 dark:bg-red-900/10">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/10">
@@ -437,9 +461,9 @@
                 <div id="customReasonContainer" class="hidden mt-4 space-y-2">
                     <div class="flex justify-between items-center">
                         <label class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Specify Reason</label>
-                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">5 - 150 chars / max 25 words</span>
+                        <span id="custom_reason_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 150 letters • 0 / 25 words</span>
                     </div>
-                    <input type="text" name="custom_reason" id="custom_reason" placeholder="Enter custom deletion reason..." minlength="5" maxlength="150"
+                    <input type="text" name="custom_reason" id="custom_reason" placeholder="Enter custom deletion reason..." minlength="5" maxlength="150" oninput="updateCustomReasonCounter()"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
             </div>
@@ -459,7 +483,7 @@
 <!-- Edit User Modal -->
 <div id="editUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
-        <form id="editUserForm" method="POST" action="">
+        <form id="editUserForm" method="POST" action="" onsubmit="confirmEditUser(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-blue/5 dark:bg-slate-800/40">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-pnp-blue/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold">
@@ -479,18 +503,18 @@
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
                         <label for="edit_full_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
-                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">2 - 60 chars / max 6 words</span>
+                        <span id="edit_fullname_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 60 letters • 0 / 6 words</span>
                     </div>
-                    <input type="text" name="full_name" id="edit_full_name" required minlength="2" maxlength="60"
+                    <input type="text" name="full_name" id="edit_full_name" required minlength="2" maxlength="60" oninput="updateEditUserCounters()"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
 
                 <div class="space-y-2">
                     <div class="flex justify-between items-center">
                         <label for="edit_email" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
-                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">max 100 chars</span>
+                        <span id="edit_email_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 100 letters</span>
                     </div>
-                    <input type="email" name="email" id="edit_email" maxlength="100"
+                    <input type="email" name="email" id="edit_email" maxlength="100" oninput="updateEditUserCounters()"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
 
@@ -518,9 +542,9 @@
                 <div class="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
                     <div class="flex justify-between items-center">
                         <label for="edit_password" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Reset Password (Optional)</label>
-                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">8 - 64 chars</span>
+                        <span id="edit_password_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 64 letters</span>
                     </div>
-                    <input type="password" name="password" id="edit_password" minlength="8" maxlength="64" placeholder="Leave blank to preserve current password"
+                    <input type="password" name="password" id="edit_password" minlength="8" maxlength="64" placeholder="Leave blank to preserve current password" oninput="updateEditUserCounters()"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
             </div>
@@ -723,6 +747,281 @@
         openDeleteUserModal(id, fullName);
     }
 
+    function updateCreateUserCounters() {
+        const nameInput = document.getElementById('full_name');
+        const nameCounter = document.getElementById('create_fullname_counter');
+        if (nameInput && nameCounter) {
+            const val = nameInput.value;
+            const letters = val.length;
+            const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+            nameCounter.textContent = `${letters} / 60 letters • ${words} / 6 words`;
+            if (letters > 60 || words > 6) {
+                nameCounter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 50 || words >= 5) {
+                nameCounter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                nameCounter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+
+        const emailInput = document.getElementById('email');
+        const emailCounter = document.getElementById('create_email_counter');
+        if (emailInput && emailCounter) {
+            const letters = emailInput.value.length;
+            emailCounter.textContent = `${letters} / 100 letters`;
+            if (letters > 100) {
+                emailCounter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 85) {
+                emailCounter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                emailCounter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+
+        const passInput = document.getElementById('password');
+        const passCounter = document.getElementById('create_password_counter');
+        if (passInput && passCounter) {
+            const letters = passInput.value.length;
+            passCounter.textContent = `${letters} / 64 letters`;
+            if (letters > 64) {
+                passCounter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 55) {
+                passCounter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                passCounter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+    }
+
+    function updateEditUserCounters() {
+        const nameInput = document.getElementById('edit_full_name');
+        const nameCounter = document.getElementById('edit_fullname_counter');
+        if (nameInput && nameCounter) {
+            const val = nameInput.value;
+            const letters = val.length;
+            const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+            nameCounter.textContent = `${letters} / 60 letters • ${words} / 6 words`;
+            if (letters > 60 || words > 6) {
+                nameCounter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 50 || words >= 5) {
+                nameCounter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                nameCounter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+
+        const emailInput = document.getElementById('edit_email');
+        const emailCounter = document.getElementById('edit_email_counter');
+        if (emailInput && emailCounter) {
+            const letters = emailInput.value.length;
+            emailCounter.textContent = `${letters} / 100 letters`;
+            if (letters > 100) {
+                emailCounter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 85) {
+                emailCounter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                emailCounter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+
+        const passInput = document.getElementById('edit_password');
+        const passCounter = document.getElementById('edit_password_counter');
+        if (passInput && passCounter) {
+            const letters = passInput.value.length;
+            passCounter.textContent = `${letters} / 64 letters`;
+            if (letters > 64) {
+                passCounter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 55) {
+                passCounter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                passCounter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+    }
+
+    function updateCustomReasonCounter() {
+        const input = document.getElementById('custom_reason');
+        const counter = document.getElementById('custom_reason_counter');
+        if (input && counter) {
+            const val = input.value;
+            const letters = val.length;
+            const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+            counter.textContent = `${letters} / 150 letters • ${words} / 25 words`;
+            if (letters > 150 || words > 25) {
+                counter.className = 'text-[8px] text-red-500 font-bold uppercase tracking-wider';
+            } else if (letters >= 130 || words >= 20) {
+                counter.className = 'text-[8px] text-amber-500 font-bold uppercase tracking-wider';
+            } else {
+                counter.className = 'text-[8px] text-gray-400 font-bold uppercase tracking-wider';
+            }
+        }
+    }
+
+    function alertPersonnelAccountLimit() {
+        const alertFn = window.strategicAlert || (({ message }) => alert(message));
+        alertFn({
+            title: 'Account Capacity Reached',
+            message: 'The Personnel Registry has reached its maximum authorized limit of 10 accounts. Please neutralize or remove an existing personnel account before adding a new one.',
+            confirmText: 'Understood',
+            type: 'warning'
+        });
+    }
+
+    async function confirmCreateAccount(event) {
+        event.preventDefault();
+        const currentCount = <%= (typeof users !== 'undefined' && users ? users.length : 0) %>;
+        if (currentCount >= 10) {
+            alertPersonnelAccountLimit();
+            return false;
+        }
+
+        const nameInput = document.getElementById('full_name');
+        const emailInput = document.getElementById('email');
+        const passInput = document.getElementById('password');
+
+        const fullName = (nameInput ? nameInput.value : '').trim();
+        const email = (emailInput ? emailInput.value : '').trim();
+        const password = passInput ? passInput.value : '';
+
+        const nameWords = fullName.split(/\s+/).filter(Boolean);
+        if (!fullName || fullName.length < 2 || fullName.length > 60 || nameWords.length > 6) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Validation Notice',
+                message: 'Full Name must be between 2 and 60 letters and contain no more than 6 words.',
+                confirmText: 'Understood',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        if (!email || email.length > 100) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Validation Notice',
+                message: 'Email address must not exceed 100 characters.',
+                confirmText: 'Understood',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        if (!password || password.length < 8 || password.length > 64) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Validation Notice',
+                message: 'Password must be between 8 and 64 characters.',
+                confirmText: 'Understood',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        return confirmOperationalAction(event, {
+            title: 'Account Creation Pending',
+            message: 'An email will be sent to the Police Chief for approval. The new personnel will NOT be able to log in until the account is approved. Proceed?',
+            type: 'info',
+            confirmText: 'Create Account'
+        });
+    }
+
+    async function confirmEditUser(event) {
+        event.preventDefault();
+        const form = document.getElementById('editUserForm');
+        const nameInput = document.getElementById('edit_full_name');
+        const emailInput = document.getElementById('edit_email');
+        const passInput = document.getElementById('edit_password');
+
+        const fullName = (nameInput ? nameInput.value : '').trim();
+        const email = (emailInput ? emailInput.value : '').trim();
+        const password = passInput ? passInput.value : '';
+
+        const nameWords = fullName.split(/\s+/).filter(Boolean);
+        if (!fullName || fullName.length < 2 || fullName.length > 60 || nameWords.length > 6) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Validation Notice',
+                message: 'Full Name must be between 2 and 60 letters and contain no more than 6 words.',
+                confirmText: 'Understood',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        if (email && email.length > 100) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Validation Notice',
+                message: 'Email address must not exceed 100 characters.',
+                confirmText: 'Understood',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        if (password && (password.length < 8 || password.length > 64)) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Validation Notice',
+                message: 'Password must be between 8 and 64 characters if provided.',
+                confirmText: 'Understood',
+                type: 'warning'
+            });
+            return false;
+        }
+
+        const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
+        const confirmed = await confirmFn({
+            title: 'Confirm Account Modifications',
+            message: `Are you sure you want to save changes to "${fullName}"'s credentials?`,
+            confirmText: 'Save Changes',
+            cancelText: 'Cancel',
+            type: 'warning'
+        });
+
+        if (confirmed) {
+            form.submit();
+        }
+        return false;
+    }
+
+    async function confirmDeleteUser(event) {
+        event.preventDefault();
+        const form = document.getElementById('deleteUserForm');
+        const otherRadio = document.querySelector('input[name="delete_reason"][value="Other"]');
+        const customInput = document.getElementById('custom_reason');
+        const targetName = document.getElementById('deleteUserTargetName').textContent;
+
+        if (otherRadio && otherRadio.checked) {
+            const val = customInput ? customInput.value.trim() : '';
+            const words = val ? val.split(/\s+/).length : 0;
+            if (val.length < 5 || val.length > 150 || words > 25) {
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'Validation Notice',
+                    message: 'Custom reason must be between 5 and 150 characters and no more than 25 words.',
+                    confirmText: 'Understood',
+                    type: 'warning'
+                });
+                return false;
+            }
+        }
+
+        const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
+        const confirmed = await confirmFn({
+            title: 'Confirm Account Neutralization',
+            message: `Are you sure you want to deactivate and neutralize credentials for "${targetName}"?`,
+            confirmText: 'Neutralize Account',
+            cancelText: 'Cancel',
+            type: 'danger'
+        });
+
+        if (confirmed) {
+            form.submit();
+        }
+        return false;
+    }
+
     function openEditUserModal(userId, fullName, email, role, status) {
         document.getElementById('editUserForm').action = `/admin/users/${userId}/edit`;
         document.getElementById('edit_full_name').value = fullName;
@@ -730,6 +1029,7 @@
         document.getElementById('edit_role').value = role || 'staff';
         document.getElementById('edit_status').value = status || 'active';
         document.getElementById('edit_password').value = '';
+        updateEditUserCounters();
 
         const modal = document.getElementById('editUserModal');
         modal.classList.remove('hidden');
@@ -760,6 +1060,7 @@
         // Reset form
         document.getElementById('deleteUserForm').reset();
         toggleCustomReason();
+        updateCustomReasonCounter();
 
         const modal = document.getElementById('deleteUserModal');
         modal.classList.remove('hidden');
@@ -941,9 +1242,14 @@
         if (otherRadio && otherRadio.checked) {
             customContainer.classList.remove('hidden');
             customInput.required = true;
+            updateCustomReasonCounter();
         } else {
             customContainer.classList.add('hidden');
             customInput.required = false;
         }
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateCreateUserCounters();
+    });
 </script>

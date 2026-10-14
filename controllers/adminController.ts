@@ -3252,6 +3252,12 @@ export const postUser = async (req: Request, res: Response) => {
       return res.status(403).send('Forbidden: Insufficient tactical clearance.');
     }
 
+    // 🛡️ Quota Enforcement: Limit administrative personnel accounts to 10
+    const existingUsersSnap = await db.collection('users').get();
+    if (existingUsersSnap.docs && existingUsersSnap.docs.length >= 10) {
+      return res.status(400).send('Account creation restricted: Personnel Registry has reached the maximum capacity limit of 10 authorized accounts.');
+    }
+
     await logAction(req, 'USER_CREATE_PENDING', `Requested creation of administrative personnel: ${username} (Role: staff)`);
 
     const docRef = await db.collection('users').add({
