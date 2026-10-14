@@ -1,5 +1,5 @@
 /**
- * Text-to-Speech Controller using Puter.js with support for Language Selection (Filipino / English)
+ * Text-to-Speech Controller with support for Language Selection (Filipino / English)
  * and native Web Speech API fallback for visually impaired accessibility.
  */
 (function () {
@@ -402,18 +402,6 @@
                     console.warn('MyMemory translation failed:', e);
                 }
 
-                // 3. Try client-side Puter AI fallback
-                if (typeof puter !== 'undefined' && puter.ai) {
-                    try {
-                        const prompt = `Translate the following text into clear, natural, official Tagalog (Filipino). Return ONLY the translated Tagalog text, with no explanations, notes, or extra formatting:\n\n${textToTranslate}`;
-                        const response = await puter.ai.chat(prompt);
-                        if (response && response.trim()) {
-                            return response.trim();
-                        }
-                    } catch (e) {
-                        console.warn('Puter AI chat translation failed:', e);
-                    }
-                }
                 return textToTranslate;
             };
 

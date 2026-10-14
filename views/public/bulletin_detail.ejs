@@ -224,46 +224,12 @@
                             renderParagraphs(translatedBody);
                             label.innerText = 'Show Original (English)';
                             isTranslated = true;
-                        } else if (typeof puter !== 'undefined' && puter.ai) {
-                            // Client-side Puter AI fallback
-                            const prompt = `Translate this bulletin into clear Tagalog (Filipino). Maintain [TITLE]: and [BODY]: tags:\n\n${fullText}`;
-                            const pResp = await puter.ai.chat(prompt);
-                            const pText = typeof pResp === 'string' ? pResp : (pResp?.message?.content || '');
-                            if (pText && pText.trim()) {
-                                const titleMatch = pText.match(/\[TITLE\]:\s*(.*)/i);
-                                const bodyMatch = pText.match(/\[BODY\]:\s*([\s\S]*)/i);
-                                translatedTitle = titleMatch && titleMatch[1] ? titleMatch[1].trim() : pText.split('\n')[0];
-                                translatedBody = bodyMatch && bodyMatch[1] ? bodyMatch[1].trim() : pText;
-                                titleEl.innerText = translatedTitle;
-                                renderParagraphs(translatedBody);
-                                label.innerText = 'Show Original (English)';
-                                isTranslated = true;
-                            } else {
-                                alert('Translation temporarily unavailable. Please try again shortly.');
-                                label.innerText = 'Isalin sa Tagalog';
-                            }
                         } else {
                             alert('Translation temporarily unavailable. Please try again shortly.');
                             label.innerText = 'Isalin sa Tagalog';
                         }
                     } catch (err) {
                         console.error('Translation error:', err);
-                        if (typeof puter !== 'undefined' && puter.ai) {
-                            try {
-                                const prompt = `Translate this bulletin into clear Tagalog (Filipino). Maintain [TITLE]: and [BODY]: tags:\n\n${originalTitle}\n\n${originalBody}`;
-                                const pResp = await puter.ai.chat(prompt);
-                                const pText = typeof pResp === 'string' ? pResp : (pResp?.message?.content || '');
-                                if (pText && pText.trim()) {
-                                    translatedTitle = pText.split('\n')[0];
-                                    translatedBody = pText;
-                                    titleEl.innerText = translatedTitle;
-                                    renderParagraphs(translatedBody);
-                                    label.innerText = 'Show Original (English)';
-                                    isTranslated = true;
-                                    return;
-                                }
-                            } catch (_) {}
-                        }
                         alert('Error requesting AI translation.');
                         label.innerText = 'Isalin sa Tagalog';
                     } finally {

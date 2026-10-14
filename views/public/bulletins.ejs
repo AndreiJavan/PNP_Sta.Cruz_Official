@@ -781,41 +781,6 @@
                 console.warn('Server chat error, checking client fallback:', netErr);
             }
             
-            // If server returned a primary AI response (OpenRouter or Gemini), use it immediately
-            if (res && res.success && res.reply && !res.fallback) {
-                const ind = document.getElementById('bulletin-chat-typing');
-                if (ind) ind.remove();
-                appendBulletinChatMessage('assistant', res.reply);
-                bulletinChatHistory.push({ role: 'user', text });
-                bulletinChatHistory.push({ role: 'assistant', text: res.reply });
-                return;
-            }
-
-            // If Puter AI is available in the browser, attempt dynamic client-side chat
-            if (typeof puter !== 'undefined' && puter.ai) {
-                try {
-                    const prompt = `You are an official public safety AI assistant for Sta. Cruz Municipal Police Station, Laguna.
-=== ARTICLE / BULLETIN DETAILS ===
-Title: ${articleTitle}
-Content: ${articleContent}
-
-User: ${text}
-Provide a direct, polite, official response with bold highlights and bullet points where helpful:`;
-                    const puterResp = await puter.ai.chat(prompt);
-                    const puterText = typeof puterResp === 'string' ? puterResp : (puterResp?.message?.content || puterResp?.text || '');
-                    if (puterText && puterText.trim()) {
-                        const ind = document.getElementById('bulletin-chat-typing');
-                        if (ind) ind.remove();
-                        appendBulletinChatMessage('assistant', puterText.trim());
-                        bulletinChatHistory.push({ role: 'user', text });
-                        bulletinChatHistory.push({ role: 'assistant', text: puterText.trim() });
-                        return;
-                    }
-                } catch (puterErr) {
-                    console.warn('Puter AI chat failed, using server response:', puterErr);
-                }
-            }
-
             const ind = document.getElementById('bulletin-chat-typing');
             if (ind) ind.remove();
 
