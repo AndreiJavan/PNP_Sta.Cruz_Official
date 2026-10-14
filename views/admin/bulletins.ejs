@@ -756,7 +756,7 @@
 
         if (titleInput && titleCounter) {
             const letters = titleInput.value ? titleInput.value.length : 0;
-            titleCounter.textContent = `${letters} / 100 letters`;
+            titleCounter.textContent = `${letters} / 200 letters`;
 
             if (letters === 0) {
                 if (titleErrorMsg) {
@@ -1327,8 +1327,8 @@
             return false;
         }
 
-        if (titleVal.length > 100 || titleWords.length > 15) {
-            if (errorText) errorText.textContent = `Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${titleVal.length} characters).`;
+        if (titleVal.length > 200 || titleWords.length > 30) {
+            if (errorText) errorText.textContent = `Validation Error: Title is too long (maximum 30 words / 200 characters. Currently: ${titleWords.length} words / ${titleVal.length} characters).`;
             if (errorEl) errorEl.classList.remove('hidden');
             return false;
         }
@@ -1648,10 +1648,10 @@
                                     Notice Title <span class="text-red-500">*</span>
                                 </label>
                                 <span id="publishTitleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                    0 / 100 letters
+                                    0 / 200 letters
                                 </span>
                             </div>
-                            <input type="text" name="title" id="publishTitle" required maxlength="100" placeholder="e.g. Heavy Rainfall Warning Advisory" oninput="updateModalCounters()" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-bold text-slate-800 dark:text-white transition">
+                            <input type="text" name="title" id="publishTitle" required maxlength="200" placeholder="e.g. Heavy Rainfall Warning Advisory" oninput="updateModalCounters()" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-bold text-slate-800 dark:text-white transition">
                             <p id="publishTitleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                         </div>
 
@@ -1714,10 +1714,10 @@
                                 Post Title / Headline <span class="text-red-500">*</span>
                             </label>
                             <span id="urlTitleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                0 / 100 letters
+                                0 / 200 letters
                             </span>
                         </div>
-                        <input type="text" id="urlTitleInput" maxlength="100" placeholder="e.g. Official Statement on Community Outreach Operation" oninput="updateModalCounters()" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-bold text-slate-800 dark:text-white transition">
+                        <input type="text" id="urlTitleInput" maxlength="200" placeholder="e.g. Official Statement on Community Outreach Operation" oninput="updateModalCounters()" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-bold text-slate-800 dark:text-white transition">
                         <p id="urlTitleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                     </div>
 

@@ -15,21 +15,30 @@
                     <form action="/admin/users/add" method="POST" class="p-8 space-y-6" onsubmit="confirmOperationalAction(event, { title: 'Account Creation Pending', message: 'An email will be sent to the Police Chief for approval. The new personnel will NOT be able to log in until the account is approved. Proceed?', type: 'info', confirmText: 'Create Account' })">
 
                         <div class="space-y-2">
-                            <label for="full_name"
-                                class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
-                            <input type="text" name="full_name" id="full_name" required placeholder="User Full Name"
+                            <div class="flex justify-between items-center">
+                                <label for="full_name"
+                                    class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">2 - 60 chars / max 6 words</span>
+                            </div>
+                            <input type="text" name="full_name" id="full_name" required minlength="2" maxlength="60" placeholder="User Full Name"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <div class="space-y-2">
-                            <label for="email"
-                                class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
-                            <input type="email" name="email" id="email" required placeholder="user@example.com"
+                            <div class="flex justify-between items-center">
+                                <label for="email"
+                                    class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">max 100 chars</span>
+                            </div>
+                            <input type="email" name="email" id="email" required maxlength="100" placeholder="user@example.com"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <div class="space-y-2">
-                            <label for="password"
-                                class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Password</label>
-                            <input type="password" name="password" id="password" required placeholder="••••••••"
+                            <div class="flex justify-between items-center">
+                                <label for="password"
+                                    class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Password</label>
+                                <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">8 - 64 chars</span>
+                            </div>
+                            <input type="password" name="password" id="password" required minlength="8" maxlength="64" placeholder="••••••••"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <!-- Personnel are always created with 'staff' role by default -->
@@ -426,8 +435,11 @@
                 </div>
 
                 <div id="customReasonContainer" class="hidden mt-4 space-y-2">
-                    <label class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Specify Reason</label>
-                    <input type="text" name="custom_reason" id="custom_reason" placeholder="Enter custom deletion reason..."
+                    <div class="flex justify-between items-center">
+                        <label class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Specify Reason</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">5 - 150 chars / max 25 words</span>
+                    </div>
+                    <input type="text" name="custom_reason" id="custom_reason" placeholder="Enter custom deletion reason..." minlength="5" maxlength="150"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
             </div>
@@ -465,14 +477,20 @@
 
             <div class="p-8 space-y-5">
                 <div class="space-y-2">
-                    <label for="edit_full_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
-                    <input type="text" name="full_name" id="edit_full_name" required
+                    <div class="flex justify-between items-center">
+                        <label for="edit_full_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">2 - 60 chars / max 6 words</span>
+                    </div>
+                    <input type="text" name="full_name" id="edit_full_name" required minlength="2" maxlength="60"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
 
                 <div class="space-y-2">
-                    <label for="edit_email" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
-                    <input type="email" name="email" id="edit_email"
+                    <div class="flex justify-between items-center">
+                        <label for="edit_email" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">max 100 chars</span>
+                    </div>
+                    <input type="email" name="email" id="edit_email" maxlength="100"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
 
@@ -498,8 +516,11 @@
                 </div>
 
                 <div class="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
-                    <label for="edit_password" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Reset Password (Optional)</label>
-                    <input type="password" name="password" id="edit_password" placeholder="Leave blank to preserve current password"
+                    <div class="flex justify-between items-center">
+                        <label for="edit_password" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Reset Password (Optional)</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">8 - 64 chars</span>
+                    </div>
+                    <input type="password" name="password" id="edit_password" minlength="8" maxlength="64" placeholder="Leave blank to preserve current password"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
             </div>

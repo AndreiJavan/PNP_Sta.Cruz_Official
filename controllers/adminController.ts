@@ -1708,7 +1708,16 @@ INPUT DATA STARTS BELOW:
       return true;
     });
 
-    return res.json({ success: true, data: uniqueFlattened });
+    const boundedRecords = uniqueFlattened.map((item: any) => {
+      let cleanOffense = String(item.offense || item.incident_type || '').trim();
+      if (cleanOffense.length > 100) cleanOffense = cleanOffense.substring(0, 100);
+      return {
+        ...item,
+        offense: cleanOffense
+      };
+    });
+
+    return res.json({ success: true, data: boundedRecords });
   } catch (err: any) {
     console.error('AI Processing Error:', err);
     return res.status(500).json({ success: false, error: `Neural Unit Error: ${err.message}` });
@@ -1719,6 +1728,15 @@ export const saveReportBatch = async (req: Request, res: Response) => {
   const { entries, filename, entryType } = req.body;
   if (!entries || !Array.isArray(entries) || entries.length === 0) {
     return res.status(400).json({ success: false, message: 'Invalid or empty entries dataset provided.' });
+  }
+
+  const cleanFilename = (filename || '').trim();
+  if (cleanFilename.length > 100) {
+    return res.status(400).json({ success: false, message: 'Validation Error: Batch filename must not exceed 100 characters.' });
+  }
+  const filenameWords = cleanFilename.split(/\s+/).filter(Boolean);
+  if (filenameWords.length > 15) {
+    return res.status(400).json({ success: false, message: 'Validation Error: Batch filename must not exceed 15 words.' });
   }
 
   // Server-side strict data validation
@@ -1751,6 +1769,15 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     const offense = (entry.incident_type || entry.offense || '').trim();
     if (!offense || offense.length < 2) {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
+    }
+
+    if (offense.length > 100) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 100 characters limit.` });
+    }
+
+    const offenseWords = offense.split(/\s+/).filter(Boolean);
+    if (offenseWords.length > 15) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 15 words limit.` });
     }
 
     const category = entry.category || 'Non-Index';
@@ -2503,14 +2530,14 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or attach image/video media for Public Advisories.`);
   }
 
-  // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 30 words / 200 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
   if (titleWords.length < 3) {
     return res.status(400).send(`Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
-  if (cleanTitle.length > 100 || titleWords.length > 15) {
-    return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
+  if (cleanTitle.length > 200 || titleWords.length > 30) {
+    return res.status(400).send(`Validation Error: Title is too long (maximum 30 words / 200 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
   // Validation 2: Body / Facebook URL
@@ -2679,14 +2706,14 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or remove the URL link to update this Public Advisory.`);
   }
 
-  // Validation 1: Title/Name character and word limits (Min 3 words, Max 15 words / 100 chars)
+  // Validation 1: Title/Name character and word limits (Min 3 words, Max 30 words / 200 chars)
   const cleanTitle = (title || '').trim();
   const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
   if (titleWords.length < 3) {
     return res.status(400).send(`Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
-  if (cleanTitle.length > 100 || titleWords.length > 15) {
-    return res.status(400).send(`Validation Error: Title is too long (maximum 15 words / 100 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
+  if (cleanTitle.length > 200 || titleWords.length > 30) {
+    return res.status(400).send(`Validation Error: Title is too long (maximum 30 words / 200 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
   }
 
   // Validation 2: Body text length limiter (Min 5 words / 15 chars, Max 500 words / 5,000 chars)
@@ -3197,10 +3224,27 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const postUser = async (req: Request, res: Response) => {
   const { full_name, email, password } = req.body;
+  const trimmedName = (full_name || '').trim();
+  const trimmedEmail = (email || '').trim();
+  const trimmedPassword = (password || '').trim();
+
+  // 🛡️ Letters and words limitation checks
+  const nameWords = trimmedName.split(/\s+/).filter(Boolean);
+  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 60 || nameWords.length > 6) {
+    return res.status(400).send('Validation Error: Full name must be between 2 and 60 characters and maximum 6 words.');
+  }
+
+  if (!trimmedEmail || trimmedEmail.length > 100) {
+    return res.status(400).send('Validation Error: Email address must not exceed 100 characters.');
+  }
+
+  if (!trimmedPassword || trimmedPassword.length < 8 || trimmedPassword.length > 64) {
+    return res.status(400).send('Validation Error: Password must be between 8 and 64 characters.');
+  }
 
   // Generate a guaranteed unique username to prevent duplicate constraint errors
-  const username = email.split('@')[0] + '_' + Math.random().toString(36).substring(2, 8);
-  const hash = bcrypt.hashSync(password, 10);
+  const username = trimmedEmail.split('@')[0] + '_' + Math.random().toString(36).substring(2, 8);
+  const hash = bcrypt.hashSync(trimmedPassword, 10);
   try {
     // 🛡️ Backend Enforcement: Only superadmins can deploy new personnel
     if (req.session.user.role !== 'superadmin') {
@@ -3274,8 +3318,20 @@ export const postEditUser = async (req: Request, res: Response) => {
     const trimmedName = (full_name || '').trim();
     const trimmedEmail = (email || '').trim();
 
-    if (!trimmedName || trimmedName.length < 2) {
-      return res.status(400).send('Full name must be at least 2 characters long.');
+    // 🛡️ Letters and words limitation checks
+    const nameWords = trimmedName.split(/\s+/).filter(Boolean);
+    if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 60 || nameWords.length > 6) {
+      return res.status(400).send('Validation Error: Full name must be between 2 and 60 characters and maximum 6 words.');
+    }
+
+    if (trimmedEmail && trimmedEmail.length > 100) {
+      return res.status(400).send('Validation Error: Email address must not exceed 100 characters.');
+    }
+
+    if (password && password.trim()) {
+      if (password.trim().length < 8 || password.trim().length > 64) {
+        return res.status(400).send('Validation Error: Reset password must be between 8 and 64 characters.');
+      }
     }
 
     const docRef = db.collection('users').doc(userId);
@@ -3303,7 +3359,7 @@ export const postEditUser = async (req: Request, res: Response) => {
       updatePayload.status = status;
     }
 
-    if (password && password.trim().length >= 6) {
+    if (password && password.trim().length >= 8) {
       updatePayload.password_hash = bcrypt.hashSync(password.trim(), 10);
     }
 
@@ -3329,8 +3385,16 @@ export const deleteUser = async (req: Request, res: Response) => {
     const userId = req.params.id;
     const { delete_reason, custom_reason } = req.body;
 
+    const trimmedCustom = (custom_reason || '').trim();
+    const customWords = trimmedCustom.split(/\s+/).filter(Boolean);
+    if (delete_reason === 'Other') {
+      if (!trimmedCustom || trimmedCustom.length < 5 || trimmedCustom.length > 150 || customWords.length > 25) {
+        return res.status(400).send('Validation Error: Custom reason must be between 5 and 150 characters (max 25 words).');
+      }
+    }
+
     // Determine the final reason
-    const finalReason = delete_reason === 'Other' ? custom_reason : delete_reason;
+    const finalReason = delete_reason === 'Other' ? trimmedCustom : delete_reason;
     const fallbackReason = 'Administrative Decision';
     const reasonText = finalReason || fallbackReason;
 
@@ -3739,6 +3803,15 @@ export const updateReportBatch = async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, message: 'Invalid or empty entries dataset provided.' });
   }
 
+  const cleanFilename = (filename || '').trim();
+  if (cleanFilename.length > 100) {
+    return res.status(400).json({ success: false, message: 'Validation Error: Batch filename must not exceed 100 characters.' });
+  }
+  const filenameWords = cleanFilename.split(/\s+/).filter(Boolean);
+  if (filenameWords.length > 15) {
+    return res.status(400).json({ success: false, message: 'Validation Error: Batch filename must not exceed 15 words.' });
+  }
+
   // 1. Strict server-side validation
   const todayStr = new Date().toISOString().split('T')[0];
   const validCategories = ['8-Focus', 'Non-Index', 'PSI'];
@@ -3769,6 +3842,15 @@ export const updateReportBatch = async (req: Request, res: Response) => {
     const offense = (entry.incident_type || entry.offense || '').trim();
     if (!offense || offense.length < 2) {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
+    }
+
+    if (offense.length > 100) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 100 characters limit.` });
+    }
+
+    const offenseWords = offense.split(/\s+/).filter(Boolean);
+    if (offenseWords.length > 15) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 15 words limit.` });
     }
 
     const category = entry.category || 'Non-Index';
