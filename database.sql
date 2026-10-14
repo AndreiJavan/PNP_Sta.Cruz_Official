@@ -241,6 +241,13 @@ CREATE TABLE IF NOT EXISTS public.personnel (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Enable RLS and Allow All policy for personnel
+ALTER TABLE public.personnel ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Allow All" ON public.personnel;
+CREATE POLICY "Allow All" ON public.personnel
+  FOR ALL USING (true) WITH CHECK (true);
+
+
 -- =====================================================
 -- PERFORMANCE INDEXING (ADMIN & PUBLIC WORKLOADS)
 -- Run this section in Supabase SQL Editor to accelerate

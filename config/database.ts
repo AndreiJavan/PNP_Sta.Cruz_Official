@@ -12,7 +12,7 @@ const __dirname = pathModule.dirname(__filename);
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
 // Lazy initialization of Supabase client
 let supabaseInstance: any = null;

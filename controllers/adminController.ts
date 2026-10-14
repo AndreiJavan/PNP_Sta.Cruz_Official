@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { db } from '../config/database.js';
 import bcrypt from 'bcryptjs';
 import * as XLSX from 'xlsx';
@@ -3144,6 +3145,8 @@ const DEFAULT_STATION_PERSONNEL = [
   { name: 'PEMS MANOLITO M BINALAY', position: 'Mespo', display_order: 8 }
 ];
 
+let activeStationPersonnel: any[] = DEFAULT_STATION_PERSONNEL.map((p, idx) => ({ id: `default-${idx + 1}`, ...p }));
+
 export const getStationPersonnelList = async (): Promise<any[]> => {
   return memoryCache.getOrSet('personnel:directory', async () => {
     try {
@@ -3151,10 +3154,10 @@ export const getStationPersonnelList = async (): Promise<any[]> => {
       if (snap && snap.docs && snap.docs.length > 0) {
         return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
       }
-    } catch (e) {
-      console.warn('[PERSONNEL DIRECTORY] Could not read from database collection, using default personnel list:', e);
+    } catch (e: any) {
+      console.warn('[PERSONNEL DIRECTORY] Could not read from database collection, using active roster:', e?.message || e);
     }
-    return DEFAULT_STATION_PERSONNEL.map((p, idx) => ({ id: `default-${idx + 1}`, ...p }));
+    return [...activeStationPersonnel].sort((a, b) => (Number(a.display_order) || 0) - (Number(b.display_order) || 0));
   }, 5 * 60 * 1000);
 };
 
@@ -3399,13 +3402,28 @@ export const postStationPersonnel = async (req: Request, res: Response) => {
     }
 
     await logAction(req, 'STATION_PERSONNEL_CREATE', `Added station directory personnel: ${trimmedName} (${trimmedPos})`);
-    await db.collection('personnel').add({
+    
+    const newEntry = {
+      id: uuidv4(),
       name: trimmedName,
       position: trimmedPos,
       display_order: orderNum,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
-    });
+    };
+    activeStationPersonnel.push(newEntry);
+
+    try {
+      await db.collection('personnel').add({
+        name: trimmedName,
+        position: trimmedPos,
+        display_order: orderNum,
+        created_at: newEntry.created_at,
+        updated_at: newEntry.updated_at
+      });
+    } catch (dbErr: any) {
+      console.warn('[STATION PERSONNEL CREATE DB ERROR] Saved to memory roster:', dbErr?.message || dbErr);
+    }
 
     await memoryCache.clearNamespace('personnel');
     await memoryCache.clearNamespace('users');
@@ -3435,22 +3453,36 @@ export const postEditStationPersonnel = async (req: Request, res: Response) => {
       return res.status(400).send('Position / Rank designation must be at least 2 characters.');
     }
 
-    // If editing a virtual default record before DB migration, insert it freshly into the table
-    if (id.startsWith('default-')) {
-      await db.collection('personnel').add({
-        name: trimmedName,
-        position: trimmedPos,
-        display_order: orderNum,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    } else {
-      await db.collection('personnel').doc(id).update({
+    const targetIdx = activeStationPersonnel.findIndex(p => p.id === id);
+    if (targetIdx !== -1) {
+      activeStationPersonnel[targetIdx] = {
+        ...activeStationPersonnel[targetIdx],
         name: trimmedName,
         position: trimmedPos,
         display_order: orderNum,
         updated_at: new Date().toISOString()
-      });
+      };
+    }
+
+    try {
+      if (id.startsWith('default-')) {
+        await db.collection('personnel').add({
+          name: trimmedName,
+          position: trimmedPos,
+          display_order: orderNum,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      } else {
+        await db.collection('personnel').doc(id).update({
+          name: trimmedName,
+          position: trimmedPos,
+          display_order: orderNum,
+          updated_at: new Date().toISOString()
+        });
+      }
+    } catch (dbErr: any) {
+      console.warn('[STATION PERSONNEL EDIT DB ERROR] Updated in memory roster:', dbErr?.message || dbErr);
     }
 
     await logAction(req, 'STATION_PERSONNEL_EDIT', `Updated station directory personnel: ${trimmedName} (${trimmedPos})`);
@@ -3470,8 +3502,14 @@ export const deleteStationPersonnel = async (req: Request, res: Response) => {
     }
 
     const id = req.params.id;
-    if (!id.startsWith('default-')) {
-      await db.collection('personnel').doc(id).delete();
+    activeStationPersonnel = activeStationPersonnel.filter(p => p.id !== id);
+
+    try {
+      if (!id.startsWith('default-')) {
+        await db.collection('personnel').doc(id).delete();
+      }
+    } catch (dbErr: any) {
+      console.warn('[STATION PERSONNEL DELETE DB ERROR] Removed from memory roster:', dbErr?.message || dbErr);
     }
 
     await logAction(req, 'STATION_PERSONNEL_DELETE', `Deleted station directory personnel ID: ${id}`);
