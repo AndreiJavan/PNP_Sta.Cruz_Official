@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
 import { decodeCustomCategory } from './adminController.js';
 import { memoryCache } from '../utils/cache.js';
+import { VALID_BARANGAYS } from '../constants/tactical_assets.js';
 
 // Cached Data Helpers
 const getRawBulletinsCached = async (): Promise<any[]> => {
@@ -468,6 +469,51 @@ export const getHotlines = async (req: Request, res: Response) => {
   }
 };
 
+// Server-side fallback translator using free MyMemory API with paragraph/sentence chunking
+async function translateViaMyMemory(text: string): Promise<string> {
+  if (!text || typeof text !== 'string') return text;
+  const paragraphs = text.split(/\r?\n\r?\n/);
+  const translatedParagraphs: string[] = [];
+
+  for (const para of paragraphs) {
+    const trimmedPara = para.trim();
+    if (!trimmedPara) {
+      translatedParagraphs.push('');
+      continue;
+    }
+
+    const sentences = trimmedPara.match(/[^.!?]+[.!?]+|\S+/g) || [trimmedPara];
+    const chunks: string[] = [];
+    let currentChunk = '';
+
+    for (const sentence of sentences) {
+      if ((currentChunk + ' ' + sentence).length > 350) {
+        if (currentChunk.trim()) chunks.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk = currentChunk ? `${currentChunk} ${sentence}` : sentence;
+      }
+    }
+    if (currentChunk.trim()) chunks.push(currentChunk.trim());
+
+    const translatedChunks = await Promise.all(
+      chunks.map(async (c) => {
+        try {
+          const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(c)}&langpair=en|tl`);
+          const data = await res.json() as any;
+          if (data?.responseData?.translatedText && !data.responseData.translatedText.includes('QUERY LENGTH LIMIT EXCEEDED')) {
+            return data.responseData.translatedText;
+          }
+        } catch (_) {}
+        return c;
+      })
+    );
+    translatedParagraphs.push(translatedChunks.join(' '));
+  }
+
+  return translatedParagraphs.join('\n\n');
+}
+
 export const translateToTagalog = async (req: Request, res: Response) => {
   try {
     const { text } = req.body;
@@ -519,25 +565,42 @@ export const translateToTagalog = async (req: Request, res: Response) => {
       }
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.CHAT_GEMINI_KEY || process.env.PALM_API_KEY;
     if (apiKey) {
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: prompt
-        });
-
-        const tagalogText = response.text ? response.text.trim() : text;
-        if (response.text) {
-          await memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000); // Cache for 24 hours
+        const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        for (const model of geminiModels) {
+          try {
+            const response = await ai.models.generateContent({
+              model,
+              contents: prompt
+            });
+            if (response.text && response.text.trim()) {
+              const tagalogText = response.text.trim();
+              await memoryCache.set(cacheKey, tagalogText, 24 * 60 * 60 * 1000);
+              return res.json({ success: true, tagalogText });
+            }
+          } catch (modelErr: any) {
+            console.warn(`Gemini translation with ${model} failed, trying next:`, modelErr?.message || modelErr);
+          }
         }
-        return res.json({ success: true, tagalogText });
       } catch (aiErr: any) {
-        console.warn('Gemini translation error, falling back to original text:', aiErr?.message || aiErr);
+        console.warn('Gemini translation error, falling back to MyMemory API:', aiErr?.message || aiErr);
       }
+    }
+
+    // 3. Robust free fallback via MyMemory API
+    try {
+      const myMemoryTagalog = await translateViaMyMemory(text);
+      if (myMemoryTagalog && myMemoryTagalog.trim() && myMemoryTagalog.trim() !== text.trim()) {
+        await memoryCache.set(cacheKey, myMemoryTagalog, 24 * 60 * 60 * 1000);
+        return res.json({ success: true, tagalogText: myMemoryTagalog });
+      }
+    } catch (mmErr) {
+      console.warn('MyMemory translation error:', mmErr);
     }
 
     return res.json({ success: true, tagalogText: text });
@@ -582,43 +645,64 @@ const getDatabaseSummaryCached = async (): Promise<string> => {
   const cached = await memoryCache.get<string>(cacheKey);
   if (cached) return cached;
 
+  // If Supabase is not configured, return standard station context immediately
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+    const defaultSummary = `
+=== READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
+• Total Logged Crime/Incident Cases: Active database records
+• Active Station Personnel: Authorized PNP Sta. Cruz officers
+• Covered Jurisdictions: All 26 Barangays of Santa Cruz, Laguna
+
+[Emergency Hotlines]
+• Station Desk Hotlines: (049) 501-5971 / 0928-465-3828 / 0998-598-5667
+• National Emergency Hotline: 911
+• BFP Sta. Cruz Fire Station: +63 967 052 8897
+• Red Cross Emergency: +63 2 8790 2300
+`.trim();
+    await memoryCache.set(cacheKey, defaultSummary, 3 * 60 * 1000);
+    return defaultSummary;
+  }
+
   try {
-    const mapSnap = await db.collection('map_points').get();
-    const mapPoints = mapSnap.docs.map((d: any) => d.data());
+    // 2.5 second timeout safeguard so AI response never hangs
+    const timeoutPromise = new Promise<null>((_, reject) => setTimeout(() => reject(new Error('DB Query Timeout')), 2500));
+    const queryPromise = (async () => {
+      const mapSnap = await db.collection('map_points').get();
+      const mapPoints = mapSnap.docs.map((d: any) => d.data());
 
-    const totalIncidents = mapPoints.length;
-    const byType: Record<string, number> = {};
-    const byBarangay: Record<string, number> = {};
+      const totalIncidents = mapPoints.length;
+      const byType: Record<string, number> = {};
+      const byBarangay: Record<string, number> = {};
 
-    mapPoints.forEach((p: any) => {
-      const type = (p.incident_type || 'Unspecified').trim();
-      const brgy = (p.barangay || 'Unspecified').trim();
-      byType[type] = (byType[type] || 0) + 1;
-      byBarangay[brgy] = (byBarangay[brgy] || 0) + 1;
-    });
+      mapPoints.forEach((p: any) => {
+        const type = (p.incident_type || 'Unspecified').trim();
+        const brgy = (p.barangay || 'Unspecified').trim();
+        byType[type] = (byType[type] || 0) + 1;
+        byBarangay[brgy] = (byBarangay[brgy] || 0) + 1;
+      });
 
-    const topTypes = Object.entries(byType)
-      .sort((a, b) => b[1] - a[1])
-      .map(([type, count]) => `• ${type}: ${count} reported case(s)`)
-      .join('\n');
+      const topTypes = Object.entries(byType)
+        .sort((a, b) => b[1] - a[1])
+        .map(([type, count]) => `• ${type}: ${count} reported case(s)`)
+        .join('\n');
 
-    const topBarangays = Object.entries(byBarangay)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([brgy, count]) => `• ${brgy}: ${count} case(s)`)
-      .join('\n');
+      const topBarangays = Object.entries(byBarangay)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([brgy, count]) => `• ${brgy}: ${count} case(s)`)
+        .join('\n');
 
-    const bulletins = await getRawBulletinsCached();
-    const activeBulletins = bulletins.filter((b: any) => !b.is_archived);
-    const bulletinList = activeBulletins.slice(0, 5).map((b: any) => `• [${b.category}] ${b.title}`).join('\n');
+      const bulletins = await getRawBulletinsCached();
+      const activeBulletins = bulletins.filter((b: any) => !b.is_archived);
+      const bulletinList = activeBulletins.slice(0, 5).map((b: any) => `• [${b.category}] ${b.title}`).join('\n');
 
-    const hotlines = await getHotlinesCached();
-    const hotlineList = hotlines.map((h: any) => `• ${h.name || h.title || 'Emergency'}: ${h.number || h.phone || h.contact || 'N/A'}`).join('\n');
+      const hotlines = await getHotlinesCached();
+      const hotlineList = hotlines.map((h: any) => `• ${h.name || h.title || 'Emergency'}: ${h.number || h.phone || h.contact || 'N/A'}`).join('\n');
 
-    const personnel = await getPersonnelCached();
-    const personnelCount = personnel.length;
+      const personnel = await getPersonnelCached();
+      const personnelCount = personnel.length;
 
-    const summary = `
+      return `
 === READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
 • Total Logged Crime/Incident Cases: ${totalIncidents}
 • Active Station Personnel: ${personnelCount}
@@ -634,16 +718,99 @@ ${topBarangays || '• No cases recorded'}
 ${bulletinList || '• No active bulletins'}
 
 [Emergency Hotlines]
-${hotlineList || '• Station Desk: 911'}
+${hotlineList || '• Station Desk: (049) 501-5971 / 0998-598-5667 / 911'}
 `.trim();
+    })();
 
+    const summary = (await Promise.race([queryPromise, timeoutPromise])) as string;
     await memoryCache.set(cacheKey, summary, 3 * 60 * 1000);
     return summary;
   } catch (err) {
-    console.warn('Error generating AI database summary:', err);
-    return 'Database context currently unavailable.';
+    console.warn('Database summary unavailable or timed out, using fallback station context:', err);
+    return `
+=== READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
+• Covered Jurisdiction: Santa Cruz, Laguna (26 Barangays)
+• Status: Active 24/7 Mobile & Checkpoint Patrols
+[Emergency Hotlines]
+• Station Desk: (049) 501-5971 / 0928-465-3828 / 0998-598-5667
+• National Emergency: 911
+• Fire Station: +63 967 052 8897
+`.trim();
   }
 };
+
+function generateIntelligentArticleResponse(articleTitle: string, articleContent: string, userMessage: string, dbContext: string): string {
+  const q = userMessage.toLowerCase().trim();
+
+  // 1. Check for out-of-scope queries
+  const outOfScopePatterns = [
+    /\b(recipe|cook|baking|capital of|coding|javascript|python|sports|football|basketball|nba|celebrity|movie|singer|horoscope|crypto|bitcoin)\b/i
+  ];
+  if (outOfScopePatterns.some(p => p.test(q)) && !q.includes('police') && !q.includes('crime') && !q.includes('safety') && !q.includes('sta. cruz')) {
+    return `I am programmed to answer questions that are related only to this article ("${articleTitle}") and official Sta. Cruz public safety information. Please ask a question related to this bulletin or station public safety.`;
+  }
+
+  // 2. Emergency hotlines & contact numbers
+  if (/\b(hotline|contact|phone|call|number|tawag|telepono|emergency|dial|numero)\b/i.test(q)) {
+    return `**Official Sta. Cruz Police & Emergency Hotlines:**\n\n• **Sta. Cruz MPS Station Desk:** (049) 501-5971 / 0928-465-3828 / 0998-598-5667\n• **National Emergency Hotline:** 911\n• **BFP Sta. Cruz Fire Station:** +63 967 052 8897\n• **Philippine Red Cross (Laguna):** +63 2 8790 2300\n• **Station Headquarters Address:** 1153 A. Mabini St., Poblacion, Sta. Cruz, Laguna\n\nFor urgent crimes in progress or life-threatening situations, dial **911** or call the station hotline immediately.`;
+  }
+
+  // 3. Summary / Overview / What is this about
+  if (/\b(summary|summarize|overview|about|ano ito|tungkol saan|buod|brief|explain|tungkol)\b/i.test(q)) {
+    const cleanContent = (articleContent || '').replace(/\r?\n+/g, ' ').trim();
+    const sentences = cleanContent.match(/[^.!?]+[.!?]+/g) || [cleanContent];
+    const keyPoints = sentences.slice(0, 3).map(s => `• ${s.trim()}`).join('\n');
+
+    return `**Summary of "${articleTitle}":**\n\n${keyPoints || '• Official advisory released by the Sta. Cruz Municipal Police Station.'}\n\n• **Issuing Agency:** Sta. Cruz Municipal Police Station\n• **Official Advice:** Please stay vigilant and refer to official station announcements for updates. If you observe any relevant activity or concern, contact the station desk at **0998 598 5667** or dial **911**.`;
+  }
+
+  // 4. Location / Where / Barangay
+  if (/\b(where|location|saan|barangay|place|street|lugar|area)\b/i.test(q)) {
+    const mentionedBrgy = VALID_BARANGAYS.filter(b => (articleContent || '').toLowerCase().includes(b.toLowerCase()) || (articleTitle || '').toLowerCase().includes(b.toLowerCase()));
+    const locText = mentionedBrgy.length > 0 
+      ? mentionedBrgy.map(b => `• **Brgy. ${b}**`).join('\n') 
+      : `• Sta. Cruz municipality jurisdiction (Poblacion and surrounding sectors)`;
+
+    return `**Location Information:**\n\n${locText}\n• **Lead Police Station:** Sta. Cruz Municipal Police Station (Main HQ: 1153 A. Mabini St., Poblacion)\n• **Active Police Patrols:** Station mobile units and sector checkpoints operate 24/7 across all 26 barangays of Sta. Cruz, Laguna.`;
+  }
+
+  // 5. Date / Time / When / Schedule
+  if (/\b(when|date|kailan|time|oras|petsa|schedule|kailan nangyari)\b/i.test(q)) {
+    const dateMatch = (articleContent || '').match(/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}\b/i) ||
+                      (articleContent || '').match(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/);
+    const dateInfo = dateMatch ? `• **Identified Date in Advisory:** **${dateMatch[0]}**` : `• Please refer to the advisory posting date on this portal for active schedule and operational validity.`;
+
+    return `**Date & Schedule Details:**\n\n${dateInfo}\n• **Advisory Topic:** ${articleTitle}\n• For questions regarding active advisories or traffic rerouting, the station desk is reachable 24/7 at **(049) 501-5971**.`;
+  }
+
+  // 6. Safety Tips / Advice / What to do / Paano mag-ingat
+  if (/\b(tips|tip|advice|paano|gawin|precaution|safety|ingat|iwasan|protect)\b/i.test(q)) {
+    return `**Public Safety Advisory Guidelines:**\n\n• **Stay Alert & Vigilant:** Report any suspicious individuals, unattended items, or unusual activities in your neighborhood immediately.\n• **Preserve Evidence / Records:** For online transactions or cybercrime concerns, keep screenshots, transaction IDs, and sender details.\n• **Cooperate with Law Enforcement:** Follow directives from PNP patrol units, traffic marshals, and local barangay tanods.\n• **Emergency Verification:** Verify official advisories directly on this PNP Sta. Cruz portal before forwarding notices to others.\n• **Emergency Dial:** Call **911** or **0998 598 5667** for immediate police assistance.`;
+  }
+
+  // 7. Statistics / Crime stats
+  if (/\b(stat|stats|statistics|crime rate|bilang|ilan|cases|datos|data)\b/i.test(q)) {
+    return `**Sta. Cruz Municipal Police Station Statistics Overview:**\n\n${dbContext}\n\n• *For in-depth crime mapping and spatial analytics, you can also view the interactive Crime Map on the main navigation.*`;
+  }
+
+  // 8. General question matching content
+  const cleanContent = (articleContent || '').replace(/\r?\n+/g, ' ').trim();
+  const sentences = cleanContent.match(/[^.!?]+[.!?]+/g) || [cleanContent];
+  const words = q.split(/\s+/).filter(w => w.length > 3);
+  const matchingSentences = sentences.filter(s => {
+    const lowerS = s.toLowerCase();
+    return words.some(w => lowerS.includes(w));
+  });
+
+  if (matchingSentences.length > 0) {
+    const points = matchingSentences.slice(0, 3).map(s => `• ${s.trim()}`).join('\n');
+    return `**Regarding "${articleTitle}":**\n\n${points}\n\n• **Station Desk Contact:** If you require further clarification or need to file an official report, please call **(049) 501-5971** or visit the station at 1153 A. Mabini St., Poblacion.`;
+  }
+
+  // Default informative excerpt
+  const fallbackExcerpt = sentences.slice(0, 2).map(s => `• ${s.trim()}`).join('\n');
+  return `**Regarding "${articleTitle}":**\n\n${fallbackExcerpt || '• Official announcement from the Sta. Cruz Municipal Police Station.'}\n\n• **Station Inquiries:** You may contact the police desk directly at **0998 598 5667** or call **911** for immediate emergency assistance.`;
+}
 
 export const chatWithArticle = async (req: Request, res: Response) => {
   try {
@@ -722,24 +889,34 @@ Assistant:`;
       }
     }
 
-    const apiKey = process.env.CHAT_GEMINI_KEY || process.env.GEMINI_API_KEY;
+    const apiKey = process.env.CHAT_GEMINI_KEY || process.env.GEMINI_API_KEY || process.env.PALM_API_KEY;
     if (apiKey) {
       try {
         const { GoogleGenAI } = await import('@google/genai');
         const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateContent({
-          model: 'gemini-3.6-flash',
-          contents: prompt
-        });
-
-        const reply = response.text ? response.text.trim() : "I'm sorry, I couldn't generate a response.";
-        return res.json({ success: true, reply });
+        const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+        for (const model of geminiModels) {
+          try {
+            const response = await ai.models.generateContent({
+              model,
+              contents: prompt
+            });
+            if (response.text && response.text.trim()) {
+              const reply = response.text.trim();
+              return res.json({ success: true, reply });
+            }
+          } catch (modelErr: any) {
+            console.warn(`Gemini chatbot with ${model} failed, trying next:`, modelErr?.message || modelErr);
+          }
+        }
       } catch (aiErr: any) {
         console.error('Gemini chatbot error:', aiErr?.message || aiErr);
       }
     }
 
-    return res.status(500).json({ error: 'AI services are currently unavailable.' });
+    // Fallback: Intelligent server-side synthesis from article content, station hotlines, and DB context
+    const synthesizedReply = generateIntelligentArticleResponse(articleTitle, articleContent, userMessage, dbContext);
+    return res.json({ success: true, reply: synthesizedReply, fallback: true });
   } catch (err: any) {
     console.error('Chat with article endpoint error:', err);
     return res.status(500).json({ error: err.message || 'An unexpected error occurred' });
