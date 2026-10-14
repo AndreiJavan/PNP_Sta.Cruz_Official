@@ -107,7 +107,12 @@
                                         <div class="flex items-center justify-end space-x-2">
                                             <% if (user && user.role === 'superadmin') { %>
                                                 <button type="button" 
-                                                    onclick="openEditUserModal('<%= u.id %>', '<%= (u.full_name || '').replace(/'/g, \"\\'\") %>', '<%= (u.email || '').replace(/'/g, \"\\'\") %>', '<%= u.role || 'staff' %>', '<%= u.status || 'active' %>')"
+                                                    data-id="<%= u.id %>"
+                                                    data-fullname="<%= u.full_name || '' %>"
+                                                    data-email="<%= u.email || '' %>"
+                                                    data-role="<%= u.role || 'staff' %>"
+                                                    data-status="<%= u.status || 'active' %>"
+                                                    onclick="handleUserEditClick(this)"
                                                     class="w-10 h-10 rounded-xl bg-pnp-blue/10 dark:bg-pnp-blue/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white transition-all flex items-center justify-center shadow-sm"
                                                     title="Edit Account Details">
                                                     <i class="fas fa-edit text-[11px]"></i>
@@ -116,7 +121,10 @@
                                             <% if (u.role === 'superadmin') { %>
                                                 <span class="text-[8px] font-black text-pnp-blue/50 dark:text-slate-400 uppercase italic px-3 py-2 bg-pnp-blue/5 dark:bg-slate-800/50 rounded-lg border border-pnp-blue/10 dark:border-slate-700/50">Protected</span>
                                             <% } else if (user && user.role === 'superadmin') { %>
-                                                <button type="button" onclick="openDeleteUserModal('<%= u.id %>', '<%= (u.full_name || '').replace(/'/g, \"\\'\") %>')"
+                                                <button type="button" 
+                                                    data-id="<%= u.id %>"
+                                                    data-fullname="<%= u.full_name || '' %>"
+                                                    onclick="handleUserDeleteClick(this)"
                                                     class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
                                                     title="Neutralize Account">
                                                     <i class="fas fa-trash-alt text-[11px]"></i>
@@ -229,13 +237,19 @@
                                             <div class="flex items-center justify-end space-x-2">
                                                 <% if (user && user.role === 'superadmin') { %>
                                                     <button type="button"
-                                                        onclick="openEditPersonnelModal('<%= p.id %>', '<%= (p.name || '').replace(/'/g, \"\\'\") %>', '<%= (p.position || '').replace(/'/g, \"\\'\") %>', '<%= p.display_order || 0 %>')"
+                                                        data-id="<%= p.id %>"
+                                                        data-name="<%= p.name || '' %>"
+                                                        data-position="<%= p.position || '' %>"
+                                                        data-order="<%= p.display_order || 0 %>"
+                                                        onclick="handlePersonnelEditClick(this)"
                                                         class="w-10 h-10 rounded-xl bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-gold hover:text-pnp-blue transition-all flex items-center justify-center shadow-sm"
                                                         title="Edit Directory Officer">
                                                         <i class="fas fa-edit text-[11px]"></i>
                                                     </button>
                                                     <button type="button"
-                                                        onclick="openDeletePersonnelModal('<%= p.id %>', '<%= (p.name || '').replace(/'/g, \"\\'\") %>')"
+                                                        data-id="<%= p.id %>"
+                                                        data-name="<%= p.name || '' %>"
+                                                        onclick="handlePersonnelDeleteClick(this)"
                                                         class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
                                                         title="Remove from Directory">
                                                         <i class="fas fa-trash-alt text-[11px]"></i>
@@ -656,6 +670,35 @@
             modal.classList.remove('flex');
             document.body.style.overflow = '';
         }, 300);
+    }
+
+    function handleUserEditClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const fullName = btn.getAttribute('data-fullname') || '';
+        const email = btn.getAttribute('data-email') || '';
+        const role = btn.getAttribute('data-role') || 'staff';
+        const status = btn.getAttribute('data-status') || 'active';
+        openEditUserModal(id, fullName, email, role, status);
+    }
+
+    function handleUserDeleteClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const fullName = btn.getAttribute('data-fullname') || '';
+        openDeleteUserModal(id, fullName);
+    }
+
+    function handlePersonnelEditClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name') || '';
+        const position = btn.getAttribute('data-position') || '';
+        const order = parseInt(btn.getAttribute('data-order'), 10) || 1;
+        openEditPersonnelModal(id, name, position, order);
+    }
+
+    function handlePersonnelDeleteClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name') || '';
+        openDeletePersonnelModal(id, name);
     }
 
     function openEditUserModal(userId, fullName, email, role, status) {
