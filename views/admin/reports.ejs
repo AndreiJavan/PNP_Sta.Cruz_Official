@@ -255,7 +255,7 @@
                             <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-40 bg-gray-100 dark:bg-slate-900">Timeline</th>
                             <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-64 bg-gray-100 dark:bg-slate-900">
                                 Classification
-                                <span class="text-[8px] text-slate-400 dark:text-slate-500 block font-bold normal-case">Max 100 chars / 15 words</span>
+                                <span class="text-[8px] text-slate-400 dark:text-slate-500 block font-bold normal-case">Max 300 chars / 50 words</span>
                             </th>
                             <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-36 bg-gray-100 dark:bg-slate-900">Category</th>
                             <th class="px-2 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest w-16 text-center bg-gray-100 dark:bg-slate-900">X</th>
@@ -388,7 +388,7 @@
                             <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-56 text-center bg-gray-100 dark:bg-slate-900">Timeline Date</th>
                             <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-64 bg-gray-100 dark:bg-slate-900">
                                 Classification / Offense
-                                <span class="text-[8px] text-slate-400 dark:text-slate-500 block font-bold normal-case">Max 100 chars / 15 words</span>
+                                <span class="text-[8px] text-slate-400 dark:text-slate-500 block font-bold normal-case">Max 300 chars / 50 words</span>
                             </th>
                             <th class="px-6 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest border-r border-gray-200 dark:border-slate-700 w-36 bg-gray-100 dark:bg-slate-900">Category</th>
                             <th class="px-2 py-5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest w-16 text-center bg-gray-100 dark:bg-slate-900">Action</th>
@@ -512,9 +512,9 @@
             <div>
                 <div class="flex justify-between items-center mb-1">
                     <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Classification (Offense)</label>
-                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase">Max: 100 chars / 15 words</span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase">Max: 300 chars / 50 words</span>
                 </div>
-                <input type="text" id="batchOffenseInput" list="batchCrimesList" maxlength="100" oninput="if(this.value.length>100)this.value=this.value.slice(0,100);" placeholder="Type or select classification..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase outline-none focus:ring-2 focus:ring-pnp-blue">
+                <input type="text" id="batchOffenseInput" list="batchCrimesList" maxlength="300" oninput="if(this.value.length>300)this.value=this.value.slice(0,300);" placeholder="Type or select classification..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase outline-none focus:ring-2 focus:ring-pnp-blue">
                 <datalist id="batchCrimesList"></datalist>
             </div>
         </div>
@@ -726,19 +726,19 @@
          const category = (catSelect ? catSelect.value : '') || 'Non-Index';
          const offense = offenseInput ? offenseInput.value.trim() : '';
 
-         if (offense && offense.length > 100) {
+         if (offense && offense.length > 300) {
              window.strategicAlert({
                  title: "Classification Too Long",
-                 message: `Crime classification must not exceed 100 letters (currently: ${offense.length}).`,
+                 message: `Crime classification must not exceed 300 letters (currently: ${offense.length}).`,
                  type: "warning"
              });
              return;
          }
          const offenseWords = offense ? offense.split(/\s+/).filter(Boolean) : [];
-         if (offenseWords.length > 15) {
+         if (offenseWords.length > 50) {
              window.strategicAlert({
                  title: "Classification Word Limit Exceeded",
-                 message: `Crime classification must not exceed 15 words (currently: ${offenseWords.length} words).`,
+                 message: `Crime classification must not exceed 50 words (currently: ${offenseWords.length} words).`,
                  type: "warning"
              });
              return;
@@ -811,7 +811,7 @@
 
      window.showIntelReview = function(data, filename = "") {
          reviewData = Array.isArray(data) ? data.map(item => {
-             const cleanOff = String(item.offense || item.incident_type || '').trim().slice(0, 100);
+             const cleanOff = String(item.offense || item.incident_type || '').trim().slice(0, 300);
              return {
                  ...item,
                  offense: cleanOff
@@ -908,7 +908,7 @@
                     </div>
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64">
-                    <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="100" oninput="if(this.value.length>100)this.value=this.value.slice(0,100);updateReviewItem(${index}, 'offense', this.value)" 
+                    <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="300" oninput="if(this.value.length>300)this.value=this.value.slice(0,300);updateReviewItem(${index}, 'offense', this.value)" 
                         class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none">
                     <datalist id="crimesList_${index}">
                         ${crimeOptions.map(o => `<option value="${o}">`).join('')}
@@ -1150,20 +1150,20 @@
                  return;
              }
 
-             if (offenseVal.length > 100) {
+             if (offenseVal.length > 300) {
                  await window.strategicAlert({
                      title: "Classification Too Long",
-                     message: `Row #${rowNum}: Classification exceeds 100 letters limit (currently: ${offenseVal.length} letters). Please shorten it.`,
+                     message: `Row #${rowNum}: Classification exceeds 300 letters limit (currently: ${offenseVal.length} letters). Please shorten it.`,
                      type: "warning"
                  });
                  return;
              }
 
              const offenseWords = offenseVal.split(/\s+/).filter(Boolean);
-             if (offenseWords.length > 15) {
+             if (offenseWords.length > 50) {
                  await window.strategicAlert({
                      title: "Classification Word Limit Exceeded",
-                     message: `Row #${rowNum}: Classification exceeds 15 words limit (currently: ${offenseWords.length} words). Please enter a concise classification.`,
+                     message: `Row #${rowNum}: Classification exceeds 50 words limit (currently: ${offenseWords.length} words). Please enter a concise classification.`,
                      type: "warning"
                  });
                  return;
@@ -1497,7 +1497,7 @@
                          </div>
                      </td>
                      <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64">
-                         <input type="text" list="${datalistId}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="100" oninput="if(this.value.length>100)this.value=this.value.slice(0,100);updateEditItem(${origIndex}, 'offense', this.value)" 
+                         <input type="text" list="${datalistId}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="300" oninput="if(this.value.length>300)this.value=this.value.slice(0,300);updateEditItem(${origIndex}, 'offense', this.value)" 
                              class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none">
                      </td>
                      <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-36">
@@ -1729,20 +1729,20 @@
                  return;
              }
 
-             if (offenseVal.length > 100) {
+             if (offenseVal.length > 300) {
                  await window.strategicAlert({
                      title: "Classification Too Long",
-                     message: `Row #${rowNum}: Classification exceeds 100 letters limit (currently: ${offenseVal.length} letters). Please shorten it.`,
+                     message: `Row #${rowNum}: Classification exceeds 300 letters limit (currently: ${offenseVal.length} letters). Please shorten it.`,
                      type: "warning"
                  });
                  return;
              }
 
              const editWords = offenseVal.split(/\s+/).filter(Boolean);
-             if (editWords.length > 15) {
+             if (editWords.length > 50) {
                  await window.strategicAlert({
                      title: "Classification Word Limit Exceeded",
-                     message: `Row #${rowNum}: Classification exceeds 15 words limit (currently: ${editWords.length} words).`,
+                     message: `Row #${rowNum}: Classification exceeds 50 words limit (currently: ${editWords.length} words).`,
                      type: "warning"
                  });
                  return;
