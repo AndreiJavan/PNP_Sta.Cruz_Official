@@ -176,7 +176,7 @@ async function getValidUserId(providedId?: string): Promise<string | null> {
   }
 
   try {
-    if (providedId && providedId !== 'admin-bypass-id' && providedId !== 'system' && providedId !== 'admin') {
+    if (providedId) {
       const userDoc = await db.collection('users').doc(providedId).get();
       if (userDoc.exists) {
         cachedValidUserIds.add(providedId);
@@ -189,7 +189,7 @@ async function getValidUserId(providedId?: string): Promise<string | null> {
       for (const doc of snap.docs) {
         cachedValidUserIds.add(doc.id);
       }
-      const found = snap.docs.find((d: any) => d.id === providedId || d.id === 'superadmin' || d.data()?.username === 'superadmin' || d.data()?.username === 'admin');
+      const found = snap.docs.find((d: any) => d.id === providedId || d.data()?.role === 'superadmin');
       return found ? found.id : snap.docs[0].id;
     }
 
