@@ -157,24 +157,33 @@
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <div class="bg-pnp-gold/20 px-3 py-1.5 rounded-xl border border-pnp-gold/30">
                         <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold tracking-widest uppercase">
-                            <%= (typeof stationPersonnel !== 'undefined' && stationPersonnel) ? stationPersonnel.length : 0 %> Listed
+                            <%= (typeof stationPersonnel !== 'undefined' && stationPersonnel) ? stationPersonnel.length : 0 %> / 10 Listed
                         </span>
                     </div>
                     <% if (user && user.role === 'superadmin') { %>
-                        <button type="button" onclick="openAddPersonnelModal()"
-                            class="px-3.5 py-1.5 bg-pnp-gold hover:bg-yellow-500 text-pnp-blue font-black rounded-xl text-[10px] uppercase tracking-wider shadow-md shadow-pnp-gold/20 flex items-center space-x-1.5 transition-all transform hover:scale-105 active:scale-95"
-                            title="Add Directory Personnel">
-                            <i class="fas fa-user-plus text-xs"></i>
-                            <span>Add Personnel</span>
-                        </button>
+                        <% const isRosterFull = (typeof stationPersonnel !== 'undefined' && stationPersonnel && stationPersonnel.length >= 10); %>
+                        <% if (isRosterFull) { %>
+                            <button type="button" onclick="alertRosterLimit()"
+                                class="px-3.5 py-1.5 bg-gray-200 dark:bg-slate-700 text-gray-500 dark:text-gray-400 font-black rounded-xl text-[10px] uppercase tracking-wider flex items-center space-x-1.5 cursor-not-allowed shadow-sm"
+                                title="Directory Capacity Reached (10/10)">
+                                <i class="fas fa-ban text-xs"></i>
+                                <span>Roster Full (10 Max)</span>
+                            </button>
+                        <% } else { %>
+                            <button type="button" onclick="openAddPersonnelModal()"
+                                class="px-3.5 py-1.5 bg-pnp-gold hover:bg-yellow-500 text-pnp-blue font-black rounded-xl text-[10px] uppercase tracking-wider shadow-md shadow-pnp-gold/20 flex items-center space-x-1.5 transition-all transform hover:scale-105 active:scale-95"
+                                title="Add Directory Personnel">
+                                <i class="fas fa-user-plus text-xs"></i>
+                                <span>Add Personnel</span>
+                            </button>
+                        <% } %>
                     <% } %>
                 </div>
             </div>
             <div class="flex-grow overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[500px]">
+                <table class="w-full text-left text-xs min-w-[450px]">
                     <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[9px] font-black tracking-[0.2em]">
                         <tr>
-                            <th class="px-5 py-4 w-16 text-center">Order</th>
                             <th class="px-5 py-4">Personnel Name & Rank</th>
                             <th class="px-5 py-4">Designation</th>
                             <th class="px-5 py-4 text-right">Actions</th>
@@ -184,11 +193,6 @@
                         <% if (typeof stationPersonnel !== 'undefined' && stationPersonnel && stationPersonnel.length > 0) { %>
                             <% stationPersonnel.forEach(p => { %>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/20 transition-colors">
-                                    <td class="px-5 py-4 text-center font-mono font-bold text-slate-400">
-                                        <span class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-900 inline-flex items-center justify-center font-black text-[10px] text-pnp-blue dark:text-pnp-gold">
-                                            <%= p.display_order || '-' %>
-                                        </span>
-                                    </td>
                                     <td class="px-5 py-4 font-black text-pnp-blue dark:text-white uppercase">
                                         <%= p.name %>
                                     </td>
@@ -204,7 +208,6 @@
                                                     data-id="<%= p.id %>"
                                                     data-name="<%= p.name || '' %>"
                                                     data-position="<%= p.position || '' %>"
-                                                    data-order="<%= p.display_order || 0 %>"
                                                     onclick="handlePersonnelEditClick(this)"
                                                     class="w-8 h-8 rounded-lg bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-gold hover:text-pnp-blue transition-all flex items-center justify-center shadow-sm"
                                                     title="Edit Directory Officer">
@@ -227,7 +230,7 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
+                                <td colspan="3" class="px-6 py-12 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
                                     No directory personnel registered yet.
                                 </td>
                             </tr>
@@ -516,7 +519,7 @@
 <!-- Add Directory Personnel Modal -->
 <div id="addPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
-        <form id="addPersonnelForm" method="POST" action="/admin/personnel/add">
+        <form id="addPersonnelForm" method="POST" action="/admin/personnel/add" onsubmit="confirmAddPersonnel(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-gold/10">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-pnp-gold/20 rounded-2xl flex items-center justify-center text-pnp-gold shadow-sm">
@@ -524,7 +527,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-widest">Add Directory Personnel</h3>
-                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Station Leadership & Public Officers</p>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Station Leadership & Public Officers (Max 10)</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeAddPersonnelModal()" class="w-10 h-10 bg-white dark:bg-slate-800 text-gray-400 hover:text-red-500 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center transition-colors">
@@ -534,22 +537,28 @@
 
             <div class="p-8 space-y-5">
                 <div class="space-y-2">
-                    <label for="add_p_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Rank & Full Name</label>
-                    <input type="text" name="name" id="add_p_name" required placeholder="e.g. PLT COL JUAN DELA CRUZ"
+                    <div class="flex justify-between items-center">
+                        <label for="add_p_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Rank & Full Name</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">3 - 60 chars</span>
+                    </div>
+                    <input type="text" name="name" id="add_p_name" required minlength="3" maxlength="60" placeholder="e.g. PLT COL JUAN DELA CRUZ"
                         class="w-full px-5 py-3.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-200 transition-all uppercase">
                 </div>
 
                 <div class="space-y-2">
-                    <label for="add_p_position" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Position / Designation</label>
-                    <input type="text" name="position" id="add_p_position" required placeholder="e.g. Chief of Police"
+                    <div class="flex justify-between items-center">
+                        <label for="add_p_position" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Position / Designation</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">2 - 60 chars</span>
+                    </div>
+                    <input type="text" name="position" id="add_p_position" required minlength="2" maxlength="60" placeholder="e.g. Chief of Police"
                         class="w-full px-5 py-3.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-200 transition-all">
                 </div>
 
-                <div class="space-y-2">
-                    <label for="add_p_order" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Display Order (Hierarchy)</label>
-                    <input type="number" name="display_order" id="add_p_order" min="1" max="99" value="<%= (typeof stationPersonnel !== 'undefined' && stationPersonnel ? stationPersonnel.length + 1 : 1) %>" required
-                        class="w-full px-5 py-3.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-200 transition-all">
-                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Lowest numbers appear highest on the public directory.</p>
+                <div class="p-4 bg-amber-500/10 rounded-2xl border border-amber-500/20 flex items-center space-x-3 text-amber-600 dark:text-amber-400">
+                    <i class="fas fa-shield-alt text-base shrink-0"></i>
+                    <p class="text-[10px] font-bold leading-relaxed">
+                        This officer will be publicly listed on the Sta. Cruz MPS Official Portal Homepage directory immediately upon confirmation.
+                    </p>
                 </div>
             </div>
 
@@ -569,7 +578,7 @@
 <!-- Edit Directory Personnel Modal -->
 <div id="editPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
-        <form id="editPersonnelForm" method="POST" action="">
+        <form id="editPersonnelForm" method="POST" action="" onsubmit="confirmEditPersonnel(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-gold/10">
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 bg-pnp-gold/20 rounded-2xl flex items-center justify-center text-pnp-gold">
@@ -587,20 +596,20 @@
 
             <div class="p-8 space-y-5">
                 <div class="space-y-2">
-                    <label for="edit_p_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Rank & Full Name</label>
-                    <input type="text" name="name" id="edit_p_name" required
+                    <div class="flex justify-between items-center">
+                        <label for="edit_p_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Rank & Full Name</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">3 - 60 chars</span>
+                    </div>
+                    <input type="text" name="name" id="edit_p_name" required minlength="3" maxlength="60"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all uppercase">
                 </div>
 
                 <div class="space-y-2">
-                    <label for="edit_p_position" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Position / Designation</label>
-                    <input type="text" name="position" id="edit_p_position" required
-                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
-                </div>
-
-                <div class="space-y-2">
-                    <label for="edit_p_order" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Display Order</label>
-                    <input type="number" name="display_order" id="edit_p_order" min="1" max="99" required
+                    <div class="flex justify-between items-center">
+                        <label for="edit_p_position" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Position / Designation</label>
+                        <span class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">2 - 60 chars</span>
+                    </div>
+                    <input type="text" name="position" id="edit_p_position" required minlength="2" maxlength="60"
                         class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                 </div>
             </div>
@@ -693,45 +702,6 @@
         openDeleteUserModal(id, fullName);
     }
 
-    function openAddPersonnelModal() {
-        const form = document.getElementById('addPersonnelForm');
-        if (form) form.reset();
-        const modal = document.getElementById('addPersonnelModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        void modal.offsetWidth;
-        modal.classList.remove('opacity-0');
-        modal.children[0].classList.remove('scale-95');
-        modal.children[0].classList.add('scale-100');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeAddPersonnelModal() {
-        const modal = document.getElementById('addPersonnelModal');
-        modal.classList.add('opacity-0');
-        modal.children[0].classList.remove('scale-100');
-        modal.children[0].classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-            document.body.style.overflow = '';
-        }, 300);
-    }
-
-    function handlePersonnelEditClick(btn) {
-        const id = btn.getAttribute('data-id');
-        const name = btn.getAttribute('data-name') || '';
-        const position = btn.getAttribute('data-position') || '';
-        const order = parseInt(btn.getAttribute('data-order'), 10) || 1;
-        openEditPersonnelModal(id, name, position, order);
-    }
-
-    function handlePersonnelDeleteClick(btn) {
-        const id = btn.getAttribute('data-id');
-        const name = btn.getAttribute('data-name') || '';
-        openDeletePersonnelModal(id, name);
-    }
-
     function openEditUserModal(userId, fullName, email, role, status) {
         document.getElementById('editUserForm').action = `/admin/users/${userId}/edit`;
         document.getElementById('edit_full_name').value = fullName;
@@ -792,11 +762,85 @@
         }, 300);
     }
 
-    function openEditPersonnelModal(id, name, position, displayOrder) {
+    function alertRosterLimit() {
+        const alertFn = window.strategicAlert || (({ message }) => alert(message));
+        alertFn({
+            title: 'Directory Roster Full',
+            message: 'The Station Directory Roster has reached its maximum capacity of 10 personnel. Please remove or update an existing officer before adding a new one.',
+            confirmText: 'Understood',
+            type: 'warning'
+        });
+    }
+
+    function openAddPersonnelModal() {
+        const currentCount = <%= (typeof stationPersonnel !== 'undefined' && stationPersonnel ? stationPersonnel.length : 0) %>;
+        if (currentCount >= 10) {
+            alertRosterLimit();
+            return;
+        }
+        const form = document.getElementById('addPersonnelForm');
+        if (form) form.reset();
+        const modal = document.getElementById('addPersonnelModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        void modal.offsetWidth;
+        modal.classList.remove('opacity-0');
+        modal.children[0].classList.remove('scale-95');
+        modal.children[0].classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddPersonnelModal() {
+        const modal = document.getElementById('addPersonnelModal');
+        modal.classList.add('opacity-0');
+        modal.children[0].classList.remove('scale-100');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    async function confirmAddPersonnel(event) {
+        event.preventDefault();
+        const form = document.getElementById('addPersonnelForm');
+        const name = document.getElementById('add_p_name').value.trim();
+        const position = document.getElementById('add_p_position').value.trim();
+        if (!name || !position) return false;
+
+        const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
+        const confirmed = await confirmFn({
+            title: 'Confirm Officer Registration',
+            message: `Are you sure you want to add "${name}" with designation "${position}" to the Station Directory Roster? This change will reflect on the public portal.`,
+            confirmText: 'Yes, Register Officer',
+            cancelText: 'Cancel',
+            type: 'warning'
+        });
+
+        if (confirmed) {
+            form.submit();
+        }
+        return false;
+    }
+
+    function handlePersonnelEditClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name') || '';
+        const position = btn.getAttribute('data-position') || '';
+        openEditPersonnelModal(id, name, position);
+    }
+
+    function handlePersonnelDeleteClick(btn) {
+        const id = btn.getAttribute('data-id');
+        const name = btn.getAttribute('data-name') || '';
+        openDeletePersonnelModal(id, name);
+    }
+
+    function openEditPersonnelModal(id, name, position) {
         document.getElementById('editPersonnelForm').action = `/admin/personnel/${id}/edit`;
         document.getElementById('edit_p_name').value = name;
         document.getElementById('edit_p_position').value = position;
-        document.getElementById('edit_p_order').value = displayOrder || 1;
 
         const modal = document.getElementById('editPersonnelModal');
         modal.classList.remove('hidden');
@@ -818,6 +862,28 @@
             modal.classList.remove('flex');
             document.body.style.overflow = '';
         }, 300);
+    }
+
+    async function confirmEditPersonnel(event) {
+        event.preventDefault();
+        const form = document.getElementById('editPersonnelForm');
+        const name = document.getElementById('edit_p_name').value.trim();
+        const position = document.getElementById('edit_p_position').value.trim();
+        if (!name || !position) return false;
+
+        const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
+        const confirmed = await confirmFn({
+            title: 'Confirm Roster Modifications',
+            message: `Are you sure you want to save changes to "${name}" (${position}) in the Station Directory Roster?`,
+            confirmText: 'Save Changes',
+            cancelText: 'Cancel',
+            type: 'warning'
+        });
+
+        if (confirmed) {
+            form.submit();
+        }
+        return false;
     }
 
     function openDeletePersonnelModal(id, name) {

@@ -3389,17 +3389,23 @@ export const postStationPersonnel = async (req: Request, res: Response) => {
       return res.status(403).send('Forbidden: Insufficient tactical clearance.');
     }
 
-    const { name, position, display_order } = req.body;
+    const currentRoster = await getStationPersonnelList();
+    if (currentRoster.length >= 10) {
+      return res.status(400).send('Station Directory Roster has reached the maximum capacity limit of 10 personnel.');
+    }
+
+    const { name, position } = req.body;
     const trimmedName = (name || '').trim();
     const trimmedPos = (position || '').trim();
-    const orderNum = parseInt(display_order, 10) || 0;
 
-    if (!trimmedName || trimmedName.length < 2) {
-      return res.status(400).send('Personnel name must be at least 2 characters.');
+    if (!trimmedName || trimmedName.length < 3 || trimmedName.length > 60) {
+      return res.status(400).send('Personnel name must be between 3 and 60 characters.');
     }
-    if (!trimmedPos || trimmedPos.length < 2) {
-      return res.status(400).send('Position / Rank designation must be at least 2 characters.');
+    if (!trimmedPos || trimmedPos.length < 2 || trimmedPos.length > 60) {
+      return res.status(400).send('Position / Rank designation must be between 2 and 60 characters.');
     }
+
+    const orderNum = currentRoster.length + 1;
 
     await logAction(req, 'STATION_PERSONNEL_CREATE', `Added station directory personnel: ${trimmedName} (${trimmedPos})`);
     
@@ -3441,25 +3447,24 @@ export const postEditStationPersonnel = async (req: Request, res: Response) => {
     }
 
     const id = req.params.id;
-    const { name, position, display_order } = req.body;
+    const { name, position } = req.body;
     const trimmedName = (name || '').trim();
     const trimmedPos = (position || '').trim();
-    const orderNum = parseInt(display_order, 10) || 0;
 
-    if (!trimmedName || trimmedName.length < 2) {
-      return res.status(400).send('Personnel name must be at least 2 characters.');
+    if (!trimmedName || trimmedName.length < 3 || trimmedName.length > 60) {
+      return res.status(400).send('Personnel name must be between 3 and 60 characters.');
     }
-    if (!trimmedPos || trimmedPos.length < 2) {
-      return res.status(400).send('Position / Rank designation must be at least 2 characters.');
+    if (!trimmedPos || trimmedPos.length < 2 || trimmedPos.length > 60) {
+      return res.status(400).send('Position / Rank designation must be between 2 and 60 characters.');
     }
 
     const targetIdx = activeStationPersonnel.findIndex(p => p.id === id);
+    const existingOrder = targetIdx !== -1 ? (activeStationPersonnel[targetIdx].display_order || (targetIdx + 1)) : 1;
     if (targetIdx !== -1) {
       activeStationPersonnel[targetIdx] = {
         ...activeStationPersonnel[targetIdx],
         name: trimmedName,
         position: trimmedPos,
-        display_order: orderNum,
         updated_at: new Date().toISOString()
       };
     }
@@ -3469,7 +3474,7 @@ export const postEditStationPersonnel = async (req: Request, res: Response) => {
         await db.collection('personnel').add({
           name: trimmedName,
           position: trimmedPos,
-          display_order: orderNum,
+          display_order: existingOrder,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
@@ -3477,7 +3482,6 @@ export const postEditStationPersonnel = async (req: Request, res: Response) => {
         await db.collection('personnel').doc(id).update({
           name: trimmedName,
           position: trimmedPos,
-          display_order: orderNum,
           updated_at: new Date().toISOString()
         });
       }
