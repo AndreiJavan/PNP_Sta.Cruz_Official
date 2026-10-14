@@ -1,81 +1,82 @@
 <div class="space-y-8">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
         <!-- Personnel Configuration -->
-        <div class="lg:col-span-1">
+        <div class="lg:col-span-1 flex flex-col">
             <div
-                class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+                class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden h-full flex flex-col">
                 <div
-                    class="p-8 border-b border-gray-50 dark:border-slate-700 bg-gradient-to-r from-pnp-blue/5 to-transparent flex justify-between items-center">
+                    class="p-6 border-b border-gray-50 dark:border-slate-700 bg-gradient-to-r from-pnp-blue/5 to-transparent flex justify-between items-center">
                     <div>
                         <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] text-[11px]">
                             Create Account</h3>
-                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Personnel Credentials</p>
+                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Personnel Credentials</p>
                     </div>
                     <% const isUserQuotaFull = (typeof users !== 'undefined' && users && users.length >= 10); %>
-                    <div class="<%= isUserQuotaFull ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold' %> px-3 py-1.5 rounded-xl font-mono font-black text-[10px] tracking-wider uppercase">
+                    <div class="<%= isUserQuotaFull ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold' %> px-3 py-1 rounded-xl font-mono font-black text-[10px] tracking-wider uppercase">
                         <%= (typeof users !== 'undefined' && users ? users.length : 0) %> / 10 Accounts
                     </div>
                 </div>
                 <% if (user && user.role==='superadmin' ) { %>
                     <% if (isUserQuotaFull) { %>
-                        <div class="p-8 space-y-6">
-                            <div class="p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-700 dark:text-amber-300 space-y-2">
+                        <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
+                            <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-700 dark:text-amber-300 space-y-1.5">
                                 <div class="flex items-center space-x-2 font-black text-xs uppercase tracking-wider">
                                     <i class="fas fa-exclamation-triangle text-amber-500"></i>
                                     <span>Account Quota Limit Reached (10/10)</span>
                                 </div>
-                                <p class="text-[11px] font-medium leading-relaxed opacity-90">
+                                <p class="text-[10px] font-medium leading-relaxed opacity-90">
                                     The Personnel Registry has reached the maximum capacity limit of 10 authorized administrative accounts. To create a new personnel account, an existing account must first be neutralized or removed.
                                 </p>
                             </div>
                             <button type="button" onclick="alertPersonnelAccountLimit()"
-                                class="w-full bg-gray-200 dark:bg-slate-700 text-gray-400 dark:text-gray-500 font-black py-5 rounded-2xl uppercase tracking-[0.3em] text-[10px] cursor-not-allowed flex items-center justify-center space-x-2">
+                                class="w-full bg-gray-200 dark:bg-slate-700 text-gray-400 dark:text-gray-500 font-black py-4 rounded-xl uppercase tracking-[0.2em] text-[10px] cursor-not-allowed flex items-center justify-center space-x-2">
                                 <i class="fas fa-ban"></i>
                                 <span>Capacity Limit Reached (10/10)</span>
                             </button>
                         </div>
                     <% } else { %>
-                    <form id="createAccountForm" action="/admin/users/add" method="POST" class="p-8 space-y-6" onsubmit="confirmCreateAccount(event)">
-
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <label for="full_name"
-                                    class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
-                                <span id="create_fullname_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 60 letters • 0 / 6 words</span>
+                    <form id="createAccountForm" action="/admin/users/add" method="POST" class="p-6 space-y-4 flex-grow flex flex-col justify-between" onsubmit="confirmCreateAccount(event)">
+                        <div class="space-y-3.5">
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center">
+                                    <label for="full_name"
+                                        class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
+                                    <span id="create_fullname_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 60 letters • 0 / 6 words</span>
+                                </div>
+                                <input type="text" name="full_name" id="full_name" required minlength="2" maxlength="60" placeholder="User Full Name" oninput="updateCreateUserCounters()"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                             </div>
-                            <input type="text" name="full_name" id="full_name" required minlength="2" maxlength="60" placeholder="User Full Name" oninput="updateCreateUserCounters()"
-                                class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <label for="email"
-                                    class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
-                                <span id="create_email_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 100 letters</span>
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center">
+                                    <label for="email"
+                                        class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
+                                    <span id="create_email_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 100 letters</span>
+                                </div>
+                                <input type="email" name="email" id="email" required maxlength="100" placeholder="user@example.com" oninput="updateCreateUserCounters()"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                             </div>
-                            <input type="email" name="email" id="email" required maxlength="100" placeholder="user@example.com" oninput="updateCreateUserCounters()"
-                                class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
-                        </div>
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center">
-                                <label for="password"
-                                    class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Password</label>
-                                <span id="create_password_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 64 letters</span>
+                            <div class="space-y-1.5">
+                                <div class="flex justify-between items-center">
+                                    <label for="password"
+                                        class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Password</label>
+                                    <span id="create_password_counter" class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">0 / 64 letters</span>
+                                </div>
+                                <input type="password" name="password" id="password" required minlength="8" maxlength="64" placeholder="••••••••" oninput="updateCreateUserCounters()"
+                                    class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                             </div>
-                            <input type="password" name="password" id="password" required minlength="8" maxlength="64" placeholder="••••••••" oninput="updateCreateUserCounters()"
-                                class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
                         </div>
                         <!-- Personnel are always created with 'staff' role by default -->
                         <button type="submit"
-                            class="w-full bg-pnp-blue hover:bg-black text-white font-black py-5 rounded-2xl shadow-xl shadow-pnp-blue/20 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-[0.3em] text-[10px]">
+                            class="w-full bg-pnp-blue hover:bg-black text-white font-black py-4 rounded-xl shadow-lg shadow-pnp-blue/20 transition-all transform hover:scale-[1.01] active:scale-95 uppercase tracking-[0.25em] text-[10px] mt-2">
                             Create Account
                         </button>
                     </form>
                     <% } %>
                     <% } else { %>
-                        <div class="p-8 py-20 text-center">
+                        <div class="p-6 py-16 text-center flex-grow flex flex-col items-center justify-center">
                             <div
-                                class="w-16 h-16 bg-pnp-blue/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <i class="fas fa-lock text-pnp-blue/20 text-2xl"></i>
+                                class="w-14 h-14 bg-pnp-blue/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-lock text-pnp-blue/20 text-xl"></i>
                             </div>
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
                                 Administrator Access Required<br>
@@ -87,16 +88,16 @@
         </div>
 
         <!-- Active Personnel -->
-        <div class="lg:col-span-2">
+        <div class="lg:col-span-2 flex flex-col">
             <div
-                class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col">
-                <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
+                class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col h-full">
+                <div class="p-6 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
                     <div>
                         <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">
                             Personnel Registry</h3>
-                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Authorized Administrators & Staff</p>
+                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Authorized Administrators & Staff</p>
                     </div>
-                    <div class="bg-pnp-blue/10 px-3 py-1.5 rounded-xl">
+                    <div class="bg-pnp-blue/10 px-3 py-1 rounded-xl">
                         <span class="text-[10px] font-black text-pnp-blue tracking-widest uppercase">
                             <%= users.length %> / 10 Accounts
                         </span>
@@ -177,18 +178,18 @@
     </div>
 
     <!-- Station Leadership Directory & Operational Audit Logs (Side-by-Side Row) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         <!-- Station Directory Roster -->
-        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col">
-            <div class="p-6 sm:p-8 border-b border-gray-50 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 bg-gradient-to-r from-pnp-blue/5 to-transparent">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col h-full">
+            <div class="p-6 border-b border-gray-50 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 bg-gradient-to-r from-pnp-blue/5 to-transparent">
                 <div>
                     <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">
                         Station Directory Roster
                     </h3>
-                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Displayed on Public Portal Homepage</p>
+                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Displayed on Public Portal Homepage</p>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <div class="bg-pnp-gold/20 px-3 py-1.5 rounded-xl border border-pnp-gold/30">
+                    <div class="bg-pnp-gold/20 px-3 py-1 rounded-xl border border-pnp-gold/30">
                         <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold tracking-widest uppercase">
                             <%= (typeof stationPersonnel !== 'undefined' && stationPersonnel) ? stationPersonnel.length : 0 %> / 10 Listed
                         </span>
@@ -214,27 +215,27 @@
                 </div>
             </div>
             <div class="flex-grow overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[450px]">
+                <table class="w-full text-left text-xs">
                     <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[9px] font-black tracking-[0.2em]">
                         <tr>
-                            <th class="px-5 py-4">Personnel Name & Rank</th>
-                            <th class="px-5 py-4">Designation</th>
-                            <th class="px-5 py-4 text-right">Actions</th>
+                            <th class="px-5 py-3.5">Personnel Name & Rank</th>
+                            <th class="px-5 py-3.5">Designation</th>
+                            <th class="px-5 py-3.5 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
                         <% if (typeof stationPersonnel !== 'undefined' && stationPersonnel && stationPersonnel.length > 0) { %>
                             <% stationPersonnel.forEach(p => { %>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/20 transition-colors">
-                                    <td class="px-5 py-4 font-black text-pnp-blue dark:text-white uppercase">
+                                    <td class="px-5 py-3.5 font-black text-pnp-blue dark:text-white uppercase">
                                         <%= p.name %>
                                     </td>
-                                    <td class="px-5 py-4 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-tight text-[11px]">
+                                    <td class="px-5 py-3.5 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-tight text-[11px]">
                                         <span class="px-2.5 py-1 bg-blue-50 dark:bg-slate-900/60 rounded-lg text-pnp-blue dark:text-pnp-gold border border-pnp-blue/10">
                                             <%= p.position %>
                                         </span>
                                     </td>
-                                    <td class="px-5 py-4 text-right">
+                                    <td class="px-5 py-3.5 text-right">
                                         <div class="flex items-center justify-end space-x-1.5">
                                             <% if (user && user.role === 'superadmin') { %>
                                                 <button type="button"
@@ -274,8 +275,8 @@
         </div>
 
         <!-- Operational Audit Logs Integration (Shrunk to align in row) -->
-        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col">
-            <div class="p-6 sm:p-8 border-b border-gray-50 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 bg-slate-50 dark:bg-slate-900/50">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col h-full">
+            <div class="p-6 border-b border-gray-50 dark:border-slate-700 flex flex-wrap justify-between items-center gap-3 bg-slate-50 dark:bg-slate-900/50">
                 <div class="flex items-center space-x-3">
                     <div class="w-10 h-10 bg-pnp-gold/20 rounded-xl flex items-center justify-center text-pnp-gold shadow-sm">
                         <i class="fas fa-fingerprint text-lg"></i>
@@ -299,41 +300,44 @@
                 </div>
             </div>
             <div class="flex-grow overflow-x-auto">
-                <table class="w-full text-left text-xs min-w-[500px]">
+                <table class="w-full text-left text-xs">
                     <thead class="bg-gray-50 dark:bg-slate-900 text-gray-400 dark:text-gray-500 uppercase text-[9px] font-black tracking-[0.2em]">
                         <tr>
-                            <th class="px-5 py-4">Personnel</th>
-                            <th class="px-5 py-4">Action</th>
-                            <th class="px-5 py-4">Details</th>
-                            <th class="px-5 py-4 text-right">Timestamp</th>
+                            <th class="px-5 py-3.5 w-40 shrink-0">Personnel & Action</th>
+                            <th class="px-5 py-3.5">Details</th>
+                            <th class="px-5 py-3.5 text-right w-28 shrink-0">Date & Time</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
                         <% if (typeof logs !=='undefined' && logs.length > 0) { %>
-                            <% logs.slice(0, 10).forEach(l=> { %>
+                            <% logs.slice(0, 8).forEach(l=> { %>
                                 <tr class="hover:bg-gray-50/50 dark:hover:bg-slate-700/20 transition-colors group">
-                                    <td class="px-5 py-4 font-black text-pnp-blue dark:text-white whitespace-nowrap">
-                                        <div class="flex items-center space-x-2">
-                                            <div class="w-1.5 h-1.5 rounded-full bg-pnp-blue"></div>
-                                            <span><%= l.username %></span>
+                                    <td class="px-5 py-3 whitespace-nowrap">
+                                        <div class="font-black text-pnp-blue dark:text-white text-xs truncate max-w-[130px]" title="<%= l.username %>">
+                                            <%= l.username %>
                                         </div>
-                                    </td>
-                                    <td class="px-5 py-4 shrink-0">
-                                        <span class="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-md text-[9px] font-black uppercase tracking-widest text-slate-500 border border-slate-200/50 dark:border-slate-600">
+                                        <span class="inline-block mt-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-[8px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-300 border border-slate-200/50 dark:border-slate-600">
                                             <%= l.action %>
                                         </span>
                                     </td>
-                                    <td class="px-5 py-4 text-gray-500 dark:text-gray-400 font-bold max-w-xs truncate uppercase tracking-tighter" title="<%= l.details %>">
-                                        <%= l.details %>
+                                    <td class="px-5 py-3">
+                                        <div class="text-[11px] font-medium text-gray-600 dark:text-gray-300 line-clamp-2 leading-relaxed" title="<%= l.details %>">
+                                            <%= l.details %>
+                                        </div>
                                     </td>
-                                    <td class="px-5 py-4 text-right text-gray-400 font-mono font-bold whitespace-nowrap text-[11px]">
-                                        <%= new Date(l.timestamp).toLocaleString(undefined, {hour12: true, month:'short', day:'numeric', hour:'numeric', minute:'numeric'}) %>
+                                    <td class="px-5 py-3 text-right whitespace-nowrap">
+                                        <div class="text-[10px] font-bold font-mono text-gray-500 dark:text-gray-300">
+                                            <%= new Date(l.timestamp).toLocaleDateString(undefined, {month:'short', day:'numeric'}) %>
+                                        </div>
+                                        <div class="text-[9px] font-mono text-gray-400 mt-0.5">
+                                            <%= new Date(l.timestamp).toLocaleTimeString(undefined, {hour:'2-digit', minute:'2-digit', hour12:true}) %>
+                                        </div>
                                     </td>
                                 </tr>
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-slate-300 font-black uppercase tracking-[0.3em] italic opacity-50">
+                                <td colspan="3" class="px-6 py-12 text-center text-slate-300 font-black uppercase tracking-[0.3em] italic opacity-50">
                                     No operational data captured in current session
                                 </td>
                             </tr>
