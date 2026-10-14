@@ -607,6 +607,11 @@ export const postLogin = async (req: Request, res: Response) => {
         ? `Account temporarily locked for 5 minutes due to 5 consecutive failed login attempts.`
         : `Invalid username or password. You have ${status.attemptsLeft} attempt(s) remaining before a 5-minute security lockout.`;
 
+      if (status.isLocked && req.session) {
+        (req.session as any).lockedUntil = status.lockedUntil;
+        req.session.save(() => {});
+      }
+
       return res.status(status.isLocked ? 429 : 401).render('admin/login', {
         title: 'Admin Login',
         layout: false,
@@ -666,6 +671,11 @@ export const postLogin = async (req: Request, res: Response) => {
       const error_msg = status.isLocked
         ? `Account temporarily locked for 5 minutes due to 5 consecutive failed login attempts.`
         : `Invalid username or password. You have ${status.attemptsLeft} attempt(s) remaining before a 5-minute security lockout.`;
+
+      if (status.isLocked && req.session) {
+        (req.session as any).lockedUntil = status.lockedUntil;
+        req.session.save(() => {});
+      }
 
       return res.status(status.isLocked ? 429 : 401).render('admin/login', {
         title: 'Admin Login',
