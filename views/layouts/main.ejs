@@ -369,26 +369,34 @@
                         <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Emergency Hotlines
                         </h3>
 
-                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                            <span>PNP Sta. Cruz: <a href="tel:09985985667" class="text-white hover:text-pnp-gold transition"><strong>0998 598 5667</strong></a></span>
-                        </div>
-                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                            <span>BFP Sta. Cruz: <a href="tel:09234567890" class="text-white hover:text-pnp-gold transition"><strong>0923-456-7890</strong></a></span>
-                        </div>
-                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                            <span>Sta. Cruz Rescue: <a href="tel:09345678901" class="text-white hover:text-pnp-gold transition"><strong>0934-567-8901</strong></a></span>
-                        </div>
-                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                            <span>MDRRMO: <a href="tel:09456789012" class="text-white hover:text-pnp-gold transition"><strong>0945-678-9012</strong></a></span>
-                        </div>
-                        <div class="text-xs text-blue-200 flex space-x-3 items-center">
-                            <i class="fas fa-phone-volume text-red-400 w-3"></i>
-                            <span>Red Cross Laguna: <a href="tel:09567890123" class="text-white hover:text-pnp-gold transition"><strong>0956-789-0123</strong></a></span>
-                        </div>
+                        <% if (locals.footerHotlines && locals.footerHotlines.length > 0) { %>
+                            <% locals.footerHotlines.slice(0, 5).forEach(h => { 
+                                const agencyName = h.agency_name || h.name || 'Emergency Hotline';
+                                const rawNum = String(h.contact_number || h.number || '');
+                                const cleanTel = rawNum.replace(/[^0-9+]/g, '');
+                                const formattedNum = rawNum.length === 11 ? rawNum.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3') : rawNum;
+                            %>
+                                <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                                    <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                                    <span><%= agencyName %>: <a href="tel:<%= cleanTel %>" class="text-white hover:text-pnp-gold transition"><strong><%= formattedNum %></strong></a></span>
+                                </div>
+                            <% }); %>
+                            <% if (locals.footerHotlines.length > 5) { %>
+                                <a href="/hotlines" class="text-[11px] text-pnp-gold hover:underline flex items-center gap-1.5 pt-1 font-semibold group">
+                                    <span>View All Hotlines (<%= locals.footerHotlines.length %>)</span>
+                                    <i class="fas fa-chevron-right text-[8px] group-hover:translate-x-0.5 transition-transform"></i>
+                                </a>
+                            <% } %>
+                        <% } else { %>
+                            <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                                <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                                <span>PNP Sta. Cruz: <a href="tel:09985985667" class="text-white hover:text-pnp-gold transition"><strong>0998 598 5667</strong></a></span>
+                            </div>
+                            <div class="text-xs text-blue-200 flex space-x-3 items-center">
+                                <i class="fas fa-phone-volume text-red-400 w-3"></i>
+                                <span>National Emergency: <a href="tel:911" class="text-white hover:text-pnp-gold transition"><strong>911</strong></a></span>
+                            </div>
+                        <% } %>
 
                         <div
                             class="mt-4 text-xs text-blue-200 flex space-x-3 items-start border-t border-white/10 pt-4">

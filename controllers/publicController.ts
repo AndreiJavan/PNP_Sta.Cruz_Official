@@ -27,7 +27,7 @@ const getRawBulletinsCached = async (): Promise<any[]> => {
   return bulletins;
 };
 
-const getHotlinesCached = async (): Promise<any[]> => {
+export const getHotlinesCached = async (): Promise<any[]> => {
   const cacheKey = 'hotlines:all';
   const cached = await memoryCache.get<any[]>(cacheKey);
   if (cached) return cached;
