@@ -2899,23 +2899,50 @@ export const deleteHotline = async (req: Request, res: Response) => {
   }
 };
 
+const DEFAULT_STATION_PERSONNEL = [
+  { name: 'PGEN JOSE MELENCIO C NARTATE JR', position: 'Chief PNP', display_order: 1 },
+  { name: 'PBGEN HANSEL M MARANTAN', position: 'Acting Regional Director', display_order: 2 },
+  { name: 'PCOL SANDRO JAY DC TAPALLA', position: 'Acting Provincial Director, Laguna PPO', display_order: 3 },
+  { name: 'PLT COL JOJO J SABENIANO', position: 'Chief of Police', display_order: 4 },
+  { name: 'PCPT GADY R MABANTO', position: 'Deputy Chief of Police', display_order: 5 },
+  { name: 'PCPT ANDY O MESANA', position: 'Chief Operation PCO', display_order: 6 },
+  { name: 'PLT ARIEL T GENTOLEO', position: 'Cadmin and Intelligence Section', display_order: 7 },
+  { name: 'PEMS MANOLITO M BINALAY', position: 'Mespo', display_order: 8 }
+];
+
+export const getStationPersonnelList = async (): Promise<any[]> => {
+  return memoryCache.getOrSet('personnel:directory', async () => {
+    try {
+      const snap = await db.collection('personnel').orderBy('display_order', 'asc').get();
+      if (snap && snap.docs && snap.docs.length > 0) {
+        return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      }
+    } catch (e) {
+      console.warn('[PERSONNEL DIRECTORY] Could not read from database collection, using default personnel list:', e);
+    }
+    return DEFAULT_STATION_PERSONNEL.map((p, idx) => ({ id: `default-${idx + 1}`, ...p }));
+  }, 5 * 60 * 1000);
+};
+
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const { users, logs } = await memoryCache.getOrSet('users:admin_view', async () => {
-      const [usersSnap, logsSnap] = await Promise.all([
+    const { users, logs, stationPersonnel } = await memoryCache.getOrSet('users:admin_view', async () => {
+      const [usersSnap, logsSnap, personnelList] = await Promise.all([
         db.collection('users').get(),
-        db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get()
+        db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get(),
+        getStationPersonnelList()
       ]);
 
       const usersList = (usersSnap && usersSnap.docs) ? usersSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
       const logsList = (logsSnap && logsSnap.docs) ? logsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
-      return { users: usersList, logs: logsList };
+      return { users: usersList, logs: logsList, stationPersonnel: personnelList };
     }, 2 * 60 * 1000);
 
     res.render('admin/users', {
       title: 'Users',
       users,
       logs,
+      stationPersonnel,
       layout: 'layouts/admin'
     });
   } catch (err) {
@@ -2924,6 +2951,7 @@ export const getUsers = async (req: Request, res: Response) => {
       title: 'Personnel & Operational Logs',
       users: [],
       logs: [],
+      stationPersonnel: DEFAULT_STATION_PERSONNEL.map((p, idx) => ({ id: `default-${idx + 1}`, ...p })),
       layout: 'layouts/admin',
       error_msg: 'Operational data retrieval partially compromised.'
     });
@@ -2998,6 +3026,62 @@ export const postUser = async (req: Request, res: Response) => {
   }
 };
 
+export const postEditUser = async (req: Request, res: Response) => {
+  try {
+    if (req.session.user.role !== 'superadmin') {
+      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+    }
+
+    const userId = req.params.id;
+    const { full_name, email, role, status, password } = req.body;
+    const trimmedName = (full_name || '').trim();
+    const trimmedEmail = (email || '').trim();
+
+    if (!trimmedName || trimmedName.length < 2) {
+      return res.status(400).send('Full name must be at least 2 characters long.');
+    }
+
+    const docRef = db.collection('users').doc(userId);
+    const snap = await docRef.get();
+    if (!snap.exists) {
+      return res.status(404).send('User not found.');
+    }
+
+    const existingUser = snap.data() as any;
+    const updatePayload: any = {
+      full_name: trimmedName,
+      email: trimmedEmail,
+      updated_at: new Date().toISOString()
+    };
+
+    if (role && (role === 'superadmin' || role === 'staff')) {
+      // Superadmin protection: prevent demoting oneself
+      if (userId === req.session.user.id && role !== 'superadmin') {
+        return res.status(400).send('You cannot remove superadmin clearance from your own active session.');
+      }
+      updatePayload.role = role;
+    }
+
+    if (status && ['active', 'pending', 'rejected'].includes(status)) {
+      updatePayload.status = status;
+    }
+
+    if (password && password.trim().length >= 6) {
+      updatePayload.password_hash = bcrypt.hashSync(password.trim(), 10);
+    }
+
+    await docRef.update(updatePayload);
+    await logAction(req, 'USER_EDIT', `Updated administrative personnel credentials for: ${existingUser.username} (${trimmedName})`);
+
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
+    res.redirect('/admin/users');
+  } catch (err) {
+    console.error('[USER EDIT ERROR]', err);
+    res.status(500).send('Operational failure during user profile modification');
+  }
+};
+
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     // 🛡️ Backend Enforcement: Only superadmins can neutralize credentials
@@ -3056,6 +3140,113 @@ export const deleteUser = async (req: Request, res: Response) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Operational failure during user neutralization');
+  }
+};
+
+// ==========================================
+// STATION PERSONNEL / DIRECTORY CRUD
+// ==========================================
+export const postStationPersonnel = async (req: Request, res: Response) => {
+  try {
+    if (req.session.user.role !== 'superadmin') {
+      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+    }
+
+    const { name, position, display_order } = req.body;
+    const trimmedName = (name || '').trim();
+    const trimmedPos = (position || '').trim();
+    const orderNum = parseInt(display_order, 10) || 0;
+
+    if (!trimmedName || trimmedName.length < 2) {
+      return res.status(400).send('Personnel name must be at least 2 characters.');
+    }
+    if (!trimmedPos || trimmedPos.length < 2) {
+      return res.status(400).send('Position / Rank designation must be at least 2 characters.');
+    }
+
+    await logAction(req, 'STATION_PERSONNEL_CREATE', `Added station directory personnel: ${trimmedName} (${trimmedPos})`);
+    await db.collection('personnel').add({
+      name: trimmedName,
+      position: trimmedPos,
+      display_order: orderNum,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    });
+
+    await memoryCache.clearNamespace('personnel');
+    await memoryCache.clearNamespace('users');
+    res.redirect('/admin/users');
+  } catch (err) {
+    console.error('[STATION PERSONNEL CREATE ERROR]', err);
+    res.status(500).send('Error adding station personnel directory entry');
+  }
+};
+
+export const postEditStationPersonnel = async (req: Request, res: Response) => {
+  try {
+    if (req.session.user.role !== 'superadmin') {
+      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+    }
+
+    const id = req.params.id;
+    const { name, position, display_order } = req.body;
+    const trimmedName = (name || '').trim();
+    const trimmedPos = (position || '').trim();
+    const orderNum = parseInt(display_order, 10) || 0;
+
+    if (!trimmedName || trimmedName.length < 2) {
+      return res.status(400).send('Personnel name must be at least 2 characters.');
+    }
+    if (!trimmedPos || trimmedPos.length < 2) {
+      return res.status(400).send('Position / Rank designation must be at least 2 characters.');
+    }
+
+    // If editing a virtual default record before DB migration, insert it freshly into the table
+    if (id.startsWith('default-')) {
+      await db.collection('personnel').add({
+        name: trimmedName,
+        position: trimmedPos,
+        display_order: orderNum,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      await db.collection('personnel').doc(id).update({
+        name: trimmedName,
+        position: trimmedPos,
+        display_order: orderNum,
+        updated_at: new Date().toISOString()
+      });
+    }
+
+    await logAction(req, 'STATION_PERSONNEL_EDIT', `Updated station directory personnel: ${trimmedName} (${trimmedPos})`);
+    await memoryCache.clearNamespace('personnel');
+    await memoryCache.clearNamespace('users');
+    res.redirect('/admin/users');
+  } catch (err) {
+    console.error('[STATION PERSONNEL EDIT ERROR]', err);
+    res.status(500).send('Error updating station personnel directory entry');
+  }
+};
+
+export const deleteStationPersonnel = async (req: Request, res: Response) => {
+  try {
+    if (req.session.user.role !== 'superadmin') {
+      return res.status(403).send('Forbidden: Insufficient tactical clearance.');
+    }
+
+    const id = req.params.id;
+    if (!id.startsWith('default-')) {
+      await db.collection('personnel').doc(id).delete();
+    }
+
+    await logAction(req, 'STATION_PERSONNEL_DELETE', `Deleted station directory personnel ID: ${id}`);
+    await memoryCache.clearNamespace('personnel');
+    await memoryCache.clearNamespace('users');
+    res.redirect('/admin/users');
+  } catch (err) {
+    console.error('[STATION PERSONNEL DELETE ERROR]', err);
+    res.status(500).send('Error removing station personnel directory entry');
   }
 };
 

@@ -4,7 +4,7 @@ import fs from 'fs';
 import { db } from '../config/database.js';
 import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcryptjs';
-import { decodeCustomCategory } from './adminController.js';
+import { decodeCustomCategory, getStationPersonnelList } from './adminController.js';
 import { memoryCache } from '../utils/cache.js';
 
 // Cached Data Helpers
@@ -31,12 +31,7 @@ const getHotlinesCached = async (): Promise<any[]> => {
 };
 
 const getPersonnelCached = async (): Promise<any[]> => {
-  return memoryCache.getOrSet('personnel:active', async () => {
-    const usersSnap = await db.collection('users').get();
-    return usersSnap.docs
-      .map((doc: any) => ({ id: doc.id, ...doc.data() }))
-      .filter((u: any) => u.status === 'active');
-  }, 5 * 60 * 1000);
+  return getStationPersonnelList();
 };
 
 function getFirstParagraph(text: string): string {

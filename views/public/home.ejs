@@ -268,53 +268,19 @@
                     </div>
 
                     <div class="space-y-6">
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PGEN JOSE MELENCIO C NARTATE JR</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief PNP</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PBGEN HANSEL M MARANTAN</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Regional Director</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCOL SANDRO JAY DC TAPALLA</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Acting Provincial Director, Laguna PPO</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT COL JOJO J SABENIANO</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief of Police</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT GADY R MABANTO</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Deputy Chief of Police</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PCPT ANDY O MESANA</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief Operation PCO</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT ARIEL T GENTOLEO</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Cadmin and Intelligence Section</p>
-                        </div>
-
-                        <!-- Item -->
-                        <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PEMS MANOLITO M BINALAY</h4>
-                            <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Mespo</p>
-                        </div>
+                        <% if (typeof personnel !== 'undefined' && personnel && personnel.length > 0) { %>
+                            <% personnel.forEach(p => { %>
+                                <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                                    <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors"><%= p.name %></h4>
+                                    <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1"><%= p.position %></p>
+                                </div>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="border-l-2 border-pnp-blue/20 dark:border-slate-700 pl-4 hover:border-pnp-blue dark:hover:border-pnp-gold transition-colors group">
+                                <h4 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-tight group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">PLT COL JOJO J SABENIANO</h4>
+                                <p class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Chief of Police</p>
+                            </div>
+                        <% } %>
                     </div>
                 </div>
             </div>

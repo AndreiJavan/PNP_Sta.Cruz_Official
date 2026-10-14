@@ -3,7 +3,9 @@ import {
   getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
   getReports, processAIExtraction, saveReportBatch, updateReportBatch, deleteReport, getHotlines,
-  postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
+  postHotline, postEditHotline, deleteHotline, getUsers, postUser, postEditUser, deleteUser,
+  postStationPersonnel, postEditStationPersonnel, deleteStationPersonnel,
+  getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive,
   getHeartbeat, debugSingleFacebookPost
 } from '../controllers/adminController.js';
@@ -89,6 +91,12 @@ router.post('/hotlines/:id/delete', deleteHotline);
 // Personnel Management
 router.get('/users', isSuperAdmin, getUsers);
 router.post('/users/add', isSuperAdmin, postUser);
+router.post('/users/:id/edit', isSuperAdmin, postEditUser);
 router.post('/users/:id/delete', isSuperAdmin, deleteUser);
+
+// Station Personnel Directory Management
+router.post('/personnel/add', isSuperAdmin, postStationPersonnel);
+router.post('/personnel/:id/edit', isSuperAdmin, postEditStationPersonnel);
+router.post('/personnel/:id/delete', isSuperAdmin, deleteStationPersonnel);
 
 export default router;
