@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- Crime & Incident Map -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/map</loc>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Public Advisories & Bulletins -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/bulletins</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Wanted Persons List -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/wanted-persons</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Missing Persons List -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/missing-persons</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- Station Releases / News -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/news</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- Emergency Hotlines Directory -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/hotlines</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <!-- Station About & Directory -->
+  <url>
+    <loc>https://stacruz-pnp.gov.ph/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+</urlset>

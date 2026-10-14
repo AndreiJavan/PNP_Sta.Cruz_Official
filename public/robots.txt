@@ -1,10 +1,30 @@
+# =====================================================
+# PNP Sta. Cruz Municipal Police Station - Robots Policy
+# =====================================================
+
 User-agent: *
+# Allow public informational and reporting pages
 Allow: /
+Allow: /map
+Allow: /bulletins
+Allow: /wanted-persons
+Allow: /missing-persons
+Allow: /news
+Allow: /hotlines
+Allow: /about
+
+# Disallow private administrative consoles & internal endpoints
 Disallow: /admin/
+Disallow: /admin
 Disallow: /api/
+
+# Sitemap location for public crawlers
+Sitemap: /sitemap.xml
 
 User-agent: Googlebot
 Allow: /
+Disallow: /admin/
+Disallow: /api/
 
 User-agent: Googlebot-Image
 Allow: /favicon*

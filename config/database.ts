@@ -64,6 +64,38 @@ class Collection {
     return { id: inserted.id, data: () => inserted };
   }
 
+  async insertMany(records: any[], chunkSize = 500) {
+    if (!records || records.length === 0) return [];
+    const sb = getSupabase();
+    const cleanRecords = records.map(r => deepSanitizeUnicode(r));
+
+    for (let i = 0; i < cleanRecords.length; i += chunkSize) {
+      const chunk = cleanRecords.slice(i, i + chunkSize);
+      const { error } = await sb.from(this.name).insert(chunk);
+      if (error) {
+        console.error(`Bulk insert into ${this.name} failed:`, error);
+        throw error;
+      }
+    }
+    return cleanRecords;
+  }
+
+  async upsertMany(records: any[], chunkSize = 500) {
+    if (!records || records.length === 0) return [];
+    const sb = getSupabase();
+    const cleanRecords = records.map(r => deepSanitizeUnicode(r));
+
+    for (let i = 0; i < cleanRecords.length; i += chunkSize) {
+      const chunk = cleanRecords.slice(i, i + chunkSize);
+      const { error } = await sb.from(this.name).upsert(chunk);
+      if (error) {
+        console.error(`Bulk upsert into ${this.name} failed:`, error);
+        throw error;
+      }
+    }
+    return cleanRecords;
+  }
+
   async get() {
     return new Query(this.name).get();
   }
@@ -335,7 +367,7 @@ class Query {
 }
 
 class Doc {
-  constructor(private table: string, public id: string) { }
+  constructor(public table: string, public id: string) { }
 
   async get() {
     try {
@@ -377,11 +409,27 @@ class Doc {
 
   async update(data: any) {
     const sb = getSupabase();
-    const cleanData = deepSanitizeUnicode(data);
-    const { error } = await sb
+    let cleanData = deepSanitizeUnicode(data);
+    let { error } = await sb
       .from(this.table)
       .update(cleanData)
       .eq('id', this.id);
+
+    // Auto-recover if schema cache does not contain a requested column (e.g. updated_at)
+    while (error && error.message && error.message.includes('in the schema cache')) {
+      const match = error.message.match(/Could not find the '([^']+)' column/i);
+      if (match && match[1] && cleanData[match[1]] !== undefined) {
+        console.warn(`[Database Notice] Column "${match[1]}" not found in table "${this.table}". Auto-recovering without it.`);
+        delete cleanData[match[1]];
+        const retryResult = await sb
+          .from(this.table)
+          .update(cleanData)
+          .eq('id', this.id);
+        error = retryResult.error;
+      } else {
+        break;
+      }
+    }
 
     if (error) throw error;
   }
@@ -400,14 +448,82 @@ class Doc {
 export const db: any = {
   collection: (name: string) => new Collection(name),
   batch: () => {
-    const operations: (() => Promise<void>)[] = [];
+    type BatchItem =
+      | { type: 'set'; table: string; id: string; data: any }
+      | { type: 'update'; table: string; id: string; data: any }
+      | { type: 'delete'; table: string; id: string }
+      | { type: 'custom'; fn: () => Promise<void> };
+
+    const items: BatchItem[] = [];
+
     return {
-      set: (ref: Doc, data: any) => operations.push(() => ref.set(data)),
-      update: (ref: Doc, data: any) => operations.push(() => ref.update(data)),
-      delete: (ref: Doc) => operations.push(() => ref.delete()),
+      set: (ref: Doc, data: any) => {
+        items.push({ type: 'set', table: ref.table, id: ref.id, data: { ...data, id: ref.id } });
+      },
+      update: (ref: Doc, data: any) => {
+        items.push({ type: 'update', table: ref.table, id: ref.id, data });
+      },
+      delete: (ref: Doc) => {
+        items.push({ type: 'delete', table: ref.table, id: ref.id });
+      },
       commit: async () => {
-        for (const op of operations) {
-          await op();
+        const sb = getSupabase();
+        let i = 0;
+        while (i < items.length) {
+          const item = items[i];
+
+          if (item.type === 'set') {
+            const table = item.table;
+            const records: any[] = [];
+            while (i < items.length && items[i].type === 'set' && (items[i] as any).table === table) {
+              records.push(deepSanitizeUnicode((items[i] as any).data));
+              i++;
+            }
+            // Execute bulk upsert in chunks of 500 records
+            for (let c = 0; c < records.length; c += 500) {
+              const chunk = records.slice(c, c + 500);
+              const { error } = await sb.from(table).upsert(chunk);
+              if (error) {
+                console.error(`[BATCH ERROR] Bulk upsert into ${table} failed:`, error);
+                throw error;
+              }
+            }
+          } else if (item.type === 'delete') {
+            const table = item.table;
+            const ids: string[] = [];
+            while (i < items.length && items[i].type === 'delete' && (items[i] as any).table === table) {
+              ids.push((items[i] as any).id);
+              i++;
+            }
+            // Execute bulk delete in chunks of 500 records
+            for (let c = 0; c < ids.length; c += 500) {
+              const chunk = ids.slice(c, c + 500);
+              const { error } = await sb.from(table).delete().in('id', chunk);
+              if (error) {
+                console.error(`[BATCH ERROR] Bulk delete from ${table} failed:`, error);
+                throw error;
+              }
+            }
+          } else if (item.type === 'update') {
+            let cleanData = deepSanitizeUnicode(item.data);
+            let { error } = await sb.from(item.table).update(cleanData).eq('id', item.id);
+            while (error && error.message && error.message.includes('in the schema cache')) {
+              const match = error.message.match(/Could not find the '([^']+)' column/i);
+              if (match && match[1] && cleanData[match[1]] !== undefined) {
+                console.warn(`[Database Notice] Column "${match[1]}" not found in table "${item.table}". Auto-recovering without it.`);
+                delete cleanData[match[1]];
+                const retryResult = await sb.from(item.table).update(cleanData).eq('id', item.id);
+                error = retryResult.error;
+              } else {
+                break;
+              }
+            }
+            if (error) throw error;
+            i++;
+          } else {
+            await (item as any).fn();
+            i++;
+          }
         }
       }
     };

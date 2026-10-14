@@ -12,6 +12,7 @@ import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import { i18nMiddleware } from './middleware/i18n.js';
 import { FileSessionStore } from './utils/sessionStore.js';
+import { verifyAuthToken } from './utils/authToken.js';
 
 // Routes
 import publicRoutes from './routes/public.js';
@@ -76,6 +77,21 @@ app.use(session({
   }
 }));
 
+// Stateless Auth Token Restoration Middleware: Bridges multi-instance & serverless cold-starts
+app.use((req, res, next) => {
+  if (req.session && !req.session.user) {
+    const token = req.cookies?.stacruz_auth;
+    if (token) {
+      const verified = verifyAuthToken(token);
+      if (verified) {
+        req.session.user = verified;
+        (req.session as any).hideSidebar = (req.session as any).hideSidebar ?? true;
+      }
+    }
+  }
+  next();
+});
+
 // General Rate Limiter - Applied AFTER static files & session parsing
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -118,11 +134,18 @@ app.use((req, res, next) => {
   // Set Permissions-Policy to allow unload for Facebook embed scripts, preventing browser console violations
   res.header('Permissions-Policy', 'unload=(self "https://www.facebook.com" "https://*.facebook.com")');
 
-  // Set no-cache only for HTML dynamic page renders / API responses, preserving static asset caching
-  if (!req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i)) {
+  // Cache & Indexing Policy
+  const hasUserSession = req.session && (req.session.user || (req.session as any).error_msg || (req.session as any).success_msg);
+  if (req.path.startsWith('/admin') || hasUserSession) {
+    if (req.path.startsWith('/admin')) {
+      res.header('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    }
     res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
     res.header('Expires', '-1');
     res.header('Pragma', 'no-cache');
+  } else if (!req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|xml|txt)$/i) && !req.path.startsWith('/api/')) {
+    // Public dynamic content: allow short edge caching with stale-while-revalidate for fast rendering
+    res.header('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   }
 
   res.locals.sessionId = req.sessionID;
@@ -161,6 +184,7 @@ app.use(async (req, res, next) => {
 
 // Health Check
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+app.get('/login', (req, res) => res.redirect('/admin/login'));
 
 // Local development fallback for Vercel Web Analytics (on Vercel, intercepted at the edge)
 app.get('/_vercel/insights/script.js', (req, res) => {

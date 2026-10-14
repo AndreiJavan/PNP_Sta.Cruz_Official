@@ -21,11 +21,11 @@
     </div>
 </div>
 
-<div class="bg-slate-50 dark:bg-slate-950 py-16 transition-colors duration-300">
+<div class="bg-slate-50 dark:bg-slate-950 py-10 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Search and Filter Section -->
-        <div class="mb-12 bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col gap-4 -mt-24 relative z-20">
+        <div class="mb-8 sm:mb-12 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col gap-4 -mt-12 sm:-mt-20 md:-mt-24 relative z-20">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <!-- Search input -->
                 <div class="relative w-full md:flex-1">
@@ -771,4 +771,30 @@
             }
         }
     });
+
+    // Touch Swipe Support for News Modal Media
+    (function initNewsModalSwipe() {
+        const container = document.getElementById('news-modal-media-container');
+        if (!container) return;
+        let startX = 0, startY = 0;
+        container.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+        container.addEventListener('touchend', (e) => {
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                const diffX = e.changedTouches[0].clientX - startX;
+                const diffY = e.changedTouches[0].clientY - startY;
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                    if (diffX < 0) {
+                        newsModalNext();
+                    } else {
+                        newsModalPrev();
+                    }
+                }
+            }
+        }, { passive: true });
+    })();
 </script>

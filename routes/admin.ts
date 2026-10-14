@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   getLogin, postLogin, getLogout, getDashboard, getBulletins, getCreateBulletin,
   postCreateBulletin, getEditBulletin, postEditBulletin, deleteBulletin, getMap, postMapPoint, deleteMapPoint, bulkAddMapPoints, purgePlaceholders,
-  getReports, processAIExtraction, saveReportBatch, deleteReport, getHotlines,
+  getReports, processAIExtraction, saveReportBatch, updateReportBatch, deleteReport, getHotlines,
   postHotline, postEditHotline, deleteHotline, getUsers, postUser, deleteUser, getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive,
   getHeartbeat, debugSingleFacebookPost
@@ -71,6 +71,7 @@ router.get('/reports', getReports);
 router.post('/reports/extract', memoryUpload.single('file'), processAIExtraction);
 router.post('/process-ai', memoryUpload.single('file'), processAIExtraction);
 router.post('/reports/save', saveReportBatch);
+router.post('/reports/:id/update', updateReportBatch);
 router.post('/reports/:id/delete', deleteReport);
 
 // Recycle Bin & Archive

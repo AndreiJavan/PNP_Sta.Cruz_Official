@@ -9,6 +9,7 @@ import nodemailer from 'nodemailer';
 import { memoryCache } from '../utils/cache.js';
 import { FacebookService } from '../utils/facebookService.js';
 import { classifyCategory } from '../utils/categoryClassifier.js';
+import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -356,9 +357,23 @@ function cleanAndParseJSON(text: string) {
 }
 
 export const getLogin = async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
+  // If user is already authenticated (via session or durable auth token), DO NOT return to login!
+  let user = req.session?.user;
+  if (!user && req.cookies?.stacruz_auth) {
+    const verified = verifyAuthToken(req.cookies.stacruz_auth);
+    if (verified) {
+      user = verified;
+      if (req.session) {
+        req.session.user = verified;
+        (req.session as any).hideSidebar = (req.session as any).hideSidebar ?? true;
+      }
+    }
+  }
+
+  if (user) {
     return res.redirect('/admin/dashboard');
   }
+
   let error_msg = null;
   if (req.query.expired === '1') {
     error_msg = 'Your session has expired. Please sign in again.';
@@ -412,12 +427,21 @@ export const postLogin = async (req: Request, res: Response) => {
       };
       (req.session as any).hideSidebar = true;
 
+      // Issue durable stateless auth cookie (30 days) to persist across serverless instances and restarts
+      const authToken = createAuthToken(req.session.user);
+      res.cookie('stacruz_auth', authToken, {
+        httpOnly: true,
+        secure: false, // Compatible with both HTTP and HTTPS behind reverse proxies
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      });
+
       await logAction(req, 'LOGIN', `Personnel ${user.username} authenticated successfully.`);
 
       return req.session.save((err) => {
         if (err) {
-          console.error('[LOGIN ERROR] Session save failed:', err);
-          return res.status(500).send('Error saving session');
+          console.error('[LOGIN WARNING] Session save had error, proceeding with auth cookie:', err);
         }
         console.log('[LOGIN SUCCESS] Redirecting to dashboard');
         res.redirect('/admin/dashboard');
@@ -433,22 +457,33 @@ export const postLogin = async (req: Request, res: Response) => {
 };
 
 export const getLogout = (req: Request, res: Response) => {
+  res.clearCookie('stacruz_auth', { path: '/' });
+  res.clearCookie('stacruz_sid', { path: '/' });
   if (req.session) {
     req.session.destroy(() => {
-      res.clearCookie('stacruz_sid', { path: '/' });
       res.redirect('/admin/login');
     });
   } else {
-    res.clearCookie('stacruz_sid', { path: '/' });
     res.redirect('/admin/login');
   }
 };
 
 export const getHeartbeat = async (req: Request, res: Response) => {
-  if (req.session && req.session.user) {
+  let user = req.session?.user;
+  if (!user && req.cookies?.stacruz_auth) {
+    const verified = verifyAuthToken(req.cookies.stacruz_auth);
+    if (verified) {
+      user = verified;
+      if (req.session) {
+        req.session.user = verified;
+      }
+    }
+  }
+
+  if (user) {
     return res.json({
       success: true,
-      user: req.session.user.username,
+      user: user.username,
       timestamp: Date.now()
     });
   }
@@ -1537,7 +1572,8 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     await batch.commit();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
-    await logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`);
+    await memoryCache.clearNamespace('reports');
+    logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`).catch(e => console.warn('[AUDIT]', e.message));
     res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
   } catch (err) {
     console.error(err);
@@ -1547,17 +1583,19 @@ export const saveReportBatch = async (req: Request, res: Response) => {
 
 export const getAuditLogs = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(100).get();
-    const logs = snap.docs.map((doc: any) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        admin_name: data.username || data.admin_id || 'System',
-        action: data.action,
-        details: data.details,
-        timestamp: data.timestamp
-      };
-    });
+    const logs = await memoryCache.getOrSet('audit_logs:latest', async () => {
+      const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(100).get();
+      return snap.docs.map((doc: any) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          admin_name: data.username || data.admin_id || 'System',
+          action: data.action,
+          details: data.details,
+          timestamp: data.timestamp
+        };
+      });
+    }, 60 * 1000);
     res.render('admin/audit_log', { title: 'System Audit Logs', logs, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -2150,18 +2188,21 @@ const parseVideos = (path: string | undefined): string[] => {
 export const getBulletins = async (req: Request, res: Response) => {
   try {
     const category = req.query.category as string;
+    const cacheKey = `bulletin:admin:${category || 'All'}`;
 
-    let query: any = db.collection('bulletins');
-    if (category && category !== 'All') {
-      query = query.where('category', '==', category);
-    }
-    
-    const snap = await query.orderBy('created_at', 'desc').get();
+    const bulletins = await memoryCache.getOrSet(cacheKey, async () => {
+      let query: any = db.collection('bulletins');
+      if (category && category !== 'All') {
+        query = query.where('category', '==', category);
+      }
+      
+      const snap = await query.orderBy('created_at', 'desc').get();
 
-    const bulletins = snap.docs.map((doc: any) => {
-      const d = doc.data();
-      return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
-    });
+      return snap.docs.map((doc: any) => {
+        const d = doc.data();
+        return decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
+      });
+    }, 2 * 60 * 1000);
 
     const title = category === 'Wanted Person' ? 'Wanted Persons' : 
                   category === 'Missing Person' ? 'Missing Persons' : 'Bulletins';
@@ -2566,7 +2607,9 @@ export const deleteBulletin = async (req: Request, res: Response) => {
 
     await logAction(req, 'BULLETIN_ARCHIVED', `Archived bulletin ID: ${req.params.id}`);
     await docRef.delete();
-    memoryCache.clearNamespace('bulletin');
+    await memoryCache.clearNamespace('bulletin');
+    await memoryCache.clearNamespace('bulletins');
+    await memoryCache.clearNamespace('archive');
     res.redirect(redirectUrl);
   } catch (err) {
     console.error('Error archiving bulletin:', err);
@@ -2580,12 +2623,16 @@ export const getTips = async (req: Request, res: Response) => {
     const limit = 20;
     const offset = (page - 1) * limit;
 
-    const [snap, countSnap] = await Promise.all([
-      db.collection('anonymous_tips').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
-      db.collection('anonymous_tips').count().get()
-    ]);
-    const tips = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-    const totalPages = Math.ceil(countSnap.data().count / limit);
+    const cacheKey = `tips:admin_p${page}`;
+    const { tips, totalPages } = await memoryCache.getOrSet(cacheKey, async () => {
+      const [snap, countSnap] = await Promise.all([
+        db.collection('anonymous_tips').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
+        db.collection('anonymous_tips').count().get()
+      ]);
+      const tipsList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      const pages = Math.ceil(countSnap.data().count / limit);
+      return { tips: tipsList, totalPages: pages };
+    }, 60 * 1000);
 
     // Mark tip-related notifications as read when viewed
     const unreadNotifs = await db.collection('admin_notifications')
@@ -2735,6 +2782,7 @@ export const deleteMapPoint = async (req: Request, res: Response) => {
     console.error(err);
     if (req.xhr || req.headers.accept?.includes('application/json')) {
       return res.status(500).json({ success: false, message: 'Neutralization sequence failed' });
+
     }
     res.status(500).send('Error deleting map point');
   }
@@ -2763,8 +2811,11 @@ export const purgePlaceholders = async (req: Request, res: Response) => {
 
 export const getHotlines = async (req: Request, res: Response) => {
   try {
-    const snap = await db.collection('hotlines').orderBy('category').get();
-    const hotlines = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const cacheKey = 'hotlines:admin';
+    const hotlines = await memoryCache.getOrSet(cacheKey, async () => {
+      const snap = await db.collection('hotlines').orderBy('category').get();
+      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    }, 5 * 60 * 1000);
     res.render('admin/hotlines', { title: 'Hotlines', hotlines, layout: 'layouts/admin' });
   } catch (err) {
     console.error(err);
@@ -2850,13 +2901,16 @@ export const deleteHotline = async (req: Request, res: Response) => {
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const [usersSnap, logsSnap] = await Promise.all([
-      db.collection('users').get(),
-      db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get()
-    ]);
+    const { users, logs } = await memoryCache.getOrSet('users:admin_view', async () => {
+      const [usersSnap, logsSnap] = await Promise.all([
+        db.collection('users').get(),
+        db.collection('audit_logs').orderBy('timestamp', 'desc').limit(50).get()
+      ]);
 
-    const users = (usersSnap && usersSnap.docs) ? usersSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
-    const logs = (logsSnap && logsSnap.docs) ? logsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
+      const usersList = (usersSnap && usersSnap.docs) ? usersSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
+      const logsList = (logsSnap && logsSnap.docs) ? logsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() })) : [];
+      return { users: usersList, logs: logsList };
+    }, 2 * 60 * 1000);
 
     res.render('admin/users', {
       title: 'Users',
@@ -2935,6 +2989,8 @@ export const postUser = async (req: Request, res: Response) => {
       `
     });
 
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
@@ -2994,6 +3050,8 @@ export const deleteUser = async (req: Request, res: Response) => {
 
     await logAction(req, 'USER_DELETE', `Neutralized administrative credentials for: ${userData.username} | Reason: ${reasonText}`);
     await docRef.delete();
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
     res.redirect('/admin/users');
   } catch (err) {
     console.error(err);
@@ -3005,46 +3063,51 @@ export const getReports = async (req: Request, res: Response) => {
   try {
     const currentYear = new Date().getFullYear();
     const currentYearStartStr = `${currentYear}-01-01`;
+    const cacheKey = `reports:admin_view_${currentYear}`;
 
-    const [reportsSnap, allPointsSnap] = await Promise.all([
-      db.collection('intelligence_scans').where('timestamp', '>=', currentYearStartStr).orderBy('timestamp', 'desc').get(),
-      db.collection('map_points').where('incident_date', '>=', currentYearStartStr).orderBy('incident_date', 'desc').get()
-    ]);
+    const { reports, allPoints } = await memoryCache.getOrSet(cacheKey, async () => {
+      const [reportsSnap, allPointsSnap] = await Promise.all([
+        db.collection('intelligence_scans').where('timestamp', '>=', currentYearStartStr).orderBy('timestamp', 'desc').get(),
+        db.collection('map_points').where('incident_date', '>=', currentYearStartStr).orderBy('incident_date', 'desc').get()
+      ]);
 
-    const reports = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      const reportsList = reportsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
 
-    const scansMap: { [key: string]: string } = {};
-    reportsSnap.docs.forEach((doc: any) => {
-      const data = doc.data();
-      const stats = data.category_stats || {};
-      scansMap[doc.id] = stats.entry_type || 'scanned';
-    });
-
-    const allPoints = allPointsSnap.docs
-      .map((doc: any) => {
+      const scansMap: { [key: string]: string } = {};
+      reportsSnap.docs.forEach((doc: any) => {
         const data = doc.data();
-        let entryType = data.entry_type;
-        if (!entryType) {
-          if (data.report_id) {
-            entryType = scansMap[data.report_id] || 'scanned';
-          } else {
-            entryType = 'manual';
-          }
-        }
-        let cat = data.category || 'Non-Index';
-        if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
-          cat = 'PSI';
-        }
-        return { id: doc.id, ...data, category: cat, entry_type: entryType };
-      })
-      .filter((p: any) => {
-        const dateStr = String(p.incident_date || '');
-        const isPlaceholder = dateStr === 'N/A' ||
-          dateStr === '' ||
-          dateStr === '2026-04-27T09:22:14.910Z' ||
-          p.description === 'Strategic placeholder data';
-        return !isPlaceholder;
+        const stats = data.category_stats || {};
+        scansMap[doc.id] = stats.entry_type || 'scanned';
       });
+
+      const pointsList = allPointsSnap.docs
+        .map((doc: any) => {
+          const data = doc.data();
+          let entryType = data.entry_type;
+          if (!entryType) {
+            if (data.report_id) {
+              entryType = scansMap[data.report_id] || 'scanned';
+            } else {
+              entryType = 'manual';
+            }
+          }
+          let cat = data.category || 'Non-Index';
+          if (cat === 'RIR' || cat === 'RIR/PSI' || cat === 'RIR - PSI' || cat === 'RIR_PSI') {
+            cat = 'PSI';
+          }
+          return { id: doc.id, ...data, category: cat, entry_type: entryType };
+        })
+        .filter((p: any) => {
+          const dateStr = String(p.incident_date || '');
+          const isPlaceholder = dateStr === 'N/A' ||
+            dateStr === '' ||
+            dateStr === '2026-04-27T09:22:14.910Z' ||
+            p.description === 'Strategic placeholder data';
+          return !isPlaceholder;
+        });
+
+      return { reports: reportsList, allPoints: pointsList };
+    }, 3 * 60 * 1000);
 
     const stats = {
       '8-Focus': allPoints.filter((p: any) => p.category === '8-Focus').length,
@@ -3132,10 +3195,18 @@ export const deleteReport = async (req: Request, res: Response) => {
     });
 
     // 4. Delete map points & scan document safely
-    await db.collection('map_points').where('report_id', '==', reportId).delete();
+    // Delete individual map points by ID first to guarantee removal
+    if (pointsSnap.docs && pointsSnap.docs.length > 0) {
+      for (const ptDoc of pointsSnap.docs) {
+        await ptDoc.ref.delete().catch((e: any) => console.warn(`[DELETE REPORT] Map point ${ptDoc.id} delete warning:`, e.message));
+      }
+    }
+    await db.collection('map_points').where('report_id', '==', reportId).delete().catch((e: any) => console.warn(`[DELETE REPORT] Bulk map points delete warning:`, e.message));
     await db.collection('intelligence_scans').doc(reportId).delete();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
+    await memoryCache.clearNamespace('reports');
+    await memoryCache.clearNamespace('archive');
 
     await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
     res.redirect('/admin/reports');
@@ -3145,6 +3216,118 @@ export const deleteReport = async (req: Request, res: Response) => {
     res.status(500).send(`Error archiving report: ${errorMsg}`);
   }
 };
+
+export const updateReportBatch = async (req: Request, res: Response) => {
+  const reportId = req.params.id;
+  const { entries, filename } = req.body;
+
+  if (!entries || !Array.isArray(entries) || entries.length === 0) {
+    return res.status(400).json({ success: false, message: 'Invalid or empty entries dataset provided.' });
+  }
+
+  // 1. Strict server-side validation
+  const todayStr = new Date().toISOString().split('T')[0];
+  const validCategories = ['8-Focus', 'Non-Index', 'PSI'];
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const rowNum = i + 1;
+
+    let rawBarangay = (entry.barangay || '').trim();
+    if (!rawBarangay) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Missing Barangay / Sector.` });
+    }
+
+    entry.barangay = normalizeSantaCruzBarangay(rawBarangay);
+    if (!VALID_BARANGAYS.includes(entry.barangay)) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: "${rawBarangay}" is not a recognized Santa Cruz Barangay.` });
+    }
+
+    const rawDate = (entry.date_committed || entry.incident_date || entry.date || '').trim();
+    if (!rawDate || !/^\d{4}-\d{2}-\d{2}$/.test(rawDate) || isNaN(new Date(rawDate).getTime())) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Invalid Timeline Date format (YYYY-MM-DD required).` });
+    }
+
+    if (rawDate < '2024-01-01' || rawDate > todayStr) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Timeline Date (${rawDate}) must be between 2024-01-01 and today.` });
+    }
+
+    const offense = (entry.incident_type || entry.offense || '').trim();
+    if (!offense || offense.length < 2) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
+    }
+
+    const category = entry.category || 'Non-Index';
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Invalid category.` });
+    }
+  }
+
+  try {
+    const reportRef = db.collection('intelligence_scans').doc(reportId);
+    const reportDoc = await reportRef.get();
+    if (!reportDoc.exists) {
+      return res.status(404).json({ success: false, message: 'Report batch not found.' });
+    }
+
+    const existingReport = reportDoc.data();
+    const entryType = existingReport.category_stats?.entry_type || (existingReport.filename?.includes('Manual') ? 'manual' : 'scanned');
+    const categoryStats: any = { '8-Focus': 0, 'PSI': 0, 'Non-Index': 0, entry_type: entryType };
+
+    // Prepare replacement points
+    const pointsToCreate = entries.map(entry => {
+      const pin = MANUAL_PINS.find(p => p.name.toLowerCase() === (entry.barangay || '').toLowerCase()) || MANUAL_PINS.find(p => p.name === 'Alipit');
+      const cat = entry.category || 'Non-Index';
+      categoryStats[cat] = (categoryStats[cat] || 0) + 1;
+
+      return {
+        lat: pin ? pin.lat : 14.223931,
+        lng: pin ? pin.lng : 121.405213,
+        incident_type: entry.incident_type || entry.offense,
+        incident_date: entry.incident_date || entry.date || entry.date_committed,
+        barangay: entry.barangay,
+        description: entry.description || (entryType === 'manual' ? 'Manual entry' : 'Intel extracted'),
+        category: cat,
+        report_id: reportId,
+        created_at: new Date().toISOString()
+      };
+    });
+
+    // Update parent report
+    const updatedReportData: any = {
+      filename: filename || existingReport.filename,
+      total_records: entries.length,
+      category_stats: categoryStats,
+      raw_data: entries
+    };
+    await reportRef.update(updatedReportData);
+
+    // Delete existing child map points safely
+    const existingPointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
+    if (existingPointsSnap.docs && existingPointsSnap.docs.length > 0) {
+      for (const ptDoc of existingPointsSnap.docs) {
+        await ptDoc.ref.delete().catch(() => {});
+      }
+    }
+    await db.collection('map_points').where('report_id', '==', reportId).delete().catch(() => {});
+
+    // Bulk insert updated map points in 1 fast query using bulk batching
+    await db.collection('map_points').insertMany(pointsToCreate);
+
+    // Clear caches
+    await memoryCache.clearNamespace('map_points');
+    await memoryCache.clearNamespace('scans');
+    await memoryCache.clearNamespace('reports');
+
+    logAction(req, 'REPORT_EDIT', `Updated intelligence report batch: ${filename || existingReport.filename} (${entries.length} records)`).catch(e => console.warn('[AUDIT]', e.message));
+
+    res.json({ success: true, count: entries.length, message: 'Report updated successfully.' });
+  } catch (err: any) {
+    console.error('Error updating report batch:', err);
+    res.status(500).json({ success: false, message: err.message || 'Server error during report update' });
+  }
+};
+
 export const bulkAddMapPoints = async (req: Request, res: Response) => {
   const { entries } = req.body;
   if (!entries || !Array.isArray(entries)) {
@@ -3158,6 +3341,18 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
     // Create report first
     const reportRef = db.collection('intelligence_scans').doc();
     const reportId = reportRef.id;
+
+    // Save parent report FIRST to ensure foreign key integrity
+    const validMapAdminId = await getValidUserId(req.session?.user?.id);
+    batch.set(reportRef, {
+      admin_id: validMapAdminId,
+      admin_name: req.session?.user?.full_name || 'System Admin',
+      timestamp: new Date().toISOString(),
+      total_records: entries.length,
+      category_stats: categoryStats,
+      raw_data: entries,
+      filename: 'Manual Intelligence Session'
+    });
 
     for (const entry of entries) {
       let rawBarangay = (entry.barangay || '').trim();
@@ -3180,22 +3375,11 @@ export const bulkAddMapPoints = async (req: Request, res: Response) => {
       });
     }
 
-    // Save a report of this scan
-    const validMapAdminId = await getValidUserId(req.session?.user?.id);
-    batch.set(reportRef, {
-      admin_id: validMapAdminId,
-      admin_name: req.session?.user?.full_name || 'System Admin',
-      timestamp: new Date().toISOString(),
-      total_records: entries.length,
-      category_stats: categoryStats,
-      raw_data: entries,
-      filename: 'Manual Intelligence Session'
-    });
-
     await batch.commit();
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
-    await logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`);
+    await memoryCache.clearNamespace('reports');
+    logAction(req, 'MAP_BULK_ADD', `Successfully synchronized ${entries.length} manual records to tactical grid.`).catch(e => console.warn('[AUDIT]', e.message));
     res.json({ success: true, count: entries.length });
   } catch (err) {
     console.error('Bulk add error:', err);
@@ -3236,6 +3420,8 @@ export const approveUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'active' });
     await logAction(req, 'USER_APPROVE', `Approved administrative credentials for: ${userData.username}`);
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
 
     // Send approval email to the new user
     if (userData.email) {
@@ -3296,6 +3482,8 @@ export const rejectUser = async (req: Request, res: Response) => {
 
     await docRef.update({ status: 'rejected' });
     await logAction(req, 'USER_REJECT', `Rejected administrative credentials for: ${userData.username}`);
+    await memoryCache.clearNamespace('users');
+    await memoryCache.clearNamespace('personnel');
 
     // Send rejection email to the new user
     if (userData.email) {
@@ -3324,8 +3512,14 @@ export const rejectUser = async (req: Request, res: Response) => {
 export const getArchive = async (req: Request, res: Response) => {
   try {
     const selectedCategory = (req.query.category as string) || 'All';
-    const snap = await db.collection('recycle_bin').orderBy('deleted_at', 'desc').get();
-    const items = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    const allItems = await memoryCache.getOrSet('archive:all', async () => {
+      const snap = await db.collection('recycle_bin').orderBy('deleted_at', 'desc').get();
+      return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+    }, 2 * 60 * 1000);
+
+    const items = selectedCategory && selectedCategory !== 'All' 
+      ? allItems.filter((doc: any) => doc.category === selectedCategory) 
+      : allItems;
 
     res.render('admin/archive', {
       title: 'Archive',
@@ -3356,6 +3550,7 @@ export const clearAllArchive = async (req: Request, res: Response) => {
       await logAction(req, 'ARCHIVE_CLEAR_ALL', `Cleared ${docsToDelete.length} items from recycle bin (Category: ${selectedCategory})`);
     }
 
+    await memoryCache.clearNamespace('archive');
     res.redirect(`/admin/archive?category=${encodeURIComponent(selectedCategory)}`);
   } catch (err) {
     console.error('Error clearing archive:', err);
@@ -3396,6 +3591,7 @@ export const restoreArchiveItem = async (req: Request, res: Response) => {
 
     await logAction(req, 'ARCHIVE_RESTORE', `Restored ${category} item: ${item.title}`);
     await docRef.delete();
+    await memoryCache.clearNamespace('archive');
     memoryCache.flush();
 
     res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
@@ -3419,6 +3615,7 @@ export const permanentlyDeleteArchiveItem = async (req: Request, res: Response) 
       await docRef.delete();
     }
 
+    await memoryCache.clearNamespace('archive');
     res.redirect(`/admin/archive?category=${encodeURIComponent(category)}`);
   } catch (err) {
     console.error('Error permanently deleting archive item:', err);

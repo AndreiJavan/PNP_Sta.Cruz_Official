@@ -34,10 +34,10 @@
     .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
 </style>
 
-<div class="container mx-auto px-4 py-20 <%= (category === 'Wanted Person' || category === 'Missing Person') ? 'pt-24' : '' %>">
+<div class="container mx-auto px-4 py-10 sm:py-16 md:py-20 <%= (category === 'Wanted Person' || category === 'Missing Person') ? 'pt-16 sm:pt-24' : '' %>">
     <!-- Category Pills & Date Filter Toolbar -->
     <% if (category !== 'Wanted Person' && category !== 'Missing Person') { %>
-    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-32 relative z-20 mb-16 max-w-5xl mx-auto flex flex-col gap-6">
+    <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 -mt-12 sm:-mt-20 md:-mt-28 relative z-20 mb-10 sm:mb-16 max-w-5xl mx-auto flex flex-col gap-6">
         <div class="flex flex-wrap gap-2.5 justify-center">
             <% 
                 const activeCat = category && category !== 'All' ? category : 'Crime Advisory';
@@ -882,4 +882,30 @@
             }
         }
     });
+
+    // Touch Swipe Support for Bulletin Modal Media
+    (function initBulletinModalSwipe() {
+        const container = document.getElementById('bulletin-modal-media-container');
+        if (!container) return;
+        let startX = 0, startY = 0;
+        container.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+        container.addEventListener('touchend', (e) => {
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                const diffX = e.changedTouches[0].clientX - startX;
+                const diffY = e.changedTouches[0].clientY - startY;
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                    if (diffX < 0) {
+                        bulletinModalNext();
+                    } else {
+                        bulletinModalPrev();
+                    }
+                }
+            }
+        }, { passive: true });
+    })();
 </script>
