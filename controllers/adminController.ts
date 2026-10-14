@@ -10,6 +10,7 @@ import { memoryCache } from '../utils/cache.js';
 import { FacebookService } from '../utils/facebookService.js';
 import { classifyCategory } from '../utils/categoryClassifier.js';
 import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
+import { getLockoutRemainingSeconds, recordFailedAttempt, clearFailedAttempts, formatLockoutDuration } from '../utils/loginSecurity.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -547,15 +548,26 @@ export const getLogin = async (req: Request, res: Response) => {
     console.warn('[LOGIN SETUP CHECK WARNING]:', err);
   }
 
+  // Check if IP or session is currently in a 5-minute security lockout
+  const lockoutRemaining = getLockoutRemainingSeconds(req);
   let error_msg = null;
   let success_msg = null;
-  if (req.query.expired === '1') {
+
+  if (lockoutRemaining > 0) {
+    error_msg = `Account temporarily locked due to 5 consecutive failed login attempts. Please wait ${formatLockoutDuration(lockoutRemaining)} before trying again.`;
+  } else if (req.query.expired === '1') {
     error_msg = 'Your session has expired. Please sign in again.';
   } else if (req.query.setup === 'success') {
     success_msg = 'Super Administrator account registered successfully! You may now sign in.';
   }
 
-  return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg, success_msg });
+  return res.render('admin/login', {
+    title: 'Admin Login',
+    layout: false,
+    error_msg,
+    success_msg,
+    lockout_seconds: lockoutRemaining
+  });
 };
 
 export const postLogin = async (req: Request, res: Response) => {
@@ -567,8 +579,20 @@ export const postLogin = async (req: Request, res: Response) => {
     return res.status(500).send('Session error: No session object found');
   }
 
+  // 1. Enforce 5-Minute Lockout Check BEFORE Processing
+  const lockoutRemaining = getLockoutRemainingSeconds(req, username);
+  if (lockoutRemaining > 0) {
+    const error_msg = `Account temporarily locked due to 5 consecutive failed login attempts. Please wait ${formatLockoutDuration(lockoutRemaining)} before trying again.`;
+    return res.status(429).render('admin/login', {
+      title: 'Admin Login',
+      layout: false,
+      error_msg,
+      lockout_seconds: lockoutRemaining
+    });
+  }
+
   try {
-    // 1. Database Lookup - Check username first
+    // 2. Database Lookup - Check username first
     let snap = await db.collection('users').where('username', '==', username).limit(1).get();
 
     // If not found by username, try looking up by email
@@ -578,13 +602,23 @@ export const postLogin = async (req: Request, res: Response) => {
 
     if (snap.empty) {
       console.warn(`[LOGIN FAILED] User not found in DB: ${username}`);
-      return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
+      const status = recordFailedAttempt(req, res, username);
+      const error_msg = status.isLocked
+        ? `Account temporarily locked for 5 minutes due to 5 consecutive failed login attempts.`
+        : `Invalid username or password. You have ${status.attemptsLeft} attempt(s) remaining before a 5-minute security lockout.`;
+
+      return res.status(status.isLocked ? 429 : 401).render('admin/login', {
+        title: 'Admin Login',
+        layout: false,
+        error_msg,
+        lockout_seconds: status.remainingSeconds
+      });
     }
 
     const user = { id: snap.docs[0].id, ...snap.docs[0].data() } as any;
     console.log(`[LOGIN DATA] User found in DB: ${user.username}, Role: ${user.role}`);
 
-    // 2. Password Verification
+    // 3. Password Verification
     const isPasswordCorrect = bcrypt.compareSync(password, user.password_hash);
     console.log(`[LOGIN RESULT] Password check: ${isPasswordCorrect}`);
 
@@ -595,6 +629,9 @@ export const postLogin = async (req: Request, res: Response) => {
       if (user.status === 'rejected') {
         return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Your account request was rejected.' });
       }
+
+      // Successful authentication: clear all failed attempt counters and lockout cookies
+      clearFailedAttempts(req, res, user.username);
 
       req.session.user = {
         id: user.id,
@@ -625,7 +662,17 @@ export const postLogin = async (req: Request, res: Response) => {
       });
     } else {
       console.warn(`[LOGIN FAILED] Incorrect password for: ${username}`);
-      return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg: 'Invalid username or password' });
+      const status = recordFailedAttempt(req, res, username);
+      const error_msg = status.isLocked
+        ? `Account temporarily locked for 5 minutes due to 5 consecutive failed login attempts.`
+        : `Invalid username or password. You have ${status.attemptsLeft} attempt(s) remaining before a 5-minute security lockout.`;
+
+      return res.status(status.isLocked ? 429 : 401).render('admin/login', {
+        title: 'Admin Login',
+        layout: false,
+        error_msg,
+        lockout_seconds: status.remainingSeconds
+      });
     }
   } catch (err) {
     console.error('[LOGIN FATAL ERROR]:', err);
