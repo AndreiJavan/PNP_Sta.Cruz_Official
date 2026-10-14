@@ -16,15 +16,16 @@ const router = Router();
 const memoryUpload = multer({ storage: multer.memoryStorage() });
 
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login requests per window
+  windowMs: 5 * 60 * 1000, // 5 minutes window
+  max: 20, // General IP flood limiter (credential lockout is handled accurately by loginSecurity)
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
     res.status(429).render('admin/login', {
       title: 'Admin Login',
       layout: false,
-      error_msg: 'Too many login attempts. Please try again after 15 minutes.'
+      error_msg: 'Too many requests from this address. Please wait a few minutes before trying again.',
+      lockout_seconds: 300
     });
   }
 });
