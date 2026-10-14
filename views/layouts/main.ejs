@@ -85,6 +85,35 @@
             border-color: #C8A415;
         }
 
+        /* Border utility fallback for border-gray-150 in both themes */
+        .border-gray-150 {
+            border-color: #e2e8f0;
+        }
+        .dark .border-gray-150 {
+            border-color: rgba(51, 65, 85, 0.6);
+        }
+
+        /* Enhanced Modal Scrollbar */
+        .custom-modal-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+        }
+        .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(100, 116, 139, 0.8);
+        }
+
         /* Dark mode overrides for custom classes if needed */
         .dark .bg-gray-50 {
             background-color: #0f172a;

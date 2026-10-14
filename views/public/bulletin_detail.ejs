@@ -6,7 +6,7 @@
         </a>
     </div>
 
-    <article class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-700">
+    <article class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
         <% 
             let mediaItems = [];
             if (bulletin.video_paths && bulletin.video_paths.length > 0) {
@@ -131,17 +131,17 @@
             <div class="flex flex-wrap items-center gap-4 mb-8">
                 <% 
                     const badgeColors = {
-                        'Wanted Person': 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-                        'Missing Person': 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
-                        'Crime Advisory': 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400',
-                        'Recovered Property': 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-                        'General Announcement': 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                        'Wanted Person': 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/60',
+                        'Missing Person': 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800/60',
+                        'Crime Advisory': 'bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-800/60',
+                        'Recovered Property': 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800/60',
+                        'General Announcement': 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60'
                     };
                 %>
-                <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest <%= badgeColors[bulletin.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
+                <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-2xs <%= badgeColors[bulletin.category] || 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-700 dark:text-gray-300' %>">
                     <%= bulletin.category %>
                 </span>
-                <span class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest flex items-center">
+                <span class="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-widest flex items-center">
                     <i class="far fa-calendar-alt mr-2"></i>
                     <%= new Date(bulletin.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }) %>
                 </span>

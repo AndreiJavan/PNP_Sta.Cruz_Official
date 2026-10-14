@@ -57,7 +57,7 @@
         </div>
 
         <!-- Search & Date Filter Bar -->
-        <div class="w-full pt-4 border-t border-gray-150 dark:border-slate-700/80 flex flex-col md:flex-row items-center gap-3">
+        <div class="w-full pt-4 border-t border-slate-200 dark:border-slate-700/80 flex flex-col md:flex-row items-center gap-3">
             <!-- Search input -->
             <div class="relative flex-1 w-full">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -281,19 +281,19 @@
 
 <!-- INTERACTIVE BULLETIN DETAIL MODAL -->
 <div id="bulletin-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="closeBulletinModal()"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl border border-gray-150 dark:border-slate-800/60 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
+    <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onclick="closeBulletinModal()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] border border-slate-200 dark:border-slate-800 ring-1 ring-black/5 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
         
         <!-- Left Side: Media Carousel -->
-        <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-800/60">
+        <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800">
             <div id="bulletin-modal-media-container" class="w-full h-full relative overflow-hidden flex items-center justify-center">
                 <!-- Media injected here -->
             </div>
             
-            <button id="modal-prev-btn" onclick="bulletinModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+            <button id="modal-prev-btn" onclick="bulletinModalPrev()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden shadow-md">
                 <i class="fas fa-chevron-left text-sm"></i>
             </button>
-            <button id="modal-next-btn" onclick="bulletinModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden">
+            <button id="modal-next-btn" onclick="bulletinModalNext()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 hover:bg-pnp-blue text-white flex items-center justify-center backdrop-blur-sm transition-all z-20 hidden shadow-md">
                 <i class="fas fa-chevron-right text-sm"></i>
             </button>
             
@@ -301,59 +301,61 @@
         </div>
 
         <!-- Right Side: Text Content -->
-        <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none">
-            <button onclick="closeBulletinModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center focus:outline-none transition-all duration-300 z-10">
+        <div class="w-full lg:w-[50%] p-6 md:p-10 overflow-y-auto bg-white dark:bg-slate-900 custom-modal-scrollbar relative max-h-[50vh] lg:max-h-none text-left">
+            <button onclick="closeBulletinModal()" class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 border border-slate-200/90 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 dark:hover:text-white dark:border-slate-700 shadow-sm flex items-center justify-center focus:outline-none transition-all duration-300 z-10" title="Close Modal">
                 <i class="fas fa-times"></i>
             </button>
 
             <div class="mb-4 pr-12 flex items-center justify-between flex-wrap gap-2">
                 <div class="flex items-center space-x-2 flex-wrap gap-y-2">
-                    <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700"></span>
+                    <span id="bulletin-modal-category" class="inline-block text-[10px] md:text-xs font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl border shadow-2xs transition-colors"></span>
                     <div id="bulletin-modal-fb-btn" class="inline-block"></div>
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                    <select class="tts-voice-select text-[10px] px-2 py-1 max-w-[125px] rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 focus:outline-none font-bold">
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                    <select class="tts-voice-select text-[11px] px-2.5 py-1.5 max-w-[135px] rounded-xl bg-slate-50 hover:bg-white text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-pnp-blue/20 font-bold shadow-2xs">
                         <option value="google:fil-PH" selected>Tagalog / Filipino</option>
                         <option value="google:en-US">English (US)</option>
                     </select>
-                    <button id="tts-bulletin-modal-btn" onclick="" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <button id="tts-bulletin-modal-btn" onclick="" class="text-[11px] font-black text-slate-800 hover:text-pnp-blue dark:text-slate-200 dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1.5 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-2xs">
                         <i class="fas fa-volume-high text-xs"></i>
                         <span>Listen</span>
                     </button>
-                    <button id="translate-bulletin-modal-btn" onclick="toggleTranslation('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', 'tts-bulletin-modal-btn')" class="text-[10px] font-black text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1 focus:outline-none transition px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <button id="translate-bulletin-modal-btn" onclick="toggleTranslation('translate-bulletin-modal-btn', 'bulletin-modal-title', 'bulletin-modal-content', 'tts-bulletin-modal-btn')" class="text-[11px] font-black text-slate-800 hover:text-pnp-blue dark:text-slate-200 dark:hover:text-pnp-gold uppercase tracking-wider flex items-center space-x-1.5 focus:outline-none transition px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 shadow-2xs">
                         <i class="fas fa-language text-xs"></i>
                         <span>Translate</span>
                     </button>
                 </div>
             </div>
-            <div id="bulletin-modal-date" class="text-[10px] md:text-xs font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest mb-4 flex items-center"></div>
+            <div id="bulletin-modal-date" class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider mb-4 flex items-center gap-1.5"></div>
             <h3 id="bulletin-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-8 tracking-tight"></h3>
             
-            <div id="bulletin-modal-content" class="text-slate-700 dark:text-slate-300 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10"></div>
+            <div id="bulletin-modal-content" class="text-slate-800 dark:text-slate-200 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10 font-normal"></div>
 
             <!-- Chatbot Section -->
-            <div class="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
+            <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
                 <div class="flex items-center justify-between mb-4">
-                    <h4 class="text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
-                        <i class="fas fa-robot text-base animate-pulse"></i>
+                    <h4 class="text-xs md:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold flex items-center justify-center">
+                            <i class="fas fa-robot text-xs animate-pulse"></i>
+                        </span>
                         <span>Ask AI Assistant</span>
                     </h4>
-                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full uppercase tracking-wider">Gemini AI</span>
+                    <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold bg-blue-50 dark:bg-pnp-gold/15 border border-blue-200 dark:border-pnp-gold/30 px-2.5 py-1 rounded-full uppercase tracking-wider shadow-2xs">Gemini AI</span>
                 </div>
                 
                 <!-- Chat Window -->
-                <div class="bg-slate-50 dark:bg-slate-950/40 rounded-2xl border border-gray-100 dark:border-slate-850 overflow-hidden flex flex-col h-[280px]">
+                <div class="bg-slate-100/70 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col h-[290px] shadow-inner">
                     <!-- Messages Area -->
                     <div id="bulletin-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 custom-modal-scrollbar text-xs">
-                        <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-3 rounded-2xl text-slate-650 dark:text-slate-300 max-w-[85%] mr-auto">
+                        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-3.5 rounded-2xl text-slate-800 dark:text-slate-200 max-w-[85%] mr-auto shadow-2xs leading-relaxed font-medium">
                             Hello! I am your AI assistant for this bulletin. Feel free to ask me any questions about the information presented above.
                         </div>
                     </div>
                     
                     <!-- Input Area -->
-                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800/80 flex items-center gap-2 shrink-0">
-                        <input type="text" id="bulletin-chat-input" placeholder="Ask about this bulletin..." class="flex-grow bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100" onkeydown="if(event.key === 'Enter') sendBulletinChat()">
-                        <button onclick="sendBulletinChat()" class="bg-pnp-blue hover:bg-blue-700 text-white dark:bg-pnp-gold dark:hover:bg-yellow-600 dark:text-pnp-blue px-3.5 py-2 rounded-xl transition flex items-center justify-center shrink-0">
+                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 shrink-0">
+                        <input type="text" id="bulletin-chat-input" placeholder="Ask about this bulletin..." class="flex-grow bg-slate-50 hover:bg-white focus:bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-pnp-blue/20 focus:border-pnp-blue text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all shadow-inner" onkeydown="if(event.key === 'Enter') sendBulletinChat()">
+                        <button onclick="sendBulletinChat()" class="bg-pnp-blue hover:bg-blue-800 text-white dark:bg-pnp-gold dark:hover:bg-yellow-500 dark:text-slate-950 px-4 py-2.5 rounded-xl transition flex items-center justify-center shrink-0 shadow-sm active:scale-95 font-bold">
                             <i class="fas fa-paper-plane text-xs"></i>
                         </button>
                     </div>
@@ -649,7 +651,21 @@
             }
         }
 
-        document.getElementById('bulletin-modal-category').textContent = bulletin.category;
+        const catBadgeColors = {
+            'Crime Advisory': 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/60',
+            'Traffic Advisory': 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60',
+            'Cybercrime Advisory': 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/60',
+            'Emergency Preparedness': 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800/60',
+            'VAWC Advisories': 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/40 dark:text-pink-300 dark:border-pink-800/60',
+            'Community Awareness': 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60',
+            'Recovered Property': 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800/60',
+            'General Announcement': 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60'
+        };
+        const catEl = document.getElementById('bulletin-modal-category');
+        if (catEl) {
+            catEl.textContent = bulletin.category || 'Public Advisory';
+            catEl.className = `inline-block text-[10px] md:text-xs font-black uppercase tracking-widest px-3.5 py-1.5 rounded-xl border shadow-2xs ${catBadgeColors[bulletin.category] || 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'}`;
+        }
         document.getElementById('bulletin-modal-date').innerHTML = `<i class="fas fa-calendar-day mr-2"></i>${new Date(bulletin.created_at).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'})}`;
         document.getElementById('bulletin-modal-title').textContent = bulletin.title;
         document.getElementById('bulletin-modal-content').textContent = bulletin.body;
@@ -731,8 +747,8 @@
         const isUser = sender === 'user';
         const msgDiv = document.createElement('div');
         msgDiv.className = isUser 
-            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-bold whitespace-pre-wrap leading-relaxed"
-            : "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto text-left shadow-sm font-normal whitespace-pre-wrap leading-relaxed";
+            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3.5 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-semibold whitespace-pre-wrap leading-relaxed"
+            : "bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3.5 rounded-2xl max-w-[85%] mr-auto text-left shadow-2xs font-normal whitespace-pre-wrap leading-relaxed";
         
         msgDiv.innerHTML = formatChatMessage(text);
         chatBox.appendChild(msgDiv);
