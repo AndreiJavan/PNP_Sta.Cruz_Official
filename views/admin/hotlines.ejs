@@ -206,6 +206,27 @@
             const numVal = numInput ? numInput.value.trim() : '';
             const catVal = catInput ? catInput.value.trim() : '';
 
+            // Check if user changed anything
+            const orig = window.hotlineOriginals && window.hotlineOriginals[id];
+            if (orig && 
+                agencyName === orig.nameVal && 
+                numVal === orig.numVal && 
+                catVal === orig.catVal) {
+
+                if (window.strategicAlert) {
+                    await window.strategicAlert({
+                        title: 'No Changes Detected',
+                        message: 'No changes were made to this hotline. The record was not modified or reloaded.',
+                        confirmText: 'Understood',
+                        type: 'info'
+                    });
+                } else {
+                    alert('No changes were made to this hotline.');
+                }
+                cancelEditHotline(id);
+                return;
+            }
+
             // Agency Name Limitation (2 to 20 characters)
             if (!agencyName || agencyName.length < 2 || agencyName.length > 20) {
                 if (window.strategicAlert) {
@@ -273,18 +294,21 @@
             
             form.submit();
         } else {
-            // Store original HTML for cancel function
+            // Store original HTML and values for cancel and no-change check
             if (!window.hotlineOriginals) window.hotlineOriginals = {};
+            const currentName = nameTd.innerText.trim();
+            const currentNum = numTd.innerText.trim().replace(/\s/g, '');
+            const currentCat = (catTd.getAttribute('data-category') || catTd.innerText || '').trim();
+
             window.hotlineOriginals[id] = {
                 nameHtml: nameTd.innerHTML,
                 numHtml: numTd.innerHTML,
                 catHtml: catTd.innerHTML,
-                actionsHtml: actionsTd ? actionsTd.innerHTML : ''
+                actionsHtml: actionsTd ? actionsTd.innerHTML : '',
+                nameVal: currentName,
+                numVal: currentNum,
+                catVal: currentCat
             };
-
-            const currentName = nameTd.innerText.trim();
-            const currentNum = numTd.innerText.trim().replace(/\s/g, '');
-            const currentCat = catTd.getAttribute('data-category') || '';
             
             nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" required minlength="2" maxlength="20" placeholder="Agency Name" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
             
