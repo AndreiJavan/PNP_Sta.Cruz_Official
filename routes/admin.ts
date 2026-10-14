@@ -7,7 +7,7 @@ import {
   postStationPersonnel, postEditStationPersonnel, deleteStationPersonnel,
   getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive,
-  getHeartbeat, debugSingleFacebookPost
+  getHeartbeat, debugSingleFacebookPost, getSetup, postSetup, postChangePassword
 } from '../controllers/adminController.js';
 import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
@@ -32,6 +32,8 @@ const loginLimiter = rateLimit({
 });
 
 // Public Admin Routes
+router.get('/setup', getSetup);
+router.post('/setup', loginLimiter, postSetup);
 router.get('/login', getLogin);
 router.post('/login', loginLimiter, postLogin);
 router.get('/logout', getLogout);
@@ -42,6 +44,7 @@ router.get('/users/:id/reject', rejectUser);
 router.use(isAuthenticated);
 
 router.get('/dashboard', getDashboard);
+router.post('/change-password', postChangePassword);
 router.get('/api/heartbeat', getHeartbeat);
 router.get('/api/ai-trends', getAITrendsAnalysis);
 router.get('/audit-logs', getAuditLogs);

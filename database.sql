@@ -21,7 +21,7 @@ CREATE TABLE public.users (
 -- =====================================================
 CREATE TABLE public.intelligence_scans (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  admin_id UUID REFERENCES public.users(id),
+  admin_id UUID REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE,
   admin_name TEXT,
   timestamp TIMESTAMPTZ DEFAULT NOW(),
   total_records INTEGER,
@@ -67,7 +67,7 @@ CREATE TABLE public.bulletins (
 
   is_archived BOOLEAN DEFAULT FALSE,
 
-  posted_by UUID REFERENCES public.users(id),
+  posted_by UUID REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE,
 
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -112,7 +112,7 @@ CREATE TABLE public.hotlines (
 -- =====================================================
 CREATE TABLE public.audit_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  admin_id UUID REFERENCES public.users(id),
+  admin_id UUID REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE,
   username TEXT,
   action TEXT NOT NULL,
   details TEXT,
@@ -170,17 +170,15 @@ BEGIN
 END $$;
 
 -- =====================================================
--- SEED USERS
+-- INITIAL SUPERADMIN ACCOUNT SETUP
 -- =====================================================
-INSERT INTO public.users (id, username, full_name, password_hash, role)
-VALUES
-  ('00000000-0000-0000-0000-000000000001',
-   'superadmin',
-   'Super Administrator',
-   '$2a$10$DMpQH4fGsPrzMYMTWe/pIeOUF2eID.ay62ZxVAkvsF24VjNgO5h3y',
-   'superadmin'
-  )
-ON CONFLICT DO NOTHING;
+-- For maximum security against web scraping and credential leaks,
+-- hardcoded administrative credentials have been removed.
+-- 
+-- The initial Super Administrator is registered dynamically
+-- on first launch via the one-time web setup wizard at:
+-- /admin/setup
+-- =====================================================
 
 -- =====================================================
 -- REFRESH SCHEMA CACHE
@@ -301,6 +299,26 @@ CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users (created_at DESC
 
 -- 11. Station Personnel Directory Indexes
 CREATE INDEX IF NOT EXISTS idx_personnel_display_order ON public.personnel (display_order ASC);
+
+-- =====================================================
+-- FIX FOR FOREIGN KEY CONSTRAINT WHEN DELETING USERS
+-- Run this block in your Supabase SQL Editor so you can 
+-- delete or reassign user accounts without getting blocked:
+-- =====================================================
+ALTER TABLE public.intelligence_scans 
+  DROP CONSTRAINT IF EXISTS intelligence_scans_admin_id_fkey,
+  ADD CONSTRAINT intelligence_scans_admin_id_fkey 
+    FOREIGN KEY (admin_id) REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE public.bulletins 
+  DROP CONSTRAINT IF EXISTS bulletins_posted_by_fkey,
+  ADD CONSTRAINT bulletins_posted_by_fkey 
+    FOREIGN KEY (posted_by) REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE public.audit_logs 
+  DROP CONSTRAINT IF EXISTS audit_logs_admin_id_fkey,
+  ADD CONSTRAINT audit_logs_admin_id_fkey 
+    FOREIGN KEY (admin_id) REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- =====================================================
 -- SEED INITIAL STATION PERSONNEL / DIRECTORY LEADERSHIP

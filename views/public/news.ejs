@@ -21,11 +21,11 @@
     </div>
 </div>
 
-<div class="bg-slate-50 dark:bg-slate-950 py-16 transition-colors duration-300">
+<div class="bg-slate-50 dark:bg-slate-950 py-10 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Search and Filter Section -->
-        <div class="mb-12 bg-white dark:bg-slate-900 rounded-[2rem] p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col gap-4 -mt-24 relative z-20">
+        <div class="mb-8 sm:mb-12 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-md border border-gray-150 dark:border-slate-800/60 flex flex-col gap-4 -mt-12 sm:-mt-20 md:-mt-24 relative z-20">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 <!-- Search input -->
                 <div class="relative w-full md:flex-1">
@@ -664,32 +664,72 @@
             const articleTitle = (titleEl?.textContent || '').trim() || 'News Article';
             const articleContent = (contentEl?.textContent || '').trim() || 'News details';
             
-            const res = await fetch('/api/chat-article', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    articleTitle,
-                    articleContent,
-                    userMessage: text,
-                    chatHistory: newsChatHistory
-                })
-            }).then(r => r.json());
+            let res = null;
+            try {
+                res = await fetch('/api/chat-article', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        articleTitle,
+                        articleContent,
+                        userMessage: text,
+                        chatHistory: newsChatHistory
+                    })
+                }).then(r => r.json());
+            } catch (netErr) {
+                console.warn('Server chat error, checking client fallback:', netErr);
+            }
             
+            // If server returned a primary AI response (OpenRouter or Gemini), use it immediately
+            if (res && res.success && res.reply && !res.fallback) {
+                const ind = document.getElementById('news-chat-typing');
+                if (ind) ind.remove();
+                appendChatMessage('assistant', res.reply);
+                newsChatHistory.push({ role: 'user', text });
+                newsChatHistory.push({ role: 'assistant', text: res.reply });
+                return;
+            }
+
+            // If Puter AI is available in the browser, attempt dynamic client-side chat
+            if (typeof puter !== 'undefined' && puter.ai) {
+                try {
+                    const prompt = `You are an official public safety AI assistant for Sta. Cruz Municipal Police Station, Laguna.
+=== ARTICLE / BULLETIN DETAILS ===
+Title: ${articleTitle}
+Content: ${articleContent}
+
+User: ${text}
+Provide a direct, polite, official response with bold highlights and bullet points where helpful:`;
+                    const puterResp = await puter.ai.chat(prompt);
+                    const puterText = typeof puterResp === 'string' ? puterResp : (puterResp?.message?.content || puterResp?.text || '');
+                    if (puterText && puterText.trim()) {
+                        const ind = document.getElementById('news-chat-typing');
+                        if (ind) ind.remove();
+                        appendChatMessage('assistant', puterText.trim());
+                        newsChatHistory.push({ role: 'user', text });
+                        newsChatHistory.push({ role: 'assistant', text: puterText.trim() });
+                        return;
+                    }
+                } catch (puterErr) {
+                    console.warn('Puter AI chat failed, using server response:', puterErr);
+                }
+            }
+
             const ind = document.getElementById('news-chat-typing');
             if (ind) ind.remove();
-            
-            if (res.success && res.reply) {
+
+            if (res && res.success && res.reply) {
                 appendChatMessage('assistant', res.reply);
                 newsChatHistory.push({ role: 'user', text });
                 newsChatHistory.push({ role: 'assistant', text: res.reply });
             } else {
-                appendChatMessage('assistant', res.error || "Sorry, I encountered an issue generating a response.");
+                appendChatMessage('assistant', res?.error || "For assistance regarding this article, you may reach the Sta. Cruz Police Station desk at (049) 501-5971 or 911.");
             }
         } catch (e) {
             console.error('Chat error:', e);
             const ind = document.getElementById('news-chat-typing');
             if (ind) ind.remove();
-            appendChatMessage('assistant', "Failed to connect to assistant service.");
+            appendChatMessage('assistant', "For assistance regarding this article, you may contact the Sta. Cruz Police Station desk at (049) 501-5971 or 911.");
         } finally {
             inputEl.disabled = false;
             inputEl.focus();
@@ -771,4 +811,30 @@
             }
         }
     });
+
+    // Touch Swipe Support for News Modal Media
+    (function initNewsModalSwipe() {
+        const container = document.getElementById('news-modal-media-container');
+        if (!container) return;
+        let startX = 0, startY = 0;
+        container.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+        container.addEventListener('touchend', (e) => {
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                const diffX = e.changedTouches[0].clientX - startX;
+                const diffY = e.changedTouches[0].clientY - startY;
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                    if (diffX < 0) {
+                        newsModalNext();
+                    } else {
+                        newsModalPrev();
+                    }
+                }
+            }
+        }, { passive: true });
+    })();
 </script>

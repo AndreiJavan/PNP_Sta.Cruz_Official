@@ -176,7 +176,7 @@ async function getValidUserId(providedId?: string): Promise<string | null> {
   }
 
   try {
-    if (providedId && providedId !== 'admin-bypass-id' && providedId !== 'system' && providedId !== 'admin') {
+    if (providedId) {
       const userDoc = await db.collection('users').doc(providedId).get();
       if (userDoc.exists) {
         cachedValidUserIds.add(providedId);
@@ -189,20 +189,13 @@ async function getValidUserId(providedId?: string): Promise<string | null> {
       for (const doc of snap.docs) {
         cachedValidUserIds.add(doc.id);
       }
-      const found = snap.docs.find((d: any) => d.id === providedId || d.id === 'superadmin' || d.data()?.username === 'superadmin' || d.data()?.username === 'admin');
+      const found = snap.docs.find((d: any) => d.id === providedId || d.data()?.role === 'superadmin');
       return found ? found.id : snap.docs[0].id;
     }
 
-    const hash = bcrypt.hashSync('admin123', 10);
-    const defaultUser = await db.collection('users').add({
-      username: 'superadmin',
-      full_name: 'Super Administrator',
-      password_hash: hash,
-      role: 'superadmin',
-      created_at: new Date().toISOString()
-    });
-    cachedValidUserIds.add(defaultUser.id);
-    return defaultUser.id;
+    // No hardcoded default superadmin insertion. Initial setup is handled securely via /admin/setup.
+    console.warn('[FK NOTICE] No administrative users currently provisioned in database.');
+    return null;
   } catch (err) {
     console.error('Error resolving valid user ID for FK constraint:', err);
     return null;
@@ -356,6 +349,176 @@ function cleanAndParseJSON(text: string) {
   }
 }
 
+/**
+ * Checks whether at least one Super Administrator account exists in the database.
+ * Caches positive results in memoryCache to prevent redundant queries once initialized.
+ */
+export async function hasSuperAdmin(): Promise<boolean> {
+  const cached = memoryCache.get<boolean>('system:has_superadmin');
+  if (typeof cached === 'boolean') {
+    return cached;
+  }
+
+  try {
+    const snap = await db.collection('users').where('role', '==', 'superadmin').limit(1).get();
+    const exists = !snap.empty;
+    if (exists) {
+      memoryCache.set('system:has_superadmin', true, 24 * 60 * 60 * 1000);
+    }
+    return exists;
+  } catch (err) {
+    console.error('[HAS_SUPERADMIN CHECK ERROR]:', err);
+    return false;
+  }
+}
+
+/**
+ * GET /admin/setup
+ * Renders the one-time master system initialization wizard.
+ * If a Super Administrator is already registered, displays a locked notice.
+ */
+export const getSetup = async (req: Request, res: Response) => {
+  try {
+    const superadminExists = await hasSuperAdmin();
+    if (superadminExists) {
+      return res.render('admin/setup_locked', {
+        title: 'Setup Disabled',
+        layout: false
+      });
+    }
+
+    const error_msg = (req.query.error as string) || null;
+    const requireSecret = Boolean(process.env.SETUP_SECRET_KEY);
+
+    return res.render('admin/setup', {
+      title: 'CPICRS System Initialization',
+      layout: false,
+      error_msg,
+      requireSecret
+    });
+  } catch (err: any) {
+    console.error('[SETUP CHECK ERROR]:', err);
+    return res.render('admin/login', {
+      title: 'Admin Login',
+      layout: false,
+      error_msg: 'Unable to verify system setup state.'
+    });
+  }
+};
+
+/**
+ * POST /admin/setup
+ * Registers the initial root Super Administrator account.
+ * Permanently locks setup once completed.
+ */
+export const postSetup = async (req: Request, res: Response) => {
+  try {
+    const superadminExists = await hasSuperAdmin();
+    if (superadminExists) {
+      return res.status(403).send('Initialization disabled. A Super Administrator already exists.');
+    }
+
+    const { full_name, email, username, password, confirm_password, setup_key } = req.body;
+
+    // Optional verification against server environment secret
+    if (process.env.SETUP_SECRET_KEY) {
+      if (!setup_key || setup_key.trim() !== process.env.SETUP_SECRET_KEY.trim()) {
+        return res.render('admin/setup', {
+          title: 'CPICRS System Initialization',
+          layout: false,
+          error_msg: 'Invalid Security Setup Key provided.',
+          requireSecret: true
+        });
+      }
+    }
+
+    // Input validations
+    if (!full_name || full_name.trim().length < 3) {
+      return res.render('admin/setup', {
+        title: 'CPICRS System Initialization',
+        layout: false,
+        error_msg: 'Please provide your full name & rank (minimum 3 characters).',
+        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
+      });
+    }
+
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      return res.render('admin/setup', {
+        title: 'CPICRS System Initialization',
+        layout: false,
+        error_msg: 'Please enter a valid official email address.',
+        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
+      });
+    }
+
+    const cleanUsername = (username || '').toLowerCase().trim();
+    if (!cleanUsername || cleanUsername.length < 3 || !/^[a-z0-9_.-]+$/.test(cleanUsername)) {
+      return res.render('admin/setup', {
+        title: 'CPICRS System Initialization',
+        layout: false,
+        error_msg: 'Username must be at least 3 characters and contain only letters, numbers, dots, or underscores.',
+        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
+      });
+    }
+
+    if (!password || password.length < 8) {
+      return res.render('admin/setup', {
+        title: 'CPICRS System Initialization',
+        layout: false,
+        error_msg: 'Master Password must be at least 8 characters long.',
+        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
+      });
+    }
+
+    if (password !== confirm_password) {
+      return res.render('admin/setup', {
+        title: 'CPICRS System Initialization',
+        layout: false,
+        error_msg: 'Master Password and Confirmation Password do not match.',
+        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
+      });
+    }
+
+    // Hash password and store in database
+    const hash = bcrypt.hashSync(password, 10);
+    const newAdmin = await db.collection('users').add({
+      username: cleanUsername,
+      full_name: full_name.trim(),
+      email: email.toLowerCase().trim(),
+      password_hash: hash,
+      role: 'superadmin',
+      status: 'active',
+      created_at: new Date().toISOString()
+    });
+
+    // Invalidate caches and lock setup
+    memoryCache.set('system:has_superadmin', true, 24 * 60 * 60 * 1000);
+    memoryCache.clearNamespace('users');
+    memoryCache.clearNamespace('personnel');
+
+    // Record system initialization audit trail
+    await db.collection('audit_logs').add({
+      admin_id: newAdmin.id,
+      username: cleanUsername,
+      action: 'SYSTEM_INITIALIZATION',
+      details: `Root Super Administrator initialized for ${cleanUsername} (${full_name.trim()}). Setup permanently locked.`,
+      timestamp: new Date().toISOString(),
+      created_at: new Date().toISOString()
+    });
+
+    console.log(`[SYSTEM INITIALIZATION SUCCESS] Root Superadmin created: ${cleanUsername}`);
+    return res.redirect('/admin/login?setup=success');
+  } catch (err: any) {
+    console.error('[SYSTEM SETUP FAILURE]:', err);
+    return res.render('admin/setup', {
+      title: 'CPICRS System Initialization',
+      layout: false,
+      error_msg: 'Database error during setup: ' + (err?.message || 'Please check database connection.'),
+      requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
+    });
+  }
+};
+
 export const getLogin = async (req: Request, res: Response) => {
   // If user is already authenticated (via session or durable auth token), DO NOT return to login!
   let user = req.session?.user;
@@ -374,11 +537,25 @@ export const getLogin = async (req: Request, res: Response) => {
     return res.redirect('/admin/dashboard');
   }
 
+  // Guide user to setup if no Super Administrator has been registered yet
+  try {
+    const superadminExists = await hasSuperAdmin();
+    if (!superadminExists) {
+      return res.redirect('/admin/setup');
+    }
+  } catch (err) {
+    console.warn('[LOGIN SETUP CHECK WARNING]:', err);
+  }
+
   let error_msg = null;
+  let success_msg = null;
   if (req.query.expired === '1') {
     error_msg = 'Your session has expired. Please sign in again.';
+  } else if (req.query.setup === 'success') {
+    success_msg = 'Super Administrator account registered successfully! You may now sign in.';
   }
-  return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg });
+
+  return res.render('admin/login', { title: 'Admin Login', layout: false, error_msg, success_msg });
 };
 
 export const postLogin = async (req: Request, res: Response) => {
@@ -3247,6 +3424,53 @@ export const deleteStationPersonnel = async (req: Request, res: Response) => {
   } catch (err) {
     console.error('[STATION PERSONNEL DELETE ERROR]', err);
     res.status(500).send('Error removing station personnel directory entry');
+  }
+};
+
+export const postChangePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = req.session?.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Session missing' });
+    }
+
+    const { current_password, new_password, confirm_password } = req.body;
+
+    if (!current_password || !new_password || !confirm_password) {
+      return res.status(400).json({ success: false, error: 'All fields are required.' });
+    }
+
+    if (new_password.length < 8) {
+      return res.status(400).json({ success: false, error: 'New password must be at least 8 characters long.' });
+    }
+
+    if (new_password !== confirm_password) {
+      return res.status(400).json({ success: false, error: 'New password and confirmation do not match.' });
+    }
+
+    const userDoc = await db.collection('users').doc(userId).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ success: false, error: 'User record not found.' });
+    }
+
+    const userData = userDoc.data() as any;
+    const isCurrentValid = bcrypt.compareSync(current_password, userData.password_hash);
+    if (!isCurrentValid) {
+      return res.status(400).json({ success: false, error: 'Current password is incorrect.' });
+    }
+
+    const newHash = bcrypt.hashSync(new_password, 10);
+    await db.collection('users').doc(userId).update({
+      password_hash: newHash,
+      updated_at: new Date().toISOString()
+    });
+
+    await logAction(req, 'PASSWORD_ROTATION', `Personnel ${userData.username} successfully rotated their account password.`);
+
+    return res.json({ success: true, message: 'Password rotated successfully.' });
+  } catch (err: any) {
+    console.error('[PASSWORD CHANGE ERROR]:', err);
+    return res.status(500).json({ success: false, error: 'Internal server error changing password.' });
   }
 };
 

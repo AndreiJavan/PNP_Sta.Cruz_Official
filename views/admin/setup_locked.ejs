@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <meta name="theme-color" content="#1A3A5C">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+
+    <title>Setup Locked - CPICRS Master Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        pnp: {
+                            blue: '#1A3A5C',
+                            gold: '#C8A415',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true' ||
+            (!('darkMode' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+
+<body
+    class="min-h-screen flex items-center justify-center p-4 py-12 relative overflow-y-auto transition-all duration-500 bg-cover bg-center bg-no-repeat"
+    style="background-image: linear-gradient(to bottom, rgba(26, 58, 92, 0.90), rgba(15, 23, 42, 0.97)), url('/images/stacruz_police_station.jpg');">
+
+    <div class="max-w-md w-full relative z-10">
+        <div class="bg-white dark:bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden border border-white/20 dark:border-slate-800 text-center p-10">
+            <!-- Locked Shield Icon -->
+            <div class="w-24 h-24 mx-auto mb-6 rounded-3xl bg-amber-500/10 text-pnp-gold border border-pnp-gold/30 flex items-center justify-center text-4xl shadow-inner">
+                <i class="fas fa-lock"></i>
+            </div>
+
+            <span class="inline-block px-3.5 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black uppercase tracking-widest mb-4">
+                System Already Initialized
+            </span>
+
+            <h1 class="text-2xl font-black uppercase tracking-tight text-pnp-blue dark:text-white mb-3">
+                Setup Portal Disabled
+            </h1>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium mb-8">
+                The primary Super Administrator account for Santa Cruz Municipal Police Station has already been established. To prevent unauthorized re-configuration and scraping, this setup wizard is permanently locked.
+            </p>
+
+            <div class="space-y-3">
+                <a href="/admin/login"
+                    class="w-full py-4 px-6 rounded-2xl bg-pnp-blue dark:bg-pnp-gold hover:bg-blue-900 dark:hover:bg-yellow-600 text-white dark:text-pnp-blue text-xs font-black uppercase tracking-wider transition shadow-xl flex items-center justify-center space-x-2">
+                    <i class="fas fa-arrow-right text-xs"></i>
+                    <span>Proceed to Admin Sign In</span>
+                </a>
+
+                <a href="/"
+                    class="block w-full py-3 px-6 rounded-2xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-600 dark:text-slate-300 text-[11px] font-bold uppercase tracking-wider transition">
+                    Return to Public Portal
+                </a>
+            </div>
+        </div>
+
+        <p class="text-center text-[10px] text-white/30 font-black uppercase tracking-widest mt-6">
+            &copy; 2026 PNP Sta. Cruz Municipal Police Station • Security Locked
+        </p>
+    </div>
+</body>
+
+</html>
