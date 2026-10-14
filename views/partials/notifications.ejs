@@ -63,8 +63,12 @@
                 title.textContent = t;
                 message.textContent = m;
                 confirmBtn.textContent = confirmText;
-                cancelBtn.textContent = cancelText;
-                cancelBtn.classList.remove('hidden');
+                cancelBtn.textContent = cancelText || '';
+                if (!cancelText) {
+                    cancelBtn.classList.add('hidden');
+                } else {
+                    cancelBtn.classList.remove('hidden');
+                }
 
                 // Tone adjustment
                 if (type === 'danger') {

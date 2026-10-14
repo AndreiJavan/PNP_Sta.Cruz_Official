@@ -974,6 +974,30 @@
             return false;
         }
 
+        const roleInput = document.getElementById('edit_role');
+        const statusInput = document.getElementById('edit_status');
+        const currentRole = roleInput ? roleInput.value.trim() : 'staff';
+        const currentStatus = statusInput ? statusInput.value.trim() : 'active';
+
+        // Check if user changed anything
+        if (window.originalUserData &&
+            (!password || password.trim() === '') &&
+            fullName === window.originalUserData.fullName &&
+            email === window.originalUserData.email &&
+            currentRole === window.originalUserData.role &&
+            currentStatus === window.originalUserData.status) {
+            
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'No Changes Detected',
+                message: 'No changes were made to this account. The record was not modified or reloaded.',
+                confirmText: 'Understood',
+                type: 'info'
+            });
+            closeEditUserModal();
+            return false;
+        }
+
         const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
         const confirmed = await confirmFn({
             title: 'Confirm Account Modifications',
@@ -1034,6 +1058,13 @@
         document.getElementById('edit_status').value = status || 'active';
         document.getElementById('edit_password').value = '';
         updateEditUserCounters();
+
+        window.originalUserData = {
+            fullName: (fullName || '').trim(),
+            email: (email || '').trim(),
+            role: (role || 'staff').trim(),
+            status: (status || 'active').trim()
+        };
 
         const modal = document.getElementById('editUserModal');
         modal.classList.remove('hidden');
@@ -1168,6 +1199,11 @@
         document.getElementById('edit_p_name').value = name;
         document.getElementById('edit_p_position').value = position;
 
+        window.originalPersonnelData = {
+            name: (name || '').trim(),
+            position: (position || '').trim()
+        };
+
         const modal = document.getElementById('editPersonnelModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -1196,6 +1232,22 @@
         const name = document.getElementById('edit_p_name').value.trim();
         const position = document.getElementById('edit_p_position').value.trim();
         if (!name || !position) return false;
+
+        // Check if officer details were changed
+        if (window.originalPersonnelData &&
+            name === window.originalPersonnelData.name &&
+            position === window.originalPersonnelData.position) {
+            
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'No Changes Detected',
+                message: 'No changes were made to this directory officer. The record was not modified or reloaded.',
+                confirmText: 'Understood',
+                type: 'info'
+            });
+            closeEditPersonnelModal();
+            return false;
+        }
 
         const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
         const confirmed = await confirmFn({

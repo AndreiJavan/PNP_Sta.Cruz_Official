@@ -550,6 +550,15 @@
         renderModalMediaGalleryGrid();
         updateModalCounters();
 
+        window.initialEditBulletinSnapshot = {
+            title: (pubType === 'url' ? (bulletin.title || '') : (bulletin.title || '')).trim(),
+            body: (pubType === 'url' ? (bulletin.body || '') : (bulletin.body || '')).trim(),
+            pubType: pubType,
+            category: (bulletin.category || '').trim(),
+            facebook_url: (bulletin.facebook_url || '').trim(),
+            mediaUrls: modalMediaItems.map(item => item.url)
+        };
+
         goToPublishStep(2);
 
         modal.classList.remove('hidden');
@@ -1363,6 +1372,42 @@
         }
 
         if (errorEl) errorEl.classList.add('hidden');
+
+        // Check if user changed anything during edit
+        if (currentModalMode === 'edit' && window.initialEditBulletinSnapshot) {
+            const isUrl = currentPublishType === 'url';
+            const curTitle = (titleVal || '').trim();
+            const curBody = (bodyVal || '').trim();
+            const curFbUrl = (isUrl ? fbUrlVal : '').trim();
+            const curCategory = (currentPublishType === 'news' || currentPublishType === 'url')
+                ? 'General Announcement'
+                : ((document.getElementById('publishCategoryAdvisory')?.value || '').trim());
+
+            const hasNewMedia = modalMediaItems.some(i => !i.isExisting || i.file);
+            const curMediaUrls = modalMediaItems.map(i => i.url);
+            const initMediaUrls = window.initialEditBulletinSnapshot.mediaUrls || [];
+            const mediaUnchanged = !hasNewMedia &&
+                curMediaUrls.length === initMediaUrls.length &&
+                curMediaUrls.every((u, i) => u === initMediaUrls[i]);
+
+            if (curTitle === window.initialEditBulletinSnapshot.title &&
+                curBody === window.initialEditBulletinSnapshot.body &&
+                currentPublishType === window.initialEditBulletinSnapshot.pubType &&
+                curCategory === window.initialEditBulletinSnapshot.category &&
+                curFbUrl === window.initialEditBulletinSnapshot.facebook_url &&
+                mediaUnchanged) {
+
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'No Changes Detected',
+                    message: 'No changes were made to this bulletin. The notice was not modified or reloaded.',
+                    confirmText: 'Understood',
+                    type: 'info'
+                });
+                closePublishNoticeModal();
+                return false;
+            }
+        }
 
         // Show Confirmation Modal
         openPublishConfirmationModal({

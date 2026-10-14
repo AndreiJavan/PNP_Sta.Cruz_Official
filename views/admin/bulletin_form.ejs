@@ -1529,6 +1529,43 @@
             if (mainBody) mainBody.value = urlBody;
         }
 
+        // Check if user changed anything during edit
+        if (isEditMode && window.initialStandaloneBulletinSnapshot) {
+            const curTitle = (isUrl ? document.getElementById('urlTitleInput')?.value : document.getElementById('titleInput')?.value || '').trim();
+            const curBody = (isUrl ? document.getElementById('urlBodyInput')?.value : document.getElementById('bodyInput')?.value || '').trim();
+            const curFbUrl = (isUrl ? document.getElementById('facebookUrlInput')?.value || '' : '').trim();
+            const curCategory = (currentPublishType === 'news' || currentPublishType === 'url')
+                ? 'General Announcement'
+                : ((document.getElementById('categorySelectAdvisory')?.value || '').trim());
+
+            const hasNewMedia = mediaItems.some(i => !i.isExisting || i.file);
+            const curMediaUrls = mediaItems.map(i => i.url);
+            const initMediaUrls = window.initialStandaloneBulletinSnapshot.mediaUrls || [];
+            const mediaUnchanged = !hasNewMedia &&
+                curMediaUrls.length === initMediaUrls.length &&
+                curMediaUrls.every((url, i) => url === initMediaUrls[i]);
+
+            const targetInitTitle = isUrl ? window.initialStandaloneBulletinSnapshot.urlTitle : window.initialStandaloneBulletinSnapshot.title;
+            const targetInitBody = isUrl ? window.initialStandaloneBulletinSnapshot.urlBody : window.initialStandaloneBulletinSnapshot.body;
+
+            if (curTitle === targetInitTitle &&
+                curBody === targetInitBody &&
+                currentPublishType === window.initialStandaloneBulletinSnapshot.pubType &&
+                curCategory === window.initialStandaloneBulletinSnapshot.category &&
+                curFbUrl === window.initialStandaloneBulletinSnapshot.facebook_url &&
+                mediaUnchanged) {
+
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'No Changes Detected',
+                    message: 'No changes were made to this bulletin. The notice was not modified or reloaded.',
+                    confirmText: 'Understood',
+                    type: 'info'
+                });
+                return false;
+            }
+        }
+
         const typeLabels = {
             'advisory': 'Public Advisory',
             'news': 'News & Release',
@@ -1660,6 +1697,19 @@
 
         if (detectedType === 'url' && initialFbUrl) {
             handleFacebookUrlInput(initialFbUrl);
+        }
+
+        if (isEditMode) {
+            window.initialStandaloneBulletinSnapshot = {
+                title: (document.getElementById('titleInput')?.value || '').trim(),
+                body: (document.getElementById('bodyInput')?.value || '').trim(),
+                urlTitle: (document.getElementById('urlTitleInput')?.value || '').trim(),
+                urlBody: (document.getElementById('urlBodyInput')?.value || '').trim(),
+                pubType: detectedType,
+                category: (document.getElementById('categorySelectAdvisory')?.value || '').trim(),
+                facebook_url: (document.getElementById('facebookUrlInput')?.value || '').trim(),
+                mediaUrls: mediaItems.map(item => item.url)
+            };
         }
     });
 </script>

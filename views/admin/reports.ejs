@@ -1306,6 +1306,18 @@
              filenameInput.value = targetReport.filename || 'Intelligence Batch';
          }
 
+         // Capture initial snapshot to detect if user changed anything
+         window.initialEditReportSnapshot = JSON.stringify({
+             filename: (targetReport.filename || 'Intelligence Batch').trim(),
+             entries: entries.map(e => ({
+                 barangay: (e.barangay || '').trim(),
+                 date_committed: (e.date_committed || e.date || '').trim(),
+                 offense: (e.offense || '').trim(),
+                 category: (e.category || '').trim(),
+                 description: (e.description || '').trim()
+             }))
+         });
+
          const isManual = (targetReport.category_stats?.entry_type === 'manual' || 
                            targetReport.filename === 'Manual Intelligence Session' || 
                            targetReport.filename === 'Manual Entry Session' || 
@@ -1616,6 +1628,31 @@
                  message: "A batch must contain at least one record to be saved.",
                  type: "warning"
              });
+             return;
+         }
+
+         // Check if user changed anything in the batch
+         const currentFilename = (document.getElementById('editBatchFilename')?.value || '').trim();
+         const currentEntries = (window.editReportData || []).map(e => ({
+             barangay: (e.barangay || '').trim(),
+             date_committed: (e.date_committed || e.date || '').trim(),
+             offense: (e.offense || '').trim(),
+             category: (e.category || '').trim(),
+             description: (e.description || '').trim()
+         }));
+         const currentSnapshot = JSON.stringify({
+             filename: currentFilename,
+             entries: currentEntries
+         });
+
+         if (window.initialEditReportSnapshot && currentSnapshot === window.initialEditReportSnapshot) {
+             await window.strategicAlert({
+                 title: "No Changes Detected",
+                 message: "No modifications were made to this batch. The record batch was not re-saved or reloaded.",
+                 confirmText: "Understood",
+                 type: "info"
+             });
+             window.closeEditReportModal();
              return;
          }
 
