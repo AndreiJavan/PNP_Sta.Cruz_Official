@@ -104,19 +104,156 @@
                                             day:'numeric', year:'numeric'}) %>
                                     </td>
                                     <td class="px-8 py-5 text-right">
-                                        <% if (u.role === 'superadmin') { %>
-                                            <span class="text-[8px] font-black text-pnp-blue/50 dark:text-slate-400 uppercase italic px-3 py-1.5 bg-pnp-blue/5 dark:bg-slate-800/50 rounded-lg border border-pnp-blue/10 dark:border-slate-700/50">Protected</span>
-                                        <% } else if (user && user.role === 'superadmin') { %>
-                                            <button type="button" onclick="openDeleteUserModal('<%= u.id %>', '<%= u.full_name %>')"
-                                                class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto shadow-sm">
-                                                <i class="fas fa-trash-alt text-[11px]"></i>
-                                            </button>
-                                        <% } else { %>
-                                            <span class="text-[8px] font-black text-slate-300 uppercase italic">Locked</span>
-                                        <% } %>
+                                        <div class="flex items-center justify-end space-x-2">
+                                            <% if (user && user.role === 'superadmin') { %>
+                                                <button type="button" 
+                                                    onclick="openEditUserModal('<%= u.id %>', '<%= (u.full_name || '').replace(/'/g, \"\\'\") %>', '<%= (u.email || '').replace(/'/g, \"\\'\") %>', '<%= u.role || 'staff' %>', '<%= u.status || 'active' %>')"
+                                                    class="w-10 h-10 rounded-xl bg-pnp-blue/10 dark:bg-pnp-blue/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white transition-all flex items-center justify-center shadow-sm"
+                                                    title="Edit Account Details">
+                                                    <i class="fas fa-edit text-[11px]"></i>
+                                                </button>
+                                            <% } %>
+                                            <% if (u.role === 'superadmin') { %>
+                                                <span class="text-[8px] font-black text-pnp-blue/50 dark:text-slate-400 uppercase italic px-3 py-2 bg-pnp-blue/5 dark:bg-slate-800/50 rounded-lg border border-pnp-blue/10 dark:border-slate-700/50">Protected</span>
+                                            <% } else if (user && user.role === 'superadmin') { %>
+                                                <button type="button" onclick="openDeleteUserModal('<%= u.id %>', '<%= (u.full_name || '').replace(/'/g, \"\\'\") %>')"
+                                                    class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
+                                                    title="Neutralize Account">
+                                                    <i class="fas fa-trash-alt text-[11px]"></i>
+                                                </button>
+                                            <% } else { %>
+                                                <span class="text-[8px] font-black text-slate-300 uppercase italic">Locked</span>
+                                            <% } %>
+                                        </div>
                                     </td>
                                 </tr>
                                 <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+    <!-- Station Personnel & Leadership Directory Management -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Add Directory Personnel Form -->
+        <div class="lg:col-span-1">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden h-full">
+                <div class="p-8 border-b border-gray-50 dark:border-slate-700 bg-gradient-to-r from-pnp-gold/10 to-transparent">
+                    <h3 class="font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.2em] text-[11px]">
+                        Add Directory Personnel</h3>
+                    <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Station Leadership & Public Officers
+                    </p>
+                </div>
+                <% if (user && user.role === 'superadmin') { %>
+                    <form action="/admin/personnel/add" method="POST" class="p-8 space-y-6">
+                        <div class="space-y-2">
+                            <label for="personnel_name"
+                                class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Rank & Full Name</label>
+                            <input type="text" name="name" id="personnel_name" required placeholder="e.g. PLT COL JUAN DELA CRUZ"
+                                class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all uppercase">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="personnel_position"
+                                class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Position / Designation</label>
+                            <input type="text" name="position" id="personnel_position" required placeholder="e.g. Chief of Police"
+                                class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label for="personnel_order"
+                                class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Display Order (Hierarchy)</label>
+                            <input type="number" name="display_order" id="personnel_order" min="1" max="99" value="<%= (typeof stationPersonnel !== 'undefined' && stationPersonnel ? stationPersonnel.length + 1 : 1) %>"
+                                class="w-full px-5 py-4 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                            <p class="text-[8px] text-gray-400 font-bold uppercase tracking-wider">Lowest numbers appear highest on the public directory.</p>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-pnp-gold hover:bg-yellow-600 text-pnp-blue font-black py-5 rounded-2xl shadow-xl shadow-pnp-gold/20 transition-all transform hover:scale-[1.02] active:scale-95 uppercase tracking-[0.3em] text-[10px]">
+                            Add to Directory
+                        </button>
+                    </form>
+                <% } else { %>
+                    <div class="p-8 py-20 text-center">
+                        <div class="w-16 h-16 bg-pnp-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-lock text-pnp-gold text-2xl"></i>
+                        </div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                            Administrator Access Required<br>
+                            <span class="text-[8px] opacity-60">Directory roster management is restricted to superadmins.</span>
+                        </p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Station Personnel Table -->
+        <div class="lg:col-span-2">
+            <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden h-full flex flex-col">
+                <div class="p-8 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center bg-gradient-to-r from-pnp-blue/5 to-transparent">
+                    <div>
+                        <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-[11px]">
+                            Station Directory Roster</h3>
+                        <p class="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Displayed on Public Portal Homepage</p>
+                    </div>
+                    <div class="bg-pnp-gold/20 px-3 py-1.5 rounded-xl border border-pnp-gold/30">
+                        <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold tracking-widest uppercase">
+                            <%= (typeof stationPersonnel !== 'undefined' && stationPersonnel) ? stationPersonnel.length : 0 %> Officers Listed
+                        </span>
+                    </div>
+                </div>
+                <div class="flex-grow overflow-x-auto">
+                    <table class="w-full text-left text-xs min-w-[600px]">
+                        <thead class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[9px] font-black tracking-[0.2em]">
+                            <tr>
+                                <th class="px-8 py-5 w-20 text-center">Order</th>
+                                <th class="px-8 py-5">Personnel Name & Rank</th>
+                                <th class="px-8 py-5">Designation / Position</th>
+                                <th class="px-8 py-5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50 dark:divide-slate-700/50">
+                            <% if (typeof stationPersonnel !== 'undefined' && stationPersonnel && stationPersonnel.length > 0) { %>
+                                <% stationPersonnel.forEach(p => { %>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/20 transition-colors">
+                                        <td class="px-8 py-5 text-center font-mono font-bold text-slate-400">
+                                            <span class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-900 inline-flex items-center justify-center font-black text-[10px] text-pnp-blue dark:text-pnp-gold">
+                                                <%= p.display_order || '-' %>
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5 font-black text-pnp-blue dark:text-white uppercase">
+                                            <%= p.name %>
+                                        </td>
+                                        <td class="px-8 py-5 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-tight text-[11px]">
+                                            <span class="px-3 py-1 bg-blue-50 dark:bg-slate-900/60 rounded-lg text-pnp-blue dark:text-pnp-gold border border-pnp-blue/10">
+                                                <%= p.position %>
+                                            </span>
+                                        </td>
+                                        <td class="px-8 py-5 text-right">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <% if (user && user.role === 'superadmin') { %>
+                                                    <button type="button"
+                                                        onclick="openEditPersonnelModal('<%= p.id %>', '<%= (p.name || '').replace(/'/g, \"\\'\") %>', '<%= (p.position || '').replace(/'/g, \"\\'\") %>', '<%= p.display_order || 0 %>')"
+                                                        class="w-10 h-10 rounded-xl bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-gold hover:text-pnp-blue transition-all flex items-center justify-center shadow-sm"
+                                                        title="Edit Directory Officer">
+                                                        <i class="fas fa-edit text-[11px]"></i>
+                                                    </button>
+                                                    <button type="button"
+                                                        onclick="openDeletePersonnelModal('<%= p.id %>', '<%= (p.name || '').replace(/'/g, \"\\'\") %>')"
+                                                        class="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm"
+                                                        title="Remove from Directory">
+                                                        <i class="fas fa-trash-alt text-[11px]"></i>
+                                                    </button>
+                                                <% } else { %>
+                                                    <span class="text-[8px] font-black text-slate-300 uppercase italic">Locked</span>
+                                                <% } %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="px-8 py-16 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">
+                                        No directory personnel registered yet.
+                                    </td>
+                                </tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>
@@ -337,6 +474,166 @@
     </div>
 </div>
 
+<!-- Edit User Modal -->
+<div id="editUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
+        <form id="editUserForm" method="POST" action="">
+            <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-blue/5 dark:bg-slate-800/40">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-pnp-blue/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold">
+                        <i class="fas fa-user-edit text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-widest">Update Personnel Account</h3>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Modify account attributes & status</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditUserModal()" class="w-10 h-10 bg-white dark:bg-slate-800 text-gray-400 hover:text-red-500 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-8 space-y-5">
+                <div class="space-y-2">
+                    <label for="edit_full_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Full Name</label>
+                    <input type="text" name="full_name" id="edit_full_name" required
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="edit_email" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Email Address</label>
+                    <input type="email" name="email" id="edit_email"
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label for="edit_role" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Role</label>
+                        <select name="role" id="edit_role"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                            <option value="staff">Staff</option>
+                            <option value="superadmin">Superadmin</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="edit_status" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Account Status</label>
+                        <select name="status" id="edit_status"
+                            class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <label for="edit_password" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Reset Password (Optional)</label>
+                    <input type="password" name="password" id="edit_password" placeholder="Leave blank to preserve current password"
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end space-x-4">
+                <button type="button" onclick="closeEditUserModal()" class="px-6 py-3 rounded-xl text-xs font-black text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-700 transition uppercase tracking-widest">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-pnp-blue text-white text-xs font-black uppercase tracking-widest hover:bg-blue-800 transition shadow-lg shadow-pnp-blue/20 flex items-center">
+                    <i class="fas fa-save mr-2"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Directory Personnel Modal -->
+<div id="editPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
+        <form id="editPersonnelForm" method="POST" action="">
+            <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-gold/10">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-pnp-gold/20 rounded-2xl flex items-center justify-center text-pnp-gold">
+                        <i class="fas fa-id-badge text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-slate-800 dark:text-white uppercase tracking-widest">Edit Directory Officer</h3>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mt-1">Station Leadership Roster</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeEditPersonnelModal()" class="w-10 h-10 bg-white dark:bg-slate-800 text-gray-400 hover:text-red-500 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-8 space-y-5">
+                <div class="space-y-2">
+                    <label for="edit_p_name" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Rank & Full Name</label>
+                    <input type="text" name="name" id="edit_p_name" required
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all uppercase">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="edit_p_position" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Position / Designation</label>
+                    <input type="text" name="position" id="edit_p_position" required
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="edit_p_order" class="text-[9px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-black">Display Order</label>
+                    <input type="number" name="display_order" id="edit_p_order" min="1" max="99" required
+                        class="w-full px-5 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-pnp-blue outline-none text-xs font-bold text-gray-700 dark:text-gray-300 transition-all">
+                </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end space-x-4">
+                <button type="button" onclick="closeEditPersonnelModal()" class="px-6 py-3 rounded-xl text-xs font-black text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-700 transition uppercase tracking-widest">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-pnp-blue text-white text-xs font-black uppercase tracking-widest hover:bg-blue-800 transition shadow-lg shadow-pnp-blue/20 flex items-center">
+                    <i class="fas fa-save mr-2"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Directory Personnel Modal -->
+<div id="deletePersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
+        <form id="deletePersonnelForm" method="POST" action="">
+            <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-red-50 dark:bg-red-900/10">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/10">
+                        <i class="fas fa-user-minus text-red-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Remove Officer</h3>
+                        <p class="text-[10px] text-red-400 font-bold uppercase tracking-[0.2em] mt-1">Directory Roster</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDeletePersonnelModal()" class="w-10 h-10 bg-white dark:bg-slate-800 text-gray-400 hover:text-red-500 rounded-xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-8">
+                <p class="text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider leading-relaxed">
+                    Are you sure you want to remove <span id="deletePersonnelTargetName" class="font-black text-pnp-blue dark:text-pnp-gold"></span> from the public station directory?
+                </p>
+            </div>
+
+            <div class="p-6 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-800 flex justify-end space-x-4">
+                <button type="button" onclick="closeDeletePersonnelModal()" class="px-6 py-3 rounded-xl text-xs font-black text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-700 transition uppercase tracking-widest">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-3 rounded-xl bg-red-500 text-white text-xs font-black uppercase tracking-widest hover:bg-red-600 transition shadow-lg shadow-red-500/20 flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Confirm Remove
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     function openUsersLogModal() {
         const modal = document.getElementById('usersLogModal');
@@ -351,6 +648,36 @@
 
     function closeUsersLogModal() {
         const modal = document.getElementById('usersLogModal');
+        modal.classList.add('opacity-0');
+        modal.children[0].classList.remove('scale-100');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function openEditUserModal(userId, fullName, email, role, status) {
+        document.getElementById('editUserForm').action = `/admin/users/${userId}/edit`;
+        document.getElementById('edit_full_name').value = fullName;
+        document.getElementById('edit_email').value = email || '';
+        document.getElementById('edit_role').value = role || 'staff';
+        document.getElementById('edit_status').value = status || 'active';
+        document.getElementById('edit_password').value = '';
+
+        const modal = document.getElementById('editUserModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        void modal.offsetWidth;
+        modal.classList.remove('opacity-0');
+        modal.children[0].classList.remove('scale-95');
+        modal.children[0].classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditUserModal() {
+        const modal = document.getElementById('editUserModal');
         modal.classList.add('opacity-0');
         modal.children[0].classList.remove('scale-100');
         modal.children[0].classList.add('scale-95');
@@ -381,6 +708,60 @@
 
     function closeDeleteUserModal() {
         const modal = document.getElementById('deleteUserModal');
+        modal.classList.add('opacity-0');
+        modal.children[0].classList.remove('scale-100');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function openEditPersonnelModal(id, name, position, displayOrder) {
+        document.getElementById('editPersonnelForm').action = `/admin/personnel/${id}/edit`;
+        document.getElementById('edit_p_name').value = name;
+        document.getElementById('edit_p_position').value = position;
+        document.getElementById('edit_p_order').value = displayOrder || 1;
+
+        const modal = document.getElementById('editPersonnelModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        void modal.offsetWidth;
+        modal.classList.remove('opacity-0');
+        modal.children[0].classList.remove('scale-95');
+        modal.children[0].classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeEditPersonnelModal() {
+        const modal = document.getElementById('editPersonnelModal');
+        modal.classList.add('opacity-0');
+        modal.children[0].classList.remove('scale-100');
+        modal.children[0].classList.add('scale-95');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = '';
+        }, 300);
+    }
+
+    function openDeletePersonnelModal(id, name) {
+        document.getElementById('deletePersonnelForm').action = `/admin/personnel/${id}/delete`;
+        document.getElementById('deletePersonnelTargetName').textContent = name;
+
+        const modal = document.getElementById('deletePersonnelModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        void modal.offsetWidth;
+        modal.classList.remove('opacity-0');
+        modal.children[0].classList.remove('scale-95');
+        modal.children[0].classList.add('scale-100');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDeletePersonnelModal() {
+        const modal = document.getElementById('deletePersonnelModal');
         modal.classList.add('opacity-0');
         modal.children[0].classList.remove('scale-100');
         modal.children[0].classList.add('scale-95');

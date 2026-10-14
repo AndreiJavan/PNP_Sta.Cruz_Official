@@ -230,6 +230,18 @@ CREATE TABLE IF NOT EXISTS public.anonymous_tips (
 );
 
 -- =====================================================
+-- STATION PERSONNEL & LEADERSHIP DIRECTORY
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.personnel (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  position TEXT NOT NULL,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =====================================================
 -- PERFORMANCE INDEXING (ADMIN & PUBLIC WORKLOADS)
 -- Run this section in Supabase SQL Editor to accelerate
 -- query responses and eliminate full table scans.
@@ -285,6 +297,9 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON public.users (role);
 CREATE INDEX IF NOT EXISTS idx_users_username ON public.users (username);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON public.users (created_at DESC);
 
+-- 11. Station Personnel Directory Indexes
+CREATE INDEX IF NOT EXISTS idx_personnel_display_order ON public.personnel (display_order ASC);
+
 -- =====================================================
 -- FIX FOR FOREIGN KEY CONSTRAINT WHEN DELETING USERS
 -- Run this block in your Supabase SQL Editor so you can 
@@ -305,6 +320,22 @@ ALTER TABLE public.audit_logs
   ADD CONSTRAINT audit_logs_admin_id_fkey 
     FOREIGN KEY (admin_id) REFERENCES public.users(id) ON DELETE SET NULL ON UPDATE CASCADE;
 
+-- =====================================================
+-- SEED INITIAL STATION PERSONNEL / DIRECTORY LEADERSHIP
+-- =====================================================
+INSERT INTO public.personnel (name, position, display_order)
+VALUES
+  ('PGEN JOSE MELENCIO C NARTATE JR', 'Chief PNP', 1),
+  ('PBGEN HANSEL M MARANTAN', 'Acting Regional Director', 2),
+  ('PCOL SANDRO JAY DC TAPALLA', 'Acting Provincial Director, Laguna PPO', 3),
+  ('PLT COL JOJO J SABENIANO', 'Chief of Police', 4),
+  ('PCPT GADY R MABANTO', 'Deputy Chief of Police', 5),
+  ('PCPT ANDY O MESANA', 'Chief Operation PCO', 6),
+  ('PLT ARIEL T GENTOLEO', 'Cadmin and Intelligence Section', 7),
+  ('PEMS MANOLITO M BINALAY', 'Mespo', 8)
+ON CONFLICT DO NOTHING;
+
 NOTIFY pgrst, 'reload schema';
+
 
 
