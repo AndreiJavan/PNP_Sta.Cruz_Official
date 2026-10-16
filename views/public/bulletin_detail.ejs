@@ -1,0 +1,270 @@
+<div class="max-w-4xl mx-auto px-4 py-12">
+    <div class="mb-8">
+        <a href="/" class="text-pnp-blue dark:text-pnp-gold font-bold hover:text-pnp-gold dark:hover:text-white flex items-center space-x-2 group">
+            <i class="fas fa-arrow-left text-xs group-hover:-translate-x-1 transition"></i>
+            <span>Back to Home</span>
+        </a>
+    </div>
+
+    <article class="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+        <% 
+            let mediaItems = [];
+            if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                bulletin.video_paths.forEach(function(path) {
+                    mediaItems.push({ type: 'video', path: path });
+                });
+            }
+            if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
+                bulletin.photo_paths.forEach(function(path) {
+                    mediaItems.push({ type: 'image', path: path });
+                });
+            } else if (bulletin.photo_path) {
+                mediaItems.push({ type: 'image', path: bulletin.photo_path });
+            }
+        %>
+        
+        <% if (mediaItems.length > 0) { %>
+            <div class="relative w-full h-64 md:h-96 overflow-hidden group bg-slate-100 dark:bg-slate-900" id="bulletinCarousel">
+                <% mediaItems.forEach(function(item, index) { %>
+                    <% if (item.type === 'image') { %>
+                        <img src="<%= item.path %>" alt="<%= bulletin.title %> - Image <%= index + 1 %>" class="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' %>" data-index="<%= index %>" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                    <% } else if (item.type === 'video') { %>
+                        <div class="absolute inset-0 w-full h-full flex items-center justify-center transition-opacity duration-500 ease-in-out bg-black <%= index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none' %>" data-index="<%= index %>">
+                            <video src="<%= item.path %>" controls class="w-full h-full object-contain" onclick="event.stopPropagation();"></video>
+                        </div>
+                    <% } %>
+                <% }); %>
+                
+                <% if (mediaItems.length > 1) { %>
+                    <!-- Carousel Controls -->
+                    <button onclick="moveCarousel(-1)" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-pnp-blue text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100 active:scale-90 focus:outline-none cursor-pointer" aria-label="Previous image">
+                        <i class="fas fa-chevron-left text-xs sm:text-base"></i>
+                    </button>
+                    <button onclick="moveCarousel(1)" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 bg-black/60 hover:bg-pnp-blue text-white w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center backdrop-blur-sm transition opacity-90 sm:opacity-0 sm:group-hover:opacity-100 active:scale-90 focus:outline-none cursor-pointer" aria-label="Next image">
+                        <i class="fas fa-chevron-right text-xs sm:text-base"></i>
+                    </button>
+                    <!-- Indicators -->
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full">
+                        <% mediaItems.forEach(function(_, index) { %>
+                            <button onclick="goToSlide(<%= index %>)" class="w-2.5 h-2.5 rounded-full transition-colors focus:outline-none <%= index === 0 ? 'bg-white' : 'bg-white/40 hover:bg-white/80' %>" data-indicator="<%= index %>"></button>
+                        <% }); %>
+                    </div>
+                <% } %>
+            </div>
+            
+            <% if (mediaItems.length > 1) { %>
+            <script>
+                let currentSlide = 0;
+                const totalSlides = <%= mediaItems.length %>;
+                
+                function updateCarousel() {
+                    const slides = document.querySelectorAll('#bulletinCarousel [data-index]');
+                    const indicators = document.querySelectorAll('#bulletinCarousel [data-indicator]');
+                    
+                    slides.forEach((slide, idx) => {
+                        if (idx === currentSlide) {
+                            slide.classList.replace('opacity-0', 'opacity-100');
+                            slide.classList.replace('z-0', 'z-10');
+                            slide.classList.remove('pointer-events-none');
+                        } else {
+                            slide.classList.replace('opacity-100', 'opacity-0');
+                            slide.classList.replace('z-10', 'z-0');
+                            slide.classList.add('pointer-events-none');
+                            const video = slide.querySelector('video');
+                            if (video) {
+                                video.pause();
+                            }
+                        }
+                    });
+                    
+                    indicators.forEach((ind, idx) => {
+                        if (idx === currentSlide) {
+                            ind.classList.add('bg-white');
+                            ind.classList.remove('bg-white/40', 'hover:bg-white/80');
+                        } else {
+                            ind.classList.remove('bg-white');
+                            ind.classList.add('bg-white/40', 'hover:bg-white/80');
+                        }
+                    });
+                }
+                
+                function moveCarousel(direction) {
+                    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+                    updateCarousel();
+                }
+                
+                function goToSlide(index) {
+                    currentSlide = index;
+                    updateCarousel();
+                }
+
+                // Touch Swipe Support
+                (function initCarouselSwipe() {
+                    const carousel = document.getElementById('bulletinCarousel');
+                    if (!carousel) return;
+                    let startX = 0, startY = 0;
+                    carousel.addEventListener('touchstart', (e) => {
+                        if (e.touches && e.touches.length > 0) {
+                            startX = e.touches[0].clientX;
+                            startY = e.touches[0].clientY;
+                        }
+                    }, { passive: true });
+                    carousel.addEventListener('touchend', (e) => {
+                        if (e.changedTouches && e.changedTouches.length > 0) {
+                            const diffX = e.changedTouches[0].clientX - startX;
+                            const diffY = e.changedTouches[0].clientY - startY;
+                            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                                if (diffX < 0) {
+                                    moveCarousel(1);
+                                } else {
+                                    moveCarousel(-1);
+                                }
+                            }
+                        }
+                    }, { passive: true });
+                })();
+            </script>
+            <% } %>
+        <% } %>
+        
+        <div class="p-8 md:p-12">
+            <div class="flex flex-wrap items-center gap-4 mb-8">
+                <% 
+                    const badgeColors = {
+                        'Wanted Person': 'bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-800/60',
+                        'Missing Person': 'bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/40 dark:text-orange-300 dark:border-orange-800/60',
+                        'Crime Advisory': 'bg-yellow-50 text-yellow-800 border border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-300 dark:border-yellow-800/60',
+                        'Recovered Property': 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-950/40 dark:text-green-300 dark:border-green-800/60',
+                        'General Announcement': 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-800/60'
+                    };
+                %>
+                <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-2xs <%= badgeColors[bulletin.category] || 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-700 dark:text-gray-300' %>">
+                    <%= bulletin.category %>
+                </span>
+                <span class="text-xs text-slate-500 dark:text-gray-400 font-bold uppercase tracking-widest flex items-center">
+                    <i class="far fa-calendar-alt mr-2"></i>
+                    <%= new Date(bulletin.created_at).toLocaleDateString('en-PH', { month: 'long', day: 'numeric', year: 'numeric' }) %>
+                </span>
+
+                <button type="button" id="translateArticleBtn" onclick="toggleArticleTranslation()" class="ml-auto px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md transition flex items-center space-x-2 cursor-pointer">
+                    <i class="fas fa-language text-sm text-amber-300"></i>
+                    <span id="translateBtnLabel">Isalin sa Tagalog (OpenRouter AI)</span>
+                </button>
+            </div>
+            
+            <h1 id="articleTitle" class="text-3xl md:text-5xl font-extrabold text-pnp-blue dark:text-pnp-gold mb-8 leading-tight"><%= bulletin.title %></h1>
+            
+            <div id="articleBody" class="prose prose-lg dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 leading-relaxed space-y-6">
+                <% bulletin.body.split('\n').forEach(para => { %>
+                    <p><%= para %></p>
+                <% }) %>
+            </div>
+
+            <script>
+                let originalTitle = <%- JSON.stringify(bulletin.title) %>;
+                let originalBody = <%- JSON.stringify(bulletin.body) %>;
+                let translatedTitle = '';
+                let translatedBody = '';
+                let isTranslated = false;
+
+                async function toggleArticleTranslation() {
+                    const btn = document.getElementById('translateArticleBtn');
+                    const label = document.getElementById('translateBtnLabel');
+                    const titleEl = document.getElementById('articleTitle');
+                    const bodyEl = document.getElementById('articleBody');
+
+                    if (isTranslated) {
+                        // Revert to original
+                        titleEl.innerText = originalTitle;
+                        renderParagraphs(originalBody);
+                        label.innerText = 'Isalin sa Tagalog (OpenRouter AI)';
+                        isTranslated = false;
+                        return;
+                    }
+
+                    if (translatedTitle && translatedBody) {
+                        // Use already fetched translation
+                        titleEl.innerText = translatedTitle;
+                        renderParagraphs(translatedBody);
+                        label.innerText = 'Show Original (English)';
+                        isTranslated = true;
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    label.innerText = 'Isinasalin sa Tagalog...';
+
+                    try {
+                        const fullText = `[TITLE]: ${originalTitle}\n\n[BODY]:\n${originalBody}`;
+                        const res = await fetch('/api/translate-tagalog', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text: fullText })
+                        });
+                        const data = await res.json();
+
+                        if (data.success && data.tagalogText) {
+                            const resText = data.tagalogText;
+                            const titleMatch = resText.match(/\[TITLE\]:\s*(.*)/i);
+                            const bodyMatch = resText.match(/\[BODY\]:\s*([\s\S]*)/i);
+
+                            if (titleMatch && titleMatch[1]) {
+                                translatedTitle = titleMatch[1].trim();
+                            } else {
+                                translatedTitle = resText.split('\n')[0];
+                            }
+
+                            if (bodyMatch && bodyMatch[1]) {
+                                translatedBody = bodyMatch[1].trim();
+                            } else {
+                                translatedBody = resText;
+                            }
+
+                            titleEl.innerText = translatedTitle;
+                            renderParagraphs(translatedBody);
+                            label.innerText = 'Show Original (English)';
+                            isTranslated = true;
+                        } else {
+                            alert('Translation temporarily unavailable. Please try again shortly.');
+                            label.innerText = 'Isalin sa Tagalog';
+                        }
+                    } catch (err) {
+                        console.error('Translation error:', err);
+                        alert('Error requesting AI translation.');
+                        label.innerText = 'Isalin sa Tagalog';
+                    } finally {
+                        btn.disabled = false;
+                    }
+                }
+
+                function renderParagraphs(text) {
+                    const bodyEl = document.getElementById('articleBody');
+                    bodyEl.innerHTML = '';
+                    text.split('\n').forEach(para => {
+                        if (para.trim()) {
+                            const p = document.createElement('p');
+                            p.innerText = para;
+                            bodyEl.appendChild(p);
+                        }
+                    });
+                }
+            </script>
+            
+            <div class="mt-12 pt-12 border-t border-gray-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-pnp-blue text-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Posted By</p>
+                        <p class="text-sm font-bold text-gray-800 dark:text-gray-200">PNP Sta. Cruz Admin</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Actions removed as per user request -->
+                </div>
+            </div>
+        </div>
+    </article>
+</div>

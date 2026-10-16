@@ -1710,7 +1710,7 @@ INPUT DATA STARTS BELOW:
 
     const boundedRecords = uniqueFlattened.map((item: any) => {
       let cleanOffense = String(item.offense || item.incident_type || '').trim();
-      if (cleanOffense.length > 100) cleanOffense = cleanOffense.substring(0, 100);
+      if (cleanOffense.length > 300) cleanOffense = cleanOffense.substring(0, 300);
       return {
         ...item,
         offense: cleanOffense
@@ -1771,13 +1771,13 @@ export const saveReportBatch = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
     }
 
-    if (offense.length > 100) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 100 characters limit.` });
+    if (offense.length > 300) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 300 characters limit.` });
     }
 
     const offenseWords = offense.split(/\s+/).filter(Boolean);
-    if (offenseWords.length > 15) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 15 words limit.` });
+    if (offenseWords.length > 50) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 50 words limit.` });
     }
 
     const category = entry.category || 'Non-Index';
@@ -3831,13 +3831,13 @@ export const updateReportBatch = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
     }
 
-    if (offense.length > 100) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 100 characters limit.` });
+    if (offense.length > 300) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 300 characters limit.` });
     }
 
     const offenseWords = offense.split(/\s+/).filter(Boolean);
-    if (offenseWords.length > 15) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 15 words limit.` });
+    if (offenseWords.length > 50) {
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 50 words limit.` });
     }
 
     const category = entry.category || 'Non-Index';

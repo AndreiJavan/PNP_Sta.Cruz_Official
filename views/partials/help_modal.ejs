@@ -4,14 +4,14 @@
     <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="toggleHelpModal()"></div>
 
     <!-- Modal Content -->
-    <div class="relative bg-white dark:bg-slate-800 w-full max-w-4xl h-[85vh] rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden flex flex-col transform transition-all scale-95 opacity-0 duration-300"
+    <div class="relative bg-white dark:bg-slate-800 w-full max-w-4xl h-[85vh] rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden flex flex-col transform transition-all scale-95 opacity-0 duration-300"
         id="helpModalContainer">
         <!-- Decoration -->
         <div class="absolute top-0 left-0 w-full h-1.5 bg-pnp-blue dark:bg-pnp-gold"></div>
 
         <!-- Header -->
         <div
-            class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50 flex-shrink-0">
+            class="p-8 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-gray-50 dark:bg-slate-900/50 flex-shrink-0">
             <div class="flex items-center space-x-4">
                 <div
                     class="w-14 h-14 bg-pnp-blue/10 dark:bg-pnp-gold/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold">
@@ -25,7 +25,7 @@
                 </div>
             </div>
             <button onclick="toggleHelpModal()"
-                class="w-10 h-10 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 transition-all border border-gray-200 dark:border-slate-700">
+                class="w-10 h-10 bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-500 rounded-xl flex items-center justify-center transition-all border border-slate-200 dark:bg-slate-800 dark:hover:bg-red-900/20 dark:text-slate-300 dark:border-slate-700 shadow-sm" title="Close Modal">
                 <i class="fas fa-times"></i>
             </button>
         </div>
