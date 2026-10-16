@@ -133,8 +133,8 @@
     <input type="hidden" name="category" id="deleteAllCategoryInput" value="All">
 </form>
 
-<!-- Confirmation Modal (Cancel / Confirm) -->
-<div id="confirmModal" class="fixed inset-0 z-[2050] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden transition-opacity duration-200">
+<!-- Confirmation Modal (Yes / No) -->
+<div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md hidden transition-opacity duration-200">
     <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 transform scale-95 transition-transform duration-200" id="confirmModalCard">
         <div class="flex items-start space-x-4">
             <div id="confirmModalIconBg" class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0">
@@ -152,10 +152,10 @@
 
         <div class="flex items-center justify-end space-x-3 pt-2 border-t border-gray-100 dark:border-slate-800">
             <button type="button" onclick="closeConfirmModal()" class="px-5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-black text-xs uppercase tracking-wider transition-all">
-                Cancel
+                No, Cancel
             </button>
             <button type="button" id="confirmModalYesBtn" class="px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-white shadow-lg transition-all flex items-center space-x-2">
-                <span>Confirm</span>
+                <span>Yes, Confirm</span>
             </button>
         </div>
     </div>
@@ -305,11 +305,9 @@
             iconBg: 'bg-emerald-500/10 text-emerald-500',
             title: 'Confirm Restore',
             message: `Are you sure you want to restore <span class="text-slate-800 dark:text-white font-black">"${itemTitle}"</span> back to active records?`,
-            yesText: 'Confirm',
+            yesText: 'Yes, Restore',
             yesClass: 'bg-emerald-600 hover:bg-emerald-700',
             onConfirm: () => {
-                const yesBtn = document.getElementById('confirmModalYesBtn');
-                if (yesBtn) { yesBtn.disabled = true; yesBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Processing...'; }
                 const form = document.getElementById('restoreForm');
                 form.action = `/admin/archive/${itemId}/restore`;
                 form.submit();
@@ -323,11 +321,9 @@
             iconBg: 'bg-red-500/10 text-red-500',
             title: 'Permanently Delete?',
             message: `Are you sure you want to permanently delete <span class="text-slate-800 dark:text-white font-black">"${itemTitle}"</span>? This action <strong class="text-red-500">cannot be undone</strong>.`,
-            yesText: 'Confirm',
+            yesText: 'Yes, Delete',
             yesClass: 'bg-red-600 hover:bg-red-700',
             onConfirm: () => {
-                const yesBtn = document.getElementById('confirmModalYesBtn');
-                if (yesBtn) { yesBtn.disabled = true; yesBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting...'; }
                 const form = document.getElementById('deleteForm');
                 form.action = `/admin/archive/${itemId}/permanent-delete`;
                 form.submit();
@@ -343,11 +339,7 @@
         });
 
         if (activeCount === 0) {
-            if (window.strategicAlert) {
-                window.strategicAlert({ title: 'Notice', message: 'No archived items available to delete in this category.' });
-            } else {
-                alert('No archived items available to delete in this category.');
-            }
+            alert('No archived items available to delete in this category.');
             return;
         }
 
@@ -358,11 +350,9 @@
             iconBg: 'bg-red-500/10 text-red-600',
             title: 'Delete All Archived Items?',
             message: `Are you sure you want to permanently delete <strong class="text-red-500 font-black">${activeCount} item(s)</strong> in ${categoryText}? This action <strong class="text-red-500">CANNOT BE UNDONE</strong>.`,
-            yesText: 'Confirm',
+            yesText: 'Yes, Delete All',
             yesClass: 'bg-red-600 hover:bg-red-700',
             onConfirm: () => {
-                const yesBtn = document.getElementById('confirmModalYesBtn');
-                if (yesBtn) { yesBtn.disabled = true; yesBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Deleting All...'; }
                 document.getElementById('deleteAllCategoryInput').value = currentCategory;
                 document.getElementById('deleteAllForm').submit();
             }

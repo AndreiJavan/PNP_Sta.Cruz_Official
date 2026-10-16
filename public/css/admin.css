@@ -33,15 +33,10 @@
     }
 }
 
-#sidebar {
-    z-index: var(--z-sidebar, 50);
-}
-
 #layoutHeader,
 #layoutFooter {
     left: 0;
     width: 100%;
-    z-index: var(--z-header, 40);
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                 transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -53,11 +48,6 @@
         left: 18rem;
         width: calc(100% - 18rem);
     }
-}
-
-/* Prevent parent stacking context clipping when modals are triggered */
-body.modal-open {
-    overflow: hidden !important;
 }
 
 /* ==========================================================================

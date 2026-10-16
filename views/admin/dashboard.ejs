@@ -437,16 +437,7 @@
     window.deletePoint = async function(id, event) {
         if (event) event.stopPropagation();
         
-        const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
-        const confirmed = await confirmFn({
-            title: 'Confirm Record Neutralization',
-            message: 'Are you sure you want to neutralize (delete) this tactical record? This item will be archived.',
-            confirmText: 'Confirm',
-            cancelText: 'Cancel',
-            type: 'danger'
-        });
-
-        if (confirmed) {
+        if (confirm('Are you sure you want to neutralize (delete) this tactical record?')) {
             try {
                 const res = await fetch(`/admin/map/${id}/delete`, { 
                     method: 'POST',
@@ -456,13 +447,11 @@
                 if (result.success) {
                     location.reload();
                 } else {
-                    const alertFn = window.strategicAlert || (({ message }) => alert(message));
-                    alertFn({ title: 'Operation Failed', message: result.message || 'Operation failed', type: 'danger' });
+                    alert('Command Failure: ' + (result.message || 'Operation failed'));
                 }
             } catch (err) {
                 console.error(err);
-                const alertFn = window.strategicAlert || (({ message }) => alert(message));
-                alertFn({ title: 'Connection Error', message: 'Protocol sequence interrupted', type: 'danger' });
+                alert('Connection error: Protocol sequence interrupted');
             }
         }
     };
@@ -1550,7 +1539,7 @@
 </script>
 
 <!-- Full Screen Strategic Analysis & Crime Trend Modal -->
-<div id="crimeTrendModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-5 lg:p-6 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300 overflow-y-auto" onclick="handleTrendModalBackdropClick(event)">
+<div id="crimeTrendModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 lg:p-6 bg-slate-950/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300 overflow-y-auto" onclick="handleTrendModalBackdropClick(event)">
     <div id="crimeTrendModalContent" class="relative w-full max-w-7xl max-h-[94vh] flex flex-col bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border border-gray-200 dark:border-slate-800 overflow-hidden transform scale-95 transition-transform duration-300" onclick="event.stopPropagation()">
         
         <!-- Modal Top Bar -->
