@@ -1,14 +1,14 @@
 <!-- Strategic Intelligence Notification System -->
-<div id="strategicAlert" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 animate-fade-in">
+<div id="strategicAlert" role="dialog" aria-modal="true" aria-labelledby="alertTitle" aria-describedby="alertMessage" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md"></div>
     
-    <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="alertContainer">
+    <div class="relative bg-white dark:bg-slate-800 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-700/80 overflow-hidden transform transition-all scale-95 opacity-0 duration-200" id="alertContainer">
         <!-- Decoration -->
         <div class="absolute top-0 left-0 w-full h-1.5 bg-pnp-blue dark:bg-pnp-gold"></div>
         
         <div class="p-8 space-y-6">
             <div class="flex items-center space-x-4">
-                <div id="alertIconContainer" class="w-14 h-14 bg-pnp-blue/10 dark:bg-pnp-gold/15 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold">
+                <div id="alertIconContainer" class="w-14 h-14 bg-pnp-blue/10 dark:bg-pnp-gold/15 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold shrink-0">
                     <i id="alertIcon" class="fas fa-shield-alt text-2xl"></i>
                 </div>
                 <div>
@@ -22,10 +22,10 @@
             </p>
             
             <div class="flex items-center space-x-3 pt-2">
-                <button id="alertCancelBtn" class="flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-500/10 transition-all border border-slate-200 dark:border-transparent">
+                <button id="alertCancelBtn" type="button" class="flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-500/10 transition-all border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400">
                     Cancel
                 </button>
-                <button id="alertConfirmBtn" class="flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95">
+                <button id="alertConfirmBtn" type="button" class="flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-pnp-gold">
                     Confirm
                 </button>
             </div>
@@ -47,8 +47,7 @@
         const icon = document.getElementById('alertIcon');
         const iconContainer = document.getElementById('alertIconContainer');
         
-        let activeCallback = null;
-        let activeCancelCallback = null;
+        let previousActiveElement = null;
 
         window.strategicConfirm = function(options) {
             return new Promise((resolve) => {
@@ -59,6 +58,8 @@
                     cancelText = 'Cancel',
                     type = 'info' // info, warning, danger
                 } = options;
+
+                previousActiveElement = document.activeElement;
 
                 title.textContent = t;
                 message.textContent = m;
@@ -72,52 +73,74 @@
 
                 // Tone adjustment
                 if (type === 'danger') {
-                    iconContainer.className = 'w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500';
+                    iconContainer.className = 'w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-500 shrink-0';
                     icon.className = 'fas fa-exclamation-triangle text-2xl';
-                    confirmBtn.className = 'flex-2 px-10 py-4 bg-red-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-red-500/20 transition-all hover:scale-[1.02] active:scale-95';
+                    confirmBtn.className = 'flex-2 px-10 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-red-500/20 transition-all hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-red-400';
                 } else if (type === 'warning') {
-                    iconContainer.className = 'w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500';
+                    iconContainer.className = 'w-14 h-14 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 shrink-0';
                     icon.className = 'fas fa-radiation text-2xl';
-                    confirmBtn.className = 'flex-2 px-10 py-4 bg-amber-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-95';
+                    confirmBtn.className = 'flex-2 px-10 py-4 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-amber-400';
                 } else {
-                    iconContainer.className = 'w-14 h-14 bg-pnp-blue/10 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold';
+                    iconContainer.className = 'w-14 h-14 bg-pnp-blue/10 dark:bg-pnp-gold/15 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold shrink-0';
                     icon.className = 'fas fa-shield-alt text-2xl';
-                    confirmBtn.className = 'flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95';
+                    confirmBtn.className = 'flex-2 px-10 py-4 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-pnp-blue/20 transition-all hover:scale-[1.02] active:scale-95 focus:outline-none focus:ring-2 focus:ring-pnp-gold';
                 }
 
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
+                document.body.classList.add('modal-open');
                 
                 setTimeout(() => {
                     container.classList.remove('scale-95', 'opacity-0');
                     container.classList.add('scale-100', 'opacity-100');
+                    confirmBtn.focus();
                 }, 10);
 
+                let isHandled = false;
+
                 const cleanup = () => {
+                    document.removeEventListener('keydown', onKeyDown);
                     container.classList.remove('scale-100', 'opacity-100');
                     container.classList.add('scale-95', 'opacity-0');
                     setTimeout(() => {
                         modal.classList.add('hidden');
                         modal.classList.remove('flex');
-                    }, 300);
+                        document.body.classList.remove('modal-open');
+                        if (previousActiveElement && typeof previousActiveElement.focus === 'function') {
+                            previousActiveElement.focus();
+                        }
+                    }, 200);
                     
                     confirmBtn.removeEventListener('click', onConfirm);
                     cancelBtn.removeEventListener('click', onCancel);
                 };
 
                 const onConfirm = () => {
+                    if (isHandled) return;
+                    isHandled = true;
                     cleanup();
                     resolve(true);
                 };
 
                 const onCancel = () => {
+                    if (isHandled) return;
+                    isHandled = true;
                     cleanup();
                     resolve(false);
                 };
 
+                const onKeyDown = (e) => {
+                    if (e.key === 'Escape' && cancelText) {
+                        e.preventDefault();
+                        onCancel();
+                    }
+                };
+
+                document.addEventListener('keydown', onKeyDown);
                 confirmBtn.addEventListener('click', onConfirm);
                 cancelBtn.addEventListener('click', onCancel);
             });
+        };
         };
 
         window.strategicAlert = function(options) {

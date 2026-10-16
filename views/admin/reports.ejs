@@ -177,7 +177,7 @@
 </div>
 
 <!-- Modal for raw data view (Polished Spreadsheet Style) -->
-<div id="reportDetailsModal" class="fixed inset-0 z-[1500] hidden items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
+<div id="reportDetailsModal" class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-900/90 backdrop-blur-md p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-[95vw] lg:max-w-7xl rounded-[3rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[95vh] animate-fade-in-up">
         <div class="p-8 border-b border-gray-100 dark:border-slate-700 flex justify-between items-center bg-gray-50/50 dark:bg-slate-900/50 relative overflow-hidden">
             <!-- Decorative Accent -->
@@ -1175,7 +1175,8 @@
          const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
              title: "Tactical Confirmation",
              message: `Commit ${reviewData.length} validated records to the CPICRS Central Database?`,
-             confirmText: "Sync Now",
+             confirmText: "Confirm",
+             cancelText: "Cancel",
              type: "info"
          });
          if (!confirmed) return;
@@ -2080,7 +2081,8 @@
         const confirmed = await window.strategicConfirm({
             title: "Archive Confirmation",
             message: "Are you sure you want to move this record to the Archive?",
-            confirmText: "Move to Archive",
+            confirmText: "Confirm",
+            cancelText: "Cancel",
             type: "warning"
         });
 

@@ -1,5 +1,5 @@
 <!-- Beginner's Instruction Guide Modal -->
-<div id="helpModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 sm:p-6 animate-fade-in">
+<div id="helpModal" class="fixed inset-0 z-[2500] hidden items-center justify-center p-4 sm:p-6 animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-md" onclick="toggleHelpModal()"></div>
 
@@ -18,7 +18,7 @@
                     <i class="fas fa-book text-2xl"></i>
                 </div>
                 <div>
-                    <h3 class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm lg:text-lg">
+                    <h3 id="helpModalTitle" class="font-black text-pnp-blue dark:text-white uppercase tracking-[0.2em] text-sm lg:text-lg">
                         Admin Operations Manual</h3>
                     <p class="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1">
                         Beginner's Guide to Sta. Cruz Crime Mapping Features</p>
@@ -209,6 +209,7 @@
         if (modal.classList.contains('hidden')) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            document.body.classList.add('modal-open');
             setTimeout(() => {
                 container.classList.remove('scale-95', 'opacity-0');
                 container.classList.add('scale-100', 'opacity-100');
@@ -219,7 +220,17 @@
             setTimeout(() => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+                document.body.classList.remove('modal-open');
             }, 300);
         }
     }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('helpModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                toggleHelpModal();
+            }
+        }
+    });
 </script>

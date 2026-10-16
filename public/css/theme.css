@@ -36,6 +36,17 @@
     --crime-8focus: #EF4444;
     --crime-nonindex: #64748B;
     --crime-psi: #3B82F6;
+
+    /* Stacking Context & Layering Tokens */
+    --z-dropdown: 20;
+    --z-sticky: 30;
+    --z-header: 40;
+    --z-sidebar: 50;
+    --z-modal-backdrop: 2000;
+    --z-modal: 2050;
+    --z-alert: 3000;
+    --z-toast: 4000;
+    --z-screen-guard: 99999;
 }
 
 /* ==========================================================================
@@ -220,18 +231,16 @@ button, a, input, select, textarea, [role="button"] {
 @keyframes fade-in {
     from {
         opacity: 0;
-        transform: translateY(10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
 @keyframes fade-in-up {
     from {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(16px);
     }
     to {
         opacity: 1;
@@ -267,11 +276,11 @@ button, a, input, select, textarea, [role="button"] {
 }
 
 .animate-fade-in {
-    animation: fade-in 0.8s ease-out forwards;
+    animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-fade-in-up {
-    animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
 }
 
@@ -291,4 +300,54 @@ button, a, input, select, textarea, [role="button"] {
     content: '';
     animation: dots-tactical 2s steps(4, end) infinite;
 }
+
+/* Standardized Modal Dialog Open/Close Micro-Transitions */
+.modal-enter {
+    opacity: 0;
+}
+.modal-enter-active {
+    opacity: 1;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-exit {
+    opacity: 1;
+}
+.modal-exit-active {
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.modal-box-enter {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+}
+.modal-box-enter-active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.modal-box-exit {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+.modal-box-exit-active {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1), opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ==========================================================================
+   Accessibility: Operating System Reduced Motion Support
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 

@@ -350,7 +350,7 @@
 </div>
 
 <!-- View All Users Audit Log Modal -->
-<div id="usersLogModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+<div id="usersLogModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-5xl mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col max-h-[85vh] transform scale-95 transition-transform duration-300">
         
         <!-- Modal Header -->
@@ -411,7 +411,7 @@
 </div>
 
 <!-- Delete User Modal -->
-<div id="deleteUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+<div id="deleteUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
         
         <form id="deleteUserForm" method="POST" action="" onsubmit="confirmDeleteUser(event)">
@@ -477,7 +477,7 @@
                     Cancel
                 </button>
                 <button type="submit" class="px-6 py-3 rounded-xl bg-red-500 text-white text-xs font-black uppercase tracking-widest hover:bg-red-600 transition shadow-lg shadow-red-500/20 flex items-center">
-                    <i class="fas fa-trash-alt mr-2"></i> Confirm Delete
+                    <i class="fas fa-trash-alt mr-2"></i> Confirm
                 </button>
             </div>
         </form>
@@ -485,7 +485,7 @@
 </div>
 
 <!-- Edit User Modal -->
-<div id="editUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+<div id="editUserModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
         <form id="editUserForm" method="POST" action="" onsubmit="confirmEditUser(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-blue/5 dark:bg-slate-800/40">
@@ -566,7 +566,7 @@
 </div>
 
 <!-- Add Directory Personnel Modal -->
-<div id="addPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+<div id="addPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
         <form id="addPersonnelForm" method="POST" action="/admin/personnel/add" onsubmit="confirmAddPersonnel(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-gold/10">
@@ -625,7 +625,7 @@
 </div>
 
 <!-- Edit Directory Personnel Modal -->
-<div id="editPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+<div id="editPersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
         <form id="editPersonnelForm" method="POST" action="" onsubmit="confirmEditPersonnel(event)">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-pnp-gold/10">
@@ -676,7 +676,7 @@
 </div>
 
 <!-- Delete Directory Personnel Modal -->
-<div id="deletePersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] hidden items-center justify-center opacity-0 transition-opacity duration-300">
+<div id="deletePersonnelModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[2000] hidden items-center justify-center opacity-0 transition-opacity duration-300">
     <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-md mx-4 overflow-hidden shadow-2xl border border-gray-100 dark:border-slate-800 flex flex-col transform scale-95 transition-transform duration-300">
         <form id="deletePersonnelForm" method="POST" action="">
             <div class="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between bg-red-50 dark:bg-red-900/10">
@@ -704,8 +704,8 @@
                 <button type="button" onclick="closeDeletePersonnelModal()" class="px-6 py-3 rounded-xl text-xs font-black text-gray-500 hover:bg-gray-200 dark:hover:bg-slate-700 transition uppercase tracking-widest">
                     Cancel
                 </button>
-                <button type="submit" class="px-6 py-3 rounded-xl bg-red-500 text-white text-xs font-black uppercase tracking-widest hover:bg-red-600 transition shadow-lg shadow-red-500/20 flex items-center">
-                    <i class="fas fa-trash-alt mr-2"></i> Confirm Remove
+                <button type="submit" id="deletePersonnelSubmitBtn" class="px-6 py-3 rounded-xl bg-red-500 text-white text-xs font-black uppercase tracking-widest hover:bg-red-600 transition shadow-lg shadow-red-500/20 flex items-center">
+                    <i class="fas fa-trash-alt mr-2"></i> Confirm
                 </button>
             </div>
         </form>
@@ -1039,12 +1039,17 @@
         const confirmed = await confirmFn({
             title: 'Confirm Account Neutralization',
             message: `Are you sure you want to deactivate and neutralize credentials for "${targetName}"?`,
-            confirmText: 'Neutralize Account',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             type: 'danger'
         });
 
         if (confirmed) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+            }
             form.submit();
         }
         return false;
@@ -1170,12 +1175,17 @@
         const confirmed = await confirmFn({
             title: 'Confirm Officer Registration',
             message: `Are you sure you want to add "${name}" with designation "${position}" to the Station Directory Roster? This change will reflect on the public portal.`,
-            confirmText: 'Yes, Register Officer',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             type: 'warning'
         });
 
         if (confirmed) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Registering...';
+            }
             form.submit();
         }
         return false;
@@ -1253,12 +1263,17 @@
         const confirmed = await confirmFn({
             title: 'Confirm Roster Modifications',
             message: `Are you sure you want to save changes to "${name}" (${position}) in the Station Directory Roster?`,
-            confirmText: 'Save Changes',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             type: 'warning'
         });
 
         if (confirmed) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            }
             form.submit();
         }
         return false;

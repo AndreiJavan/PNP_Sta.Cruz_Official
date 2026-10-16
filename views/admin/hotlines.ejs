@@ -161,7 +161,8 @@
             confirmed = await window.strategicConfirm({
                 title: 'Confirm Hotline Creation',
                 message: `Are you sure you want to save "${agencyName}" with contact number "${numVal}" under category "${catVal}" to the directory?`,
-                confirmText: 'Save Hotline',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'info'
             });
         } else {
@@ -169,6 +170,11 @@
         }
 
         if (confirmed) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+            }
             form.submit();
         }
         return false;
@@ -278,7 +284,8 @@
                 confirmed = await window.strategicConfirm({
                     title: 'Confirm Hotline Update',
                     message: `Are you sure you want to update the hotline for "${agencyName}" to number "${numVal}" and category "${catVal}"?`,
-                    confirmText: 'Update Hotline',
+                    confirmText: 'Confirm',
+                    cancelText: 'Cancel',
                     type: 'warning'
                 });
             } else {
