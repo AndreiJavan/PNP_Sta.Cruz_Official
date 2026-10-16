@@ -1,0 +1,43 @@
+/* ==========================================================================
+   CPICRS (Crime Mapping & Reporting System) - Public Community Portal Stylesheet
+   Navigation, Public Bulletins, Advisory Filter Bars, and Terms Modals
+   ========================================================================== */
+
+/* ==========================================================================
+   1. NAVIGATION & MOBILE DRAWER
+   ========================================================================== */
+
+#mobileMenu {
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* ==========================================================================
+   2. PUBLIC ADVISORY & BULLETIN CONTROLS
+   ========================================================================== */
+
+.category-pill-btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.category-pill-btn:hover {
+    transform: translateY(-1px);
+}
+
+.category-pill-btn:active {
+    transform: scale(0.97);
+}
+
+/* ==========================================================================
+   3. HERO & BANNER ENHANCEMENTS
+   ========================================================================== */
+
+.hero-gradient-overlay {
+    background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.92));
+}
+
+.hero-login-overlay {
+    background-image: linear-gradient(to bottom, rgba(26, 58, 92, 0.85), rgba(15, 23, 42, 0.95));
+}
+

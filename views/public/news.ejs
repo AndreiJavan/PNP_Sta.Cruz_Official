@@ -271,25 +271,6 @@
     </div>
 </div>
 
-<style>
-    .custom-modal-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(148, 163, 184, 0.5);
-        border-radius: 20px;
-    }
-    .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(71, 85, 105, 0.5);
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(148, 163, 184, 0.8);
-    }
-</style>
-
 <script>
     const newsDatabase = <%- JSON.stringify(newsList) %>;
     window.newsDatabase = newsDatabase;

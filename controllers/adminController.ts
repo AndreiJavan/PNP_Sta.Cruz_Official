@@ -2477,18 +2477,7 @@ export const getBulletins = async (req: Request, res: Response) => {
 };
 
 export const getCreateBulletin = (req: Request, res: Response) => {
-  const category = req.query.category as string || '';
-  const isPublic = !req.originalUrl.startsWith('/admin');
-  if (!isPublic) {
-    return res.redirect('/admin/bulletins?openModal=true');
-  }
-  res.render('admin/bulletin_form', {
-    title: 'New Bulletin',
-    bulletin: null,
-    defaultCategory: category,
-    layout: 'layouts/main',
-    isPublic: true
-  });
+  return res.redirect('/admin/bulletins?openModal=true');
 };
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
@@ -2666,15 +2655,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
 };
 
 export const getEditBulletin = async (req: Request, res: Response) => {
-  try {
-    const doc = await db.collection('bulletins').doc(req.params.id).get();
-    const d = doc.data();
-    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
-    res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin', isPublic: false });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading bulletin');
-  }
+  return res.redirect(`/admin/bulletins?openModal=true&editId=${req.params.id}`);
 };
 
 export const postEditBulletin = async (req: Request, res: Response) => {

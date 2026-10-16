@@ -322,7 +322,12 @@
         // Check query param to auto open modal if redirected
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('openModal') === 'true') {
-            openPublishNoticeModal();
+            const editId = urlParams.get('editId');
+            if (editId) {
+                openEditNoticeModal(editId);
+            } else {
+                openPublishNoticeModal();
+            }
         }
 
         const dropZone = document.getElementById('modalDropZone');

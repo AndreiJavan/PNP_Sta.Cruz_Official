@@ -1,0 +1,294 @@
+/* ==========================================================================
+   CPICRS (Crime Mapping & Reporting System) - Base Theme & Design Tokens
+   Official Platform Stylesheet for PNP Sta. Cruz, Laguna
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Brand Primary Palette */
+    --pnp-blue: #1A3A5C;
+    --pnp-blue-50: #EBF1F7;
+    --pnp-blue-100: #D1DEEB;
+    --pnp-blue-200: #A3BDD7;
+    --pnp-blue-300: #759CC3;
+    --pnp-blue-400: #477BAF;
+    --pnp-blue-500: #1A3A5C;
+    --pnp-blue-600: #152E4A;
+    --pnp-blue-700: #102237;
+    --pnp-blue-800: #0A1725;
+    --pnp-blue-900: #050B12;
+
+    /* Brand Accent Palette */
+    --pnp-gold: #C8A415;
+    --pnp-gold-50: #FAF7E8;
+    --pnp-gold-100: #F5F0D1;
+    --pnp-gold-200: #EBE1A3;
+    --pnp-gold-300: #E1D275;
+    --pnp-gold-400: #D7C347;
+    --pnp-gold-500: #C8A415;
+    --pnp-gold-600: #A08311;
+    --pnp-gold-700: #78620D;
+    --pnp-gold-800: #504109;
+    --pnp-gold-900: #282104;
+
+    /* Tactical Crime Status Tokens */
+    --crime-8focus: #EF4444;
+    --crime-nonindex: #64748B;
+    --crime-psi: #3B82F6;
+}
+
+/* ==========================================================================
+   Base Elements & Performance Resets
+   ========================================================================== */
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+button, a, input, select, textarea, [role="button"] {
+    touch-action: manipulation;
+}
+
+/* ==========================================================================
+   Brand Utility Classes
+   ========================================================================== */
+
+.bg-pnp-blue {
+    background-color: var(--pnp-blue) !important;
+}
+
+.text-pnp-blue {
+    color: var(--pnp-blue) !important;
+}
+
+.border-pnp-blue {
+    border-color: var(--pnp-blue) !important;
+}
+
+.bg-pnp-gold {
+    background-color: var(--pnp-gold) !important;
+}
+
+.text-pnp-gold {
+    color: var(--pnp-gold) !important;
+}
+
+.border-pnp-gold {
+    border-color: var(--pnp-gold) !important;
+}
+
+.pnp-gradient-blue {
+    background: linear-gradient(135deg, var(--pnp-blue) 0%, var(--pnp-blue-800) 100%) !important;
+}
+
+.text-shadow-tactical {
+    text-shadow: 0 0 20px rgba(200, 164, 21, 0.3);
+}
+
+/* ==========================================================================
+   Dark Mode Overrides
+   ========================================================================== */
+
+.dark .bg-gray-50 {
+    background-color: #0f172a;
+}
+
+.dark .bg-white {
+    background-color: #1e293b;
+}
+
+.dark .text-gray-800 {
+    color: #f1f5f9;
+}
+
+.dark .text-gray-700 {
+    color: #e2e8f0;
+}
+
+.dark .text-gray-600 {
+    color: #cbd5e1;
+}
+
+.dark .text-gray-500 {
+    color: #94a3b8;
+}
+
+.dark .text-gray-400 {
+    color: #64748b;
+}
+
+.dark .border-gray-100 {
+    border-color: #334155;
+}
+
+.dark .border-gray-200 {
+    border-color: #475569;
+}
+
+/* ==========================================================================
+   Scrollbar Normalization & Hiding
+   ========================================================================== */
+
+/* Universal Scrollbar Hiding (enforces clean, distraction-free tactical UI) */
+* {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+*::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Explicit class for elements needing scrollbar-free UX */
+.scrollbar-none {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+    display: none !important;
+}
+
+/* Modal and Content Custom Thin Scrollbar */
+.custom-scrollbar-thin::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar {
+    display: block !important;
+    width: 4px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(200, 164, 21, 0.25);
+    border-radius: 10px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(200, 164, 21, 0.5);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+/* Modal scrollbar */
+.custom-modal-scrollbar::-webkit-scrollbar {
+    display: block !important;
+    width: 6px;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.5);
+    border-radius: 20px;
+}
+
+.dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(71, 85, 105, 0.5);
+}
+
+.custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(148, 163, 184, 0.8);
+}
+
+/* ==========================================================================
+   Animations & Micro-interactions
+   ========================================================================== */
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce-slow {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes radar-ping {
+    0% { transform: scale(0.85); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(0.85); opacity: 0.5; }
+}
+
+@keyframes spin-tactical {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes dots-tactical {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 3s ease-in-out infinite;
+}
+
+.animate-radar-ping {
+    animation: radar-ping 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin-tactical {
+    animation: spin-tactical 1.2s linear infinite;
+}
+
+.loading-dots-tactical::after {
+    content: '';
+    animation: dots-tactical 2s steps(4, end) infinite;
+}
+

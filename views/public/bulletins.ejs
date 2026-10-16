@@ -26,14 +26,6 @@
     </div>
 </div>
 
-<style>
-    @keyframes fade-in {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
-</style>
-
 <div class="container mx-auto px-4 py-10 sm:py-16 md:py-20 <%= (category === 'Wanted Person' || category === 'Missing Person') ? 'pt-16 sm:pt-24' : '' %>">
     <!-- Category Pills & Date Filter Toolbar -->
     <% if (category !== 'Wanted Person' && category !== 'Missing Person') { %>
@@ -362,25 +354,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    .custom-modal-scrollbar::-webkit-scrollbar {
-        width: 6px;
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(148, 163, 184, 0.5);
-        border-radius: 20px;
-    }
-    .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(71, 85, 105, 0.5);
-    }
-    .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(148, 163, 184, 0.8);
-    }
-</style>
 
 <script>
     const bulletinsDatabase = <%- JSON.stringify(bulletins) %>;

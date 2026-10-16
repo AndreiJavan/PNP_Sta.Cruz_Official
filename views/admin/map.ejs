@@ -221,42 +221,6 @@
     </div>
 </div>
 
-<style>
-    .barangay-label-tooltip {
-        background: rgba(15, 23, 42, 0.75) !important;
-        backdrop-filter: blur(4px) !important;
-        -webkit-backdrop-filter: blur(4px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
-        color: #ffffff !important;
-        font-weight: 900 !important;
-        font-size: 9px !important;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8) !important;
-        text-align: center;
-        white-space: pre-wrap;
-        line-height: 1.2;
-        padding: 5px 8px !important;
-        z-index: 1000 !important;
-        transition: opacity 0.3s ease-in-out !important;
-    }
-
-    .barangay-label-tooltip::before,
-    .barangay-label-tooltip::after {
-        display: none !important;
-    }
-
-    .map-outside-mask {
-        opacity: 0.95;
-    }
-
-    .dark .leaflet-container {
-        background: #0f172a;
-    }
-</style>
-
 <script>
     function cycleBarangay(direction) {
         const select = document.getElementById('filterBarangay');
@@ -1771,56 +1735,3 @@
         setupListener('filterBarangay', () => loadMapPoints());
     });
 </script>
-
-<style>
-    .sidebar-hidden {
-        opacity: 0;
-        transform: scale(0.9) translateX(-20px);
-        pointer-events: none;
-    }
-
-    .sidebar-visible {
-        opacity: 1;
-        transform: scale(1) translateX(0);
-        pointer-events: auto;
-    }
-
-    /* Hide scrollbar for Sidebar */
-    #filterSidebar {
-        -ms-overflow-style: none;
-        /* IE and Edge */
-        scrollbar-width: none;
-        /* Firefox */
-    }
-
-    #filterSidebar::-webkit-scrollbar {
-        display: none;
-        /* Chrome, Safari and Opera */
-    }
-
-    .sidebar-scroll {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-
-    .sidebar-scroll::-webkit-scrollbar {
-        display: none;
-    }
-
-    .custom-scrollbar-thin::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .custom-scrollbar-thin::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .custom-scrollbar-thin::-webkit-scrollbar-thumb {
-        background: rgba(200, 164, 21, 0.2);
-        border-radius: 10px;
-    }
-
-    .custom-scrollbar-thin::-webkit-scrollbar-thumb:hover {
-        background: rgba(200, 164, 21, 0.4);
-    }
-</style>
