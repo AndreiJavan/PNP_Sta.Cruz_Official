@@ -200,6 +200,16 @@
 </div>
 
 <!-- Intelligence Review Modal (Polished Grid Spreadsheet Style) -->
+<style>
+  .no-calendar-picker::-webkit-calendar-picker-indicator,
+  .no-calendar-picker::-webkit-inner-spin-button {
+      display: none !important;
+      -webkit-appearance: none !important;
+  }
+  .no-calendar-picker {
+      -moz-appearance: textfield !important;
+  }
+</style>
 <div id="intelReviewModal" class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-900/95 backdrop-blur-xl p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-[95vw] lg:max-w-7xl rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden animate-fade-in-up flex flex-col h-[90vh] max-h-[90vh]">
         <div class="p-8 border-b border-gray-100 dark:border-slate-700 bg-pnp-blue/5 dark:bg-slate-900/50 flex flex-col lg:flex-row justify-between items-start lg:items-center space-y-4 lg:space-y-0 flex-shrink-0">
@@ -2599,4 +2609,42 @@
             </p>
         </div>
     </div>
+
+    <style>
+        @keyframes radar-ping {
+            0% { transform: scale(0.85); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.85); opacity: 0.5; }
+        }
+        @keyframes spin-tactical {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes dots-tactical {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+        .animate-radar-ping {
+            animation: radar-ping 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .animate-spin-tactical {
+            animation: spin-tactical 1.2s linear infinite;
+        }
+        .loading-dots-tactical::after {
+            content: '';
+            animation: dots-tactical 2s steps(4, end) infinite;
+        }
+        /* Absolute Override for Full Coverage */
+        #intelLoadingOverlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    </style>
 </div>

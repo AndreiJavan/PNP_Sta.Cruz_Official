@@ -294,11 +294,12 @@
             
             form.submit();
         } else {
+            // Store original HTML and values for cancel and no-change check
+            if (!window.hotlineOriginals) window.hotlineOriginals = {};
             const currentName = nameTd.innerText.trim();
             const currentNum = numTd.innerText.trim().replace(/\s/g, '');
             const currentCat = (catTd.getAttribute('data-category') || catTd.innerText || '').trim();
 
-            if (!window.hotlineOriginals) window.hotlineOriginals = {};
             window.hotlineOriginals[id] = {
                 nameHtml: nameTd.innerHTML,
                 numHtml: numTd.innerHTML,

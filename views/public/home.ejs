@@ -1266,4 +1266,62 @@
         });
     </script>
 
-    <!-- Additional Styles moved to external stylesheets (theme.css, components.css, map.css) -->    
+    <!-- Additional Styles for Micro-animations -->
+    <style>
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in-up {
+            animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        .home-barangay-label-tooltip {
+            background: rgba(15, 23, 42, 0.75) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            font-size: 8px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+            white-space: pre-wrap;
+            line-height: 1.2;
+            padding: 3px 6px !important;
+            z-index: 1000 !important;
+        }
+        .home-barangay-label-tooltip::before,
+        .home-barangay-label-tooltip::after {
+            display: none !important;
+        }
+
+        .custom-modal-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 0.5);
+            border-radius: 20px;
+        }
+        .dark .custom-modal-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(71, 85, 105, 0.5);
+        }
+        .custom-modal-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(148, 163, 184, 0.8);
+        }
+    </style>    

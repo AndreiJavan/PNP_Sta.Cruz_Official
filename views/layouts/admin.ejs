@@ -72,12 +72,116 @@
 
     <!-- Vercel Web Analytics -->
     <%- include('../partials/analytics') %>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-    <!-- External Modular Stylesheets -->
-    <link rel="stylesheet" href="/css/theme.css">
-    <link rel="stylesheet" href="/css/components.css">
-    <link rel="stylesheet" href="/css/admin.css">
-    <link rel="stylesheet" href="/css/map.css">
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .bg-pnp-blue {
+            background-color: #1A3A5C;
+        }
+
+        .text-pnp-blue {
+            color: #1A3A5C;
+        }
+
+        .bg-pnp-gold {
+            background-color: #C8A415;
+        }
+
+        .text-pnp-gold {
+            color: #C8A415;
+        }
+
+        .border-pnp-gold {
+            border-color: #C8A415;
+        }
+
+        /* Border utility fallback for border-gray-150 in both themes */
+        .border-gray-150 {
+            border-color: #e2e8f0;
+        }
+        .dark .border-gray-150 {
+            border-color: rgba(51, 65, 85, 0.6);
+        }
+
+        .pnp-gradient-blue {
+            background: linear-gradient(135deg, #1A3A5C 0%, #0A1725 100%);
+        }
+
+        .pnp-card {
+            @apply bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50 shadow-sm transition-all duration-300;
+        }
+
+        .pnp-card:hover {
+            @apply shadow-xl border-pnp-blue/20 transform -translate-y-1;
+        }
+
+        .pnp-glass {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pnp-glass-dark {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .text-shadow-tactical {
+            text-shadow: 0 0 20px rgba(200, 164, 21, 0.3);
+        }
+
+        .sidebar-item-active {
+            @apply bg-white/10 border-l-4 border-pnp-gold/80 shadow-[inset_-10px_0_20px_rgba(0, 0, 0, 0.1)];
+        }
+
+        /* Global scrollbar hiding */
+        * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        *::-webkit-scrollbar {
+            display: none !important;
+        }
+
+        /* Sidebar toggle states & flexible layout */
+        .sidebar-hidden {
+            transform: translateX(-100%);
+        }
+
+        .main-content-expanded {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        @media (min-width: 1024px) {
+            #sidebar:not(.sidebar-hidden) + #mainContent {
+                margin-left: 18rem;
+                /* w-72 matches aside width */
+                width: calc(100% - 18rem) !important;
+            }
+        }
+
+        #layoutHeader,
+        #layoutFooter {
+            left: 0;
+            width: 100%;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (min-width: 1024px) {
+            #sidebar:not(.sidebar-hidden) ~ #mainContent #layoutHeader,
+            #sidebar:not(.sidebar-hidden) ~ #mainContent #layoutFooter {
+                left: 18rem;
+                width: calc(100% - 18rem);
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
