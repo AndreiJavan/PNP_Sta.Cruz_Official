@@ -2062,20 +2062,22 @@ IMPORTANT: Keep each section brief and separate them with blank lines.`;
       const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
       for (const m of modelsToTry) {
         try {
-          aiResponse = await client.models.generateContent({
+          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI generation timeout')), 4000));
+          const generatePromise = client.models.generateContent({
             model: m,
             contents: prompt
           });
+          aiResponse = await Promise.race([generatePromise, timeoutPromise]);
           if (aiResponse && aiResponse.text) break;
         } catch (mErr: any) {
-          console.warn(`[AI TRENDS] Model ${m} failed:`, mErr?.message || mErr);
+          console.warn(`[AI TRENDS] Model ${m} failed or timed out:`, mErr?.message || mErr);
         }
       }
 
       if (aiResponse && aiResponse.text) {
         analysisText = aiResponse.text;
       } else {
-        throw new Error('All Gemini model attempts exhausted or rate limited.');
+        throw new Error('All Gemini model attempts exhausted or timed out.');
       }
     } catch (aiError: any) {
       console.info("AI Generation falling back to dynamic intelligence analysis:", aiError?.message || String(aiError));

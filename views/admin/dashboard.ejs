@@ -22,7 +22,6 @@
     if (typeof points !== 'undefined' && points) {
         safePoints = points;
     }
-
     let defaultYearVal = new Date().getFullYear();
     if (typeof defaultYear !== 'undefined' && defaultYear) {
         defaultYearVal = defaultYear;
@@ -32,18 +31,18 @@
     const uniqueBarangays = new Set(safePoints.map(p => p.barangay).filter(b => b));
     const uniqueBarangaysCount = uniqueBarangays.size;
 %>
-<!-- Top Section: Monthly Crime Trends & Strategic Directives -->
-<div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 sm:p-8 mb-8 transition-all hover:shadow-xl relative">
+<!-- Top Section: Monthly Crime Trends & Strategic Directives (Picture 1 Inspired Theme) -->
+<div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 sm:p-7 mb-7 transition-all relative">
     
     <!-- Header & Controls -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-gray-100 dark:border-slate-700/60 gap-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-6 border-b border-slate-100 dark:border-slate-700/60 gap-4">
         <div>
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-2xl bg-pnp-blue/10 dark:bg-pnp-gold/20 flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-pnp-blue/10 dark:border-pnp-gold/20 shadow-md shrink-0">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-xs shrink-0">
                     <i class="fas fa-chart-column text-base"></i>
                 </div>
                 <div>
-                    <h2 class="text-base sm:text-lg font-black text-pnp-blue dark:text-white uppercase tracking-wider">
+                    <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider">
                         Monthly Crime Trends
                     </h2>
                     <p id="trendScopeSubtitle" class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">
@@ -57,15 +56,15 @@
         <div class="flex flex-wrap items-center gap-3">
             <!-- Category Filter Legend Buttons -->
             <div class="flex items-center gap-1.5 flex-wrap">
-                <button type="button" onclick="toggleTrendDataset(0)" id="legend8Focus" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/30 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" onclick="toggleTrendDataset(0)" id="legend8Focus" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800/60 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
                     <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
                     <span>8-Focus</span>
                 </button>
-                <button type="button" onclick="toggleTrendDataset(1)" id="legendNonIndex" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" onclick="toggleTrendDataset(1)" id="legendNonIndex" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 hover:bg-blue-600 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
                     <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                     <span>Non-Index</span>
                 </button>
-                <button type="button" onclick="toggleTrendDataset(2)" id="legendPSI" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer">
+                <button type="button" onclick="toggleTrendDataset(2)" id="legendPSI" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 hover:bg-amber-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
                     <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
                     <span>PSI</span>
                 </button>
@@ -83,7 +82,7 @@
 
                     if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
                 %>
-                <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold cursor-pointer shadow-xs">
+                <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs">
                     <% availableYears.forEach(year => { %>
                         <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
                     <% }) %>
@@ -92,7 +91,7 @@
 
             <!-- Barangay Dropdown -->
             <div class="relative w-48 sm:w-56">
-                <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold cursor-pointer shadow-xs truncate">
+                <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs truncate">
                     <option value="ALL">ALL BARANGAYS</option>
                     <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
                         , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
@@ -107,42 +106,42 @@
             </div>
 
             <!-- Refresh AI Directives button -->
-            <button type="button" onclick="generateAITrends()" id="aiGenerateBtn" class="p-2 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 font-bold text-xs uppercase transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-xs" title="Refresh Directives Analysis">
+            <button type="button" onclick="generateAITrends()" id="aiGenerateBtn" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs uppercase transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-2xs" title="Refresh Directives Analysis">
                 <i class="fas fa-sync-alt text-xs"></i>
             </button>
         </div>
     </div>
 
     <!-- Main Section: Bar Graph (Left) & KPIs in 1 Column (Right) aligned to Bar Graph height -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch mb-7">
         <!-- Left: Bar Graph Canvas -->
-        <div class="lg:col-span-9 bg-gray-50/70 dark:bg-slate-900/40 rounded-3xl p-4 sm:p-5 border border-gray-100 dark:border-slate-800 flex flex-col justify-between">
+        <div class="lg:col-span-9 bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-4 sm:p-5 border border-slate-150 dark:border-slate-800 flex flex-col justify-between">
             <div class="relative w-full h-[340px] sm:h-[370px]">
                 <canvas id="crimeTrendChart"></canvas>
             </div>
         </div>
 
-        <!-- Right: 1 Column with Total Incidents, Peak Month, and Leading Offense (Aligned to graph height) -->
-        <div class="lg:col-span-3 flex flex-col justify-between gap-4">
+        <!-- Right: 1 Column with Total Incidents, Peak Month, and Leading Offense (MIMPA/Picture 1 inspired) -->
+        <div class="lg:col-span-3 flex flex-col justify-between gap-3.5">
             <!-- 1. Total Incidents Card -->
-            <div class="p-4 sm:p-5 bg-gray-50/80 dark:bg-slate-900/60 rounded-3xl border border-gray-100 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-2xs hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between mb-2">
+            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Total Incidents</span>
-                    <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0">
-                        <i class="fas fa-layer-group text-sm"></i>
+                    <div class="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <i class="fas fa-folder-open text-sm"></i>
                     </div>
                 </div>
                 <div>
-                    <span id="modalKpiTotal" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tabular-nums block">0</span>
+                    <span id="modalKpiTotal" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tabular-nums block tracking-tight">0</span>
                     <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mt-0.5">Recorded Cases</span>
                 </div>
             </div>
 
             <!-- 2. Peak Month Card -->
-            <div class="p-4 sm:p-5 bg-gray-50/80 dark:bg-slate-900/60 rounded-3xl border border-gray-100 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-2xs hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between mb-2">
+            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Peak Month</span>
-                    <div class="w-9 h-9 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
                         <i class="fas fa-arrow-trend-up text-sm"></i>
                     </div>
                 </div>
@@ -153,15 +152,15 @@
             </div>
 
             <!-- 3. Leading Offense Card -->
-            <div class="p-4 sm:p-5 bg-gray-50/80 dark:bg-slate-900/60 rounded-3xl border border-gray-100 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-2xs hover:shadow-md transition-shadow">
-                <div class="flex items-center justify-between mb-2">
+            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Leading Offense</span>
-                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                        <i class="fas fa-crosshairs text-sm"></i>
+                    <div class="w-9 h-9 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-500 flex items-center justify-center shrink-0">
+                        <i class="fas fa-bullseye text-sm"></i>
                     </div>
                 </div>
                 <div class="min-w-0">
-                    <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-pnp-blue dark:text-pnp-gold uppercase break-words leading-tight block" title="--">--</span>
+                    <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase break-words leading-tight block truncate" title="--">--</span>
                     <span id="modalKpiTopShare" class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-1">0% of total</span>
                 </div>
             </div>
@@ -169,30 +168,30 @@
     </div>
 
     <!-- Bottom Row of Container: Trend Analysis, Crime Pattern, and Strategic Directives Below Bar Graph & KPIs -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch pt-2 border-t border-gray-100 dark:border-slate-700/60">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch pt-2 border-t border-slate-100 dark:border-slate-700/60">
         
         <!-- 1. TREND ANALYSIS -->
-        <div id="modalCardTrend" class="p-5 rounded-2xl border border-blue-200 dark:border-blue-800/60 bg-gradient-to-br from-blue-50/80 to-slate-50/40 dark:from-blue-950/30 dark:to-slate-900/60 shadow-2xs transition-all hover:shadow-md flex flex-col justify-between">
+        <div id="modalCardTrend" class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-blue-200/60 dark:border-blue-800/40">
+                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 flex items-center justify-center text-sm shadow-xs shrink-0">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xs shrink-0">
                             <i class="fas fa-chart-line"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-blue-300">
+                            <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
                                 Trend Analysis
                             </h4>
-                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 block">
                                 Directional Trajectory
                             </span>
                         </div>
                     </div>
-                    <span id="modalTrendBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-100 text-blue-700 dark:bg-blue-900/80 dark:text-blue-200 border border-blue-300/50 dark:border-blue-700/50 shrink-0">
+                    <span id="modalTrendBadge" class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 shrink-0">
                         Evaluated
                     </span>
                 </div>
-                <div id="modalTrendText" class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                <div id="modalTrendText" class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
                     <div class="flex items-center gap-2 py-3 text-slate-400">
                         <div class="w-4 h-4 rounded-full border-2 border-blue-500 border-t-transparent animate-spin"></div>
                         <span class="text-xs uppercase tracking-widest font-bold">Computing trend direction...</span>
@@ -202,27 +201,27 @@
         </div>
 
         <!-- 2. CRIME PATTERN -->
-        <div id="modalCardPattern" class="p-5 rounded-2xl border border-amber-200 dark:border-amber-800/60 bg-gradient-to-br from-amber-50/80 to-slate-50/40 dark:from-amber-950/30 dark:to-slate-900/60 shadow-2xs transition-all hover:shadow-md flex flex-col justify-between">
+        <div id="modalCardPattern" class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-amber-200/60 dark:border-amber-800/40">
+                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-600 dark:text-amber-300 flex items-center justify-center text-sm shadow-xs shrink-0">
+                        <div class="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xs shrink-0">
                             <i class="fas fa-bullseye"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-900 dark:text-amber-300">
+                            <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
                                 Crime Pattern
                             </h4>
-                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 block">
                                 Concentration & Drivers
                             </span>
                         </div>
                     </div>
-                    <span id="modalPatternBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/80 dark:text-amber-200 border border-amber-300/50 dark:border-amber-700/50 shrink-0">
+                    <span id="modalPatternBadge" class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 shrink-0">
                         Identified
                     </span>
                 </div>
-                <div id="modalPatternText" class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                <div id="modalPatternText" class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
                     <div class="flex items-center gap-2 py-3 text-slate-400">
                         <div class="w-4 h-4 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"></div>
                         <span class="text-xs uppercase tracking-widest font-bold">Identifying crime patterns...</span>
@@ -232,27 +231,27 @@
         </div>
 
         <!-- 3. STRATEGIC DIRECTIVES -->
-        <div id="modalCardSuggestions" class="p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-50/80 to-slate-50/40 dark:from-emerald-950/30 dark:to-slate-900/60 shadow-2xs transition-all hover:shadow-md flex flex-col justify-between">
+        <div id="modalCardSuggestions" class="p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/60 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
             <div>
-                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-emerald-200/60 dark:border-emerald-800/40">
+                <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-sm shadow-xs shrink-0">
+                        <div class="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs shrink-0">
                             <i class="fas fa-shield-halved"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
+                            <h4 class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
                                 Strategic Directives
                             </h4>
-                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 block">
+                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 block">
                                 Tactical Suggestions
                             </span>
                         </div>
                     </div>
-                    <span id="modalSuggestionsBadge" class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-700 dark:bg-emerald-900/80 dark:text-emerald-200 border border-emerald-300/50 dark:border-emerald-700/50 shrink-0">
+                    <span id="modalSuggestionsBadge" class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 shrink-0">
                         Directives
                     </span>
                 </div>
-                <div id="modalSuggestionsText" class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">
+                <div id="modalSuggestionsText" class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
                     <div class="flex items-center gap-2 py-3 text-slate-400">
                         <div class="w-4 h-4 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
                         <span class="text-xs uppercase tracking-widest font-bold">Synthesizing recommendations...</span>
@@ -772,10 +771,19 @@
         // Initialize Distribution Chart
         updateDistributionChart(<%= defaultYearVal %>);
 
-        // Initialize bento details with overall (ALL) data
-        window.updateBentoDetails('ALL', <%= defaultYearVal %>);
+        // Instantly populate bar graph, top KPIs (Total Incidents, Peak Month, Leading Offense), bento stats, and distribution
+        if (typeof window.filterMonthlyTrends === 'function') {
+            window.filterMonthlyTrends();
+        } else {
+            window.updateBentoDetails('ALL', <%= defaultYearVal %>);
+        }
 
-        // Instantly invoke AI Trend diagnostics on load
+        // Instantly populate Trend Analysis, Crime Pattern, and Strategic Directives (0ms instant display)
+        if (typeof updateModalTrendsFromMarkdown === 'function') {
+            updateModalTrendsFromMarkdown(null, 'ALL', <%= defaultYearVal %>);
+        }
+
+        // Fetch AI Trend insights asynchronously in background with fallback
         if (typeof window.generateAITrends === 'function') {
             window.generateAITrends('ALL', <%= defaultYearVal %>);
         }
@@ -993,9 +1001,7 @@
     };
 
     window.generateAITrends = async function(selectedBrgy, selectedYear) {
-        const resultDiv = document.getElementById('aiAnalysisResult');
         const generateBtn = document.getElementById('aiGenerateBtn');
-        if (!resultDiv || !generateBtn) return;
 
         // If not passed, find the active value in the dropdowns
         if (!selectedBrgy) {
@@ -1007,65 +1013,36 @@
             selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
         }
 
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<i class="fas fa-spinner animate-spin text-[11px]"></i>';
-        
-        const displayName = selectedBrgy === 'ALL' ? 'ALL BARANGAYS' : selectedBrgy.toUpperCase();
+        if (generateBtn) {
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fas fa-spinner animate-spin text-xs"></i>';
+        }
 
-        resultDiv.innerHTML = `
-            <div class="flex items-center gap-3 py-2">
-                <div class="w-4 h-4 rounded-full border-2 border-pnp-blue dark:border-pnp-gold border-t-transparent animate-spin shrink-0"></div>
-                <div class="flex flex-col items-start">
-                    <p class="text-[10px] text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-widest animate-pulse">Generating Trend Analysis for ${selectedYear}...</p>
-                    <p class="text-[8px] text-slate-400 dark:text-slate-500 font-mono tracking-tighter">DATA CORRELATION IN PROGRESS</p>
-                </div>
-            </div>
-        `;
+        // Render immediate mathematical and operational indicators so user is never waiting
+        updateModalTrendsFromMarkdown(null, selectedBrgy, selectedYear);
 
         try {
-            const response = await fetch(`/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}&year=${selectedYear}`);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+            const response = await fetch(`/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}&year=${selectedYear}`, {
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
             const result = await response.json();
 
-            if (result.success) {
-                const rawMarkdown = result.analysis;
-                let parsedHtml = formatMarkdown(rawMarkdown);
-                resultDiv.innerHTML = `<div class="text-slate-700 dark:text-slate-300 font-sans text-xs leading-relaxed text-left">${parsedHtml}</div>`;
-                updateModalTrendsFromMarkdown(rawMarkdown);
+            if (result.success && result.analysis) {
+                updateModalTrendsFromMarkdown(result.analysis, selectedBrgy, selectedYear);
             } else {
-                resultDiv.innerHTML = `
-                    <div class="p-4 bg-gray-50 dark:bg-slate-800/40 border border-gray-100 dark:border-slate-700/50 rounded-2xl">
-                        <div class="flex items-center gap-2 mb-3 text-pnp-blue dark:text-pnp-gold">
-                            <i class="fas fa-shield-halved text-sm animate-pulse"></i>
-                            <span class="text-[10px] font-black uppercase tracking-wider">Local Analytical Sandbox Active</span>
-                        </div>
-                        <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                            Using localized mathematical projection models for ${selectedBrgy === 'ALL' ? 'Overall Barangays' : 'Barangay ' + selectedBrgy} in ${selectedYear}. The crime distribution trend is stable with consistent monitoring across all sectors.
-                        </p>
-                    </div>
-                `;
                 updateModalTrendsFromMarkdown(null, selectedBrgy, selectedYear);
             }
         } catch (err) {
-            console.error('AI Trends Fetch Error:', err);
-            resultDiv.innerHTML = `
-                <div class="p-4 bg-gray-50 dark:bg-slate-800/40 border border-gray-100 dark:border-slate-700/50 rounded-2xl">
-                    <div class="flex items-center gap-2 mb-3 text-pnp-blue dark:text-pnp-gold">
-                        <i class="fas fa-shield-halved text-sm animate-pulse"></i>
-                        <span class="text-[10px] font-black uppercase tracking-wider">Local Analytical Sandbox Active</span>
-                    </div>
-                    <p class="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
-                        Using localized mathematical projection models for ${selectedBrgy === 'ALL' ? 'Overall Barangays' : 'Barangay ' + selectedBrgy} in ${selectedYear}. The crime distribution trend is stable with consistent monitoring across all sectors.
-                    </p>
-                </div>
-            `;
+            console.warn('AI Trends Fetch (using local projection):', err);
             updateModalTrendsFromMarkdown(null, selectedBrgy, selectedYear);
         } finally {
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = '<i class="fas fa-sync-alt text-[11px]"></i>';
-            const modalRefreshBtn = document.getElementById('modalRefreshBtn');
-            if (modalRefreshBtn) {
-                modalRefreshBtn.disabled = false;
-                modalRefreshBtn.innerHTML = '<i class="fas fa-sync-alt text-xs"></i><span class="hidden sm:inline">Refresh</span>';
+            if (generateBtn) {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-sync-alt text-xs"></i>';
             }
         }
     };
