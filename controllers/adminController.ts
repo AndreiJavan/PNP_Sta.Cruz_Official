@@ -12,6 +12,7 @@ import { FacebookService } from '../utils/facebookService.js';
 import { classifyCategory } from '../utils/categoryClassifier.js';
 import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 import { getLockoutRemainingSeconds, recordFailedAttempt, clearFailedAttempts, formatLockoutDuration } from '../utils/loginSecurity.js';
+import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord } from '../utils/inputValidator.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -434,17 +435,19 @@ export const postSetup = async (req: Request, res: Response) => {
       }
     }
 
-    // Input validations
-    if (!full_name || full_name.trim().length < 3) {
+    // Input validations: Blank spaces and unworkable names prevention
+    const nameCheck = isValidPersonName(full_name, 3, 60);
+    if (!nameCheck.valid) {
       return res.render('admin/setup', {
         title: 'CPICRS System Initialization',
         layout: false,
-        error_msg: 'Please provide your full name & rank (minimum 3 characters).',
+        error_msg: nameCheck.error || 'Please provide a valid full name and rank.',
         requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
       });
     }
 
-    if (!email || !email.includes('@') || !email.includes('.')) {
+    const cleanEmail = normalizeWhitespace(email);
+    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.') || cleanEmail.length > 100) {
       return res.render('admin/setup', {
         title: 'CPICRS System Initialization',
         layout: false,
@@ -453,12 +456,12 @@ export const postSetup = async (req: Request, res: Response) => {
       });
     }
 
-    const cleanUsername = (username || '').toLowerCase().trim();
-    if (!cleanUsername || cleanUsername.length < 3 || !/^[a-z0-9_.-]+$/.test(cleanUsername)) {
+    const cleanUsername = normalizeWhitespace(username).toLowerCase();
+    if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 30 || !/^[a-z0-9_.-]+$/.test(cleanUsername)) {
       return res.render('admin/setup', {
         title: 'CPICRS System Initialization',
         layout: false,
-        error_msg: 'Username must be at least 3 characters and contain only letters, numbers, dots, or underscores.',
+        error_msg: 'Username must be at least 3 characters (letters, numbers, dots, or underscores only).',
         requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
       });
     }
@@ -1766,9 +1769,9 @@ export const saveReportBatch = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Timeline Date (${rawDate}) must be between 2024-01-01 and today.` });
     }
 
-    const offense = (entry.incident_type || entry.offense || '').trim();
+    const offense = normalizeWhitespace(entry.incident_type || entry.offense || '');
     if (!offense || offense.length < 2) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense cannot be empty or blank spaces (minimum 2 characters).` });
     }
 
     if (offense.length > 300) {
@@ -1778,6 +1781,13 @@ export const saveReportBatch = async (req: Request, res: Response) => {
     const offenseWords = offense.split(/\s+/).filter(Boolean);
     if (offenseWords.length > 50) {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 50 words limit.` });
+    }
+
+    for (const w of offenseWords) {
+      const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+        return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: "${w}" is unworkable or unrecognized as a valid crime classification.` });
+      }
     }
 
     const category = entry.category || 'Non-Index';
@@ -2530,18 +2540,15 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or attach image/video media for Public Advisories.`);
   }
 
-  // Validation 1: Title/Name character and word limits (Min 3 words, Max 30 words / 200 chars)
-  const cleanTitle = (title || '').trim();
-  const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
-  if (titleWords.length < 3) {
-    return res.status(400).send(`Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
-  }
-  if (cleanTitle.length > 200 || titleWords.length > 30) {
-    return res.status(400).send(`Validation Error: Title is too long (maximum 30 words / 200 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
+  // Validation 1: Title/Name character, word limits, and workable words check (Min 3 words, Max 30 words / 200 chars)
+  const cleanTitle = normalizeWhitespace(title);
+  const titleCheck = isValidTitleOrHeadline(cleanTitle, 3, 30, 200);
+  if (!titleCheck.valid) {
+    return res.status(400).send(`Validation Error: ${titleCheck.error}`);
   }
 
   // Validation 2: Body / Facebook URL
-  let cleanBody = (body || '').trim();
+  let cleanBody = normalizeWhitespace(body);
   if (isUrlPost) {
     if (!finalFacebookUrl) {
       return res.status(400).send('Validation Error: Facebook Post URL is required.');
@@ -2550,12 +2557,16 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       cleanBody = cleanTitle;
     }
   } else {
-    const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-    if (bodyWords.length < 5 || cleanBody.length < 15) {
-      return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+    const narrativeCheck = isValidNarrative(cleanBody, 15, 5000);
+    if (!narrativeCheck.valid) {
+      return res.status(400).send(`Validation Error: ${narrativeCheck.error}`);
     }
-    if (bodyWords.length > 500 || cleanBody.length > 5000) {
-      return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+    const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+    if (bodyWords.length < 5) {
+      return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words).`);
+    }
+    if (bodyWords.length > 500) {
+      return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words. Currently: ${bodyWords.length} words).`);
     }
   }
 
@@ -2706,24 +2717,25 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or remove the URL link to update this Public Advisory.`);
   }
 
-  // Validation 1: Title/Name character and word limits (Min 3 words, Max 30 words / 200 chars)
-  const cleanTitle = (title || '').trim();
-  const titleWords = cleanTitle.split(/\s+/).filter(Boolean);
-  if (titleWords.length < 3) {
-    return res.status(400).send(`Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
-  }
-  if (cleanTitle.length > 200 || titleWords.length > 30) {
-    return res.status(400).send(`Validation Error: Title is too long (maximum 30 words / 200 characters. Currently: ${titleWords.length} words / ${cleanTitle.length} characters).`);
+  // Validation 1: Title/Name character, word limits, and workable words check (Min 3 words, Max 30 words / 200 chars)
+  const cleanTitle = normalizeWhitespace(title);
+  const titleCheck = isValidTitleOrHeadline(cleanTitle, 3, 30, 200);
+  if (!titleCheck.valid) {
+    return res.status(400).send(`Validation Error: ${titleCheck.error}`);
   }
 
   // Validation 2: Body text length limiter (Min 5 words / 15 chars, Max 500 words / 5,000 chars)
-  const cleanBody = (body || '').trim();
-  const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-  if (bodyWords.length < 5 || cleanBody.length < 15) {
-    return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+  const cleanBody = normalizeWhitespace(body);
+  const narrativeCheck = isValidNarrative(cleanBody, 15, 5000);
+  if (!narrativeCheck.valid) {
+    return res.status(400).send(`Validation Error: ${narrativeCheck.error}`);
   }
-  if (bodyWords.length > 500 || cleanBody.length > 5000) {
-    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words / 5,000 characters. Currently: ${bodyWords.length} words / ${cleanBody.length} characters).`);
+  const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+  if (bodyWords.length < 5) {
+    return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words).`);
+  }
+  if (bodyWords.length > 500) {
+    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words. Currently: ${bodyWords.length} words).`);
   }
 
   try {
@@ -2986,7 +2998,20 @@ export const postMapPoint = async (req: Request, res: Response) => {
   try {
     const pin = MANUAL_PINS.find(p => p.name === barangay);
 
-    let finalOffense = incident_type || '';
+    const cleanIncidentType = normalizeWhitespace(incident_type);
+    if (!cleanIncidentType || cleanIncidentType.length < 2) {
+      return res.status(400).send('Validation Error: Incident type cannot be empty or blank spaces.');
+    }
+
+    const typeWords = cleanIncidentType.split(' ').filter(Boolean);
+    for (const w of typeWords) {
+      const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+        return res.status(400).send(`Validation Error: "${w}" in incident type is unworkable or unrecognized.`);
+      }
+    }
+
+    let finalOffense = cleanIncidentType;
     let category = 'Non-Index';
     
     if (typeof finalOffense === 'string') {
@@ -3087,18 +3112,33 @@ export const getHotlines = async (req: Request, res: Response) => {
 
 export const postHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
-  const trimmedName = (name || '').trim();
-  const trimmedNumber = (number || '').trim();
-  const trimmedCat = (category || '').trim();
+  const trimmedName = normalizeWhitespace(name);
+  const trimmedNumber = String(number || '').trim().replace(/\s+/g, '');
+  const trimmedCat = normalizeWhitespace(category);
 
   if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
     return res.status(400).send('Invalid agency name. Must be between 2 and 20 characters.');
   }
+  const nameWords = trimmedName.split(' ').filter(Boolean);
+  for (const w of nameWords) {
+    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+      return res.status(400).send(`Invalid agency name: "${w}" does not appear to be a valid organization name.`);
+    }
+  }
+
   if (!/^\d{3,11}$/.test(trimmedNumber)) {
     return res.status(400).send('Invalid hotline number. Must contain exact digits only (3 to 11 digits), no characters or spaces.');
   }
   if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 20) {
     return res.status(400).send('Invalid category. Must be between 2 and 20 characters.');
+  }
+  const catWords = trimmedCat.split(' ').filter(Boolean);
+  for (const w of catWords) {
+    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+      return res.status(400).send(`Invalid category: "${w}" does not appear to be a recognizable category name.`);
+    }
   }
 
   try {
@@ -3119,18 +3159,33 @@ export const postHotline = async (req: Request, res: Response) => {
 
 export const postEditHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
-  const trimmedName = (name || '').trim();
-  const trimmedNumber = (number || '').trim();
-  const trimmedCat = (category || '').trim();
+  const trimmedName = normalizeWhitespace(name);
+  const trimmedNumber = String(number || '').trim().replace(/\s+/g, '');
+  const trimmedCat = normalizeWhitespace(category);
 
   if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
     return res.status(400).send('Invalid agency name. Must be between 2 and 20 characters.');
   }
+  const nameWords = trimmedName.split(' ').filter(Boolean);
+  for (const w of nameWords) {
+    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+      return res.status(400).send(`Invalid agency name: "${w}" does not appear to be a valid organization name.`);
+    }
+  }
+
   if (!/^\d{3,11}$/.test(trimmedNumber)) {
     return res.status(400).send('Invalid hotline number. Must contain exact digits only (3 to 11 digits), no characters or spaces.');
   }
   if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 20) {
     return res.status(400).send('Invalid category. Must be between 2 and 20 characters.');
+  }
+  const catWords = trimmedCat.split(' ').filter(Boolean);
+  for (const w of catWords) {
+    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+      return res.status(400).send(`Invalid category: "${w}" does not appear to be a recognizable category name.`);
+    }
   }
 
   try {
@@ -3224,18 +3279,23 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const postUser = async (req: Request, res: Response) => {
   const { full_name, email, password } = req.body;
-  const trimmedName = (full_name || '').trim();
-  const trimmedEmail = (email || '').trim();
+  const trimmedName = normalizeWhitespace(full_name);
+  const trimmedEmail = normalizeWhitespace(email);
   const trimmedPassword = (password || '').trim();
 
-  // 🛡️ Letters and words limitation checks
-  const nameWords = trimmedName.split(/\s+/).filter(Boolean);
-  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 60 || nameWords.length > 6) {
-    return res.status(400).send('Validation Error: Full name must be between 2 and 60 characters and maximum 6 words.');
+  // 🛡️ Letters, spacing, and workable name validation
+  const nameCheck = isValidPersonName(trimmedName, 2, 60);
+  if (!nameCheck.valid) {
+    return res.status(400).send(`Validation Error: ${nameCheck.error}`);
   }
 
-  if (!trimmedEmail || trimmedEmail.length > 100) {
-    return res.status(400).send('Validation Error: Email address must not exceed 100 characters.');
+  const nameWords = trimmedName.split(/\s+/).filter(Boolean);
+  if (nameWords.length > 6) {
+    return res.status(400).send('Validation Error: Full name must not exceed 6 words.');
+  }
+
+  if (!trimmedEmail || !trimmedEmail.includes('@') || !trimmedEmail.includes('.') || trimmedEmail.length > 100) {
+    return res.status(400).send('Validation Error: A valid email address is required (maximum 100 characters).');
   }
 
   if (!trimmedPassword || trimmedPassword.length < 8 || trimmedPassword.length > 64) {
@@ -3465,14 +3525,23 @@ export const postStationPersonnel = async (req: Request, res: Response) => {
     }
 
     const { name, position } = req.body;
-    const trimmedName = (name || '').trim();
-    const trimmedPos = (position || '').trim();
+    const trimmedName = normalizeWhitespace(name);
+    const trimmedPos = normalizeWhitespace(position);
 
-    if (!trimmedName || trimmedName.length < 3 || trimmedName.length > 60) {
-      return res.status(400).send('Personnel name must be between 3 and 60 characters.');
+    const nameCheck = isValidPersonName(trimmedName, 3, 60);
+    if (!nameCheck.valid) {
+      return res.status(400).send(`Validation Error: ${nameCheck.error}`);
     }
+
     if (!trimmedPos || trimmedPos.length < 2 || trimmedPos.length > 60) {
-      return res.status(400).send('Position / Rank designation must be between 2 and 60 characters.');
+      return res.status(400).send('Validation Error: Position / Rank designation must be between 2 and 60 characters.');
+    }
+    const posWords = trimmedPos.split(' ').filter(Boolean);
+    for (const w of posWords) {
+      const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+        return res.status(400).send(`Validation Error: "${w}" in position designation does not appear to be a valid title or rank.`);
+      }
     }
 
     const orderNum = currentRoster.length + 1;
@@ -3518,14 +3587,23 @@ export const postEditStationPersonnel = async (req: Request, res: Response) => {
 
     const id = req.params.id;
     const { name, position } = req.body;
-    const trimmedName = (name || '').trim();
-    const trimmedPos = (position || '').trim();
+    const trimmedName = normalizeWhitespace(name);
+    const trimmedPos = normalizeWhitespace(position);
 
-    if (!trimmedName || trimmedName.length < 3 || trimmedName.length > 60) {
-      return res.status(400).send('Personnel name must be between 3 and 60 characters.');
+    const nameCheck = isValidPersonName(trimmedName, 3, 60);
+    if (!nameCheck.valid) {
+      return res.status(400).send(`Validation Error: ${nameCheck.error}`);
     }
+
     if (!trimmedPos || trimmedPos.length < 2 || trimmedPos.length > 60) {
-      return res.status(400).send('Position / Rank designation must be between 2 and 60 characters.');
+      return res.status(400).send('Validation Error: Position / Rank designation must be between 2 and 60 characters.');
+    }
+    const posWords = trimmedPos.split(' ').filter(Boolean);
+    for (const w of posWords) {
+      const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+        return res.status(400).send(`Validation Error: "${w}" in position designation does not appear to be a valid title or rank.`);
+      }
     }
 
     const targetIdx = activeStationPersonnel.findIndex(p => p.id === id);
@@ -3604,16 +3682,19 @@ export const postChangePassword = async (req: Request, res: Response) => {
     }
 
     const { current_password, new_password, confirm_password } = req.body;
+    const cleanCurrent = (current_password || '').trim();
+    const cleanNew = (new_password || '').trim();
+    const cleanConfirm = (confirm_password || '').trim();
 
-    if (!current_password || !new_password || !confirm_password) {
-      return res.status(400).json({ success: false, error: 'All fields are required.' });
+    if (!cleanCurrent || !cleanNew || !cleanConfirm) {
+      return res.status(400).json({ success: false, error: 'Password fields cannot be empty or blank spaces.' });
     }
 
-    if (new_password.length < 8) {
-      return res.status(400).json({ success: false, error: 'New password must be at least 8 characters long.' });
+    if (cleanNew.length < 8 || cleanNew.length > 64) {
+      return res.status(400).json({ success: false, error: 'New password must be between 8 and 64 characters long.' });
     }
 
-    if (new_password !== confirm_password) {
+    if (cleanNew !== cleanConfirm) {
       return res.status(400).json({ success: false, error: 'New password and confirmation do not match.' });
     }
 
@@ -3845,9 +3926,9 @@ export const updateReportBatch = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Timeline Date (${rawDate}) must be between 2024-01-01 and today.` });
     }
 
-    const offense = (entry.incident_type || entry.offense || '').trim();
+    const offense = normalizeWhitespace(entry.incident_type || entry.offense || '');
     if (!offense || offense.length < 2) {
-      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense must be at least 2 characters.` });
+      return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense cannot be empty or blank spaces (minimum 2 characters).` });
     }
 
     if (offense.length > 300) {
@@ -3857,6 +3938,13 @@ export const updateReportBatch = async (req: Request, res: Response) => {
     const offenseWords = offense.split(/\s+/).filter(Boolean);
     if (offenseWords.length > 50) {
       return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: Crime classification / offense exceeds 50 words limit.` });
+    }
+
+    for (const w of offenseWords) {
+      const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+        return res.status(400).json({ success: false, message: `Validation Error Row #${rowNum}: "${w}" is unworkable or unrecognized as a valid crime classification.` });
+      }
     }
 
     const category = entry.category || 'Non-Index';

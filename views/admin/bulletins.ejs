@@ -1330,8 +1330,27 @@
         const titleWords = titleVal.split(/\s+/).filter(Boolean);
         const bodyWords = bodyVal.split(/\s+/).filter(Boolean);
 
+        // Workable word checker
+        const isWorkableNoticeWord = (w) => {
+            const clean = w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+            if (!clean) return true;
+            if (/^(.)\1{3,}$/i.test(clean)) return false; // Repetitive letters e.g. aaaa
+            if (/(..+)\1{2,}/i.test(clean)) return false; // Repetitive pattern e.g. asdasd
+            const lettersOnly = clean.replace(/[^a-zA-Z]/g, '');
+            if (lettersOnly.length >= 5 && !/[aeiouyAEIOUY]/.test(lettersOnly)) return false;
+            if (/[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]{5,}/i.test(lettersOnly)) return false;
+            return true;
+        };
+
         if (!titleVal || titleWords.length < 3) {
-            if (errorText) errorText.textContent = `Validation Error: Title / Name must be at least 3 words long (currently: ${titleWords.length} words / ${titleVal.length} characters).`;
+            if (errorText) errorText.textContent = `Validation Error: Title / Name cannot be blank and must be at least 3 words long (currently: ${titleWords.length} words / ${titleVal.length} characters).`;
+            if (errorEl) errorEl.classList.remove('hidden');
+            return false;
+        }
+
+        const unworkableTitleWord = titleWords.find(w => !isWorkableNoticeWord(w));
+        if (unworkableTitleWord) {
+            if (errorText) errorText.textContent = `Validation Error: Title contains an invalid or unworkable word ("${unworkableTitleWord}"). Please enter a legitimate title.`;
             if (errorEl) errorEl.classList.remove('hidden');
             return false;
         }
@@ -1350,7 +1369,13 @@
             }
         } else {
             if (!bodyVal || bodyWords.length < 5 || bodyVal.length < 15) {
-                if (errorText) errorText.textContent = `Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words / ${bodyVal.length} characters).`;
+                if (errorText) errorText.textContent = `Validation Error: Bulletin body cannot be blank and must be at least 5 words / 15 characters long.`;
+                if (errorEl) errorEl.classList.remove('hidden');
+                return false;
+            }
+            const unworkableBodyWord = bodyWords.slice(0, 15).find(w => !isWorkableNoticeWord(w));
+            if (unworkableBodyWord) {
+                if (errorText) errorText.textContent = `Validation Error: Bulletin content contains an invalid or unworkable word ("${unworkableBodyWord}").`;
                 if (errorEl) errorEl.classList.remove('hidden');
                 return false;
             }

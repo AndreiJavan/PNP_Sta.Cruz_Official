@@ -883,20 +883,35 @@
         const emailInput = document.getElementById('email');
         const passInput = document.getElementById('password');
 
-        const fullName = (nameInput ? nameInput.value : '').trim();
+        const fullName = (nameInput ? nameInput.value : '').replace(/\s+/g, ' ').trim();
         const email = (emailInput ? emailInput.value : '').trim();
         const password = passInput ? passInput.value : '';
 
-        const nameWords = fullName.split(/\s+/).filter(Boolean);
+        const nameWords = fullName.split(' ').filter(Boolean);
         if (!fullName || fullName.length < 2 || fullName.length > 60 || nameWords.length > 6) {
             const alertFn = window.strategicAlert || (({ message }) => alert(message));
             alertFn({
                 title: 'Validation Notice',
-                message: 'Full Name must be between 2 and 60 letters and contain no more than 6 words.',
+                message: 'Full Name cannot be blank spaces (must be between 2 and 60 letters, maximum 6 words).',
                 confirmText: 'Understood',
                 type: 'warning'
             });
             return false;
+        }
+
+        // Workable words validation check
+        for (const w of nameWords) {
+            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'Validation Notice',
+                    message: `"${w}" does not appear to be a workable name or recognizable word.`,
+                    confirmText: 'Understood',
+                    type: 'warning'
+                });
+                return false;
+            }
         }
 
         if (!email || email.length > 100) {
@@ -1162,9 +1177,27 @@
     async function confirmAddPersonnel(event) {
         event.preventDefault();
         const form = document.getElementById('addPersonnelForm');
-        const name = document.getElementById('add_p_name').value.trim();
-        const position = document.getElementById('add_p_position').value.trim();
-        if (!name || !position) return false;
+        const name = (document.getElementById('add_p_name').value || '').replace(/\s+/g, ' ').trim();
+        const position = (document.getElementById('add_p_position').value || '').replace(/\s+/g, ' ').trim();
+        
+        if (!name || name.length < 3 || name.length > 60) {
+            alert('Personnel name cannot be blank spaces (must be between 3 and 60 characters).');
+            return false;
+        }
+
+        const nameWords = name.split(' ').filter(Boolean);
+        for (const w of nameWords) {
+            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                alert(`"${w}" does not appear to be a workable name or recognizable word.`);
+                return false;
+            }
+        }
+
+        if (!position || position.length < 2 || position.length > 60) {
+            alert('Position / Rank designation cannot be blank spaces (must be between 2 and 60 characters).');
+            return false;
+        }
 
         const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
         const confirmed = await confirmFn({
@@ -1229,9 +1262,27 @@
     async function confirmEditPersonnel(event) {
         event.preventDefault();
         const form = document.getElementById('editPersonnelForm');
-        const name = document.getElementById('edit_p_name').value.trim();
-        const position = document.getElementById('edit_p_position').value.trim();
-        if (!name || !position) return false;
+        const name = (document.getElementById('edit_p_name').value || '').replace(/\s+/g, ' ').trim();
+        const position = (document.getElementById('edit_p_position').value || '').replace(/\s+/g, ' ').trim();
+        
+        if (!name || name.length < 3 || name.length > 60) {
+            alert('Personnel name cannot be blank spaces (must be between 3 and 60 characters).');
+            return false;
+        }
+
+        const nameWords = name.split(' ').filter(Boolean);
+        for (const w of nameWords) {
+            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                alert(`"${w}" does not appear to be a workable name or recognizable word.`);
+                return false;
+            }
+        }
+
+        if (!position || position.length < 2 || position.length > 60) {
+            alert('Position / Rank designation cannot be blank spaces (must be between 2 and 60 characters).');
+            return false;
+        }
 
         // Check if officer details were changed
         if (window.originalPersonnelData &&

@@ -264,8 +264,47 @@
         }
 
         document.getElementById('setupForm').addEventListener('submit', function (e) {
-            const p1 = document.getElementById('password').value;
-            const p2 = document.getElementById('confirm_password').value;
+            const name = (document.getElementById('full_name').value || '').trim();
+            const email = (document.getElementById('email').value || '').trim();
+            const username = (document.getElementById('username').value || '').trim();
+            const p1 = (document.getElementById('password').value || '').trim();
+            const p2 = (document.getElementById('confirm_password').value || '').trim();
+
+            if (!name || name.length < 3) {
+                e.preventDefault();
+                alert('Full Name & Rank cannot be empty or blank spaces (min 3 characters).');
+                return;
+            }
+
+            // Unworkable / keyboard mash check
+            const words = name.split(/\s+/).filter(Boolean);
+            for (const w of words) {
+                const clean = w.replace(/[^a-zA-Z0-9]/g, '');
+                if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                    e.preventDefault();
+                    alert(`"${w}" does not appear to be a workable name or recognizable word.`);
+                    return;
+                }
+            }
+
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                e.preventDefault();
+                alert('Please enter a valid official email address.');
+                return;
+            }
+
+            if (!username || username.length < 3) {
+                e.preventDefault();
+                alert('Master Username cannot be blank spaces (min 3 characters).');
+                return;
+            }
+
+            if (!p1 || p1.length < 8) {
+                e.preventDefault();
+                alert('Master Password cannot be blank spaces (minimum 8 characters).');
+                return;
+            }
+
             if (p1 !== p2) {
                 e.preventDefault();
                 alert('Master Password and Confirmation Password do not match!');

@@ -107,23 +107,33 @@
         const numInput = document.getElementById('number');
         const catInput = document.getElementById('category');
 
-        const agencyName = nameInput ? nameInput.value.trim() : '';
-        const numVal = numInput ? numInput.value.trim() : '';
-        const catVal = catInput ? catInput.value.trim() : '';
+        const agencyName = nameInput ? nameInput.value.replace(/\s+/g, ' ').trim() : '';
+        const numVal = numInput ? numInput.value.trim().replace(/\s/g, '') : '';
+        const catVal = catInput ? catInput.value.replace(/\s+/g, ' ').trim() : '';
 
         // Agency name limitation check (2 to 20 characters)
         if (!agencyName || agencyName.length < 2 || agencyName.length > 20) {
             if (window.strategicAlert) {
                 await window.strategicAlert({
                     title: 'Invalid Agency Name',
-                    message: 'Agency name must be between 2 and 20 characters.',
+                    message: 'Agency name cannot be blank spaces (must be between 2 and 20 characters).',
                     type: 'danger'
                 });
             } else {
-                alert('Agency name must be between 2 and 20 characters.');
+                alert('Agency name cannot be blank spaces (must be between 2 and 20 characters).');
             }
             if (nameInput) nameInput.focus();
             return false;
+        }
+
+        const nameWords = agencyName.split(' ').filter(Boolean);
+        for (const w of nameWords) {
+            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                alert(`"${w}" does not appear to be a valid organization name.`);
+                if (nameInput) nameInput.focus();
+                return false;
+            }
         }
 
         // Contact number limitation check (exact 3 to 11 digits)
@@ -146,15 +156,26 @@
             if (window.strategicAlert) {
                 await window.strategicAlert({
                     title: 'Invalid Category',
-                    message: 'Category name must be between 2 and 20 characters.',
+                    message: 'Category cannot be blank spaces (must be between 2 and 20 characters).',
                     type: 'danger'
                 });
             } else {
-                alert('Category name must be between 2 and 20 characters.');
+                alert('Category cannot be blank spaces (must be between 2 and 20 characters).');
             }
             if (catInput) catInput.focus();
             return false;
         }
+
+        const catWords = catVal.split(' ').filter(Boolean);
+        for (const w of catWords) {
+            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                alert(`"${w}" does not appear to be a recognizable category.`);
+                if (catInput) catInput.focus();
+                return false;
+            }
+        }
+
 
         let confirmed = false;
         if (window.strategicConfirm) {
@@ -202,9 +223,9 @@
             const numInput = numTd.querySelector('input');
             const catInput = catTd.querySelector('input');
 
-            const agencyName = nameInput ? nameInput.value.trim() : '';
-            const numVal = numInput ? numInput.value.trim() : '';
-            const catVal = catInput ? catInput.value.trim() : '';
+            const agencyName = nameInput ? nameInput.value.replace(/\s+/g, ' ').trim() : '';
+            const numVal = numInput ? numInput.value.trim().replace(/\s/g, '') : '';
+            const catVal = catInput ? catInput.value.replace(/\s+/g, ' ').trim() : '';
 
             // Check if user changed anything
             const orig = window.hotlineOriginals && window.hotlineOriginals[id];
@@ -232,14 +253,24 @@
                 if (window.strategicAlert) {
                     await window.strategicAlert({
                         title: 'Invalid Agency Name',
-                        message: 'Agency name must be between 2 and 20 characters.',
+                        message: 'Agency name cannot be blank spaces (must be between 2 and 20 characters).',
                         type: 'danger'
                     });
                 } else {
-                    alert('Agency name must be between 2 and 20 characters.');
+                    alert('Agency name cannot be blank spaces (must be between 2 and 20 characters).');
                 }
                 if (nameInput) nameInput.focus();
                 return;
+            }
+
+            const nameWords = agencyName.split(' ').filter(Boolean);
+            for (const w of nameWords) {
+                const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                    alert(`"${w}" does not appear to be a valid organization name.`);
+                    if (nameInput) nameInput.focus();
+                    return;
+                }
             }
 
             // Contact Number Limitation (3 to 11 digits only)
@@ -262,14 +293,24 @@
                 if (window.strategicAlert) {
                     await window.strategicAlert({
                         title: 'Invalid Category',
-                        message: 'Category name must be between 2 and 20 characters.',
+                        message: 'Category cannot be blank spaces (must be between 2 and 20 characters).',
                         type: 'danger'
                     });
                 } else {
-                    alert('Category name must be between 2 and 20 characters.');
+                    alert('Category cannot be blank spaces (must be between 2 and 20 characters).');
                 }
                 if (catInput) catInput.focus();
                 return;
+            }
+
+            const catWords = catVal.split(' ').filter(Boolean);
+            for (const w of catWords) {
+                const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
+                    alert(`"${w}" does not appear to be a recognizable category.`);
+                    if (catInput) catInput.focus();
+                    return;
+                }
             }
 
             // Confirmation before saving edits

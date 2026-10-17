@@ -1131,11 +1131,11 @@
              }
 
              // 3. Classification Check
-             const offenseVal = (r.offense || r.incident_type || '').trim();
+             const offenseVal = (r.offense || r.incident_type || '').replace(/\s+/g, ' ').trim();
              if (!offenseVal) {
                  await window.strategicAlert({
                      title: "Incomplete Classification",
-                     message: `Row #${rowNum}: Crime classification / offense is missing. Please enter or select a classification.`,
+                     message: `Row #${rowNum}: Crime classification / offense cannot be empty or blank spaces. Please enter or select a classification.`,
                      type: "warning"
                  });
                  return;
@@ -1159,7 +1159,7 @@
                  return;
              }
 
-             const offenseWords = offenseVal.split(/\s+/).filter(Boolean);
+             const offenseWords = offenseVal.split(' ').filter(Boolean);
              if (offenseWords.length > 50) {
                  await window.strategicAlert({
                      title: "Classification Word Limit Exceeded",
@@ -1167,6 +1167,19 @@
                      type: "warning"
                  });
                  return;
+             }
+
+             // Prevent unworkable names / made-up words in crime classification
+             for (const w of offenseWords) {
+                 const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                 if (cleanW.length >= 4 && !/[aeiouy]/i.test(cleanW)) {
+                     await window.strategicAlert({
+                         title: "Unworkable Classification Word",
+                         message: `Row #${rowNum}: "${w}" does not appear to be a workable or recognizable word.`,
+                         type: "warning"
+                     });
+                     return;
+                 }
              }
 
              // 4. Category Check
@@ -1719,11 +1732,11 @@
                  return;
              }
 
-             const offenseVal = (r.offense || r.incident_type || '').trim();
+             const offenseVal = (r.offense || r.incident_type || '').replace(/\s+/g, ' ').trim();
              if (!offenseVal || offenseVal.length < 2) {
                  await window.strategicAlert({
                      title: "Incomplete Classification",
-                     message: `Row #${rowNum}: Crime classification / offense must be at least 2 characters long.`,
+                     message: `Row #${rowNum}: Crime classification / offense cannot be empty or blank spaces (minimum 2 characters).`,
                      type: "warning"
                  });
                  return;
@@ -1738,7 +1751,7 @@
                  return;
              }
 
-             const editWords = offenseVal.split(/\s+/).filter(Boolean);
+             const editWords = offenseVal.split(' ').filter(Boolean);
              if (editWords.length > 50) {
                  await window.strategicAlert({
                      title: "Classification Word Limit Exceeded",
@@ -1746,6 +1759,18 @@
                      type: "warning"
                  });
                  return;
+             }
+
+             for (const w of editWords) {
+                 const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                 if (cleanW.length >= 4 && !/[aeiouy]/i.test(cleanW)) {
+                     await window.strategicAlert({
+                         title: "Unworkable Classification Word",
+                         message: `Row #${rowNum}: "${w}" does not appear to be a workable or recognizable word.`,
+                         type: "warning"
+                     });
+                     return;
+                 }
              }
 
              const categoryVal = r.category || 'Non-Index';

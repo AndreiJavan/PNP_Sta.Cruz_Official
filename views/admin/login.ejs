@@ -163,7 +163,7 @@
                     </div>
                 <% } %>
 
-                        <form action="/admin/login" method="POST" class="space-y-8">
+                        <form action="/admin/login" method="POST" class="space-y-8" onsubmit="return validateLoginForm(event)">
                             <div class="space-y-2">
                                 <label for="username"
                                     class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">Email Address</label>
@@ -242,6 +242,27 @@
                 eyeIcon.classList.remove('fa-eye-slash');
                 eyeIcon.classList.add('fa-eye');
             }
+        }
+
+        function validateLoginForm(e) {
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const cleanUser = (usernameInput.value || '').trim();
+            const cleanPass = (passwordInput.value || '').trim();
+
+            if (!cleanUser) {
+                alert('Email address cannot be empty or blank spaces.');
+                usernameInput.focus();
+                e.preventDefault();
+                return false;
+            }
+            if (!cleanPass) {
+                alert('Password cannot be empty or blank spaces.');
+                passwordInput.focus();
+                e.preventDefault();
+                return false;
+            }
+            return true;
         }
 
         // Initial icon state
