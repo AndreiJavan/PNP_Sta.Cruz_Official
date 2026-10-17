@@ -239,6 +239,22 @@
             </div>
         </div>
 
+        <!-- Top Error Notification Banner for Detected Issues -->
+        <div id="reviewModalErrorAlert" class="hidden px-8 py-4 bg-amber-500/10 dark:bg-amber-950/40 border-b border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-3 flex-shrink-0 animate-fade-in">
+            <div class="flex items-start md:items-center space-x-3">
+                <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-sm"></i>
+                </div>
+                <div>
+                    <h4 id="reviewModalErrorTitle" class="text-xs font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">Errors Detected in Staged Records</h4>
+                    <p id="reviewModalErrorDesc" class="text-[11px] font-bold text-amber-600/90 dark:text-amber-400/90 mt-0.5">Rows containing invalid Date, Sector (Barangay), or Crime Classification are sorted to the top and highlighted. Please review and correct them.</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <span id="reviewModalErrorBadge" class="px-3 py-1 rounded-lg bg-amber-500 text-slate-900 font-black text-[10px] uppercase tracking-wider">0 Issues Found</span>
+            </div>
+        </div>
+
         <div class="flex-grow overflow-auto p-6 bg-gray-50/50 dark:bg-slate-900/30 custom-scrollbar min-h-0">
             <div class="bg-white dark:bg-slate-800 rounded-3xl border border-gray-200 dark:border-slate-700 shadow-xl overflow-hidden">
                 <table class="w-full text-left border-collapse table-fixed">
@@ -613,29 +629,23 @@
             }
 
             // 2. Client-side Sorting & Verification Engine:
-            // Checks:
-            // - Sector / Barangay: Only Santa Cruz's 26 valid barangays allowed. If not recognized, cancel row sorting.
-            // - Timeline Date limitation: Must be between 2024-01-01 and present date (no earlier than 2024, no future dates).
-            // - Internal duplicate records detection: Remove identical rows within the scanned file.
+            // Checks each record for:
+            // - Sector / Barangay: Must match one of 26 Santa Cruz barangays
+            // - Timeline Date limitation: Must be between 2024-01-01 and present date
+            // - Crime Classification: Must be non-empty, 2-300 chars, <= 50 words, and contain workable words
+            // - Internal duplicate records detection within the file
 
             const todayStr = new Date().toISOString().split('T')[0];
-            const sortedRecords = [];
+            const processedRecords = [];
             const seenKeys = new Set();
-            const sortingReport = {
-                totalScanned: rawRecords.length,
-                duplicatesRemoved: 0,
-                cancelledBarangayErrors: [],
-                dateErrors: [],
-                validSortedCount: 0
-            };
+            let duplicatesFiltered = 0;
 
             rawRecords.forEach((item, idx) => {
-                const rowNum = idx + 1;
                 const rawLoc = String(item.barangay || item.location || '').trim();
-                const rawOff = String(item.offense || item.incident_type || '').replace(/\s+/g, ' ').trim() || 'Incident';
+                const rawOff = String(item.offense || item.incident_type || '').replace(/\s+/g, ' ').trim();
                 let rawDate = String(item.date_committed || item.date || '').trim();
 
-                // Barangay Validation (26 Santa Cruz Barangays only)
+                // Barangay Validation
                 const cleanLoc = rawLoc.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase();
                 const matchedBarangay = VALID_BARANGAYS.find(b => 
                     b.toLowerCase() === rawLoc.toLowerCase() ||
@@ -643,75 +653,68 @@
                     b.toLowerCase().includes(cleanLoc) ||
                     cleanLoc.includes(b.toLowerCase())
                 );
+                const isBarangayValid = !!matchedBarangay;
+                const assignedBarangay = matchedBarangay || rawLoc;
 
-                if (!matchedBarangay) {
-                    // Not included in the 26 barangays -> consider it as cancellation of sorting for this row
-                    sortingReport.cancelledBarangayErrors.push(`Row #${rowNum}: "${rawLoc || 'EMPTY'}" is not among Santa Cruz's 26 Barangays.`);
-                    return; // Skip/cancel this entry from sorting
-                }
-
-                // Date Validation: 2024 - present limitation
+                // Date Validation: 2024 - present
                 let formattedDate = rawDate.split('T')[0].split(' ')[0];
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(formattedDate) || isNaN(new Date(formattedDate).getTime())) {
-                    sortingReport.dateErrors.push(`Row #${rowNum}: Invalid date format "${rawDate}".`);
-                    return; // Cancel sorting for unparseable dates
+                let isDateValid = false;
+                if (/^\d{4}-\d{2}-\d{2}$/.test(formattedDate) && !isNaN(new Date(formattedDate).getTime())) {
+                    if (formattedDate >= '2024-01-01' && formattedDate <= todayStr) {
+                        isDateValid = true;
+                    }
+                }
+                if (!formattedDate) formattedDate = rawDate || 'INVALID-DATE';
+
+                // Crime Classification Validation
+                let isCrimeValid = false;
+                if (rawOff && rawOff.length >= 2 && rawOff.length <= 300) {
+                    const words = rawOff.split(' ').filter(Boolean);
+                    if (words.length <= 50) {
+                        const hasUnworkable = words.some(w => {
+                            const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                            return cleanW.length >= 4 && !/[aeiouy]/i.test(cleanW);
+                        });
+                        if (!hasUnworkable) isCrimeValid = true;
+                    }
                 }
 
-                if (formattedDate < '2024-01-01') {
-                    sortingReport.dateErrors.push(`Row #${rowNum}: Date (${formattedDate}) is prior to 2024 (Allowed: 2024-present).`);
-                    return; // Cancel sorting for dates prior to 2024
-                }
-
-                if (formattedDate > todayStr) {
-                    sortingReport.dateErrors.push(`Row #${rowNum}: Date (${formattedDate}) is in the future.`);
-                    return; // Cancel sorting for future dates
-                }
-
-                // Duplicate Entry Detection within the scanned file
+                // Duplicate Check within the file
                 const timeKey = item.time_committed ? String(item.time_committed).trim() : '';
-                const dupKey = `${matchedBarangay.toLowerCase()}|${formattedDate}|${timeKey}|${rawOff.toLowerCase()}`;
+                const dupKey = `${assignedBarangay.toLowerCase()}|${formattedDate}|${timeKey}|${rawOff.toLowerCase()}`;
                 if (seenKeys.has(dupKey)) {
-                    sortingReport.duplicatesRemoved++;
-                    return; // Skip duplicate record
+                    duplicatesFiltered++;
+                    return; // Filter out identical duplicate records from file
                 }
                 seenKeys.add(dupKey);
 
-                sortedRecords.push({
-                    barangay: matchedBarangay,
+                processedRecords.push({
+                    barangay: assignedBarangay,
                     date_committed: formattedDate,
                     time_committed: item.time_committed || null,
                     offense: rawOff.slice(0, 300),
                     category: item.category || 'Non-Index',
-                    description: item.description || ''
+                    description: item.description || '',
+                    _isBarangayValid: isBarangayValid,
+                    _isDateValid: isDateValid,
+                    _isCrimeValid: isCrimeValid
                 });
             });
 
-            sortingReport.validSortedCount = sortedRecords.length;
-
-            if (sortedRecords.length === 0) {
-                let errDetails = "All scanned records were rejected or cancelled:\n";
-                if (sortingReport.cancelledBarangayErrors.length > 0) {
-                    errDetails += `\n• Invalid Sectors/Barangays (${sortingReport.cancelledBarangayErrors.length} cancelled):\n  - ${sortingReport.cancelledBarangayErrors.slice(0, 4).join('\n  - ')}`;
-                    if (sortingReport.cancelledBarangayErrors.length > 4) errDetails += `\n  ...and ${sortingReport.cancelledBarangayErrors.length - 4} more.`;
-                }
-                if (sortingReport.dateErrors.length > 0) {
-                    errDetails += `\n• Date Limit Violations (${sortingReport.dateErrors.length} cancelled):\n  - ${sortingReport.dateErrors.slice(0, 4).join('\n  - ')}`;
-                    if (sortingReport.dateErrors.length > 4) errDetails += `\n  ...and ${sortingReport.dateErrors.length - 4} more.`;
-                }
-
+            if (processedRecords.length === 0) {
                 await window.strategicAlert({
-                    title: "Sorting Cancellation",
-                    message: errDetails,
-                    type: "danger"
+                    title: "No Records Found",
+                    message: "The document contains no records or only duplicate entries.",
+                    type: "warning"
                 });
                 return;
             }
 
-            // Save for review & staging
+            // Save file info and pass processed records to review modal
             lastProcessedFile = { name: file.name, size: file.size };
-            window.lastSortingReport = sortingReport;
+            window.lastDuplicatesFiltered = duplicatesFiltered;
 
-            showIntelReview(sortedRecords, file.name);
+            showIntelReview(processedRecords, file.name);
 
         } catch (error) {
             console.error("Sorting Engine Error:", error);
@@ -904,6 +907,58 @@
          modal.classList.add('flex');
      };
 
+     window.checkRecordIssues = function(item) {
+         const issues = [];
+         const todayStr = new Date().toISOString().split('T')[0];
+
+         // 1. Barangay Issue Check
+         const rawLoc = String(item.barangay || item.location || '').trim();
+         const cleanLoc = rawLoc.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase();
+         const matchedBarangay = VALID_BARANGAYS.find(b => 
+             b.toLowerCase() === rawLoc.toLowerCase() ||
+             b.toLowerCase() === cleanLoc ||
+             b.toLowerCase().includes(cleanLoc) ||
+             cleanLoc.includes(b.toLowerCase())
+         );
+         if (!rawLoc || !matchedBarangay) {
+             issues.push({ field: 'barangay', label: 'Barangay (Sector)', msg: `"${rawLoc || 'EMPTY'}" is not a recognized Santa Cruz Barangay.` });
+         }
+
+         // 2. Date Issue Check
+         const rawDate = String(item.date_committed || item.date || '').trim();
+         const formattedDate = rawDate.split('T')[0].split(' ')[0];
+         if (!formattedDate || !/^\d{4}-\d{2}-\d{2}$/.test(formattedDate) || isNaN(new Date(formattedDate).getTime())) {
+             issues.push({ field: 'date', label: 'Date', msg: `Invalid date format "${rawDate}".` });
+         } else if (formattedDate < '2024-01-01') {
+             issues.push({ field: 'date', label: 'Date', msg: `Date (${formattedDate}) is prior to 2024 (Allowed: 2024-present).` });
+         } else if (formattedDate > todayStr) {
+             issues.push({ field: 'date', label: 'Date', msg: `Future date (${formattedDate}) is not allowed.` });
+         }
+
+         // 3. Crime Classification Check
+         const rawOff = String(item.offense || item.incident_type || '').replace(/\s+/g, ' ').trim();
+         if (!rawOff || rawOff.length < 2) {
+             issues.push({ field: 'offense', label: 'Crime Classification', msg: 'Classification cannot be empty or single letter.' });
+         } else if (rawOff.length > 300) {
+             issues.push({ field: 'offense', label: 'Crime Classification', msg: `Exceeds 300 characters (currently: ${rawOff.length}).` });
+         } else {
+             const words = rawOff.split(' ').filter(Boolean);
+             if (words.length > 50) {
+                 issues.push({ field: 'offense', label: 'Crime Classification', msg: `Exceeds 50 words (currently: ${words.length}).` });
+             } else {
+                 const unworkableWord = words.find(w => {
+                     const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                     return cleanW.length >= 4 && !/[aeiouy]/i.test(cleanW);
+                 });
+                 if (unworkableWord) {
+                     issues.push({ field: 'offense', label: 'Crime Classification', msg: `Contains unworkable word ("${unworkableWord}").` });
+                 }
+             }
+         }
+
+         return issues;
+     };
+
      window.showIntelReview = function(data, filename = "") {
          reviewData = Array.isArray(data) ? data.map(item => {
              const cleanOff = String(item.offense || item.incident_type || '').trim().slice(0, 300);
@@ -912,6 +967,16 @@
                  offense: cleanOff
              };
          }) : [];
+
+         // Automatically sort rows with errors to the top
+         reviewData.sort((a, b) => {
+             const aIssues = window.checkRecordIssues(a).length;
+             const bIssues = window.checkRecordIssues(b).length;
+             if (aIssues > 0 && bIssues === 0) return -1;
+             if (bIssues > 0 && aIssues === 0) return 1;
+             return 0;
+         });
+
          currentFilename = (filename || '').slice(0, 100);
          currentEntryType = "scanned";
          
@@ -942,13 +1007,60 @@
              'PSI': ['Vehicular Accident', 'Road Accident / Traffic Incident', 'Fire Incident', 'Flood Incident', 'Earthquake Incident', 'Landslide Incident', 'Disaster Incident Reports', 'Public Disturbance Incident', 'Emergency Response Incident', 'Missing Person Report', 'Rescue Operation Cases']
          };
 
+         // Compute issues across all current review records
+         let totalErrorRows = 0;
+         const errorRowNumbers = [];
+         const errorBreakdown = { barangay: 0, date: 0, crime: 0 };
+
+         reviewData.forEach((item, index) => {
+             const issues = window.checkRecordIssues(item);
+             if (issues.length > 0) {
+                 totalErrorRows++;
+                 errorRowNumbers.push(index + 1);
+                 issues.forEach(iss => {
+                     if (iss.field === 'barangay') errorBreakdown.barangay++;
+                     if (iss.field === 'date') errorBreakdown.date++;
+                     if (iss.field === 'offense') errorBreakdown.crime++;
+                 });
+             }
+         });
+
+         // Update Top Error Notification Banner in Review Modal
+         const errorAlert = document.getElementById('reviewModalErrorAlert');
+         const errorTitle = document.getElementById('reviewModalErrorTitle');
+         const errorDesc = document.getElementById('reviewModalErrorDesc');
+         const errorBadge = document.getElementById('reviewModalErrorBadge');
+
+         if (errorAlert) {
+             if (totalErrorRows > 0) {
+                 errorAlert.classList.remove('hidden');
+                 if (errorBadge) errorBadge.textContent = `${totalErrorRows} Row(s) With Errors`;
+                 if (errorTitle) errorTitle.textContent = `Attention Required: ${totalErrorRows} Staged Row(s) Contain Errors`;
+                 if (errorDesc) {
+                     const parts = [];
+                     if (errorBreakdown.barangay > 0) parts.push(`${errorBreakdown.barangay} Sector/Barangay`);
+                     if (errorBreakdown.date > 0) parts.push(`${errorBreakdown.date} Date (2024-present)`);
+                     if (errorBreakdown.crime > 0) parts.push(`${errorBreakdown.crime} Classification/Crime`);
+                     errorDesc.innerHTML = `Errors detected in <strong>Rows #${errorRowNumbers.slice(0, 8).join(', ')}${errorRowNumbers.length > 8 ? '...' : ''}</strong> (${parts.join(', ')}). Invalid rows are prioritized at the top with amber highlights. Correct them before confirming.`;
+                 }
+             } else {
+                 errorAlert.classList.add('hidden');
+             }
+         }
+
          reviewData.forEach((item, index) => {
              const cat = item.category || 'Non-Index';
              stats[cat]++;
              if (filter !== 'All' && cat !== filter) return;
+
+             const issues = window.checkRecordIssues(item);
+             const hasError = issues.length > 0;
+             const hasBrgyError = issues.some(i => i.field === 'barangay');
+             const hasDateError = issues.some(i => i.field === 'date');
+             const hasCrimeError = issues.some(i => i.field === 'offense');
    
              const tr = document.createElement('tr');
-             tr.className = 'bg-white dark:bg-slate-900 transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 animate-fade-in-up group border-b border-gray-100 dark:border-slate-800';
+             tr.className = `${hasError ? 'bg-amber-500/10 dark:bg-amber-950/20' : 'bg-white dark:bg-slate-900'} transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 animate-fade-in-up group border-b ${hasError ? 'border-amber-400/30' : 'border-gray-100 dark:border-slate-800'}`;
              tr.style.animationDelay = `${index * 20}ms`;
              
              const isFocus = cat === '8-Focus';
@@ -970,44 +1082,59 @@
                          <i class="fas fa-plus text-[10px]"></i>
                      </button>
                  </td>
-                 <td class="px-4 py-4 text-[10px] font-black text-gray-400 border-r border-gray-100 dark:border-slate-800 w-16 text-center tabular-nums">${displayIndex++}</td>
+                 <td class="px-4 py-4 text-[10px] font-black border-r border-gray-100 dark:border-slate-800 w-16 text-center tabular-nums ${hasError ? 'text-amber-600 dark:text-amber-400 font-extrabold' : 'text-gray-400'}">
+                     <div class="flex flex-col items-center">
+                         <span>${displayIndex++}</span>
+                         ${hasError ? `<span class="mt-0.5 px-1 py-0.2 rounded text-[7px] font-black bg-amber-500 text-slate-950 uppercase tracking-tighter" title="${issues.map(i => i.msg).join(' ')}">FIX</span>` : ''}
+                     </div>
+                 </td>
                  <td class="hidden px-6 py-4 text-[10px] font-bold text-slate-400 border-r border-gray-100 dark:border-slate-800 truncate max-w-[120px]" title="${currentFilename}">
                     ${currentFilename || 'Buffer'}
                  </td>
-                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-48">
-                    <select onchange="updateReviewItem(${index}, 'barangay', this.value)" class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-700 dark:text-white uppercase outline-none focus:ring-0 p-4 cursor-pointer">
-                        ${VALID_BARANGAYS.map(b => `<option value="${b}" ${b === item.barangay ? 'selected' : ''} class="dark:bg-slate-900">${b}</option>`).join('')}
-                    </select>
-                 </td>
-                 <td class="px-2 py-2 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-56">
-                    <div class="flex items-center space-x-1 justify-center">
-                        <select onchange="updateReviewItemDate(${index}, 'day', this.value)" title="Day (DD)" class="w-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                            ${[...Array(31)].map((_, i) => {
-                                const d = String(i + 1).padStart(2, '0');
-                                return `<option value="${d}" ${d === itemDay ? 'selected' : ''} class="dark:bg-slate-900">${d}</option>`;
-                            }).join('')}
+                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-48 ${hasBrgyError ? 'bg-amber-500/15 ring-2 ring-amber-400 ring-inset' : ''}">
+                    <div class="relative w-full h-full flex flex-col justify-center">
+                        <select onchange="updateReviewItem(${index}, 'barangay', this.value)" class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-700 dark:text-white uppercase outline-none focus:ring-0 p-4 cursor-pointer">
+                            ${!VALID_BARANGAYS.includes(item.barangay) ? `<option value="${item.barangay}" selected class="text-red-500 bg-amber-50 font-black">⚠ ${item.barangay || '[SELECT BARANGAY]'}</option>` : ''}
+                            ${VALID_BARANGAYS.map(b => `<option value="${b}" ${b === item.barangay ? 'selected' : ''} class="dark:bg-slate-900">${b}</option>`).join('')}
                         </select>
-                        <span class="text-slate-400 font-bold text-[10px]">/</span>
-                        <select onchange="updateReviewItemDate(${index}, 'month', this.value)" title="Month" class="w-16 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                            ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((mName, idx) => {
-                                const m = String(idx + 1).padStart(2, '0');
-                                return `<option value="${m}" ${m === itemMonth ? 'selected' : ''} class="dark:bg-slate-900">${mName}</option>`;
-                            }).join('')}
-                        </select>
-                        <span class="text-slate-400 font-bold text-[10px]">/</span>
-                        <select onchange="updateReviewItemDate(${index}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                            ${['2026', '2025', '2024'].map(y => {
-                                return `<option value="${y}" ${y === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${y}</option>`;
-                            }).join('')}
-                        </select>
+                        ${hasBrgyError ? `<span class="absolute right-2 top-1 text-[8px] font-bold text-amber-700 dark:text-amber-300 pointer-events-none">Invalid Sector</span>` : ''}
                     </div>
                  </td>
-                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64">
-                    <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="300" oninput="if(this.value.length>300)this.value=this.value.slice(0,300);updateReviewItem(${index}, 'offense', this.value)" 
-                        class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none">
-                    <datalist id="crimesList_${index}">
-                        ${crimeOptions.map(o => `<option value="${o}">`).join('')}
-                    </datalist>
+                 <td class="px-2 py-2 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-56 ${hasDateError ? 'bg-amber-500/15 ring-2 ring-amber-400 ring-inset' : ''}">
+                    <div class="flex flex-col items-center justify-center space-y-0.5">
+                        <div class="flex items-center space-x-1 justify-center">
+                            <select onchange="updateReviewItemDate(${index}, 'day', this.value)" title="Day (DD)" class="w-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                                ${[...Array(31)].map((_, i) => {
+                                    const d = String(i + 1).padStart(2, '0');
+                                    return `<option value="${d}" ${d === itemDay ? 'selected' : ''} class="dark:bg-slate-900">${d}</option>`;
+                                }).join('')}
+                            </select>
+                            <span class="text-slate-400 font-bold text-[10px]">/</span>
+                            <select onchange="updateReviewItemDate(${index}, 'month', this.value)" title="Month" class="w-16 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                                ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((mName, idx) => {
+                                    const m = String(idx + 1).padStart(2, '0');
+                                    return `<option value="${m}" ${m === itemMonth ? 'selected' : ''} class="dark:bg-slate-900">${mName}</option>`;
+                                }).join('')}
+                            </select>
+                            <span class="text-slate-400 font-bold text-[10px]">/</span>
+                            <select onchange="updateReviewItemDate(${index}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                                ${['2026', '2025', '2024'].map(y => {
+                                    return `<option value="${y}" ${y === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${y}</option>`;
+                                }).join('')}
+                            </select>
+                        </div>
+                        ${hasDateError ? `<span class="text-[8px] font-bold text-amber-700 dark:text-amber-300">Requires 2024–present</span>` : ''}
+                    </div>
+                 </td>
+                 <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative w-64 ${hasCrimeError ? 'bg-amber-500/15 ring-2 ring-amber-400 ring-inset' : ''}">
+                    <div class="relative w-full h-full flex flex-col justify-center">
+                        <input type="text" list="crimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." minlength="2" maxlength="300" oninput="if(this.value.length>300)this.value=this.value.slice(0,300);updateReviewItem(${index}, 'offense', this.value)" 
+                            class="w-full h-full bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-0 p-4 outline-none">
+                        <datalist id="crimesList_${index}">
+                            ${crimeOptions.map(o => `<option value="${o}">`).join('')}
+                        </datalist>
+                        ${hasCrimeError ? `<span class="absolute right-2 top-1 text-[8px] font-bold text-amber-700 dark:text-amber-300 pointer-events-none">Invalid Crime</span>` : ''}
+                    </div>
                  </td>
                  <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-36">
                     <select onchange="updateReviewItem(${index}, 'category', this.value)" class="w-full h-full bg-transparent border-none text-[10px] font-black uppercase tracking-widest ${badgeClass} outline-none focus:ring-0 p-4 cursor-pointer">
@@ -1147,169 +1274,79 @@
              return;
          }
 
-         // Input & Data Integrity Validation Protocol BEFORE confirmation dialog
-         const todayStr = new Date().toISOString().split('T')[0];
-         const validCategories = ['8-Focus', 'Non-Index', 'PSI'];
+         // Auto-normalize barangays across records where matched
+        for (let i = 0; i < reviewData.length; i++) {
+            const r = reviewData[i];
+            if (r.barangay) {
+                const cleanB = String(r.barangay).trim();
+                const matchedB = VALID_BARANGAYS.find(b => 
+                    b.toLowerCase() === cleanB.toLowerCase() ||
+                    b.toLowerCase() === cleanB.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase() ||
+                    cleanB.toLowerCase().includes(b.toLowerCase())
+                );
+                if (matchedB) {
+                    r.barangay = matchedB;
+                }
+            }
+        }
 
-         for (let i = 0; i < reviewData.length; i++) {
-             const r = reviewData[i];
-             const rowNum = i + 1;
-             
-             // 1. Missing basic fields check (Barangay)
-             if (!r.barangay || !String(r.barangay).trim()) {
-                 await window.strategicAlert({
-                     title: "Validation Failure",
-                     message: `Row #${rowNum}: Barangay (Sector) is missing. Please select a valid Barangay before synchronizing.`,
-                     type: "warning"
-                 });
-                 return;
-             }
+        // Collect all uncorrected errors across all staged rows
+        const uncorrectedRows = [];
+        reviewData.forEach((r, idx) => {
+            const issues = window.checkRecordIssues(r);
+            if (issues.length > 0) {
+                uncorrectedRows.push({
+                    rowNumber: idx + 1,
+                    issues: issues
+                });
+            }
+        });
 
-             // Auto-normalize barangay matching (handles "Alipit", "Brgy. Alipit", "alipit", etc.)
-             const cleanB = String(r.barangay).trim();
-             const matchedB = VALID_BARANGAYS.find(b => 
-                 b.toLowerCase() === cleanB.toLowerCase() ||
-                 b.toLowerCase() === cleanB.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase() ||
-                 cleanB.toLowerCase().includes(b.toLowerCase())
-             );
-             if (matchedB) {
-                 r.barangay = matchedB;
-             }
+        // IF UNCORRECTED ERRORS EXIST: Show user-friendly confirmation dialog explaining exactly what is wrong and which rows have errors
+        if (uncorrectedRows.length > 0) {
+            let errorWarningMessage = `You have not corrected all detected errors. There are ${uncorrectedRows.length} row(s) with invalid data at the top of the table:\n`;
+            
+            const sampleRows = uncorrectedRows.slice(0, 10);
+            sampleRows.forEach(item => {
+                const issueDescriptions = item.issues.map(iss => `${iss.label}: ${iss.msg}`).join(', ');
+                errorWarningMessage += `\n• Row #${item.rowNumber}: ${issueDescriptions}`;
+            });
 
-             if (!VALID_BARANGAYS.includes(r.barangay)) {
-                 await window.strategicAlert({
-                     title: "Invalid Sector",
-                     message: `Row #${rowNum}: "${r.barangay}" is not a recognized Santa Cruz Barangay. Please select a valid Barangay.`,
-                     type: "warning"
-                 });
-                 return;
-             }
+            if (uncorrectedRows.length > 10) {
+                errorWarningMessage += `\n• ...and ${uncorrectedRows.length - 10} more row(s) with issues.`;
+            }
 
-             // 2. Timeline Date Check
-             const rawDate = r.date_committed || r.incident_date || r.date || '';
-             if (!rawDate || !rawDate.trim()) {
-                 await window.strategicAlert({
-                     title: "Missing Date",
-                     message: `Row #${rowNum}: Timeline Date is missing. Please set a valid date before synchronizing.`,
-                     type: "warning"
-                 });
-                 return;
-             }
+            errorWarningMessage += `\n\nPlease correct or delete these highlighted rows before committing them to the CPICRS Central Database.`;
 
-             const dateVal = rawDate.trim();
-             const dateObj = new Date(dateVal);
-             if (isNaN(dateObj.getTime()) || !/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
-                 await window.strategicAlert({
-                     title: "Invalid Date Format",
-                     message: `Row #${rowNum}: "${dateVal}" is not a valid date format (YYYY-MM-DD required).`,
-                     type: "warning"
-                 });
-                 return;
-             }
+            await (window.strategicAlert || (async (opts) => alert(opts.message)))({
+                title: "Uncorrected Errors Detected",
+                message: errorWarningMessage,
+                type: "warning"
+            });
+            return;
+        }
 
-             if (dateVal > todayStr) {
-                 await window.strategicAlert({
-                     title: "Future Date Restricted",
-                     message: `Row #${rowNum}: Timeline date (${dateVal}) cannot be in the future. Maximum allowed date is today (${todayStr}).`,
-                     type: "warning"
-                 });
-                 return;
-             }
+        // ALL VALIDATIONS PASSED -> DISPLAY CONFIRMATION DIALOG (CONFIRM OR CANCEL) WITH DIAGNOSTIC SUMMARY
+        let confirmMsg = `Ready to synchronize ${reviewData.length} validated records to the CPICRS Central Database.`;
+        if (window.lastSortingReport) {
+            const rep = window.lastSortingReport;
+            const hasIssues = rep.duplicatesRemoved > 0 || rep.cancelledBarangayErrors.length > 0 || rep.dateErrors.length > 0;
+            if (hasIssues) {
+                confirmMsg += `\n\nSorting & Filtering Diagnostic Summary:`;
+                if (rep.duplicatesRemoved > 0) {
+                    confirmMsg += `\n• Duplicates Filtered: ${rep.duplicatesRemoved} duplicate record(s) removed.`;
+                }
+                if (rep.cancelledBarangayErrors.length > 0) {
+                    confirmMsg += `\n• Invalid Sectors Detected: ${rep.cancelledBarangayErrors.length} row(s) sorted for review.`;
+                }
+                if (rep.dateErrors.length > 0) {
+                    confirmMsg += `\n• Date Limit Violations Detected: ${rep.dateErrors.length} row(s) sorted for review.`;
+                }
+            }
+        }
+        confirmMsg += `\n\nAll ${reviewData.length} records have been verified without errors. Select 'Confirm' to commit these verified records or 'Cancel' to abort.`;
 
-             if (dateVal < '2024-01-01') {
-                 await window.strategicAlert({
-                     title: "Timeline Date Out of Range",
-                     message: `Row #${rowNum}: Timeline date (${dateVal}) cannot be prior to January 1, 2024.`,
-                     type: "warning"
-                 });
-                 return;
-             }
-
-             // 3. Classification Check
-             const offenseVal = (r.offense || r.incident_type || '').replace(/\s+/g, ' ').trim();
-             if (!offenseVal) {
-                 await window.strategicAlert({
-                     title: "Incomplete Classification",
-                     message: `Row #${rowNum}: Crime classification / offense cannot be empty or blank spaces. Please enter or select a classification.`,
-                     type: "warning"
-                 });
-                 return;
-             }
-
-             if (offenseVal.length < 2) {
-                 await window.strategicAlert({
-                     title: "Invalid Classification",
-                     message: `Row #${rowNum}: Classification "${offenseVal}" must be at least 2 characters long (single-letter entries are not allowed).`,
-                     type: "warning"
-                 });
-                 return;
-             }
-
-             if (offenseVal.length > 300) {
-                 await window.strategicAlert({
-                     title: "Classification Too Long",
-                     message: `Row #${rowNum}: Classification exceeds 300 letters limit (currently: ${offenseVal.length} letters). Please shorten it.`,
-                     type: "warning"
-                 });
-                 return;
-             }
-
-             const offenseWords = offenseVal.split(' ').filter(Boolean);
-             if (offenseWords.length > 50) {
-                 await window.strategicAlert({
-                     title: "Classification Word Limit Exceeded",
-                     message: `Row #${rowNum}: Classification exceeds 50 words limit (currently: ${offenseWords.length} words). Please enter a concise classification.`,
-                     type: "warning"
-                 });
-                 return;
-             }
-
-             // Prevent unworkable names / made-up words in crime classification
-             for (const w of offenseWords) {
-                 const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-                 if (cleanW.length >= 4 && !/[aeiouy]/i.test(cleanW)) {
-                     await window.strategicAlert({
-                         title: "Unworkable Classification Word",
-                         message: `Row #${rowNum}: "${w}" does not appear to be a workable or recognizable word.`,
-                         type: "warning"
-                     });
-                     return;
-                 }
-             }
-
-             // 4. Category Check
-             const categoryVal = r.category || 'Non-Index';
-             if (!validCategories.includes(categoryVal)) {
-                 await window.strategicAlert({
-                     title: "Invalid Category",
-                     message: `Row #${rowNum}: Category "${categoryVal}" is invalid. Must be 8-Focus, Non-Index, or PSI.`,
-                     type: "warning"
-                 });
-                 return;
-             }
-         }
-
-         // ALL VALIDATIONS PASSED -> NOW DISPLAY CONFIRMATION DIALOG (CONFIRM OR CANCEL) WITH ERROR SUMMARY
-         let confirmMsg = `Ready to synchronize ${reviewData.length} validated records to the CPICRS Central Database.`;
-         if (window.lastSortingReport) {
-             const rep = window.lastSortingReport;
-             const hasIssues = rep.duplicatesRemoved > 0 || rep.cancelledBarangayErrors.length > 0 || rep.dateErrors.length > 0;
-             if (hasIssues) {
-                 confirmMsg += `\n\nSorting & Filtering Diagnostic Summary:`;
-                 if (rep.duplicatesRemoved > 0) {
-                     confirmMsg += `\n• Duplicates Filtered: ${rep.duplicatesRemoved} duplicate record(s) removed.`;
-                 }
-                 if (rep.cancelledBarangayErrors.length > 0) {
-                     confirmMsg += `\n• Invalid Sectors Cancelled: ${rep.cancelledBarangayErrors.length} row(s) outside 26 Santa Cruz barangays excluded.`;
-                 }
-                 if (rep.dateErrors.length > 0) {
-                     confirmMsg += `\n• Date Limit Violations Cancelled: ${rep.dateErrors.length} row(s) outside 2024-present excluded.`;
-                 }
-             }
-         }
-         confirmMsg += `\n\nSelect 'Confirm' to commit these verified records or 'Cancel' to abort.`;
-
-         const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
+        const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
              title: "Dataset Synchronization Confirmation",
              message: confirmMsg,
              confirmText: "Confirm",
