@@ -335,46 +335,73 @@
     <div id="mainContent"
         class="hidden lg:flex flex-grow lg:ml-72 <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'main-content-expanded' : '' %> flex-col min-h-screen transition-all duration-300 w-full lg:w-auto">
         <!-- Top Header -->
-        <header
-            class="bg-pnp-blue text-white h-20 border-b-4 border-pnp-gold shadow-2xl flex items-center justify-between px-4 sm:px-6 md:px-10 fixed top-0 right-0 z-40"
-            id="layoutHeader">
-            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
+        <% if (typeof title !== 'undefined' && title === 'Dashboard') { %>
+            <!-- Header/Navbar removed on Admin Dashboard per user request -->
+            <!-- Floating Sidebar Toggle & Utilities for Dashboard -->
+            <div class="fixed top-6 left-6 z-40 flex items-center gap-3">
                 <button id="sidebarToggle"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition border border-white/20 shrink-0">
-                    <i class="fas fa-bars"></i>
+                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 shrink-0 cursor-pointer"
+                    title="Toggle Sidebar Navigation">
+                    <i class="fas fa-bars text-sm"></i>
                 </button>
-
-                <div class="flex items-center space-x-2 sm:space-x-4 min-w-0">
-                    <h2 class="text-base sm:text-xl font-black text-white tracking-tighter uppercase truncate">
-                        <%= title %>
-                    </h2>
-                </div>
             </div>
-
-            <div class="flex items-center space-x-4">
-                <!-- Help / Manual Button -->
+            <div class="fixed top-6 right-6 z-40 flex items-center gap-3">
                 <button onclick="toggleHelpModal()" title="View Instruction Manual"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
+                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 cursor-pointer">
                     <i class="fas fa-question text-sm"></i>
                 </button>
-
-                <!-- Public Site Button -->
                 <a href="/" title="View Public Site"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
+                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 cursor-pointer">
                     <i class="fas fa-globe text-sm"></i>
                 </a>
-
-                <!-- Dark Mode Toggle (Synced with Public Design) -->
                 <button id="darkModeToggle"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
+                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 cursor-pointer">
                     <i class="fas fa-moon text-sm dark:hidden"></i>
                     <i class="fas fa-sun text-sm hidden dark:block"></i>
                 </button>
             </div>
-        </header>
+        <% } else { %>
+            <header
+                class="bg-pnp-blue text-white h-20 border-b-4 border-pnp-gold shadow-2xl flex items-center justify-between px-4 sm:px-6 md:px-10 fixed top-0 right-0 z-40"
+                id="layoutHeader">
+                <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
+                    <button id="sidebarToggle"
+                        class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition border border-white/20 shrink-0">
+                        <i class="fas fa-bars"></i>
+                    </button>
+
+                    <div class="flex items-center space-x-2 sm:space-x-4 min-w-0">
+                        <h2 class="text-base sm:text-xl font-black text-white tracking-tighter uppercase truncate">
+                            <%= title %>
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Help / Manual Button -->
+                    <button onclick="toggleHelpModal()" title="View Instruction Manual"
+                        class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
+                        <i class="fas fa-question text-sm"></i>
+                    </button>
+
+                    <!-- Public Site Button -->
+                    <a href="/" title="View Public Site"
+                        class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
+                        <i class="fas fa-globe text-sm"></i>
+                    </a>
+
+                    <!-- Dark Mode Toggle (Synced with Public Design) -->
+                    <button id="darkModeToggle"
+                        class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
+                        <i class="fas fa-moon text-sm dark:hidden"></i>
+                        <i class="fas fa-sun text-sm hidden dark:block"></i>
+                    </button>
+                </div>
+            </header>
+        <% } %>
 
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32' %>">
+        <main class="flex-grow animate-fade-in <%= typeof title !== 'undefined' && title === 'Dashboard' ? 'p-8 sm:p-10 pt-16 sm:pt-20 pb-32' : (title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32') %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div
@@ -468,10 +495,12 @@
             let documentHeight = document.documentElement.scrollHeight;
 
             // Header logic: hide on scroll down, show on scroll up
-            if (scrollTop > lastScrollTop && scrollTop > 50) {
-                layoutHeader.style.transform = 'translateY(-100%)';
-            } else {
-                layoutHeader.style.transform = 'translateY(0)';
+            if (layoutHeader) {
+                if (scrollTop > lastScrollTop && scrollTop > 50) {
+                    layoutHeader.style.transform = 'translateY(-100%)';
+                } else {
+                    layoutHeader.style.transform = 'translateY(0)';
+                }
             }
 
             // Footer logic: only show when near the bottom
