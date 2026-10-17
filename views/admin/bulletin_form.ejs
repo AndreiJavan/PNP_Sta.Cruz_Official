@@ -29,8 +29,8 @@
             </a>
         </div>
 
-        <!-- PUBLICATION TYPE SELECTOR (3 CARDS / TABS) -->
-        <div class="p-6 sm:p-8 border-b border-gray-150 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/40">
+        <!-- PUBLICATION TYPE SELECTOR (3 CARDS / TABS) - Hidden during edit -->
+        <div class="p-6 sm:p-8 border-b border-gray-150 dark:border-slate-800 bg-gray-50/30 dark:bg-slate-900/40 <%= bulletin ? 'hidden' : '' %>">
             <div class="flex items-center justify-between mb-4">
                 <label class="block text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                     Select Publication Type
@@ -307,92 +307,120 @@
             </div>
 
             <!-- FORMAT 3: URL POST FLOW (FACEBOOK IMPORT) -->
-            <div id="urlPublishPanel" class="hidden space-y-6">
-                <!-- Header Banner -->
-                <div class="p-5 rounded-2xl bg-[#1877F2]/10 border border-[#1877F2]/20 flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
-                        <i class="fab fa-facebook-f"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-black text-[#1877F2] uppercase tracking-wider">Facebook Official Post URL Import</h4>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">Link directly to an official post published on the PNP Sta. Cruz Facebook page.</p>
-                    </div>
-                </div>
-
-                <!-- TITLE FIELD FOR URL POST -->
-                <div class="space-y-1.5">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                            Post Title / Headline <span class="text-red-500">*</span>
-                        </label>
-                        <span id="urlTitleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                            0 / 200 letters
-                        </span>
-                    </div>
-                    <input type="text" id="urlTitleInput" maxlength="200"
-                        value="<%= bulletin ? (bulletin.title || '') : '' %>"
-                        placeholder="e.g. Official Statement on Community Outreach Operation"
-                        oninput="updateValidationState()"
-                        class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-bold text-slate-800 dark:text-white transition">
-                    <p id="urlTitleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
-                </div>
-
-                <!-- CAPTION / DESCRIPTION FIELD FOR URL POST -->
-                <div class="space-y-1.5">
-                    <div class="flex justify-between items-center">
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                            Post Description / First Paragraph <span class="text-slate-400 font-normal">(Optional)</span>
-                        </label>
-                        <span id="urlBodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                            0 / 5,000 letters
-                        </span>
-                    </div>
-                    <textarea id="urlBodyInput" rows="4"
-                        placeholder="Paste or enter the Facebook caption or brief summary..."
-                        oninput="updateValidationState()"
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"><%= bulletin ? (bulletin.body || '') : '' %></textarea>
-                </div>
-
-                <!-- FACEBOOK POST URL FIELD -->
-                <div class="space-y-3">
-                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                        Facebook Post URL <span class="text-red-500">*</span>
+            <!-- FORMAT 3: 2-COLUMN LAYOUT FOR URL POST (MATCHING NEWS UI DESIGN) -->
+            <div id="urlPublishPanel" class="hidden grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+                <!-- LEFT COLUMN: FACEBOOK EMBEDDED MEDIA PREVIEW BOX -->
+                <div class="space-y-4 flex flex-col">
+                    <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
+                        Facebook Media Preview <span class="text-slate-400 font-normal">(Live Interactive Embed)</span>
                     </label>
-                    <div class="relative">
-                        <i class="fab fa-facebook text-[#1877F2] absolute left-4 top-1/2 -translate-y-1/2 text-base"></i>
-                        <input type="url" name="facebook_url" id="facebookUrlInput"
-                            value="<%= bulletin ? (bulletin.facebook_url || bulletin.facebook_post_url || '') : '' %>"
-                            oninput="handleFacebookUrlInput(this.value); updateValidationState();"
-                            placeholder="https://www.facebook.com/..."
-                            class="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-[#1877F2] outline-none text-xs font-semibold text-slate-800 dark:text-white transition">
-                    </div>
-                    <p id="facebookUrlError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
-                    <p class="text-[11px] text-slate-400 font-medium">Paste the exact link to a public post or video from the official PNP Facebook page.</p>
 
-                    <!-- Live Facebook Embedded Media Preview Container -->
-                    <div id="fbUrlPreviewBox" class="hidden mt-3 p-4 rounded-2xl bg-slate-950 border border-[#1877F2]/30 space-y-2.5 overflow-hidden">
-                        <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-wider text-[#1877F2]">
-                            <span class="flex items-center space-x-1.5">
-                                <i class="fab fa-facebook text-sm"></i>
-                                <span>Imported Facebook Media Preview</span>
+                    <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-5 min-h-[380px] lg:min-h-[460px]">
+                        <!-- Live Preview Container or Placeholder -->
+                        <div id="urlDropZone" class="w-full flex-1 rounded-xl bg-gray-100/80 dark:bg-slate-900 flex flex-col items-center justify-center transition-all duration-300 border-2 border-dashed border-gray-200 dark:border-slate-800 p-4 relative group overflow-hidden min-h-[320px]">
+                            
+                            <!-- Empty Placeholder (shown when no URL yet) -->
+                            <div id="urlPlaceholder" class="flex flex-col items-center justify-center text-center p-4 my-auto">
+                                <div class="w-16 h-16 rounded-2xl bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">
+                                    <i class="fab fa-facebook-f"></i>
+                                </div>
+                                <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Facebook Post Preview</span>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">
+                                    Enter an official Facebook post or video URL on the right to load live preview
+                                </p>
+                            </div>
+
+                            <!-- Active Embedded Preview (shown when valid URL is input) -->
+                            <div id="fbUrlPreviewBox" class="hidden w-full h-full flex flex-col justify-between items-center relative">
+                                <!-- Top Header Overlay Badge -->
+                                <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-30 pointer-events-none">
+                                    <span class="pointer-events-auto px-3 py-1 rounded-lg bg-slate-900/85 text-white backdrop-blur-md text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg flex items-center">
+                                        <i class="fab fa-facebook text-[#1877F2] mr-1.5"></i>
+                                        <span>Official Facebook Post</span>
+                                    </span>
+                                </div>
+
+                                <!-- Embedded Iframe Canvas -->
+                                <div id="fbIframeContainer" class="relative w-full flex-1 flex items-center justify-center bg-black/40 dark:bg-slate-950/80 rounded-xl overflow-hidden min-h-[300px] p-1">
+                                    <!-- Dynamic iframe injected here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom helper note -->
+                        <div class="mt-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center space-x-2">
+                            <i class="fab fa-facebook text-[#1877F2] text-sm shrink-0"></i>
+                            <span class="text-[11px] leading-snug">Facebook posts render interactively with video playback and official station accreditation.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: FORM FIELDS (Same UI Design as News) -->
+                <div class="space-y-6 flex flex-col">
+                    <!-- TITLE FIELD FOR URL POST -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                Post Title / Headline <span class="text-red-500">*</span>
+                            </label>
+                            <span id="urlTitleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                0 / 200 letters
                             </span>
-                            <span class="px-2.5 py-0.5 rounded-full bg-[#1877F2]/20 text-[#1877F2]">General Announcement</span>
                         </div>
-                        <div id="fbIframeContainer" class="w-full h-[340px] rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center">
-                            <!-- Dynamic iframe injected here -->
+                        <input type="text" id="urlTitleInput" maxlength="200"
+                            value="<%= bulletin ? (bulletin.title || '') : '' %>"
+                            placeholder="e.g. Official Statement on Community Outreach Operation"
+                            oninput="updateValidationState()"
+                            class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold text-slate-800 dark:text-white transition">
+                        <p id="urlTitleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                    </div>
+
+                    <!-- CATEGORY FIELD (Identical Locked Badge to News) -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Category <span class="text-red-500">*</span>
+                        </label>
+                        <div class="w-full px-4 py-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-between">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-newspaper text-sm"></i>
+                                <span>General Announcement (News / Facebook Release)</span>
+                            </div>
+                            <span class="text-[10px] uppercase tracking-wider font-black px-2 py-0.5 rounded bg-blue-500/20">Locked</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- Info note & Default Category -->
-                <div class="p-3.5 rounded-xl bg-blue-50/60 dark:bg-slate-900/60 border border-blue-150 dark:border-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center space-x-2">
-                    <i class="fab fa-facebook text-[#1877F2] text-sm"></i>
-                    <span>Facebook post URLs render the official embedded post directly without photo/video file attachments.</span>
-                </div>
+                    <!-- FACEBOOK POST URL FIELD -->
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                            Facebook Post URL <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fab fa-facebook text-[#1877F2] absolute left-4 top-1/2 -translate-y-1/2 text-sm"></i>
+                            <input type="url" name="facebook_url" id="facebookUrlInput"
+                                value="<%= bulletin ? (bulletin.facebook_url || bulletin.facebook_post_url || '') : '' %>"
+                                oninput="handleFacebookUrlInput(this.value); updateValidationState();"
+                                placeholder="https://www.facebook.com/..."
+                                class="w-full pl-11 pr-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-semibold text-slate-800 dark:text-white transition">
+                        </div>
+                        <p id="facebookUrlError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                        <p class="text-[11px] text-slate-400 font-medium">Paste the exact link to a public post or video from the official Facebook page.</p>
+                    </div>
 
-                <div class="p-4 rounded-xl bg-gray-50 dark:bg-slate-950 border border-gray-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-300 font-bold">
-                    <span class="uppercase tracking-wider text-[10px] text-slate-400">Default Category</span>
-                    <span class="px-3 py-1 rounded-full bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold text-[10px] uppercase font-black tracking-wider">General Announcement</span>
+                    <!-- CAPTION / DESCRIPTION FIELD FOR URL POST -->
+                    <div class="flex-1 flex flex-col space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                                Post Description / Caption <span class="text-slate-400 font-normal">(Optional for URL posts)</span>
+                            </label>
+                            <span id="urlBodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                0 / 5,000 letters
+                            </span>
+                        </div>
+                        <textarea id="urlBodyInput" rows="6"
+                            placeholder="Paste or enter the Facebook caption or brief summary..."
+                            oninput="updateValidationState()"
+                            class="flex-1 w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"><%= bulletin ? (bulletin.body || '') : '' %></textarea>
+                    </div>
                 </div>
             </div>
 
@@ -692,7 +720,10 @@
                 activeTypeTag.className = 'px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20';
             }
             if (manualPanel) manualPanel.classList.remove('hidden');
-            if (urlPanel) urlPanel.classList.add('hidden');
+            if (urlPanel) {
+                urlPanel.classList.add('hidden');
+                urlPanel.classList.remove('grid');
+            }
 
             if (advisorySelect) {
                 advisorySelect.classList.remove('hidden');
@@ -721,7 +752,10 @@
                 activeTypeTag.className = 'px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-pnp-blue/10 text-pnp-blue dark:text-blue-300 border border-pnp-blue/20';
             }
             if (manualPanel) manualPanel.classList.remove('hidden');
-            if (urlPanel) urlPanel.classList.add('hidden');
+            if (urlPanel) {
+                urlPanel.classList.add('hidden');
+                urlPanel.classList.remove('grid');
+            }
 
             if (advisorySelect) {
                 advisorySelect.classList.add('hidden');
@@ -750,7 +784,10 @@
                 activeTypeTag.className = 'px-3 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#1877F2]/10 text-[#1877F2] border border-[#1877F2]/20';
             }
             if (manualPanel) manualPanel.classList.add('hidden');
-            if (urlPanel) urlPanel.classList.remove('hidden');
+            if (urlPanel) {
+                urlPanel.classList.remove('hidden');
+                urlPanel.classList.add('grid');
+            }
 
             if (advisorySelect) {
                 advisorySelect.classList.add('hidden');
@@ -1525,8 +1562,14 @@
             const urlBody = document.getElementById('urlBodyInput')?.value.trim() || '';
             const mainTitle = document.getElementById('titleInput');
             const mainBody = document.getElementById('bodyInput');
-            if (mainTitle) mainTitle.value = urlTitle;
-            if (mainBody) mainBody.value = urlBody;
+            if (mainTitle) {
+                mainTitle.value = urlTitle;
+                mainTitle.name = 'title';
+            }
+            if (mainBody) {
+                mainBody.value = urlBody;
+                mainBody.name = 'body';
+            }
         }
 
         // Check if user changed anything during edit
@@ -1616,6 +1659,21 @@
         const btnText = document.getElementById('finalConfirmBtnText');
         if (btn) btn.disabled = true;
         if (btnText) btnText.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> ${isEditMode ? 'Updating...' : 'Publishing...'}`;
+
+        if (currentPublishType === 'url') {
+            const urlTitle = document.getElementById('urlTitleInput')?.value.trim() || '';
+            const urlBody = document.getElementById('urlBodyInput')?.value.trim() || '';
+            const mainTitle = document.getElementById('titleInput');
+            const mainBody = document.getElementById('bodyInput');
+            if (mainTitle) {
+                mainTitle.value = urlTitle;
+                mainTitle.name = 'title';
+            }
+            if (mainBody) {
+                mainBody.value = urlBody;
+                mainBody.name = 'body';
+            }
+        }
 
         document.getElementById('bulletinForm').submit();
     }
