@@ -32,90 +32,87 @@
     const uniqueBarangaysCount = uniqueBarangays.size;
 %>
 <!-- Top Section: Monthly Crime Trends & Strategic Directives (Picture 1 Inspired Theme) -->
-<div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 sm:p-7 mb-7 transition-all relative">
+<div class="bg-slate-50/70 dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700/80 p-6 sm:p-7 mb-7 transition-all relative">
     
     <!-- Header & Controls -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between pb-5 mb-6 border-b border-slate-100 dark:border-slate-700/60 gap-4">
-        <div>
-            <div class="flex items-center space-x-3.5">
-                <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-xs shrink-0">
-                    <i class="fas fa-chart-column text-base"></i>
-                </div>
-                <div>
-                    <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                        Monthly Crime Trends
-                    </h2>
-                    <p id="trendScopeSubtitle" class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                        Sta. Cruz Municipal Police Station &bull; All Barangays &bull; Year <%= defaultYearVal %>
-                    </p>
-                </div>
+    <div class="pb-5 mb-6 border-b border-slate-200/80 dark:border-slate-700/60">
+        <!-- Title Text -->
+        <div class="flex items-center space-x-3.5 mb-4">
+            <div class="w-10 h-10 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-xs shrink-0">
+                <i class="fas fa-chart-column text-base"></i>
+            </div>
+            <div>
+                <h2 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    Monthly Crime Trends
+                </h2>
+                <p id="trendScopeSubtitle" class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                    Sta. Cruz Municipal Police Station &bull; All Barangays &bull; Year <%= defaultYearVal %>
+                </p>
             </div>
         </div>
 
-        <!-- Filter Controls & Category Toggles -->
-        <div class="flex flex-wrap items-center gap-3">
-            <!-- Category Filter Legend Buttons -->
-            <div class="flex items-center gap-1.5 flex-wrap">
-                <button type="button" onclick="toggleTrendDataset(0)" id="legend8Focus" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-50 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-200 dark:border-red-800/60 hover:bg-red-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+        <!-- Filter Controls & Category Toggles Below Title Text -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <!-- Category Filter Legend Buttons (8-Focus, Non-Index, PSI) -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="toggleTrendDataset(0)" id="legend8Focus" class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-300 dark:border-red-800/60 hover:bg-red-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-700"></span>
                     <span>8-Focus</span>
                 </button>
-                <button type="button" onclick="toggleTrendDataset(1)" id="legendNonIndex" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 hover:bg-blue-600 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <button type="button" onclick="toggleTrendDataset(1)" id="legendNonIndex" class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-300 dark:border-blue-800/60 hover:bg-blue-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <span class="w-2.5 h-2.5 rounded-full bg-blue-700"></span>
                     <span>Non-Index</span>
                 </button>
-                <button type="button" onclick="toggleTrendDataset(2)" id="legendPSI" class="px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800/60 hover:bg-amber-500 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
-                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <button type="button" onclick="toggleTrendDataset(2)" id="legendPSI" class="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-300 dark:border-amber-800/60 hover:bg-amber-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-700"></span>
                     <span>PSI</span>
                 </button>
             </div>
 
-            <!-- Year Dropdown -->
-            <div class="relative w-28">
-                <% 
-                    const availableYears = [...new Set(safePoints.map(p => {
-                        const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
-                        if(!rawDate) return null;
-                        const d = new Date(rawDate);
-                        return !isNaN(d.getTime()) ? d.getUTCFullYear() : null;
-                    }).filter(y => y !== null))].sort((a, b) => b - a);
+            <!-- Dropdowns of Date (Year) and Barangay -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <!-- Year Dropdown -->
+                <div class="relative w-32">
+                    <% 
+                        const availableYears = [...new Set(safePoints.map(p => {
+                            const rawDate = p.incident_date || p.date_committed || p.dateCommitted;
+                            if(!rawDate) return null;
+                            const d = new Date(rawDate);
+                            return !isNaN(d.getTime()) ? d.getUTCFullYear() : null;
+                        }).filter(y => y !== null))].sort((a, b) => b - a);
 
-                    if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
-                %>
-                <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs">
-                    <% availableYears.forEach(year => { %>
-                        <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
-                    <% }) %>
-                </select>
+                        if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
+                    %>
+                    <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs">
+                        <% availableYears.forEach(year => { %>
+                            <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <!-- Barangay Dropdown -->
+                <div class="relative w-48 sm:w-60">
+                    <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs truncate">
+                        <option value="ALL">ALL BARANGAYS</option>
+                        <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
+                            , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
+                            , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
+                            , "Poblacion III (Barangay III)" , "Poblacion IV (Barangay IV)"
+                            , "Poblacion V (Barangay V)" , "San Jose" , "San Juan" , "San Pablo Norte"
+                            , "San Pablo Sur" , "Santisima Cruz" , "Santo Angel Central"
+                            , "Santo Angel Norte" , "Santo Angel Sur" ].forEach(brgy=> { %>
+                            <option value="<%= brgy %>"><%= brgy.toUpperCase() %></option>
+                        <% }) %>
+                    </select>
+                </div>
             </div>
-
-            <!-- Barangay Dropdown -->
-            <div class="relative w-48 sm:w-56">
-                <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold uppercase text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500 cursor-pointer shadow-2xs truncate">
-                    <option value="ALL">ALL BARANGAYS</option>
-                    <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
-                        , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
-                        , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
-                        , "Poblacion III (Barangay III)" , "Poblacion IV (Barangay IV)"
-                        , "Poblacion V (Barangay V)" , "San Jose" , "San Juan" , "San Pablo Norte"
-                        , "San Pablo Sur" , "Santisima Cruz" , "Santo Angel Central"
-                        , "Santo Angel Norte" , "Santo Angel Sur" ].forEach(brgy=> { %>
-                        <option value="<%= brgy %>"><%= brgy.toUpperCase() %></option>
-                    <% }) %>
-                </select>
-            </div>
-
-            <!-- Refresh AI Directives button -->
-            <button type="button" onclick="generateAITrends()" id="aiGenerateBtn" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs uppercase transition-all flex items-center justify-center shrink-0 cursor-pointer shadow-2xs" title="Refresh Directives Analysis">
-                <i class="fas fa-sync-alt text-xs"></i>
-            </button>
         </div>
     </div>
 
     <!-- Main Section: Bar Graph (Left) & KPIs in 1 Column (Right) aligned to Bar Graph height -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch mb-7">
-        <!-- Left: Bar Graph Canvas -->
-        <div class="lg:col-span-9 bg-slate-50/70 dark:bg-slate-900/40 rounded-2xl p-4 sm:p-5 border border-slate-150 dark:border-slate-800 flex flex-col justify-between">
+        <!-- Left: Bar Graph Canvas (Darker background on white) -->
+        <div class="lg:col-span-9 bg-slate-100/90 dark:bg-slate-900/60 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between">
             <div class="relative w-full h-[340px] sm:h-[370px]">
                 <canvas id="crimeTrendChart"></canvas>
             </div>
@@ -124,7 +121,7 @@
         <!-- Right: 1 Column with Total Incidents, Peak Month, and Leading Offense (MIMPA/Picture 1 inspired) -->
         <div class="lg:col-span-3 flex flex-col justify-between gap-3.5">
             <!-- 1. Total Incidents Card -->
-            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Total Incidents</span>
                     <div class="w-9 h-9 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
@@ -138,7 +135,7 @@
             </div>
 
             <!-- 2. Peak Month Card -->
-            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Peak Month</span>
                     <div class="w-9 h-9 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
@@ -146,13 +143,13 @@
                     </div>
                 </div>
                 <div>
-                    <span id="modalKpiPeakMonth" class="text-xl sm:text-2xl font-black text-red-600 dark:text-red-400 uppercase leading-none block">--</span>
+                    <span id="modalKpiPeakMonth" class="text-base sm:text-lg font-black text-red-600 dark:text-red-400 uppercase leading-snug block break-words">--</span>
                     <span id="modalKpiPeakCount" class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-1">0 records</span>
                 </div>
             </div>
 
-            <!-- 3. Leading Offense Card -->
-            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+            <!-- 3. Leading Offense Card (Full name of crime, no ellipsis) -->
+            <div class="p-4 sm:p-4.5 bg-white dark:bg-slate-900/70 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-1.5">
                     <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Leading Offense</span>
                     <div class="w-9 h-9 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-500 flex items-center justify-center shrink-0">
@@ -160,7 +157,7 @@
                     </div>
                 </div>
                 <div class="min-w-0">
-                    <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase break-words leading-tight block truncate" title="--">--</span>
+                    <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase break-words whitespace-normal leading-tight block" title="--">--</span>
                     <span id="modalKpiTopShare" class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-1">0% of total</span>
                 </div>
             </div>
@@ -282,10 +279,10 @@
                     <div class="flex items-center space-x-2 mb-1">
                         <span id="label8Focus" class="text-[9px] font-bold text-red-500 uppercase tracking-widest">8-Focus</span>
                     </div>
-                    <span id="top8Focus" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
+                    <span id="top8Focus" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="--">--</span>
                 </div>
                 <div class="text-right shrink-0">
-                    <span id="count8Focus" class="text-lg font-black text-slate-700 dark:text-white leading-none">...</span>
+                    <span id="count8Focus" class="text-lg font-black text-slate-700 dark:text-white leading-none">0</span>
                     <span class="text-[8px] text-gray-400 font-bold uppercase block mt-1">Records</span>
                 </div>
             </div>
@@ -296,10 +293,10 @@
                     <div class="flex items-center space-x-2 mb-1">
                         <span id="labelNonIndex" class="text-[9px] font-bold text-pnp-blue uppercase tracking-widest">Non-Index</span>
                     </div>
-                    <span id="topNonIndex" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
+                    <span id="topNonIndex" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="--">--</span>
                 </div>
                 <div class="text-right shrink-0">
-                    <span id="countNonIndex" class="text-lg font-black text-slate-700 dark:text-white leading-none">...</span>
+                    <span id="countNonIndex" class="text-lg font-black text-slate-700 dark:text-white leading-none">0</span>
                     <span class="text-[8px] text-gray-400 font-bold uppercase block mt-1">Records</span>
                 </div>
             </div>
@@ -310,10 +307,10 @@
                     <div class="flex items-center space-x-2 mb-1">
                         <span id="labelPSI" class="text-[9px] font-bold text-pnp-gold uppercase tracking-widest">PSI</span>
                     </div>
-                    <span id="topPSI" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="...">Loading...</span>
+                    <span id="topPSI" class="text-[10px] md:text-xs font-black text-slate-700 dark:text-white uppercase tracking-tight break-words leading-snug" title="--">--</span>
                 </div>
                 <div class="text-right shrink-0">
-                    <span id="countPSI" class="text-lg font-black text-slate-700 dark:text-white leading-none">...</span>
+                    <span id="countPSI" class="text-lg font-black text-slate-700 dark:text-white leading-none">0</span>
                     <span class="text-[8px] text-gray-400 font-bold uppercase block mt-1">Records</span>
                 </div>
             </div>
@@ -321,9 +318,7 @@
     </div>
 </div>
 
-
-
-<<!-- Middle Row: Top 5 Barangays Distribution & Incident Feed -->
+<!-- Middle Row: Top 5 Barangays Distribution & Incident Feed -->
 <div class="mb-8">
     <div class="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-slate-700 p-6 flex flex-col transition-all hover:shadow-xl relative overflow-hidden group">
         <!-- View 1: Recorded Crime Distribution -->
@@ -372,6 +367,7 @@
     let distChart;
     const points = <%- JSON.stringify(safePoints) %>;
     const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const FULL_MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     // High-performance incident pre-indexing for instantaneous filtering
     const preprocessedPoints = points.map(p => {
@@ -679,42 +675,42 @@
                     {
                         label: '8-Focus (Manual)',
                         data: trendsData.map(d => d.focusManual || 0),
-                        backgroundColor: '#ef4444',
+                        backgroundColor: '#b91c1c',
                         stack: '8-Focus',
                         borderRadius: 6
                     },
                     {
                         label: '8-Focus (Scanned)',
                         data: trendsData.map(d => d.focusScanned || 0),
-                        backgroundColor: '#ef444480',
+                        backgroundColor: '#dc2626d0',
                         stack: '8-Focus',
                         borderRadius: 6
                     },
                     {
                         label: 'Non-Index (Manual)',
                         data: trendsData.map(d => d.nonIndexManual || 0),
-                        backgroundColor: '#3b82f6',
+                        backgroundColor: '#1d4ed8',
                         stack: 'Non-Index',
                         borderRadius: 6
                     },
                     {
                         label: 'Non-Index (Scanned)',
                         data: trendsData.map(d => d.nonIndexScanned || 0),
-                        backgroundColor: '#3b82f680',
+                        backgroundColor: '#2563ebd0',
                         stack: 'Non-Index',
                         borderRadius: 6
                     },
                     {
                         label: 'PSI (Manual)',
                         data: trendsData.map(d => d.psiManual || 0),
-                        backgroundColor: '#D4AF37',
+                        backgroundColor: '#b45309',
                         stack: 'PSI',
                         borderRadius: 6
                     },
                     {
                         label: 'PSI (Scanned)',
                         data: trendsData.map(d => d.psiScanned || 0),
-                        backgroundColor: '#D4AF3780',
+                        backgroundColor: '#d97706d0',
                         stack: 'PSI',
                         borderRadius: 6
                     }
@@ -934,7 +930,7 @@
 
         const kpiPeakMonthEl = document.getElementById('modalKpiPeakMonth');
         const kpiPeakCountEl = document.getElementById('modalKpiPeakCount');
-        if (kpiPeakMonthEl) kpiPeakMonthEl.textContent = matchedCount > 0 ? MONTH_LABELS[maxMonthIdx] : '--';
+        if (kpiPeakMonthEl) kpiPeakMonthEl.textContent = matchedCount > 0 ? FULL_MONTH_NAMES[maxMonthIdx] : '--';
         if (kpiPeakCountEl) {
             kpiPeakCountEl.textContent = matchedCount > 0 
                 ? `${maxMonthVal} records (${((maxMonthVal / Math.max(matchedCount, 1)) * 100).toFixed(0)}%)` 
@@ -1207,7 +1203,7 @@
 
         const kpiPeakMonth = document.getElementById('modalKpiPeakMonth');
         const kpiPeakCount = document.getElementById('modalKpiPeakCount');
-        if (kpiPeakMonth) kpiPeakMonth.textContent = total > 0 ? monthNames[maxMonthIdx] : 'None';
+        if (kpiPeakMonth) kpiPeakMonth.textContent = total > 0 ? FULL_MONTH_NAMES[maxMonthIdx] : 'None';
         if (kpiPeakCount) kpiPeakCount.textContent = total > 0 ? `${maxMonthVal} records (${((maxMonthVal/Math.max(total, 1))*100).toFixed(0)}%)` : '0 records';
 
         const sortedOffenses = Object.entries(offenseCounts).sort((a, b) => b[1] - a[1]);
