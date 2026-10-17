@@ -1951,10 +1951,23 @@ function buildDynamicAnalysisText(
 **Suggestions**: ${tailoredSuggestion}`;
 }
 
+const aiTrendMemoryCache = new Map<string, { analysis: string; timestamp: number }>();
+let geminiRateLimitedUntil = 0;
+
 export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   try {
     const selectedBarangay = req.query.barangay ? String(req.query.barangay).trim() : 'ALL';
     const selectedYear = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
+
+    // Check memory cache first (TTL: 30 minutes)
+    const cacheKey = `${selectedBarangay.toLowerCase()}_${selectedYear}`;
+    const cached = aiTrendMemoryCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < 30 * 60 * 1000)) {
+      return res.json({
+        success: true,
+        analysis: cached.analysis
+      });
+    }
 
     let points: any[] = [];
     try {
@@ -1990,9 +2003,11 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
     });
 
     if (filteredPoints.length === 0) {
+      const emptyAnalysis = `**Trend**: Recorded incidents across ${selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay} for ${selectedYear} remain exceptionally calm with zero active or reported crimes.\n\n**Pattern**: A consistent zero-incident baseline is observed across all 12 operational months.\n\n**Suggestions**: Maintain high-visibility preventive patrols, routine barangay tanod coordination, and active community outreach to preserve this peaceful environment.`;
+      aiTrendMemoryCache.set(cacheKey, { analysis: emptyAnalysis, timestamp: Date.now() });
       return res.json({
         success: true,
-        analysis: `No active crime incidents recorded yet for Barangay ${selectedBarangay === 'ALL' ? 'overall' : selectedBarangay} in the local system. The region is deemed safe with stable patrol coverage.`
+        analysis: emptyAnalysis
       });
     }
 
@@ -2040,9 +2055,13 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
 
     let analysisText = "";
 
-    try {
-      const client = getGptOssClient();
-      const prompt = `You are GPT-OSS 120B, a high-level Crime Intelligence AI. Analyze the following crime data for ${barangayName} in the year ${selectedYear}:
+    // If Gemini was recently rate-limited, immediately use dynamic analysis
+    if (Date.now() < geminiRateLimitedUntil) {
+      analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount);
+    } else {
+      try {
+        const client = getGptOssClient();
+        const prompt = `You are GPT-OSS 120B, a high-level Crime Intelligence AI. Analyze the following crime data for ${barangayName} in the year ${selectedYear}:
 Total Incidents: ${totalCount}
 Peak Month: ${peakMonth || 'N/A'} with ${peakCount} incidents
 Top Crime Category: ${topCrime} (${topCrimeCount} incidents)
@@ -2058,31 +2077,30 @@ Provide a clear, actionable analysis organized strictly into 3 labelled sections
 
 IMPORTANT: Keep each section brief and separate them with blank lines.`;
 
-      let aiResponse: any = null;
-      const modelsToTry = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-      for (const m of modelsToTry) {
-        try {
-          const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI generation timeout')), 4000));
-          const generatePromise = client.models.generateContent({
-            model: m,
-            contents: prompt
-          });
-          aiResponse = await Promise.race([generatePromise, timeoutPromise]);
-          if (aiResponse && aiResponse.text) break;
-        } catch (mErr: any) {
-          console.warn(`[AI TRENDS] Model ${m} failed or timed out:`, mErr?.message || mErr);
-        }
-      }
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('AI generation timeout')), 2500));
+        const generatePromise = client.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: prompt
+        });
+        const aiResponse: any = await Promise.race([generatePromise, timeoutPromise]);
 
-      if (aiResponse && aiResponse.text) {
-        analysisText = aiResponse.text;
-      } else {
-        throw new Error('All Gemini model attempts exhausted or timed out.');
+        if (aiResponse && aiResponse.text) {
+          analysisText = aiResponse.text;
+        } else {
+          throw new Error('AI returned empty text');
+        }
+      } catch (aiError: any) {
+        const errMsg = aiError?.message || String(aiError);
+        if (errMsg.includes('429') || errMsg.includes('RESOURCE_EXHAUSTED') || errMsg.includes('quota')) {
+          geminiRateLimitedUntil = Date.now() + 15 * 60 * 1000; // Circuit break for 15 minutes
+        }
+        console.info("[AI Trends] Fast fallback to dynamic intelligence analysis:", errMsg);
+        analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount);
       }
-    } catch (aiError: any) {
-      console.info("AI Generation falling back to dynamic intelligence analysis:", aiError?.message || String(aiError));
-      analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount);
     }
+
+    // Save to memory cache
+    aiTrendMemoryCache.set(cacheKey, { analysis: analysisText, timestamp: Date.now() });
 
     res.json({
       success: true,

@@ -17,7 +17,7 @@
     <meta name="theme-color" content="#1A3A5C">
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 
-    <title>Admin Dashboard - MIMPA</title>
+    <title>Admin Dashboard - MIMPAS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -136,7 +136,7 @@
         }
 
         .sidebar-item-active {
-            @apply bg-white/10 border-l-4 border-pnp-gold/80 shadow-[inset_-10px_0_20px_rgba(0, 0, 0, 0.1)];
+            @apply bg-white/20 border-l-4 border-white shadow-[inset_-10px_0_20px_rgba(255, 255, 255, 0.05)];
         }
 
         /* Global scrollbar hiding */
@@ -161,9 +161,9 @@
 
         @media (min-width: 1024px) {
             #sidebar:not(.sidebar-hidden) + #mainContent {
-                margin-left: 18rem;
-                /* w-72 matches aside width */
-                width: calc(100% - 18rem) !important;
+                margin-left: 16rem;
+                /* w-64 matches aside width (decreased by 10% from 18rem) */
+                width: calc(100% - 16rem) !important;
             }
         }
 
@@ -177,8 +177,8 @@
         @media (min-width: 1024px) {
             #sidebar:not(.sidebar-hidden) ~ #mainContent #layoutHeader,
             #sidebar:not(.sidebar-hidden) ~ #mainContent #layoutFooter {
-                left: 18rem;
-                width: calc(100% - 18rem);
+                left: 16rem;
+                width: calc(100% - 16rem);
             }
         }
     </style>
@@ -209,7 +209,7 @@
             </h2>
 
             <p class="text-xs text-slate-400 leading-relaxed font-medium mb-6">
-                The MIMPA (Municipality Incident Management and Public Advisory) Administration Console and Geospatial Intelligence Command is strictly restricted to desktop and laptop computers (screens 1024px or wider). Mobile access is disabled for operational security, tactical mapping precision, and data integrity.
+                The MIMPAS (Municipality Incident Management and Public Advisory Sta.Cruz) Administration Console and Crime Map Command is strictly restricted to desktop and laptop computers (screens 1024px or wider). Mobile access is disabled for operational security, tactical mapping precision, and data integrity.
             </p>
 
             <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/50 mb-6 flex items-center space-x-3 text-left">
@@ -228,159 +228,141 @@
         </div>
     </div>
 
-    <!-- Sidebar -->
+    <!-- Fixed Sidebar (All controls visible, high-contrast readable text) -->
     <aside id="sidebar"
-        class="w-72 pnp-gradient-blue text-white hidden lg:flex flex-col fixed h-full z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 sidebar-scroll overflow-y-auto <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'sidebar-hidden' : '' %>">
-        <div class="p-8 border-b border-white/10 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg"
-                    onerror="this.onerror=null; this.src='/favicon.ico';">
-                <div>
-                    <h1 class="text-lg font-black tracking-tighter leading-none">MIMPA</h1>
-                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-bold mt-0.5">Municipality Incident Management and Public Advisory</p>
+        class="w-64 pnp-gradient-blue text-white hidden lg:flex flex-col fixed top-0 left-0 h-screen z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 overflow-y-auto justify-between <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'sidebar-hidden' : '' %>">
+        <!-- Brand Header with Logo in White Circle -->
+        <div class="px-4 py-3.5 border-b border-white/10 flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3 min-w-0">
+                <!-- White circular logo container with MIMPAS logo -->
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1 shadow-md border border-white/20 shrink-0">
+                    <img src="/favicon.png" alt="MIMPAS Logo" class="w-full h-full object-contain rounded-full"
+                        onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-base font-black tracking-wider leading-none text-white">M I M P A S</h1>
+                    <p class="text-[8px] text-blue-100 uppercase tracking-wider font-bold mt-1 leading-tight">Municipality Incident Management and Public Advisory Sta.Cruz</p>
                 </div>
             </div>
-            <button id="sidebarClose" class="lg:hidden text-white/50 hover:text-white transition">
+            <button id="sidebarClose" class="lg:hidden text-white/50 hover:text-white transition cursor-pointer">
                 <i class="fas fa-times"></i>
             </button>
         </div>
 
-        <nav class="flex-grow p-4 space-y-1.5">
-            <p class="text-[10px] text-blue-400 uppercase tracking-[0.2em] font-black mb-4 px-4 opacity-50">Main Menu
-            </p>
+        <!-- Navigation Menu (All items clearly visible, high contrast text) -->
+        <nav class="flex-grow px-3 py-2 space-y-1.5 overflow-y-auto flex flex-col justify-start">
+            <p class="text-[9.5px] text-blue-200 uppercase tracking-[0.2em] font-black mb-1 px-3">Main Menu</p>
 
             <a href="/admin/dashboard"
-                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Dashboard' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div
-                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Dashboard' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Dashboard' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-chart-line text-xs"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest">Dashboard</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Dashboard</span>
             </a>
 
             <a href="/admin/bulletins"
-                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div
-                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-bullhorn text-xs"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest">Bulletins</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Bulletins</span>
             </a>
 
             <a href="/admin/reports"
-                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Crime Reports' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div
-                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Crime Reports' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Crime Reports' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-file-invoice text-xs"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest">Crime Reports</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Crime Reports</span>
             </a>
 
             <a href="/admin/map"
-                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Map' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div
-                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <i class="fas fa-map-marked-alt text-xs"></i>
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Map' || title === 'Map Management' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Map' || title === 'Map Management' ? 'text-white' : 'text-white/80' %>">
+                    <i class="fas fa-map-location-dot text-xs"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest">Map</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Crime Map</span>
             </a>
 
             <a href="/admin/hotlines"
-                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Hotlines' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div
-                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Hotlines' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Hotlines' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-phone-volume text-xs"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest">Hotlines</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Hotlines</span>
             </a>
 
             <% if (user && user.role === 'superadmin') { %>
                 <a href="/admin/users"
-                    class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Users' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                    <div
-                        class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Users' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                    <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Users' ? 'text-white' : 'text-white/80' %>">
                         <i class="fas fa-users-cog text-xs"></i>
                     </div>
-                    <span class="text-[10px] font-black uppercase tracking-widest">Users</span>
+                    <span class="text-xs font-bold uppercase tracking-wider">Users</span>
                 </a>
             <% } %>
 
             <a href="/admin/archive"
-                class="flex items-center space-x-3 px-4 py-3.5 rounded-2xl transition-all duration-300 group <%= title === 'Archive' ? 'sidebar-item-active text-pnp-gold' : 'hover:bg-white/5 text-slate-400 hover:text-white' %>">
-                <div
-                    class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Archive' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Archive' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-box-archive text-xs"></i>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-widest">Archive</span>
+                <span class="text-xs font-bold uppercase tracking-wider">Archive</span>
             </a>
         </nav>
 
-        <div class="p-6 border-t border-white/10 space-y-2">
+        <!-- Sidebar Footer -->
+        <div class="p-3 border-t border-white/10 space-y-1.5 shrink-0">
+            <!-- Quick utilities: Dark Theme, Instruction Manual, Public Site -->
+            <div class="flex items-center justify-between gap-1.5 px-1 py-0.5">
+                <button id="darkModeToggle" title="Toggle Theme (Dark / Light)"
+                    class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hover:text-white flex items-center justify-center transition cursor-pointer">
+                    <i class="fas fa-moon text-xs dark:hidden"></i>
+                    <i class="fas fa-sun text-xs hidden dark:block"></i>
+                </button>
+                <button onclick="toggleHelpModal()" title="Instruction Manual"
+                    class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hover:text-white flex items-center justify-center transition cursor-pointer">
+                    <i class="fas fa-question text-xs"></i>
+                </button>
+                <a href="/" title="View Public Portal"
+                    class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hover:text-white flex items-center justify-center transition cursor-pointer">
+                    <i class="fas fa-globe text-xs"></i>
+                </a>
+            </div>
+
             <button onclick="openChangePasswordModal()"
-                class="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition duration-300 group cursor-pointer"
+                class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition duration-200 group cursor-pointer"
                 title="Change Account Password">
-                <i class="fas fa-key text-[10px] text-pnp-gold group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Change Password</span>
+                <i class="fas fa-key text-[10px] text-white/80 group-hover:scale-105 transition shrink-0"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-white">Change Password</span>
             </button>
             <a href="/admin/logout" onclick="confirmLogout(event); return false;"
-                class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-600 hover:text-white transition duration-300 group cursor-pointer"
+                class="flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-500/20 text-red-200 hover:bg-red-600 hover:text-white transition duration-200 group cursor-pointer"
                 title="End Administrative Session">
-                <i class="fas fa-sign-out-alt text-[10px] group-hover:scale-110 transition"></i>
-                <span class="text-[10px] font-bold uppercase tracking-widest">Logout</span>
+                <i class="fas fa-sign-out-alt text-[10px] group-hover:scale-105 transition shrink-0"></i>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-red-200 group-hover:text-white">Logout</span>
             </a>
         </div>
     </aside>
 
-    <!-- Main Content Area -->
+    <!-- Main Content Area (Navbar removed per user request) -->
     <div id="mainContent"
-        class="hidden lg:flex flex-grow lg:ml-72 <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'main-content-expanded' : '' %> flex-col min-h-screen transition-all duration-300 w-full lg:w-auto">
-        <!-- Top Header (Restored Navbar) -->
-        <header
-            class="bg-pnp-blue text-white h-20 border-b-4 border-pnp-gold shadow-2xl flex items-center justify-between px-4 sm:px-6 md:px-10 fixed top-0 right-0 z-40"
-            id="layoutHeader">
-            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
-                <button id="sidebarToggle"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition border border-white/20 shrink-0 cursor-pointer"
-                    title="Toggle Sidebar Navigation">
-                    <i class="fas fa-bars"></i>
-                </button>
-
-                <div class="flex items-center space-x-2 sm:space-x-4 min-w-0">
-                    <h2 class="text-base sm:text-xl font-black text-white tracking-tighter uppercase truncate">
-                        <%= title %>
-                    </h2>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <!-- Help / Manual Button -->
-                <button onclick="toggleHelpModal()" title="View Instruction Manual"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer">
-                    <i class="fas fa-question text-sm"></i>
-                </button>
-
-                <!-- Public Site Button -->
-                <a href="/" title="View Public Site"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer">
-                    <i class="fas fa-globe text-sm"></i>
-                </a>
-
-                <!-- Dark Mode Toggle (Synced with Public Design) -->
-                <button id="darkModeToggle"
-                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer">
-                    <i class="fas fa-moon text-sm dark:hidden"></i>
-                    <i class="fas fa-sun text-sm hidden dark:block"></i>
-                </button>
-            </div>
-        </header>
+        class="hidden lg:flex flex-grow lg:ml-64 <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'main-content-expanded' : '' %> flex-col min-h-screen transition-all duration-300 w-full lg:w-auto">
+        <!-- Floating Sidebar Toggle Button (Visible if sidebar is collapsed) -->
+        <button id="sidebarToggle"
+            class="fixed top-3 left-3 z-40 w-9 h-9 rounded-xl bg-pnp-blue text-white shadow-lg flex items-center justify-center hover:bg-blue-900 transition <%= typeof hideSidebar !== 'undefined' && hideSidebar ? '' : 'lg:hidden' %> cursor-pointer"
+            title="Toggle Sidebar Navigation">
+            <i class="fas fa-bars text-sm"></i>
+        </button>
 
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-6 sm:p-10 pt-28 pb-32') %>">
+        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0' : 'p-4 sm:p-6 pb-20') %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div
-                    class="bg-green-50 text-green-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-green-100 flex items-center space-x-4 shadow-sm mx-10">
-                    <i class="fas fa-check-circle text-lg"></i>
+                    class="bg-green-50 text-green-600 p-4 sm:p-5 rounded-xl text-xs font-bold uppercase tracking-widest mb-6 border border-green-100 flex items-center space-x-4 shadow-sm mx-4 sm:mx-6">
+                    <i class="fas fa-check-circle text-base"></i>
                     <span>
                         <%= success_msg %>
                     </span>
@@ -388,8 +370,8 @@
                 <% } %>
                     <% if (typeof error_msg !=='undefined' && error_msg) { %>
                         <div
-                            class="bg-red-50 text-red-600 p-6 rounded-2xl text-xs font-bold uppercase tracking-widest mb-8 border border-red-100 flex items-center space-x-4 shadow-sm mx-10">
-                            <i class="fas fa-exclamation-circle text-lg"></i>
+                            class="bg-red-50 text-red-600 p-4 sm:p-5 rounded-xl text-xs font-bold uppercase tracking-widest mb-6 border border-red-100 flex items-center space-x-4 shadow-sm mx-4 sm:mx-6">
+                            <i class="fas fa-exclamation-circle text-base"></i>
                             <span>
                                 <%= error_msg %>
                             </span>
@@ -399,12 +381,15 @@
                             <%- body %>
         </main>
     </div>
+
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
-        darkModeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-        });
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            });
+        }
 
         // Sidebar Toggle Logic
         const sidebarToggle = document.getElementById('sidebarToggle');
