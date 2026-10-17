@@ -31,12 +31,44 @@
     const uniqueBarangays = new Set(safePoints.map(p => p.barangay).filter(b => b));
     const uniqueBarangaysCount = uniqueBarangays.size;
 %>
-<!-- Top Section: Monthly Crime Trends & Strategic Directives (Picture 1 Inspired Theme) -->
-<div class="bg-slate-50/70 dark:bg-slate-800 rounded-2xl sm:rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700/80 p-4 sm:p-5 mb-5 transition-all relative">
+<!-- Top Section 1: User Greeting & Aligned Sector Map Quick Access -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 mb-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <!-- Greeting on Left -->
+    <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center border border-blue-500/20 shadow-xs shrink-0">
+            <i class="fas fa-shield-halved text-2xl"></i>
+        </div>
+        <div>
+            <h1 class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+                <span>Welcome back, <%= (typeof user !== 'undefined' && user && user.name) ? user.name : 'Officer' %></span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                MIMPA Incident Command & Geospatial Analytics Console &bull; Sta. Cruz MPS
+            </p>
+        </div>
+    </div>
+
+    <!-- Sector Map Quick Button Aligned on Right -->
+    <a href="/admin/map" class="flex items-center gap-3.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-blue text-slate-800 dark:text-white border border-slate-200 dark:border-slate-700 transition-all duration-200 shadow-xs group shrink-0" title="Launch Sector Map">
+        <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-pnp-blue dark:text-blue-400 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+            <i class="fas fa-map-location-dot text-base"></i>
+        </div>
+        <div class="text-left">
+            <span class="text-[9px] font-black uppercase tracking-wider block text-slate-400 dark:text-slate-400 group-hover:text-blue-100 transition-colors">Tactical Map</span>
+            <span class="text-xs font-black uppercase tracking-tight block">Sector Map (<%= uniqueBarangaysCount || 26 %> Sectors)</span>
+        </div>
+        <div class="w-6 h-6 rounded-lg bg-slate-200/70 dark:bg-slate-700 group-hover:bg-white/20 flex items-center justify-center text-slate-500 dark:text-slate-300 group-hover:text-white group-hover:translate-x-0.5 transition-all ml-1">
+            <i class="fas fa-chevron-right text-[10px]"></i>
+        </div>
+    </a>
+</div>
+
+<!-- Top Section 2: Monthly Crime Trends & Strategic Directives -->
+<div class="bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl shadow-xs border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 mb-5 transition-all relative">
     
-    <!-- Header: Title on Left, Dropdowns, Category Buttons & Bulletins on Right -->
-    <div class="flex flex-wrap items-center justify-between gap-3 pb-3.5 mb-4 border-b border-slate-200/80 dark:border-slate-700/60">
-        <!-- Title Text (No Logo, Single Line) -->
+    <!-- Header: Title Text on top, Dropdowns & Category Buttons BELOW LEFT -->
+    <div class="flex flex-col gap-2.5 pb-3.5 mb-4 border-b border-slate-200/80 dark:border-slate-700/60">
+        <!-- Title Text (Single Line, No Logo) -->
         <div class="flex items-center">
             <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <span>Monthly Crime Trends</span>
@@ -45,7 +77,7 @@
             </h2>
         </div>
 
-        <!-- Controls: Dropdown on the left side with 8-focus, non-index, PSI, and Bulletins on the right -->
+        <!-- Controls: Below LEFT of the title text -->
         <div class="flex items-center gap-2 flex-wrap">
             <!-- Year Dropdown -->
             <div class="relative w-24">
@@ -59,7 +91,7 @@
 
                     if(availableYears.length === 0) availableYears.push(new Date().getFullYear());
                 %>
-                <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 text-[11px] font-bold uppercase text-slate-800 dark:text-white focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs">
+                <select id="monthlyTrendYearFilter" onchange="filterMonthlyTrends()" class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-bold uppercase text-slate-800 dark:text-white focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs">
                     <% availableYears.forEach(year => { %>
                         <option value="<%= year %>" <%= year === defaultYearVal ? 'selected' : '' %>><%= year %></option>
                     <% }) %>
@@ -67,8 +99,8 @@
             </div>
 
             <!-- Barangay Dropdown -->
-            <div class="relative w-36 sm:w-44">
-                <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-2 py-1.5 text-[11px] font-bold uppercase text-slate-800 dark:text-white focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs truncate">
+            <div class="relative w-40 sm:w-48">
+                <select id="monthlyTrendBarangayFilter" onchange="filterMonthlyTrends()" class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] font-bold uppercase text-slate-800 dark:text-white focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-2xs truncate">
                     <option value="ALL">ALL BARANGAYS</option>
                     <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
                         , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
@@ -97,78 +129,82 @@
                     <span>PSI</span>
                 </button>
             </div>
-
-            <!-- Repositioned Bulletins Button (Removed bottom container) -->
-            <a href="/admin/bulletins" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 dark:bg-slate-700/80 dark:text-white dark:hover:bg-blue-600 border border-slate-300 dark:border-slate-600 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs group" title="View Active Bulletins">
-                <i class="fas fa-bullhorn text-[11px] text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors"></i>
-                <span>Bulletins</span>
-                <span class="px-1.5 py-0.2 rounded-md bg-blue-600 text-white text-[10px] font-black tabular-nums leading-none group-hover:bg-white group-hover:text-blue-600 transition-colors"><%= safeStats.totalBulletins %></span>
-            </a>
         </div>
     </div>
 
-    <!-- Main Section: Bar Graph (Left) & KPIs in 1 Column (Right) aligned to Bar Graph height (20% decreased size) -->
+    <!-- Main Section: Bar Graph (Left) & 4 KPI Cards in 1 Column (Right) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch mb-4 sm:mb-5">
-        <!-- Left: Bar Graph Canvas (20% decreased height) -->
-        <div class="lg:col-span-9 bg-slate-100/90 dark:bg-slate-900/60 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200/90 dark:border-slate-800 flex flex-col justify-between">
-            <div class="relative w-full h-[270px] sm:h-[295px]">
+        <!-- Left: Bar Graph Canvas -->
+        <div class="lg:col-span-9 bg-slate-50 dark:bg-slate-950/60 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-200/80 dark:border-slate-800 flex flex-col justify-between">
+            <div class="relative w-full h-[320px] sm:h-[340px]">
                 <canvas id="crimeTrendChart"></canvas>
             </div>
         </div>
 
-        <!-- Right: 1 Column with Total Incidents (Quick Button), Peak Month, and Leading Offense (Selection) -->
-        <div class="lg:col-span-3 flex flex-col justify-between gap-2.5 sm:gap-3">
+        <!-- Right: 1 Column with Total Incidents, PNP Bulletins, Peak Month, and Leading Offense (Selection) -->
+        <div class="lg:col-span-3 flex flex-col justify-between gap-2 sm:gap-2.5">
             <!-- 1. Total Incidents Card (Quick button to crime reports) -->
-            <a href="/admin/reports" class="p-3 sm:p-3.5 bg-white dark:bg-slate-900/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-600 transition-all cursor-pointer group" title="Open Crime Reports">
+            <a href="/admin/reports" class="p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-600 transition-all cursor-pointer group" title="Open Crime Reports">
                 <div class="flex items-center justify-between mb-1">
                     <div class="flex items-center gap-1.5">
                         <span class="text-[9px] sm:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Total Incidents</span>
                         <i class="fas fa-arrow-up-right-from-square text-[8px] text-slate-400 group-hover:text-blue-500 transition-colors"></i>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <i class="fas fa-folder-open text-xs"></i>
                     </div>
                 </div>
                 <div>
-                    <span id="modalKpiTotal" class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tabular-nums block tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">0</span>
+                    <span id="modalKpiTotal" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums block tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">0</span>
                     <span class="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mt-0.5">Recorded Cases &bull; View Reports</span>
                 </div>
             </a>
 
-            <!-- 2. Peak Month Card -->
-            <div class="p-3 sm:p-3.5 bg-white dark:bg-slate-900/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+            <!-- 2. PNP Bulletins Card (Exact Same UI as Total Incidents) -->
+            <a href="/admin/bulletins" class="p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md hover:border-blue-400 dark:hover:border-blue-600 transition-all cursor-pointer group" title="Open PNP Bulletins">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[9px] sm:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">PNP Bulletins</span>
+                        <i class="fas fa-arrow-up-right-from-square text-[8px] text-slate-400 group-hover:text-blue-500 transition-colors"></i>
+                    </div>
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                        <i class="fas fa-bullhorn text-xs"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tabular-nums block tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"><%= safeStats.totalBulletins || 0 %></span>
+                    <span class="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mt-0.5">Active Advisories &bull; View Bulletins</span>
+                </div>
+            </a>
+
+            <!-- 3. Peak Month Card -->
+            <div class="p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-1">
                     <span class="text-[9px] sm:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Peak Month</span>
-                    <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 flex items-center justify-center shrink-0">
                         <i class="fas fa-arrow-trend-up text-xs"></i>
                     </div>
                 </div>
                 <div>
                     <span id="modalKpiPeakMonth" class="text-sm sm:text-base font-black text-red-600 dark:text-red-400 uppercase leading-snug block break-words">--</span>
-                    <span id="modalKpiPeakCount" class="text-[9px] sm:text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">0 records</span>
+                    <span id="modalKpiPeakCount" class="text-[8px] sm:text-[9px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">0 records</span>
                 </div>
             </div>
 
-            <!-- 3. Leading Offense Card (Category Selection: ALL, 8-Focus, Non-Index, PSI) -->
-            <div class="p-3 sm:p-3.5 bg-white dark:bg-slate-900/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md transition-shadow">
+            <!-- 4. Leading Offense Card (Click whole container to open category selection popup) -->
+            <div onclick="openLeadingOffenseModal()" class="p-2.5 sm:p-3 bg-slate-50 dark:bg-slate-800/70 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between flex-1 shadow-xs hover:shadow-md hover:border-amber-400 dark:hover:border-amber-500 transition-all cursor-pointer group" title="Click to filter by category: ALL, 8-Focus, Non-Index, or PSI">
                 <div class="flex items-center justify-between mb-1">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="text-[9px] sm:text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Leading Offense:</span>
-                        <!-- Selection Dropdown -->
-                        <select id="leadingOffenseCategory" onchange="updateLeadingOffenseCategory(this.value)" class="text-[9px] font-black uppercase bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-1.5 py-0.5 text-slate-800 dark:text-slate-200 cursor-pointer focus:ring-1 focus:ring-amber-500 shadow-2xs">
-                            <option value="ALL" selected>ALL</option>
-                            <option value="8-Focus">8-FOCUS</option>
-                            <option value="Non-Index">NON-INDEX</option>
-                            <option value="PSI">PSI</option>
-                        </select>
+                        <span id="leadingOffenseCategoryBadge" class="text-[8px] sm:text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700">ALL</span>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                         <i class="fas fa-bullseye text-xs"></i>
                     </div>
                 </div>
                 <div class="min-w-0">
-                    <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase break-words whitespace-normal leading-tight block" title="--">--</span>
-                    <span id="modalKpiTopShare" class="text-[9px] sm:text-[10px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">0% of total</span>
+                    <span id="modalKpiTopCrime" class="text-xs sm:text-sm font-black text-slate-900 dark:text-white uppercase break-words whitespace-normal leading-tight block group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" title="--">--</span>
+                    <span id="modalKpiTopShare" class="text-[8px] sm:text-[9px] font-semibold text-slate-500 dark:text-slate-400 block mt-0.5">0 cases (0% of total)</span>
                 </div>
             </div>
         </div>
@@ -270,8 +306,133 @@
     </div>
 </div>
 
+<!-- Leading Offense Category Selection Modal -->
+<div id="leadingOffenseModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs transition-opacity duration-300 hidden" onclick="if(event.target === this) closeLeadingOffenseModal()">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full overflow-hidden animate-scale-up">
+        <!-- Modal Header -->
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center border border-amber-500/20 shrink-0">
+                    <i class="fas fa-bullseye text-base"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                        Select Leading Offense Category
+                    </h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                        Choose a category to display top crimes and filter the monthly bar graph
+                    </p>
+                </div>
+            </div>
+            <button onclick="closeLeadingOffenseModal()" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition cursor-pointer">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
 
+        <!-- Modal Choices List -->
+        <div class="p-5 sm:p-6 space-y-3">
+            <!-- Choice 1: ALL CATEGORIES -->
+            <button type="button" onclick="selectLeadingOffenseCategory('ALL')" id="choiceCat_ALL" class="w-full text-left p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all flex items-center justify-between group cursor-pointer">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <i class="fas fa-layer-group text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">All Categories</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">Complete Overview</span>
+                        </div>
+                        <div class="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase">Leading:</span>
+                            <span id="choiceCrime_ALL" class="text-xs font-black text-slate-800 dark:text-white uppercase truncate">--</span>
+                            <span id="choiceStats_ALL" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">(0 cases)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="choiceCheckmark shrink-0 w-6 h-6 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-transparent group-hover:border-blue-500">
+                    <i class="fas fa-check text-[10px]"></i>
+                </div>
+            </button>
 
+            <!-- Choice 2: 8-FOCUS CRIMES -->
+            <button type="button" onclick="selectLeadingOffenseCategory('8-Focus')" id="choiceCat_8Focus" class="w-full text-left p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-red-500 dark:hover:border-red-500 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-red-50/50 dark:hover:bg-red-950/30 transition-all flex items-center justify-between group cursor-pointer">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
+                        <i class="fas fa-crosshairs text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">8-Focus Crimes</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300">Index Offenses</span>
+                        </div>
+                        <div class="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase">Leading:</span>
+                            <span id="choiceCrime_8Focus" class="text-xs font-black text-red-600 dark:text-red-400 uppercase truncate">--</span>
+                            <span id="choiceStats_8Focus" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">(0 cases)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="choiceCheckmark shrink-0 w-6 h-6 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-transparent group-hover:border-red-500">
+                    <i class="fas fa-check text-[10px]"></i>
+                </div>
+            </button>
+
+            <!-- Choice 3: NON-INDEX CRIMES -->
+            <button type="button" onclick="selectLeadingOffenseCategory('Non-Index')" id="choiceCat_NonIndex" class="w-full text-left p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 transition-all flex items-center justify-between group cursor-pointer">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                        <i class="fas fa-shield-virus text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Non-Index Crimes</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">Special Laws & Ordinances</span>
+                        </div>
+                        <div class="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase">Leading:</span>
+                            <span id="choiceCrime_NonIndex" class="text-xs font-black text-blue-600 dark:text-blue-400 uppercase truncate">--</span>
+                            <span id="choiceStats_NonIndex" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">(0 cases)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="choiceCheckmark shrink-0 w-6 h-6 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-transparent group-hover:border-blue-500">
+                    <i class="fas fa-check text-[10px]"></i>
+                </div>
+            </button>
+
+            <!-- Choice 4: PSI (PUBLIC SAFETY INCIDENTS) -->
+            <button type="button" onclick="selectLeadingOffenseCategory('PSI')" id="choiceCat_PSI" class="w-full text-left p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-amber-500 dark:hover:border-amber-500 bg-slate-50/70 dark:bg-slate-800/60 hover:bg-amber-50/50 dark:hover:bg-amber-950/30 transition-all flex items-center justify-between group cursor-pointer">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                        <i class="fas fa-triangle-exclamation text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Public Safety Incidents (PSI)</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300">Accidents & Disasters</span>
+                        </div>
+                        <div class="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                            <span class="text-[10px] text-slate-400 font-bold uppercase">Leading:</span>
+                            <span id="choiceCrime_PSI" class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase truncate">--</span>
+                            <span id="choiceStats_PSI" class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">(0 cases)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="choiceCheckmark shrink-0 w-6 h-6 rounded-full border border-slate-300 dark:border-slate-700 flex items-center justify-center text-transparent group-hover:border-amber-500">
+                    <i class="fas fa-check text-[10px]"></i>
+                </div>
+            </button>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-[11px] text-slate-400 font-medium">Click any category above to filter the chart & update leading crime</span>
+            <button onclick="closeLeadingOffenseModal()" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white text-xs font-bold uppercase tracking-wider hover:bg-slate-300 dark:hover:bg-slate-600 transition cursor-pointer">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -859,9 +1020,11 @@
         window.currentCategoryCounts = categoryCounts;
         window.currentMatchedCount = matchedCount;
 
-        // Update Leading Offense based on selection (ALL, 8-Focus, Non-Index, PSI)
-        const selectedLeadingCat = document.getElementById('leadingOffenseCategory')?.value || 'ALL';
-        window.updateLeadingOffenseCategory(selectedLeadingCat);
+        // Update Leading Offense based on active category (ALL, 8-Focus, Non-Index, PSI)
+        window.updateLeadingOffenseCard(window.activeLeadingCategory || 'ALL');
+        if (window.activeLeadingCategory && window.activeLeadingCategory !== 'ALL') {
+            window.applyCategoryFilterToChart(window.activeLeadingCategory);
+        }
 
         const trendScopeYear = document.getElementById('trendScopeYear');
         if (trendScopeYear) {
@@ -880,9 +1043,157 @@
         }
     };
 
-    window.updateLeadingOffenseCategory = function(cat) {
-        if (!cat) cat = document.getElementById('leadingOffenseCategory')?.value || 'ALL';
-        
+    window.activeLeadingCategory = 'ALL';
+
+    window.openLeadingOffenseModal = function() {
+        const modal = document.getElementById('leadingOffenseModal');
+        if (!modal) return;
+
+        function computeTop(countsObj, totalScope) {
+            const sorted = Object.entries(countsObj || {}).sort((a, b) => b[1] - a[1]);
+            if (sorted.length === 0 || sorted[0][1] === 0) {
+                return { name: 'NONE', cases: 0, share: '0' };
+            }
+            const topName = sorted[0][0];
+            const topCases = sorted[0][1];
+            const share = totalScope > 0 ? ((topCases / totalScope) * 100).toFixed(1) : '0';
+            return { name: topName, cases: topCases, share };
+        }
+
+        const overallTop = computeTop(window.currentOverallCounts, window.currentMatchedCount);
+        const top8Focus = computeTop(
+            (window.currentCategoryCounts && window.currentCategoryCounts['8-Focus']) || {},
+            Object.values((window.currentCategoryCounts && window.currentCategoryCounts['8-Focus']) || {}).reduce((a, b) => a + b, 0)
+        );
+        const topNonIndex = computeTop(
+            (window.currentCategoryCounts && window.currentCategoryCounts['Non-Index']) || {},
+            Object.values((window.currentCategoryCounts && window.currentCategoryCounts['Non-Index']) || {}).reduce((a, b) => a + b, 0)
+        );
+        const topPSI = computeTop(
+            (window.currentCategoryCounts && window.currentCategoryCounts['PSI']) || {},
+            Object.values((window.currentCategoryCounts && window.currentCategoryCounts['PSI']) || {}).reduce((a, b) => a + b, 0)
+        );
+
+        const updateChoice = (catKey, topObj) => {
+            const crimeEl = document.getElementById(`choiceCrime_${catKey}`);
+            const statsEl = document.getElementById(`choiceStats_${catKey}`);
+            if (crimeEl) crimeEl.textContent = topObj.name;
+            if (statsEl) statsEl.innerHTML = `(${topObj.cases} cases &bull; ${topObj.share}%)`;
+        };
+
+        updateChoice('ALL', overallTop);
+        updateChoice('8Focus', top8Focus);
+        updateChoice('NonIndex', topNonIndex);
+        updateChoice('PSI', topPSI);
+
+        const allCatKeys = [
+            { id: 'choiceCat_ALL', cat: 'ALL' },
+            { id: 'choiceCat_8Focus', cat: '8-Focus' },
+            { id: 'choiceCat_NonIndex', cat: 'Non-Index' },
+            { id: 'choiceCat_PSI', cat: 'PSI' }
+        ];
+
+        allCatKeys.forEach(item => {
+            const btn = document.getElementById(item.id);
+            if (!btn) return;
+            const check = btn.querySelector('.choiceCheckmark');
+            if (item.cat === window.activeLeadingCategory) {
+                btn.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/70', 'dark:bg-blue-950/40');
+                if (check) {
+                    check.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                    check.classList.remove('text-transparent');
+                }
+            } else {
+                btn.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50/70', 'dark:bg-blue-950/40');
+                if (check) {
+                    check.classList.remove('bg-blue-600', 'text-white', 'border-blue-600');
+                    check.classList.add('text-transparent');
+                }
+            }
+        });
+
+        modal.classList.remove('hidden');
+    };
+
+    window.closeLeadingOffenseModal = function() {
+        const modal = document.getElementById('leadingOffenseModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.selectLeadingOffenseCategory = function(cat) {
+        window.activeLeadingCategory = cat || 'ALL';
+        window.closeLeadingOffenseModal();
+
+        // 1. Update Leading Offense Card
+        window.updateLeadingOffenseCard(window.activeLeadingCategory);
+
+        // 2. Filter Bar Graph to the selected category
+        window.applyCategoryFilterToChart(window.activeLeadingCategory);
+    };
+
+    window.applyCategoryFilterToChart = function(cat) {
+        if (!window.trendChart) return;
+
+        if (cat === 'ALL') {
+            for (let i = 0; i < 6; i++) {
+                window.trendChart.getDatasetMeta(i).hidden = false;
+            }
+            ['legend8Focus', 'legendNonIndex', 'legendPSI'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.classList.remove('opacity-40', 'line-through');
+            });
+        } else if (cat === '8-Focus') {
+            window.trendChart.getDatasetMeta(0).hidden = false;
+            window.trendChart.getDatasetMeta(1).hidden = false;
+            window.trendChart.getDatasetMeta(2).hidden = true;
+            window.trendChart.getDatasetMeta(3).hidden = true;
+            window.trendChart.getDatasetMeta(4).hidden = true;
+            window.trendChart.getDatasetMeta(5).hidden = true;
+
+            const b0 = document.getElementById('legend8Focus');
+            const b1 = document.getElementById('legendNonIndex');
+            const b2 = document.getElementById('legendPSI');
+            if (b0) b0.classList.remove('opacity-40', 'line-through');
+            if (b1) b1.classList.add('opacity-40', 'line-through');
+            if (b2) b2.classList.add('opacity-40', 'line-through');
+        } else if (cat === 'Non-Index') {
+            window.trendChart.getDatasetMeta(0).hidden = true;
+            window.trendChart.getDatasetMeta(1).hidden = true;
+            window.trendChart.getDatasetMeta(2).hidden = false;
+            window.trendChart.getDatasetMeta(3).hidden = false;
+            window.trendChart.getDatasetMeta(4).hidden = true;
+            window.trendChart.getDatasetMeta(5).hidden = true;
+
+            const b0 = document.getElementById('legend8Focus');
+            const b1 = document.getElementById('legendNonIndex');
+            const b2 = document.getElementById('legendPSI');
+            if (b0) b0.classList.add('opacity-40', 'line-through');
+            if (b1) b1.classList.remove('opacity-40', 'line-through');
+            if (b2) b2.classList.add('opacity-40', 'line-through');
+        } else if (cat === 'PSI') {
+            window.trendChart.getDatasetMeta(0).hidden = true;
+            window.trendChart.getDatasetMeta(1).hidden = true;
+            window.trendChart.getDatasetMeta(2).hidden = true;
+            window.trendChart.getDatasetMeta(3).hidden = true;
+            window.trendChart.getDatasetMeta(4).hidden = false;
+            window.trendChart.getDatasetMeta(5).hidden = false;
+
+            const b0 = document.getElementById('legend8Focus');
+            const b1 = document.getElementById('legendNonIndex');
+            const b2 = document.getElementById('legendPSI');
+            if (b0) b0.classList.add('opacity-40', 'line-through');
+            if (b1) b1.classList.add('opacity-40', 'line-through');
+            if (b2) b2.classList.remove('opacity-40', 'line-through');
+        }
+        window.trendChart.update();
+    };
+
+    window.updateLeadingOffenseCard = function(cat) {
+        if (!cat) cat = window.activeLeadingCategory || 'ALL';
+
+        const badge = document.getElementById('leadingOffenseCategoryBadge');
+        if (badge) badge.textContent = cat;
+
         let counts = {};
         let totalScope = 0;
         if (cat === 'ALL') {
@@ -1275,29 +1586,7 @@
     };
 </script>
 
-<!-- Map Location Quick Card -->
-<div class="mb-8">
-    <a href="/admin/map" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 shadow-xs hover:shadow-md p-5 rounded-2xl relative overflow-hidden group transition-all duration-300 block">
-        <div class="relative z-10 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-11 h-11 rounded-2xl bg-blue-500/10 text-pnp-blue dark:text-blue-400 flex items-center justify-center border border-blue-500/20 shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-                    <i class="fas fa-map-location-dot text-lg"></i>
-                </div>
-                <div>
-                    <span class="text-[9px] text-pnp-blue dark:text-blue-400 font-black uppercase tracking-[0.2em] block">Interactive Geospatial Map</span>
-                    <h3 class="text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">Sector Mapping & Tactical Coverage</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5"><%= uniqueBarangaysCount || 26 %> Barangays Covered across Sta. Cruz</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-xs font-bold text-pnp-blue dark:text-blue-400 uppercase tracking-wider hidden sm:inline">Launch Map</span>
-                <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 group-hover:translate-x-1 group-hover:bg-pnp-blue group-hover:text-white transition-all">
-                    <i class="fas fa-chevron-right text-xs"></i>
-                </div>
-            </div>
-        </div>
-    </a>
-</div>
+
 
 <style>
     .custom-scrollbar::-webkit-scrollbar {

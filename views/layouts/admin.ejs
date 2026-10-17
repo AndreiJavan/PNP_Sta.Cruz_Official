@@ -17,7 +17,7 @@
     <meta name="theme-color" content="#1A3A5C">
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 
-    <title>Admin Dashboard - CPICRS</title>
+    <title>Admin Dashboard - MIMPA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -184,7 +184,7 @@
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
+<body class="bg-[#eaedf2] dark:bg-slate-950 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
     <!-- Global Network Resilience Banner -->
     <div id="networkStatusBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden transition-all duration-300 transform -translate-y-4 opacity-0 pointer-events-none">
         <div id="networkStatusContent" class="flex items-center gap-3 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl backdrop-blur-md border">
@@ -209,7 +209,7 @@
             </h2>
 
             <p class="text-xs text-slate-400 leading-relaxed font-medium mb-6">
-                The CPICRS Administration Console and Geospatial Intelligence Command is strictly restricted to desktop and laptop computers (screens 1024px or wider). Mobile access is disabled for operational security, tactical mapping precision, and data integrity.
+                The MIMPA (Municipality Incident Management and Public Advisory) Administration Console and Geospatial Intelligence Command is strictly restricted to desktop and laptop computers (screens 1024px or wider). Mobile access is disabled for operational security, tactical mapping precision, and data integrity.
             </p>
 
             <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/50 mb-6 flex items-center space-x-3 text-left">
@@ -236,8 +236,8 @@
                 <img src="/images/PNP.jpg" alt="PNP Logo" class="w-10 h-10 object-contain drop-shadow-lg"
                     onerror="this.onerror=null; this.src='/favicon.ico';">
                 <div>
-                    <h1 class="text-lg font-black tracking-tighter leading-none">CPICRS</h1>
-                    <p class="text-[10px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">Records</p>
+                    <h1 class="text-lg font-black tracking-tighter leading-none">MIMPA</h1>
+                    <p class="text-[9px] text-blue-200 uppercase tracking-wider font-bold mt-0.5">Municipality Incident Management and Public Advisory</p>
                 </div>
             </div>
             <button id="sidebarClose" class="lg:hidden text-white/50 hover:text-white transition">
@@ -334,74 +334,48 @@
     <!-- Main Content Area -->
     <div id="mainContent"
         class="hidden lg:flex flex-grow lg:ml-72 <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'main-content-expanded' : '' %> flex-col min-h-screen transition-all duration-300 w-full lg:w-auto">
-        <!-- Top Header -->
-        <% if (typeof title !== 'undefined' && title === 'Dashboard') { %>
-            <!-- Header/Navbar removed on Admin Dashboard per user request -->
-            <!-- Floating Sidebar Toggle & Utilities for Dashboard -->
-            <div class="fixed top-6 left-6 z-40 flex items-center gap-3">
+        <!-- Top Header (Restored Navbar) -->
+        <header
+            class="bg-pnp-blue text-white h-20 border-b-4 border-pnp-gold shadow-2xl flex items-center justify-between px-4 sm:px-6 md:px-10 fixed top-0 right-0 z-40"
+            id="layoutHeader">
+            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
                 <button id="sidebarToggle"
-                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 shrink-0 cursor-pointer"
+                    class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition border border-white/20 shrink-0 cursor-pointer"
                     title="Toggle Sidebar Navigation">
-                    <i class="fas fa-bars text-sm"></i>
+                    <i class="fas fa-bars"></i>
                 </button>
+
+                <div class="flex items-center space-x-2 sm:space-x-4 min-w-0">
+                    <h2 class="text-base sm:text-xl font-black text-white tracking-tighter uppercase truncate">
+                        <%= title %>
+                    </h2>
+                </div>
             </div>
-            <div class="fixed top-6 right-6 z-40 flex items-center gap-3">
+
+            <div class="flex items-center space-x-4">
+                <!-- Help / Manual Button -->
                 <button onclick="toggleHelpModal()" title="View Instruction Manual"
-                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 cursor-pointer">
+                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer">
                     <i class="fas fa-question text-sm"></i>
                 </button>
+
+                <!-- Public Site Button -->
                 <a href="/" title="View Public Site"
-                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 cursor-pointer">
+                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer">
                     <i class="fas fa-globe text-sm"></i>
                 </a>
+
+                <!-- Dark Mode Toggle (Synced with Public Design) -->
                 <button id="darkModeToggle"
-                    class="w-10 h-10 bg-white dark:bg-slate-800 text-slate-700 dark:text-white hover:text-pnp-gold dark:hover:text-pnp-gold shadow-md hover:shadow-xl rounded-2xl flex items-center justify-center transition border border-gray-200 dark:border-slate-700 cursor-pointer">
+                    class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer">
                     <i class="fas fa-moon text-sm dark:hidden"></i>
                     <i class="fas fa-sun text-sm hidden dark:block"></i>
                 </button>
             </div>
-        <% } else { %>
-            <header
-                class="bg-pnp-blue text-white h-20 border-b-4 border-pnp-gold shadow-2xl flex items-center justify-between px-4 sm:px-6 md:px-10 fixed top-0 right-0 z-40"
-                id="layoutHeader">
-                <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
-                    <button id="sidebarToggle"
-                        class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition border border-white/20 shrink-0">
-                        <i class="fas fa-bars"></i>
-                    </button>
-
-                    <div class="flex items-center space-x-2 sm:space-x-4 min-w-0">
-                        <h2 class="text-base sm:text-xl font-black text-white tracking-tighter uppercase truncate">
-                            <%= title %>
-                        </h2>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-4">
-                    <!-- Help / Manual Button -->
-                    <button onclick="toggleHelpModal()" title="View Instruction Manual"
-                        class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
-                        <i class="fas fa-question text-sm"></i>
-                    </button>
-
-                    <!-- Public Site Button -->
-                    <a href="/" title="View Public Site"
-                        class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
-                        <i class="fas fa-globe text-sm"></i>
-                    </a>
-
-                    <!-- Dark Mode Toggle (Synced with Public Design) -->
-                    <button id="darkModeToggle"
-                        class="w-10 h-10 bg-white/10 hover:bg-white/20 shadow-sm rounded-full flex items-center justify-center text-white hover:text-pnp-gold transition-all duration-300 hover:scale-110 border border-white/20">
-                        <i class="fas fa-moon text-sm dark:hidden"></i>
-                        <i class="fas fa-sun text-sm hidden dark:block"></i>
-                    </button>
-                </div>
-            </header>
-        <% } %>
+        </header>
 
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= typeof title !== 'undefined' && title === 'Dashboard' ? 'p-8 sm:p-10 pt-16 sm:pt-20 pb-32' : (title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-10 pt-28 pb-32') %>">
+        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0 pt-20' : 'p-6 sm:p-10 pt-28 pb-32') %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div
