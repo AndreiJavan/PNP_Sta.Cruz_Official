@@ -40,7 +40,7 @@
         <button onclick="document.getElementById('fileConverterInput').click()" class="pnp-card pnp-gradient-blue p-6 rounded-[2rem] shadow-sm hover:shadow-2xl flex flex-col justify-center border-2 border-white/10 text-left group hover:scale-105 hover:-translate-y-1.5 transition-all duration-300 relative overflow-hidden">
             <div class="absolute inset-0 bg-pnp-gold/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
             <div class="flex justify-between items-start w-full relative z-10">
-                <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Active Scanner</span>
+                <span class="text-[10px] text-pnp-gold font-black uppercase tracking-[0.3em] mb-2 group-hover:animate-pulse">Automated Scanner</span>
                 <div class="flex items-center space-x-2">
                     <div class="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center text-pnp-gold group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border border-white/20">
                         <i class="fas fa-file-invoice text-xs"></i>
@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="text-xl font-black text-white leading-none uppercase tracking-tighter relative z-10">Report Scanner</div>
-            <p class="text-[10px] text-white/50 font-bold uppercase mt-3 tracking-widest relative z-10">Automated File Intake</p>
+            <p class="text-[10px] text-white/50 font-bold uppercase mt-3 tracking-widest relative z-10">Sorting & Validation Engine</p>
             <input type="file" id="fileConverterInput" accept=".xlsx,.xls,.docx,.pdf" class="hidden" onchange="handleIntelConvert(this)">
         </button>
     </div>
@@ -493,8 +493,6 @@
                             <option value="2026">2026</option>
                             <option value="2025">2025</option>
                             <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
                         </select>
                     </div>
                 </div>
@@ -560,16 +558,16 @@
         return "";
     };
 
-     window.handleIntelConvert = async function(input) {
+      window.handleIntelConvert = async function(input) {
         if (!input.files || !input.files[0]) return;
 
         const file = input.files[0];
         
-        // Verification Protocol: Check for existing intelligence batches
-        if (window.reports && window.reports.some(r => r.filename === file.name)) {
-            window.strategicAlert({
-                title: "Duplicate Signal Detected",
-                message: `The intelligence batch [${file.name}] is already archived in the CPICRS database. Re-scanning duplicate datasets is restricted to preserve structural integrity.`,
+        // 1. Verification Protocol: Check for existing intelligence batches (Duplicate Dataset Detection)
+        if (window.reports && window.reports.some(r => r.filename && r.filename.toLowerCase() === file.name.toLowerCase())) {
+            await window.strategicAlert({
+                title: "Duplicate File Detected",
+                message: `The dataset file [${file.name}] is already archived in the CPICRS database. Re-sorting duplicate files is restricted to prevent duplicate records.`,
                 type: "warning"
             });
             input.value = '';
@@ -585,9 +583,8 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            statusText.textContent = `Scanned File: ${file.name} - Extracting records...`;
+            statusText.textContent = `Sorting File: ${file.name} - Reading & classifying records...`;
 
-            // ✅ Targeted route for AI processing
             const res = await fetch('/admin/process-ai', {
                 method: 'POST',
                 body: formData
@@ -601,27 +598,125 @@
             const result = await res.json();
 
             if (!result.success) {
-                throw new Error(result.error || "Automated file intake processing failed");
+                throw new Error(result.error || "File sorting and intake failed.");
             }
 
-            const flattened = result.data;
+            const rawRecords = result.data || [];
 
-            if (flattened.length === 0) {
-                window.strategicAlert({
-                    title: "Neural Scan Negative",
-                    message: "No incident records detected in this document. Please verify source data.",
+            if (rawRecords.length === 0) {
+                await window.strategicAlert({
+                    title: "Sorting Result: Empty",
+                    message: "No incident records found in this document. Please ensure the file contains valid rows.",
                     type: "warning"
                 });
                 return;
             }
 
+            // 2. Client-side Sorting & Verification Engine:
+            // Checks:
+            // - Sector / Barangay: Only Santa Cruz's 26 valid barangays allowed. If not recognized, cancel row sorting.
+            // - Timeline Date limitation: Must be between 2024-01-01 and present date (no earlier than 2024, no future dates).
+            // - Internal duplicate records detection: Remove identical rows within the scanned file.
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            const sortedRecords = [];
+            const seenKeys = new Set();
+            const sortingReport = {
+                totalScanned: rawRecords.length,
+                duplicatesRemoved: 0,
+                cancelledBarangayErrors: [],
+                dateErrors: [],
+                validSortedCount: 0
+            };
+
+            rawRecords.forEach((item, idx) => {
+                const rowNum = idx + 1;
+                const rawLoc = String(item.barangay || item.location || '').trim();
+                const rawOff = String(item.offense || item.incident_type || '').replace(/\s+/g, ' ').trim() || 'Incident';
+                let rawDate = String(item.date_committed || item.date || '').trim();
+
+                // Barangay Validation (26 Santa Cruz Barangays only)
+                const cleanLoc = rawLoc.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase();
+                const matchedBarangay = VALID_BARANGAYS.find(b => 
+                    b.toLowerCase() === rawLoc.toLowerCase() ||
+                    b.toLowerCase() === cleanLoc ||
+                    b.toLowerCase().includes(cleanLoc) ||
+                    cleanLoc.includes(b.toLowerCase())
+                );
+
+                if (!matchedBarangay) {
+                    // Not included in the 26 barangays -> consider it as cancellation of sorting for this row
+                    sortingReport.cancelledBarangayErrors.push(`Row #${rowNum}: "${rawLoc || 'EMPTY'}" is not among Santa Cruz's 26 Barangays.`);
+                    return; // Skip/cancel this entry from sorting
+                }
+
+                // Date Validation: 2024 - present limitation
+                let formattedDate = rawDate.split('T')[0].split(' ')[0];
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(formattedDate) || isNaN(new Date(formattedDate).getTime())) {
+                    sortingReport.dateErrors.push(`Row #${rowNum}: Invalid date format "${rawDate}".`);
+                    return; // Cancel sorting for unparseable dates
+                }
+
+                if (formattedDate < '2024-01-01') {
+                    sortingReport.dateErrors.push(`Row #${rowNum}: Date (${formattedDate}) is prior to 2024 (Allowed: 2024-present).`);
+                    return; // Cancel sorting for dates prior to 2024
+                }
+
+                if (formattedDate > todayStr) {
+                    sortingReport.dateErrors.push(`Row #${rowNum}: Date (${formattedDate}) is in the future.`);
+                    return; // Cancel sorting for future dates
+                }
+
+                // Duplicate Entry Detection within the scanned file
+                const timeKey = item.time_committed ? String(item.time_committed).trim() : '';
+                const dupKey = `${matchedBarangay.toLowerCase()}|${formattedDate}|${timeKey}|${rawOff.toLowerCase()}`;
+                if (seenKeys.has(dupKey)) {
+                    sortingReport.duplicatesRemoved++;
+                    return; // Skip duplicate record
+                }
+                seenKeys.add(dupKey);
+
+                sortedRecords.push({
+                    barangay: matchedBarangay,
+                    date_committed: formattedDate,
+                    time_committed: item.time_committed || null,
+                    offense: rawOff.slice(0, 300),
+                    category: item.category || 'Non-Index',
+                    description: item.description || ''
+                });
+            });
+
+            sortingReport.validSortedCount = sortedRecords.length;
+
+            if (sortedRecords.length === 0) {
+                let errDetails = "All scanned records were rejected or cancelled:\n";
+                if (sortingReport.cancelledBarangayErrors.length > 0) {
+                    errDetails += `\n• Invalid Sectors/Barangays (${sortingReport.cancelledBarangayErrors.length} cancelled):\n  - ${sortingReport.cancelledBarangayErrors.slice(0, 4).join('\n  - ')}`;
+                    if (sortingReport.cancelledBarangayErrors.length > 4) errDetails += `\n  ...and ${sortingReport.cancelledBarangayErrors.length - 4} more.`;
+                }
+                if (sortingReport.dateErrors.length > 0) {
+                    errDetails += `\n• Date Limit Violations (${sortingReport.dateErrors.length} cancelled):\n  - ${sortingReport.dateErrors.slice(0, 4).join('\n  - ')}`;
+                    if (sortingReport.dateErrors.length > 4) errDetails += `\n  ...and ${sortingReport.dateErrors.length - 4} more.`;
+                }
+
+                await window.strategicAlert({
+                    title: "Sorting Cancellation",
+                    message: errDetails,
+                    type: "danger"
+                });
+                return;
+            }
+
+            // Save for review & staging
             lastProcessedFile = { name: file.name, size: file.size };
-            showIntelReview(flattened, file.name);
+            window.lastSortingReport = sortingReport;
+
+            showIntelReview(sortedRecords, file.name);
 
         } catch (error) {
-            console.error("Scanner Error:", error);
-            window.strategicAlert({
-                title: "Extraction Failure",
+            console.error("Sorting Engine Error:", error);
+            await window.strategicAlert({
+                title: "File Sorting Error",
                 message: error.message,
                 type: "danger"
             });
@@ -901,7 +996,7 @@
                         </select>
                         <span class="text-slate-400 font-bold text-[10px]">/</span>
                         <select onchange="updateReviewItemDate(${index}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
-                            ${['2026', '2025', '2024', '2023', '2022'].map(y => {
+                            ${['2026', '2025', '2024'].map(y => {
                                 return `<option value="${y}" ${y === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${y}</option>`;
                             }).join('')}
                         </select>
@@ -1194,11 +1289,31 @@
              }
          }
 
-         // ALL VALIDATIONS PASSED -> NOW DISPLAY CONFIRMATION DIALOG
+         // ALL VALIDATIONS PASSED -> NOW DISPLAY CONFIRMATION DIALOG (CONFIRM OR CANCEL) WITH ERROR SUMMARY
+         let confirmMsg = `Ready to synchronize ${reviewData.length} validated records to the CPICRS Central Database.`;
+         if (window.lastSortingReport) {
+             const rep = window.lastSortingReport;
+             const hasIssues = rep.duplicatesRemoved > 0 || rep.cancelledBarangayErrors.length > 0 || rep.dateErrors.length > 0;
+             if (hasIssues) {
+                 confirmMsg += `\n\nSorting & Filtering Diagnostic Summary:`;
+                 if (rep.duplicatesRemoved > 0) {
+                     confirmMsg += `\n• Duplicates Filtered: ${rep.duplicatesRemoved} duplicate record(s) removed.`;
+                 }
+                 if (rep.cancelledBarangayErrors.length > 0) {
+                     confirmMsg += `\n• Invalid Sectors Cancelled: ${rep.cancelledBarangayErrors.length} row(s) outside 26 Santa Cruz barangays excluded.`;
+                 }
+                 if (rep.dateErrors.length > 0) {
+                     confirmMsg += `\n• Date Limit Violations Cancelled: ${rep.dateErrors.length} row(s) outside 2024-present excluded.`;
+                 }
+             }
+         }
+         confirmMsg += `\n\nSelect 'Confirm' to commit these verified records or 'Cancel' to abort.`;
+
          const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${reviewData.length} records to the CPICRS Central Database?`)))({
-             title: "Tactical Confirmation",
-             message: `Commit ${reviewData.length} validated records to the CPICRS Central Database?`,
-             confirmText: "Sync Now",
+             title: "Dataset Synchronization Confirmation",
+             message: confirmMsg,
+             confirmText: "Confirm",
+             cancelText: "Cancel",
              type: "info"
          });
          if (!confirmed) return;
@@ -1434,7 +1549,7 @@
          }
 
          const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-         const years = ['2026', '2025', '2024', '2023', '2022'];
+         const years = ['2026', '2025', '2024'];
 
          let rowsHtml = '';
          for (let p = 0; p < pageSlice.length; p++) {
@@ -2491,14 +2606,14 @@
             <!-- Enhanced Batch Info Header -->
             <div class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-8 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="space-y-2">
-                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Neural Scanning Source</span>
+                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Intake & Sorting Source</span>
                     <div class="flex items-center space-x-3">
                         <div class="w-8 h-8 rounded-full bg-pnp-blue flex items-center justify-center text-[10px] font-black text-pnp-gold border border-pnp-gold/20">
                             ${(report.admin_name || 'A').charAt(0)}
                         </div>
                         <div class="flex flex-col">
                             <p class="text-sm font-black text-pnp-blue dark:text-pnp-gold uppercase leading-none">${report.admin_name || 'System Administrator'}</p>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px] mt-1" title="${report.filename || 'Neural Scan Buffer'}">${report.filename || 'Neural Scan Buffer'}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase truncate max-w-[150px] mt-1" title="${report.filename || 'Sorted Batch Buffer'}">${report.filename || 'Sorted Batch Buffer'}</p>
                         </div>
                     </div>
                 </div>
@@ -2625,12 +2740,12 @@
         <!-- Dynamic Intelligence Text -->
         <div class="mt-20 text-center">
             <h4 class="text-3xl font-black text-pnp-gold uppercase tracking-[0.8em] flex items-center justify-center pl-[0.8em]">
-                <span>Scanning</span>
+                <span>Sorting</span>
                 <span class="loading-dots-tactical text-left w-16"></span>
             </h4>
             <div class="h-px w-64 bg-gradient-to-r from-transparent via-pnp-gold/20 to-transparent mx-auto mt-6"></div>
             <p id="intelLoadingText" class="mt-6 text-[10px] text-white/30 uppercase font-black tracking-[0.4em] animate-pulse max-w-xs leading-relaxed italic mx-auto">
-                Analyzing tactical datasets...
+                Sorting & validating tactical datasets...
             </p>
         </div>
     </div>
