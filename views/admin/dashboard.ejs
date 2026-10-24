@@ -96,7 +96,7 @@
     let personnelFirstName = extractCleanFirstName(rawPersonnelName);
 %>
 <!-- Top Section 1: Separated User Greeting & Crime Map Quick Access Boxes -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-5">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-[0.95rem] mb-[1.1875rem]">
     <!-- Container 1: Greeting Box (lg:col-span-8) - Box container without curve sides -->
     <div class="lg:col-span-8 bg-white dark:bg-slate-900 rounded-none border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 shadow-xs flex items-center justify-between gap-4">
         <div class="flex items-center gap-3.5">
@@ -135,10 +135,10 @@
 </div>
 
 <!-- Top Section 2: Monthly Crime Trends & Strategic Directives - Box container without curve sides -->
-<div class="bg-white dark:bg-slate-900 rounded-none shadow-xs border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 mb-5 transition-all relative">
+<div class="bg-white dark:bg-slate-900 rounded-none shadow-xs border border-slate-200/90 dark:border-slate-800 p-4 sm:p-5 mb-[1.1875rem] transition-all relative">
     
     <!-- Header: Title Text & Dropdowns (Left) + PNP Bulletins (Right) Aligned -->
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-3.5 mb-4 border-b border-slate-200/80 dark:border-slate-700/60">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-[0.95rem] pb-3.5 mb-[0.95rem] border-b border-slate-200/80 dark:border-slate-700/60">
         <!-- Left Side: Title Text + Dropdown & Category Filters Below -->
         <div class="flex flex-col gap-2.5 min-w-0">
             <!-- Title Text -->
@@ -189,17 +189,17 @@
 
                 <!-- Category Filter Buttons (8-Focus, Non-Index, PSI) -->
                 <div class="flex items-center gap-1.5 flex-wrap">
-                    <button type="button" onclick="toggleTrendDataset(0)" id="legend8Focus" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-300 dark:border-red-800/60 hover:bg-red-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <button type="button" onclick="setDashboardCategoryFilter('8-Focus')" id="legend8Focus" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-300 dark:border-red-800/60 hover:bg-red-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
                         <span class="w-2 h-2 rounded-full bg-red-700"></span>
                         <span>8-Focus</span>
                     </button>
-                    <button type="button" onclick="toggleTrendDataset(1)" id="legendNonIndex" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-300 dark:border-blue-800/60 hover:bg-blue-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <button type="button" onclick="setDashboardCategoryFilter('Non-Index')" id="legendNonIndex" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-300 dark:border-blue-800/60 hover:bg-blue-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
                         <span class="w-2 h-2 rounded-full bg-blue-700"></span>
                         <span>Non-Index</span>
                     </button>
-                    <button type="button" onclick="toggleTrendDataset(2)" id="legendPSI" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-300 dark:border-amber-800/60 hover:bg-amber-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                    <button type="button" onclick="setDashboardCategoryFilter('PSI')" id="legendPSI" title="PUBLIC SAFETY INCIDENT" class="px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-300 dark:border-amber-800/60 hover:bg-amber-700 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs">
                         <span class="w-2 h-2 rounded-full bg-amber-700"></span>
-                        <span>PSI</span>
+                        <span title="PUBLIC SAFETY INCIDENT">PSI</span>
                     </button>
                 </div>
             </div>
@@ -226,7 +226,7 @@
     </div>
 
     <!-- Main Section: Bar Graph (Left) & 3 KPI Cards in 1 Column (Right) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch mb-4 sm:mb-5">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-[0.95rem] items-stretch mb-[1.1875rem]">
         <!-- Left: Bar Graph Canvas (Inner element keeps curves - Neutral dark gray background) -->
         <div class="lg:col-span-9 bg-slate-100 dark:bg-slate-800/60 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-slate-300/80 dark:border-slate-700/80 flex flex-col justify-between shadow-2xs">
             <div class="relative w-full h-[320px] sm:h-[340px]">
@@ -249,7 +249,7 @@
                 </div>
                 <div>
                     <span id="modalKpiTotal" class="text-xl sm:text-2xl font-black text-blue-950 dark:text-white tabular-nums block tracking-tight group-hover:text-blue-700 dark:group-hover:text-pnp-gold transition-colors">0</span>
-                    <span class="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mt-0.5">Recorded Cases &bull; View Reports</span>
+                    <span id="modalKpiTotalSub" class="text-[8px] sm:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mt-0.5">Recorded Cases &bull; View Reports</span>
                 </div>
             </a>
 
@@ -290,7 +290,7 @@
     </div>
 
     <!-- Bottom Row of Container: Trend Analysis, Crime Pattern, and Strategic Directives (Restored Accent Colors) -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 items-stretch pt-2 border-t border-slate-200/80 dark:border-slate-700/60">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-[0.95rem] items-stretch pt-2 border-t border-slate-200/80 dark:border-slate-700/60">
         
         <!-- 1. TREND ANALYSIS (Restored Blue Theme) -->
         <div id="modalCardTrend" class="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-blue-200/90 dark:border-blue-900/60 bg-blue-50/60 hover:bg-blue-50/80 dark:bg-blue-950/30 dark:hover:bg-blue-950/40 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
@@ -479,7 +479,7 @@
                     <div class="min-w-0">
                         <div class="flex items-center gap-1.5">
                             <span class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">Public Safety Incidents (PSI)</span>
-                            <span class="text-[8px] font-bold px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300">Accidents</span>
+                            <span class="text-[8px] font-bold px-1.5 py-0.2 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300">Traffic & RIR</span>
                         </div>
                         <div class="mt-0.5 flex items-baseline gap-1.5 flex-wrap">
                             <span class="text-[9px] text-slate-400 font-bold uppercase">Leading:</span>
@@ -1006,8 +1006,110 @@
         updateBentoDetailsFromCounts(overallCounts, categoryCounts, count, selectedBrgy);
     };
 
+    // --- Unified Crime Intelligence & Trend State ---
+    window.activeLeadingCategory = 'ALL';
+    window.activeSpecificOffense = null;
+    window.currentBuckets = Array.from({ length: 12 }, () => [0, 0, 0, 0, 0, 0]);
+    window.currentOverallCounts = {};
+    window.currentCategoryCounts = { '8-Focus': {}, 'Non-Index': {}, 'PSI': {} };
+    window.currentMatchedCount = 0;
+    window.currentAITrendController = null;
+
+    // --- High-Level PNP Tactical Directives Knowledge Base ---
+    function getTacticalDirectives(crimeName, category, barangayName, totalCount) {
+        const bName = (!barangayName || barangayName === 'ALL') ? 'the entire municipality' : barangayName;
+        if (!totalCount || totalCount === 0) {
+            return [
+                `Maintain high-visibility preventive cruiser and beat foot patrols across all sectors of ${bName} to sustain this zero-incident operational baseline.`,
+                `Sustain proactive liaison meetings with Barangay Tanods and Barangay Peacekeeping Action Teams (BPATs) along major community accessways.`,
+                `Conduct periodic public safety dialogues and keep confidential hotlines active to support continuous community vigilance.`
+            ];
+        }
+
+        const lower = (crimeName || '').toLowerCase();
+
+        // Property Crimes (Theft, Robbery, Burglary)
+        if (lower.includes('theft') || lower.includes('robbery') || lower.includes('burglary')) {
+            return [
+                `Deploy dedicated beat foot patrols and mobile cruiser visibility along commercial strips, public markets, and financial establishments in ${bName} during peak transaction hours (10:00–14:00 & 18:00–22:00).`,
+                `Coordinate with barangay tanods for continuous CCTV perimeter surveillance, target-hardening inspections, and immediate restoration of defunct public street lighting.`,
+                `Implement strategic Oplan Sita chokepoints along primary ingress and egress routes of ${bName} to intercept fleeing motorcycle-riding suspects.`
+            ];
+        }
+        // Carnapping (Motorcycle & Motor Vehicle)
+        if (lower.includes('carnapping')) {
+            return [
+                `Deploy dedicated Oplan Bakal/Sita checkpoints at major arterial exits and boundary intersections connecting ${bName} during late-night and early-morning hours (22:00–04:00).`,
+                `Coordinate with LTO and Highway Patrol Group (HPG) for strict spot-checks on suspicious unregistered, plate-less, and open-pipe motorcycles.`,
+                `Distribute anti-carnapping security bulletins urging vehicle owners in ${bName} to install dual physical locks, secure parking perimeters, and GPS trackers.`
+            ];
+        }
+        // Violent Crimes (Physical Injury, Assault, Homicide, Murder)
+        if (lower.includes('injury') || lower.includes('assault') || lower.includes('brawl') || lower.includes('physical') || lower.includes('homicide') || lower.includes('murder')) {
+            return [
+                `Strictly enforce municipal curfew ordinances for unchaperoned minors and enforce local liquor licensing hours around commercial bars, videoke hubs, and public plazas in ${bName}.`,
+                `Deploy joint PNP-Barangay standby security units at recreation spots and gathering hubs during weekend evening windows (20:00–02:00).`,
+                `Coordinate closely with Barangay Lupon Tagapamayapa for early dispute mediation in neighborhood friction before physical escalation occurs.`
+            ];
+        }
+        // Crimes Against Persons / Gender (Rape, VAWC, Child Abuse)
+        if (lower.includes('rape') || lower.includes('vawc') || lower.includes('child abuse') || lower.includes('ra 9262') || lower.includes('ra 7610')) {
+            return [
+                `Direct Women and Children Protection Desk (WCPD) officers to conduct proactive monitoring and coordinated case interventions in collaboration with MSWDO and Barangay VAW desks in ${bName}.`,
+                `Execute multi-agency safety assessments and prompt issuance of Barangay Protection Orders (BPOs) for identified high-risk households.`,
+                `Expedite forensic documentation and case buildup for inquest proceedings under DIDM standards while maintaining strict victim confidentiality.`
+            ];
+        }
+        // Dangerous Drugs (RA 9165)
+        if (lower.includes('drugs') || lower.includes('ra 9165') || lower.includes('dangerous drugs')) {
+            return [
+                `Intensify intelligence surveillance and synchronized barangay clearing operations in close coordination with PDEA and the local BADAC in ${bName}.`,
+                `Deploy random mobile interdiction checkpoints along transit corridors commonly exploited by couriers and street-level pushers.`,
+                `Sustain community-based drug rehabilitation monitoring (CBDRP) and strengthen anonymous community reporting hotlines across all puroks.`
+            ];
+        }
+        // Traffic Incidents / Public Safety (PSI)
+        if (lower.includes('traffic') || lower.includes('accident') || lower.includes('reckless') || lower.includes('damage to property') || category === 'PSI') {
+            return [
+                `Station static traffic police visibility units and radar speed enforcement teams along high-density highways and accident-prone intersections in ${bName} during morning and evening rush hours.`,
+                `Conduct joint enforcement operations with LGU Traffic Enforcers targeting motorcycle helmet compliance, unauthorized vehicle modifications, and driving under the influence (RA 10586).`,
+                `Coordinate with DPWH and Municipal Engineering to repair blind curves, install reflectorized road markings, and clear road shoulder obstructions.`
+            ];
+        }
+        // Cybercrime (RA 10175, Fraud, Estafa)
+        if (lower.includes('cyber') || lower.includes('scam') || lower.includes('fraud') || lower.includes('estafa')) {
+            return [
+                `Publish targeted cybercrime advisories via PNP social media bulletins educating ${bName} residents on prevailing phishing, fake parcel deliveries, and e-wallet fraudulent schemes.`,
+                `Guide victims through electronic evidence preservation for immediate referral to Regional Anti-Cybercrime Units (RACU).`,
+                `Conduct digital literacy and online fraud awareness workshops at local barangay halls and schools.`
+            ];
+        }
+        // Non-Index General
+        if (category === 'Non-Index') {
+            return [
+                `Execute targeted regulatory inspections and special law enforcement sweeps in coordination with municipal licensing and regulatory officers in ${bName}.`,
+                `Establish proactive intelligence surveillance networks to detect and interdict clandestine illicit activities and special law violations.`,
+                `Conduct regular legal orientation briefings for Barangay Tanods on evidentiary preservation for special penal law infractions.`
+            ];
+        }
+        // 8-Focus General
+        if (category === '8-Focus') {
+            return [
+                `Maintain high-visibility beat foot and mobile cruiser patrols across critical commercial corridors and residential boundaries during peak crime hours.`,
+                `Coordinate with Barangay Tanods for continuous CCTV monitoring, target hardening, and rapid incident dispatch.`,
+                `Execute strategic Oplan Sita operations to deter opportunistic criminal elements and motorized offenders.`
+            ];
+        }
+        // Default cross-category
+        return [
+            `Maintain high-visibility proactive patrol operations and motorized checkpoints during peak incident hours (18:00–23:00) in ${bName}.`,
+            `Coordinate with Barangay Tanods and BPATs along high-density thoroughfares and residential boundaries.`,
+            `Maintain strict enforcement of local municipal ordinances (curfew, liquor ban) and ensure rapid incident dispatch.`
+        ];
+    }
+
     // --- Ultra-Fast Real-Time Dynamic Intelligence Generator ---
-    window.renderDynamicTrendAnalysis = function(selectedBrgy, selectedYear, totalCount, buckets, overallCounts) {
+    window.renderDynamicTrendAnalysis = function(selectedBrgy, selectedYear, activeCat, leadingCrimeName, leadingCrimeCount, scopeTotal, scopeMonthlyTotals, scopeCounts, overallCounts, categoryCounts) {
         const trendEl = document.getElementById('modalTrendText');
         const patternEl = document.getElementById('modalPatternText');
         const suggEl = document.getElementById('modalSuggestionsText');
@@ -1015,62 +1117,80 @@
         const patternBadge = document.getElementById('modalPatternBadge');
         const suggBadge = document.getElementById('modalSuggestionsBadge');
 
-        const barangayName = selectedBrgy === 'ALL' ? 'All Barangays' : `Barangay ${selectedBrgy}`;
+        const bName = selectedBrgy === 'ALL' ? 'All Barangays' : `Barangay ${selectedBrgy}`;
+        const catLabel = activeCat === '8-Focus'
+            ? '8-Focus Crimes (Index Crimes)'
+            : (activeCat === 'Non-Index'
+                ? 'Non-Index Crimes (Special Laws)'
+                : (activeCat === 'PSI'
+                    ? 'Public Safety Incidents (PSI / Traffic)'
+                    : 'All Recorded Crime Categories'));
 
-        if (totalCount === 0) {
+        // Case 1: ZERO INCIDENTS IN SCOPE
+        if (!scopeTotal || scopeTotal === 0) {
             if (trendEl) {
-                trendEl.innerHTML = `<p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">Recorded incidents across <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${barangayName}</strong> for <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${selectedYear}</strong> remain exceptionally calm with zero active or reported crimes.</p>`;
+                trendEl.innerHTML = `
+                    <p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
+                        Operational tracking for <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${bName}</strong> across calendar year <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${selectedYear}</strong> demonstrates a pristine baseline with <strong class="font-bold text-slate-900 dark:text-white">0 recorded incidents</strong> under <strong class="font-bold text-slate-900 dark:text-white">${catLabel}</strong>. Public peace and order indicators remain fully intact across all monitored sectors.
+                    </p>
+                `;
             }
             if (patternEl) {
-                patternEl.innerHTML = `<p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">A consistent zero-incident baseline is maintained across all 12 operational months.</p>`;
+                patternEl.innerHTML = `
+                    <p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
+                        Pattern mapping for <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${bName}</strong> reveals a consistent zero-incident baseline across all 12 operational months. No recurring modus operandi, geographic clusters, or tactical hot zones were detected in this scope.
+                    </p>
+                `;
             }
             if (suggEl) {
+                const directives = getTacticalDirectives('none', activeCat, bName, 0);
                 suggEl.innerHTML = `
                     <ul class="space-y-1.5 my-0.5">
-                        <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-medium">
-                            <span class="text-emerald-500 font-bold text-base leading-none shrink-0">•</span>
-                            <span>Maintain high-visibility preventive patrols and routine barangay tanod coordination.</span>
-                        </li>
-                        <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-medium">
-                            <span class="text-emerald-500 font-bold text-base leading-none shrink-0">•</span>
-                            <span>Conduct proactive community outreach to preserve a crime-free environment.</span>
-                        </li>
+                        ${directives.map(d => `
+                            <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-medium">
+                                <span class="text-emerald-500 font-bold text-base leading-none shrink-0">•</span>
+                                <span>${d}</span>
+                            </li>
+                        `).join('')}
                     </ul>
                 `;
             }
-            if (trendBadge) trendBadge.textContent = 'Stable';
+            if (trendBadge) trendBadge.textContent = 'Pristine Baseline';
             if (patternBadge) patternBadge.textContent = 'Baseline';
-            if (suggBadge) suggBadge.textContent = 'Preventive';
+            if (suggBadge) suggBadge.textContent = 'Preventive SOP';
             return;
         }
 
-        // 1. Calculate monthly totals and H1 vs H2
-        const monthTotals = buckets.map(b => b.reduce((acc, curr) => acc + curr, 0));
-        const h1 = monthTotals.slice(0, 6).reduce((a, b) => a + b, 0);
-        const h2 = monthTotals.slice(6, 12).reduce((a, b) => a + b, 0);
+        // Case 2: ACTIVE INCIDENTS
+        const mTotals = scopeMonthlyTotals || [];
+        const h1 = mTotals.slice(0, 6).reduce((a, b) => a + b, 0);
+        const h2 = mTotals.slice(6, 12).reduce((a, b) => a + b, 0);
 
-        let trendDirection = "a stable and balanced distribution";
+        let trendDirection = "a stable and balanced month-to-month distribution";
         let trendBadgeText = "Stable";
         if (h1 > 0 && h2 > h1) {
             const pct = Math.round(((h2 - h1) / h1) * 100);
-            trendDirection = `an upward trajectory (+${pct}% increase in H2 compared to H1)`;
+            trendDirection = `an upward trajectory (+${pct}% increase in the second semester compared to H1)`;
             trendBadgeText = `Upward +${pct}%`;
         } else if (h1 > 0 && h2 < h1) {
             const pct = Math.round(((h1 - h2) / h1) * 100);
-            trendDirection = `a steady downward trajectory (-${pct}% reduction in H2 compared to H1)`;
+            trendDirection = `a steady downward trajectory (-${pct}% reduction in the second semester compared to H1)`;
             trendBadgeText = `Downward -${pct}%`;
         } else if (h1 === 0 && h2 > 0) {
-            trendDirection = `incident activity concentrated during the second half of ${selectedYear}`;
+            trendDirection = `incident activity concentrated exclusively during the second semester of ${selectedYear}`;
             trendBadgeText = "Active H2";
+        } else if (h2 === 0 && h1 > 0) {
+            trendDirection = `activity successfully contained during the first semester with zero incidents in H2`;
+            trendBadgeText = "Contained H1";
         }
 
-        // 2. Identify peak month and quietest month
+        // Peak and quietest months
         let peakIdx = 0;
         let peakVal = 0;
         let quietIdx = 0;
         let quietVal = Infinity;
 
-        monthTotals.forEach((val, idx) => {
+        mTotals.forEach((val, idx) => {
             if (val > peakVal) {
                 peakVal = val;
                 peakIdx = idx;
@@ -1083,61 +1203,52 @@
 
         const peakMonthName = FULL_MONTH_NAMES[peakIdx] || 'N/A';
         const quietMonthName = FULL_MONTH_NAMES[quietIdx] || 'N/A';
+        const peakShare = scopeTotal > 0 ? Math.round((peakVal / scopeTotal) * 100) : 0;
 
-        // 3. Top crimes from overallCounts
-        const sortedCrimes = Object.entries(overallCounts || {}).sort((a, b) => b[1] - a[1]);
-        const topCrimeList = sortedCrimes.slice(0, 3).map(([name, cnt]) => {
-            const share = Math.round((cnt / totalCount) * 100);
-            return `<strong class="font-bold text-slate-900 dark:text-white">${name}</strong> (${cnt} case${cnt > 1 ? 's' : ''}, ${share}%)`;
-        });
-        const topCrimeStr = topCrimeList.length > 0 ? topCrimeList.join(', ') : 'general offenses';
+        // Top crimes in scope
+        const sortedCrimes = Object.entries(scopeCounts || {}).sort((a, b) => b[1] - a[1]);
+        const primaryCrime = leadingCrimeName || (sortedCrimes.length > 0 ? sortedCrimes[0][0] : 'None');
+        const primaryCount = leadingCrimeCount || (sortedCrimes.length > 0 ? sortedCrimes[0][1] : 0);
+        const primaryShare = scopeTotal > 0 ? ((primaryCount / scopeTotal) * 100).toFixed(1) : '0';
 
-        const leadingCrimeName = (sortedCrimes.length > 0 ? sortedCrimes[0][0] : '').toLowerCase();
+        // Secondary crimes
+        const secondaryCrimes = sortedCrimes.filter(([n]) => n !== primaryCrime).slice(0, 2);
+        let secondaryStr = "";
+        if (secondaryCrimes.length > 0) {
+            secondaryStr = "Secondary patterns include " + secondaryCrimes.map(([n, c]) => {
+                const s = scopeTotal > 0 ? Math.round((c / scopeTotal) * 100) : 0;
+                return `<strong class="font-bold text-slate-900 dark:text-white">${n}</strong> (${c} case${c > 1 ? 's' : ''}, ${s}%)`;
+            }).join(' and ') + ".";
+        }
 
-        // 4. Tailored Strategic Directives
-        let directives = [
-            "Sustain targeted mobile checkpoint visibility during peak transit hours (18:00 - 23:00).",
-            "Coordinate with Barangay Tanod patrols along high-density thoroughfares and residential boundaries.",
-            "Maintain strict enforcement of local municipal ordinances and public illumination monitoring."
-        ];
-
-        if (leadingCrimeName.includes('theft') || leadingCrimeName.includes('robbery') || leadingCrimeName.includes('burglary')) {
-            directives = [
-                "Increase foot and mobile patrols in commercial areas, public markets, and transport hubs during peak business hours.",
-                "Coordinate with barangay tanods for continuous CCTV monitoring and perimeter lighting enhancements.",
-                "Conduct community crime-prevention seminars on property security for local commercial establishments."
-            ];
-        } else if (leadingCrimeName.includes('injury') || leadingCrimeName.includes('assault') || leadingCrimeName.includes('brawl') || leadingCrimeName.includes('physical')) {
-            directives = [
-                "Strictly enforce municipal liquor ban ordinances and night youth curfew across barangay perimeters.",
-                "Deploy joint police-tanod standby teams near commercial plazas, recreation halls, and gathering spots during weekend evening hours.",
-                "Establish rapid dispute mediation protocols with barangay lupon tagapamayapa."
-            ];
-        } else if (leadingCrimeName.includes('traffic') || leadingCrimeName.includes('accident') || leadingCrimeName.includes('reckless') || leadingCrimeName.includes('damage to property')) {
-            directives = [
-                "Establish speed control checkpoints and position traffic enforcers along key barangay arterial roads and accident-prone intersections.",
-                "Coordinate with local DPWH/engineering office to repair street signage, road markings, and high-visibility lane dividers.",
-                "Intensify roadside random breath testing and anti-drunk driving patrols during late night hours."
-            ];
-        } else if (leadingCrimeName.includes('drugs') || leadingCrimeName.includes('ra 9165') || leadingCrimeName.includes('comprehensive dangerous')) {
-            directives = [
-                "Intensify intelligence surveillance and coordinated anti-illegal drug clearing operations with PDEA and local BADAC.",
-                "Strengthen barangay-level monitoring checkpoints and confidential reporting hotlines for residents.",
-                "Conduct proactive community education and rehabilitation advocacy in coordination with municipal social welfare."
-            ];
-        } else if (leadingCrimeName.includes('cyber') || leadingCrimeName.includes('scam') || leadingCrimeName.includes('fraud')) {
-            directives = [
-                "Conduct cyber-safety awareness workshops at local barangay halls regarding digital scams and identity theft.",
-                "Publish regular PNP advisory bulletins on common e-wallet and online banking fraud methods.",
-                "Establish a dedicated digital evidence intake desk for cybercrime complaints."
-            ];
+        // Qualitative characterization
+        let qualitativeNature = "The pattern reflects general municipal incident activity requiring steady preventive police presence.";
+        const lowP = primaryCrime.toLowerCase();
+        if (activeCat === '8-Focus') {
+            if (lowP.includes('theft') || lowP.includes('robbery') || lowP.includes('carnapping')) {
+                qualitativeNature = "Classified under PNP Index property crimes, this pattern highlights opportunistic theft and property-directed offenses along commercial hubs, transport corridors, and residential access points.";
+            } else {
+                qualitativeNature = "Classified under PNP Index crimes against persons, this indicates interpersonal disputes and physical altercations requiring strict curfew and liquor ordinance enforcement.";
+            }
+        } else if (activeCat === 'Non-Index') {
+            if (lowP.includes('drugs') || lowP.includes('ra 9165')) {
+                qualitativeNature = "Classified under Special Penal Laws, this profile is driven by proactive law enforcement interdiction and anti-illegal drug clearing operations in coordination with BADAC.";
+            } else if (lowP.includes('vawc') || lowP.includes('ra 9262') || lowP.includes('child abuse') || lowP.includes('ra 7610')) {
+                qualitativeNature = "Classified under Special Penal Laws for women and child protection, this indicates domestic or neighborhood disputes requiring WCPD intervention and barangay VAW desk coordination.";
+            } else {
+                qualitativeNature = "Classified under Special Penal Laws and regulatory statutes, this concentration reflects targeted statutory interdictions and municipal code enforcement.";
+            }
+        } else if (activeCat === 'PSI') {
+            qualitativeNature = "Classified under Public Safety Incidents, this volume represents vehicular friction, traffic collisions, and reckless imprudence along arterial highways and transit intersections.";
+        } else {
+            qualitativeNature = `Across all monitored categories, ${primaryCrime} serves as the prevailing contributor, accounting for ${primaryShare}% of overall municipal recorded volume.`;
         }
 
         // Render Card 1: Trend Analysis
         if (trendEl) {
             trendEl.innerHTML = `
                 <p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
-                    Crime incidents in <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${barangayName}</strong> for <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${selectedYear}</strong> show ${trendDirection}, totaling <strong class="text-slate-900 dark:text-white font-bold">${totalCount}</strong> recorded incident${totalCount === 1 ? '' : 's'}. Peak volume was recorded in <strong class="font-bold text-slate-900 dark:text-white">${peakMonthName}</strong> (${peakVal} case${peakVal === 1 ? '' : 's'}), while <strong class="font-bold text-slate-900 dark:text-white">${quietMonthName}</strong> recorded the lowest volume (${quietVal} case${quietVal === 1 ? '' : 's'}).
+                    Incident velocity for <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${catLabel}</strong> in <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${bName}</strong> during calendar year <strong class="text-pnp-blue dark:text-pnp-gold font-bold">${selectedYear}</strong> exhibits ${trendDirection}, totaling <strong class="text-slate-900 dark:text-white font-bold">${scopeTotal}</strong> recorded case${scopeTotal === 1 ? '' : 's'}. Activity is heavily driven by <strong class="text-slate-900 dark:text-white font-bold">${primaryCrime}</strong> (${primaryCount} case${primaryCount === 1 ? '' : 's'}, representing ${primaryShare}% of volume). Tactical peak occurred during <strong class="font-bold text-slate-900 dark:text-white">${peakMonthName}</strong> (${peakVal} case${peakVal === 1 ? '' : 's'}, ${peakShare}%), while <strong class="font-bold text-slate-900 dark:text-white">${quietMonthName}</strong> recorded the lowest volume (${quietVal} case${quietVal === 1 ? '' : 's'}).
                 </p>
             `;
         }
@@ -1145,143 +1256,257 @@
 
         // Render Card 2: Crime Pattern
         if (patternEl) {
-            const h1Pct = Math.round((h1 / totalCount) * 100);
-            const h2Pct = Math.round((h2 / totalCount) * 100);
+            const h1Pct = Math.round((h1 / scopeTotal) * 100);
+            const h2Pct = Math.round((h2 / scopeTotal) * 100);
             patternEl.innerHTML = `
                 <p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 font-medium">
-                    Incident distribution is driven primarily by ${topCrimeStr}. The first half of the year (H1) accounted for <strong class="font-bold text-slate-900 dark:text-white">${h1}</strong> incident${h1 === 1 ? '' : 's'} (${h1Pct}%), while the second half (H2) recorded <strong class="font-bold text-slate-900 dark:text-white">${h2}</strong> incident${h2 === 1 ? '' : 's'} (${h2Pct}%).
+                    Pattern analysis confirms that <strong class="text-slate-900 dark:text-white font-bold">${primaryCrime}</strong> is the primary operational driver with <strong class="font-bold text-slate-900 dark:text-white">${primaryCount} of ${scopeTotal}</strong> cases (<strong class="text-amber-600 dark:text-amber-400 font-bold">${primaryShare}%</strong> dominance). ${secondaryStr} ${qualitativeNature} Semester distribution shows <strong class="font-bold text-slate-900 dark:text-white">${h1}</strong> case${h1 === 1 ? '' : 's'} (${h1Pct}%) in H1 (Jan–Jun) versus <strong class="font-bold text-slate-900 dark:text-white">${h2}</strong> case${h2 === 1 ? '' : 's'} (${h2Pct}%) in H2 (Jul–Dec).
                 </p>
             `;
         }
-        if (patternBadge) patternBadge.textContent = sortedCrimes.length > 0 ? (sortedCrimes[0][0].length > 14 ? sortedCrimes[0][0].substring(0, 14) + '...' : sortedCrimes[0][0]) : 'Identified';
+        if (patternBadge) {
+            patternBadge.textContent = primaryCrime.length > 14 ? primaryCrime.substring(0, 14) + '...' : primaryCrime;
+        }
 
         // Render Card 3: Strategic Directives
         if (suggEl) {
-            const listItems = directives.map(d => `
-                <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-medium">
-                    <span class="text-emerald-500 font-bold text-base leading-none shrink-0">•</span>
-                    <span>${d}</span>
-                </li>
-            `).join('');
-            suggEl.innerHTML = `<ul class="space-y-1.5 my-0.5">${listItems}</ul>`;
+            const directives = getTacticalDirectives(primaryCrime, activeCat, bName, scopeTotal);
+            suggEl.innerHTML = `
+                <ul class="space-y-1.5 my-0.5">
+                    ${directives.map(d => `
+                        <li class="flex items-start gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-medium">
+                            <span class="text-emerald-500 font-bold text-base leading-none shrink-0">•</span>
+                            <span>${d}</span>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
         }
-        if (suggBadge) suggBadge.textContent = 'Directives';
+        if (suggBadge) {
+            suggBadge.textContent = activeCat === '8-Focus'
+                ? 'Index Ops'
+                : (activeCat === 'Non-Index'
+                    ? 'Special Laws'
+                    : (activeCat === 'PSI' ? 'Traffic SOP' : 'Directives'));
+        }
     };
 
-    // --- Ultra-Fast Monthly Crime Trends Filtering Logic ---
-    window.filterMonthlyTrends = function() {
+    // --- Category Button UI Synchronization ---
+    window.updateCategoryButtonsUI = function(cat) {
+        const btn8Focus = document.getElementById('legend8Focus');
+        const btnNonIndex = document.getElementById('legendNonIndex');
+        const btnPSI = document.getElementById('legendPSI');
+
+        if (btn8Focus) {
+            if (cat === '8-Focus') {
+                btn8Focus.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-red-700 text-white dark:bg-red-600 dark:text-white border border-red-700 ring-2 ring-red-400 shadow-xs flex items-center gap-1.5 cursor-pointer transition-all";
+            } else if (cat === 'ALL') {
+                btn8Focus.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-300 dark:border-red-800/60 hover:bg-red-700 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs";
+            } else {
+                btn8Focus.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-medium uppercase tracking-wider bg-red-50/40 text-red-400 dark:bg-red-950/20 dark:text-red-500/60 border border-red-200/60 dark:border-red-900/40 opacity-40 line-through flex items-center gap-1.5 cursor-pointer transition-all";
+            }
+        }
+
+        if (btnNonIndex) {
+            if (cat === 'Non-Index') {
+                btnNonIndex.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-blue-700 text-white dark:bg-blue-600 dark:text-white border border-blue-700 ring-2 ring-blue-400 shadow-xs flex items-center gap-1.5 cursor-pointer transition-all";
+            } else if (cat === 'ALL') {
+                btnNonIndex.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-300 dark:border-blue-800/60 hover:bg-blue-700 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs";
+            } else {
+                btnNonIndex.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-medium uppercase tracking-wider bg-blue-50/40 text-blue-400 dark:bg-blue-950/20 dark:text-blue-500/60 border border-blue-200/60 dark:border-blue-900/40 opacity-40 line-through flex items-center gap-1.5 cursor-pointer transition-all";
+            }
+        }
+
+        if (btnPSI) {
+            if (cat === 'PSI') {
+                btnPSI.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-amber-600 text-white dark:bg-amber-600 dark:text-white border border-amber-600 ring-2 ring-amber-400 shadow-xs flex items-center gap-1.5 cursor-pointer transition-all";
+            } else if (cat === 'ALL') {
+                btnPSI.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-300 dark:border-amber-800/60 hover:bg-amber-700 hover:text-white flex items-center gap-1.5 cursor-pointer transition-all shadow-2xs";
+            } else {
+                btnPSI.className = "px-2.5 py-1.5 rounded-lg text-[11px] font-medium uppercase tracking-wider bg-amber-50/40 text-amber-400 dark:bg-amber-950/20 dark:text-amber-500/60 border border-amber-200/60 dark:border-amber-900/40 opacity-40 line-through flex items-center gap-1.5 cursor-pointer transition-all";
+            }
+        }
+    };
+
+    // --- Chart Category Isolation Logic ---
+    window.applyCategoryFilterToChart = function(cat) {
+        if (!window.trendChart) return;
+        if (cat === 'ALL') {
+            for (let i = 0; i < 6; i++) {
+                window.trendChart.getDatasetMeta(i).hidden = false;
+            }
+        } else if (cat === '8-Focus') {
+            window.trendChart.getDatasetMeta(0).hidden = false;
+            window.trendChart.getDatasetMeta(1).hidden = false;
+            window.trendChart.getDatasetMeta(2).hidden = true;
+            window.trendChart.getDatasetMeta(3).hidden = true;
+            window.trendChart.getDatasetMeta(4).hidden = true;
+            window.trendChart.getDatasetMeta(5).hidden = true;
+        } else if (cat === 'Non-Index') {
+            window.trendChart.getDatasetMeta(0).hidden = true;
+            window.trendChart.getDatasetMeta(1).hidden = true;
+            window.trendChart.getDatasetMeta(2).hidden = false;
+            window.trendChart.getDatasetMeta(3).hidden = false;
+            window.trendChart.getDatasetMeta(4).hidden = true;
+            window.trendChart.getDatasetMeta(5).hidden = true;
+        } else if (cat === 'PSI') {
+            window.trendChart.getDatasetMeta(0).hidden = true;
+            window.trendChart.getDatasetMeta(1).hidden = true;
+            window.trendChart.getDatasetMeta(2).hidden = true;
+            window.trendChart.getDatasetMeta(3).hidden = true;
+            window.trendChart.getDatasetMeta(4).hidden = false;
+            window.trendChart.getDatasetMeta(5).hidden = false;
+        }
+        window.trendChart.update('none');
+    };
+
+    // --- Synchronized KPI & Intelligence Engine ---
+    window.updateKpisAndIntelligence = function() {
         const brgyDropdown = document.getElementById('monthlyTrendBarangayFilter');
         const yrDropdown = document.getElementById('monthlyTrendYearFilter');
         const selectedBrgy = brgyDropdown ? brgyDropdown.value : 'ALL';
         const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
+        const cat = window.activeLeadingCategory || 'ALL';
 
-        // 1. Single O(N) pass for instant 12-month buckets, bento details, and sector distribution (<1ms)
-        const buckets = Array.from({ length: 12 }, () => [0, 0, 0, 0, 0, 0]); // [focusM, focusS, nonIndexM, nonIndexS, psiM, psiS]
-        const sectorCounts = {};
-        const overallCounts = {};
-        const categoryCounts = { '8-Focus': {}, 'Non-Index': {}, 'PSI': {} };
-        let matchedCount = 0;
+        const buckets = window.currentBuckets || Array.from({ length: 12 }, () => [0, 0, 0, 0, 0, 0]);
+        let scopeCounts = {};
+        let scopeTotal = 0;
+        let scopeMonthlyTotals = [];
+        let kpiSubtitle = "Recorded Cases • View Reports";
 
-        for (let i = 0; i < preprocessedPoints.length; i++) {
-            const item = preprocessedPoints[i];
-            if (item.year !== selectedYear) continue;
-
-            const sector = item.barangay || 'Unknown';
-            sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
-
-            if (selectedBrgy !== 'ALL' && item.barangay !== selectedBrgy) continue;
-            matchedCount++;
-
-            const m = item.month;
-            if (m >= 0 && m < 12) {
-                const isScan = item.isScanned ? 1 : 0;
-                if (item.category === '8-Focus') {
-                    buckets[m][isScan]++;
-                } else if (item.category === 'PSI') {
-                    buckets[m][4 + isScan]++;
-                } else {
-                    buckets[m][2 + isScan]++;
-                }
-            }
-
-            const type = item.incident_type;
-            if (type && type !== 'UNKNOWN') {
-                overallCounts[type] = (overallCounts[type] || 0) + 1;
-                const cat = item.category === '8-Focus' || item.category === 'PSI' ? item.category : 'Non-Index';
-                categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
-            }
+        if (cat === 'ALL') {
+            scopeCounts = window.currentOverallCounts || {};
+            scopeTotal = window.currentMatchedCount || 0;
+            scopeMonthlyTotals = buckets.map(b => b.reduce((acc, curr) => acc + curr, 0));
+            kpiSubtitle = "All Recorded Cases • View Reports";
+        } else if (cat === '8-Focus') {
+            scopeCounts = (window.currentCategoryCounts && window.currentCategoryCounts['8-Focus']) || {};
+            scopeTotal = Object.values(scopeCounts).reduce((a, b) => a + b, 0);
+            scopeMonthlyTotals = buckets.map(b => b[0] + b[1]);
+            kpiSubtitle = "8-Focus Index Cases • View Reports";
+        } else if (cat === 'Non-Index') {
+            scopeCounts = (window.currentCategoryCounts && window.currentCategoryCounts['Non-Index']) || {};
+            scopeTotal = Object.values(scopeCounts).reduce((a, b) => a + b, 0);
+            scopeMonthlyTotals = buckets.map(b => b[2] + b[3]);
+            kpiSubtitle = "Non-Index Cases • View Reports";
+        } else if (cat === 'PSI') {
+            scopeCounts = (window.currentCategoryCounts && window.currentCategoryCounts['PSI']) || {};
+            scopeTotal = Object.values(scopeCounts).reduce((a, b) => a + b, 0);
+            scopeMonthlyTotals = buckets.map(b => b[4] + b[5]);
+            kpiSubtitle = "Public Safety Incidents • View Reports";
         }
 
-        // STEP 1: INSTANT BARGRAPH UPDATE (0ms)
-        if (window.trendChart) {
-            window.trendChart.data.labels = MONTH_LABELS;
-            window.trendChart.data.datasets[0].data = buckets.map(b => b[0]);
-            window.trendChart.data.datasets[1].data = buckets.map(b => b[1]);
-            window.trendChart.data.datasets[2].data = buckets.map(b => b[2]);
-            window.trendChart.data.datasets[3].data = buckets.map(b => b[3]);
-            window.trendChart.data.datasets[4].data = buckets.map(b => b[4]);
-            window.trendChart.data.datasets[5].data = buckets.map(b => b[5]);
-            window.trendChart.update('none'); // Render immediately!
+        // Top Crime Calculation
+        const sortedCrimes = Object.entries(scopeCounts).sort((a, b) => b[1] - a[1]);
+        let topCrimeName = 'NONE';
+        let topCrimeCount = 0;
+
+        if (window.activeSpecificOffense && scopeCounts[window.activeSpecificOffense] !== undefined) {
+            topCrimeName = window.activeSpecificOffense;
+            topCrimeCount = scopeCounts[topCrimeName];
+        } else if (sortedCrimes.length > 0) {
+            topCrimeName = sortedCrimes[0][0];
+            topCrimeCount = sortedCrimes[0][1];
         }
 
-        // STEP 2: INSTANT TOP KPI METRICS UPDATE (Total Incidents, Peak Month, Leading Offense)
-        const kpiTotalEl = document.getElementById('modalKpiTotal');
-        if (kpiTotalEl) kpiTotalEl.textContent = matchedCount;
-
-        // Calculate Peak Month
-        const monthTotals = buckets.map(b => b.reduce((acc, curr) => acc + curr, 0));
+        // Peak Month Calculation for the scope
         let maxMonthIdx = 0;
         let maxMonthVal = 0;
-        monthTotals.forEach((val, idx) => {
+        scopeMonthlyTotals.forEach((val, idx) => {
             if (val > maxMonthVal) {
                 maxMonthVal = val;
                 maxMonthIdx = idx;
             }
         });
 
+        // Update KPI 1: Total Incidents
+        const kpiTotalEl = document.getElementById('modalKpiTotal');
+        const kpiTotalSub = document.getElementById('modalKpiTotalSub');
+        if (kpiTotalEl) kpiTotalEl.textContent = scopeTotal;
+        if (kpiTotalSub) kpiTotalSub.textContent = kpiSubtitle;
+
+        // Update KPI 2: Peak Month
         const kpiPeakMonthEl = document.getElementById('modalKpiPeakMonth');
         const kpiPeakCountEl = document.getElementById('modalKpiPeakCount');
-        if (kpiPeakMonthEl) kpiPeakMonthEl.textContent = matchedCount > 0 ? FULL_MONTH_NAMES[maxMonthIdx] : '--';
+        if (kpiPeakMonthEl) kpiPeakMonthEl.textContent = scopeTotal > 0 ? FULL_MONTH_NAMES[maxMonthIdx] : '--';
         if (kpiPeakCountEl) {
-            kpiPeakCountEl.textContent = matchedCount > 0 
-                ? `${maxMonthVal} records (${((maxMonthVal / Math.max(matchedCount, 1)) * 100).toFixed(0)}%)` 
+            kpiPeakCountEl.textContent = scopeTotal > 0 
+                ? `${maxMonthVal} records (${((maxMonthVal / Math.max(scopeTotal, 1)) * 100).toFixed(0)}%)` 
                 : '0 records';
         }
 
-        // Save current counts for Leading Offense category selection
-        window.currentOverallCounts = overallCounts;
-        window.currentCategoryCounts = categoryCounts;
-        window.currentMatchedCount = matchedCount;
+        // Update KPI 3: Leading Offense Card
+        const badge = document.getElementById('leadingOffenseCategoryBadge');
+        if (badge) badge.textContent = cat;
 
-        // Update Leading Offense based on active category (ALL, 8-Focus, Non-Index, PSI)
-        window.updateLeadingOffenseCard(window.activeLeadingCategory || 'ALL');
-        if (window.activeLeadingCategory && window.activeLeadingCategory !== 'ALL') {
-            window.applyCategoryFilterToChart(window.activeLeadingCategory);
+        const kpiTopCrimeEl = document.getElementById('modalKpiTopCrime');
+        const kpiTopShareEl = document.getElementById('modalKpiTopShare');
+        if (kpiTopCrimeEl) {
+            kpiTopCrimeEl.textContent = topCrimeName;
+            kpiTopCrimeEl.title = topCrimeName;
+        }
+        if (kpiTopShareEl) {
+            const share = scopeTotal > 0 ? ((topCrimeCount / scopeTotal) * 100).toFixed(1) : '0';
+            const catLabel = cat === 'ALL' ? 'total' : cat;
+            kpiTopShareEl.textContent = scopeTotal > 0 
+                ? `${topCrimeCount} cases (${share}% of ${catLabel})` 
+                : `0 cases (0% of ${catLabel})`;
         }
 
-        const trendScopeYear = document.getElementById('trendScopeYear');
-        if (trendScopeYear) {
-            trendScopeYear.textContent = selectedYear;
-        }
-
-        // STEP 3: INSTANT BENTO STATS UPDATE
-        updateBentoDetailsFromCounts(overallCounts, categoryCounts, matchedCount, selectedBrgy);
-
-        // STEP 4: INSTANT DISTRIBUTION PIE UPDATE
-        updateDistributionChartFromCounts(sectorCounts, selectedYear);
-
-        // STEP 5: INSTANT REAL-TIME DYNAMIC INTELLIGENCE ANALYSIS (0ms, no waiting!)
+        // Update Dynamic Intelligence Cards (0ms instant)
         if (typeof window.renderDynamicTrendAnalysis === 'function') {
-            window.renderDynamicTrendAnalysis(selectedBrgy, selectedYear, matchedCount, buckets, overallCounts);
+            window.renderDynamicTrendAnalysis(
+                selectedBrgy, 
+                selectedYear, 
+                cat, 
+                topCrimeName, 
+                topCrimeCount, 
+                scopeTotal, 
+                scopeMonthlyTotals, 
+                scopeCounts, 
+                window.currentOverallCounts, 
+                window.currentCategoryCounts
+            );
         }
 
-        // STEP 6: BACKGROUND AI TRENDS (non-blocking, enriches insights if available)
+        // Trigger Non-Blocking Background AI Trends
         if (typeof window.generateAITrends === 'function') {
-            window.generateAITrends(selectedBrgy, selectedYear);
+            window.generateAITrends(selectedBrgy, selectedYear, cat, topCrimeName);
         }
     };
 
-    window.activeLeadingCategory = 'ALL';
+    // --- Master Category Filter Controller ---
+    window.setDashboardCategoryFilter = function(cat, specificOffense) {
+        if (!cat) cat = 'ALL';
+        // If clicking the active category button (and no specific offense specified), toggle back to 'ALL'
+        if (window.activeLeadingCategory === cat && cat !== 'ALL' && !specificOffense) {
+            cat = 'ALL';
+        }
+        window.activeLeadingCategory = cat;
+        window.activeSpecificOffense = specificOffense || null;
+
+        // Synchronize category button visuals
+        updateCategoryButtonsUI(cat);
+
+        // Apply dataset visibility to Chart
+        applyCategoryFilterToChart(cat);
+
+        // Update KPI metrics & Intelligence Cards
+        updateKpisAndIntelligence();
+    };
+
+    // Forward compatibility for category legend buttons
+    window.toggleTrendDataset = function(groupIndex) {
+        const map = ['8-Focus', 'Non-Index', 'PSI'];
+        const cat = map[groupIndex] || 'ALL';
+        window.setDashboardCategoryFilter(cat);
+    };
+
+    // Selection from Leading Offense Modal
+    window.selectLeadingOffenseCategory = function(cat, specificOffense) {
+        window.closeLeadingOffenseModal();
+        window.setDashboardCategoryFilter(cat, specificOffense);
+    };
 
     window.openLeadingOffenseModal = function() {
         const modal = document.getElementById('leadingOffenseModal');
@@ -1335,7 +1560,7 @@
             const btn = document.getElementById(item.id);
             if (!btn) return;
             const check = btn.querySelector('.choiceCheckmark');
-            if (item.cat === window.activeLeadingCategory) {
+            if (item.cat === (window.activeLeadingCategory || 'ALL')) {
                 btn.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/70', 'dark:bg-blue-950/40');
                 if (check) {
                     check.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
@@ -1358,138 +1583,95 @@
         if (modal) modal.classList.add('hidden');
     };
 
-    window.selectLeadingOffenseCategory = function(cat) {
-        window.activeLeadingCategory = cat || 'ALL';
-        window.closeLeadingOffenseModal();
+    // --- Ultra-Fast Monthly Crime Trends Filtering Logic ---
+    window.filterMonthlyTrends = function() {
+        const brgyDropdown = document.getElementById('monthlyTrendBarangayFilter');
+        const yrDropdown = document.getElementById('monthlyTrendYearFilter');
+        const selectedBrgy = brgyDropdown ? brgyDropdown.value : 'ALL';
+        const selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
 
-        // 1. Update Leading Offense Card
-        window.updateLeadingOffenseCard(window.activeLeadingCategory);
+        // 1. Single O(N) pass for instant 12-month buckets, bento details, and sector distribution (<1ms)
+        const buckets = Array.from({ length: 12 }, () => [0, 0, 0, 0, 0, 0]); // [focusM, focusS, nonIndexM, nonIndexS, psiM, psiS]
+        const sectorCounts = {};
+        const overallCounts = {};
+        const categoryCounts = { '8-Focus': {}, 'Non-Index': {}, 'PSI': {} };
+        let matchedCount = 0;
 
-        // 2. Filter Bar Graph to the selected category
-        window.applyCategoryFilterToChart(window.activeLeadingCategory);
-    };
+        for (let i = 0; i < preprocessedPoints.length; i++) {
+            const item = preprocessedPoints[i];
+            if (item.year !== selectedYear) continue;
 
-    window.applyCategoryFilterToChart = function(cat) {
-        if (!window.trendChart) return;
+            const sector = item.barangay || 'Unknown';
+            sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
 
-        if (cat === 'ALL') {
-            for (let i = 0; i < 6; i++) {
-                window.trendChart.getDatasetMeta(i).hidden = false;
+            if (selectedBrgy !== 'ALL' && item.barangay !== selectedBrgy) continue;
+            matchedCount++;
+
+            const m = item.month;
+            if (m >= 0 && m < 12) {
+                const isScan = item.isScanned ? 1 : 0;
+                if (item.category === '8-Focus') {
+                    buckets[m][isScan]++;
+                } else if (item.category === 'PSI') {
+                    buckets[m][4 + isScan]++;
+                } else {
+                    buckets[m][2 + isScan]++;
+                }
             }
-            ['legend8Focus', 'legendNonIndex', 'legendPSI'].forEach(id => {
-                const btn = document.getElementById(id);
-                if (btn) btn.classList.remove('opacity-40', 'line-through');
-            });
-        } else if (cat === '8-Focus') {
-            window.trendChart.getDatasetMeta(0).hidden = false;
-            window.trendChart.getDatasetMeta(1).hidden = false;
-            window.trendChart.getDatasetMeta(2).hidden = true;
-            window.trendChart.getDatasetMeta(3).hidden = true;
-            window.trendChart.getDatasetMeta(4).hidden = true;
-            window.trendChart.getDatasetMeta(5).hidden = true;
 
-            const b0 = document.getElementById('legend8Focus');
-            const b1 = document.getElementById('legendNonIndex');
-            const b2 = document.getElementById('legendPSI');
-            if (b0) b0.classList.remove('opacity-40', 'line-through');
-            if (b1) b1.classList.add('opacity-40', 'line-through');
-            if (b2) b2.classList.add('opacity-40', 'line-through');
-        } else if (cat === 'Non-Index') {
-            window.trendChart.getDatasetMeta(0).hidden = true;
-            window.trendChart.getDatasetMeta(1).hidden = true;
-            window.trendChart.getDatasetMeta(2).hidden = false;
-            window.trendChart.getDatasetMeta(3).hidden = false;
-            window.trendChart.getDatasetMeta(4).hidden = true;
-            window.trendChart.getDatasetMeta(5).hidden = true;
-
-            const b0 = document.getElementById('legend8Focus');
-            const b1 = document.getElementById('legendNonIndex');
-            const b2 = document.getElementById('legendPSI');
-            if (b0) b0.classList.add('opacity-40', 'line-through');
-            if (b1) b1.classList.remove('opacity-40', 'line-through');
-            if (b2) b2.classList.add('opacity-40', 'line-through');
-        } else if (cat === 'PSI') {
-            window.trendChart.getDatasetMeta(0).hidden = true;
-            window.trendChart.getDatasetMeta(1).hidden = true;
-            window.trendChart.getDatasetMeta(2).hidden = true;
-            window.trendChart.getDatasetMeta(3).hidden = true;
-            window.trendChart.getDatasetMeta(4).hidden = false;
-            window.trendChart.getDatasetMeta(5).hidden = false;
-
-            const b0 = document.getElementById('legend8Focus');
-            const b1 = document.getElementById('legendNonIndex');
-            const b2 = document.getElementById('legendPSI');
-            if (b0) b0.classList.add('opacity-40', 'line-through');
-            if (b1) b1.classList.add('opacity-40', 'line-through');
-            if (b2) b2.classList.remove('opacity-40', 'line-through');
-        }
-        window.trendChart.update();
-    };
-
-    window.updateLeadingOffenseCard = function(cat) {
-        if (!cat) cat = window.activeLeadingCategory || 'ALL';
-
-        const badge = document.getElementById('leadingOffenseCategoryBadge');
-        if (badge) badge.textContent = cat;
-
-        let counts = {};
-        let totalScope = 0;
-        if (cat === 'ALL') {
-            counts = window.currentOverallCounts || {};
-            totalScope = window.currentMatchedCount || 0;
-        } else {
-            counts = (window.currentCategoryCounts && window.currentCategoryCounts[cat]) || {};
-            totalScope = Object.values(counts).reduce((a, b) => a + b, 0);
-        }
-
-        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-        const top = sorted.length > 0 ? sorted[0] : ['None', 0];
-
-        const kpiTopCrimeEl = document.getElementById('modalKpiTopCrime');
-        const kpiTopShareEl = document.getElementById('modalKpiTopShare');
-
-        if (kpiTopCrimeEl) {
-            kpiTopCrimeEl.textContent = top[0];
-            kpiTopCrimeEl.title = top[0];
-        }
-        if (kpiTopShareEl) {
-            const share = totalScope > 0 ? ((top[1] / totalScope) * 100).toFixed(1) : '0';
-            const catLabel = cat === 'ALL' ? 'total' : cat;
-            kpiTopShareEl.textContent = totalScope > 0 ? `${top[1]} cases (${share}% of ${catLabel})` : `0 cases (0% of ${catLabel})`;
-        }
-    };
-
-    // Toggle datasets on the top bar graph via category buttons
-    window.toggleTrendDataset = function(groupIndex) {
-        if (!window.trendChart) return;
-        
-        // 0 = 8-Focus (datasets 0, 1), 1 = Non-Index (datasets 2, 3), 2 = PSI (datasets 4, 5)
-        const targetIndices = [groupIndex * 2, groupIndex * 2 + 1];
-        const currentHidden = window.trendChart.getDatasetMeta(targetIndices[0]).hidden;
-        const newHidden = !currentHidden;
-
-        targetIndices.forEach(idx => {
-            const meta = window.trendChart.getDatasetMeta(idx);
-            meta.hidden = newHidden;
-        });
-        window.trendChart.update();
-
-        // Update button appearance
-        const btnIds = ['legend8Focus', 'legendNonIndex', 'legendPSI'];
-        const btn = document.getElementById(btnIds[groupIndex]);
-        if (btn) {
-            if (newHidden) {
-                btn.classList.add('opacity-40', 'line-through');
-            } else {
-                btn.classList.remove('opacity-40', 'line-through');
+            const type = item.incident_type;
+            if (type && type !== 'UNKNOWN') {
+                overallCounts[type] = (overallCounts[type] || 0) + 1;
+                const cat = item.category === '8-Focus' || item.category === 'PSI' ? item.category : 'Non-Index';
+                categoryCounts[cat][type] = (categoryCounts[cat][type] || 0) + 1;
             }
         }
+
+        // Save current counts for synchronization
+        window.currentBuckets = buckets;
+        window.currentOverallCounts = overallCounts;
+        window.currentCategoryCounts = categoryCounts;
+        window.currentMatchedCount = matchedCount;
+
+        // STEP 1: INSTANT BARGRAPH DATA REFRESH (0ms)
+        if (window.trendChart) {
+            window.trendChart.data.labels = MONTH_LABELS;
+            window.trendChart.data.datasets[0].data = buckets.map(b => b[0]);
+            window.trendChart.data.datasets[1].data = buckets.map(b => b[1]);
+            window.trendChart.data.datasets[2].data = buckets.map(b => b[2]);
+            window.trendChart.data.datasets[3].data = buckets.map(b => b[3]);
+            window.trendChart.data.datasets[4].data = buckets.map(b => b[4]);
+            window.trendChart.data.datasets[5].data = buckets.map(b => b[5]);
+            window.trendChart.update('none');
+        }
+
+        // STEP 2: APPLY CURRENT ACTIVE CATEGORY FILTER
+        const activeCat = window.activeLeadingCategory || 'ALL';
+        applyCategoryFilterToChart(activeCat);
+        updateCategoryButtonsUI(activeCat);
+
+        const trendScopeYear = document.getElementById('trendScopeYear');
+        if (trendScopeYear) {
+            trendScopeYear.textContent = selectedYear;
+        }
+
+        // STEP 3: INSTANT BENTO STATS UPDATE
+        updateBentoDetailsFromCounts(overallCounts, categoryCounts, matchedCount, selectedBrgy);
+
+        // STEP 4: INSTANT DISTRIBUTION PIE UPDATE
+        updateDistributionChartFromCounts(sectorCounts, selectedYear);
+
+        // STEP 5: INSTANT SYNCHRONIZED KPIS & INTELLIGENCE ANALYSIS
+        updateKpisAndIntelligence();
     };
 
-    window.generateAITrends = async function(selectedBrgy, selectedYear) {
-        const generateBtn = document.getElementById('aiGenerateBtn');
+    // --- Background AI Trends Integration ---
+    window.generateAITrends = async function(selectedBrgy, selectedYear, activeCat, leadingCrime) {
+        if (window.currentAITrendController) {
+            window.currentAITrendController.abort();
+        }
+        window.currentAITrendController = new AbortController();
 
-        // If not passed, find the active value in the dropdowns
         if (!selectedBrgy) {
             const dropdown = document.getElementById('monthlyTrendBarangayFilter');
             selectedBrgy = dropdown ? dropdown.value : 'ALL';
@@ -1498,27 +1680,44 @@
             const yrDropdown = document.getElementById('monthlyTrendYearFilter');
             selectedYear = yrDropdown ? parseInt(yrDropdown.value, 10) : <%= defaultYearVal %>;
         }
+        if (!activeCat) {
+            activeCat = window.activeLeadingCategory || 'ALL';
+        }
+        if (!leadingCrime) {
+            const topEl = document.getElementById('modalKpiTopCrime');
+            leadingCrime = topEl ? topEl.textContent : '';
+        }
 
+        const generateBtn = document.getElementById('aiGenerateBtn');
         if (generateBtn) {
             generateBtn.disabled = true;
             generateBtn.innerHTML = '<i class="fas fa-spinner animate-spin text-xs"></i>';
         }
 
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const timeoutId = setTimeout(() => {
+                if (window.currentAITrendController) window.currentAITrendController.abort();
+            }, 6000);
 
-            const response = await fetch(`/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}&year=${selectedYear}`, {
-                signal: controller.signal
-            });
+            const url = `/admin/api/ai-trends?barangay=${encodeURIComponent(selectedBrgy)}&year=${selectedYear}&category=${encodeURIComponent(activeCat)}&leadingOffense=${encodeURIComponent(leadingCrime)}`;
+            const response = await fetch(url, { signal: window.currentAITrendController.signal });
             clearTimeout(timeoutId);
             const result = await response.json();
 
-            if (result && result.success && result.analysis) {
-                updateModalTrendsFromMarkdown(result.analysis, selectedBrgy, selectedYear);
+            // Verify filter state hasn't drifted while waiting for network
+            const curBrgy = document.getElementById('monthlyTrendBarangayFilter')?.value || 'ALL';
+            const curYr = parseInt(document.getElementById('monthlyTrendYearFilter')?.value || '<%= defaultYearVal %>', 10);
+            const curCat = window.activeLeadingCategory || 'ALL';
+
+            if (curBrgy === selectedBrgy && curYr === selectedYear && curCat === activeCat) {
+                if (result && result.success && result.analysis) {
+                    updateModalTrendsFromMarkdown(result.analysis, selectedBrgy, selectedYear, activeCat);
+                }
             }
         } catch (err) {
-            console.info('AI Trends background sync:', err);
+            if (err.name !== 'AbortError') {
+                console.info('AI Trends background sync notice:', err);
+            }
         } finally {
             if (generateBtn) {
                 generateBtn.disabled = false;
@@ -1710,15 +1909,18 @@
         }
     }
 
-    function updateModalTrendsFromMarkdown(rawMarkdown, selectedBrgy, selectedYear) {
+    function updateModalTrendsFromMarkdown(rawMarkdown, selectedBrgy, selectedYear, category) {
         if (!rawMarkdown) return;
         window.lastRawMarkdown = rawMarkdown;
 
         const trendEl = document.getElementById('modalTrendText');
         const patternEl = document.getElementById('modalPatternText');
         const suggEl = document.getElementById('modalSuggestionsText');
+        const trendBadge = document.getElementById('modalTrendBadge');
+        const patternBadge = document.getElementById('modalPatternBadge');
+        const suggBadge = document.getElementById('modalSuggestionsBadge');
 
-        let raw = rawMarkdown.replace(/```markdown|```/g, '').trim().replace(/\\n/g, '\n');
+        let raw = rawMarkdown.replace(/\`\`\`markdown|\`\`\`/g, '').trim().replace(/\\n/g, '\n');
         const sectionRegex = /(?:^|\n)(?:\#{1,4}\s*|\*{1,2}\s*)?(Trend|Pattern|Suggestions?|Recommendations?)(?:\*{1,2})?\s*[\:\-]?/gi;
         
         let matches = [];
@@ -1762,12 +1964,15 @@
 
         if (trendEl && parsedSections.trend) {
             trendEl.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">${parsedSections.trend}</div>`;
+            if (trendBadge) trendBadge.textContent = 'Verified';
         }
         if (patternEl && parsedSections.pattern) {
             patternEl.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">${parsedSections.pattern}</div>`;
+            if (patternBadge) patternBadge.textContent = 'Identified';
         }
         if (suggEl && parsedSections.suggestion) {
             suggEl.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-medium">${parsedSections.suggestion}</div>`;
+            if (suggBadge) suggBadge.textContent = 'Directives';
         }
     }
 

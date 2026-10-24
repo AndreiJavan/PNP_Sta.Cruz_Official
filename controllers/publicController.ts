@@ -77,13 +77,13 @@ export const getHome = async (req: Request, res: Response) => {
     const bulletins = (await getRawBulletinsCached())
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
-    // Filter out mock data for public advisory, restrict to target categories, and exclude Facebook URL posts
+    // Filter out mock data for public advisory, restrict to target categories (now supports Facebook URL advisories too)
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
+    const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
 
-    // Map "General Announcement" bulletins and Facebook URL posts to policeNewsList for news releases
+    // Map "General Announcement" bulletins and Facebook news posts to policeNewsList for news releases
     const policeNewsList = bulletins
-      .filter((b: any) => (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'))
+      .filter((b: any) => (b.category === 'General Announcement' || (b.facebook_url && !allowedAdvisoryCategories.includes(b.category))) && !b.id.startsWith('bulletin-'))
       .map((b: any) => {
         const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
         const firstPara = getFirstParagraph(bodyText);
@@ -122,7 +122,8 @@ export const getHome = async (req: Request, res: Response) => {
 export const getNews = async (req: Request, res: Response) => {
   try {
     const rawBulletins = await getRawBulletinsCached();
-    const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || b.facebook_url) && !b.id.startsWith('bulletin-'));
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+    const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || (b.facebook_url && !allowedAdvisoryCategories.includes(b.category))) && !b.id.startsWith('bulletin-'));
 
     const newsList = dbBulletins.map((b: any) => {
       const bodyText = (b.body && b.body.trim() && b.body !== 'Official Facebook post update from PNP Sta. Cruz, Laguna.') ? b.body.trim() : b.title;
@@ -369,7 +370,7 @@ export const getBulletins = async (req: Request, res: Response) => {
     const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     let bulletins = rawBulletins
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
-      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category) && !b.facebook_url);
+      .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
 
     let activeCategory = category;
     if (!activeCategory || activeCategory === 'All' || !allowedAdvisoryCategories.includes(String(activeCategory))) {

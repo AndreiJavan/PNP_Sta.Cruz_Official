@@ -46,12 +46,17 @@ export function isWorkableWord(word: string): boolean {
     return /^[a-zA-Z0-9\.\-ñÑ]+$/.test(clean);
   }
 
-  // Accepted police / military acronyms and abbreviations
+  // Purely numeric tokens, years, RA/statute numbers, Roman numerals (e.g. "2002", "7610", "9165", "10591", "RA9165", "III")
+  if (/^[\d\.\-\/]+$/.test(clean) || /\d/.test(clean) || /^[ivxlcdm]+$/i.test(clean)) {
+    return true;
+  }
+
+  // Accepted police / military / legal acronyms and abbreviations
   const recognizedAcronyms = new Set([
     'PNP', 'MPS', 'PMAJ', 'PLT', 'PCOL', 'PLTCOL', 'PCMS', 'PSMS', 'PMSg', 'PSSg', 'PCpl', 'Pat',
-    'PO1', 'PO2', 'PO3', 'SPO1', 'SPO2', 'SPO3', 'SPO4', 'RIR', 'PSI', 'RA', 'BFP', 'BJMP', 'AFP',
-    'LGU', 'MDRRMO', 'RHU', 'DILG', 'NBI', 'CIDG', 'SWAT', 'EOD', 'K9', 'TOC', 'PCR', 'CPICRS',
-    'BRGY', 'ST.', 'STA.', 'STO.', 'SAN'
+    'PO1', 'PO2', 'PO3', 'SPO1', 'SPO2', 'SPO3', 'SPO4', 'RIR', 'PSI', 'RA', 'PD', 'BP', 'RPC',
+    'VAWC', 'WCPD', 'BFP', 'BJMP', 'AFP', 'LGU', 'MDRRMO', 'RHU', 'DILG', 'NBI', 'CIDG', 'SWAT',
+    'EOD', 'K9', 'TOC', 'PCR', 'CPICRS', 'BRGY', 'ST.', 'STA.', 'STO.', 'SAN'
   ]);
   const upper = clean.toUpperCase().replace(/[^A-Z0-9]/g, '');
   if (recognizedAcronyms.has(upper)) {
@@ -63,19 +68,34 @@ export function isWorkableWord(word: string): boolean {
     return false;
   }
 
-  // Check for repeated substrings (e.g. "asdasdasd", "qweqweqwe")
-  if (REPEATING_SUBSTRING_REGEX.test(clean)) {
+  // Check for repeated substrings (e.g. "asdasd", "asdasdadsads", "qweqwe")
+  if (/(.{2,4})\1{1,}/i.test(clean)) {
+    return false;
+  }
+
+  // Pure alphabetical words with 4 or more letters must have at least one vowel
+  const lettersOnly = clean.replace(/[^a-zA-ZñÑ]/g, '').toLowerCase();
+  if (lettersOnly.length >= 4 && !VOWEL_REGEX.test(lettersOnly)) {
+    return false;
+  }
+
+  // Low character diversity (e.g. "asdasdadsads" has only 3 unique letters across 12 characters)
+  if (lettersOnly.length >= 5) {
+    const uniqueChars = new Set(lettersOnly.split(''));
+    if (uniqueChars.size <= 2 || (lettersOnly.length >= 7 && uniqueChars.size <= 3)) {
+      return false;
+    }
+  }
+
+  // Common keyboard sequence mash
+  const mashSeqs = ['qwerty', 'qwert', 'asdfg', 'asdf', 'zxcvb', 'zxcv', 'poiuy', 'lkjhg', 'mnbvc'];
+  if (mashSeqs.some(seq => lettersOnly.includes(seq))) {
     return false;
   }
 
   // Check for excessive consecutive consonants (5 or more consecutive consonants is almost always mash)
   const CONSONANT_CLUSTER_REGEX = /[bcdfghjklmnpqrstvwxz]{5,}/i;
   if (CONSONANT_CLUSTER_REGEX.test(clean)) {
-    return false;
-  }
-
-  // Words with 4 or more letters must have at least one vowel
-  if (clean.length >= 4 && !VOWEL_REGEX.test(clean)) {
     return false;
   }
 

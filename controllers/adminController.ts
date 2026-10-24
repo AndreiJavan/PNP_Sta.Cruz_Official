@@ -377,151 +377,19 @@ export async function hasSuperAdmin(): Promise<boolean> {
 
 /**
  * GET /admin/setup
- * Renders the one-time master system initialization wizard.
- * If a Super Administrator is already registered, displays a locked notice.
+ * GET /admin/setup
+ * Legacy route - redirects to login
  */
 export const getSetup = async (req: Request, res: Response) => {
-  try {
-    const superadminExists = await hasSuperAdmin();
-    if (superadminExists) {
-      return res.render('admin/setup_locked', {
-        title: 'Setup Disabled',
-        layout: false
-      });
-    }
-
-    const error_msg = (req.query.error as string) || null;
-    const requireSecret = Boolean(process.env.SETUP_SECRET_KEY);
-
-    return res.render('admin/setup', {
-      title: 'CPICRS System Initialization',
-      layout: false,
-      error_msg,
-      requireSecret
-    });
-  } catch (err: any) {
-    console.error('[SETUP CHECK ERROR]:', err);
-    return res.render('admin/login', {
-      title: 'Admin Login',
-      layout: false,
-      error_msg: 'Unable to verify system setup state.'
-    });
-  }
+  return res.redirect('/admin/login');
 };
 
 /**
  * POST /admin/setup
- * Registers the initial root Super Administrator account.
- * Permanently locks setup once completed.
+ * Legacy route - redirects to login
  */
 export const postSetup = async (req: Request, res: Response) => {
-  try {
-    const superadminExists = await hasSuperAdmin();
-    if (superadminExists) {
-      return res.status(403).send('Initialization disabled. A Super Administrator already exists.');
-    }
-
-    const { full_name, email, username, password, confirm_password, setup_key } = req.body;
-
-    // Optional verification against server environment secret
-    if (process.env.SETUP_SECRET_KEY) {
-      if (!setup_key || setup_key.trim() !== process.env.SETUP_SECRET_KEY.trim()) {
-        return res.render('admin/setup', {
-          title: 'CPICRS System Initialization',
-          layout: false,
-          error_msg: 'Invalid Security Setup Key provided.',
-          requireSecret: true
-        });
-      }
-    }
-
-    // Input validations: Blank spaces and unworkable names prevention
-    const nameCheck = isValidPersonName(full_name, 3, 60);
-    if (!nameCheck.valid) {
-      return res.render('admin/setup', {
-        title: 'CPICRS System Initialization',
-        layout: false,
-        error_msg: nameCheck.error || 'Please provide a valid full name and rank.',
-        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
-      });
-    }
-
-    const cleanEmail = normalizeWhitespace(email);
-    if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.') || cleanEmail.length > 100) {
-      return res.render('admin/setup', {
-        title: 'CPICRS System Initialization',
-        layout: false,
-        error_msg: 'Please enter a valid official email address.',
-        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
-      });
-    }
-
-    const cleanUsername = normalizeWhitespace(username).toLowerCase();
-    if (!cleanUsername || cleanUsername.length < 3 || cleanUsername.length > 30 || !/^[a-z0-9_.-]+$/.test(cleanUsername)) {
-      return res.render('admin/setup', {
-        title: 'CPICRS System Initialization',
-        layout: false,
-        error_msg: 'Username must be at least 3 characters (letters, numbers, dots, or underscores only).',
-        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
-      });
-    }
-
-    if (!password || password.length < 8) {
-      return res.render('admin/setup', {
-        title: 'CPICRS System Initialization',
-        layout: false,
-        error_msg: 'Master Password must be at least 8 characters long.',
-        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
-      });
-    }
-
-    if (password !== confirm_password) {
-      return res.render('admin/setup', {
-        title: 'CPICRS System Initialization',
-        layout: false,
-        error_msg: 'Master Password and Confirmation Password do not match.',
-        requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
-      });
-    }
-
-    // Hash password and store in database
-    const hash = bcrypt.hashSync(password, 10);
-    const newAdmin = await db.collection('users').add({
-      username: cleanUsername,
-      full_name: full_name.trim(),
-      email: email.toLowerCase().trim(),
-      password_hash: hash,
-      role: 'superadmin',
-      status: 'active',
-      created_at: new Date().toISOString()
-    });
-
-    // Invalidate caches and lock setup
-    memoryCache.set('system:has_superadmin', true, 24 * 60 * 60 * 1000);
-    memoryCache.clearNamespace('users');
-    memoryCache.clearNamespace('personnel');
-
-    // Record system initialization audit trail
-    await db.collection('audit_logs').add({
-      admin_id: newAdmin.id,
-      username: cleanUsername,
-      action: 'SYSTEM_INITIALIZATION',
-      details: `Root Super Administrator initialized for ${cleanUsername} (${full_name.trim()}). Setup permanently locked.`,
-      timestamp: new Date().toISOString(),
-      created_at: new Date().toISOString()
-    });
-
-    console.log(`[SYSTEM INITIALIZATION SUCCESS] Root Superadmin created: ${cleanUsername}`);
-    return res.redirect('/admin/login?setup=success');
-  } catch (err: any) {
-    console.error('[SYSTEM SETUP FAILURE]:', err);
-    return res.render('admin/setup', {
-      title: 'CPICRS System Initialization',
-      layout: false,
-      error_msg: 'Database error during setup: ' + (err?.message || 'Please check database connection.'),
-      requireSecret: Boolean(process.env.SETUP_SECRET_KEY)
-    });
-  }
+  return res.redirect('/admin/login');
 };
 
 export const getLogin = async (req: Request, res: Response) => {
@@ -542,15 +410,6 @@ export const getLogin = async (req: Request, res: Response) => {
     return res.redirect('/admin/dashboard');
   }
 
-  // Guide user to setup if no Super Administrator has been registered yet
-  try {
-    const superadminExists = await hasSuperAdmin();
-    if (!superadminExists) {
-      return res.redirect('/admin/setup');
-    }
-  } catch (err) {
-    console.warn('[LOGIN SETUP CHECK WARNING]:', err);
-  }
 
   // Check if IP or session is currently in a 5-minute security lockout
   const lockoutRemaining = getLockoutRemainingSeconds(req);
@@ -1094,9 +953,9 @@ export const processAIExtraction = async (req: Request, res: Response) => {
               const lowerOff = rawOffense.toLowerCase();
               if (lowerOff.includes('reckless imprudence') || lowerOff.includes('reckless impudence') || /\brir\b/i.test(lowerOff)) {
                 finalCategory = 'PSI';
-              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOff.includes(t)) && !lowerOff.includes('anti-rape') && !lowerOff.includes('anti rape')) {
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOff.includes(t)) && !lowerOff.includes('anti-rape') && !lowerOff.includes('anti rape') && !lowerOff.includes('qualified theft')) {
                 finalCategory = '8-Focus';
-              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOff.includes(t))) {
+              } else if (['vehicular', 'traffic', 'road accident', 'hit and run', 'collision', 'motorcycle accident'].some(t => lowerOff.includes(t))) {
                 finalCategory = 'PSI';
               }
 
@@ -1628,9 +1487,9 @@ INPUT DATA STARTS BELOW:
           const lowerOffense = String(rawOffense).toLowerCase();
           if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
             finalCategory = 'PSI';
-          } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+          } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape') && !lowerOffense.includes('qualified theft')) {
             finalCategory = '8-Focus';
-          } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+          } else if (['vehicular', 'traffic', 'road accident', 'hit and run', 'collision', 'motorcycle accident'].some(t => lowerOffense.includes(t))) {
             finalCategory = 'PSI';
           } else if (rawCategory === '8-Focus' || rawCategory === 'PSI' || rawCategory === 'Non-Index') {
             finalCategory = rawCategory;
@@ -1670,9 +1529,9 @@ INPUT DATA STARTS BELOW:
               const lowerOffense = String(rawOffense).toLowerCase();
               if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
                 finalCategory = 'PSI';
-              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+              } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape') && !lowerOffense.includes('qualified theft')) {
                 finalCategory = '8-Focus';
-              } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident'].some(t => lowerOffense.includes(t))) {
+              } else if (['vehicular', 'traffic', 'road accident', 'hit and run', 'collision', 'motorcycle accident'].some(t => lowerOffense.includes(t))) {
                 finalCategory = 'PSI';
               } else if (rawCategory === '8-Focus' || rawCategory === 'PSI' || rawCategory === 'Non-Index') {
                 finalCategory = rawCategory;
@@ -1854,25 +1713,7 @@ export const saveReportBatch = async (req: Request, res: Response) => {
 };
 
 export const getAuditLogs = async (req: Request, res: Response) => {
-  try {
-    const logs = await memoryCache.getOrSet('audit_logs:latest', async () => {
-      const snap = await db.collection('audit_logs').orderBy('timestamp', 'desc').limit(100).get();
-      return snap.docs.map((doc: any) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          admin_name: data.username || data.admin_id || 'System',
-          action: data.action,
-          details: data.details,
-          timestamp: data.timestamp
-        };
-      });
-    }, 60 * 1000);
-    res.render('admin/audit_log', { title: 'System Audit Logs', logs, layout: 'layouts/admin' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading audit logs');
-  }
+  return res.redirect('/admin/dashboard');
 };
 
 const getYearFromPoint = (p: any): number | null => {
@@ -1896,29 +1737,44 @@ function buildDynamicAnalysisText(
   monthlyTrendData: any[],
   sortedCrimes: [string, number][],
   peakMonth: string,
-  peakCount: number
+  peakCount: number,
+  selectedCategory: string = 'ALL',
+  selectedOffense: string = ''
 ): string {
+  const catLabel = selectedCategory === '8-Focus'
+    ? '8-Focus Crimes (Index Crimes)'
+    : selectedCategory === 'Non-Index'
+      ? 'Non-Index Crimes (Special Laws)'
+      : selectedCategory === 'PSI'
+        ? 'Public Safety Incidents (PSI / Traffic)'
+        : 'All Monitored Incidents';
+
   if (totalCount === 0) {
-    return `**Trend**: Recorded incidents across ${barangayName} for ${selectedYear} remain exceptionally calm with zero active or reported crimes.
+    return `**Trend**: Recorded incidents for ${catLabel} across ${barangayName} during calendar year ${selectedYear} remain exceptionally calm with zero active or reported crimes. No escalations or criminal spikes were detected.
 
-**Pattern**: A consistent zero-incident baseline is observed across all 12 months.
+**Pattern**: A consistent zero-incident baseline is maintained across all 12 operational months in ${barangayName}. Community peace and public order indicators remain fully intact.
 
-**Suggestions**: Maintain high-visibility preventive patrols, routine barangay tanod coordination, and active community outreach to preserve this peaceful environment.`;
+**Suggestions**:
+- Maintain high-visibility preventive cruiser and beat patrols along main barangay thoroughfares to preserve this crime-free environment.
+- Sustain proactive collaboration with Barangay Tanods and Barangay Peacekeeping Action Teams (BPATs).
+- Conduct periodic community outreach and public safety dialogues to maintain community vigilance.`;
   }
 
   // Calculate H1 vs H2
   const h1 = (monthlyTrendData || []).slice(0, 6).reduce((acc: number, m: any) => acc + (m.count || 0), 0);
   const h2 = (monthlyTrendData || []).slice(6, 12).reduce((acc: number, m: any) => acc + (m.count || 0), 0);
   
-  let trendDirection = "a stable and balanced distribution";
+  let trendDirection = "a stable and balanced distribution across all quarters";
   if (h1 > 0 && h2 > h1) {
     const pct = Math.round(((h2 - h1) / h1) * 100);
-    trendDirection = `an upward shift (+${pct}% in the second half of the year compared to H1)`;
+    trendDirection = `an upward trajectory (+${pct}% increase in the second half of the year compared to H1)`;
   } else if (h1 > 0 && h2 < h1) {
     const pct = Math.round(((h1 - h2) / h1) * 100);
     trendDirection = `a steady downward trajectory (-${pct}% reduction in the second half of the year)`;
   } else if (h1 === 0 && h2 > 0) {
-    trendDirection = `an uptick in incident activity concentrated during the second half of ${selectedYear}`;
+    trendDirection = `incident activity concentrated exclusively during the second half of ${selectedYear}`;
+  } else if (h2 === 0 && h1 > 0) {
+    trendDirection = `activity contained in the first half of ${selectedYear} with zero incidents in the second half`;
   }
 
   // Quiet month
@@ -1926,29 +1782,64 @@ function buildDynamicAnalysisText(
   const quietMonth = quietObj ? quietObj.month : 'N/A';
   const quietCount = quietObj ? quietObj.count : 0;
 
-  // Top 3 Crimes
+  // Primary offense identification
+  const topCrimeEntry: [string, number] = (sortedCrimes && sortedCrimes.length > 0) ? sortedCrimes[0] : ['General Offenses', 0];
+  const activeCrimeName: string = String(selectedOffense || topCrimeEntry[0]);
+  const activeCrimeCount: number = Number(selectedOffense 
+    ? ((sortedCrimes || []).find(([n]) => String(n).toLowerCase() === selectedOffense.toLowerCase())?.[1] || topCrimeEntry[1])
+    : topCrimeEntry[1]);
+  const activeCrimeShare = totalCount > 0 ? Math.round((activeCrimeCount / totalCount) * 100) : 0;
+
+  // Top 3 Crimes list
   const topCrimeStr = (sortedCrimes && sortedCrimes.length > 0)
     ? sortedCrimes.slice(0, 3).map(([name, cnt]) => `${name} (${cnt} case${cnt > 1 ? 's' : ''}, ${Math.round((cnt / totalCount) * 100)}%)`).join(', ')
-    : 'No major category concentration';
+    : 'general offenses';
 
-  const topCrimeName = (sortedCrimes && sortedCrimes.length > 0) ? sortedCrimes[0][0].toLowerCase() : '';
+  const lowerCrime = activeCrimeName.toLowerCase();
 
-  let tailoredSuggestion = "Maintain targeted patrol operations, increase police visibility during high-activity periods, and engage community watch groups for proactive threat reporting.";
-  if (topCrimeName.includes('theft') || topCrimeName.includes('robbery') || topCrimeName.includes('burglary')) {
-    tailoredSuggestion = `Increase foot and mobile patrols in commercial areas, public markets, and transport hubs during peak hours. Coordinate with barangay tanods for continuous CCTV monitoring and street lighting enhancements.`;
-  } else if (topCrimeName.includes('injury') || topCrimeName.includes('assault') || topCrimeName.includes('brawl') || topCrimeName.includes('physical')) {
-    tailoredSuggestion = `Strictly enforce local liquor ordinances and night curfew. Deploy joint police-tanod standby teams near commercial plazas, recreation halls, and gathering spots during weekend evening hours.`;
-  } else if (topCrimeName.includes('traffic') || topCrimeName.includes('accident') || topCrimeName.includes('reckless')) {
-    tailoredSuggestion = `Establish speed control checkpoints and position traffic enforcers along key barangay arterial roads and intersections during peak commute hours.`;
-  } else if (topCrimeName.includes('cyber') || topCrimeName.includes('scam') || topCrimeName.includes('fraud')) {
-    tailoredSuggestion = `Conduct cyber-safety awareness workshops at local barangay halls and publish official public advisories regarding common digital fraud schemes.`;
+  // Dynamic tactical suggestions
+  let d1 = "Increase high-visibility foot and mobile cruiser patrols during peak hours (10:00-14:00 & 18:00-22:00) along key transit corridors and commercial centers.";
+  let d2 = "Coordinate with Barangay Tanods and BPATs for continuous CCTV monitoring and perimeter lighting enhancements.";
+  let d3 = "Conduct proactive community awareness campaigns and establish rapid reporting hotlines with local residents.";
+
+  if (lowerCrime.includes('theft') || lowerCrime.includes('robbery') || lowerCrime.includes('burglary')) {
+    d1 = `Deploy dedicated beat foot patrols and mobile cruiser visibility along commercial strips, public markets, and financial establishments in ${barangayName} during peak transaction hours.`;
+    d2 = `Coordinate with barangay tanods for continuous CCTV surveillance, perimeter lighting improvements, and target-hardening inspections of local commercial establishments.`;
+    d3 = `Execute strategic Oplan Sita chokepoints along primary ingress and egress routes of ${barangayName} to intercept fleeing motorcycle-riding suspects.`;
+  } else if (lowerCrime.includes('carnapping')) {
+    d1 = `Deploy dedicated Oplan Bakal/Sita checkpoints at major arterial exits and boundary intersections connecting ${barangayName} during late-night hours (22:00–04:00).`;
+    d2 = `Coordinate with LTO and Highway Patrol Group (HPG) for verification of suspicious unregistered or open-pipe motorcycles.`;
+    d3 = `Distribute anti-carnapping advisories urging motorcycle owners to utilize dual physical wheel locks, secure parking, and GPS tags.`;
+  } else if (lowerCrime.includes('injury') || lowerCrime.includes('assault') || lowerCrime.includes('brawl') || lowerCrime.includes('physical') || lowerCrime.includes('homicide') || lowerCrime.includes('murder')) {
+    d1 = `Strictly enforce municipal curfew ordinances for unchaperoned minors and enforce local liquor licensing hours around commercial bars, videoke hubs, and plazas.`;
+    d2 = `Deploy joint PNP-Barangay standby security units at known gathering spots and recreation halls during weekend evening windows (20:00–02:00).`;
+    d3 = `Coordinate closely with Barangay Lupon Tagapamayapa for early intervention in escalating interpersonal neighbor disputes before criminal escalation occurs.`;
+  } else if (lowerCrime.includes('drugs') || lowerCrime.includes('ra 9165') || lowerCrime.includes('dangerous drugs')) {
+    d1 = `Intensify intelligence surveillance and synchronized barangay clearing operations in coordination with PDEA and the Barangay Anti-Drug Abuse Council (BADAC).`;
+    d2 = `Deploy random mobile interdiction checkpoints along transit corridors commonly used by couriers and street-level pushers.`;
+    d3 = `Sustain community-based drug rehabilitation monitoring (CBDRP) and strengthen confidential reporting hotlines across all puroks of ${barangayName}.`;
+  } else if (lowerCrime.includes('vawc') || lowerCrime.includes('ra 9262') || lowerCrime.includes('child abuse') || lowerCrime.includes('ra 7610')) {
+    d1 = `Ensure 24/7 operational readiness of the Barangay VAW Desk in ${barangayName} in coordination with Station WCPD investigators for prompt issuance of Barangay Protection Orders.`;
+    d2 = `Execute multi-agency home visits alongside barangay social workers in identified high-risk domestic dispute households.`;
+    d3 = `Expedite forensic documentation and medical referral protocols for domestic abuse complaints to ensure air-tight case buildup for inquest proceedings.`;
+  } else if (lowerCrime.includes('traffic') || lowerCrime.includes('accident') || lowerCrime.includes('reckless') || lowerCrime.includes('damage to property')) {
+    d1 = `Station static traffic police visibility units and radar speed enforcement teams along high-density highways and accident-prone intersections in ${barangayName} during peak rush hours.`;
+    d2 = `Conduct joint enforcement operations with LGU Traffic Enforcers targeting motorcycle helmet compliance, unauthorized vehicle modifications, and driving under the influence (RA 10586).`;
+    d3 = `Coordinate with DPWH and Municipal Engineering to repair blind curves, install reflectorized road markings, and clear road shoulder obstructions.`;
+  } else if (lowerCrime.includes('cyber') || lowerCrime.includes('scam') || lowerCrime.includes('fraud') || lowerCrime.includes('estafa')) {
+    d1 = `Publish targeted cybercrime advisories via PNP social media bulletins educating ${barangayName} residents on prevailing phishing, fake parcel deliveries, and e-wallet fraudulent schemes.`;
+    d2 = `Guide victims through electronic evidence preservation for immediate referral to Regional Anti-Cybercrime Units (RACU).`;
+    d3 = `Conduct digital literacy and online fraud awareness workshops at local barangay halls and schools.`;
   }
 
-  return `**Trend**: Crime incidents in ${barangayName} for ${selectedYear} show ${trendDirection}, totaling ${totalCount} recorded incident${totalCount === 1 ? '' : 's'}. Peak volume occurred in ${peakMonth} (${peakCount} case${peakCount === 1 ? '' : 's'}), while ${quietMonth} recorded the lowest volume (${quietCount} case${quietCount === 1 ? '' : 's'}).
+  return `**Trend**: Incident trajectory for ${catLabel} in ${barangayName} during ${selectedYear} exhibits ${trendDirection}, totaling ${totalCount} recorded incident${totalCount === 1 ? '' : 's'}. Activity is heavily driven by **${activeCrimeName}** (${activeCrimeCount} cases, representing ${activeCrimeShare}% of volume). Peak volume occurred in **${peakMonth}** (${peakCount} case${peakCount === 1 ? '' : 's'}), while **${quietMonth}** maintained the lowest volume (${quietCount} case${quietCount === 1 ? '' : 's'}).
 
-**Pattern**: Incident distribution is driven primarily by ${topCrimeStr}. H1 accounted for ${h1} incident${h1 === 1 ? '' : 's'} (${Math.round((h1 / totalCount) * 100)}%) and H2 recorded ${h2} incident${h2 === 1 ? '' : 's'} (${Math.round((h2 / totalCount) * 100)}%).
+**Pattern**: Pattern mapping indicates incident distribution is driven primarily by ${topCrimeStr}. Chronological clustering shows ${h1} incident${h1 === 1 ? '' : 's'} (${Math.round((h1 / totalCount) * 100)}%) during the first semester (Jan–Jun) versus ${h2} incident${h2 === 1 ? '' : 's'} (${Math.round((h2 / totalCount) * 100)}%) during the second semester (Jul–Dec).
 
-**Suggestions**: ${tailoredSuggestion}`;
+**Suggestions**:
+- ${d1}
+- ${d2}
+- ${d3}`;
 }
 
 const aiTrendMemoryCache = new Map<string, { analysis: string; timestamp: number }>();
@@ -1958,9 +1849,11 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
   try {
     const selectedBarangay = req.query.barangay ? String(req.query.barangay).trim() : 'ALL';
     const selectedYear = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
+    const selectedCategory = req.query.category ? String(req.query.category).trim() : 'ALL';
+    const selectedOffense = req.query.leadingOffense ? String(req.query.leadingOffense).trim() : '';
 
     // Check memory cache first (TTL: 30 minutes)
-    const cacheKey = `${selectedBarangay.toLowerCase()}_${selectedYear}`;
+    const cacheKey = `${selectedBarangay.toLowerCase()}_${selectedYear}_${selectedCategory.toLowerCase()}_${selectedOffense.toLowerCase()}`;
     const cached = aiTrendMemoryCache.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp < 30 * 60 * 1000)) {
       return res.json({
@@ -1994,16 +1887,21 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
       console.warn("Database retrieval failed for AI trends, defaulting to offline math fallback mode:", dbErr);
     }
 
-    // Filter by selected barangay if applicable
+    // Filter by selected barangay and category if applicable
     const filteredPoints = points.filter((p: any) => {
       if (selectedBarangay !== 'ALL' && (!p.barangay || p.barangay.toLowerCase() !== selectedBarangay.toLowerCase())) {
+        return false;
+      }
+      if (selectedCategory !== 'ALL' && p.category !== selectedCategory) {
         return false;
       }
       return true;
     });
 
+    const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
+
     if (filteredPoints.length === 0) {
-      const emptyAnalysis = `**Trend**: Recorded incidents across ${selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay} for ${selectedYear} remain exceptionally calm with zero active or reported crimes.\n\n**Pattern**: A consistent zero-incident baseline is observed across all 12 operational months.\n\n**Suggestions**: Maintain high-visibility preventive patrols, routine barangay tanod coordination, and active community outreach to preserve this peaceful environment.`;
+      const emptyAnalysis = buildDynamicAnalysisText(barangayName, selectedYear, 0, [], [], 'N/A', 0, selectedCategory, selectedOffense);
       aiTrendMemoryCache.set(cacheKey, { analysis: emptyAnalysis, timestamp: Date.now() });
       return res.json({
         success: true,
@@ -2024,7 +1922,7 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
       monthlyTrendData.push({ month: monthLabel, count });
     }
 
-    // Evaluate highest crime incident types for this barangay
+    // Evaluate highest crime incident types for this scope
     const crimeCounts: { [key: string]: number } = {};
     const categoryCounts: { [key: string]: number } = {};
     filteredPoints.forEach((p: any) => {
@@ -2049,27 +1947,28 @@ export const getAITrendsAnalysis = async (req: Request, res: Response) => {
       }
     });
 
-    const topCrime = sortedCrimes.length > 0 ? sortedCrimes[0][0] : 'N/A';
-    const topCrimeCount = sortedCrimes.length > 0 ? sortedCrimes[0][1] : 0;
-    const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
+    const topCrime = selectedOffense || (sortedCrimes.length > 0 ? sortedCrimes[0][0] : 'N/A');
+    const topCrimeCount = selectedOffense
+      ? (crimeCounts[selectedOffense] || 0)
+      : (sortedCrimes.length > 0 ? sortedCrimes[0][1] : 0);
 
     let analysisText = "";
 
     // If Gemini was recently rate-limited, immediately use dynamic analysis
     if (Date.now() < geminiRateLimitedUntil) {
-      analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount);
+      analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount, selectedCategory, selectedOffense);
     } else {
       try {
         const client = getGptOssClient();
-        const prompt = `You are GPT-OSS 120B, a high-level Crime Intelligence AI. Analyze the following crime data for ${barangayName} in the year ${selectedYear}:
-Total Incidents: ${totalCount}
+        const prompt = `You are GPT-OSS 120B, a high-level Crime Intelligence AI for PNP Sta. Cruz. Analyze the following crime data for ${barangayName} (Scope: ${selectedCategory}, Leading Offense: ${topCrime}) in the year ${selectedYear}:
+Total Incidents in Scope: ${totalCount}
 Peak Month: ${peakMonth || 'N/A'} with ${peakCount} incidents
-Top Crime Category: ${topCrime} (${topCrimeCount} incidents)
+Top Crime Category/Offense: ${topCrime} (${topCrimeCount} incidents)
 Monthly Incident Breakdown: ${JSON.stringify(monthlyTrendData)}
 
 Provide a clear, actionable analysis organized strictly into 3 labelled sections with bold headers:
 
-**Trend**: [Concise statement on the overall direction - e.g., upward, downward, or stable trend]
+**Trend**: [Concise statement on the overall direction - e.g., upward, downward, or stable trend with percentage change]
 
 **Pattern**: [Key criminal patterns identified, including highest incident types and peak months]
 
@@ -2095,7 +1994,7 @@ IMPORTANT: Keep each section brief and separate them with blank lines.`;
           geminiRateLimitedUntil = Date.now() + 15 * 60 * 1000; // Circuit break for 15 minutes
         }
         console.info("[AI Trends] Fast fallback to dynamic intelligence analysis:", errMsg);
-        analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount);
+        analysisText = buildDynamicAnalysisText(barangayName, selectedYear, totalCount, monthlyTrendData, sortedCrimes, peakMonth, peakCount, selectedCategory, selectedOffense);
       }
     }
 
@@ -2110,10 +2009,12 @@ IMPORTANT: Keep each section brief and separate them with blank lines.`;
     console.warn('GPT-OSS Outermost Error Intercepted, returning dynamic analysis fallback:', err);
     const selectedBarangay = req.query.barangay ? String(req.query.barangay).trim() : 'ALL';
     const selectedYear = req.query.year ? parseInt(String(req.query.year), 10) : new Date().getFullYear();
+    const selectedCategory = req.query.category ? String(req.query.category).trim() : 'ALL';
+    const selectedOffense = req.query.leadingOffense ? String(req.query.leadingOffense).trim() : '';
     const barangayName = selectedBarangay === 'ALL' ? 'All Barangays' : 'Barangay ' + selectedBarangay;
     res.json({
       success: true,
-      analysis: buildDynamicAnalysisText(barangayName, selectedYear, 0, [], [], 'N/A', 0)
+      analysis: buildDynamicAnalysisText(barangayName, selectedYear, 0, [], [], 'N/A', 0, selectedCategory, selectedOffense)
     });
   }
 };
@@ -2217,8 +2118,8 @@ This report summarizes **${rawData.length} crime and public safety records** sca
 
 #### **I. Pillar Breakdown**
 - **8-Focus**: **${counts['8-Focus']} cases** — Highlights major street level indexes (Theft, Robbery, Homicide, Homicide, Rape).
-- **PSI (Public Safety Index)**: **${counts['PSI']} cases** — Captures road accidents, physical hazards, traffic events, and disaster/rescue compliance.
-- **Non-Index**: **${counts['Non-Index']} cases** — Covers local municipal ordinances, special laws, drug possession, cybercrime, and minor security threats.
+- **PSI (Public Safety Incident)**: **${counts['PSI']} cases** — Captures traffic incidents, road vehicular collisions, hit-and-run, and Reckless Imprudence (RIR) cases.
+- **Non-Index**: **${counts['Non-Index']} cases** — Covers Special Penal Laws (VAWC, Drugs/RA 9165, Cybercrime, Firearms), RPC non-focus offenses (Estafa, Qualified Theft, Malicious Mischief), and local municipal ordinances.
 
 #### **II. Pattern Analysis**
 - **Sectors of Concern**: The primary hotspots identified in this dataset are ${topBrgyText || 'N/A'}. These sectors account for the highest density of reported incidents and should be prioritized for patrol routing.
@@ -2507,18 +2408,7 @@ export const getBulletins = async (req: Request, res: Response) => {
 };
 
 export const getCreateBulletin = (req: Request, res: Response) => {
-  const category = req.query.category as string || '';
-  const isPublic = !req.originalUrl.startsWith('/admin');
-  if (!isPublic) {
-    return res.redirect('/admin/bulletins?openModal=true');
-  }
-  res.render('admin/bulletin_form', {
-    title: 'New Bulletin',
-    bulletin: null,
-    defaultCategory: category,
-    layout: 'layouts/main',
-    isPublic: true
-  });
+  return res.redirect('/admin/bulletins?openModal=true');
 };
 
 export const postCreateBulletin = async (req: Request, res: Response) => {
@@ -2527,10 +2417,10 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
   // Safely extract rawCategory, resolving array inputs if multiple category fields were submitted
   let rawCategory: string = '';
   if (Array.isArray(category)) {
-    if (publish_type === 'url' || publish_type === 'news') {
+    if (publish_type === 'news') {
       rawCategory = 'General Announcement';
     } else {
-      rawCategory = String(category.find((c: any) => c && String(c) !== 'General Announcement') || category[0] || '');
+      rawCategory = String(category.find((c: any) => c && String(c) !== 'category_inactive') || category[0] || '');
     }
   } else {
     rawCategory = String(category === 'Other' ? custom_category : (category || ''));
@@ -2542,23 +2432,8 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
     rawCategory = classifyCategory(`${title || ''} ${body || ''}`);
   }
 
-  // If publish_type is 'url', the intent is explicitly to import a Facebook URL as a General Announcement
-  if (publish_type === 'url') {
-    rawCategory = 'General Announcement';
-  }
-
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
-  const isUrlPost = publish_type === 'url' || (finalFacebookUrl.length > 0 && rawCategory === 'General Announcement');
-
-  // Validation: Public Advisories do NOT accept URLs or Facebook Post links
-  const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-  const isAdvisoryCat = publish_type !== 'url' && rawCategory !== 'General Announcement' && (
-    advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person')
-  );
-
-  if (isAdvisoryCat && (finalFacebookUrl.length > 0 || publish_type === 'url')) {
-    return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or attach image/video media for Public Advisories.`);
-  }
+  const isUrlPost = publish_type === 'url' || finalFacebookUrl.length > 0;
 
   // Validation 1: Title/Name character, word limits, and workable words check (Min 3 words, Max 30 words / 200 chars)
   const cleanTitle = normalizeWhitespace(title);
@@ -2604,11 +2479,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       };
     }
 
-    if (isUrlPost || finalFacebookUrl.length > 0) {
-      // URL posts rely solely on the Facebook link embed - no photo/video media attachments
-      uploadedPhotoPaths = [];
-      uploadedVideoPaths = [];
-    } else if (files) {
+    if (files) {
       let totalUploaded = 0;
       if (files.photos && files.photos.length > 0) {
         for (const file of files.photos) {
@@ -2649,7 +2520,11 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
       }
     }
 
-    const targetCategory = isUrlPost ? 'General Announcement' : (rawCategory || 'General Announcement');
+    if (!isUrlPost && uploadedPhotoPaths.length === 0 && uploadedVideoPaths.length === 0) {
+      return res.status(400).send('Validation Error: At least 1 picture, video, or Facebook URL link must be attached to the bulletin.');
+    }
+
+    const targetCategory = rawCategory || 'General Announcement';
     const encoded = encodeCustomCategory(targetCategory, cleanBody, uploadedVideoPaths, isUrlPost ? finalFacebookUrl : undefined);
 
     const validPostedBy = await getValidUserId(req.session?.user?.id);
@@ -2697,15 +2572,7 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
 };
 
 export const getEditBulletin = async (req: Request, res: Response) => {
-  try {
-    const doc = await db.collection('bulletins').doc(req.params.id).get();
-    const d = doc.data();
-    const bulletin = decodeCustomCategory({ id: doc.id, ...d, photo_paths: parsePhotos(d.photo_path), video_paths: parseVideos(d.video_path) });
-    res.render('admin/bulletin_form', { title: 'Edit Bulletin', bulletin, layout: 'layouts/admin', isPublic: false });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading bulletin');
-  }
+  return res.redirect(`/admin/bulletins?edit=${req.params.id}`);
 };
 
 export const postEditBulletin = async (req: Request, res: Response) => {
@@ -2721,21 +2588,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
   rawCategory = rawCategory.trim();
 
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();
-
-  // If a Facebook URL is supplied AND General Announcement is present in category input, normalize rawCategory to General Announcement
-  if (finalFacebookUrl.length > 0 && (category === 'General Announcement' || (Array.isArray(category) && category.includes('General Announcement')))) {
-    rawCategory = 'General Announcement';
-  }
-
-  // Validation: Public Advisories do NOT accept URLs or Facebook Post links
-  const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
-  const isAdvisoryCat = rawCategory !== 'General Announcement' && (
-    advisoryCategories.includes(rawCategory) || (rawCategory && rawCategory !== 'Wanted Person' && rawCategory !== 'Missing Person')
-  );
-
-  if (isAdvisoryCat && finalFacebookUrl.length > 0) {
-    return res.status(400).send(`Validation Error: URLs / Facebook post links are not accepted for Public Advisories (${rawCategory || 'Public Advisory'}). Please select "General Announcement" to import Facebook posts, or remove the URL link to update this Public Advisory.`);
-  }
+  const isUrlPost = finalFacebookUrl.length > 0;
 
   // Validation 1: Title/Name character, word limits, and workable words check (Min 3 words, Max 30 words / 200 chars)
   const cleanTitle = normalizeWhitespace(title);
@@ -2744,18 +2597,27 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: ${titleCheck.error}`);
   }
 
-  // Validation 2: Body text length limiter (Min 5 words / 15 chars, Max 500 words / 5,000 chars)
-  const cleanBody = normalizeWhitespace(body);
-  const narrativeCheck = isValidNarrative(cleanBody, 15, 5000);
-  if (!narrativeCheck.valid) {
-    return res.status(400).send(`Validation Error: ${narrativeCheck.error}`);
-  }
-  const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
-  if (bodyWords.length < 5) {
-    return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words).`);
-  }
-  if (bodyWords.length > 500) {
-    return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words. Currently: ${bodyWords.length} words).`);
+  // Validation 2: Body / Facebook URL
+  let cleanBody = normalizeWhitespace(body);
+  if (isUrlPost) {
+    if (!finalFacebookUrl) {
+      return res.status(400).send('Validation Error: Facebook Post URL is required.');
+    }
+    if (!cleanBody) {
+      cleanBody = cleanTitle;
+    }
+  } else {
+    const narrativeCheck = isValidNarrative(cleanBody, 15, 5000);
+    if (!narrativeCheck.valid) {
+      return res.status(400).send(`Validation Error: ${narrativeCheck.error}`);
+    }
+    const bodyWords = cleanBody.split(/\s+/).filter(Boolean);
+    if (bodyWords.length < 5) {
+      return res.status(400).send(`Validation Error: Bulletin body must be at least 5 words long (currently: ${bodyWords.length} words).`);
+    }
+    if (bodyWords.length > 500) {
+      return res.status(400).send(`Validation Error: Bulletin body is too long (maximum 500 words. Currently: ${bodyWords.length} words).`);
+    }
   }
 
   try {
@@ -2791,14 +2653,10 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     const hasNewVideos = files && files.videos && files.videos.length > 0;
     const totalMedia = finalPhotos.length + finalVideos.length + (hasNewPhotos ? files.photos.length : 0) + (hasNewVideos ? files.videos.length : 0);
 
-    if (finalFacebookUrl.length > 0) {
-      // URL posts rely solely on the Facebook link embed - no photo/video attachments
-      finalPhotos = [];
-      finalVideos = [];
-    } else if (totalMedia === 0) {
+    if (totalMedia === 0 && finalFacebookUrl.length === 0) {
       return res.status(400).send('Validation Error: At least 1 picture, video, or Facebook URL link must be attached to the bulletin.');
     }
-    if (finalFacebookUrl.length === 0 && files) {
+    if (files) {
       if (files.photos && files.photos.length > 0) {
         const uploadedPaths: string[] = [];
         for (const file of files.photos) {
@@ -2836,10 +2694,11 @@ export const postEditBulletin = async (req: Request, res: Response) => {
       }
     }
 
-    const encoded = encodeCustomCategory(rawCategory, body, finalVideos, finalFacebookUrl || undefined);
+    const targetCategory = rawCategory || 'General Announcement';
+    const encoded = encodeCustomCategory(targetCategory, cleanBody, finalVideos, finalFacebookUrl || undefined);
 
     const data: any = {
-      title,
+      title: cleanTitle,
       category: encoded.category,
       body: encoded.body,
       is_archived: is_archived === 'on' || is_archived === true,
@@ -2849,7 +2708,7 @@ export const postEditBulletin = async (req: Request, res: Response) => {
     // Always update these so that any deleted items are properly removed from the list
     data.photo_path = finalPhotos.length > 0 ? JSON.stringify(finalPhotos) : '';
 
-    await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${title})`);
+    await logAction(req, 'BULLETIN_EDIT', `Updated bulletin ID: ${req.params.id} (${cleanTitle})`);
     await db.collection('bulletins').doc(req.params.id).update(data);
     memoryCache.clearNamespace('bulletin');
     if (encoded.category === 'Wanted Person') {
@@ -2912,41 +2771,7 @@ export const deleteBulletin = async (req: Request, res: Response) => {
 };
 
 export const getTips = async (req: Request, res: Response) => {
-  try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = 20;
-    const offset = (page - 1) * limit;
-
-    const cacheKey = `tips:admin_p${page}`;
-    const { tips, totalPages } = await memoryCache.getOrSet(cacheKey, async () => {
-      const [snap, countSnap] = await Promise.all([
-        db.collection('anonymous_tips').orderBy('created_at', 'desc').offset(offset).limit(limit).get(),
-        db.collection('anonymous_tips').count().get()
-      ]);
-      const tipsList = snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      const pages = Math.ceil(countSnap.data().count / limit);
-      return { tips: tipsList, totalPages: pages };
-    }, 60 * 1000);
-
-    // Mark tip-related notifications as read when viewed
-    const unreadNotifs = await db.collection('admin_notifications')
-      .where('type', '==', 'TIP')
-      .where('is_read', '==', false)
-      .get();
-
-    if (!unreadNotifs.empty) {
-      const batch = db.batch();
-      unreadNotifs.docs.forEach((doc: any) => {
-        batch.update(doc.ref, { is_read: true, updated_at: new Date().toISOString() });
-      });
-      await batch.commit();
-    }
-
-    res.render('admin/tips', { title: 'Anonymous Tips', tips, currentPage: page, totalPages, layout: 'layouts/admin' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error loading tips');
-  }
+  return res.redirect('/admin/dashboard');
 };
 
 export const getUnreadTipsCount = async (req: Request, res: Response) => {
@@ -2972,7 +2797,7 @@ export const updateTip = async (req: Request, res: Response) => {
       admin_notes,
       updated_at: new Date().toISOString()
     });
-    res.redirect('/admin/tips');
+    res.redirect('/admin/dashboard');
   } catch (err) {
     console.error(err);
     res.status(500).send('Error updating tip');
@@ -3048,9 +2873,9 @@ export const postMapPoint = async (req: Request, res: Response) => {
     const lowerOffense = String(finalOffense).toLowerCase();
     if (lowerOffense.includes('reckless imprudence') || lowerOffense.includes('reckless impudence') || /\brir\b/i.test(lowerOffense)) {
       category = 'PSI';
-    } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'physical injuries', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape')) {
+    } else if (['theft', 'robbery', 'murder', 'homicide', 'physical injury', 'physical injuries', 'rape', 'carnapping'].some(t => lowerOffense.includes(t)) && !lowerOffense.includes('anti-rape') && !lowerOffense.includes('anti rape') && !lowerOffense.includes('qualified theft')) {
       category = '8-Focus';
-    } else if (['vehicular accident', 'traffic incident', 'fire incident', 'vehicular', 'traffic accident', 'accident', 'safety'].some(t => lowerOffense.includes(t))) {
+    } else if (['vehicular', 'traffic', 'road accident', 'hit and run', 'collision', 'motorcycle accident', 'accident', 'safety'].some(t => lowerOffense.includes(t))) {
       category = 'PSI';
     }
 
@@ -3879,21 +3704,22 @@ export const deleteReport = async (req: Request, res: Response) => {
       deleted_at: new Date().toISOString()
     });
 
-    // 4. Delete map points & scan document safely
-    // Delete individual map points by ID first to guarantee removal
+    // 4. Delete map points & scan document concurrently for high speed
     if (pointsSnap.docs && pointsSnap.docs.length > 0) {
-      for (const ptDoc of pointsSnap.docs) {
-        await ptDoc.ref.delete().catch((e: any) => console.warn(`[DELETE REPORT] Map point ${ptDoc.id} delete warning:`, e.message));
-      }
+      await Promise.all(pointsSnap.docs.map((ptDoc: any) =>
+        ptDoc.ref.delete().catch((e: any) => console.warn(`[DELETE REPORT] Map point ${ptDoc.id} delete warning:`, e.message))
+      ));
     }
-    await db.collection('map_points').where('report_id', '==', reportId).delete().catch((e: any) => console.warn(`[DELETE REPORT] Bulk map points delete warning:`, e.message));
-    await db.collection('intelligence_scans').doc(reportId).delete();
+    await db.collection('intelligence_scans').doc(reportId).delete().catch((e: any) => console.warn(`[DELETE REPORT] Scan delete warning:`, e.message));
     await memoryCache.clearNamespace('map_points');
     await memoryCache.clearNamespace('scans');
     await memoryCache.clearNamespace('reports');
     await memoryCache.clearNamespace('archive');
 
     await logAction(req, 'REPORT_ARCHIVED', `Archived crime report ID: ${reportId}`);
+    if (req.xhr || req.headers.accept?.includes('json')) {
+      return res.json({ success: true, message: 'Report deleted successfully' });
+    }
     res.redirect('/admin/reports');
   } catch (err: any) {
     console.error('Error archiving report:', err);

@@ -3,7 +3,7 @@
     const advisoryCount = bulletins.filter(b => advisoryCategories.includes(b.category)).length;
     const newsCount = bulletins.filter(b => b.category === 'General Announcement').length;
 %>
-<div class="space-y-8 animate-fade-in px-4 lg:px-4 max-w-7xl mx-auto w-full transition-all duration-300">
+<div class="space-y-[1.9rem] animate-fade-in px-[0.95rem] lg:px-[0.95rem] max-w-7xl mx-auto w-full transition-all duration-300">
     <!-- Header with Stats -->
     <div class="w-full transition-all duration-300">
         <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs p-5 md:p-6 rounded-none flex flex-col lg:flex-row items-center justify-between lg:space-x-8 space-y-6 lg:space-y-0 group w-full transition-all duration-300">
@@ -452,27 +452,27 @@
 
         selectPublishType(pubType);
 
-        // Pre-fill values
-        if (pubType === 'url') {
-            const urlTitleInput = document.getElementById('urlTitleInput');
-            const urlBodyInput = document.getElementById('urlBodyInput');
-            const fbUrlInput = document.getElementById('publishFacebookUrl');
+        // Pre-fill values (Unified Title, Body, Category, Facebook URL)
+        const titleInput = document.getElementById('publishTitle');
+        const bodyInput = document.getElementById('publishBody');
+        const fbUrlInput = document.getElementById('publishFacebookUrl');
+        const advisorySelect = document.getElementById('publishCategoryAdvisory');
+        const urlCategorySelect = document.getElementById('urlCategorySelect');
 
-            if (urlTitleInput) urlTitleInput.value = bulletin.title || '';
-            if (urlBodyInput) urlBodyInput.value = bulletin.body || '';
+        if (titleInput) titleInput.value = bulletin.title || '';
+        if (bodyInput) bodyInput.value = bulletin.body || '';
+
+        if (pubType === 'url') {
             if (fbUrlInput) {
                 fbUrlInput.value = bulletin.facebook_url || '';
                 handleFacebookUrlInput(bulletin.facebook_url || '');
             }
-        } else {
-            const titleInput = document.getElementById('publishTitle');
-            const bodyInput = document.getElementById('publishBody');
-            const categorySelect = document.getElementById('publishCategoryAdvisory');
-
-            if (titleInput) titleInput.value = bulletin.title || '';
-            if (bodyInput) bodyInput.value = bulletin.body || '';
-            if (pubType === 'advisory' && categorySelect && bulletin.category) {
-                categorySelect.value = bulletin.category;
+            if (urlCategorySelect && bulletin.category) {
+                urlCategorySelect.value = bulletin.category;
+            }
+        } else if (pubType === 'advisory') {
+            if (advisorySelect && bulletin.category) {
+                advisorySelect.value = bulletin.category;
             }
         }
 
@@ -564,9 +564,19 @@
         renderModalMediaGalleryGrid();
         updateModalCounters();
 
+        if (pubType === 'url') {
+            if (modalMediaItems.length > 0) {
+                switchUrlLeftTab('media');
+            } else if (bulletin.facebook_url && bulletin.facebook_url.trim().length > 0) {
+                switchUrlLeftTab('embed');
+            } else {
+                switchUrlLeftTab('media');
+            }
+        }
+
         window.initialEditBulletinSnapshot = {
-            title: (pubType === 'url' ? (bulletin.title || '') : (bulletin.title || '')).trim(),
-            body: (pubType === 'url' ? (bulletin.body || '') : (bulletin.body || '')).trim(),
+            title: (bulletin.title || '').trim(),
+            body: (bulletin.body || '').trim(),
             pubType: pubType,
             category: (bulletin.category || '').trim(),
             facebook_url: (bulletin.facebook_url || '').trim(),
@@ -633,24 +643,19 @@
         const publishTypeInput = document.getElementById('publishTypeInput');
         if (publishTypeInput) publishTypeInput.value = type;
 
-        const manualPanel = document.getElementById('manualPublishPanel');
-        const urlPanel = document.getElementById('urlPublishPanel');
         const selectedBadge = document.getElementById('selectedTypeBadge');
-        
         const advisorySelect = document.getElementById('publishCategoryAdvisory');
         const newsBadge = document.getElementById('publishCategoryNewsBadge');
+        const urlCategorySelect = document.getElementById('urlCategorySelect');
+        const fbUrlGroup = document.getElementById('publishFacebookUrlGroup');
         const fbUrlInput = document.getElementById('publishFacebookUrl');
-        const publishBody = document.getElementById('publishBody');
-        const publishTitle = document.getElementById('publishTitle');
-        const urlTitleInput = document.getElementById('urlTitleInput');
-        const urlBodyInput = document.getElementById('urlBodyInput');
+        const urlLeftTabSwitcher = document.getElementById('urlLeftTabSwitcher');
+        const bodyLabelRequired = document.getElementById('publishBodyRequiredStar');
+        const bodyOptionalNote = document.getElementById('publishBodyOptionalNote');
 
         if (type === 'url') {
-            if (manualPanel) manualPanel.classList.add('hidden');
-            if (urlPanel) {
-                urlPanel.classList.remove('hidden');
-                urlPanel.classList.add('grid');
-            }
+            if (urlLeftTabSwitcher) urlLeftTabSwitcher.classList.remove('hidden');
+            if (fbUrlGroup) fbUrlGroup.classList.remove('hidden');
 
             if (selectedBadge) {
                 selectedBadge.textContent = 'Facebook Official Post';
@@ -662,50 +667,49 @@
                 advisorySelect.name = "category_inactive";
                 advisorySelect.disabled = true;
             }
+            if (newsBadge) newsBadge.classList.add('hidden');
+            if (urlCategorySelect) {
+                urlCategorySelect.classList.remove('hidden');
+                urlCategorySelect.name = "category";
+                urlCategorySelect.disabled = false;
+            }
+
+            const newsCatHidden = document.getElementById('hiddenNewsCategory');
+            if (newsCatHidden) {
+                newsCatHidden.disabled = true;
+                newsCatHidden.name = "category_inactive";
+            }
 
             if (fbUrlInput) fbUrlInput.required = true;
+            if (bodyLabelRequired) bodyLabelRequired.classList.add('hidden');
+            if (bodyOptionalNote) bodyOptionalNote.classList.remove('hidden');
 
-            if (urlTitleInput && publishTitle) {
-                urlTitleInput.name = "title";
-                publishTitle.name = "title_inactive";
-                urlTitleInput.required = true;
-                publishTitle.required = false;
+            if (modalMediaItems.length > 0) {
+                switchUrlLeftTab('media');
+            } else if (fbUrlInput && fbUrlInput.value.trim().length > 0) {
+                switchUrlLeftTab('embed');
+            } else {
+                switchUrlLeftTab('media');
             }
 
-            if (urlBodyInput && publishBody) {
-                urlBodyInput.name = "body";
-                publishBody.name = "body_inactive";
-                urlBodyInput.required = false;
-                publishBody.required = false;
-            }
-
-            // Set hidden category for URL post
-            setFormCategory('General Announcement');
             if (fbUrlInput && fbUrlInput.value) {
                 handleFacebookUrlInput(fbUrlInput.value);
             }
         } else {
-            if (manualPanel) manualPanel.classList.remove('hidden');
-            if (urlPanel) {
-                urlPanel.classList.add('hidden');
-                urlPanel.classList.remove('grid');
+            if (urlLeftTabSwitcher) urlLeftTabSwitcher.classList.add('hidden');
+            if (fbUrlGroup) fbUrlGroup.classList.add('hidden');
+
+            switchUrlLeftTab('media');
+
+            if (urlCategorySelect) {
+                urlCategorySelect.classList.add('hidden');
+                urlCategorySelect.name = "category_inactive";
+                urlCategorySelect.disabled = true;
             }
 
             if (fbUrlInput) fbUrlInput.required = false;
-
-            if (urlTitleInput && publishTitle) {
-                publishTitle.name = "title";
-                urlTitleInput.name = "title_inactive";
-                publishTitle.required = true;
-                urlTitleInput.required = false;
-            }
-
-            if (urlBodyInput && publishBody) {
-                publishBody.name = "body";
-                urlBodyInput.name = "body_inactive";
-                publishBody.required = true;
-                urlBodyInput.required = false;
-            }
+            if (bodyLabelRequired) bodyLabelRequired.classList.remove('hidden');
+            if (bodyOptionalNote) bodyOptionalNote.classList.add('hidden');
 
             if (type === 'advisory') {
                 if (advisorySelect) {
@@ -746,12 +750,39 @@
         goToPublishStep(2);
     }
 
+    function switchUrlLeftTab(tab) {
+        const mediaBtn = document.getElementById('urlTabMediaBtn');
+        const embedBtn = document.getElementById('urlTabEmbedBtn');
+        const mediaContent = document.getElementById('modalMediaBoxContent');
+        const embedContent = document.getElementById('urlFbEmbedContent');
+
+        if (tab === 'media') {
+            if (mediaContent) mediaContent.classList.remove('hidden');
+            if (embedContent) embedContent.classList.add('hidden');
+            if (mediaBtn) {
+                mediaBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-sm cursor-pointer';
+            }
+            if (embedBtn) {
+                embedBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer';
+            }
+        } else {
+            if (mediaContent) mediaContent.classList.add('hidden');
+            if (embedContent) embedContent.classList.remove('hidden');
+            if (embedBtn) {
+                embedBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 bg-white dark:bg-slate-800 text-[#1877F2] shadow-sm cursor-pointer';
+            }
+            if (mediaBtn) {
+                mediaBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer';
+            }
+        }
+    }
+
     function handleFacebookUrlInput(url) {
         const previewBox = document.getElementById('fbUrlPreviewBox');
         const placeholder = document.getElementById('urlPlaceholder');
         const iframeContainer = document.getElementById('fbIframeContainer');
         const externalLink = document.getElementById('fbUrlExternalLink');
-        const urlTitleInput = document.getElementById('urlTitleInput');
+        const publishTitle = document.getElementById('publishTitle');
 
         if (!url || !url.trim() || (!url.includes('facebook.com') && !url.includes('fb.watch') && !url.includes('fb.me'))) {
             if (previewBox) previewBox.classList.add('hidden');
@@ -776,12 +807,9 @@
         if (placeholder) placeholder.classList.add('hidden');
         if (previewBox) previewBox.classList.remove('hidden');
 
-        // Auto-set Category to General Announcement
-        setFormCategory('General Announcement');
-
-        // Auto-suggest title if empty
-        if (urlTitleInput && !urlTitleInput.value.trim()) {
-            urlTitleInput.value = 'Official PNP Facebook Advisory Update';
+        // Auto-suggest title if empty and not in edit mode
+        if (publishTitle && !publishTitle.value.trim() && currentModalMode !== 'edit') {
+            publishTitle.value = 'Official PNP Facebook Advisory Update';
             updateModalCounters();
         }
     }
@@ -807,14 +835,12 @@
 
     function updateModalCounters() {
         const isUrl = currentPublishType === 'url';
-        const titleInput = isUrl ? document.getElementById('urlTitleInput') : document.getElementById('publishTitle');
-        const bodyInput = isUrl ? document.getElementById('urlBodyInput') : document.getElementById('publishBody');
-
-        const titleCounter = isUrl ? document.getElementById('urlTitleCounter') : document.getElementById('publishTitleCounter');
-        const bodyCounter = isUrl ? document.getElementById('urlBodyCounter') : document.getElementById('publishBodyCounter');
-
-        const titleErrorMsg = isUrl ? document.getElementById('urlTitleError') : document.getElementById('publishTitleError');
-        const bodyErrorMsg = isUrl ? document.getElementById('urlBodyError') : document.getElementById('publishBodyError');
+        const titleInput = document.getElementById('publishTitle');
+        const bodyInput = document.getElementById('publishBody');
+        const titleCounter = document.getElementById('publishTitleCounter');
+        const bodyCounter = document.getElementById('publishBodyCounter');
+        const titleErrorMsg = document.getElementById('publishTitleError');
+        const bodyErrorMsg = document.getElementById('publishBodyError');
 
         if (titleInput && titleCounter) {
             const letters = titleInput.value ? titleInput.value.length : 0;
@@ -840,9 +866,9 @@
                 titleInput.classList.remove('border-emerald-500', 'ring-emerald-500/20');
                 titleCounter.classList.add('text-red-500');
                 titleCounter.classList.remove('text-slate-400', 'text-emerald-500');
-            } else if (letters > 100) {
+            } else if (letters > 200) {
                 if (titleErrorMsg) {
-                    titleErrorMsg.textContent = `Title exceeds maximum limit of 100 letters (currently ${letters} letters).`;
+                    titleErrorMsg.textContent = `Title exceeds maximum limit of 200 letters (currently ${letters} letters).`;
                     titleErrorMsg.classList.remove('hidden');
                     titleErrorMsg.className = 'text-[11px] font-bold text-red-500 mt-1';
                 }
@@ -999,6 +1025,9 @@
 
             if (modalMediaItems.length > 0) {
                 modalCurrentSlide = modalMediaItems.length - 1;
+                if (currentPublishType === 'url') {
+                    switchUrlLeftTab('media');
+                }
             }
 
             syncModalMediaInputs();
@@ -1140,33 +1169,8 @@
 
         renderModalThumbnailsStrip();
 
-        // Sync attached file list in urlPublishPanel if present
-        const urlFilesContainer = document.getElementById('urlAttachedFilesContainer');
-        const urlFilesList = document.getElementById('urlAttachedFilesList');
-        const urlAddBtnText = document.getElementById('urlAddFileBtnText');
-
-        if (urlFilesContainer && urlFilesList) {
-            if (modalMediaItems.length === 0) {
-                urlFilesContainer.classList.add('hidden');
-                if (urlAddBtnText) urlAddBtnText.textContent = 'Choose / Upload File';
-            } else {
-                urlFilesContainer.classList.remove('hidden');
-                if (urlAddBtnText) urlAddBtnText.textContent = `Attached (${modalMediaItems.length}/10) - Add More`;
-                urlFilesList.innerHTML = modalMediaItems.map((item, idx) => `
-                    <div class="flex items-center justify-between p-2.5 bg-white dark:bg-slate-900 rounded-xl border border-gray-150 dark:border-slate-800 text-xs shadow-sm">
-                        <div class="flex items-center space-x-2.5 truncate mr-2">
-                            <i class="${item.type === 'image' ? 'fas fa-image text-emerald-500' : 'fas fa-film text-amber-500'} text-sm"></i>
-                            <span class="font-bold text-slate-700 dark:text-slate-200 truncate">${item.name}</span>
-                            ${item.isExisting ? '<span class="text-[10px] font-bold text-pnp-blue dark:text-pnp-gold">(Saved)</span>' : `<span class="text-[10px] font-mono font-bold text-slate-400">(${(item.size/(1024*1024)).toFixed(1)}MB)</span>`}
-                        </div>
-                        <button type="button" onclick="removeUrlModalMediaItem(${idx})" class="text-red-500 hover:text-white hover:bg-red-500 text-xs px-2.5 py-1 rounded-lg transition flex items-center space-x-1 cursor-pointer" title="Remove file">
-                            <i class="fas fa-trash-alt text-[10px]"></i>
-                            <span class="text-[10px] font-bold">Remove</span>
-                        </button>
-                    </div>
-                `).join('');
-            }
-        }
+        const urlTabMediaCount = document.getElementById('urlTabMediaCount');
+        if (urlTabMediaCount) urlTabMediaCount.textContent = modalMediaItems.length;
     }
 
     function removeUrlModalMediaItem(idx) {
@@ -1369,6 +1373,9 @@
     function openModalFullscreenMediaByIndex(idx) {
         if (idx < 0 || idx >= modalMediaItems.length) return;
         goToModalSlide(idx);
+        if (currentPublishType === 'url') {
+            switchUrlLeftTab('media');
+        }
         closeModalMediaGalleryModal();
     }
 
@@ -1379,16 +1386,7 @@
         const errorEl = document.getElementById('publishFormError');
         const errorText = document.getElementById('publishFormErrorText');
 
-        if (currentPublishType === 'url') {
-            const urlTitle = document.getElementById('urlTitleInput')?.value.trim() || '';
-            const urlBody = document.getElementById('urlBodyInput')?.value.trim() || '';
-            const mainTitleInput = document.getElementById('publishTitle');
-            const mainBodyInput = document.getElementById('publishBody');
-            if (mainTitleInput) mainTitleInput.value = urlTitle;
-            if (mainBodyInput) mainBodyInput.value = urlBody;
-        }
-
-        const titleInput = currentPublishType === 'url' ? document.getElementById('urlTitleInput') : document.getElementById('publishTitle');
+        const titleInput = document.getElementById('publishTitle');
         const fbUrlInput = document.getElementById('publishFacebookUrl');
         const bodyInput = document.getElementById('publishBody');
 
@@ -1430,9 +1428,20 @@
             return false;
         }
 
+        if (modalMediaItems.length > 10) {
+            if (errorText) errorText.textContent = `Media limit exceeded: Maximum 10 media files allowed (currently ${modalMediaItems.length} files attached).`;
+            if (errorEl) errorEl.classList.remove('hidden');
+            return false;
+        }
+
         if (currentPublishType === 'url') {
             if (!fbUrlVal) {
                 if (errorText) errorText.textContent = 'Facebook Post URL is required for URL Post.';
+                if (errorEl) errorEl.classList.remove('hidden');
+                return false;
+            }
+            if (bodyVal && (bodyWords.length > 500 || bodyVal.length > 5000)) {
+                if (errorText) errorText.textContent = `Validation Error: Bulletin description is too long (maximum 500 words / 5,000 characters).`;
                 if (errorEl) errorEl.classList.remove('hidden');
                 return false;
             }
@@ -1458,11 +1467,6 @@
                 if (errorEl) errorEl.classList.remove('hidden');
                 return false;
             }
-            if (modalMediaItems.length > 10) {
-                if (errorText) errorText.textContent = `Media limit exceeded: Maximum 10 media files allowed (currently ${modalMediaItems.length} files attached).`;
-                if (errorEl) errorEl.classList.remove('hidden');
-                return false;
-            }
         }
 
         if (errorEl) errorEl.classList.add('hidden');
@@ -1473,9 +1477,9 @@
             const curTitle = (titleVal || '').trim();
             const curBody = (bodyVal || '').trim();
             const curFbUrl = (isUrl ? fbUrlVal : '').trim();
-            const curCategory = (currentPublishType === 'news' || currentPublishType === 'url')
-                ? 'General Announcement'
-                : ((document.getElementById('publishCategoryAdvisory')?.value || '').trim());
+            const curCategory = currentPublishType === 'url'
+                ? ((document.getElementById('urlCategorySelect')?.value || 'General Announcement').trim())
+                : (currentPublishType === 'news' ? 'General Announcement' : ((document.getElementById('publishCategoryAdvisory')?.value || '').trim()));
 
             const hasNewMedia = modalMediaItems.some(i => !i.isExisting || i.file);
             const curMediaUrls = modalMediaItems.map(i => i.url);
@@ -1507,7 +1511,7 @@
         openPublishConfirmationModal({
             title: titleVal,
             type: currentPublishType === 'advisory' ? 'Public Advisory' : (currentPublishType === 'news' ? 'News & Release' : 'Facebook URL Post'),
-            category: (currentPublishType === 'news' || currentPublishType === 'url') ? 'General Announcement' : (document.getElementById('publishCategoryAdvisory')?.value || 'Advisory'),
+            category: currentPublishType === 'url' ? (document.getElementById('urlCategorySelect')?.value || 'General Announcement') : (currentPublishType === 'news' ? 'General Announcement' : (document.getElementById('publishCategoryAdvisory')?.value || 'Advisory')),
             mediaBadge: modalMediaItems.length > 0 ? `${modalMediaItems.length} file(s) attached (${modalMediaItems.filter(i => i.type === 'image').length} photo(s), ${modalMediaItems.filter(i => i.type === 'video').length} video(s))` : (currentPublishType === 'url' ? 'Facebook URL Attached' : 'No media attached')
         });
 
@@ -1561,12 +1565,11 @@
         }
 
         if (currentPublishType === 'url') {
-            const urlTitle = document.getElementById('urlTitleInput')?.value.trim() || '';
-            const urlBody = document.getElementById('urlBodyInput')?.value.trim() || '';
-            const mainTitleInput = document.getElementById('publishTitle');
-            const mainBodyInput = document.getElementById('publishBody');
-            if (mainTitleInput) mainTitleInput.value = urlTitle;
-            if (mainBodyInput) mainBodyInput.value = urlBody;
+            const urlCatSelect = document.getElementById('urlCategorySelect');
+            if (urlCatSelect) {
+                urlCatSelect.name = 'category';
+                urlCatSelect.disabled = false;
+            }
         }
 
         document.getElementById('publishNoticeForm').submit();
@@ -1681,87 +1684,148 @@
                     <span id="publishFormErrorText"></span>
                 </div>
 
-                <!-- DYNAMIC CONTENT AREA 1: For Advisory & News (2-Column bulletin_form layout) -->
-                <div id="manualPublishPanel" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
+                <!-- UNIFIED PUBLICATION FORM (2-COLUMN LAYOUT FOR ADVISORY, NEWS & URL POSTS) -->
+                <div id="unifiedPublishPanel" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
                     
-                    <!-- LEFT COLUMN: UNIFIED MEDIA DRAG & DROP BOX -->
+                    <!-- LEFT COLUMN: UNIFIED MEDIA & FACEBOOK EMBED BOX -->
                     <div class="space-y-4 flex flex-col">
-                        <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
-                            Upload Media <span class="text-slate-400 font-normal">(Images & Videos Optional, Max 10)</span>
-                        </label>
+                        <div class="flex items-center justify-between">
+                            <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
+                                Upload Media & Previews <span class="text-slate-400 font-normal">(Images & Videos, Max 10)</span>
+                            </label>
+                        </div>
 
-                        <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-5">
-                            <!-- Dropzone Container -->
-                            <div id="modalDropZone" onclick="if(modalMediaItems.length === 0) document.getElementById('modalMediaInput').click()"
-                                class="w-full min-h-[300px] lg:min-h-[340px] flex-1 rounded-xl bg-gray-100/80 dark:bg-slate-900 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-pnp-blue p-4 relative group overflow-hidden">
-                                
-                                <!-- Empty State Placeholder -->
-                                <div id="modalMediaPlaceholder" class="flex flex-col items-center justify-center text-center p-4">
-                                    <div class="w-16 h-16 rounded-2xl bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">
-                                        <i class="fas fa-cloud-upload-alt"></i>
+                        <!-- Top Tab Switcher for URL Mode: choose media vs live Facebook embed -->
+                        <div id="urlLeftTabSwitcher" class="hidden flex items-center p-1 bg-gray-200/70 dark:bg-slate-900 rounded-xl space-x-1">
+                            <button type="button" id="urlTabMediaBtn" onclick="switchUrlLeftTab('media')" 
+                                class="flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 bg-white dark:bg-slate-800 text-pnp-blue dark:text-pnp-gold shadow-sm cursor-pointer">
+                                <i class="fas fa-images"></i>
+                                <span>Attached Media (<span id="urlTabMediaCount">0</span>)</span>
+                            </button>
+                            <button type="button" id="urlTabEmbedBtn" onclick="switchUrlLeftTab('embed')" 
+                                class="flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center space-x-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer">
+                                <i class="fab fa-facebook text-[#1877F2]"></i>
+                                <span>Live Facebook Embed</span>
+                            </button>
+                        </div>
+
+                        <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-5 min-h-[380px] lg:min-h-[460px]">
+                            
+                            <!-- CONTENT 1: MEDIA DROPZONE & CAROUSEL (Active for Advisory, News & URL Attached Media) -->
+                            <div id="modalMediaBoxContent" class="w-full flex-1 flex flex-col justify-between">
+                                <!-- Dropzone Container -->
+                                <div id="modalDropZone" onclick="if(modalMediaItems.length === 0) document.getElementById('modalMediaInput').click()"
+                                    class="w-full min-h-[280px] lg:min-h-[320px] flex-1 rounded-xl bg-gray-100/80 dark:bg-slate-900 flex items-center justify-center cursor-pointer transition-all duration-300 border-2 border-dashed border-gray-200 dark:border-slate-800 hover:border-pnp-blue p-4 relative group overflow-hidden">
+                                    
+                                    <!-- Empty State Placeholder -->
+                                    <div id="modalMediaPlaceholder" class="flex flex-col items-center justify-center text-center p-4">
+                                        <div class="w-16 h-16 rounded-2xl bg-pnp-blue/10 text-pnp-blue dark:text-pnp-gold flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">
+                                            <i class="fas fa-cloud-upload-alt"></i>
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Drag & Drop or Click to Browse</span>
+                                        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">Upload up to 10 photos or videos combined (JPG, PNG, WEBP, MP4)</p>
                                     </div>
-                                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Drag & Drop or Click to Browse</span>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">Upload up to 10 photos or videos combined (JPG, PNG, WEBP, MP4)</p>
-                                </div>
 
-                                <!-- Active Carousel Box -->
-                                <div id="modalMediaPreviewBox" class="hidden w-full h-full min-h-[280px] flex flex-col justify-between items-center relative" onclick="event.stopPropagation()">
-                                    <!-- Media Display Canvas -->
-                                    <div class="relative w-full flex-1 flex items-center justify-center bg-black/40 dark:bg-slate-950/80 rounded-xl overflow-hidden min-h-[220px] p-2">
-                                        <!-- Top Header Bar Overlay -->
-                                        <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-30 pointer-events-none">
-                                            <!-- Badge -->
-                                            <span id="modalCarouselBadge" class="pointer-events-auto px-3 py-1 rounded-lg bg-slate-900/85 text-white backdrop-blur-md text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg flex items-center">
-                                                <i class="fas fa-image text-emerald-400 mr-1.5"></i>
-                                                <span>PHOTO (1/1)</span>
-                                            </span>
+                                    <!-- Active Carousel Box -->
+                                    <div id="modalMediaPreviewBox" class="hidden w-full h-full min-h-[280px] flex flex-col justify-between items-center relative" onclick="event.stopPropagation()">
+                                        <!-- Media Display Canvas -->
+                                        <div class="relative w-full flex-1 flex items-center justify-center bg-black/40 dark:bg-slate-950/80 rounded-xl overflow-hidden min-h-[220px] p-2">
+                                            <!-- Top Header Bar Overlay -->
+                                            <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-30 pointer-events-none">
+                                                <!-- Badge -->
+                                                <span id="modalCarouselBadge" class="pointer-events-auto px-3 py-1 rounded-lg bg-slate-900/85 text-white backdrop-blur-md text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg flex items-center">
+                                                    <i class="fas fa-image text-emerald-400 mr-1.5"></i>
+                                                    <span>PHOTO (1/1)</span>
+                                                </span>
 
-                                            <div class="pointer-events-auto flex items-center space-x-2">
-                                                <!-- VIEW ALL IN GRID BUTTON -->
-                                                <button type="button" onclick="openModalMediaGalleryModal()" class="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-950 text-pnp-gold rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-pnp-gold/30" title="View all photos and videos in one container">
-                                                    <i class="fas fa-th-large text-xs"></i>
-                                                    <span>Grid View</span>
-                                                </button>
+                                                <div class="pointer-events-auto flex items-center space-x-2">
+                                                    <!-- VIEW ALL IN GRID BUTTON -->
+                                                    <button type="button" onclick="openModalMediaGalleryModal()" class="px-3 py-1.5 bg-slate-900/90 hover:bg-slate-950 text-pnp-gold rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-pnp-gold/30" title="View all photos and videos in one container">
+                                                        <i class="fas fa-th-large text-xs"></i>
+                                                        <span>Grid View</span>
+                                                    </button>
 
-                                                <!-- TRASH / DELETE ITEM BUTTON -->
-                                                <button type="button" id="modalTrashCurrentItemBtn" onclick="trashCurrentModalMediaItem(event)" class="px-3 py-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-red-500/30" title="Delete this image/video from notice">
-                                                    <i class="fas fa-trash-alt text-xs"></i>
-                                                    <span>Trash</span>
-                                                </button>
+                                                    <!-- TRASH / DELETE ITEM BUTTON -->
+                                                    <button type="button" id="modalTrashCurrentItemBtn" onclick="trashCurrentModalMediaItem(event)" class="px-3 py-1.5 bg-red-600/90 hover:bg-red-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer border border-red-500/30" title="Delete this image/video from notice">
+                                                        <i class="fas fa-trash-alt text-xs"></i>
+                                                        <span>Trash</span>
+                                                    </button>
+                                                </div>
                                             </div>
+
+                                            <!-- Image Slide -->
+                                            <img id="modalPreviewImg" class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden">
+
+                                            <!-- Video Slide -->
+                                            <video id="modalPreviewVid" controls class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden"></video>
+
+                                            <!-- Prev Slide Chevron -->
+                                            <button type="button" id="modalPrevSlideBtn" onclick="navigateModalCarousel(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden" title="Previous Media">
+                                                <i class="fas fa-chevron-left text-xs"></i>
+                                            </button>
+
+                                            <!-- Next Slide Chevron -->
+                                            <button type="button" id="modalNextSlideBtn" onclick="navigateModalCarousel(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden" title="Next Media">
+                                                <i class="fas fa-chevron-right text-xs"></i>
+                                            </button>
                                         </div>
 
-                                        <!-- Image Slide -->
-                                        <img id="modalPreviewImg" class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden">
+                                        <!-- Dots & File Info Footer -->
+                                        <div class="w-full mt-3 flex flex-col items-center space-y-1.5">
+                                            <div id="modalCarouselDots" class="flex items-center space-x-1.5 min-h-[12px]"></div>
+                                            <p id="modalCarouselInfo" class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate max-w-full px-2 text-center"></p>
 
-                                        <!-- Video Slide -->
-                                        <video id="modalPreviewVid" controls class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden"></video>
-
-                                        <!-- Prev Slide Chevron -->
-                                        <button type="button" id="modalPrevSlideBtn" onclick="navigateModalCarousel(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden" title="Previous Media">
-                                            <i class="fas fa-chevron-left text-xs"></i>
-                                        </button>
-
-                                        <!-- Next Slide Chevron -->
-                                        <button type="button" id="modalNextSlideBtn" onclick="navigateModalCarousel(1, event)" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden" title="Next Media">
-                                            <i class="fas fa-chevron-right text-xs"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Dots & File Info Footer -->
-                                    <div class="w-full mt-3 flex flex-col items-center space-y-1.5">
-                                        <div id="modalCarouselDots" class="flex items-center space-x-1.5 min-h-[12px]"></div>
-                                        <p id="modalCarouselInfo" class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate max-w-full px-2 text-center"></p>
-
-                                        <!-- Inline Thumbnails Strip: View All Uploaded Pictures & Videos directly on modal -->
-                                        <div id="modalThumbnailsStrip" class="w-full pt-2 border-t border-gray-200/60 dark:border-slate-800/80 flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar hidden">
-                                            <!-- Injected thumbnail previews -->
+                                            <!-- Inline Thumbnails Strip: View All Uploaded Pictures & Videos directly on modal -->
+                                            <div id="modalThumbnailsStrip" class="w-full pt-2 border-t border-gray-200/60 dark:border-slate-800/80 flex items-center space-x-2 overflow-x-auto pb-1 custom-scrollbar hidden">
+                                                <!-- Injected thumbnail previews -->
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Inputs & Control Buttons -->
+                            <!-- CONTENT 2: LIVE FACEBOOK EMBED BOX (Shown when switched on URL post) -->
+                            <div id="urlFbEmbedContent" class="hidden w-full flex-1 flex flex-col justify-between">
+                                <div id="urlDropZone" class="w-full flex-1 rounded-xl bg-gray-100/80 dark:bg-slate-900 flex flex-col items-center justify-center transition-all duration-300 border-2 border-dashed border-gray-200 dark:border-slate-800 p-4 relative group overflow-hidden min-h-[280px] lg:min-h-[320px]">
+                                    <!-- Empty Placeholder (shown when no URL yet) -->
+                                    <div id="urlPlaceholder" class="flex flex-col items-center justify-center text-center p-4 my-auto">
+                                        <div class="w-16 h-16 rounded-2xl bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">
+                                            <i class="fab fa-facebook-f"></i>
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Facebook Post Preview</span>
+                                        <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">
+                                            Enter an official Facebook post or video URL on the right to load live preview
+                                        </p>
+                                    </div>
+
+                                    <!-- Active Embedded Preview (shown when valid URL is input) -->
+                                    <div id="fbUrlPreviewBox" class="hidden w-full h-full flex flex-col justify-between items-center relative">
+                                        <!-- Top Header Overlay Badge -->
+                                        <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-30 pointer-events-none">
+                                            <span class="pointer-events-auto px-3 py-1 rounded-lg bg-slate-900/85 text-white backdrop-blur-md text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg flex items-center">
+                                                <i class="fab fa-facebook text-[#1877F2] mr-1.5"></i>
+                                                <span>Official Facebook Post</span>
+                                            </span>
+                                            <a id="fbUrlExternalLink" href="#" target="_blank" rel="noopener noreferrer" class="pointer-events-auto px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer">
+                                                <i class="fas fa-external-link-alt text-[9px]"></i>
+                                                <span>Open</span>
+                                            </a>
+                                        </div>
+
+                                        <!-- Embedded Iframe Canvas -->
+                                        <div id="fbIframeContainer" class="relative w-full flex-1 flex items-center justify-center bg-black/40 dark:bg-slate-950/80 rounded-xl overflow-hidden min-h-[250px] p-1">
+                                            <!-- Dynamic iframe injected here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Bottom helper note -->
+                                <div class="mt-2 p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center space-x-2">
+                                    <i class="fab fa-facebook text-[#1877F2] text-sm shrink-0"></i>
+                                    <span class="text-[11px] leading-snug">Facebook posts render interactively with video playback and official accreditation.</span>
+                                </div>
+                            </div>
+
+                            <!-- Inputs & Control Buttons (ALWAYS VISIBLE FOR ALL MODES & TABS) -->
                             <div class="mt-4 space-y-2">
                                 <input type="file" id="modalMediaInput" accept="image/*,video/*" multiple class="hidden" onchange="handleModalMediaSelect(this.files)">
                                 <input type="file" name="photos" id="modalPhotos" accept="image/*" multiple class="hidden">
@@ -1792,7 +1856,7 @@
                         </div>
                     </div>
 
-                    <!-- RIGHT COLUMN: FORM FIELDS -->
+                    <!-- RIGHT COLUMN: FORM FIELDS (TITLE, CATEGORY, FACEBOOK URL, DESCRIPTION) -->
                     <div class="space-y-5 flex flex-col">
                         <!-- TITLE FIELD -->
                         <div class="space-y-1.5">
@@ -1830,108 +1894,23 @@
                                 </div>
                                 <span class="text-[10px] uppercase tracking-wider font-black px-2 py-0.5 rounded bg-pnp-blue/20">Locked</span>
                             </div>
+
+                            <!-- Combined Category Select for URL Post -->
+                            <select name="category_inactive" id="urlCategorySelect" onchange="updateModalCounters()" class="hidden w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold text-slate-800 dark:text-white transition cursor-pointer">
+                                <optgroup label="News & Official Releases">
+                                    <option value="General Announcement">General Announcement (News / Press Release)</option>
+                                </optgroup>
+                                <optgroup label="Public Advisories & Prevention / Awareness">
+                                    <option value="Crime Advisory">Crime Advisory (Crime Prevention & Warnings)</option>
+                                    <option value="Community Awareness">Community Awareness (Public Safety & Awareness)</option>
+                                    <option value="Traffic Advisory">Traffic Advisory (Road & Traffic Safety)</option>
+                                    <option value="Cybercrime Advisory">Cybercrime Advisory (Online Scams & Prevention)</option>
+                                </optgroup>
+                            </select>
                         </div>
 
-                        <!-- BODY TEXTAREA -->
-                        <div class="flex-1 flex flex-col space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                    Description / Content <span class="text-red-500">*</span>
-                                </label>
-                                <span id="publishBodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                    0 / 5,000 letters
-                                </span>
-                            </div>
-                            <textarea name="body" id="publishBody" rows="8" placeholder="Enter official announcement or advisory contents..." oninput="updateModalCounters()" class="flex-1 w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"></textarea>
-                            <p id="publishBodyError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- DYNAMIC CONTENT AREA 2: URL Post Flow (2-COLUMN LAYOUT MATCHING NEWS UI DESIGN) -->
-                <div id="urlPublishPanel" class="hidden grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10 items-stretch">
-                    <!-- LEFT COLUMN: FACEBOOK EMBEDDED MEDIA PREVIEW BOX (Same container design as News) -->
-                    <div class="space-y-4 flex flex-col">
-                        <label class="block text-[10px] font-bold text-gray-400 dark:text-slate-400 uppercase tracking-widest">
-                            Facebook Media Preview <span class="text-slate-400 font-normal">(Live Interactive Embed)</span>
-                        </label>
-
-                        <div class="flex-1 flex flex-col justify-between bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-2xl p-5 min-h-[380px] lg:min-h-[460px]">
-                            <!-- Live Preview Container or Placeholder -->
-                            <div id="urlDropZone" class="w-full flex-1 rounded-xl bg-gray-100/80 dark:bg-slate-900 flex flex-col items-center justify-center transition-all duration-300 border-2 border-dashed border-gray-200 dark:border-slate-800 p-4 relative group overflow-hidden min-h-[320px]">
-                                
-                                <!-- Empty Placeholder (shown when no URL yet) -->
-                                <div id="urlPlaceholder" class="flex flex-col items-center justify-center text-center p-4 my-auto">
-                                    <div class="w-16 h-16 rounded-2xl bg-[#1877F2]/10 text-[#1877F2] flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition duration-300">
-                                        <i class="fab fa-facebook-f"></i>
-                                    </div>
-                                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1">Facebook Post Preview</span>
-                                    <p class="text-xs text-slate-400 dark:text-slate-500 font-medium max-w-xs leading-relaxed">
-                                        Enter an official Facebook post or video URL on the right to load live preview
-                                    </p>
-                                </div>
-
-                                <!-- Active Embedded Preview (shown when valid URL is input) -->
-                                <div id="fbUrlPreviewBox" class="hidden w-full h-full flex flex-col justify-between items-center relative">
-                                    <!-- Top Header Overlay Badge -->
-                                    <div class="absolute top-2 left-2 right-2 flex justify-between items-center z-30 pointer-events-none">
-                                        <span class="pointer-events-auto px-3 py-1 rounded-lg bg-slate-900/85 text-white backdrop-blur-md text-[10px] font-black uppercase tracking-wider border border-white/10 shadow-lg flex items-center">
-                                            <i class="fab fa-facebook text-[#1877F2] mr-1.5"></i>
-                                            <span>Official Facebook Post</span>
-                                        </span>
-                                        <a id="fbUrlExternalLink" href="#" target="_blank" rel="noopener noreferrer" class="pointer-events-auto px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-wider cursor-pointer">
-                                            <i class="fas fa-external-link-alt text-[9px]"></i>
-                                            <span>Open</span>
-                                        </a>
-                                    </div>
-
-                                    <!-- Embedded Iframe Canvas -->
-                                    <div id="fbIframeContainer" class="relative w-full flex-1 flex items-center justify-center bg-black/40 dark:bg-slate-950/80 rounded-xl overflow-hidden min-h-[300px] p-1">
-                                        <!-- Dynamic iframe injected here -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Bottom helper note -->
-                            <div class="mt-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs font-semibold text-blue-600 dark:text-blue-400 flex items-center space-x-2">
-                                <i class="fab fa-facebook text-[#1877F2] text-sm shrink-0"></i>
-                                <span class="text-[11px] leading-snug">Facebook posts render interactively with video playback and official station accreditation.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT COLUMN: FORM FIELDS (Same UI Design as News) -->
-                    <div class="space-y-5 flex flex-col">
-                        <!-- TITLE FIELD -->
-                        <div class="space-y-1.5">
-                            <div class="flex justify-between items-center">
-                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                    Notice Title <span class="text-red-500">*</span>
-                                </label>
-                                <span id="urlTitleCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
-                                    0 / 200 letters
-                                </span>
-                            </div>
-                            <input type="text" id="urlTitleInput" maxlength="200" placeholder="e.g. Official Statement on Community Outreach Operation" oninput="updateModalCounters()" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold text-slate-800 dark:text-white transition">
-                            <p id="urlTitleError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
-                        </div>
-
-                        <!-- CATEGORY FIELD (Identical Locked Badge to News) -->
-                        <div class="space-y-1.5">
-                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                Notice Category <span class="text-red-500">*</span>
-                            </label>
-                            <div class="w-full px-4 py-3.5 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 flex items-center justify-between">
-                                <div class="flex items-center space-x-2">
-                                    <i class="fas fa-newspaper text-sm"></i>
-                                    <span>General Announcement (News / Facebook Release)</span>
-                                </div>
-                                <span class="text-[10px] uppercase tracking-wider font-black px-2 py-0.5 rounded bg-blue-500/20">Locked</span>
-                            </div>
-                        </div>
-
-                        <!-- FACEBOOK POST URL FIELD -->
-                        <div class="space-y-1.5">
+                        <!-- FACEBOOK POST URL FIELD (Active for URL Post Mode) -->
+                        <div id="publishFacebookUrlGroup" class="hidden space-y-1.5">
                             <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                 Facebook Post URL <span class="text-red-500">*</span>
                             </label>
@@ -1942,18 +1921,19 @@
                             <p class="text-[11px] text-slate-400 font-medium">Paste the exact link to a public post or video from the official Facebook page.</p>
                         </div>
 
-                        <!-- BODY / DESCRIPTION TEXTAREA (Identical to News) -->
+                        <!-- BODY TEXTAREA -->
                         <div class="flex-1 flex flex-col space-y-1.5">
                             <div class="flex justify-between items-center">
                                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                                    Description / Caption <span class="text-slate-400 font-normal">(Optional for URL posts)</span>
+                                    Description / Content <span id="publishBodyRequiredStar" class="text-red-500">*</span>
+                                    <span id="publishBodyOptionalNote" class="text-slate-400 font-normal hidden">(Optional for URL posts)</span>
                                 </label>
-                                <span id="urlBodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
+                                <span id="publishBodyCounter" class="text-[10px] font-mono font-bold text-slate-400 uppercase">
                                     0 / 5,000 letters
                                 </span>
                             </div>
-                            <textarea id="urlBodyInput" rows="6" placeholder="Enter post caption or official summary..." oninput="updateModalCounters()" class="flex-1 w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"></textarea>
-                            <p id="urlBodyError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
+                            <textarea name="body" id="publishBody" rows="8" placeholder="Enter official announcement or advisory contents..." oninput="updateModalCounters()" class="flex-1 w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-medium text-slate-800 dark:text-white transition leading-relaxed"></textarea>
+                            <p id="publishBodyError" class="text-[11px] font-bold text-red-500 mt-1 hidden"></p>
                         </div>
                     </div>
                 </div>

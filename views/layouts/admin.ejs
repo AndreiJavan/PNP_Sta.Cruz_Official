@@ -357,7 +357,7 @@
         </button>
 
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0' : 'p-4 sm:p-6 pb-20') %>">
+        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0' : (title === 'Dashboard' || title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'p-[0.95rem] sm:p-[1.425rem] pb-[4.75rem]' : 'p-4 sm:p-6 pb-20')) %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div
@@ -726,6 +726,130 @@
             }
             return false;
         };
+    </script>
+
+    <!-- Global Custom Designed Tooltip Component -->
+    <script>
+        (function() {
+            let tooltipEl = null;
+            let arrowEl = null;
+            let activeTarget = null;
+            let hideTimeout = null;
+
+            function initTooltip() {
+                if (tooltipEl) return tooltipEl;
+                tooltipEl = document.createElement('div');
+                tooltipEl.id = 'customAppTooltip';
+                tooltipEl.className = 'fixed z-[999999] pointer-events-none transition-all duration-150 ease-out opacity-0 translate-y-1 scale-95 flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/95 dark:bg-slate-950/95 border border-amber-500/40 shadow-2xl shadow-black/50 backdrop-blur-md text-white';
+                tooltipEl.style.display = 'none';
+                
+                tooltipEl.innerHTML = `
+                    <span id="customTooltipText" class="text-white text-[11px] font-black uppercase tracking-wider whitespace-nowrap">PUBLIC SAFETY INCIDENT</span>
+                    <div id="customTooltipArrow" class="absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-950 border-amber-500/40 rotate-45 pointer-events-none"></div>
+                `;
+                document.body.appendChild(tooltipEl);
+                arrowEl = document.getElementById('customTooltipArrow');
+                return tooltipEl;
+            }
+
+            function showTooltip(target) {
+                const rawText = target.getAttribute('data-tooltip') || target.getAttribute('data-psi-tooltip') || target.getAttribute('title') || target.getAttribute('data-stored-title');
+                if (!rawText) return;
+
+                // Suppress native OS title tooltip
+                if (target.hasAttribute('title')) {
+                    target.setAttribute('data-stored-title', target.getAttribute('title'));
+                    target.removeAttribute('title');
+                }
+
+                activeTarget = target;
+                clearTimeout(hideTimeout);
+
+                const tip = initTooltip();
+                const textEl = document.getElementById('customTooltipText');
+
+                const isPSI = rawText.toLowerCase().includes('public safety') || rawText.toLowerCase().includes('psi');
+                if (isPSI) {
+                    textEl.textContent = 'PUBLIC SAFETY INCIDENT';
+                } else {
+                    textEl.textContent = rawText;
+                }
+
+                tip.style.display = 'flex';
+                tip.style.visibility = 'hidden'; // measurement pass
+
+                // Calculate bounding box
+                requestAnimationFrame(() => {
+                    const rect = target.getBoundingClientRect();
+                    const tipRect = tip.getBoundingClientRect();
+
+                    let top = rect.top - tipRect.height - 8;
+                    let left = rect.left + (rect.width / 2) - (tipRect.width / 2);
+                    let isBelow = false;
+
+                    // Flip below if overflowing off top
+                    if (top < 10) {
+                        top = rect.bottom + 8;
+                        isBelow = true;
+                    }
+
+                    // Keep inside horizontal screen bounds
+                    if (left < 10) left = 10;
+                    if (left + tipRect.width > window.innerWidth - 10) {
+                        left = window.innerWidth - tipRect.width - 10;
+                    }
+
+                    tip.style.top = `${Math.round(top)}px`;
+                    tip.style.left = `${Math.round(left)}px`;
+                    tip.style.visibility = 'visible';
+
+                    if (arrowEl) {
+                        if (isBelow) {
+                            arrowEl.style.top = '-4px';
+                            arrowEl.style.bottom = 'auto';
+                            arrowEl.className = 'absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-950 border-t border-l border-amber-500/40 rotate-45 pointer-events-none';
+                        } else {
+                            arrowEl.style.bottom = '-4px';
+                            arrowEl.style.top = 'auto';
+                            arrowEl.className = 'absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 dark:bg-slate-950 border-b border-r border-amber-500/40 rotate-45 pointer-events-none';
+                        }
+                    }
+
+                    tip.classList.remove('opacity-0', 'translate-y-1', 'scale-95');
+                    tip.classList.add('opacity-100', 'translate-y-0', 'scale-100');
+                });
+            }
+
+            function hideTooltip(target) {
+                if (target && target.hasAttribute('data-stored-title')) {
+                    target.setAttribute('title', target.getAttribute('data-stored-title'));
+                    target.removeAttribute('data-stored-title');
+                }
+                if (tooltipEl) {
+                    tooltipEl.classList.remove('opacity-100', 'translate-y-0', 'scale-100');
+                    tooltipEl.classList.add('opacity-0', 'translate-y-1', 'scale-95');
+                    hideTimeout = setTimeout(() => {
+                        if (tooltipEl) tooltipEl.style.display = 'none';
+                    }, 150);
+                }
+                activeTarget = null;
+            }
+
+            document.addEventListener('mouseover', function(e) {
+                const target = e.target.closest('[data-tooltip], [data-psi-tooltip], [title*="Public Safety" i], [title*="PSI" i], [data-stored-title*="Public Safety" i], [data-stored-title*="PSI" i]');
+                if (target) {
+                    showTooltip(target);
+                }
+            }, true);
+
+            document.addEventListener('mouseout', function(e) {
+                if (!activeTarget) return;
+                const related = e.relatedTarget;
+                if (!activeTarget.contains(related)) {
+                    hideTooltip(activeTarget);
+                }
+            }, true);
+        })();
     </script>
 
 
