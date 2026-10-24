@@ -1,246 +1,565 @@
-<div class="flex h-[calc(100dvh-64px)] sm:h-[calc(100dvh-80px)] md:h-[calc(100dvh-96px)] w-full overflow-hidden bg-slate-50 dark:bg-slate-900 relative">
-    <!-- Sidebar -->
+<div class="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-900 relative">
+    <!-- Sidebar: Location Overview & Stored Report Files Container -->
     <div id="filterSidebar"
-        class="absolute md:relative z-[1000] md:z-10 w-full md:w-[400px] h-full bg-white/95 dark:bg-slate-800/95 flex flex-col border-r border-gray-200 dark:border-slate-700/50 shadow-2xl transition-transform duration-300 flex-shrink-0 sidebar-visible md:!transform-none md:!translate-x-0">
-        <div
-            class="bg-gray-100/50 dark:bg-slate-800 p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center md:hidden">
-            <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest">Filters</h3>
-            <button onclick="toggleMapSidebar()" class="text-slate-500 hover:text-pnp-blue transition">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+        class="absolute top-0 left-0 z-[1050] w-full sm:w-[400px] lg:w-[420px] h-full bg-white dark:bg-slate-900 flex flex-col border-r border-gray-200 dark:border-slate-800 shadow-2xl transition-all duration-300 flex-shrink-0 sidebar-hidden">
+        
+        <!-- Header with Dual View Tabs & Collapse Controls -->
+        <div class="p-3.5 bg-slate-100/90 dark:bg-slate-900/90 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
+            <!-- View Switcher Tabs -->
+            <div class="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-gray-200/80 dark:border-slate-700/80 shadow-2xs flex-1">
+                <button type="button" onclick="switchSidebarView('overview')" id="tabBtnOverview" class="flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue shadow-xs cursor-pointer">
+                    <i class="fas fa-layer-group text-[9px]"></i>
+                    <span>Overview</span>
+                </button>
+                <button type="button" onclick="switchSidebarView('reports')" id="tabBtnReports" class="flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer">
+                    <i class="fas fa-folder-open text-[9px]"></i>
+                    <span>Stored Files</span>
+                    <span id="tabReportsBadge" class="px-1.5 py-0.2 rounded-full text-[9px] font-black bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 tabular-nums"><%= (typeof reports !== 'undefined' ? reports.length : 0) %></span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-1 shrink-0">
+                <!-- Controls Info Toggle -->
+                <button type="button" onclick="document.getElementById('mapControlsBox').classList.toggle('hidden')" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 text-slate-500 hover:text-pnp-blue dark:hover:text-pnp-gold border border-gray-200 dark:border-slate-700 transition shadow-2xs cursor-pointer" title="Map Controls Info">
+                    <i class="fas fa-info-circle text-xs"></i>
+                </button>
+                <!-- Close / Collapse Sidebar Button (Works on both mobile & desktop) -->
+                <button type="button" onclick="toggleMapSidebar()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 border border-gray-200 dark:border-slate-700 transition shadow-2xs cursor-pointer" title="Collapse Location Overview">
+                    <i class="fas fa-chevron-left text-xs"></i>
+                </button>
+            </div>
         </div>
 
-        <div class="flex-grow overflow-y-auto sidebar-scroll">
-            <div class="p-5 space-y-5">
-                <div class="space-y-3">
-                    <div class="space-y-1 mb-2">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.3em]">
-                                    Location Overview</h3>
-                                <h4 class="text-xl font-black tracking-tighter text-slate-800 dark:text-white">Sta. Cruz Map
-                                </h4>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button onclick="document.getElementById('mapControlsBox').classList.toggle('hidden')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-pnp-blue/10 text-pnp-blue dark:bg-pnp-gold/10 dark:text-pnp-gold hover:bg-pnp-blue/20 dark:hover:bg-pnp-gold/20 transition shadow-sm" title="Toggle Map Controls">
-                                    <i class="fas fa-info-circle text-lg"></i>
-                                </button>
-                            </div>
+        <!-- TAB 1: LOCATION OVERVIEW CONTAINER -->
+        <div id="sidebarViewOverview" class="flex-grow overflow-y-auto sidebar-scroll">
+            <div class="p-4 sm:p-5 space-y-4">
+                <!-- Title & Header Badge -->
+                <div class="space-y-1">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.25em] block">Location Overview</span>
+                            <h4 class="text-lg font-black tracking-tight text-slate-800 dark:text-white leading-tight">Sta. Cruz Map</h4>
                         </div>
-
-                        <div id="mapControlsBox"
-                            class="hidden mt-3 p-3 bg-pnp-blue/5 dark:bg-pnp-gold/5 rounded-xl border border-pnp-blue/10 dark:border-pnp-gold/10">
-                            <p
-                                class="text-[9px] text-slate-500 dark:text-gray-400 font-bold uppercase leading-relaxed tracking-widest">
-                                <i class="fas fa-info-circle text-pnp-blue dark:text-pnp-gold mr-1"></i> <strong
-                                    class="text-slate-700 dark:text-slate-300">Map Controls:</strong><br>
-                                <span class="opacity-80 block mt-1.5"><i
-                                        class="fas fa-keyboard mr-1 w-3 text-center"></i> Left/Right Arrow Keys to
-                                    navigate</span>
-                                <span class="opacity-80 block mt-1"><i
-                                        class="fas fa-mouse-pointer mr-1 w-3 text-center"></i> Select a Barangay to
-                                    isolate data</span>
-                                <span class="opacity-80 block mt-1"><i class="fas fa-mouse mr-1 w-3 text-center"></i>
-                                    Double-click an incident below for reports</span>
-                            </p>
+                        <div class="px-2.5 py-1 rounded-lg bg-pnp-blue/5 dark:bg-pnp-gold/10 border border-pnp-blue/15 dark:border-pnp-gold/20 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-[9px] font-black uppercase text-pnp-blue dark:text-pnp-gold tracking-wider">Live Intel</span>
                         </div>
                     </div>
-                    <div class="space-y-2">
+
+                    <!-- Collapsible Map Controls Guidance Box -->
+                    <div id="mapControlsBox" class="hidden mt-2 p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-gray-200 dark:border-slate-700 text-[10px] space-y-1.5">
+                        <p class="font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-1.5">
+                            <i class="fas fa-compass text-xs"></i>
+                            <span>Navigation Controls</span>
+                        </p>
+                        <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                            <span class="block">&bull; <strong>Left/Right Arrows:</strong> Cycle through barangays</span>
+                            <span class="block">&bull; <strong>Click Sector:</strong> Zoom & isolate barangay density</span>
+                            <span class="block">&bull; <strong>Double-click Incident:</strong> Jump to report logs</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Filter Controls Form -->
+                <div class="space-y-3 bg-slate-50/80 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-gray-200/80 dark:border-slate-700/60 shadow-2xs">
+                    <!-- Sector / Barangay Selector -->
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sector / Barangay</label>
+                        <div class="flex items-center gap-1.5">
+                            <select id="filterBarangay" class="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition text-slate-800 dark:text-white cursor-pointer">
+                                <option value="">All Barangays</option>
+                                <% ["Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin", "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)", "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)", "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur", "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"].forEach(brgy => { %>
+                                    <option value="<%= brgy %>"><%= brgy %></option>
+                                <% }) %>
+                            </select>
+                            <button onclick="document.getElementById('filterBarangay').value=''; const m=document.getElementById('mapDisplayMode'); if(m) m.value='density'; locateBarangay(false); if(typeof loadMapPoints === 'function') loadMapPoints(false);" class="w-9 h-9 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-xs hover:scale-105 active:scale-95 transition flex items-center justify-center shrink-0 cursor-pointer" title="Reset to All Barangays">
+                                <i class="fas fa-globe text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Category & Crime Date Row -->
+                    <div class="grid grid-cols-2 gap-2">
+                        <!-- Category Filter -->
                         <div class="space-y-1">
-                            <label class="text-[9px] font-bold text-gray-400 uppercase">Barangay</label>
-                            <div class="flex space-x-2">
-                                <select id="filterBarangay"
-                                    class="flex-1 px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 text-slate-800 dark:text-white appearance-none">
-                                    <option value="">All Barangays</option>
-                                    <% ["Alipit", "Bagumbayan" , "Bubukal" , "Calios" , "Duhat" , "Gatid" , "Jasaan"
-                                        , "Labuin" , "Malinao" , "Oogong" , "Pagsawitan" , "Palasan" , "Patimbao"
-                                        , "Poblacion I (Barangay I)" , "Poblacion II (Barangay II)"
-                                        , "Poblacion III (Barangay III)" , "Poblacion IV (Barangay IV)"
-                                        , "Poblacion V (Barangay V)" , "San Jose" , "San Juan" , "San Pablo Norte"
-                                        , "San Pablo Sur" , "Santisima Cruz" , "Santo Angel Central"
-                                        , "Santo Angel Norte" , "Santo Angel Sur" ].forEach(brgy=> { %>
-                                        <option value="<%= brgy %>">
-                                            <%= brgy %>
-                                        </option>
-                                        <% }) %>
-                                </select>
-                                <button
-                                    onclick="document.getElementById('filterBarangay').value=''; const m=document.getElementById('mapDisplayMode'); if(m) m.value='density'; locateBarangay(false); if(typeof loadMapPoints === 'function') loadMapPoints(false);"
-                                    class="px-4 py-2 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center"
-                                    title="Default to All Barangays">
-                                    <i class="fas fa-globe"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2 mt-2">
-                            <div class="flex-1 space-y-1">
-                                <label class="text-[9px] font-bold text-gray-400 uppercase">Category</label>
-                                <select id="mapDisplayMode" onchange="updateHeatmap(); updateLegend();"
-                                    class="w-full px-4 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 text-slate-800 dark:text-white appearance-none cursor-pointer">
-                                    <option value="density">All Crimes</option>
-                                    <option value="density_focus">8-Focus</option>
-                                    <option value="density_nonindex">Non-Index</option>
-                                    <option value="density_psi" title="PUBLIC SAFETY INCIDENT">PSI</option>
-                                </select>
-                            </div>
-                            <div class="flex-1 space-y-1">
-                                <label class="text-[9px] font-bold text-gray-400 uppercase">Crime Date</label>
-                                <button id="crimeDateBtn" type="button" onclick="toggleCrimeDatePopover(event)"
-                                    class="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 text-slate-800 dark:text-white flex items-center justify-between shadow-sm cursor-pointer group hover:bg-white dark:hover:bg-slate-800">
-                                    <span id="crimeDateLabel" class="truncate text-slate-800 dark:text-white font-bold">This Year (Default)</span>
-                                    <i class="fas fa-calendar-alt text-[10px] text-gray-500 dark:text-gray-400 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition"></i>
-                                </button>
-                            </div>
+                            <label class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Category</label>
+                            <select id="mapDisplayMode" onchange="updateHeatmap(); updateLegend();" class="w-full px-2.5 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition text-slate-800 dark:text-white cursor-pointer">
+                                <option value="density">All Crimes</option>
+                                <option value="density_focus">8-Focus</option>
+                                <option value="density_nonindex">Non-Index</option>
+                                <option value="density_psi" title="PUBLIC SAFETY INCIDENT">PSI</option>
+                            </select>
                         </div>
 
-                        <!-- Crime Date Inline Selector Container (Responsive & Non-Clipped) -->
-                        <div id="crimeDatePopover" class="hidden mt-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-gray-300 dark:border-slate-700 space-y-3 transition-all duration-300 shadow-lg">
-                            <!-- Date filter option selection -->
+                        <!-- Crime Date Filter Button -->
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Timeline</label>
+                            <button id="crimeDateBtn" type="button" onclick="toggleCrimeDatePopover(event)" class="w-full px-2.5 py-2 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition text-slate-800 dark:text-white flex items-center justify-between shadow-2xs cursor-pointer group">
+                                <span id="crimeDateLabel" class="truncate text-slate-800 dark:text-white font-bold text-[11px]">This Year</span>
+                                <i class="fas fa-calendar-alt text-[10px] text-gray-400 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition shrink-0 ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Crime Date Inline Selector Popover -->
+                    <div id="crimeDatePopover" class="hidden mt-2 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-gray-300 dark:border-slate-700 space-y-2.5 shadow-xl">
+                        <div class="space-y-1">
+                            <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Timeline Method</label>
+                            <select id="crimeDateMode" onchange="onCrimeDateModeChange()" class="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold outline-none text-slate-800 dark:text-white cursor-pointer">
+                                <option value="thisYear">This Year (Default)</option>
+                                <option value="allYears">All Years</option>
+                                <option value="monthYear">Month & Year</option>
+                                <option value="yearOnly">Year Only</option>
+                                <option value="customRange">Custom Date Range</option>
+                            </select>
+                        </div>
+
+                        <div id="modeMonthYear" class="hidden grid grid-cols-2 gap-2">
                             <div class="space-y-1">
-                                <label class="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Filter Method</label>
-                                <select id="crimeDateMode" onchange="onCrimeDateModeChange()"
-                                    class="w-full px-3 py-1.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue outline-none transition-all duration-300 text-slate-800 dark:text-white">
-                                    <option value="thisYear">This Year (Default)</option>
-                                    <option value="allYears">All Years</option>
-                                    <option value="monthYear">Month & Year</option>
-                                    <option value="yearOnly">Year Only</option>
-                                    <option value="customRange">Custom Date Range</option>
+                                <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Month</label>
+                                <select id="filterMonth" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none text-slate-800 dark:text-white">
+                                    <option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7" selected>July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
                                 </select>
                             </div>
-
-                            <!-- Mode 2: Month & Year Sub-controls -->
-                            <div id="modeMonthYear" class="hidden grid grid-cols-2 gap-2">
-                                <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Month</label>
-                                    <select id="filterMonth" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none text-slate-800 dark:text-white">
-                                        <option value="1">January</option>
-                                        <option value="2">February</option>
-                                        <option value="3">March</option>
-                                        <option value="4">April</option>
-                                        <option value="5">May</option>
-                                        <option value="6">June</option>
-                                        <option value="7" selected>July</option>
-                                        <option value="8">August</option>
-                                        <option value="9">September</option>
-                                        <option value="10">October</option>
-                                        <option value="11">November</option>
-                                        <option value="12">December</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Year</label>
-                                    <select id="filterMonthYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none text-slate-800 dark:text-white">
-                                        <option value="2026" selected>2026</option>
-                                        <option value="2025">2025</option>
-                                        <option value="2024">2024</option>
-                                        <option value="2023">2023</option>
-                                        <option value="2022">2022</option>
-                                    </select>
-                                </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Year</label>
+                                <select id="filterMonthYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none text-slate-800 dark:text-white"></select>
                             </div>
+                        </div>
 
-                            <!-- Mode 3: Year Sub-controls -->
-                            <div id="modeYearOnly" class="hidden space-y-1">
-                                <label class="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Select Year</label>
-                                <select id="filterYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none text-slate-800 dark:text-white">
-                                    <option value="2026" selected>2026</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                </select>
+                        <div id="modeYearOnly" class="hidden space-y-1">
+                            <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">Select Year</label>
+                            <select id="filterYear" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[11px] font-bold outline-none text-slate-800 dark:text-white"></select>
+                        </div>
+
+                        <div id="modeCustomRange" class="hidden grid grid-cols-2 gap-2">
+                            <div class="space-y-1">
+                                <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">From</label>
+                                <input type="date" id="filterFromDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none text-slate-800 dark:text-white text-center">
                             </div>
-
-                            <!-- Mode 4: Custom Date Range Sub-controls -->
-                            <div id="modeCustomRange" class="hidden grid grid-cols-2 gap-2">
-                                <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">From</label>
-                                    <input type="date" id="filterFromDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none text-slate-800 dark:text-white text-center">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">To</label>
-                                    <input type="date" id="filterToDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none text-slate-800 dark:text-white text-center">
-                                </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest">To</label>
+                                <input type="date" id="filterToDate" onchange="applyCrimeDateFilter(false)" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none text-slate-800 dark:text-white text-center">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div id="topIncidentsSection" class="space-y-3 pt-5 border-t border-gray-100 dark:border-slate-700">
-                    <label id="sidebarCategoryLabel"
-                        class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">All
-                        Crime</label>
-                    <div id="topIncidentsList" class="space-y-2">
-                        <!-- All incidents will be injected here -->
+                <!-- ALL CRIME / BREAKDOWN SECTION -->
+                <div id="topIncidentsSection" class="space-y-2 pt-1">
+                    <div class="flex items-center justify-between">
+                        <label id="sidebarCategoryLabel" class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                            All Crime
+                        </label>
+                        <span class="text-[8px] font-bold text-slate-400 uppercase">Double-click to view</span>
                     </div>
+                    <div id="topIncidentsList" class="space-y-1.5 max-h-[320px] overflow-y-auto sidebar-scroll pr-0.5">
+                        <!-- All incidents injected here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: STORED REPORT FILES CONTAINER -->
+        <div id="sidebarViewReports" class="hidden flex-grow overflow-y-auto sidebar-scroll flex flex-col">
+            <div class="p-4 sm:p-5 space-y-3.5 flex-1 flex flex-col">
+                <!-- Section Header -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.25em] block">Storage Vault</span>
+                        <h4 class="text-lg font-black tracking-tight text-slate-800 dark:text-white leading-tight">Stored Report Files</h4>
+                    </div>
+                    <a href="/admin/reports" class="px-2.5 py-1 rounded-lg bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue font-black text-[9px] uppercase tracking-wider shadow-xs hover:opacity-90 transition flex items-center gap-1" title="Go to Crime Reports Page">
+                        <span>Reports Page</span>
+                        <i class="fas fa-arrow-up-right-from-square text-[8px]"></i>
+                    </a>
+                </div>
+
+                <!-- Active Report Filter Alert Banner (If isolated by report) -->
+                <div id="reportActiveFilterBanner" class="hidden p-3 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/10 border border-pnp-blue/30 dark:border-pnp-gold/30 flex items-center justify-between gap-2 animate-fade-in">
+                    <div class="min-w-0">
+                        <span class="text-[8px] font-black uppercase text-pnp-blue dark:text-pnp-gold block tracking-wider">Map Isolated to File:</span>
+                        <span id="activeFilterReportName" class="text-[11px] font-black text-slate-900 dark:text-white uppercase truncate block">--</span>
+                    </div>
+                    <button type="button" onclick="clearReportFilter()" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-[9px] font-black uppercase tracking-wider hover:bg-red-600 hover:text-white transition cursor-pointer shrink-0">
+                        Clear Filter
+                    </button>
+                </div>
+
+                <!-- Search Reports Input -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="reportsSearchInput" oninput="renderStoredReportsList(this.value)" placeholder="Search stored report files..." class="w-full pl-8 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue placeholder:text-slate-400">
+                </div>
+
+
+                <!-- Stored Files List -->
+                <div id="storedReportsListContainer" class="space-y-2.5 flex-1">
+                    <!-- Populated dynamically via JS -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Map Container -->
-    <div class="flex-grow relative z-0 h-full w-full">
-        <!-- Floating Legend & Overview -->
-        <div
-            class="absolute top-4 right-4 z-[1000] bg-white/95 dark:bg-slate-800/95 p-5 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700/50 w-64 md:w-80 backdrop-blur-md">
-            <div class="flex items-center mb-2">
-                <label
-                    class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest flex items-center">
-                    <i class="fas fa-layer-group mr-2 text-pnp-blue dark:text-pnp-gold"></i> Legend
-                </label>
-            </div>
+    <!-- Map Canvas Container (Full Screen / Resizable) -->
+    <div class="flex-grow relative z-0 h-full w-full overflow-hidden">
+        
+        <!-- Floating Top-Left Button: Location Overview Button (Top-Left, does not cover map) -->
+        <button id="openSidebarBtn" onclick="toggleMapSidebar()" class="absolute top-4 left-4 z-[1000] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-800/95 shadow-xl border border-gray-200/90 dark:border-slate-700/90 text-slate-800 dark:text-white font-black text-[11px] uppercase tracking-wider flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer backdrop-blur-md">
+            <i class="fas fa-layer-group text-pnp-blue dark:text-pnp-gold"></i>
+            <span>Location Overview</span>
+        </button>
 
-            <!-- mapDisplayMode moved to Category filter -->
+        <!-- Floating Top-Right Controls: Dynamic Context Legend (Replaces Stored Files Button on Right Side) -->
+        <div class="absolute top-4 right-4 z-[1000] flex flex-col items-end pointer-events-none max-w-[calc(100vw-32px)]">
+            <div id="mapTopRightLegend" class="pointer-events-auto w-64 sm:w-72 rounded-2xl bg-white/95 dark:bg-slate-900/95 shadow-2xl border border-gray-200/90 dark:border-slate-700/90 backdrop-blur-md transition-all duration-300 overflow-hidden text-left">
+                <!-- Header with Minimize/Expand Toggle -->
+                <div class="px-3.5 py-2.5 bg-slate-100/90 dark:bg-slate-800/90 border-b border-gray-200/80 dark:border-slate-700/80 flex items-center justify-between cursor-pointer select-none" onclick="toggleMapLegend()">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <i id="topLegendIcon" class="fas fa-map-location-dot text-pnp-blue dark:text-pnp-gold text-xs shrink-0"></i>
+                        <span id="topLegendTitle" class="text-[10px] font-black uppercase tracking-wider text-slate-800 dark:text-white truncate">Location Density Heatmap Legend</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0 ml-2">
+                        <span id="topLegendBadge" class="text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md bg-pnp-blue/10 text-pnp-blue dark:bg-pnp-gold/10 dark:text-pnp-gold tracking-wider">Sector Density</span>
+                        <div class="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white">
+                            <i id="topLegendChevron" class="fas fa-chevron-up text-[9px] transition-transform duration-200"></i>
+                        </div>
+                    </div>
+                </div>
 
-            <div id="dynamicLegend"
-                class="grid grid-cols-1 gap-1 bg-gray-50 dark:bg-slate-900/80 p-3 rounded-xl border border-gray-100 dark:border-slate-700 max-h-40 overflow-y-auto sidebar-scroll">
-                <p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Loading data...</p>
+                <!-- Legend Body (Switches between Overview Heatmap and Stored Files Legend) -->
+                <div id="topLegendBody" class="p-3 space-y-2.5 transition-all duration-200">
+                    <!-- VIEW A: Location Density Heatmap Legend Content (When on Overview) -->
+                    <div id="legendContentHeatmap" class="space-y-2">
+                        <!-- Dynamic Sector List populated via updateLegend() -->
+                        <div id="dynamicLegend" class="space-y-1 max-h-48 overflow-y-auto sidebar-scroll">
+                            <p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Loading legend...</p>
+                        </div>
+                    </div>
+
+                    <!-- VIEW B: Stored Files Heatmap & Top Sector Intel (When on Stored Files) -->
+                    <div id="legendContentStoredFiles" class="hidden space-y-2.5">
+                        <div id="dynamicStoredFilesLegend" class="space-y-2">
+                            <p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Loading stored files intel...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Floating Mobile Toggle & Add New Record Button -->
-        <div class="absolute bottom-5 right-5 md:bottom-8 md:right-8 z-[1000] flex flex-col items-end gap-3 pointer-events-none">
-            <a href="/admin/reports?add_new=true&return_to=map" class="pointer-events-auto flex items-center justify-center px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue font-black text-[11px] uppercase tracking-widest hover:-translate-y-0.5 active:scale-95 transition-all duration-200 shadow-xl border border-white/10">
+        <!-- Floating Bottom-Right Action: Add New Record (Opens Manual Store Modal) -->
+        <div class="absolute bottom-6 right-6 md:bottom-8 md:right-8 z-[1000] flex flex-col items-end gap-3 pointer-events-none">
+            <button type="button" onclick="openManualEntry()" class="pointer-events-auto flex items-center justify-center px-5 py-3 rounded-2xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue font-black text-xs uppercase tracking-widest hover:-translate-y-0.5 active:scale-95 transition-all duration-200 shadow-2xl border border-white/20 cursor-pointer">
                 <i class="fas fa-plus mr-2 text-sm"></i> Add New Record
-            </a>
+            </button>
             
-            <button id="mapSidebarToggle" onclick="toggleMapSidebar()"
-                class="pointer-events-auto md:hidden w-12 h-12 sm:w-14 sm:h-14 bg-pnp-blue text-white rounded-full shadow-2xl flex items-center justify-center text-lg sm:text-xl active:scale-95 transition-all duration-200 border border-white/10"
-                aria-label="Toggle map filters">
+            <button id="mapSidebarToggle" onclick="toggleMapSidebar()" class="pointer-events-auto lg:hidden w-12 h-12 bg-pnp-blue text-white rounded-full shadow-2xl flex items-center justify-center text-lg active:scale-95 transition-all duration-200 border border-white/10" aria-label="Toggle map sidebar">
                 <i class="fas fa-filter"></i>
             </button>
         </div>
-        <div id="leafletMap" class="h-full w-full transition-all duration-500"></div>
+
+        <!-- Leaflet Map Element -->
+        <div id="leafletMap" class="h-full w-full transition-all duration-300"></div>
 
         <!-- Loading Overlay -->
-        <div id="mapLoading"
-            class="absolute inset-0 bg-pnp-blue z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <div id="mapLoading" class="absolute inset-0 bg-pnp-blue z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500">
             <div class="w-20 h-20 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
         </div>
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- 1. DEDICATED MANUAL ENTRY MODAL           -->
+<!-- ========================================== -->
+<div id="manualEntryModal" class="fixed inset-0 z-[2500] hidden items-center justify-center bg-slate-950/75 dark:bg-slate-950/85 backdrop-blur-md p-3 sm:p-5 animate-modal-backdrop">
+    <div class="modal-dialog-card bg-white dark:bg-slate-800 w-full max-w-5xl xl:max-w-6xl rounded-3xl shadow-2xl border border-gray-200/90 dark:border-slate-700/80 overflow-hidden flex flex-col h-[82vh] max-h-[82vh] animate-modal-pop">
+        <!-- Header -->
+        <div class="px-5 py-3.5 sm:px-6 sm:py-4 border-b border-gray-100 dark:border-slate-700/80 bg-gray-50/70 dark:bg-slate-900/70 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 flex-shrink-0">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-10 h-10 bg-pnp-blue text-white rounded-xl flex items-center justify-center border border-white/20 shadow-md flex-shrink-0">
+                    <i class="fas fa-keyboard text-lg text-white"></i>
+                </div>
+                <div>
+                    <h3 class="text-pnp-blue dark:text-pnp-gold font-black uppercase tracking-wider text-sm sm:text-base leading-tight">Manual Input</h3>
+                    <p id="manualRowCount" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Direct Grid Recording Session</p>
+                </div>
+            </div>
+
+            <!-- Filters & Counters -->
+            <div class="flex items-center space-x-2.5 bg-white dark:bg-slate-700/80 p-1.5 rounded-xl border border-gray-100 dark:border-slate-600/80 shadow-2xs">
+                <select id="manualCategoryFilter" onchange="renderManualTable()" class="bg-transparent border-none text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase px-3 py-1 outline-none cursor-pointer">
+                    <option value="All">All Categories</option>
+                    <option value="8-Focus">8-Focus Target</option>
+                    <option value="Non-Index">Non-Index</option>
+                    <option value="PSI" title="PUBLIC SAFETY INCIDENT">PSI Sector</option>
+                </select>
+                <div class="w-px h-5 bg-gray-200 dark:bg-slate-600"></div>
+                <div class="flex items-center space-x-3.5 px-3 py-1">
+                    <div class="flex items-center space-x-1.5" title="8-Focus Total"><div class="w-2 h-2 rounded-full bg-red-500 shadow-2xs shadow-red-500/50"></div><span id="manualCount8Focus" class="text-xs font-black text-pnp-blue dark:text-white">0</span></div>
+                    <div class="flex items-center space-x-1.5" title="Non-Index Total"><div class="w-2 h-2 rounded-full bg-slate-500 shadow-2xs shadow-slate-500/50"></div><span id="manualCountNonIndex" class="text-xs font-black text-pnp-blue dark:text-white">0</span></div>
+                    <div class="flex items-center space-x-1.5 cursor-help" title="PUBLIC SAFETY INCIDENT Total"><div class="w-2 h-2 rounded-full bg-blue-500 shadow-2xs shadow-blue-500/50"></div><span id="manualCountPSI" class="text-xs font-black text-pnp-blue dark:text-white">0</span></div>
+                </div>
+            </div>
+
+            <button type="button" onclick="closeManualEntry()" class="w-8 h-8 rounded-xl bg-gray-100 dark:bg-slate-700 text-gray-500 hover:bg-red-500 hover:text-white transition-all transform hover:rotate-90 flex items-center justify-center shadow-2xs cursor-pointer flex-shrink-0 self-end sm:self-center" title="Close">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Top Error Notification Banner for Detected Issues in Manual Entry -->
+        <div id="manualModalErrorAlert" class="hidden px-5 py-2.5 bg-amber-500/10 dark:bg-amber-950/40 border-b border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-2.5 flex-shrink-0 animate-fade-in">
+            <div class="flex items-start md:items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-xs"></i>
+                </div>
+                <div>
+                    <h4 id="manualModalErrorTitle" class="text-[11px] font-black uppercase tracking-wider text-amber-700 dark:text-amber-300">Errors Detected in Manual Input</h4>
+                    <p id="manualModalErrorDesc" class="text-[10px] font-bold text-amber-600/90 dark:text-amber-400/90 mt-0.5">Rows containing invalid Date, Sector, or Classification are highlighted below. Correct them to continue.</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <span id="manualModalErrorBadge" class="px-2.5 py-0.5 rounded-md bg-amber-500 text-slate-900 font-black text-[9px] uppercase tracking-wider">0 Issues to Fix</span>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="flex-grow overflow-auto p-4 sm:p-5 bg-gray-50/50 dark:bg-slate-900/30 custom-scrollbar min-h-0">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-md overflow-hidden">
+                <table class="w-full text-left border-collapse table-fixed min-w-[960px]">
+                    <thead class="sticky top-0 z-20 shadow-xs">
+                        <tr class="bg-gray-100 dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700">
+                            <th class="px-2 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider border-r border-gray-200 dark:border-slate-700 w-12 text-center bg-gray-100 dark:bg-slate-900">
+                                <button type="button" onclick="addNewManualRow()" title="Add Single Row" class="w-6 h-6 rounded-md bg-pnp-blue text-white hover:bg-black dark:bg-pnp-gold dark:text-slate-900 dark:hover:bg-white transition flex items-center justify-center mx-auto shadow-2xs cursor-pointer">
+                                    <i class="fas fa-plus text-[10px]"></i>
+                                </button>
+                            </th>
+                            <th class="px-3 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider border-r border-gray-200 dark:border-slate-700 w-14 text-center bg-gray-100 dark:bg-slate-900">ROW</th>
+                            <th class="px-4 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider border-r border-gray-200 dark:border-slate-700 w-44 bg-gray-100 dark:bg-slate-900">Sector (Barangay)</th>
+                            <th class="px-3 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider border-r border-gray-200 dark:border-slate-700 w-64 text-center bg-gray-100 dark:bg-slate-900">Timeline</th>
+                            <th class="px-4 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider border-r border-gray-200 dark:border-slate-700 min-w-[300px] w-auto bg-gray-100 dark:bg-slate-900">
+                                <div class="flex items-center justify-between">
+                                    <span>Classification</span>
+                                    <span class="text-[7.5px] text-slate-400 dark:text-slate-500 font-bold normal-case">Max 300 chars / 50 words</span>
+                                </div>
+                            </th>
+                            <th class="px-4 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider border-r border-gray-200 dark:border-slate-700 w-32 bg-gray-100 dark:bg-slate-900">Category</th>
+                            <th class="px-2 py-3 text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider w-12 text-center bg-gray-100 dark:bg-slate-900">X</th>
+                        </tr>
+                    </thead>
+                    <tbody id="manualTableBody" class="divide-y divide-gray-100 dark:divide-slate-700/50"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer with Actions (Confirm and Bordered Cancel on Right Side) -->
+        <div class="px-5 py-3.5 sm:px-6 sm:py-3.5 border-t border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3 relative z-10 flex-shrink-0">
+            <div class="flex items-center space-x-2.5">
+                <button type="button" onclick="addNewManualRow()" class="px-4 py-2.5 bg-gray-50 dark:bg-slate-700/50 border border-gray-200 dark:border-slate-600 rounded-xl text-[11px] font-black text-pnp-blue dark:text-white uppercase tracking-wider hover:bg-gray-100 dark:hover:bg-slate-600 transition shadow-2xs group flex items-center space-x-1.5 cursor-pointer">
+                    <i class="fas fa-plus text-pnp-blue dark:text-pnp-gold group-hover:scale-125 transition text-[10px]"></i>
+                    <span>Add Row</span>
+                </button>
+                <button type="button" onclick="openBatchGeneratorModal()" class="px-4 py-2.5 bg-pnp-blue/10 dark:bg-pnp-gold/10 border border-pnp-blue/20 dark:border-pnp-gold/20 rounded-xl text-[11px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition shadow-2xs group flex items-center space-x-1.5 cursor-pointer">
+                    <i class="fas fa-layer-group group-hover:scale-125 transition text-[10px]"></i>
+                    <span>Add Multiple Rows</span>
+                </button>
+            </div>
+            
+            <!-- Right Side: Bordered Cancel Button + Confirm Button -->
+            <div class="flex items-center space-x-3">
+                <button type="button" onclick="closeManualEntry()" class="px-5 py-2.5 bg-white dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-600 rounded-xl text-[11px] font-black text-slate-600 dark:text-slate-200 uppercase tracking-wider hover:border-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 dark:hover:border-red-500 dark:hover:text-red-400 transition-all shadow-2xs cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="btnConfirmManual" onclick="confirmManualEntry()" class="px-7 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all transform hover:scale-[1.02] active:scale-95 flex items-center space-x-2 cursor-pointer">
+                    <i class="fas fa-check-circle text-xs"></i>
+                    <span>Confirm</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- BATCH GENERATOR MODAL                      -->
+<!-- ========================================== -->
+<div id="batchGeneratorModal" class="fixed inset-0 z-[2600] hidden items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fade-in">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-3xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col animate-fade-in-up">
+        <div class="p-6 border-b border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-700/50 flex items-center justify-center font-bold shadow-sm flex-shrink-0">
+                    <i class="fas fa-layer-group text-sm"></i>
+                </div>
+                <div>
+                    <h4 class="font-black text-pnp-blue dark:text-pnp-gold text-sm uppercase tracking-wider">Generate Data Rows</h4>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Batch Row Parameters</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeBatchGeneratorModal()" class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 text-gray-400 hover:text-red-500 flex items-center justify-center transition cursor-pointer">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="p-6 space-y-4 text-left">
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Number of Rows to Generate</label>
+                    <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase">Max: 50</span>
+                </div>
+                <input type="number" id="batchCount" min="1" max="50" value="1" placeholder="1-50" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue">
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1">Sector (Barangay)</label>
+                <select id="batchBarangaySelect" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Timeline Date</label>
+                <div class="grid grid-cols-[1fr_1.3fr_1fr] gap-2.5">
+                    <div>
+                        <label class="block text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Day (DD)</label>
+                        <select id="batchDaySelect" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                            <% for(let d = 1; d <= 31; d++) { %>
+                                <% const dd = String(d).padStart(2, '0'); %>
+                                <option value="<%= dd %>"><%= dd %></option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Month</label>
+                        <select id="batchMonthSelect" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                            <% const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']; %>
+                            <% months.forEach((mName, idx) => { %>
+                                <% const mm = String(idx + 1).padStart(2, '0'); %>
+                                <option value="<%= mm %>"><%= mName %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-black text-slate-400 uppercase tracking-wider mb-1">Year (YYYY)</label>
+                        <select id="batchYearSelect" class="w-full px-3 py-2.5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Category</label>
+                <select id="batchCategorySelect" onchange="onBatchCategoryChange(this.value)" class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-pnp-blue cursor-pointer">
+                    <option value="8-Focus">8-Focus</option>
+                    <option value="Non-Index" selected>Non-Index</option>
+                    <option value="PSI" title="PUBLIC SAFETY INCIDENT">PSI</option>
+                </select>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Classification (Offense)</label>
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase">Max 300 chars / 50 words</span>
+                </div>
+                <input type="text" id="batchOffenseInput" list="batchCrimesList" maxlength="300" oninput="if(this.value.length>300)this.value=this.value.slice(0,300);" placeholder="Type or select classification..." class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase outline-none focus:ring-2 focus:ring-pnp-blue">
+                <datalist id="batchCrimesList"></datalist>
+            </div>
+        </div>
+
+        <div class="p-6 border-t border-gray-100 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/50 flex justify-end space-x-3">
+            <button type="button" onclick="closeBatchGeneratorModal()" class="px-6 py-3 rounded-xl text-xs font-black text-gray-400 uppercase hover:text-slate-700 dark:hover:text-white transition cursor-pointer">Cancel</button>
+            <button type="button" onclick="executeBatchGeneration()" class="px-8 py-3 bg-pnp-blue hover:bg-black text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-lg flex items-center space-x-2 transition cursor-pointer">
+                <i class="fas fa-plus-circle"></i>
+                <span>Generate Rows</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
     .barangay-label-tooltip {
-        background: rgba(15, 23, 42, 0.75) !important;
-        backdrop-filter: blur(4px) !important;
-        -webkit-backdrop-filter: blur(4px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        border-radius: 8px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3) !important;
+        background: rgba(15, 23, 42, 0.88) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 6px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
         color: #ffffff !important;
-        font-weight: 900 !important;
-        font-size: 9px !important;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.8) !important;
+        font-weight: 800 !important;
+        font-size: 8px !important;
         text-align: center;
-        white-space: pre-wrap;
-        line-height: 1.2;
-        padding: 5px 8px !important;
+        white-space: nowrap !important;
+        line-height: 1 !important;
+        padding: 2.5px 6px !important;
         z-index: 1000 !important;
-        transition: opacity 0.3s ease-in-out !important;
+        transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out !important;
+        pointer-events: auto !important;
+    }
+
+    .barangay-label-tooltip:hover {
+        border-color: #EF4444 !important;
+        transform: scale(1.06);
+        z-index: 1200 !important;
+    }
+
+    .brgy-label-unified {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+
+    .brgy-label-name {
+        font-size: 8px;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .brgy-label-badge {
+        font-size: 7.5px;
+        font-weight: 900;
+        padding: 1px 4px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+        font-family: monospace;
+    }
+
+    .brgy-label-unified.is-top .brgy-label-badge {
+        background: #DC2626 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 6px rgba(220, 38, 38, 0.6);
+    }
+
+    .brgy-label-unified.is-dim .brgy-label-name {
+        opacity: 0.45;
+    }
+
+    .brgy-label-unified.is-selected {
+        background: #1A3A5C !important;
+        border: 1.5px solid #D4AF37 !important;
+        box-shadow: 0 0 14px rgba(212, 175, 55, 0.75) !important;
+        border-radius: 6px;
+        padding: 2.5px 7px;
+        color: #FFFFFF !important;
+        transform: scale(1.12);
+        z-index: 1500 !important;
+    }
+    .brgy-label-unified.is-selected .brgy-label-name {
+        color: #FCD34D !important;
+        font-weight: 900 !important;
+    }
+
+    .manual-pin-container {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    #map.barangay-selected .barangay-label-tooltip {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
 
     .barangay-label-tooltip::before,
@@ -255,6 +574,51 @@
     .dark .leaflet-container {
         background: #0f172a;
     }
+
+    .no-calendar-picker::-webkit-calendar-picker-indicator,
+    .no-calendar-picker::-webkit-inner-spin-button {
+        display: none !important;
+        -webkit-appearance: none !important;
+    }
+    .no-calendar-picker {
+        -moz-appearance: textfield !important;
+    }
+    tr.has-error {
+        background-color: rgba(245, 158, 11, 0.1) !important;
+        border-color: rgba(251, 191, 36, 0.4) !important;
+    }
+    .dark tr.has-error {
+        background-color: rgba(69, 26, 3, 0.2) !important;
+    }
+
+    @keyframes modalPopIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.95) translateY(12px);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    @keyframes modalBackdropIn {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .animate-modal-pop {
+        animation: modalPopIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .animate-modal-backdrop {
+        animation: modalBackdropIn 0.2s ease-out both;
+    }
+
 </style>
 
 <script>
@@ -688,17 +1052,37 @@
     };
 
     function getBarangayLabel(name, zoom) {
+        let shortName = name;
         const pobMatch = name.match(/Poblacion (I{1,3}|IV|V)/);
         if (pobMatch) {
             const romanToNum = { 'I': '1', 'II': '2', 'III': '3', 'IV': '4', 'V': '5' };
-            const num = romanToNum[pobMatch[1]];
-            if (zoom < 16) {
-                return `POB. ${num}`;
+            shortName = `Pob ${romanToNum[pobMatch[1]]}`;
+        } else {
+            shortName = name.replace('Santo Angel ', 'Sto. Angel ').replace('San Pablo ', 'S. Pablo ');
+        }
+
+        const selected = document.getElementById('filterBarangay') ? document.getElementById('filterBarangay').value : '';
+        const isSelected = selected && selected.toLowerCase() === name.toLowerCase();
+        const selClass = isSelected ? ' is-selected' : '';
+
+        // When viewing Stored Files: integrate the count into the label!
+        if (window.currentSidebarView === 'reports' || window.activeReportFilter) {
+            const pts = currentPoints || [];
+            const count = pts.filter(p => p.barangay === name).length;
+            const isTop = window.activeReportTopBrgy === name;
+
+            if (count > 0) {
+                if (isTop) {
+                    return `<div class="brgy-label-unified is-top${selClass}"><span class="brgy-label-name">${shortName}</span><span class="brgy-label-badge top-badge"><i class="fas fa-crown text-yellow-300 text-[6.5px]"></i>${count}</span></div>`;
+                } else {
+                    return `<div class="brgy-label-unified${selClass}"><span class="brgy-label-name">${shortName}</span><span class="brgy-label-badge">${count}</span></div>`;
+                }
             } else {
-                return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+                return `<div class="brgy-label-unified is-dim${selClass}"><span class="brgy-label-name">${shortName}</span></div>`;
             }
         }
-        return name.replace('Poblacion', 'POB.').replace(' (Barangay ', '\n(BRGY. ').replace(')', '');
+
+        return `<div class="brgy-label-unified${selClass}"><span class="brgy-label-name">${shortName}</span></div>`;
     }
 
     function getTacticalColor(name) {
@@ -746,28 +1130,38 @@
 
     function locateBarangay(shouldMinimize = true) {
         const selectedName = document.getElementById('filterBarangay').value;
+        const mapContainer = document.getElementById('map');
 
         // Always clear any currently drawn selected pins first!
         selectedPinsLayer.clearLayers();
         updateHighlightMarkerVisibility();
 
         if (!selectedName) {
-            // Reset to default view if "All Barangays" is selected
-            const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-            map.flyToBounds(bounds, {
-                padding: [50, 50],
-                duration: 1.5
-            });
-            // Disable interaction when in summary view
-            map.dragging.disable();
-            map.touchZoom.disable();
-            map.doubleClickZoom.disable();
-            map.scrollWheelZoom.disable();
-            map.boxZoom.disable();
-            map.keyboard.disable();
+            if (mapContainer) mapContainer.classList.remove('barangay-selected');
+            // Reset to default whole map view
+            if (typeof fitWholeMapBounds === 'function') {
+                fitWholeMapBounds();
+            } else if (map) {
+                const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            }
+            // Always keep map interaction enabled in overview
+            if (map) {
+                map.dragging.enable();
+                map.touchZoom.enable();
+                map.doubleClickZoom.enable();
+                map.scrollWheelZoom.enable();
+                map.boxZoom.enable();
+                map.keyboard.enable();
+            }
+            if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+            setTimeout(() => {
+                if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+            }, 150);
             return;
         }
 
+        if (mapContainer) mapContainer.classList.add('barangay-selected');
         const pin = manualPins.find(p => p.name.toLowerCase() === selectedName.toLowerCase());
         if (pin && map) {
             // Enable interaction when a barangay is selected
@@ -778,32 +1172,40 @@
             map.boxZoom.enable();
             map.keyboard.enable();
 
-            // Minimize sidebar to view the whole map if requested (only on mobile)
-            const sidebar = document.getElementById('filterSidebar');
-            if (shouldMinimize && sidebar && sidebar.classList.contains('sidebar-visible') && window.innerWidth < 768) {
-                toggleMapSidebar();
+            // Open the Location Overview sidebar when a barangay is selected!
+            openLocationOverviewSidebar();
+
+            let targetCenter = [pin.lat, pin.lng];
+            if (window.innerWidth >= 768) {
+                try {
+                    const targetPoint = map.project([pin.lat, pin.lng], 16).subtract([210, 0]);
+                    targetCenter = map.unproject(targetPoint, 16);
+                } catch (e) {
+                    targetCenter = [pin.lat, pin.lng];
+                }
             }
 
-            map.flyTo([pin.lat, pin.lng], 16, {
+            map.flyTo(targetCenter, 16, {
                 animate: true,
                 duration: 1.5
             });
 
-            // Create and show the beautiful gold Tactical Pin for the selected barangay!
+            // Create and show the beautiful gold Tactical Pin directly on the barangay name!
             const tacticalPin = L.marker([pin.lat, pin.lng], {
                 icon: L.divIcon({
                     className: 'manual-pin-container',
                     html: `
-                        <div class="relative group flex flex-col items-center">
-                            <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
-                            <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
-                                <i class="fas fa-location-dot text-white dark:text-pnp-blue text-lg"></i>
+                        <div class="relative group flex flex-col items-center select-none pointer-events-none">
+                            <div class="absolute -inset-1.5 bg-pnp-blue/25 dark:bg-pnp-gold/35 rounded-2xl animate-ping pointer-events-none"></div>
+                            <div class="relative px-3.5 py-1.5 rounded-xl bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue font-black text-xs uppercase tracking-wider shadow-2xl border-2 border-white dark:border-slate-900 flex items-center gap-1.5 z-10 whitespace-nowrap">
+                                <i class="fas fa-location-dot text-[11px] text-pnp-gold dark:text-pnp-blue"></i>
+                                <span>${pin.name}</span>
                             </div>
-                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-[1px]"></div>
                         </div>
                     `,
-                    iconSize: [40, 48],
-                    iconAnchor: [20, 48]
+                    iconSize: [160, 42],
+                    iconAnchor: [80, 42]
                 })
             }).addTo(selectedPinsLayer);
 
@@ -852,6 +1254,11 @@
             }
 
             // Popup functions removed per user request, but animations kept
+            if (typeof updateSidebarStats === 'function') updateSidebarStats();
+            if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+            setTimeout(() => {
+                if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+            }, 100);
         }
     }
 
@@ -918,10 +1325,18 @@
         if (barangay && shouldLocate) {
             locateBarangay();
         } else if (!barangay && shouldLocate) {
-            // Optional: reset view when "All Barangays" is selected
-            const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-            map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            // Reset view when "All Barangays" is selected
+            if (typeof fitWholeMapBounds === 'function') {
+                fitWholeMapBounds();
+            } else if (map) {
+                const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+            }
             updateHighlightMarkerVisibility();
+            if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+            setTimeout(() => {
+                if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+            }, 150);
         }
 
         const topIncidentsSection = document.getElementById('topIncidentsSection');
@@ -993,6 +1408,18 @@
             return name;
         };
         const brgyName = normalizeBrgyName(feature.properties.ADM4_EN);
+
+        // When viewing Stored Files or isolated report: REMOVE HEATMAP COMPLETELY!
+        if (window.currentSidebarView === 'reports' || window.activeReportFilter) {
+            const isTop = window.activeReportTopBrgy === brgyName;
+            return {
+                color: isTop ? '#EF4444' : '#C8A415',
+                weight: isTop ? 2.5 : 1,
+                fillOpacity: 0,
+                fillColor: 'transparent'
+            };
+        }
+
         const brgyPoints = currentPoints.filter(p => p.barangay === brgyName);
         const modeSelect = document.getElementById('mapDisplayMode');
         const mode = modeSelect ? modeSelect.value : 'density';
@@ -1079,10 +1506,12 @@
 
             const newLabel = getBarangayLabel(name, currentZoom);
             layer.setTooltipContent(newLabel);
-            if (name.toLowerCase() === 'jasaan') {
+
+            const pin = manualPins.find(p => p.name.toLowerCase() === name.toLowerCase());
+            if (pin) {
                 const tooltip = layer.getTooltip();
                 if (tooltip) {
-                    tooltip.setLatLng(L.latLng(14.2215, 121.3885));
+                    tooltip.setLatLng(L.latLng(pin.lat, pin.lng));
                 }
             }
         });
@@ -1090,16 +1519,26 @@
 
     function manageTooltipVisibility() {
         if (!map) return;
-        // Sorting tooltips to ensure consistent behavior
         const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
-        const boxes = [];
+        const selectedBrgy = (document.getElementById('filterBarangay')?.value || '').trim();
 
+        // When a specific barangay is selected, hide all polygon name labels on the map
+        // The selected barangay is clearly identified by its gold tactical pin badge!
+        if (selectedBrgy) {
+            tooltips.forEach(t => {
+                t.style.opacity = '0';
+                t.style.pointerEvents = 'none';
+            });
+            return;
+        }
+
+        const boxes = [];
         // Prioritize Jasaan so its label is evaluated first and never suppressed
         tooltips.sort((a, b) => {
             const aIsJasaan = (a.textContent || '').toUpperCase().includes('JASAAN');
             const bIsJasaan = (b.textContent || '').toUpperCase().includes('JASAAN');
-            if (aIsJasaan) return -1;
-            if (bIsJasaan) return 1;
+            if (aIsJasaan && !bIsJasaan) return -1;
+            if (!aIsJasaan && bIsJasaan) return 1;
             return 0;
         });
 
@@ -1109,18 +1548,26 @@
             if (rect.width === 0 && rect.height === 0) return;
 
             const isJasaan = (t.textContent || '').toUpperCase().includes('JASAAN');
-
             let isColliding = false;
             const pad = 2; // Extra padding
 
-            for (let i = 0; i < boxes.length; i++) {
-                const b = boxes[i];
-                if (!(rect.right + pad < b.left ||
-                    rect.left - pad > b.right ||
-                    rect.bottom + pad < b.top ||
-                    rect.top - pad > b.bottom)) {
-                    isColliding = true;
-                    break;
+            const isPoblacion = (t.textContent || '').toUpperCase().includes('POB');
+            const currentZoom = map.getZoom();
+
+            // At low zoom (< 15), hide minor poblacion labels if not top
+            const isTop = t.querySelector('.is-top') !== null;
+            if (isPoblacion && currentZoom < 15 && !isTop) {
+                isColliding = true;
+            } else {
+                for (let i = 0; i < boxes.length; i++) {
+                    const b = boxes[i];
+                    if (!(rect.right + pad < b.left ||
+                        rect.left - pad > b.right ||
+                        rect.bottom + pad < b.top ||
+                        rect.top - pad > b.bottom)) {
+                        isColliding = true;
+                        break;
+                    }
                 }
             }
 
@@ -1346,32 +1793,32 @@
     }
 
     const manualPins = [
-        { name: 'Alipit', lat: 14.223931, lng: 121.405213 },
-        { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
-        { name: 'Duhat', lat: 14.2525, lng: 121.3825 },
-        { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
-        { name: 'Calios', lat: 14.2750, lng: 121.4050 },
-        { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
-        { name: 'Jasaan', lat: 14.2215, lng: 121.3885 },
-        { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
-        { name: 'Malinao', lat: 14.232833, lng: 121.396823 },
-        { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
-        { name: 'Pagsawitan', lat: 14.265754, lng: 121.426545 },
-        { name: 'Palasan', lat: 14.257498, lng: 121.418992 },
-        { name: 'Patimbao', lat: 14.270081, lng: 121.418366 },
-        { name: 'Poblacion I (Barangay I)', lat: 14.277068, lng: 121.418881 },
-        { name: 'Poblacion II (Barangay II)', lat: 14.279647, lng: 121.416006 },
-        { name: 'Poblacion III (Barangay III)', lat: 14.282028, lng: 121.415159 },
-        { name: 'Poblacion IV (Barangay IV)', lat: 14.283790, lng: 121.414016 },
-        { name: 'Poblacion V (Barangay V)', lat: 14.285282, lng: 121.412476 },
-        { name: 'San Jose', lat: 14.237118, lng: 121.403754 },
-        { name: 'San Juan', lat: 14.243815, lng: 121.406972 },
-        { name: 'San Pablo Norte', lat: 14.290210, lng: 121.413023 },
-        { name: 'San Pablo Sur', lat: 14.282211, lng: 121.422261 },
-        { name: 'Santisima Cruz', lat: 14.290647, lng: 121.409140 },
-        { name: 'Santo Angel Central', lat: 14.285137, lng: 121.408947 },
-        { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 },
-        { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
+        { name: 'Alipit', lat: 14.229393, lng: 121.411665 },
+        { name: 'Bagumbayan', lat: 14.272644, lng: 121.393879 },
+        { name: 'Bubukal', lat: 14.260435, lng: 121.404959 },
+        { name: 'Calios', lat: 14.278913, lng: 121.404043 },
+        { name: 'Duhat', lat: 14.254408, lng: 121.376783 },
+        { name: 'Gatid', lat: 14.264925, lng: 121.382959 },
+        { name: 'Jasaan', lat: 14.224928, lng: 121.390316 },
+        { name: 'Labuin', lat: 14.248934, lng: 121.396198 },
+        { name: 'Malinao', lat: 14.238920, lng: 121.388256 },
+        { name: 'Oogong', lat: 14.226557, lng: 121.400343 },
+        { name: 'Pagsawitan', lat: 14.271173, lng: 121.425275 },
+        { name: 'Palasan', lat: 14.251078, lng: 121.419158 },
+        { name: 'Patimbao', lat: 14.266534, lng: 121.415825 },
+        { name: 'Poblacion I (Barangay I)', lat: 14.276999, lng: 121.417883 },
+        { name: 'Poblacion II (Barangay II)', lat: 14.279862, lng: 121.416228 },
+        { name: 'Poblacion III (Barangay III)', lat: 14.282193, lng: 121.415350 },
+        { name: 'Poblacion IV (Barangay IV)', lat: 14.284662, lng: 121.414664 },
+        { name: 'Poblacion V (Barangay V)', lat: 14.285884, lng: 121.412864 },
+        { name: 'San Jose', lat: 14.237303, lng: 121.408087 },
+        { name: 'San Juan', lat: 14.246504, lng: 121.408098 },
+        { name: 'San Pablo Norte', lat: 14.288913, lng: 121.419124 },
+        { name: 'San Pablo Sur', lat: 14.283660, lng: 121.426164 },
+        { name: 'Santisima Cruz', lat: 14.295321, lng: 121.409790 },
+        { name: 'Santo Angel Central', lat: 14.285425, lng: 121.407055 },
+        { name: 'Santo Angel Norte', lat: 14.293621, lng: 121.403587 },
+        { name: 'Santo Angel Sur', lat: 14.280498, lng: 121.411990 }
     ];
 
     function addManualPins() {
@@ -1462,12 +1909,12 @@
 
             map = L.map('leafletMap', {
                 zoomControl: false,
-                dragging: false,
-                touchZoom: false,
-                doubleClickZoom: false,
-                scrollWheelZoom: false,
-                boxZoom: false,
-                keyboard: false,
+                dragging: true,
+                touchZoom: true,
+                doubleClickZoom: true,
+                scrollWheelZoom: true,
+                boxZoom: true,
+                keyboard: true,
                 attributionControl: false,
                 minZoom: 13,
                 maxZoom: 18,
@@ -1483,8 +1930,8 @@
                 : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
 
             let baseTileLayer = L.tileLayer(tileLayerUrl, {
-                maxZoom: 19,
-                maxNativeZoom: 18,
+                maxZoom: 18,
+                maxNativeZoom: 16,
                 attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>'
             }).addTo(map);
 
@@ -1549,6 +1996,7 @@
                             const newUrl = dark
                                 ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
                                 : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+                            baseTileLayer.options.maxNativeZoom = 16;
                             baseTileLayer.setUrl(newUrl);
                         }
                     });
@@ -1567,10 +2015,11 @@
                                 name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
                             }
 
-                            // Anchor Jasaan explicitly inside its spacious polygon area
-                            if (name.toLowerCase() === 'jasaan') {
+                            // Anchor each barangay explicitly to its verified true polygon centroid
+                            const pin = manualPins.find(p => p.name.toLowerCase() === name.toLowerCase());
+                            if (pin) {
                                 layer.getCenter = function () {
-                                    return L.latLng(14.2215, 121.3885);
+                                    return L.latLng(pin.lat, pin.lng);
                                 };
                             }
 
@@ -1584,10 +2033,10 @@
                                 interactive: false
                             });
 
-                            if (name.toLowerCase() === 'jasaan') {
+                            if (pin) {
                                 const tooltip = layer.getTooltip();
                                 if (tooltip) {
-                                    tooltip.setLatLng(L.latLng(14.2215, 121.3885));
+                                    tooltip.setLatLng(L.latLng(pin.lat, pin.lng));
                                 }
                             }
 
@@ -1621,25 +2070,12 @@
                                     }
                                 }
                             });
-
-                            // Add marker for each barangay at true geographic center
-                            try {
-                                const centroid = (layer.getCenter && typeof layer.getCenter === 'function')
-                                    ? layer.getCenter()
-                                    : layer.getBounds().getCenter();
-
-                                // Update dynamic reference for search/locate system
-                                const pinIndex = manualPins.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-                                if (pinIndex !== -1) {
-                                    manualPins[pinIndex].lat = centroid.lat;
-                                    manualPins[pinIndex].lng = centroid.lng;
-                                }
-                            } catch (err) {
-                                console.error('Error adding accurate marker for barangay:', name, err);
-                            }
                         }
                     }).addTo(map);
-                    setTimeout(manageTooltipVisibility, 100);
+                    updateHeatmap();
+                    updateLegend();
+                    if (typeof fitWholeMapBounds === 'function') fitWholeMapBounds();
+                    setTimeout(manageTooltipVisibility, 150);
                 })
                 .catch(err => {
                     console.error('Error loading GeoJSON:', err);
@@ -1657,30 +2093,1611 @@
     }
 
 
+    function openLocationOverviewSidebar() {
+        const sidebar = document.getElementById('filterSidebar');
+        const openBtn = document.getElementById('openSidebarBtn');
+        const mobileToggle = document.getElementById('mapSidebarToggle');
+
+        if (sidebar) {
+            sidebar.classList.remove('sidebar-hidden');
+            sidebar.classList.add('sidebar-visible');
+            if (openBtn) openBtn.classList.add('hidden');
+            if (mobileToggle) mobileToggle.classList.add('opacity-0', 'pointer-events-none');
+
+            // Switch to Location Overview view tab
+            const viewOverview = document.getElementById('sidebarViewOverview');
+            const viewReports = document.getElementById('sidebarViewReports');
+            const btnOverview = document.getElementById('tabBtnOverview');
+            const btnReports = document.getElementById('tabBtnReports');
+
+            if (viewOverview) viewOverview.classList.remove('hidden');
+            if (viewReports) viewReports.classList.add('hidden');
+            if (btnOverview) {
+                btnOverview.className = "flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue shadow-xs cursor-pointer";
+            }
+            if (btnReports) {
+                btnReports.className = "flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer";
+            }
+            window.currentSidebarView = 'overview';
+
+            setTimeout(() => {
+                if (window.map) {
+                    window.map.invalidateSize({ pan: false });
+                }
+            }, 320);
+        }
+    }
+
     function toggleMapSidebar() {
         const sidebar = document.getElementById('filterSidebar');
-        const toggleBtn = document.getElementById('mapSidebarToggle');
+        const openBtn = document.getElementById('openSidebarBtn');
+        const mobileToggle = document.getElementById('mapSidebarToggle');
 
         if (sidebar.classList.contains('sidebar-hidden')) {
             sidebar.classList.remove('sidebar-hidden');
             sidebar.classList.add('sidebar-visible');
-            if (toggleBtn) toggleBtn.classList.add('opacity-0', 'pointer-events-none');
-
-            // Re-render data when sidebar opens
-            loadMapPoints(false);
+            if (openBtn) openBtn.classList.add('hidden');
+            if (mobileToggle) mobileToggle.classList.add('opacity-0', 'pointer-events-none');
         } else {
             sidebar.classList.add('sidebar-hidden');
             sidebar.classList.remove('sidebar-visible');
-            if (toggleBtn) toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
+            if (openBtn) openBtn.classList.remove('hidden');
+            if (mobileToggle) mobileToggle.classList.remove('opacity-0', 'pointer-events-none');
         }
 
-        // Prevent rendering errors (grey tiles) and keep map static
         setTimeout(() => {
             if (window.map) {
                 window.map.invalidateSize({ pan: false });
+                const currentBrgy = document.getElementById('filterBarangay')?.value;
+                if (!currentBrgy && typeof fitWholeMapBounds === 'function') {
+                    fitWholeMapBounds();
+                }
             }
-        }, 350);
+        }, 320);
     }
+
+    
+    // =========================================================================
+    // STORED REPORT FILES VAULT & MANUAL DATA ENGINE
+    // =========================================================================
+    let storedReportsList = <%- JSON.stringify(typeof reports !== 'undefined' ? reports : []) %>;
+    window.storedReportsList = storedReportsList;
+    window.activeReportFilter = null;
+    window.activeReportFilename = null;
+    window.activeReportTopBrgy = null;
+    window.activeReportTopCount = 0;
+    window.activeReportBrgyRanking = null;
+    window.currentSidebarView = 'overview';
+
+    window.toggleMapLegend = function() {
+        const body = document.getElementById('topLegendBody') || document.getElementById('topLeftLegendBody');
+        const chevron = document.getElementById('topLegendChevron') || document.getElementById('topLeftLegendChevron');
+        if (!body) return;
+        const isHidden = body.classList.toggle('hidden');
+        if (chevron) {
+            chevron.className = isHidden ? 'fas fa-chevron-down text-[9px] transition-transform duration-200' : 'fas fa-chevron-up text-[9px] transition-transform duration-200';
+        }
+    };
+    window.toggleTopRightLegend = window.toggleMapLegend;
+    window.toggleTopLeftLegend = window.toggleMapLegend;
+
+    // View the Whole Map with Total Cases in Unified Labels (No Duplicate Markers)
+    window.fitWholeMapBounds = function() {
+        if (!map) return;
+        const wholeMapBounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+        const sidebar = document.getElementById('filterSidebar');
+        const isSidebarOpen = sidebar && !sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 768;
+        
+        map.fitBounds(wholeMapBounds, {
+            paddingTopLeft: [isSidebarOpen ? 460 : 30, 30],
+            paddingBottomRight: [300, 30],
+            maxZoom: 14
+        });
+    };
+
+    window.locateTopSectorForReport = function(points) {
+        if (selectedPinsLayer) selectedPinsLayer.clearLayers();
+
+        const pts = points || currentPoints || [];
+        if (!pts.length) {
+            window.activeReportTopBrgy = null;
+            window.activeReportTopCount = 0;
+            window.activeReportBrgyRanking = [];
+            fitWholeMapBounds();
+            if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+            return null;
+        }
+
+        // Aggregate cases by sector/barangay
+        const brgyCounts = {};
+        pts.forEach(p => {
+            if (p.barangay) {
+                brgyCounts[p.barangay] = (brgyCounts[p.barangay] || 0) + 1;
+            }
+        });
+
+        const sorted = Object.entries(brgyCounts).sort((a, b) => b[1] - a[1]);
+        if (!sorted.length) {
+            window.activeReportTopBrgy = null;
+            window.activeReportTopCount = 0;
+            window.activeReportBrgyRanking = [];
+            fitWholeMapBounds();
+            if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+            return null;
+        }
+
+        const [topName, topCount] = sorted[0];
+        window.activeReportTopBrgy = topName;
+        window.activeReportTopCount = topCount;
+        window.activeReportBrgyRanking = sorted;
+
+        // 1. Center the whole map comfortably in the visible canvas area
+        fitWholeMapBounds();
+
+        // 2. Update the unified labels on the polygons (NO duplicate markers!)
+        if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+        setTimeout(() => {
+            if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+        }, 150);
+
+        return { name: topName, count: topCount, ranking: sorted };
+    };
+
+    window.focusBarangay = function(bName) {
+        if (!bName) return;
+        const barangaySelect = document.getElementById('filterBarangay');
+        if (barangaySelect) {
+            barangaySelect.value = bName;
+        }
+        if (typeof locateBarangay === 'function') {
+            locateBarangay(false);
+        } else {
+            const pin = (typeof manualPins !== 'undefined' ? manualPins : []).find(p => p.name.toLowerCase() === bName.toLowerCase());
+            if (pin && map) {
+                map.flyTo([pin.lat, pin.lng], 16, { animate: true, duration: 1.2 });
+            }
+        }
+    };
+
+    // Render Clean & Compact Stored Files Summary in the top-right legend
+    window.renderStoredFilesHeatmapLegend = function() {
+        const container = document.getElementById('dynamicStoredFilesLegend') || document.getElementById('legendContentStoredFiles');
+        if (!container) return;
+
+        const isIsolated = !!window.activeReportFilter;
+        const filename = window.activeReportFilename || 'All Stored Reports';
+        const pts = currentPoints || [];
+        const totalCases = pts.length;
+
+        // Calculate ranking of barangays
+        const brgyCounts = {};
+        pts.forEach(p => {
+            if (p.barangay) {
+                brgyCounts[p.barangay] = (brgyCounts[p.barangay] || 0) + 1;
+            }
+        });
+
+        const sorted = Object.entries(brgyCounts).sort((a, b) => b[1] - a[1]);
+        const top = sorted.length > 0 ? sorted[0] : null;
+
+        let rankingHtml = '';
+        if (sorted.length > 0) {
+            rankingHtml = sorted.map(([bName, bCount], idx) => {
+                const pct = totalCases > 0 ? Math.round((bCount / totalCases) * 100) : 0;
+                const isTop = idx === 0;
+
+                return `
+                    <div class="flex items-center justify-between p-1 rounded-lg ${isTop ? 'bg-red-50/80 dark:bg-red-950/30 font-black text-red-700 dark:text-red-400' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-300'} transition cursor-pointer" onclick="focusBarangay('${bName}')" title="Locate ${bName}">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="w-3.5 h-3.5 rounded ${isTop ? 'bg-red-500 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'} text-[7.5px] font-bold flex items-center justify-center shrink-0">
+                                ${idx + 1}
+                            </span>
+                            <span class="truncate">${bName}</span>
+                            ${isTop ? '<i class="fas fa-crown text-yellow-500 text-[7px]"></i>' : ''}
+                        </div>
+                        <div class="text-right shrink-0 ml-1.5 text-[8.5px]">
+                            <span>${bCount}</span>
+                            <span class="text-slate-400 text-[7.5px]">(${pct}%)</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            rankingHtml = `<p class="text-[8.5px] text-slate-400 font-bold uppercase text-center py-2">No sector incidents recorded</p>`;
+        }
+
+        container.innerHTML = `
+            <div class="space-y-2 text-left">
+                <!-- Active File & Cases Badge -->
+                <div class="flex items-center justify-between pb-2 border-b border-gray-150 dark:border-slate-800">
+                    <div class="min-w-0 pr-2">
+                        <span class="text-[7.5px] font-black uppercase tracking-widest text-slate-400 block">Report Dataset</span>
+                        <h5 class="text-xs font-black text-slate-800 dark:text-white uppercase truncate" title="${filename}">${filename}</h5>
+                    </div>
+                    <span class="px-2 py-0.5 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold font-black text-[9.5px] shrink-0 tabular-nums">
+                        ${totalCases} Cases
+                    </span>
+                </div>
+
+                <!-- Top Sector Highlight Row -->
+                ${top ? `
+                    <div class="p-2 rounded-xl bg-slate-50/90 dark:bg-slate-800/80 border border-gray-200/80 dark:border-slate-700/80 flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                <span class="text-[7.5px] font-black uppercase text-red-600 dark:text-red-400 tracking-wider">Top Sector</span>
+                            </div>
+                            <h6 class="text-[11px] font-black text-slate-900 dark:text-white uppercase truncate leading-tight">${top[0]}</h6>
+                            <span class="text-[8px] font-bold text-slate-500 dark:text-slate-400">${top[1]} cases (${totalCases > 0 ? Math.round((top[1] / totalCases) * 100) : 0}% of file)</span>
+                        </div>
+                        <button type="button" onclick="focusBarangay('${top[0]}')" class="px-2 py-1 rounded-lg bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 hover:text-pnp-blue dark:hover:text-pnp-gold font-bold text-[8px] uppercase tracking-wider transition flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs">
+                            <i class="fas fa-crosshairs text-[7px]"></i>
+                            <span>Locate</span>
+                        </button>
+                    </div>
+                ` : ''}
+
+                <!-- Sector Breakdown List -->
+                <div class="space-y-0.5 pt-0.5">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[7.5px] font-black uppercase tracking-wider text-slate-400">Barangay Cases</span>
+                        <span class="text-[7.5px] text-slate-400 font-bold">${sorted.length} active</span>
+                    </div>
+                    <div class="space-y-0.5 max-h-32 overflow-y-auto sidebar-scroll pr-0.5">
+                        ${rankingHtml}
+                    </div>
+                </div>
+
+                <!-- Footer Links -->
+                <div class="pt-2 border-t border-gray-150 dark:border-slate-800 flex items-center justify-between text-[8.5px]">
+                    <a href="/admin/reports" target="_blank" class="font-bold text-pnp-blue dark:text-pnp-gold hover:underline flex items-center gap-1">
+                        <span>Reports Page</span>
+                        <i class="fas fa-arrow-up-right-from-square text-[7px]"></i>
+                    </a>
+                    ${isIsolated ? `
+                        <button type="button" onclick="clearReportFilter()" class="font-bold text-red-600 dark:text-red-400 hover:underline flex items-center gap-1 cursor-pointer">
+                            <i class="fas fa-times text-[7px]"></i>
+                            <span>Clear Filter</span>
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    };
+
+    window.updateMapLegend = function(view) {
+        const currentView = view || window.currentSidebarView || 'overview';
+        const isStoredFiles = currentView === 'reports' || !!window.activeReportFilter;
+
+        const heatmapContent = document.getElementById('legendContentHeatmap');
+        const storedFilesContent = document.getElementById('legendContentStoredFiles');
+        const icon = document.getElementById('topLegendIcon') || document.getElementById('topLeftLegendIcon');
+        const title = document.getElementById('topLegendTitle') || document.getElementById('topLeftLegendTitle');
+        const badge = document.getElementById('topLegendBadge') || document.getElementById('topLeftLegendBadge');
+
+        if (isStoredFiles) {
+            if (heatmapContent) heatmapContent.classList.add('hidden');
+            if (storedFilesContent) storedFilesContent.classList.remove('hidden');
+            if (icon) icon.className = 'fas fa-chart-pie text-pnp-blue dark:text-pnp-gold text-xs shrink-0';
+            if (title) title.textContent = window.activeReportFilter ? 'Report Intel' : 'Stored Files Intel';
+            if (badge) {
+                badge.textContent = window.activeReportTopBrgy ? 'Top: ' + window.activeReportTopBrgy : 'Summary';
+                badge.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md bg-pnp-blue/10 text-pnp-blue dark:bg-pnp-gold/10 dark:text-pnp-gold tracking-wider';
+            }
+            if (typeof renderStoredFilesHeatmapLegend === 'function') {
+                renderStoredFilesHeatmapLegend();
+            }
+        } else {
+            if (heatmapContent) heatmapContent.classList.remove('hidden');
+            if (storedFilesContent) storedFilesContent.classList.add('hidden');
+            if (icon) icon.className = 'fas fa-map-location-dot text-pnp-blue dark:text-pnp-gold text-xs shrink-0';
+            if (title) title.textContent = 'Location Density Heatmap Legend';
+            if (badge) {
+                badge.textContent = 'Sector Density';
+                badge.className = 'text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md bg-pnp-blue/10 text-pnp-blue dark:bg-pnp-gold/10 dark:text-pnp-gold tracking-wider';
+            }
+            if (typeof updateLegend === 'function') {
+                updateLegend();
+            }
+        }
+    };
+    window.updateTopLeftLegend = window.updateMapLegend;
+    window.updateTopRightLegend = window.updateMapLegend;
+
+    // Alias for legacy calls: locate the top sector and show total cases
+    window.plotStoredReportPins = function(points) {
+        if (typeof locateTopSectorForReport === 'function') {
+            locateTopSectorForReport(points);
+        }
+    };
+
+    window.switchSidebarView = function(view) {
+        window.currentSidebarView = view;
+        const viewOverview = document.getElementById('sidebarViewOverview');
+        const viewReports = document.getElementById('sidebarViewReports');
+        const btnOverview = document.getElementById('tabBtnOverview');
+        const btnReports = document.getElementById('tabBtnReports');
+
+        if (view === 'reports') {
+            if (viewOverview) viewOverview.classList.add('hidden');
+            if (viewReports) viewReports.classList.remove('hidden');
+            if (btnOverview) {
+                btnOverview.className = "flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer";
+            }
+            if (btnReports) {
+                btnReports.className = "flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue shadow-xs cursor-pointer";
+            }
+            renderStoredReportsList();
+
+            // Set currentPoints to isolated report or all stored points
+            if (window.activeReportFilter) {
+                currentPoints = (allMapPointsCached || []).filter(p => p.report_id === window.activeReportFilter);
+            } else {
+                currentPoints = allMapPointsCached || [];
+            }
+
+            // 1. Locate top sector and display total cases across whole map
+            locateTopSectorForReport(currentPoints);
+
+            // 2. Remove heatmap fill for stored files
+            updateHeatmap();
+
+            // 3. Switch Top-Right Legend to show top barangay
+            updateTopLeftLegend('reports');
+        } else {
+            if (viewOverview) viewOverview.classList.remove('hidden');
+            if (viewReports) viewReports.classList.add('hidden');
+            if (btnOverview) {
+                btnOverview.className = "flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue shadow-xs cursor-pointer";
+            }
+            if (btnReports) {
+                btnReports.className = "flex-1 py-1.5 px-2.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 text-slate-500 hover:text-slate-800 dark:hover:text-white cursor-pointer";
+            }
+
+            // Clear isolated report filter and stats if returning to overview
+            window.activeReportFilter = null;
+            window.activeReportFilename = null;
+            window.activeReportTopBrgy = null;
+            window.activeReportTopCount = 0;
+            window.activeReportBrgyRanking = [];
+
+            // Reset Barangay filter dropdown to default "All Sectors"
+            const brgySelect = document.getElementById('filterBarangay');
+            if (brgySelect) brgySelect.value = '';
+
+            // Reset Map Display Mode to default "density"
+            const modeSelect = document.getElementById('mapDisplayMode');
+            if (modeSelect) modeSelect.value = 'density';
+
+            const banner = document.getElementById('reportActiveFilterBanner');
+            if (banner) banner.classList.add('hidden');
+            if (selectedPinsLayer) selectedPinsLayer.clearLayers();
+
+            // Always ensure map interactions remain enabled in overview
+            if (map) {
+                map.dragging.enable();
+                map.touchZoom.enable();
+                map.doubleClickZoom.enable();
+                map.scrollWheelZoom.enable();
+                map.boxZoom.enable();
+                map.keyboard.enable();
+            }
+
+            // Restore current points and heatmap
+            currentPoints = filterPointsByDate(allMapPointsCached);
+            updateHeatmap();
+            updateSidebarStats();
+
+            // Reset map view to whole map safely framed
+            if (typeof fitWholeMapBounds === 'function') {
+                fitWholeMapBounds();
+            } else if (map) {
+                map.fitBounds([[14.2100, 121.3400], [14.3100, 121.4850]], { padding: [30, 30], maxZoom: 14 });
+            }
+
+            // Switch Top-Right Legend back to Location Density Heatmap Legend
+            updateTopLeftLegend('overview');
+
+            // Revert all polygon labels on the map to clean default overview chips
+            if (typeof updateBarangayLabels === 'function') {
+                updateBarangayLabels();
+            }
+            setTimeout(() => {
+                if (typeof manageTooltipVisibility === 'function') {
+                    manageTooltipVisibility();
+                }
+            }, 150);
+        }
+    };
+
+    window.openStoredReportsView = function() {
+        const sidebar = document.getElementById('filterSidebar');
+        if (sidebar && sidebar.classList.contains('sidebar-hidden')) {
+            toggleMapSidebar();
+        }
+        switchSidebarView('reports');
+    };
+
+    window.renderStoredReportsList = function(searchQuery = '') {
+        const container = document.getElementById('storedReportsListContainer');
+        if (!container) return;
+
+        const query = (searchQuery || '').toLowerCase().trim();
+        let list = Array.isArray(window.storedReportsList) ? window.storedReportsList : [];
+        if (query) {
+            list = list.filter(r => (r.filename || '').toLowerCase().includes(query) || (r.timestamp || '').toLowerCase().includes(query));
+        }
+
+        const totalCount = (window.storedReportsList || []).length;
+        const badgeEl = document.getElementById('tabReportsBadge');
+        if (badgeEl) badgeEl.textContent = totalCount;
+        const mapBadgeEl = document.getElementById('mapReportsCountBadge');
+        if (mapBadgeEl) mapBadgeEl.textContent = totalCount;
+
+        if (list.length === 0) {
+            container.innerHTML = `
+                <div class="py-12 px-4 text-center">
+                    <div class="w-12 h-12 mx-auto mb-3 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                        <i class="fas fa-folder-open text-xl"></i>
+                    </div>
+                    <p class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">No stored reports found</p>
+                    <p class="text-[10px] text-slate-400 font-medium mt-1">Recorded reports and scan batches will appear here.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = list.map(report => {
+            const stats = report.category_stats || {};
+            const count8Focus = stats['8-Focus'] || 0;
+            const countNonIndex = stats['Non-Index'] || 0;
+            const countPSI = stats['PSI'] || 0;
+            const total = report.total_records || (count8Focus + countNonIndex + countPSI) || 0;
+            const isManual = report.entry_type === 'manual' || (report.filename || '').toLowerCase().includes('manual');
+            const isActive = window.activeReportFilter === report.id;
+
+            let dateFormatted = report.timestamp ? new Date(report.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+
+            return `
+                <div class="p-3 bg-white dark:bg-slate-800/90 rounded-2xl border ${isActive ? 'border-pnp-blue dark:border-pnp-gold ring-2 ring-pnp-blue/20 dark:ring-pnp-gold/20' : 'border-gray-200/80 dark:border-slate-700/70'} hover:border-pnp-blue/60 transition shadow-2xs space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-start gap-2 min-w-0">
+                            <div class="w-7 h-7 rounded-lg ${isManual ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'} flex items-center justify-center shrink-0 mt-0.5">
+                                <i class="${isManual ? 'fas fa-keyboard' : 'fas fa-file-invoice'} text-xs"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <h5 class="text-xs font-black text-slate-800 dark:text-white uppercase truncate leading-tight" title="${report.filename || 'Recorded Report'}">
+                                    ${report.filename || 'Recorded Report'}
+                                </h5>
+                                <div class="flex items-center gap-1.5 mt-0.5 flex-wrap text-[8.5px]">
+                                    <span class="font-bold text-slate-400">${dateFormatted}</span>
+                                    <span class="text-[7.5px] font-black px-1.5 py-0.2 rounded ${isManual ? 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400' : 'bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'} uppercase">${isManual ? 'Direct' : 'Scanned'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-700/80 text-slate-800 dark:text-slate-200 font-black text-[9.5px] tabular-nums shrink-0">
+                            ${total} ${total === 1 ? 'case' : 'cases'}
+                        </span>
+                    </div>
+
+                    <!-- Category Breakdown Badges -->
+                    <div class="flex items-center gap-1 flex-wrap text-[8px] font-bold">
+                        <span class="px-1.5 py-0.5 rounded bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 dark:border-red-900/40">8-Focus: ${count8Focus}</span>
+                        <span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-900/40">Non-Index: ${countNonIndex}</span>
+                        <span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 dark:border-amber-900/40">PSI: ${countPSI}</span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="pt-1.5 border-t border-gray-100 dark:border-slate-700/60 flex items-center justify-between gap-2">
+                        <button type="button" onclick="filterMapByReport('${report.id}', '${encodeURIComponent(report.filename || 'Report')}')" class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${isActive ? 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/40 hover:bg-red-100' : 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue hover:opacity-90'} transition flex items-center gap-1 cursor-pointer">
+                            <i class="fas ${isActive ? 'fa-xmark' : 'fa-map-location-dot'} text-[8px]"></i>
+                            <span>${isActive ? 'Clear View' : 'Show on Map'}</span>
+                        </button>
+                        <a href="/admin/reports" target="_blank" class="text-[9px] font-bold text-slate-500 hover:text-pnp-blue dark:hover:text-pnp-gold transition flex items-center gap-1">
+                            <span>Reports Page</span>
+                            <i class="fas fa-arrow-up-right-from-square text-[7.5px]"></i>
+                        </a>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
+
+    window.filterMapByReport = function(reportId, encodedFilename) {
+        if (window.activeReportFilter === reportId) {
+            clearReportFilter();
+            return;
+        }
+
+        const filename = decodeURIComponent(encodedFilename || 'Report');
+        window.activeReportFilter = reportId;
+        window.activeReportFilename = filename;
+
+        const banner = document.getElementById('reportActiveFilterBanner');
+        const nameEl = document.getElementById('activeFilterReportName');
+        if (banner && nameEl) {
+            banner.classList.remove('hidden');
+            nameEl.textContent = filename;
+        }
+
+        // Filter cached points matching this report_id
+        currentPoints = (allMapPointsCached || []).filter(p => p.report_id === reportId);
+
+        // 1. Locate top sector and show total cases on the whole map
+        const topInfo = locateTopSectorForReport(currentPoints);
+
+        // 2. Remove heatmap fill
+        updateHeatmap();
+
+        // 3. Update legend & stats
+        updateTopLeftLegend('reports');
+        updateSidebarStats();
+        renderStoredReportsList();
+
+        const toastMsg = topInfo 
+            ? `${filename}: ${currentPoints.length} total cases. Top Sector: ${topInfo.name} (${topInfo.count} cases)`
+            : `${filename}: ${currentPoints.length} total cases recorded.`;
+        showMapToast(toastMsg);
+
+        // Auto-close sidebar so user immediately views the whole map uncovered
+        const sidebar = document.getElementById('filterSidebar');
+        if (sidebar && !sidebar.classList.contains('sidebar-hidden')) {
+            toggleMapSidebar();
+        }
+    };
+
+    window.clearReportFilter = function() {
+        window.activeReportFilter = null;
+        window.activeReportFilename = null;
+        window.activeReportTopBrgy = null;
+        window.activeReportTopCount = 0;
+        window.activeReportBrgyRanking = [];
+
+        const banner = document.getElementById('reportActiveFilterBanner');
+        if (banner) banner.classList.add('hidden');
+        if (selectedPinsLayer) selectedPinsLayer.clearLayers();
+
+        if (window.currentSidebarView === 'reports') {
+            // Still in stored files view: show total cases across whole map
+            currentPoints = allMapPointsCached || [];
+            locateTopSectorForReport(currentPoints);
+            updateHeatmap();
+            updateTopLeftLegend('reports');
+        } else {
+            // Overview view: restore heatmap & legend
+            currentPoints = filterPointsByDate(allMapPointsCached);
+            updateHeatmap();
+            updateTopLeftLegend('overview');
+            updateSidebarStats();
+            if (typeof fitWholeMapBounds === 'function') {
+                fitWholeMapBounds();
+            } else if (map) {
+                map.fitBounds([[14.2100, 121.3400], [14.3100, 121.4850]], { padding: [30, 30], maxZoom: 14 });
+            }
+            if (typeof updateBarangayLabels === 'function') {
+                updateBarangayLabels();
+            }
+            setTimeout(() => {
+                if (typeof manageTooltipVisibility === 'function') {
+                    manageTooltipVisibility();
+                }
+            }, 150);
+        }
+        renderStoredReportsList();
+        showMapToast("Report filter cleared.");
+    };
+
+        // =========================================================================
+    // DEDICATED MANUAL ENTRY ENGINE & REAL-TIME VALIDATION SYSTEM
+    // =========================================================================
+    const VALID_BARANGAYS = [
+        "Alipit", "Bagumbayan", "Bubukal", "Calios", "Duhat", "Gatid", "Jasaan", "Labuin",
+        "Malinao", "Oogong", "Pagsawitan", "Palasan", "Patimbao", "Poblacion I (Barangay I)",
+        "Poblacion II (Barangay II)", "Poblacion III (Barangay III)", "Poblacion IV (Barangay IV)",
+        "Poblacion V (Barangay V)", "San Jose", "San Juan", "San Pablo Norte", "San Pablo Sur",
+        "Santisima Cruz", "Santo Angel Central", "Santo Angel Norte", "Santo Angel Sur"
+    ];
+    window.VALID_BARANGAYS = VALID_BARANGAYS;
+    const VALID_CRIME_BARANGAYS = VALID_BARANGAYS;
+
+    const CRIMES_BY_PILLAR = {
+        '8-Focus': ['Murder', 'Homicide', 'Physical Injuries', 'Rape', 'Robbery', 'Theft', 'Carnapping (Motorcycle)', 'Carnapping (Motor Vehicle)'],
+        'Non-Index': [
+            'Acts of Lasciviousness',
+            'Alarm and Scandal',
+            'Anti-Child Pornography Act (RA 9775)',
+            'Anti-Fencing Law - PD 1612',
+            'Anti-Fencing Law (PD 1612)',
+            'Anti-Gambling Law - PD 1602 / RA 9287',
+            'Anti-Hazing Act (RA 11053)',
+            'Anti-Photo and Video Voyeurism Act (RA 9995)',
+            'Anti-Trafficking in Persons Act (RA 9208)',
+            'Anti-Violence Against Women and Their Children Act of 2004 - RA 9262',
+            'Bouncing Checks Law - BP 22',
+            'Bouncing Checks Law (BP 22)',
+            'Child Abuse (RA 7610)',
+            'Comprehensive Dangerous Drugs Act (RA 9165)',
+            'Comprehensive Dangerous Drugs Act of 2002 - RA 9165',
+            'Comprehensive Firearms and Ammunition Regulation Act - RA 10591',
+            'Curfew Violation (Ordinance)',
+            'Cyber Libel',
+            'Cybercrime',
+            'Cybercrime (Online Fraud, Hacking, Identity Theft, Cyber Libel)',
+            'Cybercrime Prevention Act of 2012 - RA 10175',
+            'Damage to Property',
+            'Direct Assault',
+            'Drinking in Public Places (Ordinance)',
+            'Drug Possession',
+            'Drug Possession (RA 9165)',
+            'Drug Sale',
+            'Drug Sale (RA 9165)',
+            'Drug Use',
+            'Drug Use (RA 9165)',
+            'Estafa',
+            'Falsification of Documents',
+            'Grave Coercion',
+            'Grave Threats',
+            'Human Trafficking',
+            'Illegal Discharge of Firearms',
+            'Illegal Gambling',
+            'Illegal Gambling (PD 1602 / RA 9287)',
+            'Illegal Logging (PD 705)',
+            'Illegal Possession of Firearms',
+            'Illegal Possession of Firearms (RA 10591)',
+            'Illegal Recruitment',
+            'Kidnapping and Serious Illegal Detention',
+            'Libel',
+            'Light Threats',
+            'Malicious Mischief',
+            'Municipal Ordinance Violations',
+            'Oral Defamation / Slander',
+            'Ordinance Violations',
+            'Perjury',
+            'Qualified Theft',
+            'Resistance and Disobedience to Authority',
+            'Safe Spaces Act - RA 11313',
+            'Safe Spaces Act (RA 11313 / Bawal Bastos)',
+            'Smoking in Public Places (Ordinance)',
+            'Special Protection of Children Against Child Abuse, Exploitation and Discrimination Act - RA 7610',
+            'Swindling / Fraud',
+            'Trespassing / Violation of Domicile',
+            'Unjust Vexation',
+            'Usurpation of Authority',
+            'Violence Against Women and Children (VAWC)'
+        ],
+        'PSI': [
+            'Abandonment of One\'s Own Victim (Traffic)',
+            'Driving Under the Influence (RA 10586 / DUI)',
+            'Hit and Run',
+            'Motorcycle Accident / Crash',
+            'Multiple Vehicle Collision',
+            'Pedestrian Hit / Traffic Incident',
+            'Reckless Driving',
+            'Reckless Imprudence Resulting in Damage to Property',
+            'Reckless Imprudence Resulting in Homicide',
+            'Reckless Imprudence Resulting in Physical Injuries',
+            'RIR - Damage to Property',
+            'RIR - Homicide',
+            'RIR - Physical Injuries',
+            'Road Accident / Traffic Incident',
+            'Self-Accident (Vehicular)',
+            'Vehicular Accident',
+            'Vehicular Collision'
+        ]
+    };
+    window.CRIMES_BY_PILLAR = CRIMES_BY_PILLAR;
+
+    let manualData = [];
+    let reviewData = [];
+    let currentEntryType = 'manual';
+    let currentFilename = 'Manual Entry Session';
+    let targetInsertIndex = null;
+
+    // --- REAL-TIME RECORD VALIDATOR ---
+    window.checkRecordIssues = function(item) {
+        const issues = [];
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        // 1. Sector / Barangay Check
+        const rawLoc = String(item.barangay || item.location || '').trim();
+        const cleanLoc = rawLoc.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase();
+        const matchedBarangay = VALID_BARANGAYS.find(b => 
+            b.toLowerCase() === rawLoc.toLowerCase() ||
+            b.toLowerCase() === cleanLoc ||
+            b.toLowerCase().includes(cleanLoc) ||
+            cleanLoc.includes(b.toLowerCase())
+        );
+        if (!rawLoc || !matchedBarangay) {
+            issues.push({ field: 'barangay', label: 'Barangay (Sector)', msg: `"${rawLoc || 'EMPTY'}" is not a recognized Santa Cruz Barangay.` });
+        }
+
+        // 2. Date Issue Check (Allowed: 2024 to present)
+        const rawDate = String(item.date_committed || item.date || item.incident_date || '').trim();
+        const formattedDate = rawDate.split('T')[0].split(' ')[0];
+        if (!formattedDate || !/^\d{4}-\d{2}-\d{2}$/.test(formattedDate) || isNaN(new Date(formattedDate).getTime())) {
+            issues.push({ field: 'date', label: 'Date', msg: `Invalid date format "${rawDate}".` });
+        } else if (formattedDate < '2024-01-01') {
+            issues.push({ field: 'date', label: 'Date', msg: `Date (${formattedDate}) is prior to 2024 (Allowed: 2024-present).` });
+        } else if (formattedDate > todayStr) {
+            issues.push({ field: 'date', label: 'Date', msg: `Future date (${formattedDate}) is not allowed.` });
+        }
+
+        // 3. Crime Classification Check (2-300 chars, max 50 words, legitimacy & keyboard mash check)
+        const rawOff = String(item.offense || item.incident_type || '').replace(/\s+/g, ' ').trim();
+        const rowCategory = item.category || 'Non-Index';
+
+        if (!rawOff || rawOff.length < 2) {
+            issues.push({ field: 'offense', label: 'Crime Classification', msg: 'Classification required (min 2 characters).' });
+        } else if (rawOff.length > 300) {
+            issues.push({ field: 'offense', label: 'Crime Classification', msg: `Exceeds 300 characters limit (${rawOff.length}/300).` });
+        } else if (!/[a-zA-ZñÑ]/.test(rawOff)) {
+            issues.push({ field: 'offense', label: 'Crime Classification', msg: 'Must contain a valid crime name (cannot be pure numbers).' });
+        } else {
+            const words = rawOff.split(' ').filter(Boolean);
+            if (words.length > 50) {
+                issues.push({ field: 'offense', label: 'Crime Classification', msg: `Exceeds 50 words limit (${words.length}/50 words).` });
+            } else {
+                // A. Detect keyboard mash, sequences, repeated chars, or gibberish in any word
+                const mashSeqs = ['qwerty', 'qwert', 'asdfg', 'asdf', 'zxcvb', 'zxcv', 'poiuy', 'lkjhg', 'mnbvc'];
+                const recognized = ['PNP', 'MPS', 'RIR', 'PSI', 'RA', 'PD', 'BP', 'RPC', 'VAWC', 'WCPD'];
+                let detectedMash = null;
+
+                for (const w of words) {
+                    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
+                    if (!cleanW || cleanW.length <= 3) continue;
+                    if (/^[\d\.\-\/]+$/.test(cleanW) || /\d/.test(cleanW) || /^[ivxlcdm]+$/i.test(cleanW)) continue;
+                    if (recognized.includes(cleanW.toUpperCase())) continue;
+
+                    const letters = cleanW.toLowerCase();
+                    if (/(.)\1{2,}/i.test(letters)) {
+                        detectedMash = `Repeated characters in "${w}".`;
+                        break;
+                    }
+                    if (letters.length >= 4 && /(.{2,4})\1{1,}/i.test(letters)) {
+                        detectedMash = `Keyboard mash pattern in "${w}".`;
+                        break;
+                    }
+                    const uniqueChars = new Set(letters.split(''));
+                    if (letters.length >= 5 && (uniqueChars.size <= 2 || (letters.length >= 7 && uniqueChars.size <= 3))) {
+                        detectedMash = `Unworkable keyboard mash in "${w}".`;
+                        break;
+                    }
+                    if (mashSeqs.some(seq => letters.includes(seq))) {
+                        detectedMash = `Keyboard sequence in "${w}".`;
+                        break;
+                    }
+                    if (letters.length >= 4 && !/[aeiouy]/.test(letters)) {
+                        detectedMash = `Unworkable word "${w}".`;
+                        break;
+                    }
+                }
+
+                if (detectedMash) {
+                    issues.push({ field: 'offense', label: 'Crime Classification', msg: detectedMash });
+                } else {
+                    // B. Crime Legitimacy & Category Alignment Check
+                    const normOff = rawOff.toLowerCase().replace(/[^a-z0-9]/gi, '');
+                    const currentCategoryCrimes = (window.CRIMES_BY_PILLAR && window.CRIMES_BY_PILLAR[rowCategory]) || [];
+                    const matchesCurrent = currentCategoryCrimes.some(c => {
+                        const normC = c.toLowerCase().replace(/[^a-z0-9]/gi, '');
+                        return normC === normOff || normC.includes(normOff) || normOff.includes(normC);
+                    });
+
+                    if (!matchesCurrent) {
+                        let belongsToOther = null;
+                        const allPillars = window.CRIMES_BY_PILLAR || {};
+                        for (const [otherCat, otherList] of Object.entries(allPillars)) {
+                            if (otherCat === rowCategory) continue;
+                            const found = otherList.find(c => {
+                                const normC = c.toLowerCase().replace(/[^a-z0-9]/gi, '');
+                                return normC === normOff || normC.includes(normOff) || normOff.includes(normC);
+                            });
+                            if (found) {
+                                belongsToOther = otherCat;
+                                break;
+                            }
+                        }
+
+                        const aliases = {
+                            '8-Focus': ['theft', 'robbery', 'murder', 'homicide', 'rape', 'carnapping', 'physical injury'],
+                            'PSI': ['accident', 'vehicular', 'traffic', 'collision', 'rir', 'reckless imprudence', 'hit and run', 'dui', 'reckless driving', 'pedestrian hit', 'road crash'],
+                            'Non-Index': ['drugs', 'vawc', 'estafa', 'swindling', 'cybercrime', 'gambling', 'firearms', 'child abuse', 'fencing', 'ordinance', 'curfew', 'drinking in public', 'smoking', 'threats', 'coercion', 'lasciviousness', 'malicious mischief', 'perjury', 'libel', 'slander', 'trespass', 'vexation', 'trafficking', 'recruitment', 'alarm and scandal', 'bouncing check']
+                        };
+
+                        const currentAliases = aliases[rowCategory] || [];
+                        const cleanLower = rawOff.toLowerCase();
+                        const matchesCurrentAlias = currentAliases.some(a => cleanLower.includes(a));
+
+                        if (!matchesCurrentAlias) {
+                            if (belongsToOther) {
+                                issues.push({ field: 'offense', label: 'Crime Classification', msg: `Belongs to ${belongsToOther}, not ${rowCategory}.` });
+                            } else {
+                                let aliasOther = null;
+                                for (const [otherCat, aList] of Object.entries(aliases)) {
+                                    if (otherCat === rowCategory) continue;
+                                    if (aList.some(a => cleanLower.includes(a))) {
+                                        aliasOther = otherCat;
+                                        break;
+                                    }
+                                }
+                                if (aliasOther) {
+                                    issues.push({ field: 'offense', label: 'Crime Classification', msg: `Belongs to ${aliasOther}, not ${rowCategory}.` });
+                                } else {
+                                    issues.push({ field: 'offense', label: 'Crime Classification', msg: `Unrecognized crime for ${rowCategory}. Select from dropdown.` });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return issues;
+    };
+
+    // --- MODAL ERROR REFRESH DISPATCHER ---
+    window.refreshModalErrorState = function(type = 'manual') {
+        const dataset = manualData;
+        let totalErrorRows = 0;
+        const errorRowNumbers = [];
+        const errorBreakdown = { barangay: 0, date: 0, crime: 0 };
+
+        dataset.forEach((item, index) => {
+            const issues = window.checkRecordIssues(item);
+            if (issues.length > 0) {
+                totalErrorRows++;
+                errorRowNumbers.push(index + 1);
+                issues.forEach(iss => {
+                    if (iss.field === 'barangay') errorBreakdown.barangay++;
+                    if (iss.field === 'date') errorBreakdown.date++;
+                    if (iss.field === 'offense') errorBreakdown.crime++;
+                });
+            }
+        });
+
+        const errorAlert = document.getElementById('manualModalErrorAlert');
+        const errorTitle = document.getElementById('manualModalErrorTitle');
+        const errorDesc = document.getElementById('manualModalErrorDesc');
+        const errorBadge = document.getElementById('manualModalErrorBadge');
+        const confirmBtn = document.getElementById('btnConfirmManual');
+
+        if (errorAlert) {
+            if (totalErrorRows > 0) {
+                errorAlert.classList.remove('hidden');
+                if (errorBadge) {
+                    errorBadge.className = "px-3 py-1 rounded-lg bg-rose-500 text-white font-black text-[10px] uppercase tracking-wider shadow-sm animate-pulse";
+                    errorBadge.textContent = `${totalErrorRows} Issue(s) to Fix`;
+                }
+                if (errorTitle) {
+                    errorTitle.textContent = `Attention Required: ${totalErrorRows} Row(s) Contain Errors (Not applicable to continue)`;
+                }
+                if (errorDesc) {
+                    const parts = [];
+                    if (errorBreakdown.barangay > 0) parts.push(`${errorBreakdown.barangay} Sector`);
+                    if (errorBreakdown.date > 0) parts.push(`${errorBreakdown.date} Timeline/Date`);
+                    if (errorBreakdown.crime > 0) parts.push(`${errorBreakdown.crime} Classification`);
+                    errorDesc.innerHTML = `Errors detected in <strong>Rows #${errorRowNumbers.slice(0, 8).join(', ')}${errorRowNumbers.length > 8 ? '...' : ''}</strong> (${parts.join(', ')}). Correct the highlighted fields to continue.`;
+                }
+            } else {
+                errorAlert.classList.add('hidden');
+                if (errorBadge) {
+                    errorBadge.className = "px-3 py-1 rounded-lg bg-emerald-500 text-white font-black text-[10px] uppercase tracking-wider shadow-sm";
+                    errorBadge.textContent = "All Records Valid";
+                }
+            }
+        }
+
+        // Highlight Confirm button status
+        if (confirmBtn) {
+            if (totalErrorRows > 0) {
+                confirmBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'shadow-blue-500/20');
+                confirmBtn.classList.add('bg-rose-600', 'hover:bg-rose-700', 'shadow-rose-500/20', 'ring-2', 'ring-rose-400/50');
+                confirmBtn.setAttribute('title', `Cannot continue: ${totalErrorRows} row(s) contain validation errors.`);
+                confirmBtn.innerHTML = `<i class="fas fa-exclamation-circle text-white"></i> <span>Fix ${totalErrorRows} Error(s)</span>`;
+            } else {
+                confirmBtn.classList.remove('bg-rose-600', 'hover:bg-rose-700', 'shadow-rose-500/20', 'ring-2', 'ring-rose-400/50');
+                confirmBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'shadow-blue-500/20');
+                confirmBtn.removeAttribute('title');
+                confirmBtn.innerHTML = `<i class="fas fa-check-circle"></i> <span>Confirm</span>`;
+            }
+        }
+    };
+
+    // --- LIVE CELL INPUT HANDLERS ---
+    window.handleStagingOffenseInput = function(type, index, value) {
+        if (!manualData[index]) return;
+        manualData[index].offense = value;
+        manualData[index].incident_type = value;
+        
+        const issues = window.checkRecordIssues(manualData[index]);
+        const crimeIssue = issues.find(i => i.field === 'offense');
+        const td = document.getElementById(`manualCrimeTd_${index}`);
+        const errSpan = document.getElementById(`manualCrimeError_${index}`);
+        const rowEl = document.getElementById(`manualRow_${index}`);
+        const fixBadge = document.getElementById(`manualFixBadge_${index}`);
+
+        if (crimeIssue) {
+            if (td) td.classList.add('bg-amber-500/15', 'ring-2', 'ring-amber-400', 'ring-inset');
+            if (errSpan) {
+                errSpan.textContent = crimeIssue.msg;
+                errSpan.classList.remove('hidden');
+            }
+        } else {
+            if (td) td.classList.remove('bg-amber-500/15', 'ring-2', 'ring-amber-400', 'ring-inset');
+            if (errSpan) errSpan.classList.add('hidden');
+        }
+
+        if (issues.length > 0) {
+            if (rowEl) {
+                rowEl.classList.add('has-error', 'bg-amber-500/10', 'dark:bg-amber-950/20', 'border-amber-400/40');
+                rowEl.classList.remove('bg-white', 'dark:bg-slate-900', 'border-gray-100', 'dark:border-slate-800');
+            }
+            if (fixBadge) fixBadge.classList.remove('hidden');
+        } else {
+            if (rowEl) {
+                rowEl.classList.remove('has-error', 'bg-amber-500/10', 'dark:bg-amber-950/20', 'border-amber-400/40');
+                rowEl.classList.add('bg-white', 'dark:bg-slate-900', 'border-gray-100', 'dark:border-slate-800');
+            }
+            if (fixBadge) fixBadge.classList.add('hidden');
+        }
+
+        window.refreshModalErrorState('manual');
+    };
+
+    window.handleStagingDateChange = function(type, index, part, value) {
+        if (!manualData[index]) return;
+        const rawDateStr = manualData[index].date_committed || manualData[index].date || manualData[index].incident_date || new Date().toISOString().split('T')[0];
+        const parts = rawDateStr.split('-');
+        let y = parts[0] || '2026';
+        let m = parts[1] || '01';
+        let d = parts[2] || '01';
+
+        if (part === 'day') d = String(value).padStart(2, '0');
+        if (part === 'month') m = String(value).padStart(2, '0');
+        if (part === 'year') y = String(value);
+
+        const newDate = `${y}-${m}-${d}`;
+        manualData[index].date_committed = newDate;
+        manualData[index].date = newDate;
+        manualData[index].incident_date = newDate;
+
+        const issues = window.checkRecordIssues(manualData[index]);
+        const dateIssue = issues.find(i => i.field === 'date');
+        const td = document.getElementById(`manualDateTd_${index}`);
+        const errSpan = document.getElementById(`manualDateError_${index}`);
+        const rowEl = document.getElementById(`manualRow_${index}`);
+        const fixBadge = document.getElementById(`manualFixBadge_${index}`);
+
+        if (dateIssue) {
+            if (td) td.classList.add('bg-amber-500/15', 'ring-2', 'ring-amber-400', 'ring-inset');
+            if (errSpan) {
+                errSpan.textContent = dateIssue.msg;
+                errSpan.classList.remove('hidden');
+            }
+        } else {
+            if (td) td.classList.remove('bg-amber-500/15', 'ring-2', 'ring-amber-400', 'ring-inset');
+            if (errSpan) errSpan.classList.add('hidden');
+        }
+
+        if (issues.length > 0) {
+            if (rowEl) {
+                rowEl.classList.add('has-error', 'bg-amber-500/10', 'dark:bg-amber-950/20', 'border-amber-400/40');
+                rowEl.classList.remove('bg-white', 'dark:bg-slate-900', 'border-gray-100', 'dark:border-slate-800');
+            }
+            if (fixBadge) fixBadge.classList.remove('hidden');
+        } else {
+            if (rowEl) {
+                rowEl.classList.remove('has-error', 'bg-amber-500/10', 'dark:bg-amber-950/20', 'border-amber-400/40');
+                rowEl.classList.add('bg-white', 'dark:bg-slate-900', 'border-gray-100', 'dark:border-slate-800');
+            }
+            if (fixBadge) fixBadge.classList.add('hidden');
+        }
+
+        window.refreshModalErrorState('manual');
+    };
+
+    window.handleStagingBarangayChange = function(type, index, value) {
+        if (!manualData[index]) return;
+        manualData[index].barangay = value;
+
+        const issues = window.checkRecordIssues(manualData[index]);
+        const brgyIssue = issues.find(i => i.field === 'barangay');
+        const td = document.getElementById(`manualBrgyTd_${index}`);
+        const errSpan = document.getElementById(`manualBrgyError_${index}`);
+        const rowEl = document.getElementById(`manualRow_${index}`);
+        const fixBadge = document.getElementById(`manualFixBadge_${index}`);
+
+        if (brgyIssue) {
+            if (td) td.classList.add('bg-amber-500/15', 'ring-2', 'ring-amber-400', 'ring-inset');
+            if (errSpan) errSpan.classList.remove('hidden');
+        } else {
+            if (td) td.classList.remove('bg-amber-500/15', 'ring-2', 'ring-amber-400', 'ring-inset');
+            if (errSpan) errSpan.classList.add('hidden');
+        }
+
+        if (issues.length > 0) {
+            if (rowEl) {
+                rowEl.classList.add('has-error', 'bg-amber-500/10', 'dark:bg-amber-950/20', 'border-amber-400/40');
+                rowEl.classList.remove('bg-white', 'dark:bg-slate-900', 'border-gray-100', 'dark:border-slate-800');
+            }
+            if (fixBadge) fixBadge.classList.remove('hidden');
+        } else {
+            if (rowEl) {
+                rowEl.classList.remove('has-error', 'bg-amber-500/10', 'dark:bg-amber-950/20', 'border-amber-400/40');
+                rowEl.classList.add('bg-white', 'dark:bg-slate-900', 'border-gray-100', 'dark:border-slate-800');
+            }
+            if (fixBadge) fixBadge.classList.add('hidden');
+        }
+
+        window.refreshModalErrorState('manual');
+    };
+
+    window.handleStagingCategoryChange = function(type, index, value) {
+        if (!manualData[index]) return;
+        manualData[index].category = value;
+        manualData[index].offense = ''; // Reset classification when category changes
+        manualData[index].incident_type = '';
+        renderManualTable();
+    };
+
+    // --- MODAL CONTROLS & TABLE RENDERING ---
+    window.openManualEntry = function() {
+        const activeBrgy = document.getElementById('filterBarangay') ? document.getElementById('filterBarangay').value : '';
+        const defaultBrgy = (activeBrgy && VALID_BARANGAYS.includes(activeBrgy)) ? activeBrgy : VALID_BARANGAYS[0];
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        manualData = [{ 
+            barangay: defaultBrgy, 
+            date_committed: todayStr, 
+            incident_date: todayStr,
+            offense: '', 
+            incident_type: '',
+            category: 'Non-Index', 
+            description: '' 
+        }];
+        window.mapManualData = manualData;
+        currentFilename = "Manual Entry Session";
+        currentEntryType = "manual";
+        reviewData = manualData;
+        
+        const modal = document.getElementById('manualEntryModal');
+        if (modal) {
+            renderManualTable();
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            const card = modal.querySelector('.modal-dialog-card');
+            if (card) {
+                card.classList.remove('animate-modal-pop');
+                void card.offsetWidth; // trigger reflow
+                card.classList.add('animate-modal-pop');
+            }
+        }
+    };
+    window.openMapManualEntry = window.openManualEntry;
+
+    window.closeManualEntry = function() {
+        const modal = document.getElementById('manualEntryModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    };
+    window.closeMapManualEntry = window.closeManualEntry;
+
+    window.addNewManualRow = function(insertIndex = null) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const activeBrgy = document.getElementById('filterBarangay') ? document.getElementById('filterBarangay').value : '';
+        const defaultBrgy = (activeBrgy && VALID_BARANGAYS.includes(activeBrgy)) ? activeBrgy : VALID_BARANGAYS[0];
+        const newRow = {
+            barangay: defaultBrgy,
+            date_committed: todayStr,
+            incident_date: todayStr,
+            offense: '',
+            incident_type: '',
+            category: 'Non-Index',
+            description: ''
+        };
+        if (insertIndex !== null && typeof insertIndex === 'number' && insertIndex >= 0 && insertIndex <= manualData.length) {
+            manualData.splice(insertIndex, 0, newRow);
+        } else {
+            manualData.push(newRow);
+        }
+        reviewData = manualData;
+        renderManualTable();
+        setTimeout(() => {
+            const tbody = document.getElementById('manualTableBody');
+            const container = tbody ? tbody.closest('.overflow-auto') : null;
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 50);
+    };
+
+    window.deleteManualRow = function(index) {
+        if (manualData.length <= 1) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const activeBrgy = document.getElementById('filterBarangay') ? document.getElementById('filterBarangay').value : '';
+            const defaultBrgy = (activeBrgy && VALID_BARANGAYS.includes(activeBrgy)) ? activeBrgy : VALID_BARANGAYS[0];
+            manualData = [{ 
+                barangay: defaultBrgy, 
+                date_committed: todayStr, 
+                incident_date: todayStr,
+                offense: '', 
+                incident_type: '',
+                category: 'Non-Index', 
+                description: '' 
+            }];
+        } else {
+            manualData.splice(index, 1);
+        }
+        reviewData = manualData;
+        renderManualTable();
+    };
+
+    window.renderManualTable = function() {
+        const tbody = document.getElementById('manualTableBody');
+        if (!tbody) return;
+        const filterEl = document.getElementById('manualCategoryFilter');
+        const filter = filterEl ? filterEl.value : 'All';
+        tbody.innerHTML = '';
+        let stats = { '8-Focus': 0, 'Non-Index': 0, 'PSI': 0 };
+        let displayIndex = 1;
+
+        manualData.forEach((item, index) => {
+            const cat = item.category || 'Non-Index';
+            stats[cat] = (stats[cat] || 0) + 1;
+            if (filter !== 'All' && cat !== filter) return;
+
+            const issues = window.checkRecordIssues(item);
+            const hasError = issues.length > 0;
+            const hasBrgyError = issues.some(i => i.field === 'barangay');
+            const hasDateError = issues.some(i => i.field === 'date');
+            const hasCrimeError = issues.some(i => i.field === 'offense');
+
+            const dateIssue = issues.find(i => i.field === 'date');
+            const crimeIssue = issues.find(i => i.field === 'offense');
+
+            const tr = document.createElement('tr');
+            tr.id = `manualRow_${index}`;
+            tr.className = `${hasError ? 'bg-amber-500/10 dark:bg-amber-950/20 border-amber-400/40 has-error' : 'bg-white dark:bg-slate-900 border-gray-100 dark:border-slate-800'} transition-all hover:bg-pnp-blue/5 dark:hover:bg-slate-700/50 group border-b`;
+            
+            const isFocus = cat === '8-Focus';
+            const isPSI = cat === 'PSI';
+            const badgeClass = isFocus ? 'bg-red-500/10 text-red-500' : isPSI ? 'bg-amber-500/10 text-amber-500' : 'bg-blue-500/10 text-blue-500';
+            
+            const offenseValue = item.offense || item.incident_type || '';
+            const crimeOptions = (CRIMES_BY_PILLAR && CRIMES_BY_PILLAR[cat]) || [];
+            
+            const rawDateStr = item.date_committed || item.date || item.incident_date || new Date().toISOString().split('T')[0];
+            const dateParts = rawDateStr.split('-');
+            const itemYear = dateParts[0] || '2026';
+            const itemMonth = dateParts[1] || '01';
+            const itemDay = dateParts[2] || '01';
+            
+            tr.innerHTML = `
+                <td class="px-2 py-3 text-center border-r border-gray-100 dark:border-slate-800 w-12">
+                    <button type="button" onclick="addNewManualRow(${index + 1})" title="Insert Row Below" class="w-6 h-6 rounded-md bg-pnp-blue/10 dark:bg-pnp-gold/10 text-pnp-blue dark:text-pnp-gold hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-900 transition flex items-center justify-center mx-auto cursor-pointer">
+                        <i class="fas fa-plus text-[9px]"></i>
+                    </button>
+                </td>
+                <td class="px-2 py-3 text-[10px] font-black border-r border-gray-100 dark:border-slate-800 w-14 text-center tabular-nums text-gray-400">
+                    <div class="flex flex-col items-center">
+                        <span>${displayIndex++}</span>
+                        <span id="manualFixBadge_${index}" class="mt-0.5 px-1 py-0.2 rounded text-[7px] font-black bg-amber-500 text-slate-950 uppercase tracking-tighter ${hasError ? '' : 'hidden'}" title="${issues.map(i => i.msg).join(' ')}">FIX</span>
+                    </div>
+                </td>
+                <td id="manualBrgyTd_${index}" class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-44 ${hasBrgyError ? 'bg-amber-500/15 ring-2 ring-amber-400 ring-inset' : ''}">
+                   <div class="relative w-full h-full flex flex-col justify-center">
+                       <select onchange="handleStagingBarangayChange('manual', ${index}, this.value)" class="w-full h-full bg-transparent border-none text-[11px] font-black text-slate-700 dark:text-white uppercase outline-none focus:ring-0 px-3 py-3 cursor-pointer">
+                           ${!VALID_BARANGAYS.includes(item.barangay) ? `<option value="${item.barangay}" selected class="text-red-500 bg-amber-50 font-black">⚠ ${item.barangay || '[SELECT BARANGAY]'}</option>` : ''}
+                           ${VALID_BARANGAYS.map(b => `<option value="${b}" ${b === item.barangay ? 'selected' : ''} class="dark:bg-slate-900">${b}</option>`).join('')}
+                       </select>
+                       <span id="manualBrgyError_${index}" class="text-[8px] font-bold text-amber-600 dark:text-amber-400 block px-3 py-0.5 ${hasBrgyError ? '' : 'hidden'}">Invalid Sector</span>
+                   </div>
+                </td>
+                <td id="manualDateTd_${index}" class="px-2.5 py-2.5 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-64 ${hasDateError ? 'bg-amber-500/15 ring-2 ring-amber-400 ring-inset' : ''}">
+                   <div class="flex flex-col items-center justify-center space-y-1">
+                       <div class="flex items-center space-x-1.5 justify-center w-full">
+                           <select onchange="handleStagingDateChange('manual', ${index}, 'day', this.value)" title="Day (DD)" class="w-14 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1.5 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                               ${[...Array(31)].map((_, i) => {
+                                   const d = String(i + 1).padStart(2, '0');
+                                   return `<option value="${d}" ${d === itemDay ? 'selected' : ''} class="dark:bg-slate-900">${d}</option>`;
+                               }).join('')}
+                           </select>
+                           <span class="text-slate-400 font-bold text-[10px]">/</span>
+                           <select onchange="handleStagingDateChange('manual', ${index}, 'month', this.value)" title="Month" class="w-16 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1.5 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                               ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].map((mName, idx) => {
+                                   const m = String(idx + 1).padStart(2, '0');
+                                   return `<option value="${m}" ${m === itemMonth ? 'selected' : ''} class="dark:bg-slate-900">${mName}</option>`;
+                               }).join('')}
+                           </select>
+                           <span class="text-slate-400 font-bold text-[10px]">/</span>
+                           <select onchange="handleStagingDateChange('manual', ${index}, 'year', this.value)" title="Year (YYYY)" class="w-20 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-[10px] font-black text-slate-800 dark:text-white px-1.5 py-1.5 outline-none focus:ring-1 focus:ring-pnp-blue cursor-pointer text-center">
+                               ${['2026', '2025', '2024'].map(y => {
+                                   return `<option value="${y}" ${y === itemYear ? 'selected' : ''} class="dark:bg-slate-900">${y}</option>`;
+                               }).join('')}
+                           </select>
+                       </div>
+                       <span id="manualDateError_${index}" class="text-[8px] font-bold text-amber-600 dark:text-amber-400 block text-center ${hasDateError ? '' : 'hidden'}">${dateIssue ? dateIssue.msg : 'Requires 2024–present'}</span>
+                   </div>
+                </td>
+                <td id="manualCrimeTd_${index}" class="px-3 py-2 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors relative min-w-[300px] w-auto ${hasCrimeError ? 'bg-amber-500/15 ring-2 ring-amber-400 ring-inset' : ''}">
+                   <div class="relative w-full flex flex-col justify-center min-h-[44px]">
+                       <div class="relative flex items-center w-full">
+                           <input type="text" list="manualCrimesList_${index}" value="${offenseValue}" placeholder="Type or select classification..." maxlength="300" oninput="handleStagingOffenseInput('manual', ${index}, this.value)" 
+                               class="w-full bg-gray-50/60 dark:bg-slate-800/60 focus:bg-white dark:focus:bg-slate-800 border border-gray-200/80 dark:border-slate-700 rounded-lg px-3 py-1.5 text-xs font-black text-pnp-blue dark:text-pnp-gold uppercase focus:ring-1 focus:ring-pnp-blue outline-none transition placeholder:text-gray-400 dark:placeholder:text-slate-500">
+                       </div>
+                       <datalist id="manualCrimesList_${index}">
+                           ${crimeOptions.map(o => `<option value="${o}">`).join('')}
+                       </datalist>
+                       <span id="manualCrimeError_${index}" class="text-[8px] font-bold text-amber-600 dark:text-amber-400 block mt-1 px-0.5 ${hasCrimeError ? '' : 'hidden'}">${crimeIssue ? crimeIssue.msg : 'Classification required'}</span>
+                   </div>
+                </td>
+                <td class="px-0 py-0 border-r border-gray-100 dark:border-slate-800 focus-within:bg-pnp-blue/5 transition-colors w-32">
+                   <select onchange="handleStagingCategoryChange('manual', ${index}, this.value)" class="w-full h-full bg-transparent border-none text-[10px] font-black uppercase tracking-widest ${badgeClass} outline-none focus:ring-0 px-3 py-3 cursor-pointer">
+                       <option value="8-Focus" ${cat === '8-Focus' ? 'selected' : ''} class="text-red-500 font-bold">8-Focus</option>
+                       <option value="Non-Index" ${cat === 'Non-Index' ? 'selected' : ''} class="text-blue-500 font-bold">Non-Index</option>
+                       <option value="PSI" ${cat === 'PSI' ? 'selected' : ''} class="text-amber-500 font-bold" title="PUBLIC SAFETY INCIDENT">PSI</option>
+                   </select>
+                </td>
+                <td class="px-2 py-0 text-center w-12">
+                    <button type="button" onclick="deleteManualRow(${index})" class="w-7 h-7 rounded-md bg-red-50 dark:bg-red-900/20 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center mx-auto cursor-pointer" title="Delete Row">
+                       <i class="fas fa-trash-alt text-[9px]"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        const manualRowCount = document.getElementById('manualRowCount');
+        if (manualRowCount) manualRowCount.textContent = `${manualData.length} manual record(s) in session`;
+        
+        const count8Focus = document.getElementById('manualCount8Focus');
+        if (count8Focus) count8Focus.textContent = stats['8-Focus'] || 0;
+        
+        const countNonIndex = document.getElementById('manualCountNonIndex');
+        if (countNonIndex) countNonIndex.textContent = stats['Non-Index'] || 0;
+        
+        const countPSI = document.getElementById('manualCountPSI');
+        if (countPSI) countPSI.textContent = stats['PSI'] || 0;
+
+        window.refreshModalErrorState('manual');
+    };
+
+    // --- BATCH GENERATOR CONTROLS ---
+    window.openBatchGeneratorModal = function(insertIndex = null) {
+        targetInsertIndex = insertIndex;
+        const now = new Date();
+        const todayDay = String(now.getDate()).padStart(2, '0');
+        const todayMonth = String(now.getMonth() + 1).padStart(2, '0');
+        const todayYear = String(now.getFullYear());
+        
+        const modal = document.getElementById('batchGeneratorModal');
+        const brgySelect = document.getElementById('batchBarangaySelect');
+        const daySelect = document.getElementById('batchDaySelect');
+        const monthSelect = document.getElementById('batchMonthSelect');
+        const yearSelect = document.getElementById('batchYearSelect');
+        const countInput = document.getElementById('batchCount');
+        const offenseInput = document.getElementById('batchOffenseInput');
+        const catSelect = document.getElementById('batchCategorySelect');
+
+        const activeBrgy = document.getElementById('filterBarangay') ? document.getElementById('filterBarangay').value : '';
+
+        if (brgySelect) {
+            brgySelect.innerHTML = VALID_BARANGAYS.map(b => `<option value="${b}" ${(activeBrgy && b === activeBrgy) ? 'selected' : ''}>${b}</option>`).join('');
+        }
+        
+        if (daySelect) daySelect.value = todayDay;
+        if (monthSelect) monthSelect.value = todayMonth;
+        if (yearSelect) yearSelect.value = todayYear;
+
+        if (countInput) countInput.value = '1';
+        if (offenseInput) offenseInput.value = '';
+        if (catSelect) catSelect.value = 'Non-Index';
+        
+        window.onBatchCategoryChange('Non-Index');
+
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            const card = modal.querySelector('div.animate-fade-in-up') || modal.firstElementChild;
+            if (card) {
+                card.classList.remove('animate-fade-in-up');
+                void card.offsetWidth;
+                card.classList.add('animate-fade-in-up');
+            }
+        }
+    };
+
+    window.closeBatchGeneratorModal = function() {
+        const modal = document.getElementById('batchGeneratorModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    };
+
+    window.onBatchCategoryChange = function(cat) {
+        const datalist = document.getElementById('batchCrimesList');
+        const crimeOptions = (CRIMES_BY_PILLAR && CRIMES_BY_PILLAR[cat]) || [];
+        if (datalist) {
+            datalist.innerHTML = crimeOptions.map(o => `<option value="${o}">`).join('');
+        }
+        const offenseInput = document.getElementById('batchOffenseInput');
+        if (offenseInput) offenseInput.value = '';
+    };
+
+    window.executeBatchGeneration = function() {
+        const countInput = document.getElementById('batchCount');
+        const brgySelect = document.getElementById('batchBarangaySelect');
+        const daySelect = document.getElementById('batchDaySelect');
+        const monthSelect = document.getElementById('batchMonthSelect');
+        const yearSelect = document.getElementById('batchYearSelect');
+        const catSelect = document.getElementById('batchCategorySelect');
+        const offenseInput = document.getElementById('batchOffenseInput');
+
+        const rawCount = parseInt(countInput ? countInput.value : '1') || 0;
+        if (rawCount < 1) {
+            (window.strategicAlert || alert)({
+                title: "Invalid Row Count",
+                message: "Please enter a valid number of rows (minimum 1).",
+                type: "warning"
+            });
+            return;
+        }
+        if (rawCount > 50) {
+            (window.strategicAlert || alert)({
+                title: "Row Limit Exceeded",
+                message: "Maximum row generation limit is 50 rows per batch.",
+                type: "warning"
+            });
+            return;
+        }
+        const count = rawCount;
+        const barangay = (brgySelect ? brgySelect.value : '') || VALID_BARANGAYS[0];
+        
+        const dayVal = daySelect ? daySelect.value : String(new Date().getDate()).padStart(2, '0');
+        const monthVal = monthSelect ? monthSelect.value : String(new Date().getMonth() + 1).padStart(2, '0');
+        const yearVal = yearSelect ? yearSelect.value : String(new Date().getFullYear());
+        const dateVal = `${yearVal}-${monthVal}-${dayVal}`;
+
+        const category = (catSelect ? catSelect.value : '') || 'Non-Index';
+        const offense = offenseInput ? offenseInput.value.trim() : '';
+
+        if (offense && offense.length > 300) {
+            (window.strategicAlert || alert)({
+                title: "Classification Too Long",
+                message: `Crime classification must not exceed 300 letters (currently: ${offense.length}).`,
+                type: "warning"
+            });
+            return;
+        }
+        const offenseWords = offense ? offense.split(/\s+/).filter(Boolean) : [];
+        if (offenseWords.length > 50) {
+            (window.strategicAlert || alert)({
+                title: "Classification Word Limit Exceeded",
+                message: `Crime classification must not exceed 50 words (currently: ${offenseWords.length} words).`,
+                type: "warning"
+            });
+            return;
+        }
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        if (!dateVal || dateVal > todayStr || dateVal < '2024-01-01') {
+            (window.strategicAlert || alert)({
+                title: "Invalid Timeline Date",
+                message: `Timeline date must be between January 1, 2024 and today (${todayStr}). Future dates are restricted.`,
+                type: "warning"
+            });
+            return;
+        }
+
+        const newRows = [];
+        for (let i = 0; i < count; i++) {
+            newRows.push({
+                barangay: barangay,
+                date_committed: dateVal,
+                incident_date: dateVal,
+                offense: offense,
+                incident_type: offense,
+                category: category,
+                description: ''
+            });
+        }
+
+        if (targetInsertIndex !== null && targetInsertIndex >= 0 && targetInsertIndex <= manualData.length) {
+            manualData.splice(targetInsertIndex, 0, ...newRows);
+        } else {
+            manualData.push(...newRows);
+        }
+        reviewData = manualData;
+
+        closeBatchGeneratorModal();
+        renderManualTable();
+
+        setTimeout(() => {
+            const tbody = document.getElementById('manualTableBody');
+            const container = tbody ? tbody.closest('.overflow-auto') : null;
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 50);
+    };
+
+    // --- CONFIRMATION & CENTRAL STORAGE ---
+    window.confirmManualEntry = async function() {
+        if (!manualData || manualData.length === 0) {
+            await (window.strategicAlert || alert)({
+                title: "No Data",
+                message: "There are no manual records to synchronize. Please enter at least one record.",
+                type: "warning"
+            });
+            return;
+        }
+
+        // Normalize barangays
+        for (let i = 0; i < manualData.length; i++) {
+            const r = manualData[i];
+            if (r.barangay) {
+                const cleanB = String(r.barangay).trim();
+                const matchedB = VALID_BARANGAYS.find(b => 
+                    b.toLowerCase() === cleanB.toLowerCase() ||
+                    b.toLowerCase() === cleanB.replace(/^(brgy\.?|bgy\.?|barangay)\s+/i, '').toLowerCase() ||
+                    cleanB.toLowerCase().includes(b.toLowerCase())
+                );
+                if (matchedB) r.barangay = matchedB;
+            }
+        }
+
+        // Validate all rows
+        const uncorrectedRows = [];
+        manualData.forEach((r, idx) => {
+            const issues = window.checkRecordIssues(r);
+            if (issues.length > 0) {
+                uncorrectedRows.push({ rowNumber: idx + 1, issues });
+            }
+        });
+
+        if (uncorrectedRows.length > 0) {
+            let errorWarningMessage = `Validation Block: There are ${uncorrectedRows.length} row(s) containing errors that are not applicable to continue:\n`;
+            uncorrectedRows.slice(0, 10).forEach(item => {
+                const issueDescriptions = item.issues.map(iss => `${iss.label}: ${iss.msg}`).join(', ');
+                errorWarningMessage += `\n• Row #${item.rowNumber}: ${issueDescriptions}`;
+            });
+            if (uncorrectedRows.length > 10) {
+                errorWarningMessage += `\n• ...and ${uncorrectedRows.length - 10} more row(s).`;
+            }
+            errorWarningMessage += `\n\nPlease resolve all highlighted fields before continuing.`;
+
+            await (window.strategicAlert || (async (opts) => alert(opts.message)))({
+                title: "Cannot Continue: Errors Detected",
+                message: errorWarningMessage,
+                type: "warning"
+            });
+
+            const firstInvalid = document.querySelector('#manualTableBody tr.has-error');
+            if (firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
+        const confirmed = await (window.strategicConfirm || (async () => confirm(`Commit ${manualData.length} manual records to the CPICRS Central Database?`)))({
+            title: "Manual Dataset Confirmation",
+            message: `Commit ${manualData.length} verified manual records to the CPICRS Central Database?\n\nSelect 'Confirm' to synchronize and plot on the map.`,
+            confirmText: "Confirm",
+            cancelText: "Cancel",
+            type: "info"
+        });
+        if (!confirmed) return;
+
+        const syncBtn = document.getElementById('btnConfirmManual');
+        const originalContent = syncBtn ? syncBtn.innerHTML : '';
+        if (syncBtn) {
+            syncBtn.disabled = true;
+            syncBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Syncing...';
+        }
+
+        try {
+            const formattedEntries = manualData.map(r => ({
+                barangay: r.barangay,
+                incident_date: r.date_committed || r.incident_date,
+                date_committed: r.date_committed || r.incident_date,
+                category: r.category || 'Non-Index',
+                incident_type: (r.offense || r.incident_type || '').trim(),
+                offense: (r.offense || r.incident_type || '').trim(),
+                description: r.description ? r.description.trim() : 'Manual direct map recording'
+            }));
+
+            const response = await fetch('/admin/reports/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                   entries: formattedEntries, 
+                   filename: `Manual Entry (${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})`,
+                   entryType: 'manual' 
+                })
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                if (result.report) {
+                    if (!window.storedReportsList) window.storedReportsList = [];
+                    window.storedReportsList.unshift({
+                        id: result.report.id,
+                        filename: result.report.filename || 'Manual Entry Session',
+                        timestamp: result.report.timestamp || new Date().toISOString(),
+                        total_records: result.count || formattedEntries.length,
+                        category_stats: result.report.category_stats || {},
+                        entry_type: 'manual',
+                        barangay: formattedEntries[0]?.barangay || 'All Sectors'
+                    });
+                    const countBadge = document.getElementById('mapReportsCountBadge');
+                    if (countBadge) countBadge.textContent = window.storedReportsList.length;
+                    const tabBadge = document.getElementById('tabReportsBadge');
+                    if (tabBadge) tabBadge.textContent = window.storedReportsList.length;
+                }
+
+                // Invalidate points cache and reload map data immediately so new incidents show on the map!
+                allMapPointsCached = [];
+                await loadMapPoints(false);
+
+                // Re-render Stored Reports list view
+                renderStoredReportsList();
+
+                closeManualEntry();
+
+                if (typeof window.showMapToast === 'function') {
+                    showMapToast(`${result.count || formattedEntries.length} record${(result.count || formattedEntries.length) > 1 ? 's' : ''} stored and plotted on map!`);
+                } else if (typeof window.strategicAlert === 'function') {
+                    await window.strategicAlert({
+                        title: "Sync Successful",
+                        message: `Archive Updated: ${result.count || formattedEntries.length} manual records committed and plotted on map.`,
+                        type: "success"
+                    });
+                }
+            } else {
+                await (window.strategicAlert || (async (opts) => alert(opts.message)))({
+                    title: "Sync Error",
+                    message: result.error || result.message || "Failed to commit manual records.",
+                    type: "error"
+                });
+                if (syncBtn) {
+                    syncBtn.disabled = false;
+                    syncBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    syncBtn.innerHTML = originalContent;
+                }
+            }
+        } catch (err) {
+            console.error("Sync Error:", err);
+            await (window.strategicAlert || (async (opts) => alert(opts.message)))({
+                title: "System Error",
+                message: "Network or server failure during data synchronization.",
+                type: "error"
+            });
+            if (syncBtn) {
+                syncBtn.disabled = false;
+                syncBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                syncBtn.innerHTML = originalContent;
+            }
+        }
+    };
+
+    window.showMapToast = function(msg) {
+        let toast = document.getElementById('mapActionToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'mapActionToast';
+            toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[3000] px-5 py-3 rounded-2xl bg-slate-900 text-white font-black text-xs uppercase tracking-wider border border-pnp-gold/60 shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<i class="fas fa-circle-check text-emerald-400"></i><span>${msg}</span>`;
+        toast.classList.remove('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'pointer-events-none');
+        }, 4000);
+    };
+
 
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1717,8 +3734,12 @@
 
         // Initialize display badge text
         updateActivePeriodDisplay();
+        renderStoredReportsList();
 
         initMap();
+        if (typeof updateTopLeftLegend === 'function') {
+            updateTopLeftLegend('overview');
+        }
 
         if (!isNaN(latParam) && !isNaN(lngParam) && latParam !== 0 && lngParam !== 0) {
             setTimeout(() => {
@@ -1773,24 +3794,24 @@
 </script>
 
 <style>
-    .sidebar-hidden {
-        opacity: 0;
-        transform: scale(0.9) translateX(-20px);
-        pointer-events: none;
-    }
-
-    .sidebar-visible {
-        opacity: 1;
-        transform: scale(1) translateX(0);
-        pointer-events: auto;
-    }
-
-    /* Hide scrollbar for Sidebar */
     #filterSidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, visibility 0.3s ease;
         -ms-overflow-style: none;
-        /* IE and Edge */
         scrollbar-width: none;
-        /* Firefox */
+    }
+
+    #filterSidebar.sidebar-hidden {
+        transform: translateX(-100%) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+    }
+
+    #filterSidebar.sidebar-visible {
+        transform: translateX(0) !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        visibility: visible !important;
     }
 
     #filterSidebar::-webkit-scrollbar {

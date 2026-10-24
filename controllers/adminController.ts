@@ -2806,10 +2806,11 @@ export const updateTip = async (req: Request, res: Response) => {
 
 export const getMap = async (req: Request, res: Response) => {
   try {
-    const currentYear = new Date().getFullYear();
-    const currentYearStartStr = `${currentYear}-01-01`;
+    const [snap, reportsSnap] = await Promise.all([
+      db.collection('map_points').get(),
+      db.collection('intelligence_scans').orderBy('timestamp', 'desc').get()
+    ]);
 
-    const snap = await db.collection('map_points').get();
     const points = snap.docs.map((doc: any) => {
       const data = doc.data();
       let cat = data.category || 'Non-Index';
@@ -2826,9 +2827,27 @@ export const getMap = async (req: Request, res: Response) => {
           p.description === 'Strategic placeholder data';
         return !isPlaceholder;
       });
+
+    const reports = reportsSnap.docs.map((doc: any) => {
+      const data = doc.data();
+      const stats = data.category_stats || {};
+      const entryType = stats.entry_type || (data.filename?.toLowerCase().includes('manual') ? 'manual' : 'scanned');
+      return {
+        id: doc.id,
+        filename: data.filename || 'Intelligence Report',
+        timestamp: data.timestamp || '',
+        total_records: data.total_records || (Array.isArray(data.raw_data) ? data.raw_data.length : 0),
+        category_stats: stats,
+        entry_type: entryType,
+        barangay: data.barangay || '',
+        admin_name: data.admin_name || 'System Admin'
+      };
+    });
+
     res.render('admin/map', {
       title: 'Map',
       points,
+      reports,
       GPT_OSS_120B_API_KEY: process.env.GPT_OSS_120B_API_KEY || process.env.GEMINI_API_KEY,
       layout: 'layouts/admin'
     });

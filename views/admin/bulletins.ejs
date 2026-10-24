@@ -1373,9 +1373,6 @@
     function openModalFullscreenMediaByIndex(idx) {
         if (idx < 0 || idx >= modalMediaItems.length) return;
         goToModalSlide(idx);
-        if (currentPublishType === 'url') {
-            switchUrlLeftTab('media');
-        }
         closeModalMediaGalleryModal();
     }
 

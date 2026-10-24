@@ -306,6 +306,17 @@
         pointer-events: none !important;
     }
 
+    .manual-pin-container {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    #map.barangay-selected .barangay-label-tooltip {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
     .barangay-label-tooltip::before,
     .barangay-label-tooltip::after {
         display: none !important;
@@ -458,6 +469,10 @@
 
     function recenterStaCruzMap(animate = true) {
         if (!map) return;
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && !document.getElementById('filterBarangay')?.value) {
+            mapContainer.classList.remove('barangay-selected');
+        }
         const isMobile = window.innerWidth < 768;
         const isWideDesktop = window.innerWidth >= 1200;
         const leftSidebar = document.getElementById('filterSidebar');
@@ -939,66 +954,67 @@
 
     function locateBarangay(shouldMinimize = true) {
         const selectedName = document.getElementById('filterBarangay').value;
+        const mapContainer = document.getElementById('map');
 
         // Always clear any currently drawn selected pins first!
         selectedPinsLayer.clearLayers();
 
         if (!selectedName) {
+            if (mapContainer) mapContainer.classList.remove('barangay-selected');
             recenterStaCruzMap();
+            if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+            setTimeout(() => {
+                if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+            }, 100);
             return;
         }
 
+        if (mapContainer) mapContainer.classList.add('barangay-selected');
         const pin = manualPins.find(p => p.name.toLowerCase() === selectedName.toLowerCase());
         if (pin && map) {
-            // Always hide sidebars on mobile when locating a barangay so user sees the pin
-            const isMobile = window.innerWidth < 768;
-            if (isMobile) {
-                const sidebar = document.getElementById('filterSidebar');
-                if (sidebar) {
-                    sidebar.classList.add('sidebar-hidden');
-                    sidebar.classList.remove('sidebar-visible');
-                    const toggleBtn = document.getElementById('sidebarToggle');
-                    if (toggleBtn) {
-                        toggleBtn.classList.remove('opacity-0', 'pointer-events-none');
-                        toggleBtn.classList.add('opacity-100', 'pointer-events-auto');
-                    }
-                }
-
-                const incidentsSidebar = document.getElementById('incidentsSidebar');
-                if (incidentsSidebar) {
-                    incidentsSidebar.classList.add('sidebar-hidden');
-                    incidentsSidebar.classList.remove('sidebar-visible');
-                    const iToggle = document.getElementById('incidentsToggle');
-                    if (iToggle) {
-                        iToggle.classList.remove('opacity-0', 'pointer-events-none');
-                        iToggle.classList.add('opacity-100', 'pointer-events-auto');
-                    }
+            // Open sidebar on desktop when a barangay is selected
+            const sidebar = document.getElementById('filterSidebar');
+            if (sidebar && sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 768) {
+                sidebar.classList.remove('sidebar-hidden');
+                sidebar.classList.add('sidebar-visible');
+                const toggleBtn = document.getElementById('sidebarToggle');
+                if (toggleBtn) {
+                    toggleBtn.classList.add('opacity-0', 'pointer-events-none');
+                    toggleBtn.classList.remove('opacity-100', 'pointer-events-auto');
                 }
             }
 
-            const popover = document.getElementById('crimeDatePopover');
-            if (popover) popover.classList.add('hidden');
+            let targetCenter = [pin.lat, pin.lng];
+            if (window.innerWidth >= 768) {
+                try {
+                    const targetPoint = map.project([pin.lat, pin.lng], 16).subtract([160, 0]);
+                    targetCenter = map.unproject(targetPoint, 16);
+                } catch (e) {
+                    targetCenter = [pin.lat, pin.lng];
+                }
+            }
 
-            map.flyTo([pin.lat, pin.lng], 16, {
+            map.flyTo(targetCenter, 16, {
                 animate: true,
                 duration: 1.2
             });
 
-            // Create and show the beautiful gold Tactical Pin for the selected barangay!
+            // Create and show the beautiful gold Tactical Pin directly on the barangay name!
             const tacticalPin = L.marker([pin.lat, pin.lng], {
                 icon: L.divIcon({
                     className: 'manual-pin-container',
                     html: `
-                        <div class="relative group flex flex-col items-center">
-                            <div class="absolute w-8 h-8 bg-pnp-gold/30 rounded-full animate-ping"></div>
-                            <div class="relative w-10 h-10 bg-pnp-blue dark:bg-pnp-gold rounded-full flex items-center justify-center shadow-2xl border-2 border-white dark:border-slate-900 transform group-hover:scale-110 transition-all duration-300">
-                                <i class="fas fa-location-dot text-white dark:text-pnp-blue text-lg"></i>
+                        <div class="relative group flex flex-col items-center select-none pointer-events-none">
+                            <div class="absolute -inset-1.5 bg-pnp-blue/25 dark:bg-pnp-gold/35 rounded-2xl animate-ping pointer-events-none"></div>
+                            <div class="relative px-3.5 py-1.5 rounded-xl bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue font-black text-xs uppercase tracking-wider shadow-2xl border-2 border-white dark:border-slate-900 flex items-center gap-1.5 z-10 whitespace-nowrap">
+                                <i class="fas fa-location-dot text-[11px] text-pnp-gold dark:text-pnp-blue"></i>
+                                <span>${pin.name}</span>
                             </div>
-                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-1"></div>
+                            <div class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-pnp-blue dark:border-t-pnp-gold -mt-[1px]"></div>
                         </div>
                     `,
-                    iconSize: [40, 48],
-                    iconAnchor: [20, 48]
+                    iconSize: [160, 42],
+                    iconAnchor: [80, 42]
                 })
             }).addTo(selectedPinsLayer);
 
@@ -1608,10 +1624,12 @@
 
             const newLabel = getBarangayLabel(name, currentZoom);
             layer.setTooltipContent(newLabel);
-            if (name.toLowerCase() === 'jasaan') {
+
+            const pin = manualPins.find(p => p.name.toLowerCase() === name.toLowerCase());
+            if (pin) {
                 const tooltip = layer.getTooltip();
                 if (tooltip) {
-                    tooltip.setLatLng(L.latLng(14.2215, 121.3885));
+                    tooltip.setLatLng(L.latLng(pin.lat, pin.lng));
                 }
             }
         });
@@ -1624,14 +1642,27 @@
         tooltipVisibilityRaf = requestAnimationFrame(() => {
             const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
             if (tooltips.length === 0) return;
-            const boxes = [];
+            const selectedBrgy = (document.getElementById('filterBarangay')?.value || '').trim();
 
+            // When a specific barangay is selected, hide all polygon name labels on the map
+            // The selected barangay is clearly identified by its gold tactical pin badge!
+            if (selectedBrgy) {
+                tooltips.forEach(t => {
+                    if (t.style.opacity !== '0') {
+                        t.style.opacity = '0';
+                        t.style.pointerEvents = 'none';
+                    }
+                });
+                return;
+            }
+
+            const boxes = [];
             // Prioritize Jasaan so its label is evaluated first and never suppressed
             tooltips.sort((a, b) => {
                 const aIsJasaan = (a.textContent || '').toUpperCase().includes('JASAAN');
                 const bIsJasaan = (b.textContent || '').toUpperCase().includes('JASAAN');
-                if (aIsJasaan) return -1;
-                if (bIsJasaan) return 1;
+                if (aIsJasaan && !bIsJasaan) return -1;
+                if (!aIsJasaan && bIsJasaan) return 1;
                 return 0;
             });
 
@@ -1773,32 +1804,32 @@
     }
 
     const manualPins = [
-        { name: 'Alipit', lat: 14.223931, lng: 121.405213 },
-        { name: 'Bagumbayan', lat: 14.268334, lng: 121.398454 },
-        { name: 'Duhat', lat: 14.2525, lng: 121.3825 },
-        { name: 'Bubukal', lat: 14.256460, lng: 121.399183 },
-        { name: 'Calios', lat: 14.2750, lng: 121.4050 },
-        { name: 'Gatid', lat: 14.2600, lng: 121.3830 },
-        { name: 'Jasaan', lat: 14.2215, lng: 121.3885 },
-        { name: 'Labuin', lat: 14.250158, lng: 121.400664 },
-        { name: 'Malinao', lat: 14.232833, lng: 121.396823 },
-        { name: 'Oogong', lat: 14.226323, lng: 121.400621 },
-        { name: 'Pagsawitan', lat: 14.265754, lng: 121.426545 },
-        { name: 'Palasan', lat: 14.257498, lng: 121.418992 },
-        { name: 'Patimbao', lat: 14.270081, lng: 121.418366 },
-        { name: 'Poblacion I (Barangay I)', lat: 14.277068, lng: 121.418881 },
-        { name: 'Poblacion II (Barangay II)', lat: 14.279647, lng: 121.416006 },
-        { name: 'Poblacion III (Barangay III)', lat: 14.282028, lng: 121.415159 },
-        { name: 'Poblacion IV (Barangay IV)', lat: 14.283790, lng: 121.414016 },
-        { name: 'Poblacion V (Barangay V)', lat: 14.285282, lng: 121.412476 },
-        { name: 'San Jose', lat: 14.237118, lng: 121.403754 },
-        { name: 'San Juan', lat: 14.243815, lng: 121.406972 },
-        { name: 'San Pablo Norte', lat: 14.290210, lng: 121.413023 },
-        { name: 'San Pablo Sur', lat: 14.282211, lng: 121.422261 },
-        { name: 'Santisima Cruz', lat: 14.290647, lng: 121.409140 },
-        { name: 'Santo Angel Central', lat: 14.285137, lng: 121.408947 },
-        { name: 'Santo Angel Norte', lat: 14.288547, lng: 121.406307 },
-        { name: 'Santo Angel Sur', lat: 14.282329, lng: 121.410985 }
+        { name: 'Alipit', lat: 14.229393, lng: 121.411665 },
+        { name: 'Bagumbayan', lat: 14.272644, lng: 121.393879 },
+        { name: 'Bubukal', lat: 14.260435, lng: 121.404959 },
+        { name: 'Calios', lat: 14.278913, lng: 121.404043 },
+        { name: 'Duhat', lat: 14.254408, lng: 121.376783 },
+        { name: 'Gatid', lat: 14.264925, lng: 121.382959 },
+        { name: 'Jasaan', lat: 14.224928, lng: 121.390316 },
+        { name: 'Labuin', lat: 14.248934, lng: 121.396198 },
+        { name: 'Malinao', lat: 14.238920, lng: 121.388256 },
+        { name: 'Oogong', lat: 14.226557, lng: 121.400343 },
+        { name: 'Pagsawitan', lat: 14.271173, lng: 121.425275 },
+        { name: 'Palasan', lat: 14.251078, lng: 121.419158 },
+        { name: 'Patimbao', lat: 14.266534, lng: 121.415825 },
+        { name: 'Poblacion I (Barangay I)', lat: 14.276999, lng: 121.417883 },
+        { name: 'Poblacion II (Barangay II)', lat: 14.279862, lng: 121.416228 },
+        { name: 'Poblacion III (Barangay III)', lat: 14.282193, lng: 121.415350 },
+        { name: 'Poblacion IV (Barangay IV)', lat: 14.284662, lng: 121.414664 },
+        { name: 'Poblacion V (Barangay V)', lat: 14.285884, lng: 121.412864 },
+        { name: 'San Jose', lat: 14.237303, lng: 121.408087 },
+        { name: 'San Juan', lat: 14.246504, lng: 121.408098 },
+        { name: 'San Pablo Norte', lat: 14.288913, lng: 121.419124 },
+        { name: 'San Pablo Sur', lat: 14.283660, lng: 121.426164 },
+        { name: 'Santisima Cruz', lat: 14.295321, lng: 121.409790 },
+        { name: 'Santo Angel Central', lat: 14.285425, lng: 121.407055 },
+        { name: 'Santo Angel Norte', lat: 14.293621, lng: 121.403587 },
+        { name: 'Santo Angel Sur', lat: 14.280498, lng: 121.411990 }
     ];
 
     function addManualPins() {
@@ -1917,8 +1948,8 @@
                 : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
 
             currentTileLayer = L.tileLayer(tileLayerUrl, {
-                maxZoom: 19,
-                maxNativeZoom: 18,
+                maxZoom: 18,
+                maxNativeZoom: 16,
                 attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a>'
             }).addTo(map);
 
@@ -1968,6 +1999,7 @@
                             const newUrl = dark
                                 ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
                                 : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+                            currentTileLayer.options.maxNativeZoom = 16;
                             currentTileLayer.setUrl(newUrl);
                         }
                     });
@@ -1986,10 +2018,11 @@
                                 name = `Poblacion ${match[1]} (Barangay ${match[1]})`;
                             }
 
-                            // Anchor Jasaan explicitly inside its spacious polygon area
-                            if (name.toLowerCase() === 'jasaan') {
+                            // Anchor each barangay explicitly to its verified true polygon centroid
+                            const pin = manualPins.find(p => p.name.toLowerCase() === name.toLowerCase());
+                            if (pin) {
                                 layer.getCenter = function () {
-                                    return L.latLng(14.2215, 121.3885);
+                                    return L.latLng(pin.lat, pin.lng);
                                 };
                             }
 
@@ -2003,10 +2036,10 @@
                                 interactive: false
                             });
 
-                            if (name.toLowerCase() === 'jasaan') {
+                            if (pin) {
                                 const tooltip = layer.getTooltip();
                                 if (tooltip) {
-                                    tooltip.setLatLng(L.latLng(14.2215, 121.3885));
+                                    tooltip.setLatLng(L.latLng(pin.lat, pin.lng));
                                 }
                             }
 
@@ -2032,22 +2065,6 @@
                                     }
                                 }
                             });
-
-                            // Add marker for each barangay at true geographic center
-                            try {
-                                const centroid = (layer.getCenter && typeof layer.getCenter === 'function')
-                                    ? layer.getCenter()
-                                    : layer.getBounds().getCenter();
-
-                                // Update dynamic reference for search/locate system
-                                const pinIndex = manualPins.findIndex(p => p.name.toLowerCase() === name.toLowerCase());
-                                if (pinIndex !== -1) {
-                                    manualPins[pinIndex].lat = centroid.lat;
-                                    manualPins[pinIndex].lng = centroid.lng;
-                                }
-                            } catch (err) {
-                                console.error('Error adding accurate marker for barangay:', name, err);
-                            }
                         }
                     }).addTo(map);
 
