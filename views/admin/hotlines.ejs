@@ -12,20 +12,20 @@
                     <label for="name"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Agency
                         Name</label>
-                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz" minlength="2" maxlength="20" title="Agency name must be 2 to 20 characters" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);"
+                    <input type="text" name="name" id="name" required placeholder="e.g., PNP Sta. Cruz" minlength="2" maxlength="40" title="Agency name must be 2 to 40 characters" oninput="if(this.value.length>40)this.value=this.value.slice(0,40);"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
                     <label for="number"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Contact
                         Number</label>
-                    <input type="text" name="number" id="number" required placeholder="e.g., 09123456789 or 911" pattern="\d{3,11}" maxlength="11" title="Exact digits only (3 to 11 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);"
+                    <input type="text" name="number" id="number" required placeholder="e.g., 09123456789 or 911" pattern="\d{3,12}" maxlength="12" title="Exact digits only (3 to 12 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                 </div>
                 <div class="space-y-2">
                     <label for="category"
                         class="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-widest font-bold">Category</label>
-                    <input type="text" name="category" id="category" list="categoryList" required placeholder="Type or select category (e.g. Police, Utility)" minlength="2" maxlength="20" title="Category must be 2 to 20 characters" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);"
+                    <input type="text" name="category" id="category" list="categoryList" required placeholder="Type or select category (e.g. Police, Utility)" minlength="2" maxlength="30" title="Category must be 2 to 30 characters" oninput="if(this.value.length>30)this.value=this.value.slice(0,30);"
                         class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-pnp-blue outline-none text-sm font-bold dark:text-white">
                     <datalist id="categoryList">
                         <option value="Police">
@@ -100,6 +100,170 @@
         window.hotlineOriginals = {};
     }
 
+    // 🛡️ Tactical Hotline Client-Side Validation Engine
+    const HOTLINE_CLUSTERS = [
+        /^[asd]+$/i, /^[qwe]+$/i, /^[zxc]+$/i, /^[jkl]+$/i,
+        /^[uiop]+$/i, /^[bnm]+$/i, /^[fgh]+$/i
+    ];
+    const HOTLINE_SHORT_MASH = [
+        'asd', 'dsa', 'sda', 'das', 'qwe', 'ewq', 'qwer', 'rewq',
+        'zxc', 'cxz', 'zxcv', 'vcxz', 'jkl', 'lkj', 'iop', 'poi', 'poiuy',
+        'dfg', 'gfd', 'fgh', 'hgf', 'ghj', 'hjk', 'xcv', 'cvb', 'vbn', 'bnm', 'mnb',
+        'wer', 'ert', 'rty', 'tyu', 'yui', 'uio'
+    ];
+    const HOTLINE_LONG_MASH = [
+        'qwerty', 'qwert', 'asdfg', 'asdf', 'zxcvb', 'zxcv', 'poiuy', 'lkjhg', 'mnbvc'
+    ];
+    const HOTLINE_RECOGNIZED_ACRONYMS = new Set([
+        'PNP', 'MPS', 'PMAJ', 'PLT', 'PCOL', 'PLTCOL', 'PCMS', 'PSMS', 'PMSg', 'PSSg', 'PCPL', 'PAT',
+        'PO1', 'PO2', 'PO3', 'BFP', 'BJMP', 'AFP', 'LGU', 'MDRRMO', 'RHU', 'DILG', 'NBI', 'CIDG', 'SWAT',
+        'EOD', 'K9', 'TOC', 'PCR', 'CPICRS', 'BRGY', 'ST', 'STA', 'STO', 'SAN', 'DR', 'MR', 'MS', 'PPO',
+        'LMC', 'RED', 'CROSS', 'EMS', '911', '117', '161', '143', '8888', 'QC', 'MMDA', 'NDRRMC'
+    ]);
+
+    function clientValidateHotlineAgency(name) {
+        const trimmed = (name || '').replace(/[\s\u00A0\u2000-\u200B\uFEFF]+/g, ' ').trim();
+        if (!trimmed || trimmed.length < 2) {
+            return { valid: false, error: 'Agency name cannot be empty or blank spaces (minimum 2 characters).' };
+        }
+        if (trimmed.length > 40) {
+            return { valid: false, error: 'Agency name cannot exceed 40 characters.' };
+        }
+        const nameRegex = /^[a-zA-Z0-9ñÑáéíóúÁÉÍÓÚ\s\.\-&/]+$/;
+        if (!nameRegex.test(trimmed)) {
+            return { valid: false, error: 'Agency name contains invalid characters. Use letters, numbers, spaces, dots, hyphens, and slashes only.' };
+        }
+
+        const lettersOnly = trimmed.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ]/g, '').toLowerCase();
+        if (lettersOnly.length < 2) {
+            return { valid: false, error: 'Agency name must contain at least 2 alphabet letters.' };
+        }
+
+        const unique = new Set(lettersOnly.split(''));
+        if (lettersOnly.length >= 6 && unique.size <= 2) {
+            return { valid: false, error: 'Agency name contains repetitive characters and does not appear to be genuine.' };
+        }
+        if (lettersOnly.length >= 8 && unique.size <= 3) {
+            return { valid: false, error: 'Agency name contains repetitive characters or keyboard mash (e.g. "asdasdasd").' };
+        }
+        if (lettersOnly.length >= 14 && unique.size <= 4) {
+            return { valid: false, error: 'Agency name contains repetitive characters or keyboard mash.' };
+        }
+
+        const words = trimmed.split(' ').filter(Boolean);
+        if (words.length > 6) {
+            return { valid: false, error: 'Agency name must not exceed 6 words.' };
+        }
+        if (words.length >= 2 && words.every(w => w.toLowerCase() === words[0].toLowerCase())) {
+            return { valid: false, error: 'Agency name cannot consist of repeated identical words.' };
+        }
+
+        for (const w of words) {
+            if (/^[a-zA-ZñÑ]\.$/.test(w)) continue;
+            if (/^[a-zA-ZñÑ]$/.test(w)) {
+                return { valid: false, error: `Single letter "${w}" in agency name must be an initial followed by a period (e.g. "${w.toUpperCase()}.").` };
+            }
+            const clean = w.replace(/[\.\-&/]/g, '');
+            if (!clean) continue;
+            const upper = clean.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            if (HOTLINE_RECOGNIZED_ACRONYMS.has(upper)) continue;
+            if (/^\d+$/.test(clean)) continue;
+            if (clean.length === 2) {
+                if (!/[aeiouy]/i.test(clean)) return { valid: false, error: `"${w}" is not a recognized abbreviation.` };
+                continue;
+            }
+            if (/(.)\1{2,}/i.test(clean) || /(.{2,4})\1+/i.test(clean)) {
+                return { valid: false, error: `"${w}" contains repetitive or unworkable characters.` };
+            }
+            const alpha = clean.replace(/[^a-zA-ZñÑ]/g, '').toLowerCase();
+            if (alpha.length >= 3 && HOTLINE_CLUSTERS.some(r => r.test(alpha))) {
+                return { valid: false, error: `"${w}" does not appear to be a valid organization or agency name.` };
+            }
+            if (alpha.length <= 4 && HOTLINE_SHORT_MASH.some(s => alpha.includes(s))) {
+                return { valid: false, error: `"${w}" does not appear to be a valid organization or agency name.` };
+            }
+            if (HOTLINE_LONG_MASH.some(s => alpha.includes(s))) {
+                return { valid: false, error: `"${w}" appears to be keyboard mash.` };
+            }
+            if (alpha.length >= 3 && !/[aeiouyáéíóú]/i.test(alpha)) {
+                return { valid: false, error: `"${w}" does not appear to be a workable name.` };
+            }
+        }
+        return { valid: true, normalized: trimmed };
+    }
+
+    function clientValidateHotlineCategory(category) {
+        const trimmed = (category || '').replace(/[\s\u00A0\u2000-\u200B\uFEFF]+/g, ' ').trim();
+        if (!trimmed || trimmed.length < 2) {
+            return { valid: false, error: 'Category cannot be empty or blank spaces (minimum 2 characters).' };
+        }
+        if (trimmed.length > 30) {
+            return { valid: false, error: 'Category cannot exceed 30 characters.' };
+        }
+        const catRegex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s\.\-&/]+$/;
+        if (!catRegex.test(trimmed)) {
+            return { valid: false, error: 'Category contains invalid characters.' };
+        }
+
+        const lettersOnly = trimmed.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ]/g, '').toLowerCase();
+        if (lettersOnly.length < 2) {
+            return { valid: false, error: 'Category must contain at least 2 alphabet letters.' };
+        }
+
+        const unique = new Set(lettersOnly.split(''));
+        if (lettersOnly.length >= 5 && unique.size <= 2) {
+            return { valid: false, error: 'Category contains repetitive characters or keyboard mash.' };
+        }
+        if (lettersOnly.length >= 8 && unique.size <= 3) {
+            return { valid: false, error: 'Category contains repetitive characters or keyboard mash.' };
+        }
+
+        const words = trimmed.split(' ').filter(Boolean);
+        if (words.length > 4) {
+            return { valid: false, error: 'Category must not exceed 4 words.' };
+        }
+
+        const standardCats = new Set(['POLICE', 'FIRE', 'MEDICAL', 'DISASTER', 'UTILITY', 'RESCUE', 'GOVERNMENT', 'TRAFFIC', 'HOSPITAL', 'SECURITY', 'EMERGENCY', 'BARANGAY', 'HOTLINE']);
+
+        for (const w of words) {
+            const clean = w.replace(/[\.\-&/]/g, '');
+            if (!clean) continue;
+            const upper = clean.toUpperCase();
+            if (standardCats.has(upper) || HOTLINE_RECOGNIZED_ACRONYMS.has(upper)) continue;
+            const alpha = clean.toLowerCase();
+            if (alpha.length >= 3 && HOTLINE_CLUSTERS.some(r => r.test(alpha))) {
+                return { valid: false, error: `"${w}" does not appear to be a recognizable category name.` };
+            }
+            if (alpha.length <= 4 && HOTLINE_SHORT_MASH.some(s => alpha.includes(s))) {
+                return { valid: false, error: `"${w}" does not appear to be a recognizable category name.` };
+            }
+            if (alpha.length >= 3 && !/[aeiouy]/i.test(alpha)) {
+                return { valid: false, error: `"${w}" does not appear to be a recognizable category name.` };
+            }
+        }
+        return { valid: true, normalized: trimmed };
+    }
+
+    function clientValidateHotlineContactNumber(number) {
+        const clean = String(number || '').trim().replace(/[\s\-\(\)\.]/g, '');
+        if (!clean) {
+            return { valid: false, error: 'Contact number cannot be empty or blank spaces.' };
+        }
+        if (!/^\d+$/.test(clean)) {
+            return { valid: false, error: 'Contact number must contain numeric digits only (3 to 12 digits).' };
+        }
+        if (clean.length < 3 || clean.length > 12) {
+            return { valid: false, error: 'Contact number must be between 3 and 12 digits.' };
+        }
+        if (/^0+$/.test(clean)) {
+            return { valid: false, error: 'Contact number cannot consist solely of zeroes.' };
+        }
+        if (clean.length >= 6 && /^(\d)\1+$/.test(clean)) {
+            return { valid: false, error: 'Contact number cannot consist of repeating identical digits (e.g. 00000000000).' };
+        }
+        return { valid: true, normalized: clean };
+    }
+
     async function handleAddHotlineSubmit(event) {
         event.preventDefault();
         const form = event.target;
@@ -107,89 +271,61 @@
         const numInput = document.getElementById('number');
         const catInput = document.getElementById('category');
 
-        const agencyName = nameInput ? nameInput.value.replace(/\s+/g, ' ').trim() : '';
-        const numVal = numInput ? numInput.value.trim().replace(/\s/g, '') : '';
-        const catVal = catInput ? catInput.value.replace(/\s+/g, ' ').trim() : '';
+        const nameVal = nameInput ? nameInput.value : '';
+        const numVal = numInput ? numInput.value : '';
+        const catVal = catInput ? catInput.value : '';
 
-        // Agency name limitation check (2 to 20 characters)
-        if (!agencyName || agencyName.length < 2 || agencyName.length > 20) {
-            if (window.strategicAlert) {
-                await window.strategicAlert({
-                    title: 'Invalid Agency Name',
-                    message: 'Agency name cannot be blank spaces (must be between 2 and 20 characters).',
-                    type: 'danger'
-                });
-            } else {
-                alert('Agency name cannot be blank spaces (must be between 2 and 20 characters).');
-            }
+        // Validate Agency Name
+        const agencyCheck = clientValidateHotlineAgency(nameVal);
+        if (!agencyCheck.valid) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Invalid Agency Name',
+                message: agencyCheck.error,
+                type: 'danger'
+            });
             if (nameInput) nameInput.focus();
             return false;
         }
 
-        const nameWords = agencyName.split(' ').filter(Boolean);
-        for (const w of nameWords) {
-            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
-                alert(`"${w}" does not appear to be a valid organization name.`);
-                if (nameInput) nameInput.focus();
-                return false;
-            }
-        }
-
-        // Contact number limitation check (exact 3 to 11 digits)
-        if (!/^\d{3,11}$/.test(numVal)) {
-            if (window.strategicAlert) {
-                await window.strategicAlert({
-                    title: 'Invalid Contact Number',
-                    message: 'Contact number must contain exact numeric digits only (3 to 11 digits). No characters or spaces allowed.',
-                    type: 'danger'
-                });
-            } else {
-                alert('Contact number must contain exact numeric digits only (3 to 11 digits). No characters or spaces allowed.');
-            }
+        // Validate Contact Number
+        const numCheck = clientValidateHotlineContactNumber(numVal);
+        if (!numCheck.valid) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Invalid Contact Number',
+                message: numCheck.error,
+                type: 'danger'
+            });
             if (numInput) numInput.focus();
             return false;
         }
 
-        // Category limitation check (2 to 20 characters)
-        if (!catVal || catVal.length < 2 || catVal.length > 20) {
-            if (window.strategicAlert) {
-                await window.strategicAlert({
-                    title: 'Invalid Category',
-                    message: 'Category cannot be blank spaces (must be between 2 and 20 characters).',
-                    type: 'danger'
-                });
-            } else {
-                alert('Category cannot be blank spaces (must be between 2 and 20 characters).');
-            }
+        // Validate Category
+        const catCheck = clientValidateHotlineCategory(catVal);
+        if (!catCheck.valid) {
+            const alertFn = window.strategicAlert || (({ message }) => alert(message));
+            alertFn({
+                title: 'Invalid Category',
+                message: catCheck.error,
+                type: 'danger'
+            });
             if (catInput) catInput.focus();
             return false;
         }
 
-        const catWords = catVal.split(' ').filter(Boolean);
-        for (const w of catWords) {
-            const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-            if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
-                alert(`"${w}" does not appear to be a recognizable category.`);
-                if (catInput) catInput.focus();
-                return false;
-            }
-        }
-
-
-        let confirmed = false;
-        if (window.strategicConfirm) {
-            confirmed = await window.strategicConfirm({
-                title: 'Confirm Hotline Creation',
-                message: `Are you sure you want to save "${agencyName}" with contact number "${numVal}" under category "${catVal}" to the directory?`,
-                confirmText: 'Save Hotline',
-                type: 'info'
-            });
-        } else {
-            confirmed = confirm(`Are you sure you want to save "${agencyName}" (${numVal}) under category "${catVal}"?`);
-        }
+        const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
+        const confirmed = await confirmFn({
+            title: 'Confirm Hotline Creation',
+            message: `Are you sure you want to save "${agencyCheck.normalized}" with contact number "${numCheck.normalized}" under category "${catCheck.normalized}" to the directory?`,
+            confirmText: 'Save Hotline',
+            type: 'info'
+        });
 
         if (confirmed) {
+            nameInput.value = agencyCheck.normalized;
+            numInput.value = numCheck.normalized;
+            catInput.value = catCheck.normalized;
             form.submit();
         }
         return false;
@@ -223,112 +359,82 @@
             const numInput = numTd.querySelector('input');
             const catInput = catTd.querySelector('input');
 
-            const agencyName = nameInput ? nameInput.value.replace(/\s+/g, ' ').trim() : '';
-            const numVal = numInput ? numInput.value.trim().replace(/\s/g, '') : '';
-            const catVal = catInput ? catInput.value.replace(/\s+/g, ' ').trim() : '';
+            const nameVal = nameInput ? nameInput.value : '';
+            const numVal = numInput ? numInput.value : '';
+            const catVal = catInput ? catInput.value : '';
 
             // Check if user changed anything
             const orig = window.hotlineOriginals && window.hotlineOriginals[id];
             if (orig && 
-                agencyName === orig.nameVal && 
-                numVal === orig.numVal && 
-                catVal === orig.catVal) {
+                nameVal.trim() === orig.nameVal && 
+                numVal.trim().replace(/\s/g, '') === orig.numVal && 
+                catVal.trim() === orig.catVal) {
 
-                if (window.strategicAlert) {
-                    await window.strategicAlert({
-                        title: 'No Changes Detected',
-                        message: 'No changes were made to this hotline. The record was not modified or reloaded.',
-                        confirmText: 'Understood',
-                        type: 'info'
-                    });
-                } else {
-                    alert('No changes were made to this hotline.');
-                }
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'No Changes Detected',
+                    message: 'No changes were made to this hotline. The record was not modified or reloaded.',
+                    confirmText: 'Understood',
+                    type: 'info'
+                });
                 cancelEditHotline(id);
                 return;
             }
 
-            // Agency Name Limitation (2 to 20 characters)
-            if (!agencyName || agencyName.length < 2 || agencyName.length > 20) {
-                if (window.strategicAlert) {
-                    await window.strategicAlert({
-                        title: 'Invalid Agency Name',
-                        message: 'Agency name cannot be blank spaces (must be between 2 and 20 characters).',
-                        type: 'danger'
-                    });
-                } else {
-                    alert('Agency name cannot be blank spaces (must be between 2 and 20 characters).');
-                }
+            // Validate Agency Name
+            const agencyCheck = clientValidateHotlineAgency(nameVal);
+            if (!agencyCheck.valid) {
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'Invalid Agency Name',
+                    message: agencyCheck.error,
+                    type: 'danger'
+                });
                 if (nameInput) nameInput.focus();
                 return;
             }
 
-            const nameWords = agencyName.split(' ').filter(Boolean);
-            for (const w of nameWords) {
-                const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-                if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
-                    alert(`"${w}" does not appear to be a valid organization name.`);
-                    if (nameInput) nameInput.focus();
-                    return;
-                }
-            }
-
-            // Contact Number Limitation (3 to 11 digits only)
-            if (!/^\d{3,11}$/.test(numVal)) {
-                if (window.strategicAlert) {
-                    await window.strategicAlert({
-                        title: 'Invalid Contact Number',
-                        message: 'Hotline contact number must contain exact digits only (3 to 11 digits). No characters, spaces, or special symbols allowed.',
-                        type: 'danger'
-                    });
-                } else {
-                    alert('Hotline contact number must contain exact digits only (3 to 11 digits). No characters, spaces, or special symbols allowed.');
-                }
+            // Validate Contact Number
+            const numCheck = clientValidateHotlineContactNumber(numVal);
+            if (!numCheck.valid) {
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'Invalid Contact Number',
+                    message: numCheck.error,
+                    type: 'danger'
+                });
                 if (numInput) numInput.focus();
                 return;
             }
 
-            // Category Limitation (2 to 20 characters)
-            if (!catVal || catVal.length < 2 || catVal.length > 20) {
-                if (window.strategicAlert) {
-                    await window.strategicAlert({
-                        title: 'Invalid Category',
-                        message: 'Category cannot be blank spaces (must be between 2 and 20 characters).',
-                        type: 'danger'
-                    });
-                } else {
-                    alert('Category cannot be blank spaces (must be between 2 and 20 characters).');
-                }
+            // Validate Category
+            const catCheck = clientValidateHotlineCategory(catVal);
+            if (!catCheck.valid) {
+                const alertFn = window.strategicAlert || (({ message }) => alert(message));
+                alertFn({
+                    title: 'Invalid Category',
+                    message: catCheck.error,
+                    type: 'danger'
+                });
                 if (catInput) catInput.focus();
                 return;
             }
 
-            const catWords = catVal.split(' ').filter(Boolean);
-            for (const w of catWords) {
-                const clean = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-                if (clean.length >= 4 && !/[aeiouy]/i.test(clean)) {
-                    alert(`"${w}" does not appear to be a recognizable category.`);
-                    if (catInput) catInput.focus();
-                    return;
-                }
-            }
-
             // Confirmation before saving edits
-            let confirmed = false;
-            if (window.strategicConfirm) {
-                confirmed = await window.strategicConfirm({
-                    title: 'Confirm Hotline Update',
-                    message: `Are you sure you want to update the hotline for "${agencyName}" to number "${numVal}" and category "${catVal}"?`,
-                    confirmText: 'Update Hotline',
-                    type: 'warning'
-                });
-            } else {
-                confirmed = confirm(`Are you sure you want to update the hotline for "${agencyName}"?`);
-            }
+            const confirmFn = window.strategicConfirm || (async ({ message }) => confirm(message));
+            const confirmed = await confirmFn({
+                title: 'Confirm Hotline Update',
+                message: `Are you sure you want to update the hotline for "${agencyCheck.normalized}" to number "${numCheck.normalized}" and category "${catCheck.normalized}"?`,
+                confirmText: 'Update Hotline',
+                type: 'warning'
+            });
 
             if (!confirmed) return;
 
             const form = document.getElementById('editForm_' + id);
+            nameInput.value = agencyCheck.normalized;
+            numInput.value = numCheck.normalized;
+            catInput.value = catCheck.normalized;
             
             if (nameInput) form.appendChild(nameInput);
             if (catInput) form.appendChild(catInput);
@@ -351,11 +457,11 @@
                 catVal: currentCat
             };
             
-            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" required minlength="2" maxlength="20" placeholder="Agency Name" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
+            nameTd.innerHTML = `<input type="text" name="name" value="${currentName}" required minlength="2" maxlength="40" placeholder="Agency Name" oninput="if(this.value.length>40)this.value=this.value.slice(0,40);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
             
-            numTd.innerHTML = `<form id="editForm_${id}" action="/admin/hotlines/${id}/edit" method="POST"><input type="text" name="number" value="${currentNum}" required pattern="\\d{3,11}" maxlength="11" title="Exact digits only (3 to 11 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>`;
+            numTd.innerHTML = `<form id="editForm_${id}" action="/admin/hotlines/${id}/edit" method="POST"><input type="text" name="number" value="${currentNum}" required pattern="\\d{3,12}" maxlength="12" title="Exact digits only (3 to 12 digits)" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 12);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-mono dark:text-white"></form>`;
             
-            catTd.innerHTML = `<input type="text" name="category" list="categoryList" value="${currentCat}" required minlength="2" maxlength="20" placeholder="Category" oninput="if(this.value.length>20)this.value=this.value.slice(0,20);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
+            catTd.innerHTML = `<input type="text" name="category" list="categoryList" value="${currentCat}" required minlength="2" maxlength="30" placeholder="Category" oninput="if(this.value.length>30)this.value=this.value.slice(0,30);" class="w-full px-2 py-1 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold dark:text-white">`;
 
             if (actionsTd) {
                 actionsTd.innerHTML = `

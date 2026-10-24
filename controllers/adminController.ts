@@ -12,7 +12,7 @@ import { FacebookService } from '../utils/facebookService.js';
 import { classifyCategory } from '../utils/categoryClassifier.js';
 import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 import { getLockoutRemainingSeconds, recordFailedAttempt, clearFailedAttempts, formatLockoutDuration } from '../utils/loginSecurity.js';
-import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord } from '../utils/inputValidator.js';
+import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord, isValidEmail, isValidPassword, isValidHotlineAgency, isValidHotlineCategory, isValidHotlineContactNumber } from '../utils/inputValidator.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -2976,34 +2976,25 @@ export const getHotlines = async (req: Request, res: Response) => {
 
 export const postHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
-  const trimmedName = normalizeWhitespace(name);
-  const trimmedNumber = String(number || '').trim().replace(/\s+/g, '');
-  const trimmedCat = normalizeWhitespace(category);
-
-  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
-    return res.status(400).send('Invalid agency name. Must be between 2 and 20 characters.');
-  }
-  const nameWords = trimmedName.split(' ').filter(Boolean);
-  for (const w of nameWords) {
-    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
-      return res.status(400).send(`Invalid agency name: "${w}" does not appear to be a valid organization name.`);
-    }
+  
+  const agencyCheck = isValidHotlineAgency(name, 2, 40);
+  if (!agencyCheck.valid) {
+    return res.status(400).send(`Validation Error: ${agencyCheck.error}`);
   }
 
-  if (!/^\d{3,11}$/.test(trimmedNumber)) {
-    return res.status(400).send('Invalid hotline number. Must contain exact digits only (3 to 11 digits), no characters or spaces.');
+  const numCheck = isValidHotlineContactNumber(number);
+  if (!numCheck.valid) {
+    return res.status(400).send(`Validation Error: ${numCheck.error}`);
   }
-  if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 20) {
-    return res.status(400).send('Invalid category. Must be between 2 and 20 characters.');
+
+  const catCheck = isValidHotlineCategory(category, 2, 30);
+  if (!catCheck.valid) {
+    return res.status(400).send(`Validation Error: ${catCheck.error}`);
   }
-  const catWords = trimmedCat.split(' ').filter(Boolean);
-  for (const w of catWords) {
-    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
-      return res.status(400).send(`Invalid category: "${w}" does not appear to be a recognizable category name.`);
-    }
-  }
+
+  const trimmedName = agencyCheck.normalized!;
+  const trimmedNumber = numCheck.normalized!;
+  const trimmedCat = catCheck.normalized!;
 
   try {
     await logAction(req, 'HOTLINE_ADD', `Added tactical hotline: ${trimmedName}`);
@@ -3023,34 +3014,25 @@ export const postHotline = async (req: Request, res: Response) => {
 
 export const postEditHotline = async (req: Request, res: Response) => {
   const { name, number, category } = req.body;
-  const trimmedName = normalizeWhitespace(name);
-  const trimmedNumber = String(number || '').trim().replace(/\s+/g, '');
-  const trimmedCat = normalizeWhitespace(category);
-
-  if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
-    return res.status(400).send('Invalid agency name. Must be between 2 and 20 characters.');
-  }
-  const nameWords = trimmedName.split(' ').filter(Boolean);
-  for (const w of nameWords) {
-    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
-      return res.status(400).send(`Invalid agency name: "${w}" does not appear to be a valid organization name.`);
-    }
+  
+  const agencyCheck = isValidHotlineAgency(name, 2, 40);
+  if (!agencyCheck.valid) {
+    return res.status(400).send(`Validation Error: ${agencyCheck.error}`);
   }
 
-  if (!/^\d{3,11}$/.test(trimmedNumber)) {
-    return res.status(400).send('Invalid hotline number. Must contain exact digits only (3 to 11 digits), no characters or spaces.');
+  const numCheck = isValidHotlineContactNumber(number);
+  if (!numCheck.valid) {
+    return res.status(400).send(`Validation Error: ${numCheck.error}`);
   }
-  if (!trimmedCat || trimmedCat.length < 2 || trimmedCat.length > 20) {
-    return res.status(400).send('Invalid category. Must be between 2 and 20 characters.');
+
+  const catCheck = isValidHotlineCategory(category, 2, 30);
+  if (!catCheck.valid) {
+    return res.status(400).send(`Validation Error: ${catCheck.error}`);
   }
-  const catWords = trimmedCat.split(' ').filter(Boolean);
-  for (const w of catWords) {
-    const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-    if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
-      return res.status(400).send(`Invalid category: "${w}" does not appear to be a recognizable category name.`);
-    }
-  }
+
+  const trimmedName = agencyCheck.normalized!;
+  const trimmedNumber = numCheck.normalized!;
+  const trimmedCat = catCheck.normalized!;
 
   try {
     await logAction(req, 'HOTLINE_EDIT', `Edited tactical hotline number ID: ${req.params.id}`);
@@ -3153,17 +3135,14 @@ export const postUser = async (req: Request, res: Response) => {
     return res.status(400).send(`Validation Error: ${nameCheck.error}`);
   }
 
-  const nameWords = trimmedName.split(/\s+/).filter(Boolean);
-  if (nameWords.length > 6) {
-    return res.status(400).send('Validation Error: Full name must not exceed 6 words.');
+  const emailCheck = isValidEmail(trimmedEmail, true);
+  if (!emailCheck.valid) {
+    return res.status(400).send(`Validation Error: ${emailCheck.error}`);
   }
 
-  if (!trimmedEmail || !trimmedEmail.includes('@') || !trimmedEmail.includes('.') || trimmedEmail.length > 100) {
-    return res.status(400).send('Validation Error: A valid email address is required (maximum 100 characters).');
-  }
-
-  if (!trimmedPassword || trimmedPassword.length < 8 || trimmedPassword.length > 64) {
-    return res.status(400).send('Validation Error: Password must be between 8 and 64 characters.');
+  const passCheck = isValidPassword(password, true);
+  if (!passCheck.valid) {
+    return res.status(400).send(`Validation Error: ${passCheck.error}`);
   }
 
   // Generate a guaranteed unique username to prevent duplicate constraint errors
@@ -3245,22 +3224,35 @@ export const postEditUser = async (req: Request, res: Response) => {
 
     const userId = req.params.id;
     const { full_name, email, role, status, password } = req.body;
-    const trimmedName = (full_name || '').trim();
-    const trimmedEmail = (email || '').trim();
+    const trimmedName = normalizeWhitespace(full_name);
+    const trimmedEmail = normalizeWhitespace(email);
 
-    // 🛡️ Letters and words limitation checks
-    const nameWords = trimmedName.split(/\s+/).filter(Boolean);
-    if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 60 || nameWords.length > 6) {
-      return res.status(400).send('Validation Error: Full name must be between 2 and 60 characters and maximum 6 words.');
+    // 🛡️ Name validation (rejects blank space, empty, or keyboard mash like "asdasdasd asda asd a")
+    const nameCheck = isValidPersonName(trimmedName, 2, 60);
+    if (!nameCheck.valid) {
+      return res.status(400).send(`Validation Error: ${nameCheck.error}`);
     }
 
-    if (trimmedEmail && trimmedEmail.length > 100) {
-      return res.status(400).send('Validation Error: Email address must not exceed 100 characters.');
+    if (trimmedEmail) {
+      const emailCheck = isValidEmail(trimmedEmail, true);
+      if (!emailCheck.valid) {
+        return res.status(400).send(`Validation Error: ${emailCheck.error}`);
+      }
     }
 
-    if (password && password.trim()) {
-      if (password.trim().length < 8 || password.trim().length > 64) {
-        return res.status(400).send('Validation Error: Reset password must be between 8 and 64 characters.');
+    const validRoles = ['staff', 'superadmin'];
+    const validStatuses = ['active', 'pending', 'rejected'];
+    if (role && !validRoles.includes(role)) {
+      return res.status(400).send('Validation Error: Invalid role assignment.');
+    }
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).send('Validation Error: Invalid account status.');
+    }
+
+    if (password !== undefined && password !== null && String(password).trim().length > 0) {
+      const passCheck = isValidPassword(password, true);
+      if (!passCheck.valid) {
+        return res.status(400).send(`Validation Error: ${passCheck.error}`);
       }
     }
 
@@ -3315,11 +3307,15 @@ export const deleteUser = async (req: Request, res: Response) => {
     const userId = req.params.id;
     const { delete_reason, custom_reason } = req.body;
 
-    const trimmedCustom = (custom_reason || '').trim();
-    const customWords = trimmedCustom.split(/\s+/).filter(Boolean);
+    const trimmedCustom = normalizeWhitespace(custom_reason);
     if (delete_reason === 'Other') {
-      if (!trimmedCustom || trimmedCustom.length < 5 || trimmedCustom.length > 150 || customWords.length > 25) {
-        return res.status(400).send('Validation Error: Custom reason must be between 5 and 150 characters (max 25 words).');
+      const customCheck = isValidNarrative(trimmedCustom, 5, 150);
+      if (!customCheck.valid) {
+        return res.status(400).send(`Validation Error: ${customCheck.error}`);
+      }
+      const customWords = trimmedCustom.split(/\s+/).filter(Boolean);
+      if (customWords.length > 25) {
+        return res.status(400).send('Validation Error: Custom reason must not exceed 25 words.');
       }
     }
 
@@ -3401,9 +3397,12 @@ export const postStationPersonnel = async (req: Request, res: Response) => {
       return res.status(400).send('Validation Error: Position / Rank designation must be between 2 and 60 characters.');
     }
     const posWords = trimmedPos.split(' ').filter(Boolean);
+    if (posWords.length > 8) {
+      return res.status(400).send('Validation Error: Position designation cannot exceed 8 words.');
+    }
     for (const w of posWords) {
       const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+      if (cleanW.length >= 1 && !isWorkableWord(cleanW)) {
         return res.status(400).send(`Validation Error: "${w}" in position designation does not appear to be a valid title or rank.`);
       }
     }
@@ -3462,10 +3461,13 @@ export const postEditStationPersonnel = async (req: Request, res: Response) => {
     if (!trimmedPos || trimmedPos.length < 2 || trimmedPos.length > 60) {
       return res.status(400).send('Validation Error: Position / Rank designation must be between 2 and 60 characters.');
     }
-    const posWords = trimmedPos.split(' ').filter(Boolean);
-    for (const w of posWords) {
+    const editPosWords = trimmedPos.split(' ').filter(Boolean);
+    if (editPosWords.length > 8) {
+      return res.status(400).send('Validation Error: Position designation cannot exceed 8 words.');
+    }
+    for (const w of editPosWords) {
       const cleanW = w.replace(/[^a-zA-Z0-9ñÑ]/g, '');
-      if (cleanW.length >= 4 && !isWorkableWord(cleanW)) {
+      if (cleanW.length >= 1 && !isWorkableWord(cleanW)) {
         return res.status(400).send(`Validation Error: "${w}" in position designation does not appear to be a valid title or rank.`);
       }
     }
@@ -4072,9 +4074,7 @@ export const getArchive = async (req: Request, res: Response) => {
       return snap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
     }, 2 * 60 * 1000);
 
-    const items = selectedCategory && selectedCategory !== 'All' 
-      ? allItems.filter((doc: any) => doc.category === selectedCategory) 
-      : allItems;
+    const items = allItems;
 
     res.render('admin/archive', {
       title: 'Archive',

@@ -61,8 +61,8 @@
                     type = 'info' // info, warning, danger
                 } = (options || {});
 
-                // Replace every instance of 'Acknowledge' or 'Acknowledged' with 'Confirm'
-                if (!confirmText || confirmText.toLowerCase().includes('ack')) {
+                // Replace every instance of 'Acknowledge' or 'Officer' with 'Confirm'
+                if (!confirmText || confirmText.toLowerCase().includes('ack') || confirmText.toLowerCase().includes('officer')) {
                     confirmText = 'Confirm';
                 }
 
@@ -147,7 +147,7 @@
                 type = 'info' 
             } = opts;
 
-            const confirmText = (!rawConfirm || rawConfirm.toLowerCase().includes('ack')) ? 'Confirm' : rawConfirm;
+            const confirmText = (!rawConfirm || rawConfirm.toLowerCase().includes('ack') || rawConfirm.toLowerCase().includes('officer')) ? 'Confirm' : rawConfirm;
 
             return strategicConfirm({
                 title: t,
