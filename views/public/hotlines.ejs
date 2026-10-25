@@ -1,138 +1,215 @@
 <% let displayHotlines=[]; if (typeof hotlines !=='undefined' && hotlines) { displayHotlines=hotlines; } %>
-    <div class="bg-red-600 dark:bg-red-700 py-24 text-center relative overflow-hidden">
-        <div class="container mx-auto px-4 relative z-10">
-            <h1 class="text-[10px] md:text-xs font-black text-white/50 uppercase tracking-[0.3em] mb-4">Emergency
-                Directory
-            </h1>
-            <h2 class="text-4xl md:text-5xl font-black text-white tracking-tighter mb-8">Sta. Cruz Hotlines</h2>
-            <div class="w-20 h-1.5 bg-white/20 mx-auto rounded-full"></div>
+
+<!-- Hero Header (Tactical Navy & Gold) -->
+<div class="relative min-h-[30vh] py-14 md:py-20 flex items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat"
+    style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('/images/directory-pnp-2.jpg');">
+    <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950/40 to-slate-950/80"></div>
+    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
+        <!-- Tactical Badge -->
+        <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-4 py-1.5 rounded-full mb-3 border border-white/20">
+            <i class="fas fa-phone-volume text-xs"></i>
+            <span class="text-[10px] font-black uppercase tracking-widest">Emergency Communications Directory</span>
         </div>
-        <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 -translate-y-1/2 translate-x-1/2 rounded-full"></div>
+        <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-2">
+            Sta. Cruz <span class="text-pnp-gold">Emergency Hotlines</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-blue-100/90 font-medium max-w-2xl mx-auto leading-relaxed">
+            Immediate contacts for police assistance, fire suppression, emergency medical rescue, and municipal crisis units in Sta. Cruz, Laguna.
+        </p>
     </div>
+</div>
 
-    <div class="container mx-auto px-4 py-10 sm:py-16 md:py-20">
-        <!-- Quick Access Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-20 -mt-12 sm:-mt-20 md:-mt-32 relative z-20">
-            <a href="tel:911"
-                class="block bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 hover:no-underline cursor-pointer">
-                <div
-                    class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition duration-500">
-                    <i class="fas fa-phone-volume text-2xl"></i>
+<div class="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
+    <!-- Top 3 Quick Emergency Cards (Admin Card Aesthetic) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10 -mt-10 sm:-mt-14 relative z-20">
+        <!-- Police 911 Card -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-lg hover:border-pnp-blue/40 dark:hover:border-pnp-gold/40 transition-all duration-300 p-6 flex flex-col justify-between text-center group">
+            <div>
+                <div class="w-14 h-14 mx-auto bg-blue-500/10 text-pnp-blue dark:text-blue-400 border border-blue-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <i class="fas fa-shield-halved text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-2 group-hover:text-white transition">
-                    Police Emergency</h3>
-                <p
-                    class="text-3xl font-black text-red-600 dark:text-red-500 mb-4 group-hover:text-pnp-gold transition tracking-tighter">
-                    911</p>
-                <p
-                    class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest group-hover:text-blue-200 transition leading-relaxed">
-                    Available 24/7 for immediate police response</p>
+                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 block">Law Enforcement</span>
+                <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mt-1">Police Emergency</h3>
+                <p class="text-3xl font-black text-red-600 dark:text-red-500 font-mono tracking-tight my-2">911</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Available 24/7 for immediate tactical dispatch</p>
+            </div>
+            <a href="tel:911" class="mt-5 w-full py-2.5 px-4 bg-pnp-blue hover:bg-blue-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm transition-all transform active:scale-95">
+                <i class="fas fa-phone text-xs"></i>
+                <span>Call 911 Now</span>
             </a>
+        </div>
 
-            <a href="tel:+639670528897"
-                class="block bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 hover:no-underline cursor-pointer">
-                <div
-                    class="w-16 h-16 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition duration-500">
+        <!-- BFP Fire Card -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-lg hover:border-orange-500/40 transition-all duration-300 p-6 flex flex-col justify-between text-center group">
+            <div>
+                <div class="w-14 h-14 mx-auto bg-orange-500/10 text-orange-600 dark:text-orange-400 border border-orange-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                     <i class="fas fa-fire-extinguisher text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-2 group-hover:text-white transition">
-                    Fire
-                    Department</h3>
-                <p
-                    class="text-3xl font-black text-orange-600 dark:text-orange-500 mb-4 group-hover:text-pnp-gold transition tracking-tighter">
-                    +63967 052 8897</p>
-                <p
-                    class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest group-hover:text-blue-200 transition leading-relaxed">
-                    BFP Sta. Cruz Municipal Fire Station</p>
-            </a>
-
-            <a href="tel:+63287902300"
-                class="block bg-white dark:bg-slate-800 p-10 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-700 flex flex-col items-center text-center group hover:bg-pnp-blue dark:hover:bg-pnp-blue hover:border-pnp-blue transition duration-500 hover:no-underline cursor-pointer">
-                <div
-                    class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 shadow-md group-hover:scale-110 transition duration-500">
-                    <i class="fas fa-ambulance text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold mb-2 group-hover:text-white transition">
-                    Medical / Rescue</h3>
-                <p
-                    class="text-3xl font-black text-blue-600 dark:text-blue-500 mb-4 group-hover:text-pnp-gold transition tracking-tighter">
-                    +63 2 8790 2300</p>
-                <p
-                    class="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest group-hover:text-blue-200 transition leading-relaxed">
-                    Red Cross</p>
+                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 block">Fire Rescue</span>
+                <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mt-1">Fire Department</h3>
+                <p class="text-2xl font-black text-orange-600 dark:text-orange-500 font-mono tracking-tight my-2">+63967 052 8897</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">BFP Sta. Cruz Municipal Fire Station</p>
+            </div>
+            <a href="tel:+639670528897" class="mt-5 w-full py-2.5 px-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm transition-all transform active:scale-95">
+                <i class="fas fa-phone text-xs"></i>
+                <span>Call BFP Fire</span>
             </a>
         </div>
 
-        <!-- Full Directory -->
-        <div
-            class="bg-white dark:bg-slate-800 rounded-[3rem] shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden">
-            <div class="p-10 border-b border-gray-50 dark:border-slate-700 flex justify-between items-center">
-                <h3 class="text-xl font-black text-pnp-blue dark:text-pnp-gold tracking-tighter uppercase">Full
-                    Emergency
-                    Directory</h3>
-                <div class="hidden md:flex items-center space-x-2 text-gray-400 dark:text-gray-500">
-                    <i class="fas fa-info-circle text-pnp-gold"></i>
-                    <span class="text-[10px] font-bold uppercase tracking-widest">Updated March 2026</span>
+        <!-- Medical / Red Cross Card -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-lg hover:border-emerald-500/40 transition-all duration-300 p-6 flex flex-col justify-between text-center group">
+            <div>
+                <div class="w-14 h-14 mx-auto bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                    <i class="fas fa-ambulance text-2xl"></i>
                 </div>
+                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 block">Medical & Rescue</span>
+                <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mt-1">Red Cross / Medical</h3>
+                <p class="text-2xl font-black text-emerald-600 dark:text-emerald-500 font-mono tracking-tight my-2">+63 2 8790 2300</p>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Emergency Medical and Disaster Response</p>
+            </div>
+            <a href="tel:+63287902300" class="mt-5 w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm transition-all transform active:scale-95">
+                <i class="fas fa-phone text-xs"></i>
+                <span>Call Medical</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Full Directory Container (Admin Panel Aesthetic) -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xs border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+        <!-- Panel Header with Search and Category Filters -->
+        <div class="p-5 sm:p-6 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-[0.2em]">Official Station Directory</h2>
+                </div>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-1">Sta. Cruz, Laguna &bull; Municipality of Santa Cruz</p>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead
-                        class="bg-gray-50 dark:bg-slate-900/50 text-gray-400 dark:text-gray-500 uppercase text-[10px] font-black tracking-[0.2em]">
-                        <tr>
-                            <th class="px-4 py-3 md:px-10 md:py-6">Agency / Office</th>
-                            <th class="px-4 py-3 md:px-10 md:py-6">Contact Number</th>
-                            <th class="px-4 py-3 md:px-10 md:py-6 hidden sm:table-cell">Category</th>
-                            <th class="px-4 py-3 md:px-10 md:py-6 text-right">Action</th>
+            <!-- Search and Category Filters -->
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+                <!-- Search input -->
+                <div class="relative w-full sm:w-64">
+                    <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                    <input type="text" id="hotlineSearchInput" oninput="filterHotlinesTable()" placeholder="Search agency or number..."
+                        class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-pnp-blue/20 transition-all placeholder:text-slate-400 shadow-2xs">
+                </div>
+
+                <!-- Category Dropdown Filter -->
+                <div class="relative w-full sm:w-48">
+                    <select id="hotlineCategoryFilter" onchange="filterHotlinesTable()"
+                        class="w-full pl-4 pr-9 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-xs font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-pnp-blue/20 transition-all cursor-pointer appearance-none shadow-2xs">
+                        <option value="All">All Categories</option>
+                        <option value="Police">Police</option>
+                        <option value="Fire">Fire</option>
+                        <option value="Medical">Medical</option>
+                        <option value="Disaster">Disaster</option>
+                        <option value="Utility">Utility</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Directory Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm" id="hotlinesTable">
+                <thead class="bg-slate-50 dark:bg-slate-950 text-slate-400 dark:text-slate-500 uppercase text-[9.5px] font-black tracking-widest border-b border-slate-200/80 dark:border-slate-800">
+                    <tr>
+                        <th class="px-5 py-3.5 sm:px-6 sm:py-4">Agency / Office</th>
+                        <th class="px-5 py-3.5 sm:px-6 sm:py-4">Contact Number</th>
+                        <th class="px-5 py-3.5 sm:px-6 sm:py-4 hidden sm:table-cell">Category</th>
+                        <th class="px-5 py-3.5 sm:px-6 sm:py-4 text-right">Connect</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300" id="hotlinesTableBody">
+                    <% displayHotlines.forEach(h => { 
+                        const agencyName = h.agency_name || h.name;
+                        const rawNum = (h.contact_number || h.number) ? String(h.contact_number || h.number) : '';
+                        const cleanTel = rawNum.replace(/[^0-9+]/g, '');
+                        const formattedNum = rawNum.length === 11 ? rawNum.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3') : rawNum;
+                        
+                        const catColors = {
+                            'Police': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+                            'Fire': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800',
+                            'Medical': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+                            'Disaster': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
+                            'Utility': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800'
+                        };
+                    %>
+                        <tr class="hotline-row hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group"
+                            data-agency="<%= (agencyName || '').toLowerCase() %>"
+                            data-number="<%= rawNum.toLowerCase() %>"
+                            data-category="<%= (h.category || '').toLowerCase() %>">
+                            <td class="px-5 py-4 sm:px-6 sm:py-4.5">
+                                <p class="text-sm font-black text-slate-900 dark:text-white group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition-colors">
+                                    <%= agencyName %>
+                                </p>
+                                <p class="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">
+                                    Santa Cruz, Laguna
+                                </p>
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 sm:py-4.5">
+                                <span class="font-mono font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200">
+                                    <%= formattedNum || 'N/A' %>
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 sm:py-4.5 hidden sm:table-cell">
+                                <span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border shadow-2xs <%= catColors[h.category] || 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700' %>">
+                                    <%= h.category || 'General' %>
+                                </span>
+                            </td>
+                            <td class="px-5 py-4 sm:px-6 sm:py-4.5 text-right">
+                                <a href="tel:<%= cleanTel %>"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pnp-blue hover:bg-blue-800 text-white rounded-lg text-[10px] font-black uppercase tracking-wider shadow-xs transition active:scale-95"
+                                    title="Call <%= agencyName %>">
+                                    <i class="fas fa-phone-alt text-[9px]"></i>
+                                    <span class="hidden sm:inline">Call</span>
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50 dark:divide-slate-700">
-                        <% displayHotlines.forEach(h=> { %>
-                            <tr class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition group">
-                                <td class="px-4 py-4 md:px-10 md:py-8">
-                                    <p
-                                        class="text-base md:text-lg font-black text-pnp-blue dark:text-pnp-gold group-hover:text-pnp-gold dark:group-hover:text-white transition">
-                                        <%= h.agency_name || h.name %>
-                                    </p>
-                                    <p
-                                        class="text-[8px] md:text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-1">
-                                        Sta. Cruz, Laguna</p>
-                                </td>
-                                <td class="px-4 py-4 md:px-10 md:py-8">
-                                    <p
-                                        class="text-sm sm:text-xl font-black text-gray-700 dark:text-gray-300 font-mono tracking-tighter">
-                                        <% let num=(h.contact_number || h.number) ? String(h.contact_number || h.number)
-                                            : '' ; %>
-                                            <%= num && num.length===11 ? num.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3'
-                                                ) : num %>
-                                    </p>
-                                </td>
-                                <td class="px-4 py-4 md:px-10 md:py-8 hidden sm:table-cell">
-                                    <% const catColors={ 'Police'
-                                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' , 'Fire'
-                                        : 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
-                                        , 'Medical'
-                                        : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                                        , 'Disaster' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                                        , 'Utility'
-                                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' };
-                                        %>
-                                        <span
-                                            class="px-2 py-1 md:px-3 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest <%= catColors[h.category] || 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400' %>">
-                                            <%= h.category %>
-                                        </span>
-                                </td>
-                                <td class="px-4 py-4 md:px-10 md:py-8 text-right">
-                                    <a href="tel:<%= (h.contact_number || h.number) ? String(h.contact_number || h.number).replace(/[^0-9+]/g, '') : '' %>"
-                                        class="inline-flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-pnp-blue text-white rounded-xl md:rounded-2xl hover:bg-pnp-gold transition duration-300 shadow-lg">
-                                        <i class="fas fa-phone text-sm"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <% }) %>
-                    </tbody>
-                </table>
+                    <% }) %>
+                </tbody>
+            </table>
+
+            <!-- Empty Filter State -->
+            <div id="hotlinesEmptyState" class="hidden py-16 text-center">
+                <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-phone-slash text-base"></i>
+                </div>
+                <h4 class="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">No Hotlines Found</h4>
+                <p class="text-[10px] text-slate-400 mt-1">Try searching with a different keyword or category filter.</p>
             </div>
         </div>
     </div>
+</div>
+
+<script>
+    function filterHotlinesTable() {
+        const query = (document.getElementById('hotlineSearchInput').value || '').toLowerCase().trim();
+        const selectedCat = (document.getElementById('hotlineCategoryFilter').value || 'All').toLowerCase();
+        const rows = document.querySelectorAll('.hotline-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const agency = row.getAttribute('data-agency') || '';
+            const number = row.getAttribute('data-number') || '';
+            const cat = row.getAttribute('data-category') || '';
+
+            const matchesQuery = !query || agency.includes(query) || number.includes(query);
+            const matchesCat = selectedCat === 'all' || cat === selectedCat;
+
+            if (matchesQuery && matchesCat) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const emptyState = document.getElementById('hotlinesEmptyState');
+        if (emptyState) {
+            emptyState.classList.toggle('hidden', visibleCount > 0);
+        }
+    }
+</script>

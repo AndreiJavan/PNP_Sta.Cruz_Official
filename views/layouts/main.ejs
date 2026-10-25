@@ -34,8 +34,32 @@
                 extend: {
                     colors: {
                         pnp: {
-                            blue: '#1A3A5C',
-                            gold: '#C8A415',
+                            blue: {
+                                50: '#EBF1F7',
+                                100: '#D1DEEB',
+                                200: '#A3BDD7',
+                                300: '#759CC3',
+                                400: '#477BAF',
+                                500: '#1A3A5C',
+                                600: '#152E4A',
+                                700: '#102237',
+                                800: '#0A1725',
+                                900: '#050B12',
+                                DEFAULT: '#1A3A5C',
+                            },
+                            gold: {
+                                50: '#FAF7E8',
+                                100: '#F5F0D1',
+                                200: '#EBE1A3',
+                                300: '#E1D275',
+                                400: '#D7C347',
+                                500: '#C8A415',
+                                600: '#A08311',
+                                700: '#78620D',
+                                800: '#504109',
+                                900: '#282104',
+                                DEFAULT: '#C8A415',
+                            }
                         }
                     }
                 }
@@ -91,6 +115,42 @@
         }
         .dark .border-gray-150 {
             border-color: rgba(51, 65, 85, 0.6);
+        }
+
+        .pnp-gradient-blue {
+            background: linear-gradient(135deg, #1A3A5C 0%, #0A1725 100%);
+        }
+
+        .pnp-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dark .pnp-card {
+            background-color: #1e293b;
+            border-color: rgba(51, 65, 85, 0.6);
+        }
+
+        .pnp-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .pnp-glass {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .pnp-glass-dark {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .text-shadow-tactical {
+            text-shadow: 0 0 20px rgba(200, 164, 21, 0.3);
         }
 
         /* Enhanced Modal Scrollbar */
@@ -246,54 +306,63 @@
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 flex flex-col min-h-screen">
+<body class="bg-[#eaedf2] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col min-h-screen transition-colors duration-300 overflow-x-hidden">
     <!-- Header -->
     <header class="bg-pnp-blue text-white sticky top-0 z-50 shadow-2xl border-b-4 border-pnp-gold">
         <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16 sm:h-20 md:h-24">
-                <!-- Logo -->
-                <a href="/" class="flex items-center space-x-3 sm:space-x-4 group min-w-0">
-                    <div
-                        class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition duration-300 p-1.5 sm:p-2 shrink-0">
-                        <img src="/images/PNP.jpg" alt="PNP Logo" class="w-full h-full object-contain">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Brand / Logo -->
+                <a href="/" class="flex items-center space-x-3 sm:space-x-3.5 group min-w-0">
+                    <!-- White circular logo container with MIMPAS logo matching Admin -->
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white flex items-center justify-center p-1 shadow-md border border-white/20 shrink-0 group-hover:scale-105 transition duration-300">
+                        <img src="/favicon.png" alt="MIMPAS Logo" class="w-full h-full object-contain rounded-full"
+                            onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                     </div>
                     <div class="min-w-0">
-                        <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tighter leading-none truncate">CRIME MAP <span
-                                class="text-pnp-gold">STA. CRUZ</span></h1>
-                        <p class="text-[9px] sm:text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-bold mt-1 truncate">
-                            Incident Visualization System</p>
+                        <h1 class="text-base sm:text-lg font-black tracking-wider leading-none text-white">M I M P A S</h1>
+                        <p class="text-[8px] sm:text-[9px] text-blue-100 uppercase tracking-wider font-bold mt-1 leading-tight truncate">
+                            Municipality Incident Management and Public Advisory Sta.Cruz
+                        </p>
                     </div>
                 </a>
 
                 <!-- Desktop Nav -->
                 <nav class="hidden lg:flex items-center space-x-1">
                     <a href="/#hero-section"
-                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Home</a>
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && title === 'Home' ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">Home</a>
                     <a href="/map"
-                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Crime
-                        Map</a>
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && (title === 'Crime Map' || title === 'Map') ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">Crime Map</a>
                     <a href="/bulletins"
-                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Public Advisory</a>
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && (title === 'Public Advisory' || title === 'Bulletins' || title === 'Wanted Persons' || title === 'Missing Persons') ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">Public Advisory</a>
                     <a href="/news"
-                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">News</a>
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && (title === 'Station Releases' || title === 'News') ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">News</a>
                     <a href="/hotlines"
-                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">Hotlines</a>
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && (title === 'Emergency Hotlines' || title === 'Hotlines') ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">Hotlines</a>
                     <a href="/about"
-                        class="px-4 py-2 rounded-xl text-sm font-bold hover:bg-white/10 transition duration-300">About</a>
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && title === 'About' ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">About</a>
+                    
+                    <% if (locals.user) { %>
+                        <a href="/admin/dashboard"
+                            class="ml-2 px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider font-black text-pnp-gold bg-white/10 hover:bg-pnp-gold hover:text-pnp-blue transition duration-200 flex items-center gap-1.5 border border-pnp-gold/30 shadow-xs"
+                            title="Access Admin Console">
+                            <i class="fas fa-shield-halved text-xs"></i>
+                            <span>Admin Console</span>
+                        </a>
+                    <% } %>
                 </nav>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <!-- Topbar Theme Toggle (Single light/dark mode button for both desktop and mobile) -->
-                    <button class="theme-toggle-btn w-10 h-10 sm:w-11 sm:h-11 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition duration-200 border border-white/20 shrink-0"
+                    <button class="theme-toggle-btn w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-white hover:text-pnp-gold transition duration-200 border border-white/20 shrink-0 cursor-pointer"
                         title="Toggle Light / Dark Mode" aria-label="Toggle Theme">
-                        <i class="fas fa-moon text-base theme-icon-moon dark:hidden"></i>
-                        <i class="fas fa-sun text-base theme-icon-sun hidden dark:block text-pnp-gold"></i>
+                        <i class="fas fa-moon text-sm theme-icon-moon dark:hidden"></i>
+                        <i class="fas fa-sun text-sm theme-icon-sun hidden dark:block text-pnp-gold"></i>
                     </button>
 
                     <!-- Mobile Menu Toggle -->
                     <button id="mobileMenuBtn" aria-label="Open Navigation Menu"
-                        class="lg:hidden w-10 h-10 sm:w-11 sm:h-11 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-lg sm:text-xl text-white transition shrink-0 border border-white/20">
+                        class="lg:hidden w-9 h-9 sm:w-10 sm:h-10 bg-white/10 hover:bg-white/20 active:scale-95 rounded-xl flex items-center justify-center text-base sm:text-lg text-white transition shrink-0 border border-white/20 cursor-pointer">
                         <i class="fas fa-bars"></i>
                     </button>
                 </div>
@@ -308,37 +377,41 @@
 
     <!-- Mobile Menu Drawer -->
     <div id="mobileMenu"
-        class="fixed top-0 right-0 bottom-0 w-[85%] sm:w-1/2 md:w-1/3 lg:w-1/4 bg-pnp-blue z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col p-6 sm:p-8 inset-y-0 shadow-2xl">
-        <div class="flex justify-between items-center mb-6 sm:mb-10">
-            <div class="flex items-center space-x-3 sm:space-x-4 min-w-0">
-                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl flex items-center justify-center p-2 shrink-0 shadow-md">
-                    <img src="/images/PNP.jpg" alt="PNP Logo" class="w-full h-full object-contain">
+        class="fixed top-0 right-0 bottom-0 w-[85%] sm:w-1/2 md:w-1/3 bg-pnp-blue z-[100] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col p-6 sm:p-7 inset-y-0 shadow-2xl border-l-4 border-pnp-gold/50">
+        <div class="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+            <div class="flex items-center space-x-3 min-w-0">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1 shadow-md border border-white/20 shrink-0">
+                    <img src="/favicon.png" alt="MIMPAS Logo" class="w-full h-full object-contain rounded-full"
+                        onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                 </div>
-                <h1 class="text-white text-base sm:text-lg font-black tracking-tighter truncate">CRIME MAPPING SYSTEM</h1>
+                <div class="min-w-0">
+                    <h2 class="text-white text-base font-black tracking-wider leading-none">M I M P A S</h2>
+                    <p class="text-[8px] text-blue-100 uppercase tracking-wider font-bold mt-0.5 truncate">Sta. Cruz Municipal Police</p>
+                </div>
             </div>
             <button id="closeMenuBtn" aria-label="Close Menu"
-                class="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center text-white text-lg sm:text-xl active:scale-95 transition shrink-0 border border-white/20">
+                class="w-9 h-9 bg-white/10 rounded-xl flex items-center justify-center text-white text-base active:scale-95 transition shrink-0 border border-white/20 cursor-pointer">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <nav class="flex flex-col space-y-3 sm:space-y-4">
-            <a href="/#hero-section" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Home</a>
-            <a href="/map" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Crime Map</a>
-            <a href="/bulletins" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Public Advisory</a>
-            <a href="/news" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">News</a>
-            <a href="/hotlines" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">Hotlines</a>
-            <a href="/about" class="text-xl sm:text-2xl font-black text-white hover:text-pnp-gold transition">About PNP</a>
+        <nav class="flex flex-col space-y-2 overflow-y-auto">
+            <a href="/#hero-section" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && title === 'Home' ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">Home</a>
+            <a href="/map" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Crime Map' || title === 'Map') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">Crime Map</a>
+            <a href="/bulletins" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Public Advisory' || title === 'Bulletins' || title === 'Wanted Persons' || title === 'Missing Persons') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">Public Advisory</a>
+            <a href="/news" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Station Releases' || title === 'News') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">News</a>
+            <a href="/hotlines" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Emergency Hotlines' || title === 'Hotlines') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">Hotlines</a>
+            <a href="/about" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && title === 'About' ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">About PNP</a>
 
             <% if (locals.user) { %>
-                <a href="/admin/dashboard" class="text-xl sm:text-2xl font-black text-pnp-gold pt-3 border-t border-white/10 flex items-center gap-2">
-                    <i class="fas fa-shield-halved text-lg"></i>
+                <a href="/admin/dashboard" class="px-3.5 py-2.5 rounded-xl text-base font-black text-pnp-gold hover:bg-white/10 transition pt-3 border-t border-white/10 flex items-center gap-2">
+                    <i class="fas fa-shield-halved text-base"></i>
                     <span>Admin Dashboard</span>
                 </a>
             <% } %>
         </nav>
 
         <!-- Mobile Drawer Footer Info -->
-        <div class="mt-auto pt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-blue-200/60 font-bold uppercase tracking-wider">
+        <div class="mt-auto pt-5 border-t border-white/10 flex items-center justify-between text-[10px] text-blue-200/70 font-bold uppercase tracking-wider">
             <span>Sta. Cruz Police Station</span>
             <span>Laguna PPO</span>
         </div>
@@ -351,21 +424,18 @@
 
     <% if (!locals.hideFooter) { %>
         <!-- Footer -->
-        <footer class="bg-pnp-blue text-white dark:bg-slate-900 border-t-4 border-pnp-gold mt-auto py-12">
+        <footer class="bg-pnp-blue text-white dark:bg-slate-950 border-t-4 border-pnp-gold mt-auto py-12 transition-colors duration-300">
             <div class="container mx-auto px-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                     <!-- Brand Section -->
                     <div class="flex flex-col space-y-4">
                         <div class="flex items-center space-x-3">
-                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg p-1.5">
-                                <img src="/images/PNP.jpg" alt="PNP Logo" class="w-full h-full object-contain">
+                            <div class="w-11 h-11 rounded-full bg-white flex items-center justify-center p-1 shadow-md border border-white/20 shrink-0">
+                                <img src="/favicon.png" alt="MIMPAS Logo" class="w-full h-full object-contain rounded-full" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                             </div>
                             <div>
-                                <h2 class="text-lg font-black tracking-tighter leading-none italic">STA. CRUZ CRIME
-                                    MAPPING</h2>
-                                <p class="text-[9px] text-blue-200 uppercase tracking-widest font-bold mt-0.5">PNP Sta.
-                                    Cruz
-                                </p>
+                                <h2 class="text-base font-black tracking-wider leading-none text-white">M I M P A S</h2>
+                                <p class="text-[8px] text-blue-100 uppercase tracking-wider font-bold mt-1">PNP Sta. Cruz &bull; Laguna PPO</p>
                             </div>
                         </div>
                         <p class="text-xs text-blue-200/80 max-w-sm leading-relaxed">
@@ -376,46 +446,36 @@
 
                     <!-- Quick Links -->
                     <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Quick Links</h3>
+                        <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.2em] mb-2">Quick Links</h3>
                         <div class="grid grid-cols-2 gap-2">
                             <a href="/"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                                <i
-                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Home
                             </a>
-
                             <a href="/bulletins"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                                <i
-                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Public Advisory
                             </a>
                             <a href="/news"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                                <i
-                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 News
                             </a>
                             <a href="/map"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                                <i
-                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Crime Map
                             </a>
-
-
-
                             <a href="/hotlines"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                                <i
-                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Hotlines
                             </a>
                             <a href="/about"
                                 class="text-xs text-blue-200 hover:text-white transition group flex items-center">
-                                <i
-                                    class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 About
                             </a>
                             <% if (locals.user) { %>
@@ -429,8 +489,7 @@
 
                     <!-- Contact Info / Hotlines -->
                     <div class="flex flex-col space-y-3">
-                        <h3 class="text-sm font-bold text-pnp-gold uppercase tracking-widest mb-2">Emergency Hotlines
-                        </h3>
+                        <h3 class="text-xs font-black text-pnp-gold uppercase tracking-[0.2em] mb-2">Emergency Hotlines</h3>
 
                         <% if (locals.footerHotlines && locals.footerHotlines.length > 0) { %>
                             <% locals.footerHotlines.slice(0, 5).forEach(h => { 
@@ -473,18 +532,19 @@
                 <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p
                         class="text-[10px] text-blue-200/60 font-bold uppercase tracking-widest text-center md:text-left">
-                        &copy; 2026 PNP Sta. Cruz Municipal Police Station. All rights reserved.
+                        &copy; 2026 PNP Sta. Cruz Municipal Police Station &bull; MIMPAS. All rights reserved.
                     </p>
                     <div class="flex space-x-4">
-                        <a href="https://www.facebook.com/stacruzpolicelagunappo" target="_blank"
-                            class="w-8 h-8 rounded-full bg-white/5 hover:bg-pnp-gold flex items-center justify-center text-blue-200 hover:text-pnp-blue transition duration-300">
-                            <i class="fab fa-facebook-f"></i>
+                        <a href="https://www.facebook.com/stacruzpolicelagunappo" target="_blank" rel="noopener noreferrer"
+                            class="w-8 h-8 rounded-full bg-white/5 hover:bg-pnp-gold flex items-center justify-center text-blue-200 hover:text-pnp-blue transition duration-300"
+                            title="Official Facebook Page">
+                            <i class="fab fa-facebook-f text-xs"></i>
                         </a>
                     </div>
                 </div>
             </div>
         </footer>
-        <% } %>
+    <% } %>
 
             <% if (locals.user) { %>
             <!-- Floating Admin Dashboard Button (Desktop only) -->

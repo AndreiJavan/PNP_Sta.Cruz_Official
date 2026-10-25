@@ -1,199 +1,196 @@
-<div class="relative min-h-[40vh] flex items-center overflow-hidden pt-24 pb-32 bg-slate-950 bg-cover bg-center bg-no-repeat"
-     style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.95)), url('/images/home-pnp.jpg');">
+<!-- Hero Header (Tactical Navy & Gold) -->
+<div class="relative min-h-[32vh] py-16 md:py-20 flex items-center justify-center overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat"
+     style="background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)), url('/images/home-pnp.jpg');">
     <div class="absolute inset-0 z-0 bg-gradient-to-br from-pnp-blue/20 via-slate-950/40 to-slate-950/80"></div>
 
     <!-- Hero Content -->
-    <div class="container mx-auto px-4 relative z-10">
-        <div class="max-w-3xl">
-            <div class="inline-flex items-center space-x-2 bg-pnp-gold/20 text-pnp-gold px-4 py-2 rounded-full mb-6 border border-pnp-gold/30">
-                <i class="fas fa-newspaper text-sm animate-pulse"></i>
-                <span class="text-xs font-black uppercase tracking-widest">Official News</span>
-            </div>
-
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-4 leading-tight tracking-tighter uppercase">
-                PNP Sta. Cruz <span class="text-pnp-gold">News Feed</span>
-            </h1>
-
-            <p class="text-lg text-blue-100 dark:text-gray-300 mb-2 leading-relaxed max-w-2xl">
-                Stay informed with official updates, news releases, and safety advisories directly from the Sta. Cruz Municipal Police Station.
-            </p>
+    <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
+        <div class="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md text-pnp-gold px-4 py-1.5 rounded-full mb-3 border border-white/20">
+            <i class="fas fa-newspaper text-xs"></i>
+            <span class="text-[10px] font-black uppercase tracking-widest">Public Information Office &bull; Sta. Cruz</span>
         </div>
+
+        <h1 class="text-3xl md:text-5xl font-black text-white uppercase tracking-tight mb-2">
+            Official <span class="text-pnp-gold">News Releases</span>
+        </h1>
+
+        <p class="text-xs sm:text-sm text-blue-100/90 font-medium max-w-2xl mx-auto leading-relaxed">
+            Stay informed with verified press releases, operational accomplishment reports, and official public updates directly from the Sta. Cruz Municipal Police Station.
+        </p>
     </div>
 </div>
 
-<div class="bg-slate-50 dark:bg-slate-950 py-10 sm:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- Search and Filter Section -->
-        <div class="mb-8 sm:mb-12 bg-white dark:bg-slate-900 rounded-2xl sm:rounded-[2rem] p-4 sm:p-6 shadow-md border border-slate-200/90 dark:border-slate-800/60 flex flex-col gap-4 -mt-12 sm:-mt-20 md:-mt-24 relative z-20">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <!-- Search input -->
-                <div class="relative w-full md:flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
-                        <i class="fas fa-search text-sm"></i>
-                    </div>
-                    <input type="text" id="news-search-input" oninput="filterNews()" placeholder="Search articles by title or content..."
-                        class="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100 transition">
+<div class="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
+    
+    <!-- Search and Filter Section (Admin Style) -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 shadow-xs border border-slate-200/90 dark:border-slate-800 -mt-10 sm:-mt-14 relative z-20 mb-8 sm:mb-12 max-w-5xl mx-auto flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+            <!-- Search input -->
+            <div class="relative w-full md:flex-1">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fas fa-search text-xs"></i>
                 </div>
-
-                <!-- Date Filter Presets and Controls -->
-                <div class="flex items-center gap-3 w-full md:w-auto">
-                    <div class="relative flex-1 md:w-48">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-pnp-gold">
-                            <i class="fas fa-calendar-alt text-xs"></i>
-                        </div>
-                        <select id="newsDateMode" onchange="onNewsDateModeChange()"
-                            class="w-full pl-9 pr-8 py-3 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold appearance-none cursor-pointer">
-                            <option value="all">All Dates</option>
-                            <option value="thisMonth">This Month</option>
-                            <option value="thisYear">This Year</option>
-                            <option value="custom">Custom Date Range</option>
-                        </select>
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                            <i class="fas fa-chevron-down text-[10px]"></i>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="resetNewsFilters()" title="Reset Filters"
-                        class="h-11 px-4 bg-slate-100 dark:bg-slate-950 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shrink-0">
-                        <i class="fas fa-rotate-left text-xs"></i>
-                        <span class="hidden sm:inline">Reset</span>
-                    </button>
-                </div>
+                <input type="text" id="news-search-input" oninput="filterNews()" placeholder="Search articles by title or content..."
+                    class="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold text-slate-800 dark:text-slate-100 outline-none transition placeholder:text-slate-400 shadow-2xs">
             </div>
 
-            <!-- Custom Date Range Row (Hidden unless 'custom' is selected) -->
-            <div id="newsCustomDateRow" class="hidden flex flex-col sm:flex-row items-center gap-3 pt-2 border-t border-gray-100 dark:border-slate-800/80">
-                <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 shrink-0">From Date:</span>
-                    <input type="date" id="newsFromDate" onchange="filterNews()"
-                        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue">
+            <!-- Date Filter Presets and Controls -->
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative flex-1 md:w-44">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-pnp-gold">
+                        <i class="fas fa-calendar-alt text-xs"></i>
+                    </div>
+                    <select id="newsDateMode" onchange="onNewsDateModeChange()"
+                        class="w-full pl-8 pr-7 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold appearance-none cursor-pointer shadow-2xs">
+                        <option value="all">All Dates</option>
+                        <option value="thisMonth">This Month</option>
+                        <option value="thisYear">This Year</option>
+                        <option value="custom">Custom Date Range</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fas fa-chevron-down text-[9px]"></i>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-gray-400 shrink-0">To Date:</span>
-                    <input type="date" id="newsToDate" onchange="filterNews()"
-                        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue">
-                </div>
+
+                <button type="button" onclick="resetNewsFilters()" title="Reset Filters"
+                    class="h-10 px-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition shrink-0 shadow-2xs">
+                    <i class="fas fa-rotate-left text-xs"></i>
+                    <span class="hidden sm:inline">Reset</span>
+                </button>
             </div>
         </div>
 
-        <!-- News Grid -->
-        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <% newsList.forEach((news, idx) => { %>
-                <div class="news-card group bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/90 dark:border-slate-800/60 overflow-hidden flex flex-col shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 cursor-pointer" style="<%= idx >= 10 ? 'display: none !important;' : '' %>" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" data-date="<%= news.publishedAt %>" onclick="openNewsModal('<%= news.id %>')">
-                    
-                    <!-- Image / Facebook Wrapper -->
-                    <div class="h-56 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
-                        <% if (news.video_paths && news.video_paths.length > 0) { %>
-                            <video src="<%= news.video_paths[0] %>" muted class="w-full h-full object-contain pointer-events-none"></video>
-                            <div class="absolute inset-0 bg-black/25 flex items-center justify-center pointer-events-none">
-                                <i class="fas fa-play text-white text-3xl opacity-90 group-hover:scale-110 transition duration-300"></i>
-                            </div>
-                            <% if (news.photo_paths && news.photo_paths.length > 0) { %>
-                                <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5 z-10">
-                                    <i class="fas fa-images"></i>
-                                    <span>+<%= news.photo_paths.length %></span>
-                                </div>
-                            <% } %>
-                        <% } else if (news.photo_paths && news.photo_paths.length > 0) { %>
-                            <img src="<%= news.photo_paths[0] %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                            <% if (news.photo_paths.length > 1) { %>
-                                <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5 z-10">
-                                    <i class="fas fa-images"></i>
-                                    <span>+<%= news.photo_paths.length - 1 %></span>
-                                </div>
-                            <% } %>
-                        <% } else if (news.urlToImage && news.urlToImage !== '/images/PNP.jpg') { %>
-                            <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                        <% } else if (news.facebook_url && !news.facebook_url.includes('post_') && !news.facebook_url.includes('undefined')) { %>
-                            <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=false&width=500" 
-                                width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
-                                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
-                            <div class="absolute inset-0 bg-transparent cursor-pointer" onclick="openNewsModal('<%= news.id %>')"></div>
-                        <% } else { %>
-                            <img src="/images/PNP.jpg" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy">
-                        <% } %>
-                        <div class="absolute top-4 left-4 bg-pnp-blue/90 dark:bg-pnp-gold/90 text-white dark:text-pnp-blue text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-md z-10 flex items-center space-x-1">
-                            <% if (news.facebook_url) { %>
-                                <i class="fab fa-facebook text-[10px]"></i>
-                                <span>Facebook Release</span>
-                            <% } else { %>
-                                <span>Press Release</span>
-                            <% } %>
-                        </div>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="p-8 flex-grow flex flex-col justify-between">
-                        <div>
-                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center">
-                                <i class="fas fa-calendar-day mr-2 text-pnp-gold"></i>
-                                <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) %>
-                            </div>
-                            
-                            <h3 class="text-lg font-black text-slate-900 dark:text-white leading-snug mb-3 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2">
-                                <%= news.headline %>
-                            </h3>
-                            
-                            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-6 line-clamp-3">
-                                <%= news.description %>
-                            </p>
-                        </div>
-
-                        <div class="pt-6 border-t border-gray-100 dark:border-slate-800/60 flex items-center justify-between">
-                            <% if (news.facebook_url || (news.author && (news.author.startsWith('http://') || news.author.startsWith('https://')))) { %>
-                                <a href="<%= news.facebook_url || news.author %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-[10px] font-black text-[#1877F2] hover:underline uppercase tracking-wider" title="Official Facebook Post">
-                                    <i class="fab fa-facebook text-xs"></i>
-                                    <span>Official Facebook Post</span>
-                                </a>
-                            <% } else { %>
-                                <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
-                            <% } %>
-                            <div class="flex items-center space-x-3">
-                                <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="inline-flex items-center space-x-1.5 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-widest hover:underline hover:scale-105 transition-all focus:outline-none cursor-pointer select-none">
-                                    <span>Read Details</span>
-                                    <i class="fas fa-arrow-right ml-1.5 text-[8px]"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            <% }) %>
-        </div>
-
-        <!-- Load More / Older Posts Pagination Button -->
-        <div id="news-load-more-container" class="mt-12 text-center" style="<%= newsList.length > 0 ? '' : 'display: none;' %>">
-            <button id="news-load-more-btn" onclick="loadMoreNews()"
-                style="<%= newsList.length > 10 ? 'display: inline-flex;' : 'display: none;' %>"
-                class="w-full sm:w-auto px-8 py-4 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-2xl shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40">
-                <i class="fas fa-history text-sm"></i>
-                <span id="news-load-more-text">Load Older News</span>
-                <i class="fas fa-chevron-down text-xs"></i>
-            </button>
-            <p id="news-load-more-info" class="text-xs text-gray-500 dark:text-gray-400 font-bold mt-3">
-                Showing <span id="news-visible-count"><%= Math.min(10, newsList.length) %></span> of <span id="news-total-count"><%= newsList.length %></span> news posts
-            </p>
-        </div>
-
-        <!-- No Results -->
-        <div id="no-news-results" class="hidden text-center py-20 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-200/90 dark:border-slate-800/60 shadow-sm">
-            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
-                <i class="fas fa-newspaper"></i>
+        <!-- Custom Date Range Row (Hidden unless 'custom' is selected) -->
+        <div id="newsCustomDateRow" class="hidden flex flex-col sm:flex-row items-center gap-3 pt-3 border-t border-slate-200/80 dark:border-slate-800">
+            <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 shrink-0">From Date:</span>
+                <input type="date" id="newsFromDate" onchange="filterNews()"
+                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold shadow-2xs">
             </div>
-            <h3 class="text-lg font-black text-slate-800 dark:text-white mb-2 uppercase">No Articles Found</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">We couldn't find any news articles matching your search criteria. Try using different keywords.</p>
+            <div class="flex items-center gap-2 w-full sm:w-auto flex-1">
+                <span class="text-[10px] font-black uppercase tracking-wider text-slate-400 shrink-0">To Date:</span>
+                <input type="date" id="newsToDate" onchange="filterNews()"
+                    class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 outline-none focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold shadow-2xs">
+            </div>
         </div>
-
     </div>
+
+    <!-- News Grid -->
+    <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <% newsList.forEach((news, idx) => { %>
+            <div class="news-card group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden flex flex-col shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 cursor-pointer" style="<%= idx >= 10 ? 'display: none !important;' : '' %>" data-title="<%= news.headline.toLowerCase() %>" data-content="<%= news.fullContent.toLowerCase() %>" data-date="<%= news.publishedAt %>" onclick="openNewsModal('<%= news.id %>')">
+                
+                <!-- Image / Facebook Wrapper -->
+                <div class="h-52 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center">
+                    <% if (news.video_paths && news.video_paths.length > 0) { %>
+                        <video src="<%= news.video_paths[0] %>" muted class="w-full h-full object-contain pointer-events-none"></video>
+                        <div class="absolute inset-0 bg-black/25 flex items-center justify-center pointer-events-none">
+                            <i class="fas fa-play text-white text-3xl opacity-90 group-hover:scale-110 transition duration-300"></i>
+                        </div>
+                        <% if (news.photo_paths && news.photo_paths.length > 0) { %>
+                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5 z-10">
+                                <i class="fas fa-images"></i>
+                                <span>+<%= news.photo_paths.length %></span>
+                            </div>
+                        <% } %>
+                    <% } else if (news.photo_paths && news.photo_paths.length > 0) { %>
+                        <img src="<%= news.photo_paths[0] %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                        <% if (news.photo_paths.length > 1) { %>
+                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5 z-10">
+                                <i class="fas fa-images"></i>
+                                <span>+<%= news.photo_paths.length - 1 %></span>
+                            </div>
+                        <% } %>
+                    <% } else if (news.urlToImage && news.urlToImage !== '/images/PNP.jpg') { %>
+                        <img src="<%= news.urlToImage %>" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <% } else if (news.facebook_url && !news.facebook_url.includes('post_') && !news.facebook_url.includes('undefined')) { %>
+                        <iframe src="https://www.facebook.com/plugins/<%= /video|watch|reel/i.test(news.facebook_url) ? 'video.php' : 'post.php' %>?href=<%= encodeURIComponent(news.facebook_url) %>&show_text=false&width=500" 
+                            width="100%" height="100%" style="border:none;overflow:hidden;min-height:220px;" scrolling="no" frameborder="0" allowfullscreen="true" 
+                            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" class="w-full h-full pointer-events-none"></iframe>
+                        <div class="absolute inset-0 bg-transparent cursor-pointer" onclick="openNewsModal('<%= news.id %>')"></div>
+                    <% } else { %>
+                        <img src="/images/PNP.jpg" alt="<%= news.headline %>" class="w-full h-full object-contain group-hover:scale-105 transition duration-700 select-none" referrerpolicy="no-referrer" loading="lazy">
+                    <% } %>
+                    <div class="absolute top-3 left-3 bg-pnp-blue/90 dark:bg-pnp-gold text-white dark:text-slate-950 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-2xs z-10 flex items-center space-x-1 border border-white/20 dark:border-slate-900/20">
+                        <% if (news.facebook_url) { %>
+                            <i class="fab fa-facebook text-[10px]"></i>
+                            <span>Facebook Release</span>
+                        <% } else { %>
+                            <span>Press Release</span>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center">
+                            <i class="fas fa-calendar-day mr-1.5 text-pnp-gold"></i>
+                            <%= new Date(news.publishedAt).toLocaleDateString(undefined, {month: 'long', day: 'numeric', year: 'numeric'}) %>
+                        </div>
+                        
+                        <h3 class="text-base font-black text-slate-900 dark:text-white leading-snug mb-2 group-hover:text-pnp-blue dark:group-hover:text-pnp-gold transition duration-200 line-clamp-2">
+                            <%= news.headline %>
+                        </h3>
+                        
+                        <p class="text-slate-500 dark:text-slate-400 text-xs leading-relaxed mb-4 line-clamp-3">
+                            <%= news.description %>
+                        </p>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <% if (news.facebook_url || (news.author && (news.author.startsWith('http://') || news.author.startsWith('https://')))) { %>
+                            <a href="<%= news.facebook_url || news.author %>" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-1.5 text-[10px] font-black text-[#1877F2] hover:underline uppercase tracking-wider" title="Official Facebook Post">
+                                <i class="fab fa-facebook text-xs"></i>
+                                <span>Facebook Post</span>
+                            </a>
+                        <% } else { %>
+                            <span class="text-[10px] font-bold text-slate-400 italic">By <%= news.author %></span>
+                        <% } %>
+                        <div class="flex items-center space-x-3">
+                            <button type="button" onclick="event.stopPropagation(); openNewsModal('<%= news.id %>')" class="inline-flex items-center space-x-1 text-[10px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-wider hover:underline transition-all focus:outline-none cursor-pointer select-none">
+                                <span>Read Details</span>
+                                <i class="fas fa-arrow-right ml-1 text-[8px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        <% }) %>
+    </div>
+
+    <!-- Load More / Older Posts Pagination Button -->
+    <div id="news-load-more-container" class="mt-10 text-center" style="<%= newsList.length > 0 ? '' : 'display: none;' %>">
+        <button id="news-load-more-btn" onclick="loadMoreNews()"
+            style="<%= newsList.length > 10 ? 'display: inline-flex;' : 'display: none;' %>"
+            class="w-full sm:w-auto px-6 py-3 bg-pnp-blue hover:bg-pnp-blue/90 text-white dark:bg-pnp-gold dark:text-slate-950 font-black rounded-xl shadow-xs flex items-center justify-center gap-2 active:scale-95 transition-all duration-200 mx-auto border border-pnp-gold/40 text-xs uppercase tracking-wider">
+            <i class="fas fa-history text-xs"></i>
+            <span id="news-load-more-text">Load Older News</span>
+            <i class="fas fa-chevron-down text-[10px]"></i>
+        </button>
+        <p id="news-load-more-info" class="text-xs text-slate-500 dark:text-slate-400 font-bold mt-3">
+            Showing <span id="news-visible-count"><%= Math.min(10, newsList.length) %></span> of <span id="news-total-count"><%= newsList.length %></span> news posts
+        </p>
+    </div>
+
+    <!-- No Results -->
+    <div id="no-news-results" class="hidden text-center py-16 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs">
+        <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
+            <i class="fas fa-newspaper"></i>
+        </div>
+        <h3 class="text-base font-black text-slate-800 dark:text-white mb-1 uppercase tracking-tight">No Articles Found</h3>
+        <p class="text-slate-500 dark:text-slate-400 text-xs max-w-md mx-auto">We couldn't find any news articles matching your search criteria. Try using different keywords.</p>
+    </div>
+
 </div>
 
 <!-- INTERACTIVE NEWS DETAIL MODAL -->
 <div id="news-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
     <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onclick="closeNewsModal()"></div>
-    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.35)] border border-slate-200 dark:border-slate-800 ring-1 ring-black/5 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
+    <div class="relative bg-white dark:bg-slate-900 w-[95%] max-w-6xl rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-all duration-300 flex flex-col lg:flex-row max-h-[90vh]">
         <!-- Left Side: Image Carousel -->
         <div class="w-full lg:w-[50%] relative bg-slate-950 flex items-center justify-center h-64 sm:h-80 md:h-[450px] lg:h-auto min-h-[240px] shrink-0 border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800">
             <div id="news-modal-media-container" class="w-full h-full relative overflow-hidden flex items-center justify-center">
