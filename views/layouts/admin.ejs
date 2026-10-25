@@ -198,10 +198,23 @@
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
+
+        /* Remove background image on the map page, but keep the blue color */
+        body.admin-bg-hero.admin-map-page,
+        body.admin-bg-hero:has(#leafletMap) {
+            background-image: none !important;
+            background-color: #8fa5bc !important;
+        }
+
+        html.dark body.admin-bg-hero.admin-map-page,
+        html.dark body.admin-bg-hero:has(#leafletMap) {
+            background-image: none !important;
+            background-color: #0b1329 !important;
+        }
     </style>
 </head>
 
-<body class="admin-bg-hero bg-[#eaedf2] dark:bg-slate-950 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
+<body class="admin-bg-hero <%= (title === 'Map' || title === 'Map Management' ? 'admin-map-page' : '') %> bg-[#eaedf2] dark:bg-slate-950 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
     <!-- Global Network Resilience Banner -->
     <div id="networkStatusBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden transition-all duration-300 transform -translate-y-4 opacity-0 pointer-events-none">
         <div id="networkStatusContent" class="flex items-center gap-3 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl backdrop-blur-md border">
@@ -371,7 +384,7 @@
     <div id="mainContent"
         class="hidden lg:flex flex-grow lg:ml-64 flex-col min-h-screen transition-all duration-300 w-full lg:w-[calc(100%-16rem)]">
         <!-- Page Body -->
-        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0' : (title === 'Dashboard' || title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'p-[0.95rem] sm:p-[1.425rem] pb-[4.75rem]' : 'p-4 sm:p-6 pb-20')) %>">
+        <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0 h-screen max-h-screen overflow-hidden' : (title === 'Dashboard' || title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'p-[0.95rem] sm:p-[1.425rem] pb-[4.75rem]' : 'p-4 sm:p-6 pb-20')) %>">
             <!-- Flash Messages -->
             <% if (typeof success_msg !=='undefined' && success_msg) { %>
                 <div
@@ -714,12 +727,10 @@
                     e.preventDefault();
                     e.stopPropagation();
 
-                    // If currently on the Crime Map page, smoothly re-center Santa Cruz in the middle
+                    // If currently on the Crime Map page, focus on the whole map
                     if (currentPath === '/admin/map') {
-                        if (typeof window.zoomToLocationOverviewMiddle === 'function') {
-                            window.zoomToLocationOverviewMiddle(1.4);
-                        } else if (typeof window.fitWholeMapBounds === 'function') {
-                            window.fitWholeMapBounds();
+                        if (typeof window.fitWholeMapBounds === 'function') {
+                            window.fitWholeMapBounds(true);
                         }
                     }
                     return false;

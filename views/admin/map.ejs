@@ -1,7 +1,7 @@
-<div class="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-900 relative">
+<div class="flex h-screen w-full overflow-hidden relative">
     <!-- Sidebar: Location Overview & Stored Report Files Container -->
     <div id="filterSidebar"
-        class="absolute top-0 left-0 z-[1050] w-full sm:w-[400px] lg:w-[420px] h-full bg-white dark:bg-slate-900 flex flex-col border-r border-gray-200 dark:border-slate-800 shadow-2xl transition-all duration-300 flex-shrink-0 sidebar-hidden">
+        class="absolute top-0 left-0 z-[1050] w-full sm:w-[400px] lg:w-[420px] h-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md flex flex-col border-r border-gray-200 dark:border-slate-800 shadow-2xl transition-all duration-300 flex-shrink-0 sidebar-hidden overflow-hidden">
         
         <!-- Header with Dual View Tabs & Collapse Controls -->
         <div class="p-3.5 bg-slate-100/90 dark:bg-slate-900/90 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
@@ -51,8 +51,9 @@
                                     <option value="<%= brgy %>"><%= brgy %></option>
                                 <% }) %>
                             </select>
-                            <button onclick="document.getElementById('filterBarangay').value=''; const m=document.getElementById('mapDisplayMode'); if(m) m.value='density'; locateBarangay(false); if(typeof loadMapPoints === 'function') loadMapPoints(false);" class="w-9 h-9 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-xs hover:scale-105 active:scale-95 transition flex items-center justify-center shrink-0 cursor-pointer" title="Reset to All Barangays">
+                            <button type="button" onclick="resetToWholeMapDefault()" class="px-2.5 py-2 bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue rounded-xl shadow-xs hover:scale-105 active:scale-95 transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer text-[10px] font-black uppercase tracking-wider" title="Default View (Whole Map)">
                                 <i class="fas fa-globe text-xs"></i>
+                                <span>Default</span>
                             </button>
                         </div>
                     </div>
@@ -183,11 +184,18 @@
     <!-- Map Canvas Container (Full Screen / Resizable) -->
     <div class="flex-grow relative z-0 h-full w-full overflow-hidden">
         
-        <!-- Floating Top-Left Button: Location Overview Button (Top-Left, does not cover map) -->
-        <button id="openSidebarBtn" onclick="toggleMapSidebar()" class="absolute top-4 left-4 z-[1000] px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-800/95 shadow-xl border border-gray-200/90 dark:border-slate-700/90 text-slate-800 dark:text-white font-black text-[11px] uppercase tracking-wider flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer backdrop-blur-md">
-            <i class="fas fa-layer-group text-pnp-blue dark:text-pnp-gold"></i>
-            <span>Location Overview</span>
-        </button>
+        <!-- Floating Top-Left Buttons: Location Overview & Default View -->
+        <div id="topLeftMapButtons" class="absolute top-4 left-4 z-[1000] flex items-center gap-2">
+            <button id="openSidebarBtn" onclick="toggleMapSidebar()" class="px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-800/95 shadow-xl border border-gray-200/90 dark:border-slate-700/90 text-slate-800 dark:text-white font-black text-[11px] uppercase tracking-wider flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer backdrop-blur-md">
+                <i class="fas fa-layer-group text-pnp-blue dark:text-pnp-gold"></i>
+                <span>Location Overview</span>
+            </button>
+
+            <button id="defaultViewBtn" onclick="resetToWholeMapDefault()" class="px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-800/95 shadow-xl border border-gray-200/90 dark:border-slate-700/90 text-slate-800 dark:text-white font-black text-[11px] uppercase tracking-wider flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer backdrop-blur-md" title="Default View (Whole Map)">
+                <i class="fas fa-globe text-pnp-blue dark:text-pnp-gold"></i>
+                <span>Default</span>
+            </button>
+        </div>
 
         <!-- Floating Top-Right Controls: Dynamic Context Legend (Replaces Stored Files Button on Right Side) -->
         <div class="absolute top-4 right-4 z-[1000] flex flex-col items-end pointer-events-none max-w-[calc(100vw-32px)]">
@@ -241,7 +249,7 @@
         <div id="leafletMap" class="h-full w-full transition-all duration-300"></div>
 
         <!-- Loading Overlay -->
-        <div id="mapLoading" class="absolute inset-0 bg-pnp-blue z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500">
+        <div id="mapLoading" class="absolute inset-0 bg-pnp-blue/95 backdrop-blur-md z-[1200] flex flex-col items-center justify-center text-white transition-opacity duration-500">
             <div class="w-20 h-20 border-4 border-pnp-gold border-t-transparent rounded-full animate-spin mb-6"></div>
             <p class="text-xs font-black uppercase tracking-[0.3em] animate-pulse">Initializing Secure Map Data...</p>
         </div>
@@ -553,8 +561,17 @@
         opacity: 0.95;
     }
 
-    .dark .leaflet-container {
-        background: #0f172a;
+    /* Leaflet Canvas (Clean Blue Color without Background Image) */
+    #leafletMap,
+    .leaflet-container {
+        background-color: #8fa5bc !important;
+        background-image: none !important;
+    }
+
+    html.dark #leafletMap,
+    html.dark .leaflet-container {
+        background-color: #0b1329 !important;
+        background-image: none !important;
     }
 
     .no-calendar-picker::-webkit-calendar-picker-indicator,
@@ -1125,13 +1142,12 @@
                 t.style.pointerEvents = 'auto';
             });
 
-            // Smooth zooming animation into the middle for Location Overview
-            if (typeof zoomToLocationOverviewMiddle === 'function') {
-                zoomToLocationOverviewMiddle(1.4);
-            } else if (typeof fitWholeMapBounds === 'function') {
-                fitWholeMapBounds();
+            // Keep showing the whole map when default/no barangay is selected
+            if (typeof fitWholeMapBounds === 'function') {
+                fitWholeMapBounds(true);
             } else if (map) {
-                map.flyTo([14.2720, 121.4150], 14, { duration: 1.4 });
+                const wholeMapBounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+                map.flyToBounds(wholeMapBounds, { padding: [30, 30], duration: 0.85, easeLinearity: 0.2 });
             }
 
             // Always keep map interaction enabled in overview
@@ -1176,7 +1192,8 @@
 
             map.flyTo(targetCenter, 16, {
                 animate: true,
-                duration: 1.5
+                duration: 0.85,
+                easeLinearity: 0.2
             });
 
             // Create and show the beautiful gold Tactical Pin directly on the barangay name!
@@ -1319,7 +1336,7 @@
                 fitWholeMapBounds();
             } else if (map) {
                 const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+                map.flyToBounds(bounds, { padding: [50, 50], duration: 0.85, easeLinearity: 0.2 });
             }
             updateHighlightMarkerVisibility();
             if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
@@ -1974,8 +1991,8 @@
                     const isDark = document.documentElement.classList.contains('dark');
                     L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
                         style: {
-                            fillColor: isDark ? '#0f172a' : '#f8fafc',
-                            fillOpacity: 1, // Completely opaque!
+                            fillColor: isDark ? '#0b1329' : '#8fa5bc',
+                            fillOpacity: 1,
                             color: 'transparent',
                             weight: 0,
                             className: 'map-outside-mask-solid'
@@ -1984,7 +2001,7 @@
 
                     const observer = new MutationObserver(() => {
                         const dark = document.documentElement.classList.contains('dark');
-                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
+                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0b1329' : '#8fa5bc'));
                         if (baseTileLayer) {
                             const newUrl = dark
                                 ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
@@ -2077,11 +2094,9 @@
                     updateHeatmap();
                     updateLegend();
 
-                    // Smooth initial zooming animation to Location Overview in the middle
-                    if (typeof zoomToLocationOverviewMiddle === 'function') {
-                        zoomToLocationOverviewMiddle(1.2);
-                    } else if (typeof fitWholeMapBounds === 'function') {
-                        fitWholeMapBounds();
+                    // When user selects or loads the map, FOCUS on the whole map
+                    if (typeof fitWholeMapBounds === 'function') {
+                        fitWholeMapBounds(false);
                     }
 
                     // Render unified labels & ensure complete visibility immediately
@@ -2120,7 +2135,7 @@
     }
 
     // Smooth zooming animation that centers the Santa Cruz municipality overview right in the middle
-    function zoomToLocationOverviewMiddle(duration = 1.4) {
+    function zoomToLocationOverviewMiddle(duration = 0.85) {
         if (!map) return;
         const centerLatLng = [14.2720, 121.4150]; // Geographic center of Santa Cruz
         const targetZoom = 14;
@@ -2142,7 +2157,7 @@
         map.flyTo(targetCenter, targetZoom, {
             animate: true,
             duration: duration,
-            easeLinearity: 0.25
+            easeLinearity: 0.2
         });
     }
     window.zoomToLocationOverviewMiddle = zoomToLocationOverviewMiddle;
@@ -2150,12 +2165,16 @@
     function openLocationOverviewSidebar() {
         const sidebar = document.getElementById('filterSidebar');
         const openBtn = document.getElementById('openSidebarBtn');
+        const defaultBtn = document.getElementById('defaultViewBtn');
+        const topButtons = document.getElementById('topLeftMapButtons');
         const mobileToggle = document.getElementById('mapSidebarToggle');
 
         if (sidebar) {
             sidebar.classList.remove('sidebar-hidden');
             sidebar.classList.add('sidebar-visible');
             if (openBtn) openBtn.classList.add('hidden');
+            if (defaultBtn) defaultBtn.classList.add('hidden');
+            if (topButtons) topButtons.classList.add('hidden');
             if (mobileToggle) mobileToggle.classList.add('opacity-0', 'pointer-events-none');
 
             // Switch to Location Overview view tab
@@ -2177,7 +2196,7 @@
             // Add smooth zooming animation when opening Location Overview in the middle
             const selectedBrgy = document.getElementById('filterBarangay')?.value;
             if (!selectedBrgy) {
-                zoomToLocationOverviewMiddle(1.4);
+                zoomToLocationOverviewMiddle(0.85);
             }
 
             setTimeout(() => {
@@ -2193,6 +2212,8 @@
     function toggleMapSidebar() {
         const sidebar = document.getElementById('filterSidebar');
         const openBtn = document.getElementById('openSidebarBtn');
+        const defaultBtn = document.getElementById('defaultViewBtn');
+        const topButtons = document.getElementById('topLeftMapButtons');
         const mobileToggle = document.getElementById('mapSidebarToggle');
 
         const opening = sidebar.classList.contains('sidebar-hidden');
@@ -2201,22 +2222,27 @@
             sidebar.classList.remove('sidebar-hidden');
             sidebar.classList.add('sidebar-visible');
             if (openBtn) openBtn.classList.add('hidden');
+            if (defaultBtn) defaultBtn.classList.add('hidden');
+            if (topButtons) topButtons.classList.add('hidden');
             if (mobileToggle) mobileToggle.classList.add('opacity-0', 'pointer-events-none');
 
+            // When opening Location Overview, activate smooth zooming animation into the middle
+            if (window.currentSidebarView !== 'overview' && typeof switchSidebarView === 'function') {
+                switchSidebarView('overview');
+            }
             const selectedBrgy = document.getElementById('filterBarangay')?.value;
-            if (!selectedBrgy && window.currentSidebarView === 'overview') {
-                zoomToLocationOverviewMiddle(1.4);
+            if (!selectedBrgy) {
+                zoomToLocationOverviewMiddle(0.85);
             }
         } else {
             sidebar.classList.add('sidebar-hidden');
             sidebar.classList.remove('sidebar-visible');
             if (openBtn) openBtn.classList.remove('hidden');
+            if (defaultBtn) defaultBtn.classList.remove('hidden');
+            if (topButtons) topButtons.classList.remove('hidden');
             if (mobileToggle) mobileToggle.classList.remove('opacity-0', 'pointer-events-none');
 
-            const selectedBrgy = document.getElementById('filterBarangay')?.value;
-            if (!selectedBrgy && window.currentSidebarView === 'overview') {
-                zoomToLocationOverviewMiddle(1.4);
-            }
+            // When closing Location Overview, keep on the last action the user did (no auto-reset)
         }
 
         setTimeout(() => {
@@ -2253,25 +2279,55 @@
     window.toggleTopRightLegend = window.toggleMapLegend;
     window.toggleTopLeftLegend = window.toggleMapLegend;
 
-    // View the Whole Map with Total Cases in Unified Labels (No Duplicate Markers)
-    window.fitWholeMapBounds = function() {
+    // Focus on the Whole Map showing all Santa Cruz barangays
+    window.fitWholeMapBounds = function(animate = true) {
         if (!map) return;
-        if (typeof zoomToLocationOverviewMiddle === 'function') {
-            zoomToLocationOverviewMiddle(1.4);
+        const wholeMapBounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+        const sidebar = document.getElementById('filterSidebar');
+        const isSidebarOpen = sidebar && !sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 1024;
+        
+        const paddingTL = isSidebarOpen ? [440, 30] : [30, 30];
+        const paddingBR = [30, 30];
+
+        if (animate) {
+            map.flyToBounds(wholeMapBounds, {
+                paddingTopLeft: paddingTL,
+                paddingBottomRight: paddingBR,
+                duration: 0.85,
+                easeLinearity: 0.2
+            });
         } else {
-            const wholeMapBounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-            const sidebar = document.getElementById('filterSidebar');
-            const isSidebarOpen = sidebar && !sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 1024;
-            
             map.fitBounds(wholeMapBounds, {
-                paddingTopLeft: [isSidebarOpen ? 460 : 30, 30],
-                paddingBottomRight: [300, 30],
-                maxZoom: 14
+                paddingTopLeft: paddingTL,
+                paddingBottomRight: paddingBR
             });
         }
     };
 
-    window.locateTopSectorForReport = function(points) {
+    // Default View Engine: Returns the map view to the whole Santa Cruz map
+    window.resetToWholeMapDefault = function() {
+        const brgySelect = document.getElementById('filterBarangay');
+        if (brgySelect) brgySelect.value = '';
+        const modeSelect = document.getElementById('mapDisplayMode');
+        if (modeSelect) modeSelect.value = 'density';
+
+        window.activeReportFilter = null;
+        window.activeReportFilename = null;
+        const banner = document.getElementById('reportActiveFilterBanner');
+        if (banner) banner.classList.add('hidden');
+        if (selectedPinsLayer) selectedPinsLayer.clearLayers();
+
+        if (typeof fitWholeMapBounds === 'function') {
+            fitWholeMapBounds(true);
+        }
+        if (typeof locateBarangay === 'function') locateBarangay(false);
+        if (typeof loadMapPoints === 'function') loadMapPoints(false);
+        if (typeof updateHeatmap === 'function') updateHeatmap();
+        if (typeof updateLegend === 'function') updateLegend();
+        if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+    };
+
+    window.locateTopSectorForReport = function(points, shouldFitBounds = false) {
         if (selectedPinsLayer) selectedPinsLayer.clearLayers();
 
         const pts = points || currentPoints || [];
@@ -2279,7 +2335,7 @@
             window.activeReportTopBrgy = null;
             window.activeReportTopCount = 0;
             window.activeReportBrgyRanking = [];
-            fitWholeMapBounds();
+            if (shouldFitBounds && typeof fitWholeMapBounds === 'function') fitWholeMapBounds();
             if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
             return null;
         }
@@ -2297,7 +2353,7 @@
             window.activeReportTopBrgy = null;
             window.activeReportTopCount = 0;
             window.activeReportBrgyRanking = [];
-            fitWholeMapBounds();
+            if (shouldFitBounds && typeof fitWholeMapBounds === 'function') fitWholeMapBounds();
             if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
             return null;
         }
@@ -2307,8 +2363,10 @@
         window.activeReportTopCount = topCount;
         window.activeReportBrgyRanking = sorted;
 
-        // 1. Center the whole map comfortably in the visible canvas area
-        fitWholeMapBounds();
+        // Only center whole map if explicitly requested (e.g. Default button)
+        if (shouldFitBounds && typeof fitWholeMapBounds === 'function') {
+            fitWholeMapBounds();
+        }
 
         // 2. Update the unified labels on the polygons (NO duplicate markers!)
         if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
@@ -2330,7 +2388,7 @@
         } else {
             const pin = (typeof manualPins !== 'undefined' ? manualPins : []).find(p => p.name.toLowerCase() === bName.toLowerCase());
             if (pin && map) {
-                map.flyTo([pin.lat, pin.lng], 16, { animate: true, duration: 1.2 });
+                map.flyTo([pin.lat, pin.lng], 16, { animate: true, duration: 0.85, easeLinearity: 0.2 });
             }
         }
     };
@@ -2512,8 +2570,8 @@
                 currentPoints = allMapPointsCached || [];
             }
 
-            // 1. Locate top sector and display total cases across whole map
-            locateTopSectorForReport(currentPoints);
+            // 1. Locate top sector and display total cases without resetting zoom
+            locateTopSectorForReport(currentPoints, false);
 
             // 2. Remove heatmap fill for stored files
             updateHeatmap();
@@ -2564,11 +2622,11 @@
             updateHeatmap();
             updateSidebarStats();
 
-            // Reset map view to whole map safely framed
-            if (typeof fitWholeMapBounds === 'function') {
-                fitWholeMapBounds();
-            } else if (map) {
-                map.fitBounds([[14.2100, 121.3400], [14.3100, 121.4850]], { padding: [30, 30], maxZoom: 14 });
+            // Keep the zooming animation when returning to location overview
+            if (map && map.getZoom() < 13) {
+                if (typeof zoomToLocationOverviewMiddle === 'function') {
+                    zoomToLocationOverviewMiddle(0.85);
+                }
             }
 
             // Switch Top-Right Legend back to Location Density Heatmap Legend
@@ -3844,7 +3902,7 @@
         if (!isNaN(latParam) && !isNaN(lngParam) && latParam !== 0 && lngParam !== 0) {
             setTimeout(() => {
                 if (window.map) {
-                    window.map.flyTo([latParam, lngParam], 16, { duration: 1.5 });
+                    window.map.flyTo([latParam, lngParam], 16, { duration: 0.85, easeLinearity: 0.2 });
                     
                     const highlightPulse = L.divIcon({
                         className: 'crime-highlight-marker',

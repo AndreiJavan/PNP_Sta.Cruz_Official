@@ -9,9 +9,10 @@
         <div class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-white/80 dark:border-slate-800 shadow-sm p-5 md:p-6 rounded-2xl md:rounded-3xl flex flex-col lg:flex-row items-center justify-between lg:space-x-8 space-y-6 lg:space-y-0 group w-full transition-all duration-300">
             <!-- Icon & Stats in Enhanced Inside Containers -->
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto justify-center lg:justify-start">
-                <div class="bg-slate-50/90 dark:bg-slate-800/70 p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center space-x-4 w-full sm:w-auto">
+                <!-- Public Advisories Clickable Container -->
+                <div id="statCardAdvisories" onclick="toggleCardFilter('advisories')" class="bg-slate-50/90 dark:bg-slate-800/70 p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center space-x-4 w-full sm:w-auto cursor-pointer hover:border-amber-400 dark:hover:border-amber-500 hover:scale-[1.02] active:scale-95 transition-all duration-200 select-none group" title="Click to filter Public Advisories (Click again to return to default)">
                     <!-- Public Advisories Emblem -->
-                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                         <i class="fas fa-bullhorn text-lg"></i>
                     </div>
                     <div>
@@ -21,8 +22,9 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-50/90 dark:bg-slate-800/70 p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center space-x-4 w-full sm:w-auto">
-                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0">
+                <!-- News & Releases Clickable Container -->
+                <div id="statCardNews" onclick="toggleCardFilter('news')" class="bg-slate-50/90 dark:bg-slate-800/70 p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center space-x-4 w-full sm:w-auto cursor-pointer hover:border-blue-400 dark:hover:border-blue-500 hover:scale-[1.02] active:scale-95 transition-all duration-200 select-none group" title="Click to filter News & Releases (Click again to return to default)">
+                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                         <i class="fas fa-newspaper text-lg"></i>
                     </div>
                     <div>
@@ -59,7 +61,7 @@
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
                 <!-- Dropdown -->
                 <div class="relative w-full sm:w-56">
-                    <select id="bulletinCategoryFilter" onchange="filterBulletins()" class="w-full pl-5 pr-10 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer appearance-none shadow-2xs">
+                    <select id="bulletinCategoryFilter" onchange="onDropdownCategoryChange()" class="w-full pl-5 pr-10 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer appearance-none shadow-2xs">
                         <option value="All" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category === 'undefined' || !category || category === 'All') ? 'selected' : '' %>>All Categories</option>
                         <option value="Crime Advisory" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Crime Advisory') ? 'selected' : '' %>>Crime Advisory</option>
                         <option value="Traffic Advisory" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Traffic Advisory') ? 'selected' : '' %>>Traffic Advisory</option>
@@ -221,9 +223,74 @@
         }
     }
 
+    window.activeCardFilter = null; // null | 'advisories' | 'news'
+    const ADVISORY_CATEGORIES = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+
+    window.toggleCardFilter = function(type) {
+        currentPage = 1;
+        if (window.activeCardFilter === type) {
+            // Unclick: Return to default (show all)
+            window.activeCardFilter = null;
+            const dropdown = document.getElementById('bulletinCategoryFilter');
+            if (dropdown) dropdown.value = 'All';
+        } else {
+            // Click: Filter to selected container type
+            window.activeCardFilter = type;
+            const dropdown = document.getElementById('bulletinCategoryFilter');
+            if (dropdown) {
+                if (type === 'news') {
+                    dropdown.value = 'General Announcement';
+                } else if (type === 'advisories') {
+                    dropdown.value = 'All';
+                }
+            }
+        }
+        updateCardFilterUI();
+        filterBulletins();
+    };
+
+    window.updateCardFilterUI = function() {
+        const cardAdvisories = document.getElementById('statCardAdvisories');
+        const cardNews = document.getElementById('statCardNews');
+        
+        if (cardAdvisories) {
+            if (window.activeCardFilter === 'advisories') {
+                cardAdvisories.classList.remove('border-slate-200/90', 'dark:border-slate-700', 'bg-slate-50/90', 'dark:bg-slate-800/70');
+                cardAdvisories.classList.add('border-amber-500', 'dark:border-amber-400', 'bg-amber-500/15', 'dark:bg-amber-500/25', 'ring-2', 'ring-amber-500/60', 'shadow-md');
+            } else {
+                cardAdvisories.classList.remove('border-amber-500', 'dark:border-amber-400', 'bg-amber-500/15', 'dark:bg-amber-500/25', 'ring-2', 'ring-amber-500/60', 'shadow-md');
+                cardAdvisories.classList.add('border-slate-200/90', 'dark:border-slate-700', 'bg-slate-50/90', 'dark:bg-slate-800/70');
+            }
+        }
+
+        if (cardNews) {
+            if (window.activeCardFilter === 'news') {
+                cardNews.classList.remove('border-slate-200/90', 'dark:border-slate-700', 'bg-slate-50/90', 'dark:bg-slate-800/70');
+                cardNews.classList.add('border-blue-500', 'dark:border-blue-400', 'bg-blue-500/15', 'dark:bg-blue-500/25', 'ring-2', 'ring-blue-500/60', 'shadow-md');
+            } else {
+                cardNews.classList.remove('border-blue-500', 'dark:border-blue-400', 'bg-blue-500/15', 'dark:bg-blue-500/25', 'ring-2', 'ring-blue-500/60', 'shadow-md');
+                cardNews.classList.add('border-slate-200/90', 'dark:border-slate-700', 'bg-slate-50/90', 'dark:bg-slate-800/70');
+            }
+        }
+    };
+
+    window.onDropdownCategoryChange = function() {
+        currentPage = 1;
+        const selectedCategory = document.getElementById('bulletinCategoryFilter')?.value || 'All';
+        if (selectedCategory === 'General Announcement') {
+            window.activeCardFilter = 'news';
+        } else if (ADVISORY_CATEGORIES.includes(selectedCategory)) {
+            window.activeCardFilter = 'advisories';
+        } else {
+            window.activeCardFilter = null;
+        }
+        updateCardFilterUI();
+        filterBulletins();
+    };
+
     window.filterBulletins = function() {
-        const selectedCategory = document.getElementById('bulletinCategoryFilter').value;
-        const input = document.getElementById('bulletinSearchInput').value.toLowerCase();
+        const selectedCategory = document.getElementById('bulletinCategoryFilter')?.value || 'All';
+        const input = (document.getElementById('bulletinSearchInput')?.value || '').toLowerCase();
         
         const cards = Array.from(document.querySelectorAll('#bulletinList > .group'));
         const matchingCards = [];
@@ -234,7 +301,19 @@
             const category = card.getAttribute('data-category');
             
             const matchesSearch = title.includes(input) || subtitle.includes(input);
-            const matchesCategory = selectedCategory === 'All' || category === selectedCategory;
+            
+            let matchesCategory = true;
+            if (window.activeCardFilter === 'advisories') {
+                if (selectedCategory !== 'All' && ADVISORY_CATEGORIES.includes(selectedCategory)) {
+                    matchesCategory = category === selectedCategory;
+                } else {
+                    matchesCategory = ADVISORY_CATEGORIES.includes(category);
+                }
+            } else if (window.activeCardFilter === 'news') {
+                matchesCategory = category === 'General Announcement';
+            } else {
+                matchesCategory = selectedCategory === 'All' || category === selectedCategory;
+            }
             
             if (matchesSearch && matchesCategory) {
                 matchingCards.push(card);
