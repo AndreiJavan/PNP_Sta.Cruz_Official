@@ -401,7 +401,7 @@ export const getLogin = async (req: Request, res: Response) => {
       user = verified;
       if (req.session) {
         req.session.user = verified;
-        (req.session as any).hideSidebar = (req.session as any).hideSidebar ?? true;
+        (req.session as any).hideSidebar = false;
       }
     }
   }
@@ -507,7 +507,7 @@ export const postLogin = async (req: Request, res: Response) => {
         full_name: user.full_name,
         role: user.role
       };
-      (req.session as any).hideSidebar = true;
+      (req.session as any).hideSidebar = false;
 
       // Issue durable stateless auth cookie (30 days) to persist across serverless instances and restarts
       const authToken = createAuthToken(req.session.user);
@@ -593,14 +593,13 @@ export const getHeartbeat = async (req: Request, res: Response) => {
 
 export const toggleSidebarState = async (req: Request, res: Response) => {
   try {
-    const { hideSidebar } = req.body;
-    (req.session as any).hideSidebar = !!hideSidebar;
+    (req.session as any).hideSidebar = false;
     req.session.save((err) => {
       if (err) {
         console.error('Failed to save session for hideSidebar:', err);
         return res.status(500).json({ success: false, error: 'Session save failed' });
       }
-      res.json({ success: true });
+      res.json({ success: true, hideSidebar: false });
     });
   } catch (err) {
     console.error('Error toggling sidebar state:', err);
@@ -1684,28 +1683,33 @@ export const saveReportBatch = async (req: Request, res: Response) => {
       };
     });
 
-    const validAdminId = await getValidUserId(req.session?.user?.id);
+    const validAdminId = req.session?.user?.id || (await getValidUserId(req.session?.user?.id));
     const reportData = {
-      admin_id: validAdminId, admin_name: req.session?.user?.full_name || 'System Admin',
-      timestamp: new Date().toISOString(), total_records: entries.length,
-      category_stats: categoryStats, raw_data: entries,
+      id: reportId,
+      admin_id: validAdminId,
+      admin_name: req.session?.user?.full_name || 'System Admin',
+      timestamp: new Date().toISOString(),
+      total_records: entries.length,
+      category_stats: categoryStats,
+      raw_data: entries,
       filename: filename || 'Neural Scan Buffer'
     };
 
-    // 2. Add Parent to batch FIRST
-    batch.set(reportRef, reportData);
+    // Parallel insert: insert report and bulk insert map_points simultaneously
+    await Promise.all([
+      db.collection('intelligence_scans').doc(reportId).set(reportData),
+      db.collection('map_points').insertMany(pointsToCreate.map(p => p.data))
+    ]);
 
-    // 3. Add Children to batch
-    for (const point of pointsToCreate) {
-      batch.set(point.ref, point.data);
-    }
+    // Fast non-blocking cache invalidation
+    Promise.all([
+      memoryCache.clearNamespace('map_points'),
+      memoryCache.clearNamespace('scans'),
+      memoryCache.clearNamespace('reports')
+    ]).catch(e => console.warn('[CACHE]', e.message));
 
-    await batch.commit();
-    await memoryCache.clearNamespace('map_points');
-    await memoryCache.clearNamespace('scans');
-    await memoryCache.clearNamespace('reports');
     logAction(req, 'REPORT_SAVE', `Saved intelligence report batch: ${filename || 'Neural Scan Buffer'} (${entries.length} records)`).catch(e => console.warn('[AUDIT]', e.message));
-    res.json({ success: true, count: entries.length, report: { id: reportId, ...reportData } });
+    res.json({ success: true, count: entries.length, report: reportData });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error during save' });
@@ -3862,19 +3866,19 @@ export const updateReportBatch = async (req: Request, res: Response) => {
     // Delete existing child map points safely
     const existingPointsSnap = await db.collection('map_points').where('report_id', '==', reportId).get();
     if (existingPointsSnap.docs && existingPointsSnap.docs.length > 0) {
-      for (const ptDoc of existingPointsSnap.docs) {
-        await ptDoc.ref.delete().catch(() => {});
-      }
+      await Promise.all(existingPointsSnap.docs.map((ptDoc: any) => ptDoc.ref.delete().catch(() => {})));
     }
     await db.collection('map_points').where('report_id', '==', reportId).delete().catch(() => {});
 
     // Bulk insert updated map points in 1 fast query using bulk batching
     await db.collection('map_points').insertMany(pointsToCreate);
 
-    // Clear caches
-    await memoryCache.clearNamespace('map_points');
-    await memoryCache.clearNamespace('scans');
-    await memoryCache.clearNamespace('reports');
+    // Fast non-blocking cache invalidation
+    Promise.all([
+      memoryCache.clearNamespace('map_points'),
+      memoryCache.clearNamespace('scans'),
+      memoryCache.clearNamespace('reports')
+    ]).catch(e => console.warn('[CACHE]', e.message));
 
     logAction(req, 'REPORT_EDIT', `Updated intelligence report batch: ${filename || existingReport.filename} (${entries.length} records)`).catch(e => console.warn('[AUDIT]', e.message));
 
@@ -4197,7 +4201,8 @@ export const syncFacebookPosts = async (req: Request, res: Response) => {
     res.json({
       success: true,
       message: msg,
-      stats: result
+      stats: result,
+      items: result.items || []
     });
   } catch (err: any) {
     console.error('[ADMIN CONTROLLER] Facebook sync failed:', err);

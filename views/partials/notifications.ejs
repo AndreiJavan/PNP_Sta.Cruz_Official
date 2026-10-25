@@ -56,20 +56,17 @@
                 let { 
                     title: t = 'System Confirmation', 
                     message: m = 'Proceed with action?', 
-                    confirmText = 'Confirm', 
-                    cancelText = 'Cancel',
                     type = 'info' // info, warning, danger
                 } = (options || {});
 
-                // Replace every instance of 'Acknowledge' or 'Officer' with 'Confirm'
-                if (!confirmText || confirmText.toLowerCase().includes('ack') || confirmText.toLowerCase().includes('officer')) {
-                    confirmText = 'Confirm';
-                }
+                // Always use "Confirm" and "Cancel" across all system confirmations and alerts
+                const confirmText = 'Confirm';
+                const cancelText = 'Cancel';
 
                 title.textContent = t;
                 message.textContent = m;
                 confirmBtn.textContent = confirmText;
-                cancelBtn.textContent = cancelText || '';
+                cancelBtn.textContent = cancelText;
 
                 // Tone adjustment
                 let btnColorClass = '';
@@ -87,21 +84,13 @@
                     btnColorClass = 'bg-pnp-blue dark:bg-pnp-gold text-white dark:text-pnp-blue shadow-xl shadow-pnp-blue/20';
                 }
 
-                if (!cancelText) {
-                    // Single button alert mode: Hide cancel and center Confirm in the middle
-                    cancelBtn.classList.add('hidden');
-                    if (actionContainer) {
-                        actionContainer.className = 'flex items-center justify-center pt-2 w-full text-center';
-                    }
-                    confirmBtn.className = `w-full sm:w-auto min-w-[200px] px-10 py-4 ${btnColorClass} rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-center mx-auto block`;
-                } else {
-                    cancelBtn.classList.remove('hidden');
-                    if (actionContainer) {
-                        actionContainer.className = 'flex items-center space-x-3 pt-2 w-full';
-                    }
-                    cancelBtn.className = 'flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-500/10 transition-all border border-slate-200 dark:border-transparent text-center';
-                    confirmBtn.className = `flex-2 px-10 py-4 ${btnColorClass} rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-center`;
+                // Always display both Cancel and Confirm buttons
+                cancelBtn.classList.remove('hidden');
+                if (actionContainer) {
+                    actionContainer.className = 'flex items-center space-x-3 pt-2 w-full';
                 }
+                cancelBtn.className = 'flex-1 px-6 py-4 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-500/10 transition-all border border-slate-200 dark:border-transparent text-center cursor-pointer';
+                confirmBtn.className = `flex-2 px-10 py-4 ${btnColorClass} rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl transition-all hover:scale-[1.02] active:scale-95 text-center cursor-pointer`;
 
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
@@ -143,17 +132,14 @@
             const { 
                 title: t = 'System Notification', 
                 message: m = '', 
-                confirmText: rawConfirm = 'Confirm',
                 type = 'info' 
             } = opts;
-
-            const confirmText = (!rawConfirm || rawConfirm.toLowerCase().includes('ack') || rawConfirm.toLowerCase().includes('officer')) ? 'Confirm' : rawConfirm;
 
             return strategicConfirm({
                 title: t,
                 message: m,
-                confirmText,
-                cancelText: '',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type
             }).then(() => true);
         };
@@ -166,7 +152,8 @@
             const confirmed = await strategicConfirm({
                 title: options.title || 'Operational Confirmation',
                 message: options.message || 'Are you sure you want to proceed with this action?',
-                confirmText: options.confirmText || 'Proceed',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: options.type || 'warning'
             });
 

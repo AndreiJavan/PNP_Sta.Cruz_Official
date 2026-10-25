@@ -4,9 +4,9 @@
 %>
 <div class="space-y-6 md:space-y-8 animate-fade-in px-2 sm:px-4 max-w-7xl mx-auto w-full transition-all duration-300">
     <!-- Header -->
-    <div class="bg-white dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shadow-xl p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
+    <div class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-white/80 dark:border-slate-800 shadow-sm p-5 sm:p-6 md:p-8 rounded-2xl md:rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
         <div class="flex items-center space-x-4 md:space-x-5 w-full md:w-auto">
-            <div class="w-12 h-12 md:w-14 md:h-14 bg-pnp-blue rounded-2xl flex items-center justify-center text-pnp-gold shadow-2xl rotate-3 border-2 border-white/10 shrink-0">
+            <div class="w-12 h-12 md:w-14 md:h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center text-pnp-blue dark:text-pnp-gold border border-slate-200/90 dark:border-slate-700 shadow-xs shrink-0">
                 <i class="fas fa-box-archive text-xl md:text-2xl"></i>
             </div>
             <div class="min-w-0">
@@ -25,38 +25,37 @@
         </div>
     </div>
 
-    <!-- Category Filter Tabs & Actions -->
-    <div class="bg-white dark:bg-slate-900 p-4 md:p-6 rounded-3xl md:rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-slate-800 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4">
-        <!-- Category Buttons (Zero Page Reload) -->
-        <div class="flex flex-wrap items-center gap-2" id="categoryTabs">
-            <button type="button" onclick="selectCategoryFilter('All')" data-cat="All" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
-                All Archives (<span id="count-All">0</span>)
-            </button>
-            <button type="button" onclick="selectCategoryFilter('Public Advisories')" data-cat="Public Advisories" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
-                Public Advisories (<span id="count-Public Advisories">0</span>)
-            </button>
-            <button type="button" onclick="selectCategoryFilter('News Releases')" data-cat="News Releases" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
-                News Releases (<span id="count-News Releases">0</span>)
-            </button>
-            <button type="button" onclick="selectCategoryFilter('Crime Reports')" data-cat="Crime Reports" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
-                Crime Reports (<span id="count-Crime Reports">0</span>)
-            </button>
-        </div>
-
-        <div class="flex items-center space-x-3 w-full lg:w-auto">
-            <div class="relative flex-grow lg:w-64">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                <input type="text" id="archiveSearchInput" oninput="filterArchiveTable(true)" placeholder="Search archived items..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl outline-none text-xs font-bold text-slate-700 dark:text-white uppercase tracking-wider">
+    <!-- Archive Table Container with Connected Header -->
+    <div class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-800 overflow-hidden">
+        <!-- Connected Category Filter Tabs & Actions Header -->
+        <div class="p-4 md:p-6 border-b border-gray-100 dark:border-slate-800 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 bg-white/70 dark:bg-slate-900/70">
+            <!-- Category Buttons (Zero Page Reload) -->
+            <div class="flex flex-wrap items-center gap-2" id="categoryTabs">
+                <button type="button" onclick="selectCategoryFilter('All')" data-cat="All" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
+                    All Archives (<span id="count-All">0</span>)
+                </button>
+                <button type="button" onclick="selectCategoryFilter('Public Advisories')" data-cat="Public Advisories" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
+                    Public Advisories (<span id="count-Public Advisories">0</span>)
+                </button>
+                <button type="button" onclick="selectCategoryFilter('News Releases')" data-cat="News Releases" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
+                    News Releases (<span id="count-News Releases">0</span>)
+                </button>
+                <button type="button" onclick="selectCategoryFilter('Crime Reports')" data-cat="Crime Reports" class="cat-tab-btn px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
+                    Crime Reports (<span id="count-Crime Reports">0</span>)
+                </button>
             </div>
-            <button type="button" onclick="promptDeleteAll()" class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-xs font-black uppercase tracking-wider transition-all flex items-center space-x-2 shadow-sm shrink-0 lg:hidden">
-                <i class="fas fa-trash-can text-xs"></i>
-                <span>Delete All</span>
-            </button>
-        </div>
-    </div>
 
-    <!-- Archive Table Container -->
-    <div class="bg-white dark:bg-slate-900 rounded-3xl md:rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-slate-800 overflow-hidden">
+            <div class="flex items-center space-x-3 w-full lg:w-auto">
+                <div class="relative flex-grow lg:w-64">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                    <input type="text" id="archiveSearchInput" oninput="filterArchiveTable(true)" placeholder="Search archived items..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl outline-none text-xs font-bold text-slate-700 dark:text-white uppercase tracking-wider">
+                </div>
+                <button type="button" onclick="promptDeleteAll()" class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 text-xs font-black uppercase tracking-wider transition-all flex items-center space-x-2 shadow-sm shrink-0 lg:hidden">
+                    <i class="fas fa-trash-can text-xs"></i>
+                    <span>Delete All</span>
+                </button>
+            </div>
+        </div>
         <div class="overflow-x-auto w-full custom-scrollbar">
             <table class="w-full text-left border-collapse min-w-[700px]">
                 <thead>

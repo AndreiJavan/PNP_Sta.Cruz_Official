@@ -85,7 +85,7 @@ app.use((req, res, next) => {
       const verified = verifyAuthToken(token);
       if (verified) {
         req.session.user = verified;
-        (req.session as any).hideSidebar = (req.session as any).hideSidebar ?? true;
+        (req.session as any).hideSidebar = false;
       }
     }
   }

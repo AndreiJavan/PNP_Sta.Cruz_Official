@@ -1,6 +1,6 @@
 <div class="space-y-6">
     <!-- Top Action Bar & Layout Switcher -->
-    <div class="bg-white dark:bg-slate-800 rounded-3xl p-4 sm:p-5 shadow-sm border border-gray-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md rounded-2xl md:rounded-3xl p-4 sm:p-5 shadow-sm border border-white/80 dark:border-slate-700/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div class="flex items-center space-x-3.5">
             <div class="w-10 h-10 rounded-2xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-900 flex items-center justify-center shadow-md">
                 <i class="fas fa-users-cog text-base"></i>
@@ -38,7 +38,7 @@
         <!-- ========================================== -->
         <!-- CONTAINER 1: PERSONNEL REGISTRY            -->
         <!-- ========================================== -->
-        <div id="containerPersonnel" class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col transition-all duration-300">
+        <div id="containerPersonnel" class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-700/80 overflow-hidden flex flex-col transition-all duration-300">
             <% const isUserQuotaFull = (typeof users !== 'undefined' && users && users.length >= 10); %>
 
             <!-- Summary View (Visible in 3-Column Mode) -->
@@ -274,7 +274,7 @@
         <!-- ========================================== -->
         <!-- CONTAINER 2: STATION DIRECTORY ROSTER      -->
         <!-- ========================================== -->
-        <div id="containerRoster" class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col transition-all duration-300">
+        <div id="containerRoster" class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-700/80 overflow-hidden flex flex-col transition-all duration-300">
             <% const isRosterFull = (typeof stationPersonnel !== 'undefined' && stationPersonnel && stationPersonnel.length >= 10); %>
 
             <!-- Summary View (Visible in 3-Column Mode) -->
@@ -483,7 +483,7 @@
         <!-- ========================================== -->
         <!-- CONTAINER 3: SYSTEM AUDIT LOG              -->
         <!-- ========================================== -->
-        <div id="containerAudit" class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden flex flex-col transition-all duration-300">
+        <div id="containerAudit" class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-700/80 overflow-hidden flex flex-col transition-all duration-300">
             <!-- Summary View (Visible in 3-Column Mode) -->
             <div id="auditSummaryView" class="p-6 flex flex-col h-full justify-between space-y-5">
                 <div>
@@ -1465,7 +1465,8 @@
         alertFn({
             title: 'Account Capacity Reached',
             message: 'The Personnel Registry has reached its maximum authorized limit of 10 accounts. Please neutralize or remove an existing personnel account before adding a new one.',
-            confirmText: 'Understood',
+            confirmText: 'Confirm',
+            cancelText: 'Cancel',
             type: 'warning'
         });
     }
@@ -1493,7 +1494,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: nameCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (nameInput) nameInput.focus();
@@ -1507,7 +1509,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: emailCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (emailInput) emailInput.focus();
@@ -1521,7 +1524,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: passCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (passInput) passInput.focus();
@@ -1532,7 +1536,8 @@
             title: 'Account Creation Pending',
             message: 'An email will be sent to the Police Chief for approval. The new personnel will NOT be able to log in until the account is approved. Proceed?',
             type: 'info',
-            confirmText: 'Create Account'
+            confirmText: 'Confirm',
+            cancelText: 'Cancel'
         });
     }
 
@@ -1554,7 +1559,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: nameCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (nameInput) nameInput.focus();
@@ -1569,7 +1575,8 @@
                 alertFn({
                     title: 'Validation Notice',
                     message: emailCheck.error,
-                    confirmText: 'Understood',
+                    confirmText: 'Confirm',
+                    cancelText: 'Cancel',
                     type: 'warning'
                 });
                 if (emailInput) emailInput.focus();
@@ -1585,7 +1592,8 @@
                 alertFn({
                     title: 'Validation Notice',
                     message: passCheck.error,
-                    confirmText: 'Understood',
+                    confirmText: 'Confirm',
+                    cancelText: 'Cancel',
                     type: 'warning'
                 });
                 if (passInput) passInput.focus();
@@ -1610,7 +1618,8 @@
             alertFn({
                 title: 'No Changes Detected',
                 message: 'No changes were made to this account. The record was not modified or reloaded.',
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'info'
             });
             closeEditUserModal();
@@ -1621,7 +1630,7 @@
         const confirmed = await confirmFn({
             title: 'Confirm Account Modifications',
             message: `Are you sure you want to save changes to "${nameCheck.normalized}"'s credentials?`,
-            confirmText: 'Save Changes',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             type: 'warning'
         });
@@ -1647,7 +1656,8 @@
                 alertFn({
                     title: 'Validation Notice',
                     message: narrativeCheck.error,
-                    confirmText: 'Understood',
+                    confirmText: 'Confirm',
+                    cancelText: 'Cancel',
                     type: 'warning'
                 });
                 if (customInput) customInput.focus();
@@ -1659,7 +1669,7 @@
         const confirmed = await confirmFn({
             title: 'Confirm Account Neutralization',
             message: `Are you sure you want to deactivate and neutralize credentials for "${targetName}"?`,
-            confirmText: 'Neutralize Account',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             type: 'danger'
         });
@@ -1744,7 +1754,8 @@
         alertFn({
             title: 'Directory Roster Full',
             message: 'The Station Directory Roster has reached its maximum capacity of 10 personnel. Please remove or update an existing officer before adding a new one.',
-            confirmText: 'Understood',
+            confirmText: 'Confirm',
+            cancelText: 'Cancel',
             type: 'warning'
         });
     }
@@ -1795,7 +1806,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: nameCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (nameInput) nameInput.focus();
@@ -1809,7 +1821,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: posCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (posInput) posInput.focus();
@@ -1892,7 +1905,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: nameCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (nameInput) nameInput.focus();
@@ -1906,7 +1920,8 @@
             alertFn({
                 title: 'Validation Notice',
                 message: posCheck.error,
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
             if (posInput) posInput.focus();
@@ -1922,7 +1937,8 @@
             alertFn({
                 title: 'No Changes Detected',
                 message: 'No changes were made to this directory officer. The record was not modified or reloaded.',
-                confirmText: 'Understood',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'info'
             });
             closeEditPersonnelModal();
@@ -1933,7 +1949,7 @@
         const confirmed = await confirmFn({
             title: 'Confirm Roster Modifications',
             message: `Are you sure you want to save changes to "${nameCheck.normalized}" (${posCheck.normalized}) in the Station Directory Roster?`,
-            confirmText: 'Save Changes',
+            confirmText: 'Confirm',
             cancelText: 'Cancel',
             type: 'warning'
         });

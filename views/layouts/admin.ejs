@@ -149,20 +149,18 @@
             display: none !important;
         }
 
-        /* Sidebar toggle states & flexible layout */
-        .sidebar-hidden {
-            transform: translateX(-100%);
-        }
-
-        .main-content-expanded {
-            margin-left: 0 !important;
-            width: 100% !important;
+        /* Fixed Sidebar & Fixed Main Content Layout */
+        #sidebar {
+            width: 16rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
         }
 
         @media (min-width: 1024px) {
-            #sidebar:not(.sidebar-hidden) + #mainContent {
-                margin-left: 16rem;
-                /* w-64 matches aside width (decreased by 10% from 18rem) */
+            #mainContent {
+                margin-left: 16rem !important;
                 width: calc(100% - 16rem) !important;
             }
         }
@@ -175,16 +173,35 @@
         }
 
         @media (min-width: 1024px) {
-            #sidebar:not(.sidebar-hidden) ~ #mainContent #layoutHeader,
-            #sidebar:not(.sidebar-hidden) ~ #mainContent #layoutFooter {
+            #layoutHeader,
+            #layoutFooter {
                 left: 16rem;
                 width: calc(100% - 16rem);
             }
         }
+
+        /* Admin Views Background Hero (Matched to Calm Steel-Slate Theme) */
+        body.admin-bg-hero {
+            background-color: #8fa5bc;
+            background-image: linear-gradient(to bottom, rgba(143, 165, 188, 0.82), rgba(125, 148, 172, 0.90)), url('/images/home_hero.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        html.dark body.admin-bg-hero {
+            background-color: #0b1329;
+            background-image: linear-gradient(to bottom, rgba(15, 23, 42, 0.88), rgba(11, 19, 41, 0.95)), url('/images/home_hero.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
     </style>
 </head>
 
-<body class="bg-[#eaedf2] dark:bg-slate-950 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
+<body class="admin-bg-hero bg-[#eaedf2] dark:bg-slate-950 min-h-screen flex transition-colors duration-300 overflow-x-hidden">
     <!-- Global Network Resilience Banner -->
     <div id="networkStatusBanner" class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] hidden transition-all duration-300 transform -translate-y-4 opacity-0 pointer-events-none">
         <div id="networkStatusContent" class="flex items-center gap-3 px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider shadow-2xl backdrop-blur-md border">
@@ -228,9 +245,9 @@
         </div>
     </div>
 
-    <!-- Fixed Sidebar (All controls visible, high-contrast readable text) -->
+    <!-- Fixed Sidebar (Permanently Fixed in Desktop View) -->
     <aside id="sidebar"
-        class="w-64 pnp-gradient-blue text-white hidden lg:flex flex-col fixed top-0 left-0 h-screen z-50 shadow-2xl border-r-4 border-pnp-gold/50 transition-transform duration-300 overflow-y-auto justify-between <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'sidebar-hidden' : '' %>">
+        class="w-64 pnp-gradient-blue text-white hidden lg:flex flex-col fixed top-0 left-0 h-screen z-50 shadow-2xl border-r-4 border-pnp-gold/50 overflow-y-auto justify-between shrink-0">
         <!-- Brand Header with Logo in White Circle -->
         <div class="px-4 py-3.5 border-b border-white/10 flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3 min-w-0">
@@ -244,9 +261,6 @@
                     <p class="text-[8px] text-blue-100 uppercase tracking-wider font-bold mt-1 leading-tight">Municipality Incident Management and Public Advisory Sta.Cruz</p>
                 </div>
             </div>
-            <button id="sidebarClose" class="lg:hidden text-white/50 hover:text-white transition cursor-pointer">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
 
         <!-- Navigation Menu (All items clearly visible, high contrast text) -->
@@ -254,6 +268,7 @@
             <p class="text-[9.5px] text-blue-200 uppercase tracking-[0.2em] font-black mb-1 px-3">Main Menu</p>
 
             <a href="/admin/dashboard"
+                <%= title === 'Dashboard' ? 'aria-current="page"' : '' %>
                 class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Dashboard' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                 <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Dashboard' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-chart-line text-xs"></i>
@@ -262,6 +277,7 @@
             </a>
 
             <a href="/admin/bulletins"
+                <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'aria-current="page"' : '' %>
                 class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                 <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-bullhorn text-xs"></i>
@@ -270,6 +286,7 @@
             </a>
 
             <a href="/admin/reports"
+                <%= title === 'Crime Reports' ? 'aria-current="page"' : '' %>
                 class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Crime Reports' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                 <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Crime Reports' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-file-invoice text-xs"></i>
@@ -278,6 +295,7 @@
             </a>
 
             <a href="/admin/map"
+                <%= title === 'Map' || title === 'Map Management' ? 'aria-current="page"' : '' %>
                 class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Map' || title === 'Map Management' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                 <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Map' || title === 'Map Management' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-map-location-dot text-xs"></i>
@@ -286,6 +304,7 @@
             </a>
 
             <a href="/admin/hotlines"
+                <%= title === 'Hotlines' ? 'aria-current="page"' : '' %>
                 class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Hotlines' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                 <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Hotlines' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-phone-volume text-xs"></i>
@@ -295,6 +314,7 @@
 
             <% if (user && user.role === 'superadmin') { %>
                 <a href="/admin/users"
+                    <%= title === 'Users' ? 'aria-current="page"' : '' %>
                     class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Users' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                     <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Users' ? 'text-white' : 'text-white/80' %>">
                         <i class="fas fa-users-cog text-xs"></i>
@@ -304,6 +324,7 @@
             <% } %>
 
             <a href="/admin/archive"
+                <%= title === 'Archive' ? 'aria-current="page"' : '' %>
                 class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Archive' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
                 <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Archive' ? 'text-white' : 'text-white/80' %>">
                     <i class="fas fa-box-archive text-xs"></i>
@@ -346,16 +367,9 @@
         </div>
     </aside>
 
-    <!-- Main Content Area (Navbar removed per user request) -->
+    <!-- Main Content Area (Fixed Beside Sidebar) -->
     <div id="mainContent"
-        class="hidden lg:flex flex-grow lg:ml-64 <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'main-content-expanded' : '' %> flex-col min-h-screen transition-all duration-300 w-full lg:w-auto">
-        <!-- Floating Sidebar Toggle Button (Visible if sidebar is collapsed) -->
-        <button id="sidebarToggle"
-            class="fixed top-3 left-3 z-40 w-9 h-9 rounded-xl bg-pnp-blue text-white shadow-lg flex items-center justify-center hover:bg-blue-900 transition <%= typeof hideSidebar !== 'undefined' && hideSidebar ? '' : 'lg:hidden' %> cursor-pointer"
-            title="Toggle Sidebar Navigation">
-            <i class="fas fa-bars text-sm"></i>
-        </button>
-
+        class="hidden lg:flex flex-grow lg:ml-64 flex-col min-h-screen transition-all duration-300 w-full lg:w-[calc(100%-16rem)]">
         <!-- Page Body -->
         <main class="flex-grow animate-fade-in <%= (title === 'Map Management' || title === 'Map' ? 'p-0' : (title === 'Dashboard' || title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'p-[0.95rem] sm:p-[1.425rem] pb-[4.75rem]' : 'p-4 sm:p-6 pb-20')) %>">
             <!-- Flash Messages -->
@@ -391,38 +405,8 @@
             });
         }
 
-        // Sidebar Toggle Logic
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarClose = document.getElementById('sidebarClose');
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const layoutHeader = document.getElementById('layoutHeader');
-        const layoutFooter = document.getElementById('layoutFooter');
-
-        const toggleSidebar = () => {
-            sidebar.classList.toggle('sidebar-hidden');
-            mainContent.classList.toggle('main-content-expanded');
-
-            const isHidden = sidebar.classList.contains('sidebar-hidden');
-            localStorage.setItem('sidebarHidden', isHidden);
-
-            // Invalidate map size if a Leaflet map is loaded on the page
-            setTimeout(() => {
-                if (window.map) {
-                    window.map.invalidateSize({ pan: false });
-                }
-            }, 350);
-
-            // Notify server to persist state across refreshes
-            fetch('/admin/api/toggle-sidebar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hideSidebar: isHidden })
-            }).catch(err => console.error('Failed to sync sidebar state'));
-        };
-
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        sidebarClose.addEventListener('click', toggleSidebar);
+        // Ensure sidebar state is permanently reset
+        localStorage.removeItem('sidebarHidden');
 
         // Global Double-Click and Repetitive Action Prevention
         document.addEventListener('submit', (e) => {
@@ -476,28 +460,8 @@
             lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
         }, { passive: true });
 
-        // Responsive Sidebar Initial State
-        const savedState = localStorage.getItem('sidebarHidden');
-        const forceHide = <%= typeof hideSidebar !== 'undefined' && hideSidebar ? 'true' : 'false' %>;
-
-
-        if (forceHide || window.innerWidth < 1024 || savedState === 'true') {
-            sidebar.classList.add('sidebar-hidden');
-            mainContent.classList.add('main-content-expanded');
-
-            // If it was forced, save it to local storage for consistency
-            if (forceHide) localStorage.setItem('sidebarHidden', 'true');
-        } else if (savedState === 'false' && window.innerWidth >= 1024) {
-            sidebar.classList.remove('sidebar-hidden');
-            mainContent.classList.remove('main-content-expanded');
-        }
-
-        // Handle viewport resize for flexible responsiveness
+        // Handle viewport resize
         window.addEventListener('resize', () => {
-            if (window.innerWidth < 1024) {
-                sidebar.classList.add('sidebar-hidden');
-                mainContent.classList.add('main-content-expanded');
-            }
             if (window.map) {
                 window.map.invalidateSize({ pan: false });
             }
@@ -716,8 +680,8 @@
             const confirmed = await confirmFn({
                 title: "Sign Out Confirmation",
                 message: "Are you sure you want to terminate your active administrative session? Any unsaved edits will be lost.",
-                confirmText: "Sign Out",
-                cancelText: "Stay Logged In",
+                confirmText: "Confirm",
+                cancelText: "Cancel",
                 type: "danger"
             });
 
@@ -726,6 +690,44 @@
             }
             return false;
         };
+
+        // Prevent refreshing/reloading when selecting the same page again on the sidebar
+        document.addEventListener('click', function(e) {
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) return;
+
+            const link = e.target.closest('#sidebar nav a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            if (!href || href === '#' || href.startsWith('javascript:') || href.includes('/admin/logout')) {
+                return;
+            }
+
+            try {
+                const currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase();
+                const targetUrl = new URL(link.href, window.location.origin);
+                const targetPath = targetUrl.pathname.replace(/\/+$/, '').toLowerCase();
+
+                // If user selected the same page they are already on
+                if (currentPath === targetPath || (link.classList.contains('sidebar-item-active') && currentPath === targetPath)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    // If currently on the Crime Map page, smoothly re-center Santa Cruz in the middle
+                    if (currentPath === '/admin/map') {
+                        if (typeof window.zoomToLocationOverviewMiddle === 'function') {
+                            window.zoomToLocationOverviewMiddle(1.4);
+                        } else if (typeof window.fitWholeMapBounds === 'function') {
+                            window.fitWholeMapBounds();
+                        }
+                    }
+                    return false;
+                }
+            } catch (err) {
+                // Ignore parse errors
+            }
+        }, true);
     </script>
 
     <!-- Global Custom Designed Tooltip Component -->

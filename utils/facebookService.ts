@@ -44,6 +44,20 @@ export interface FacebookPost {
   video_url?: string;
 }
 
+export interface SyncedPostItem {
+  id: string;
+  title: string;
+  message: string;
+  category: string;
+  date: string;
+  status: 'added' | 'updated' | 'skipped' | 'failed';
+  statusLabel: string;
+  permalink: string;
+  photos: string[];
+  videos: string[];
+  error?: string;
+}
+
 export interface SyncStats {
   retrieved: number;
   added: number;
@@ -51,9 +65,12 @@ export interface SyncStats {
   skipped: number;
   failed: number;
   errors: string[];
+  items?: SyncedPostItem[];
 }
 
 export class FacebookService {
+  private static cachedNumericPageId: string | null = null;
+
   private static getCredentials() {
     const pageId = process.env.FB_PAGE_ID || 'stacruzpolicelagunappo';
     const accessToken = process.env.FB_PAGE_ACCESS_TOKEN || (process.env.FB_APP_ID && process.env.FB_APP_SECRET ? `${process.env.FB_APP_ID}|${process.env.FB_APP_SECRET}` : '');
@@ -71,21 +88,27 @@ export class FacebookService {
       return [];
     }
 
-    // Resolve exact numeric Page ID from Meta Graph API
-    let numericPageId = pageId;
-    try {
-      const meRes = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${accessToken}`);
-      if (meRes.ok) {
-        const meData = await meRes.json();
-        if (meData && meData.id) {
-          numericPageId = meData.id;
-          console.log(`[FACEBOOK SYNC] Resolved Meta Page Name: "${meData.name}", Numeric ID: ${numericPageId}`);
+    // Resolve exact numeric Page ID from Meta Graph API (cached in-memory for speed)
+    let numericPageId = this.cachedNumericPageId || pageId;
+    if (!this.cachedNumericPageId && !/^\d+$/.test(pageId)) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const meRes = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${accessToken}`, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData && meData.id) {
+            numericPageId = meData.id;
+            this.cachedNumericPageId = meData.id;
+            console.log(`[FACEBOOK SYNC] Resolved Meta Page Name: "${meData.name}", Numeric ID: ${numericPageId}`);
+          }
         }
-      }
-    } catch (_) { }
+      } catch (_) { }
+    }
 
     const fields = 'id,message,story,caption,created_time,full_picture,picture,source,attachments{description,media,media_type,target,title,type,url,subattachments{description,media,media_type,target,title,type,url}},permalink_url';
-    const batchLimit = Math.min(25, limit);
+    const batchLimit = Math.min(50, limit);
     const initialEndpoints = [
       `https://graph.facebook.com/v19.0/${numericPageId}/published_posts?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`,
       `https://graph.facebook.com/v19.0/${numericPageId}/feed?fields=${fields}&limit=${batchLimit}&access_token=${accessToken}`,
@@ -101,13 +124,17 @@ export class FacebookService {
 
       let currentUrl: string | null = startUrl;
       let pageCount = 0;
-      const MAX_PAGES = 4; // Safety limit for pagination loop
+      const MAX_PAGES = 3;
 
       while (currentUrl && pageCount < MAX_PAGES && allPosts.length < limit) {
         pageCount++;
         try {
           console.log(`[FACEBOOK SYNC API] Fetching page ${pageCount}: ${currentUrl.split('?')[0]}`);
-          const response = await fetch(currentUrl);
+          const controller = new AbortController();
+          const tId = setTimeout(() => controller.abort(), 4000);
+          const response = await fetch(currentUrl, { signal: controller.signal });
+          clearTimeout(tId);
+
           if (!response.ok) {
             const errBody = await response.json().catch(() => ({}));
             console.warn(`[FACEBOOK SYNC API NOTICE] Endpoint returned HTTP ${response.status}:`, errBody);
@@ -306,8 +333,12 @@ export class FacebookService {
       });
 
       const seenBatchUrls = new Set<string>();
+      const syncedItems: SyncedPostItem[] = [];
 
       for (const post of posts) {
+        let postStatus: 'added' | 'updated' | 'skipped' | 'failed' = 'skipped';
+        let postStatusLabel = 'Skipped';
+
         try {
           const rawMessage = post.message?.trim() || post.story?.trim() || post.caption?.trim() || '';
           const cleanMessage = sanitizeUnicode(rawMessage);
@@ -319,6 +350,18 @@ export class FacebookService {
 
           if (seenBatchUrls.has(fbPermalink)) {
             stats.skipped++;
+            syncedItems.push({
+              id: post.id || String(Math.random()),
+              title,
+              message: cleanMessage,
+              category: 'General Announcement',
+              date: post.created_time ? new Date(post.created_time).toISOString() : new Date().toISOString(),
+              status: 'skipped',
+              statusLabel: 'Duplicate in Batch',
+              permalink: fbPermalink,
+              photos: [],
+              videos: []
+            });
             continue;
           }
           seenBatchUrls.add(fbPermalink);
@@ -373,28 +416,77 @@ export class FacebookService {
               updated_at: new Date().toISOString()
             });
             stats.updated++;
+            postStatus = 'updated';
+            postStatusLabel = 'Updated';
             console.log(`[FACEBOOK SYNC UPSERT] Updated FB Post ${post.id} (${fbPermalink})`);
           } else {
-            // Live URL Health Verification for new posts
-            const isUrlAlive = await FacebookScraper.verifyUrlHealth(fbPermalink);
+            // Live URL Health Verification for new posts:
+            // If post was returned directly by Graph API, it is guaranteed alive
+            const isKnownAlive = !!post.id && !post.id.startsWith('post_');
+            let isUrlAlive = isKnownAlive;
+            if (!isUrlAlive) {
+              isUrlAlive = await FacebookScraper.verifyUrlHealth(fbPermalink);
+            }
+
             if (!isUrlAlive) {
               console.warn(`[FACEBOOK SYNC] Skipping broken/unreachable URL: ${fbPermalink}`);
               stats.skipped++;
+              syncedItems.push({
+                id: post.id || String(Math.random()),
+                title,
+                message: cleanMessage,
+                category: autoCategory,
+                date: originalDate,
+                status: 'skipped',
+                statusLabel: 'Unreachable URL',
+                permalink: fbPermalink,
+                photos,
+                videos
+              });
               continue;
             }
 
             await db.collection('bulletins').add(bulletinRecord);
             stats.added++;
+            postStatus = 'added';
+            postStatusLabel = 'Newly Added';
             console.log(`[FACEBOOK SYNC INSERT] Inserted FB Post ${post.id} as [${autoCategory}] with ${photos.length} photos and ${videos.length} videos`);
           }
+
+          syncedItems.push({
+            id: post.id || String(Math.random()),
+            title,
+            message: cleanMessage,
+            category: autoCategory,
+            date: originalDate,
+            status: postStatus,
+            statusLabel: postStatusLabel,
+            permalink: fbPermalink,
+            photos,
+            videos
+          });
         } catch (postErr: any) {
           stats.failed++;
           const errMsg = `Post ${post.id}: ${postErr.message || postErr}`;
           console.error(`[FACEBOOK SYNC POST ERROR] ${errMsg}`);
           stats.errors.push(errMsg);
+          syncedItems.push({
+            id: post.id || String(Math.random()),
+            title: post.message ? post.message.split('\n')[0] : 'Error Post',
+            message: postErr.message || String(postErr),
+            category: 'General Announcement',
+            date: post.created_time ? new Date(post.created_time).toISOString() : new Date().toISOString(),
+            status: 'failed',
+            statusLabel: 'Failed',
+            permalink: post.permalink_url || '#',
+            photos: [],
+            videos: [],
+            error: postErr.message || String(postErr)
+          });
         }
       }
 
+      stats.items = syncedItems;
       console.log(`[FACEBOOK SYNC COMPLETED] Retrieved: ${stats.retrieved}, Added: ${stats.added}, Updated: ${stats.updated}, Skipped: ${stats.skipped}, Failed: ${stats.failed}`);
       return stats;
     } catch (err: any) {

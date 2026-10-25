@@ -6,13 +6,13 @@
 <div class="space-y-[1.9rem] animate-fade-in px-[0.95rem] lg:px-[0.95rem] max-w-7xl mx-auto w-full transition-all duration-300">
     <!-- Header with Stats -->
     <div class="w-full transition-all duration-300">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs p-5 md:p-6 rounded-none flex flex-col lg:flex-row items-center justify-between lg:space-x-8 space-y-6 lg:space-y-0 group w-full transition-all duration-300">
+        <div class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border border-white/80 dark:border-slate-800 shadow-sm p-5 md:p-6 rounded-2xl md:rounded-3xl flex flex-col lg:flex-row items-center justify-between lg:space-x-8 space-y-6 lg:space-y-0 group w-full transition-all duration-300">
             <!-- Icon & Stats in Enhanced Inside Containers -->
             <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto justify-center lg:justify-start">
                 <div class="bg-slate-50/90 dark:bg-slate-800/70 p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-2xs flex items-center space-x-4 w-full sm:w-auto">
-                    <!-- White circle enclosing MIMPAS logo -->
-                    <div class="w-12 h-12 rounded-full bg-white dark:bg-slate-800 p-1 flex items-center justify-center border-2 border-slate-200 dark:border-slate-700 shadow-xs shrink-0 overflow-hidden">
-                        <img src="/favicon.png" alt="MIMPAS Seal" class="w-full h-full object-contain rounded-full" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                    <!-- Public Advisories Emblem -->
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                        <i class="fas fa-bullhorn text-lg"></i>
                     </div>
                     <div>
                         <h4 class="text-[9px] font-black text-pnp-blue dark:text-blue-300 uppercase tracking-[0.15em] leading-none opacity-80">Public Advisories</h4>
@@ -47,8 +47,8 @@
         </div>
     </div>
 
-    <!-- Bulletin Grid (Outer box without curve sides) -->
-    <div class="bg-white dark:bg-slate-900 rounded-none shadow-xs border border-slate-200/90 dark:border-slate-800 overflow-hidden min-h-[500px]">
+    <!-- Bulletin Grid -->
+    <div class="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-800 overflow-hidden min-h-[500px]">
         <div class="p-6 sm:p-8 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/60 flex flex-col lg:flex-row justify-between items-center gap-6">
             <div>
                 <h3 class="font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] text-sm flex items-center gap-2">
@@ -211,7 +211,7 @@
         const confirmed = await confirmFn({
             title: "Delete Bulletin",
             message: "Are you sure you want to delete this bulletin? It will be moved to the Archive for easy recovery.",
-            confirmText: "Move to Archive",
+            confirmText: "Confirm",
             cancelText: "Cancel",
             type: "danger"
         });
@@ -1496,7 +1496,8 @@
                 alertFn({
                     title: 'No Changes Detected',
                     message: 'No changes were made to this bulletin. The notice was not modified or reloaded.',
-                    confirmText: 'Understood',
+                    confirmText: 'Confirm',
+                    cancelText: 'Cancel',
                     type: 'info'
                 });
                 closePublishNoticeModal();
@@ -2048,7 +2049,506 @@
     </div>
 </div>
 
+<!-- Facebook Sync Center In-Progress Progress Modal -->
+<div id="fbSyncToast" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-auto">
+    <div id="fbSyncCard" class="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl border border-white/80 dark:border-slate-800 text-center space-y-5 transform scale-95 transition-all duration-300">
+        <!-- Top decorative gradient line -->
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-pnp-blue rounded-t-3xl"></div>
+
+        <!-- Center Animated Icon -->
+        <div class="relative w-16 h-16 mx-auto flex items-center justify-center mt-2">
+            <div id="fbSyncHalo" class="absolute inset-0 rounded-2xl bg-blue-500/20 animate-ping"></div>
+            <div class="relative w-14 h-14 rounded-2xl bg-[#1877F2] flex items-center justify-center text-white shadow-xl shadow-blue-500/30">
+                <i id="fbSyncToastIcon" class="fab fa-facebook text-2xl"></i>
+            </div>
+        </div>
+
+        <!-- Title & Status Message -->
+        <div class="space-y-1.5">
+            <h3 id="fbSyncToastTitle" class="text-base font-black uppercase tracking-wider text-slate-800 dark:text-white">
+                Facebook Sync in Progress
+            </h3>
+            <p id="fbSyncToastMsg" class="text-xs font-semibold text-slate-500 dark:text-slate-300 leading-relaxed max-w-xs mx-auto">
+                Connecting to PNP Sta. Cruz Facebook Page and syncing latest posts...
+            </p>
+        </div>
+
+        <!-- Progress Container -->
+        <div class="space-y-2 pt-1 text-left bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/60 shadow-inner">
+            <div class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                <span id="fbSyncStatusLabel">Synchronizing Feed</span>
+                <span id="fbSyncPercentage" class="tabular-nums">Connecting...</span>
+            </div>
+            <!-- Progress Bar Track -->
+            <div class="w-full h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-300/80 dark:border-slate-700 shadow-inner">
+                <div id="fbSyncProgressBar" class="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400 rounded-full transition-all duration-300 w-1/4"></div>
+            </div>
+        </div>
+
+        <!-- Cancel Sync Action Button -->
+        <div class="pt-1">
+            <button type="button" onclick="cancelFacebookSync()" class="w-full py-3 px-4 rounded-2xl bg-slate-100 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/40 text-slate-600 hover:text-red-600 dark:text-slate-300 dark:hover:text-red-400 border border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-800/60 text-xs font-black uppercase tracking-widest transition flex items-center justify-center space-x-2 cursor-pointer shadow-xs">
+                <i class="fas fa-times text-xs"></i>
+                <span>Cancel Sync</span>
+            </button>
+        </div>
+
+        <!-- Subtext indicator -->
+        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center justify-center gap-1.5 pt-0.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            Official PNP Advisory Channel
+        </p>
+    </div>
+</div>
+
+<!-- ========================================================== -->
+<!-- Rich Facebook Sync Complete Modal (Showing Fetched Data)    -->
+<!-- ========================================================== -->
+<div id="fbSyncCompleteModal" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-5 bg-slate-950/65 backdrop-blur-md transition-all duration-300 opacity-0 pointer-events-auto">
+    <div id="fbSyncCompleteCard" class="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl w-full max-w-5xl max-h-[90vh] rounded-3xl md:rounded-[2.5rem] shadow-2xl border border-white/80 dark:border-slate-800 flex flex-col overflow-hidden transform scale-95 transition-all duration-300">
+        <!-- Top decorative gradient line -->
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-emerald-500 to-pnp-blue rounded-t-3xl"></div>
+
+        <!-- Modal Header -->
+        <div class="p-5 sm:p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center text-xl shadow-lg shadow-blue-500/25 shrink-0">
+                    <i class="fab fa-facebook-f"></i>
+                </div>
+                <div>
+                    <h3 class="text-base sm:text-lg font-black uppercase tracking-wider text-slate-900 dark:text-white leading-tight">
+                        Facebook Sync Complete
+                    </h3>
+                    <p class="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
+                        Synchronization Stream • PNP Sta. Cruz Official Page
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="closeFbSyncCompleteModal(false)" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition flex items-center justify-center cursor-pointer shadow-xs" title="Close Dialog">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Summary Statistics Cards Row -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 p-4 sm:p-5 bg-slate-50/80 dark:bg-slate-800/50 border-b border-gray-100 dark:border-slate-800 shrink-0">
+            <div class="flex items-center space-x-2.5 p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-800/60 shadow-2xs">
+                <div class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+                    <i class="fas fa-cloud-arrow-down"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 block truncate">Retrieved</span>
+                    <span id="fbModalRetrieved" class="text-base font-black text-slate-800 dark:text-white tabular-nums">0</span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2.5 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 shadow-2xs">
+                <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block truncate">Newly Added</span>
+                    <span id="fbModalAdded" class="text-base font-black text-slate-800 dark:text-white tabular-nums">0</span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2.5 p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 shadow-2xs">
+                <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+                    <i class="fas fa-arrows-rotate"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block truncate">Updated</span>
+                    <span id="fbModalUpdated" class="text-base font-black text-slate-800 dark:text-white tabular-nums">0</span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2.5 p-3 rounded-2xl bg-slate-100 dark:bg-slate-700/50 border border-slate-200/80 dark:border-slate-600/60 shadow-2xs">
+                <div class="w-8 h-8 rounded-xl bg-slate-500 text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+                    <i class="fas fa-forward"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-400 block truncate">Skipped</span>
+                    <span id="fbModalSkipped" class="text-base font-black text-slate-800 dark:text-white tabular-nums">0</span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2.5 p-3 rounded-2xl bg-red-50 dark:bg-red-950/40 border border-red-200/80 dark:border-red-800/60 col-span-2 sm:col-span-1 shadow-2xs">
+                <div class="w-8 h-8 rounded-xl bg-red-600 text-white flex items-center justify-center text-xs shrink-0 shadow-xs">
+                    <i class="fas fa-triangle-exclamation"></i>
+                </div>
+                <div class="min-w-0">
+                    <span class="text-[9px] font-black uppercase tracking-wider text-red-600 dark:text-red-400 block truncate">Failed</span>
+                    <span id="fbModalFailed" class="text-base font-black text-slate-800 dark:text-white tabular-nums">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="p-3.5 sm:p-4 bg-white/70 dark:bg-slate-900/70 border-b border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+            <!-- Filter Tabs -->
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0" id="fbModalFilterTabs">
+                <button type="button" onclick="setFbModalFilter('all')" data-filter="all" class="fb-filter-tab px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-pnp-blue text-white shadow-xs cursor-pointer">
+                    All (<span id="fbFilterCountAll">0</span>)
+                </button>
+                <button type="button" onclick="setFbModalFilter('updated')" data-filter="updated" class="fb-filter-tab px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">
+                    Updated (<span id="fbFilterCountUpdated">0</span>)
+                </button>
+                <button type="button" onclick="setFbModalFilter('added')" data-filter="added" class="fb-filter-tab px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">
+                    Added (<span id="fbFilterCountAdded">0</span>)
+                </button>
+                <button type="button" onclick="setFbModalFilter('skipped')" data-filter="skipped" class="fb-filter-tab px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer">
+                    Skipped (<span id="fbFilterCountSkipped">0</span>)
+                </button>
+            </div>
+
+            <!-- Search Field -->
+            <div class="relative w-full sm:w-64">
+                <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none"></i>
+                <input type="text" id="fbModalSearchInput" oninput="renderFbModalItems()" placeholder="Search synchronized posts..." class="w-full pl-9 pr-3.5 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-gray-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-800 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+        </div>
+
+        <!-- Scrollable Fetched Posts Data List -->
+        <div id="fbModalItemsContainer" class="flex-grow overflow-y-auto p-4 sm:p-5 space-y-3">
+            <div id="fbModalItemsList" class="space-y-3">
+                <!-- Dynamically populated via renderFbModalItems() -->
+            </div>
+            <!-- Empty state -->
+            <div id="fbModalEmptyState" class="hidden text-center py-12 space-y-3">
+                <div class="w-16 h-16 mx-auto rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-2xl">
+                    <i class="fab fa-facebook text-slate-400"></i>
+                </div>
+                <h4 class="text-sm font-black uppercase tracking-wider text-slate-700 dark:text-slate-200">No Posts Match Filter</h4>
+                <p class="text-xs text-slate-400">Try adjusting your search query or selecting a different status tab.</p>
+            </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="p-4 sm:p-5 border-t border-gray-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400" id="fbModalFooterInfo">
+                Showing all retrieved feed items
+            </div>
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+                <button type="button" onclick="closeFbSyncCompleteModal(false)" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-black uppercase tracking-wider transition cursor-pointer border border-gray-200 dark:border-slate-700 shadow-xs">
+                    Close
+                </button>
+                <button type="button" onclick="closeFbSyncCompleteModal(true)" class="flex-1 sm:flex-none px-7 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider transition shadow-md hover:shadow-lg flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fas fa-check-circle text-xs"></i>
+                    <span>Done & Refresh</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+let fbSyncProgressTimer = null;
+let fbSyncAbortController = null;
+let currentFbSyncItems = [];
+let currentFbModalFilter = 'all';
+
+function showFbSyncToast(title, msg, isSpinning = true) {
+    const modal = document.getElementById('fbSyncToast');
+    const card = document.getElementById('fbSyncCard');
+    const toastTitle = document.getElementById('fbSyncToastTitle');
+    const toastMsg = document.getElementById('fbSyncToastMsg');
+    const toastIcon = document.getElementById('fbSyncToastIcon');
+    const halo = document.getElementById('fbSyncHalo');
+    const progressBar = document.getElementById('fbSyncProgressBar');
+    const percentEl = document.getElementById('fbSyncPercentage');
+    const statusLabel = document.getElementById('fbSyncStatusLabel');
+    if (!modal) return;
+
+    if (toastTitle) toastTitle.textContent = title;
+    if (toastMsg) toastMsg.textContent = msg;
+
+    if (isSpinning) {
+        if (toastIcon) toastIcon.className = 'fas fa-spinner fa-spin text-2xl';
+        if (halo) halo.classList.remove('hidden');
+        if (statusLabel) statusLabel.textContent = 'Synchronizing Feed';
+        if (progressBar) {
+            progressBar.className = 'h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400 rounded-full transition-all duration-300';
+            progressBar.style.width = '25%';
+        }
+        if (percentEl) percentEl.textContent = 'Connecting...';
+
+        let currentWidth = 25;
+        if (fbSyncProgressTimer) clearInterval(fbSyncProgressTimer);
+        fbSyncProgressTimer = setInterval(() => {
+            if (currentWidth < 90) {
+                currentWidth += Math.floor(Math.random() * 12) + 6;
+                if (currentWidth > 90) currentWidth = 90;
+                if (progressBar) progressBar.style.width = currentWidth + '%';
+                if (percentEl) percentEl.textContent = `${currentWidth}%`;
+                if (statusLabel) {
+                    if (currentWidth > 60) statusLabel.textContent = 'Normalizing Data...';
+                    else if (currentWidth > 35) statusLabel.textContent = 'Streaming Feed...';
+                }
+            }
+        }, 220);
+    } else {
+        if (fbSyncProgressTimer) clearInterval(fbSyncProgressTimer);
+        if (toastIcon) toastIcon.className = 'fas fa-check text-2xl text-white';
+        if (halo) halo.classList.add('hidden');
+        if (statusLabel) statusLabel.textContent = 'Completed';
+        if (progressBar) {
+            progressBar.className = 'h-full bg-emerald-500 rounded-full transition-all duration-300';
+            progressBar.style.width = '100%';
+        }
+        if (percentEl) percentEl.textContent = '100%';
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    void modal.offsetWidth;
+    modal.classList.remove('opacity-0');
+    modal.classList.add('opacity-100');
+    if (card) {
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }
+}
+
+function hideFbSyncToast() {
+    if (fbSyncProgressTimer) {
+        clearInterval(fbSyncProgressTimer);
+        fbSyncProgressTimer = null;
+    }
+    const modal = document.getElementById('fbSyncToast');
+    const card = document.getElementById('fbSyncCard');
+    if (!modal) return;
+
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    if (card) {
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+    }
+    setTimeout(() => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+    }, 280);
+}
+
+function cancelFacebookSync() {
+    if (fbSyncAbortController) {
+        fbSyncAbortController.abort();
+        fbSyncAbortController = null;
+    }
+    hideFbSyncToast();
+    const btn1 = document.getElementById('syncFbBtn');
+    const icon1 = document.getElementById('syncFbIcon');
+    const text1 = document.getElementById('syncFbText');
+    const btn2 = document.getElementById('syncFbToolbarBtn');
+    const icon2 = document.getElementById('syncFbToolbarIcon');
+    const text2 = document.getElementById('syncFbToolbarText');
+
+    if (btn1) { btn1.disabled = false; if (icon1) icon1.className = 'fab fa-facebook text-sm'; if (text1) text1.textContent = 'Sync Facebook'; }
+    if (btn2) { btn2.disabled = false; if (icon2) icon2.className = 'fab fa-facebook text-sm'; if (text2) text2.textContent = 'Sync Facebook'; }
+
+    const alertFn = window.strategicAlert || (async ({ message }) => alert(message));
+    alertFn({
+        title: 'Sync Cancelled',
+        message: 'Facebook synchronization was cancelled.',
+        type: 'info',
+        confirmText: 'Confirm',
+        cancelText: 'Cancel'
+    });
+}
+
+function showFbSyncCompleteModal(stats, items = []) {
+    currentFbSyncItems = items || [];
+    currentFbModalFilter = 'all';
+
+    // Populate Counters
+    const rEl = document.getElementById('fbModalRetrieved');
+    const aEl = document.getElementById('fbModalAdded');
+    const uEl = document.getElementById('fbModalUpdated');
+    const sEl = document.getElementById('fbModalSkipped');
+    const fEl = document.getElementById('fbModalFailed');
+
+    if (rEl) rEl.textContent = stats.retrieved || currentFbSyncItems.length || 0;
+    if (aEl) aEl.textContent = stats.added || 0;
+    if (uEl) uEl.textContent = stats.updated || 0;
+    if (sEl) sEl.textContent = stats.skipped || 0;
+    if (fEl) fEl.textContent = stats.failed || 0;
+
+    // Filter Tab Counts
+    const cAll = document.getElementById('fbFilterCountAll');
+    const cUp = document.getElementById('fbFilterCountUpdated');
+    const cAdd = document.getElementById('fbFilterCountAdded');
+    const cSkip = document.getElementById('fbFilterCountSkipped');
+
+    if (cAll) cAll.textContent = currentFbSyncItems.length;
+    if (cUp) cUp.textContent = currentFbSyncItems.filter(i => i.status === 'updated').length;
+    if (cAdd) cAdd.textContent = currentFbSyncItems.filter(i => i.status === 'added').length;
+    if (cSkip) cSkip.textContent = currentFbSyncItems.filter(i => i.status === 'skipped').length;
+
+    // Reset Search
+    const searchInput = document.getElementById('fbModalSearchInput');
+    if (searchInput) searchInput.value = '';
+
+    renderFbModalItems();
+
+    const modal = document.getElementById('fbSyncCompleteModal');
+    const card = document.getElementById('fbSyncCompleteCard');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    void modal.offsetWidth;
+    modal.classList.remove('opacity-0');
+    modal.classList.add('opacity-100');
+    if (card) {
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }
+}
+
+function closeFbSyncCompleteModal(reload = false) {
+    const modal = document.getElementById('fbSyncCompleteModal');
+    const card = document.getElementById('fbSyncCompleteCard');
+    if (!modal) return;
+
+    modal.classList.remove('opacity-100');
+    modal.classList.add('opacity-0');
+    if (card) {
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+    }
+    setTimeout(() => {
+        modal.classList.remove('flex');
+        modal.classList.add('hidden');
+        if (reload) {
+            window.location.reload();
+        }
+    }, 280);
+}
+
+function setFbModalFilter(filter) {
+    currentFbModalFilter = filter;
+    document.querySelectorAll('.fb-filter-tab').forEach(tab => {
+        if (tab.getAttribute('data-filter') === filter) {
+            tab.className = 'fb-filter-tab px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-pnp-blue text-white shadow-xs cursor-pointer';
+        } else {
+            tab.className = 'fb-filter-tab px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 cursor-pointer';
+        }
+    });
+    renderFbModalItems();
+}
+
+function renderFbModalItems() {
+    const listEl = document.getElementById('fbModalItemsList');
+    const emptyEl = document.getElementById('fbModalEmptyState');
+    const footerInfo = document.getElementById('fbModalFooterInfo');
+    const query = (document.getElementById('fbModalSearchInput')?.value || '').toLowerCase().trim();
+    if (!listEl) return;
+
+    let filtered = currentFbSyncItems.slice();
+
+    if (currentFbModalFilter !== 'all') {
+        filtered = filtered.filter(item => item.status === currentFbModalFilter);
+    }
+
+    if (query) {
+        filtered = filtered.filter(item => 
+            (item.title && item.title.toLowerCase().includes(query)) ||
+            (item.message && item.message.toLowerCase().includes(query)) ||
+            (item.category && item.category.toLowerCase().includes(query))
+        );
+    }
+
+    if (footerInfo) {
+        footerInfo.textContent = `Showing ${filtered.length} of ${currentFbSyncItems.length} synchronized items`;
+    }
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+    }
+
+    if (emptyEl) emptyEl.classList.add('hidden');
+
+    listEl.innerHTML = filtered.map(item => {
+        const photoUrl = (item.photos && item.photos.length > 0) ? item.photos[0] : null;
+        let statusBadgeClass = 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-300/80 dark:border-slate-700';
+        let statusIcon = 'fa-forward';
+        if (item.status === 'added') {
+            statusBadgeClass = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700';
+            statusIcon = 'fa-plus-circle';
+        } else if (item.status === 'updated') {
+            statusBadgeClass = 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-300 dark:border-blue-700';
+            statusIcon = 'fa-arrows-rotate';
+        } else if (item.status === 'failed') {
+            statusBadgeClass = 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300 border-red-300 dark:border-red-700';
+            statusIcon = 'fa-triangle-exclamation';
+        }
+
+        const dateFormatted = item.date ? new Date(item.date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        }) : 'Official Post';
+
+        return `
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-800/80 border border-gray-200/90 dark:border-slate-700 shadow-2xs hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 group">
+            <div class="flex items-start space-x-3.5 min-w-0 flex-1">
+                ${photoUrl ? `
+                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 shrink-0 shadow-2xs">
+                        <img src="${photoUrl}" alt="Post Media" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.parentElement.style.display='none'">
+                    </div>
+                ` : `
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/50 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                        <i class="fab fa-facebook text-lg"></i>
+                    </div>
+                `}
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                        <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border ${statusBadgeClass} inline-flex items-center gap-1">
+                            <i class="fas ${statusIcon} text-[8px]"></i>
+                            <span>${item.statusLabel || item.status}</span>
+                        </span>
+                        <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600">
+                            ${item.category || 'General Announcement'}
+                        </span>
+                    </div>
+                    <h4 class="text-xs font-black text-slate-900 dark:text-white line-clamp-1 leading-snug">
+                        ${item.title || 'Official Facebook Post'}
+                    </h4>
+                    <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                        ${item.message || ''}
+                    </p>
+                    <div class="flex items-center space-x-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 mt-1">
+                        <span class="inline-flex items-center gap-1">
+                            <i class="fas fa-calendar-alt text-[9px]"></i>
+                            <span>${dateFormatted}</span>
+                        </span>
+                        ${(item.photos && item.photos.length > 1) ? `
+                            <span class="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                <i class="fas fa-images text-[9px]"></i>
+                                <span>${item.photos.length} photos</span>
+                            </span>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+
+            <div class="shrink-0 flex items-center space-x-2 self-end sm:self-center w-full sm:w-auto justify-end">
+                ${item.permalink ? `
+                    <a href="${item.permalink}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-600 hover:text-white dark:bg-blue-950/50 dark:hover:bg-blue-600 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-wider transition border border-blue-200/80 dark:border-blue-800/60 inline-flex items-center gap-1.5 shadow-2xs">
+                        <i class="fab fa-facebook text-xs"></i>
+                        <span>View Post</span>
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+        `;
+    }).join('');
+}
+
 async function triggerFacebookSync() {
     const btn1 = document.getElementById('syncFbBtn');
     const icon1 = document.getElementById('syncFbIcon');
@@ -2064,6 +2564,8 @@ async function triggerFacebookSync() {
     };
 
     setLoading(true);
+    fbSyncAbortController = new AbortController();
+    showFbSyncToast('Facebook Sync in Progress', 'Connecting to PNP Sta. Cruz Facebook Page and syncing latest posts...', true);
 
     try {
         let response = await fetch('/admin/api/sync-facebook', {
@@ -2071,7 +2573,8 @@ async function triggerFacebookSync() {
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
-            }
+            },
+            signal: fbSyncAbortController.signal
         });
 
         if (response.status === 404) {
@@ -2080,23 +2583,48 @@ async function triggerFacebookSync() {
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                }
+                },
+                signal: fbSyncAbortController.signal
             });
         }
 
         const data = await response.json();
 
         if (data.success) {
-            alert(`Facebook Sync Complete!\n\n${data.message}`);
-            window.location.reload();
+            showFbSyncToast('Facebook Sync Complete', data.message || 'Latest official announcements synchronized successfully.', false);
+            setTimeout(() => {
+                hideFbSyncToast();
+                showFbSyncCompleteModal(data.stats || {}, data.items || []);
+            }, 600);
         } else {
-            alert(`Facebook Sync Error:\n\n${data.error || 'Failed to fetch Facebook posts.'}`);
+            hideFbSyncToast();
+            const alertFn = window.strategicAlert || (async ({ message }) => alert(message));
+            await alertFn({
+                title: 'Facebook Sync Error',
+                message: data.error || 'Failed to fetch Facebook posts. Please verify network access or credentials.',
+                type: 'danger',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel'
+            });
         }
     } catch (err) {
+        if (err.name === 'AbortError') {
+            console.log('Facebook sync aborted by user.');
+            return;
+        }
         console.error('Facebook sync error:', err);
-        alert('Network or server error during Facebook sync. Check console logs.');
+        hideFbSyncToast();
+        const alertFn = window.strategicAlert || (async ({ message }) => alert(message));
+        await alertFn({
+            title: 'Connection Notice',
+            message: 'Network or server error encountered during Facebook synchronization.',
+            type: 'warning',
+            confirmText: 'Confirm',
+            cancelText: 'Cancel'
+        });
     } finally {
         setLoading(false);
+        fbSyncAbortController = null;
     }
 }
 </script>

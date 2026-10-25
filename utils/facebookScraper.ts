@@ -31,7 +31,7 @@ export class FacebookScraper {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 1200);
 
       const response = await fetch(url, {
         method: 'HEAD',
@@ -49,8 +49,11 @@ export class FacebookScraper {
 
     // Fallback validation via Facebook oEmbed endpoint
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1200);
       const oembedUrl = `https://www.facebook.com/plugins/post/oembed.json/?url=${encodeURIComponent(url)}`;
-      const res = await fetch(oembedUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      const res = await fetch(oembedUrl, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: controller.signal });
+      clearTimeout(timeoutId);
       return res.ok;
     } catch (_) {
       return false;

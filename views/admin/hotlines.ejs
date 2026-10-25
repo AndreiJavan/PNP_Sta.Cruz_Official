@@ -2,7 +2,7 @@
     <!-- Add Hotline Form -->
     <div class="lg:col-span-1">
         <div
-            class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+            class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-700/80 overflow-hidden">
             <div class="p-6 border-b border-gray-50 dark:border-slate-700">
                 <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">Add New Hotline
                 </h3>
@@ -46,7 +46,7 @@
     <!-- Hotline List -->
     <div class="lg:col-span-2">
         <div
-            class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 overflow-hidden">
+            class="bg-white/85 dark:bg-slate-800/85 backdrop-blur-md rounded-2xl md:rounded-3xl shadow-sm border border-white/80 dark:border-slate-700/80 overflow-hidden">
             <div class="p-6 border-b border-gray-50 dark:border-slate-700">
                 <h3 class="font-bold text-pnp-blue dark:text-pnp-gold uppercase tracking-widest text-xs">Emergency
                     Directory</h3>
@@ -318,7 +318,8 @@
         const confirmed = await confirmFn({
             title: 'Confirm Hotline Creation',
             message: `Are you sure you want to save "${agencyCheck.normalized}" with contact number "${numCheck.normalized}" under category "${catCheck.normalized}" to the directory?`,
-            confirmText: 'Save Hotline',
+            confirmText: 'Confirm',
+            cancelText: 'Cancel',
             type: 'info'
         });
 
@@ -374,7 +375,8 @@
                 alertFn({
                     title: 'No Changes Detected',
                     message: 'No changes were made to this hotline. The record was not modified or reloaded.',
-                    confirmText: 'Understood',
+                    confirmText: 'Confirm',
+                    cancelText: 'Cancel',
                     type: 'info'
                 });
                 cancelEditHotline(id);
@@ -425,7 +427,8 @@
             const confirmed = await confirmFn({
                 title: 'Confirm Hotline Update',
                 message: `Are you sure you want to update the hotline for "${agencyCheck.normalized}" to number "${numCheck.normalized}" and category "${catCheck.normalized}"?`,
-                confirmText: 'Update Hotline',
+                confirmText: 'Confirm',
+                cancelText: 'Cancel',
                 type: 'warning'
             });
 

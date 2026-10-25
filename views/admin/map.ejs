@@ -19,10 +19,6 @@
             </div>
 
             <div class="flex items-center gap-1 shrink-0">
-                <!-- Controls Info Toggle -->
-                <button type="button" onclick="document.getElementById('mapControlsBox').classList.toggle('hidden')" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 text-slate-500 hover:text-pnp-blue dark:hover:text-pnp-gold border border-gray-200 dark:border-slate-700 transition shadow-2xs cursor-pointer" title="Map Controls Info">
-                    <i class="fas fa-info-circle text-xs"></i>
-                </button>
                 <!-- Close / Collapse Sidebar Button (Works on both mobile & desktop) -->
                 <button type="button" onclick="toggleMapSidebar()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-slate-800 text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 border border-gray-200 dark:border-slate-700 transition shadow-2xs cursor-pointer" title="Collapse Location Overview">
                     <i class="fas fa-chevron-left text-xs"></i>
@@ -40,23 +36,6 @@
                             <span class="text-[9px] font-black text-pnp-blue dark:text-pnp-gold uppercase tracking-[0.25em] block">Location Overview</span>
                             <h4 class="text-lg font-black tracking-tight text-slate-800 dark:text-white leading-tight">Sta. Cruz Map</h4>
                         </div>
-                        <div class="px-2.5 py-1 rounded-lg bg-pnp-blue/5 dark:bg-pnp-gold/10 border border-pnp-blue/15 dark:border-pnp-gold/20 flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[9px] font-black uppercase text-pnp-blue dark:text-pnp-gold tracking-wider">Live Intel</span>
-                        </div>
-                    </div>
-
-                    <!-- Collapsible Map Controls Guidance Box -->
-                    <div id="mapControlsBox" class="hidden mt-2 p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-gray-200 dark:border-slate-700 text-[10px] space-y-1.5">
-                        <p class="font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-1.5">
-                            <i class="fas fa-compass text-xs"></i>
-                            <span>Navigation Controls</span>
-                        </p>
-                        <p class="text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
-                            <span class="block">&bull; <strong>Left/Right Arrows:</strong> Cycle through barangays</span>
-                            <span class="block">&bull; <strong>Click Sector:</strong> Zoom & isolate barangay density</span>
-                            <span class="block">&bull; <strong>Double-click Incident:</strong> Jump to report logs</span>
-                        </p>
                     </div>
                 </div>
 
@@ -492,6 +471,7 @@
         line-height: 1 !important;
         padding: 2.5px 6px !important;
         z-index: 1000 !important;
+        opacity: 1;
         transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out !important;
         pointer-events: auto !important;
     }
@@ -556,6 +536,8 @@
         border: none !important;
     }
 
+    .barangay-selected .barangay-label-tooltip,
+    #leafletMap.barangay-selected .barangay-label-tooltip,
     #map.barangay-selected .barangay-label-tooltip {
         display: none !important;
         opacity: 0 !important;
@@ -1129,8 +1111,8 @@
     }
 
     function locateBarangay(shouldMinimize = true) {
-        const selectedName = document.getElementById('filterBarangay').value;
-        const mapContainer = document.getElementById('map');
+        const selectedName = (document.getElementById('filterBarangay')?.value || '').trim();
+        const mapContainer = document.getElementById('leafletMap') || document.getElementById('map');
 
         // Always clear any currently drawn selected pins first!
         selectedPinsLayer.clearLayers();
@@ -1138,13 +1120,20 @@
 
         if (!selectedName) {
             if (mapContainer) mapContainer.classList.remove('barangay-selected');
-            // Reset to default whole map view
-            if (typeof fitWholeMapBounds === 'function') {
+            document.querySelectorAll('.barangay-label-tooltip').forEach(t => {
+                t.style.opacity = '1';
+                t.style.pointerEvents = 'auto';
+            });
+
+            // Smooth zooming animation into the middle for Location Overview
+            if (typeof zoomToLocationOverviewMiddle === 'function') {
+                zoomToLocationOverviewMiddle(1.4);
+            } else if (typeof fitWholeMapBounds === 'function') {
                 fitWholeMapBounds();
             } else if (map) {
-                const bounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-                map.flyToBounds(bounds, { padding: [50, 50], duration: 1.5 });
+                map.flyTo([14.2720, 121.4150], 14, { duration: 1.4 });
             }
+
             // Always keep map interaction enabled in overview
             if (map) {
                 map.dragging.enable();
@@ -1522,8 +1511,7 @@
         const tooltips = Array.from(document.querySelectorAll('.barangay-label-tooltip'));
         const selectedBrgy = (document.getElementById('filterBarangay')?.value || '').trim();
 
-        // When a specific barangay is selected, hide all polygon name labels on the map
-        // The selected barangay is clearly identified by its gold tactical pin badge!
+        // When a specific barangay is selected, hide the general labels (the tactical pin highlights the selected one)
         if (selectedBrgy) {
             tooltips.forEach(t => {
                 t.style.opacity = '0';
@@ -1532,52 +1520,57 @@
             return;
         }
 
-        const boxes = [];
-        // Prioritize Jasaan so its label is evaluated first and never suppressed
-        tooltips.sort((a, b) => {
-            const aIsJasaan = (a.textContent || '').toUpperCase().includes('JASAAN');
-            const bIsJasaan = (b.textContent || '').toUpperCase().includes('JASAAN');
-            if (aIsJasaan && !bIsJasaan) return -1;
-            if (!aIsJasaan && bIsJasaan) return 1;
-            return 0;
-        });
+        const currentZoom = map.getZoom();
+        const pobBoxes = [];
 
         tooltips.forEach(t => {
-            const rect = t.getBoundingClientRect();
-            // Skip unrendered elements
-            if (rect.width === 0 && rect.height === 0) return;
-
-            const isJasaan = (t.textContent || '').toUpperCase().includes('JASAAN');
-            let isColliding = false;
-            const pad = 2; // Extra padding
-
-            const isPoblacion = (t.textContent || '').toUpperCase().includes('POB');
-            const currentZoom = map.getZoom();
-
-            // At low zoom (< 15), hide minor poblacion labels if not top
+            const text = (t.textContent || '').toUpperCase();
+            const isPoblacion = text.includes('POB');
             const isTop = t.querySelector('.is-top') !== null;
-            if (isPoblacion && currentZoom < 15 && !isTop) {
-                isColliding = true;
-            } else {
-                for (let i = 0; i < boxes.length; i++) {
-                    const b = boxes[i];
-                    if (!(rect.right + pad < b.left ||
-                        rect.left - pad > b.right ||
-                        rect.bottom + pad < b.top ||
-                        rect.top - pad > b.bottom)) {
-                        isColliding = true;
-                        break;
-                    }
+
+            // Non-Poblacion barangays have dedicated distinct geographic sectors:
+            // ALWAYS display them with full opacity!
+            if (!isPoblacion) {
+                t.style.opacity = '1';
+                t.style.pointerEvents = 'auto';
+                return;
+            }
+
+            // For Poblacion (cluster of 5 adjacent sectors):
+            // At zoom >= 15 or top incident sector, always display
+            if (currentZoom >= 15 || isTop) {
+                t.style.opacity = '1';
+                t.style.pointerEvents = 'auto';
+                return;
+            }
+
+            // At lower zoom (< 15), prevent crowded overlaps among the Poblacion labels only
+            const rect = t.getBoundingClientRect();
+            if (rect.width === 0 && rect.height === 0) {
+                t.style.opacity = '1';
+                t.style.pointerEvents = 'auto';
+                return;
+            }
+
+            let isColliding = false;
+            for (let i = 0; i < pobBoxes.length; i++) {
+                const b = pobBoxes[i];
+                if (!(rect.right + 2 < b.left ||
+                    rect.left - 2 > b.right ||
+                    rect.bottom + 2 < b.top ||
+                    rect.top - 2 > b.bottom)) {
+                    isColliding = true;
+                    break;
                 }
             }
 
-            if (isColliding && !isJasaan) {
+            if (isColliding) {
                 t.style.opacity = '0';
                 t.style.pointerEvents = 'none';
             } else {
                 t.style.opacity = '1';
                 t.style.pointerEvents = 'auto';
-                boxes.push(rect);
+                pobBoxes.push(rect);
             }
         });
     }
@@ -2072,26 +2065,87 @@
                             });
                         }
                     }).addTo(map);
+
+                    // Ensure all tooltips are explicitly opened and bound to the Leaflet tooltip pane
+                    boundaryLayerGroup.eachLayer(layer => {
+                        if (layer.openTooltip) layer.openTooltip();
+                    });
+
+                    // Calibrate container dimensions immediately
+                    map.invalidateSize({ pan: false });
+
                     updateHeatmap();
                     updateLegend();
-                    if (typeof fitWholeMapBounds === 'function') fitWholeMapBounds();
-                    setTimeout(manageTooltipVisibility, 150);
+
+                    // Smooth initial zooming animation to Location Overview in the middle
+                    if (typeof zoomToLocationOverviewMiddle === 'function') {
+                        zoomToLocationOverviewMiddle(1.2);
+                    } else if (typeof fitWholeMapBounds === 'function') {
+                        fitWholeMapBounds();
+                    }
+
+                    // Render unified labels & ensure complete visibility immediately
+                    if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+                    if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+
+                    // Staggered reinforcements so names persist reliably after fonts and animations settle
+                    setTimeout(() => {
+                        if (boundaryLayerGroup) {
+                            boundaryLayerGroup.eachLayer(layer => {
+                                if (layer.openTooltip) layer.openTooltip();
+                            });
+                        }
+                        if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+                        if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+                    }, 300);
+
+                    setTimeout(() => {
+                        if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+                        if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
+                    }, 800);
                 })
                 .catch(err => {
                     console.error('Error loading GeoJSON:', err);
                 });
 
-            map.on('zoomend', () => {
-                updateBarangayLabels();
-                setTimeout(manageTooltipVisibility, 50);
+            // Listen to all movement, zoom, and container resize events to guarantee names are never missing
+            map.on('moveend zoomend resize', () => {
+                if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+                if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
             });
-            map.on('resize', () => setTimeout(manageTooltipVisibility, 50));
         } catch (err) {
             console.error('Error initializing map:', err);
             hideLoading();
         }
     }
 
+    // Smooth zooming animation that centers the Santa Cruz municipality overview right in the middle
+    function zoomToLocationOverviewMiddle(duration = 1.4) {
+        if (!map) return;
+        const centerLatLng = [14.2720, 121.4150]; // Geographic center of Santa Cruz
+        const targetZoom = 14;
+        const sidebar = document.getElementById('filterSidebar');
+        const isSidebarOpen = sidebar && !sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 1024;
+
+        let targetCenter = centerLatLng;
+        if (isSidebarOpen) {
+            try {
+                // Sidebar occupies ~420px on the left; offset by half width (210px) to the left
+                // so Santa Cruz is framed in the visual center of the visible map area
+                const point = map.project(centerLatLng, targetZoom).subtract([210, 0]);
+                targetCenter = map.unproject(point, targetZoom);
+            } catch (e) {
+                targetCenter = centerLatLng;
+            }
+        }
+
+        map.flyTo(targetCenter, targetZoom, {
+            animate: true,
+            duration: duration,
+            easeLinearity: 0.25
+        });
+    }
+    window.zoomToLocationOverviewMiddle = zoomToLocationOverviewMiddle;
 
     function openLocationOverviewSidebar() {
         const sidebar = document.getElementById('filterSidebar');
@@ -2120,9 +2174,17 @@
             }
             window.currentSidebarView = 'overview';
 
+            // Add smooth zooming animation when opening Location Overview in the middle
+            const selectedBrgy = document.getElementById('filterBarangay')?.value;
+            if (!selectedBrgy) {
+                zoomToLocationOverviewMiddle(1.4);
+            }
+
             setTimeout(() => {
                 if (window.map) {
                     window.map.invalidateSize({ pan: false });
+                    if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+                    if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
                 }
             }, 320);
         }
@@ -2133,25 +2195,35 @@
         const openBtn = document.getElementById('openSidebarBtn');
         const mobileToggle = document.getElementById('mapSidebarToggle');
 
-        if (sidebar.classList.contains('sidebar-hidden')) {
+        const opening = sidebar.classList.contains('sidebar-hidden');
+
+        if (opening) {
             sidebar.classList.remove('sidebar-hidden');
             sidebar.classList.add('sidebar-visible');
             if (openBtn) openBtn.classList.add('hidden');
             if (mobileToggle) mobileToggle.classList.add('opacity-0', 'pointer-events-none');
+
+            const selectedBrgy = document.getElementById('filterBarangay')?.value;
+            if (!selectedBrgy && window.currentSidebarView === 'overview') {
+                zoomToLocationOverviewMiddle(1.4);
+            }
         } else {
             sidebar.classList.add('sidebar-hidden');
             sidebar.classList.remove('sidebar-visible');
             if (openBtn) openBtn.classList.remove('hidden');
             if (mobileToggle) mobileToggle.classList.remove('opacity-0', 'pointer-events-none');
+
+            const selectedBrgy = document.getElementById('filterBarangay')?.value;
+            if (!selectedBrgy && window.currentSidebarView === 'overview') {
+                zoomToLocationOverviewMiddle(1.4);
+            }
         }
 
         setTimeout(() => {
             if (window.map) {
                 window.map.invalidateSize({ pan: false });
-                const currentBrgy = document.getElementById('filterBarangay')?.value;
-                if (!currentBrgy && typeof fitWholeMapBounds === 'function') {
-                    fitWholeMapBounds();
-                }
+                if (typeof updateBarangayLabels === 'function') updateBarangayLabels();
+                if (typeof manageTooltipVisibility === 'function') manageTooltipVisibility();
             }
         }, 320);
     }
@@ -2184,15 +2256,19 @@
     // View the Whole Map with Total Cases in Unified Labels (No Duplicate Markers)
     window.fitWholeMapBounds = function() {
         if (!map) return;
-        const wholeMapBounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
-        const sidebar = document.getElementById('filterSidebar');
-        const isSidebarOpen = sidebar && !sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 768;
-        
-        map.fitBounds(wholeMapBounds, {
-            paddingTopLeft: [isSidebarOpen ? 460 : 30, 30],
-            paddingBottomRight: [300, 30],
-            maxZoom: 14
-        });
+        if (typeof zoomToLocationOverviewMiddle === 'function') {
+            zoomToLocationOverviewMiddle(1.4);
+        } else {
+            const wholeMapBounds = [[14.2100, 121.3400], [14.3100, 121.4850]];
+            const sidebar = document.getElementById('filterSidebar');
+            const isSidebarOpen = sidebar && !sidebar.classList.contains('sidebar-hidden') && window.innerWidth >= 1024;
+            
+            map.fitBounds(wholeMapBounds, {
+                paddingTopLeft: [isSidebarOpen ? 460 : 30, 30],
+                paddingBottomRight: [300, 30],
+                maxZoom: 14
+            });
+        }
     };
 
     window.locateTopSectorForReport = function(points) {
@@ -3638,24 +3714,48 @@
                     if (tabBadge) tabBadge.textContent = window.storedReportsList.length;
                 }
 
-                // Invalidate points cache and reload map data immediately so new incidents show on the map!
-                allMapPointsCached = [];
-                await loadMapPoints(false);
+                // Instantly inject new points into local cache for 0ms rendering
+                const newPoints = formattedEntries.map((e, idx) => {
+                    const pin = (typeof MANUAL_PINS !== 'undefined' ? MANUAL_PINS : []).find(p => p.name.toLowerCase() === (e.barangay || '').toLowerCase()) || { lat: 14.223931, lng: 121.405213 };
+                    return {
+                        id: (result.report?.id || 'manual') + '-' + idx,
+                        lat: pin.lat,
+                        lng: pin.lng,
+                        incident_type: e.incident_type || e.offense,
+                        incident_date: e.incident_date || e.date_committed,
+                        barangay: e.barangay,
+                        description: e.description,
+                        category: e.category || 'Non-Index',
+                        report_id: result.report?.id || '',
+                        created_at: new Date().toISOString()
+                    };
+                });
+                allMapPointsCached = [...newPoints, ...(allMapPointsCached || [])];
 
-                // Re-render Stored Reports list view
+                // Fast local render & close modal immediately
+                currentPoints = filterPointsByDate(allMapPointsCached);
+                updateHeatmap();
+                updateLegend();
+                updateSidebarStats();
+                incidentMarkers.clearLayers();
                 renderStoredReportsList();
-
                 closeManualEntry();
 
                 if (typeof window.showMapToast === 'function') {
                     showMapToast(`${result.count || formattedEntries.length} record${(result.count || formattedEntries.length) > 1 ? 's' : ''} stored and plotted on map!`);
                 } else if (typeof window.strategicAlert === 'function') {
-                    await window.strategicAlert({
+                    window.strategicAlert({
                         title: "Sync Successful",
                         message: `Archive Updated: ${result.count || formattedEntries.length} manual records committed and plotted on map.`,
                         type: "success"
                     });
                 }
+
+                // Silently refresh in background without delaying user
+                setTimeout(() => {
+                    allMapPointsCached = [];
+                    loadMapPoints(false).catch(() => {});
+                }, 1200);
             } else {
                 await (window.strategicAlert || (async (opts) => alert(opts.message)))({
                     title: "Sync Error",
