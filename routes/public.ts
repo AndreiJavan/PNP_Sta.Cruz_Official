@@ -14,6 +14,7 @@ router.get('/bulletins', publicController.getBulletins);
 router.get('/bulletins/:id', publicController.getBulletinDetail);
 
 router.get('/about', publicController.getAbout);
+router.get('/faq', publicController.getFaq);
 router.get('/hotlines', publicController.getHotlines);
 router.get('/news', publicController.getNews);
 router.get('/api/media-proxy', publicController.proxyMedia);

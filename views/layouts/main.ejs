@@ -341,6 +341,14 @@
                     <a href="/about"
                         class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && title === 'About' ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">About</a>
                     
+                    <!-- FAQ Nav Button -->
+                    <button type="button" onclick="openFaqModal()"
+                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 text-white/90 hover:bg-white/10 hover:text-white font-bold flex items-center gap-1.5 cursor-pointer border border-transparent hover:border-pnp-gold/30"
+                        title="Frequently Asked Questions & Verified Guidelines">
+                        <i class="fas fa-circle-question text-pnp-gold text-xs"></i>
+                        <span>FAQ</span>
+                    </button>
+                    
                     <% if (locals.user) { %>
                         <a href="/admin/dashboard"
                             class="ml-2 px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider font-black text-pnp-gold bg-white/10 hover:bg-pnp-gold hover:text-pnp-blue transition duration-200 flex items-center gap-1.5 border border-pnp-gold/30 shadow-xs"
@@ -401,6 +409,16 @@
             <a href="/news" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Station Releases' || title === 'News') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">News</a>
             <a href="/hotlines" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Emergency Hotlines' || title === 'Hotlines') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">Hotlines</a>
             <a href="/about" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && title === 'About' ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">About PNP</a>
+
+            <!-- Mobile FAQ Trigger -->
+            <button type="button" onclick="closeMenu(); openFaqModal();"
+                class="w-full text-left px-3.5 py-2.5 rounded-xl text-base font-bold text-pnp-gold hover:bg-white/10 transition flex items-center justify-between cursor-pointer">
+                <span class="flex items-center gap-2.5">
+                    <i class="fas fa-circle-question text-base text-pnp-gold"></i>
+                    <span>Station FAQ & Help</span>
+                </span>
+                <span class="text-[9px] px-2 py-0.5 rounded-md bg-pnp-gold text-pnp-blue font-black uppercase">Verified</span>
+            </button>
 
             <% if (locals.user) { %>
                 <a href="/admin/dashboard" class="px-3.5 py-2.5 rounded-xl text-base font-black text-pnp-gold hover:bg-white/10 transition pt-3 border-t border-white/10 flex items-center gap-2">
@@ -478,6 +496,11 @@
                                 <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 About
                             </a>
+                            <button type="button" onclick="openFaqModal()"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center text-left cursor-pointer">
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Official FAQ
+                            </button>
                             <% if (locals.user) { %>
                             <a href="/admin/dashboard"
                                 class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
@@ -546,13 +569,31 @@
         </footer>
     <% } %>
 
-            <% if (locals.user) { %>
-            <!-- Floating Admin Dashboard Button (Desktop only) -->
-            <a href="/admin/dashboard" title="Admin Dashboard"
-                class="hidden md:flex fixed bottom-6 right-6 z-40 w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold">
-                <i class="fas fa-shield-halved text-lg"></i>
-            </a>
-            <% } %>
+            <!-- Floating Actions Container (Every Public Page) -->
+            <div class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-3 pointer-events-none">
+                <% if (locals.user) { %>
+                <!-- Floating Admin Dashboard Button (Desktop only) -->
+                <a href="/admin/dashboard" title="Admin Dashboard"
+                    class="pointer-events-auto hidden md:flex w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold cursor-pointer">
+                    <i class="fas fa-shield-halved text-lg"></i>
+                </a>
+                <% } %>
+
+                <!-- Floating FAQ Trigger Button -->
+                <button id="floatingFaqBtn" onclick="openFaqModal()" type="button" aria-label="Frequently Asked Questions (FAQ)"
+                    class="pointer-events-auto group relative flex items-center gap-2 sm:gap-2.5 bg-pnp-blue hover:bg-blue-900 dark:bg-pnp-gold dark:hover:bg-yellow-400 text-white dark:text-slate-950 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full shadow-2xl border-2 border-pnp-gold dark:border-slate-800 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer ring-4 ring-black/10 dark:ring-white/10"
+                    title="Open Verified Station FAQs">
+                    <span class="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pnp-gold dark:bg-pnp-blue opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-pnp-gold dark:bg-pnp-blue"></span>
+                    </span>
+                    <i class="fas fa-circle-question text-base sm:text-lg text-pnp-gold dark:text-slate-950 group-hover:rotate-12 transition-transform"></i>
+                    <div class="flex flex-col text-left leading-none">
+                        <span class="font-black text-xs uppercase tracking-wider">FAQ</span>
+                        <span class="text-[8px] sm:text-[9px] text-blue-200 dark:text-slate-900 font-extrabold uppercase tracking-tight">Verified Info</span>
+                    </div>
+                </button>
+            </div>
 
              <script>
                 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -696,6 +737,8 @@
                     initSmoothScroll();
                 }
             </script>
+    <!-- Station Verified FAQ Modal Partial -->
+    <%- include('../partials/faq_modal') %>
 </body>
 
 </html>
