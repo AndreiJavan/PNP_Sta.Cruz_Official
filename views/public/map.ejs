@@ -1743,73 +1743,293 @@
 
         const modeSelect = document.getElementById('mapDisplayMode');
         const mode = modeSelect ? modeSelect.value : 'density';
+        const selectedBrgy = (document.getElementById('filterBarangay')?.value || '').trim();
 
-        if (mode.startsWith('density')) {
-            let targetCategory = null;
-            if (mode === 'density_focus') targetCategory = '8-Focus';
-            else if (mode === 'density_nonindex') targetCategory = 'Non-Index';
-            else if (mode === 'density_psi') targetCategory = 'PSI';
-
-            let globalPoints = currentPoints;
-            if (targetCategory) {
-                globalPoints = currentPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
-            }
-
-            const selectedClassification = document.getElementById('filterClassification')?.value || 'All';
-            if (selectedClassification !== 'All') {
-                globalPoints = globalPoints.filter(p => p.incident_type === selectedClassification);
-            }
-
-            if (globalPoints.length === 0) {
-                let friendlyCat = targetCategory === '8-Focus' ? 'Major Crime' : (targetCategory === 'Non-Index' ? 'Minor Crime' : 'Accident/Safety');
-                legendContainer.innerHTML = `<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">No ${friendlyCat} incidents recorded</p>`;
-                return;
-            }
-            // Density Legend (Static & Fixed Scale)
-            let legendTitle = "All Crimes Density";
-            if (mode === 'density_focus') legendTitle = "Major Crimes Density";
-            else if (mode === 'density_nonindex') legendTitle = "Minor Crimes Density";
-            else if (mode === 'density_psi') legendTitle = "Accidents & Safety Density";
-
+        if (mode === 'clear') {
             legendContainer.innerHTML = `
-                <div class="mb-2 px-1 flex items-center justify-between">
-                    <span class="text-[9px] font-black uppercase text-pnp-blue dark:text-pnp-gold">${legendTitle}</span>
+                <div class="p-3.5 bg-slate-100/80 dark:bg-[#132238] rounded-2xl border border-slate-200 dark:border-[#22354e] text-center">
+                    <p class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Map Overlay Cleared</p>
+                    <p class="text-[8px] text-slate-400 dark:text-slate-500 mt-0.5">Select a crime category to display density layers</p>
                 </div>
-                <div class="grid grid-cols-1 gap-1.5">
-                    <div class="flex items-center justify-between px-3 py-1.5 bg-white/60 dark:bg-slate-800/80 rounded-xl border border-gray-100/50 dark:border-slate-700/50">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#EF4444]"></div>
-                            <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">High Density</span>
-                        </div>
-                        <span class="text-[8px] font-bold text-gray-400">Red</span>
+            `;
+            return;
+        }
+
+        let targetCategory = null;
+        let categoryTitle = "All Crimes Density";
+        let categorySubtitle = "Comprehensive Municipal Crime & Incident Heatmap";
+        let baseColor = "#EF4444";
+        let colorName = "Red";
+
+        if (mode === 'density_focus') {
+            targetCategory = '8-Focus';
+            categoryTitle = "Major Crimes Density";
+            categorySubtitle = "8-Focus: Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping (MV/MC)";
+            baseColor = "#EF4444";
+            colorName = "Red";
+        } else if (mode === 'density_nonindex') {
+            targetCategory = 'Non-Index';
+            categoryTitle = "Minor Crimes Density";
+            categorySubtitle = "Non-Index: Special Penal Laws, Local Ordinances & Property Violations";
+            baseColor = "#3B82F6";
+            colorName = "Blue";
+        } else if (mode === 'density_psi') {
+            targetCategory = 'PSI';
+            categoryTitle = "Public Safety Incidents Density";
+            categorySubtitle = "PSI: Vehicular Traffic Collisions, Road Rescues & Emergency Safety Calls";
+            baseColor = "#D4AF37";
+            colorName = "Gold";
+        }
+
+        let globalPoints = currentPoints || [];
+        if (targetCategory) {
+            globalPoints = globalPoints.filter(p => (p.category || 'Non-Index') === targetCategory);
+        }
+
+        const selectedClassification = document.getElementById('filterClassification')?.value || 'All';
+        if (selectedClassification !== 'All') {
+            globalPoints = globalPoints.filter(p => p.incident_type === selectedClassification);
+        }
+
+        // Count per barangay
+        const brgyCounts = {};
+        globalPoints.forEach(p => {
+            if (p.barangay) {
+                brgyCounts[p.barangay] = (brgyCounts[p.barangay] || 0) + 1;
+            }
+        });
+        const countsArray = Object.values(brgyCounts);
+        const maxCount = countsArray.length > 0 ? Math.max(...countsArray) : 0;
+        const totalIncidents = globalPoints.length;
+        const activeBarangaysCount = countsArray.filter(c => c > 0).length;
+
+        // If no incidents exist for this entire category/timeframe
+        if (totalIncidents === 0) {
+            legendContainer.innerHTML = `
+                <div class="space-y-2">
+                    <div class="px-1 flex items-center justify-between">
+                        <span class="text-xs font-black uppercase text-amber-500 dark:text-pnp-gold tracking-wider">${categoryTitle}</span>
+                        <span class="text-[8px] font-bold text-slate-400">0 Total Cases</span>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-1.5 bg-white/60 dark:bg-slate-800/80 rounded-xl border border-gray-100/50 dark:border-slate-700/50">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#F97316]"></div>
-                            <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Medium-High Density</span>
-                        </div>
-                        <span class="text-[8px] font-bold text-gray-400">Orange</span>
+                    <div class="p-3.5 bg-slate-100/90 dark:bg-[#132238] rounded-2xl border border-slate-200 dark:border-[#22354e] text-center space-y-1">
+                        <p class="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase">No Incidents Recorded</p>
+                        <p class="text-[8px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                            No cases reported for this period. Color not appearing across all 26 barangays (transparent clear sectors).
+                        </p>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-1.5 bg-white/60 dark:bg-slate-800/80 rounded-xl border border-gray-100/50 dark:border-slate-700/50">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#FBBF24]"></div>
-                            <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Medium-Low Density</span>
+                </div>
+            `;
+            return;
+        }
+
+        let selectedBrgyHtml = '';
+        if (selectedBrgy) {
+            const countInBrgy = brgyCounts[selectedBrgy] || 0;
+            const ratioInBrgy = maxCount > 0 ? countInBrgy / maxCount : 0;
+            let statusBadge = "Zero Cases / Clear";
+            let statusClass = "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+            let visualDesc = "Color not appearing (transparent sector)";
+
+            if (countInBrgy > 0) {
+                if (targetCategory) {
+                    if (ratioInBrgy >= 0.70) {
+                        statusBadge = `High Density (${colorName})`;
+                        statusClass = "bg-rose-500/10 text-rose-500 border border-rose-500/20";
+                        visualDesc = `Solid ${colorName} (High concentration)`;
+                    } else if (ratioInBrgy >= 0.30) {
+                        statusBadge = `Medium Density (${colorName})`;
+                        statusClass = "bg-amber-500/10 text-amber-500 border border-amber-500/20";
+                        visualDesc = `Medium ${colorName} (Moderate occurrences)`;
+                    } else {
+                        statusBadge = `Low Density (${colorName})`;
+                        statusClass = "bg-blue-500/10 text-blue-500 border border-blue-500/20";
+                        visualDesc = `Dimmed ${colorName} (Color dimmed: isolated cases)`;
+                    }
+                } else {
+                    if (ratioInBrgy >= 0.75) {
+                        statusBadge = "High Density (Red)";
+                        statusClass = "bg-rose-500/10 text-rose-500 border border-rose-500/20";
+                        visualDesc = "Solid Red (Critical hotspot)";
+                    } else if (ratioInBrgy >= 0.40) {
+                        statusBadge = "Medium-High (Orange)";
+                        statusClass = "bg-orange-500/10 text-orange-500 border border-orange-500/20";
+                        visualDesc = "Orange fill (Elevated incidents)";
+                    } else if (ratioInBrgy >= 0.15) {
+                        statusBadge = "Medium-Low (Yellow)";
+                        statusClass = "bg-amber-500/10 text-amber-500 border border-amber-500/20";
+                        visualDesc = "Yellow fill (Moderate incidents)";
+                    } else {
+                        statusBadge = "Low Density (Green)";
+                        statusClass = "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20";
+                        visualDesc = "Green fill (Low incident count)";
+                    }
+                }
+            }
+
+            selectedBrgyHtml = `
+                <div class="p-3 bg-pnp-blue/5 dark:bg-[#132238] rounded-2xl border border-pnp-blue/20 dark:border-[#22354e] space-y-1.5 mb-2.5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <i class="fas fa-location-dot text-pnp-blue dark:text-pnp-gold text-[11px]"></i>
+                            <span class="text-[11px] font-black uppercase text-slate-800 dark:text-white truncate">${selectedBrgy}</span>
                         </div>
-                        <span class="text-[8px] font-bold text-gray-400">Yellow</span>
+                        <span class="text-[9px] font-black px-2.5 py-0.5 rounded-full ${statusClass} shrink-0">${countInBrgy} Case${countInBrgy === 1 ? '' : 's'}</span>
                     </div>
-                    <div class="flex items-center justify-between px-3 py-1.5 bg-white/60 dark:bg-slate-800/80 rounded-xl border border-gray-100/50 dark:border-slate-700/50">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 rounded-full shadow-sm shrink-0 bg-[#10B981]"></div>
-                            <span class="text-[10px] font-black uppercase tracking-tight text-slate-700 dark:text-slate-200">Low Density</span>
+                    <div class="flex items-center justify-between text-[8px] text-slate-500 dark:text-slate-400 pt-0.5 border-t border-slate-200/60 dark:border-[#1c2c44]">
+                        <span class="font-bold text-slate-700 dark:text-slate-300">${visualDesc}</span>
+                        <span class="font-semibold text-slate-400">Other 25 sectors dimmed</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        let rowsHtml = '';
+
+        if (targetCategory) {
+            // Monochrome Opacity Scale (Color Dimming + Color Not Appearing)
+            rowsHtml = `
+                <!-- High Density (Solid Vibrant Color) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-black/10 dark:border-white/20" style="background-color: ${baseColor}; opacity: 0.85;"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">High Density</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Frequent incidents (Solid ${colorName}, ~80% opacity)</span>
                         </div>
-                        <span class="text-[8px] font-bold text-gray-400">Green</span>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Solid ${colorName}</span>
+                    </div>
+                </div>
+
+                <!-- Moderate Density (Medium Opacity) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-black/10 dark:border-white/20" style="background-color: ${baseColor}; opacity: 0.50;"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Medium Density</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Average concentration (~50% opacity)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Medium ${colorName}</span>
+                    </div>
+                </div>
+
+                <!-- Low Density (Color Dimmed) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border border-black/10 dark:border-white/20" style="background-color: ${baseColor}; opacity: 0.20;"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Low Density (Color Dimmed)</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Color dimmed: lower opacity indicates isolated cases</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Dim ${colorName}</span>
+                    </div>
+                </div>
+
+                <!-- Zero Incidents (Color Not Appearing) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border-2 border-dashed border-slate-400 dark:border-slate-500 bg-transparent"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Zero Incidents (Not Appearing)</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Color not appearing: 0 reported cases (transparent)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Clear</span>
                     </div>
                 </div>
             `;
         } else {
-            // Clear legend
-            legendContainer.innerHTML = '<p class="text-[9px] text-gray-400 font-bold uppercase text-center py-2">Map overlay cleared</p>';
+            // Multi-color scale for All Crimes (Matches the screenshot layout)
+            rowsHtml = `
+                <!-- High Density (Red) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs bg-[#EF4444] border border-black/10 dark:border-white/20"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">High Density</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Critical incident hotspot (Top 25% of max volume)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Red</span>
+                    </div>
+                </div>
+
+                <!-- Medium-High Density (Orange) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs bg-[#F97316] border border-black/10 dark:border-white/20"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Medium-High Density</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Elevated incident volume (40% - 74% of max)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Orange</span>
+                    </div>
+                </div>
+
+                <!-- Medium-Low Density (Yellow) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs bg-[#FBBF24] border border-black/10 dark:border-white/20"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Medium-Low Density</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Moderate incident volume (15% - 39% of max)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Yellow</span>
+                    </div>
+                </div>
+
+                <!-- Low Density (Green) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs bg-[#10B981] border border-black/10 dark:border-white/20"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Low Density</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Low incident activity (< 15% of max volume)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Green</span>
+                    </div>
+                </div>
+
+                <!-- Zero Incidents (Color Not Appearing) -->
+                <div class="flex items-center justify-between px-3.5 py-2.5 bg-slate-100/90 dark:bg-[#132238] hover:bg-slate-200/60 dark:hover:bg-[#182840] rounded-2xl border border-slate-200/80 dark:border-[#22354e] transition shadow-2xs">
+                    <div class="flex items-center space-x-3 min-w-0 pr-2">
+                        <div class="w-3.5 h-3.5 rounded-full shrink-0 shadow-xs border-2 border-dashed border-slate-400 dark:border-slate-500 bg-transparent"></div>
+                        <div class="min-w-0">
+                            <span class="text-[11px] font-black uppercase tracking-wider text-slate-800 dark:text-white block truncate">Zero Incidents (Not Appearing)</span>
+                            <span class="text-[8px] text-slate-500 dark:text-slate-400 font-medium block truncate mt-0.5">Color not appearing: 0 reported cases (transparent)</span>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Clear</span>
+                    </div>
+                </div>
+            `;
         }
+
+        legendContainer.innerHTML = `
+            ${selectedBrgyHtml}
+            <div class="mb-1.5 px-1 flex items-center justify-between">
+                <span class="text-xs font-black uppercase text-amber-500 dark:text-pnp-gold tracking-wider">${categoryTitle}</span>
+                <span class="text-[8px] font-bold text-slate-400">${totalIncidents} Case${totalIncidents === 1 ? '' : 's'} (${activeBarangaysCount} active)</span>
+            </div>
+            <p class="text-[8px] text-slate-500 dark:text-slate-400 px-1 mb-2 leading-tight">${categorySubtitle}</p>
+            <div class="grid grid-cols-1 gap-1.5">
+                ${rowsHtml}
+            </div>
+        `;
     }
 
     const manualPins = [
