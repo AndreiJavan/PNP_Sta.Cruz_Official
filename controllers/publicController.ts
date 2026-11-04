@@ -451,6 +451,10 @@ export const getAbout = (req: Request, res: Response) => {
   res.render('public/about', { title: 'About', layout: 'layouts/main' });
 };
 
+export const getFaq = (req: Request, res: Response) => {
+  res.redirect('/?faq=1');
+};
+
 export const getIncidents = async (req: Request, res: Response) => {
   res.redirect('/?tab=incidents');
 };

@@ -289,6 +289,10 @@
                     <div id="bulletin-modal-fb-btn" class="inline-block"></div>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap justify-end">
+                    <button onclick="openFaqModal('bulletins')" type="button" class="text-[11px] font-black text-pnp-blue hover:text-white hover:bg-pnp-blue dark:text-pnp-gold dark:hover:bg-pnp-gold dark:hover:text-slate-950 uppercase tracking-wider flex items-center space-x-1.5 focus:outline-none transition px-3 py-1.5 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/15 border border-pnp-blue/20 dark:border-pnp-gold/30 shadow-2xs cursor-pointer" title="View Official Verified FAQ">
+                        <i class="fas fa-circle-question text-xs"></i>
+                        <span>Official FAQ</span>
+                    </button>
                     <select class="tts-voice-select text-[11px] px-2.5 py-1.5 max-w-[135px] rounded-xl bg-slate-50 hover:bg-white text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-pnp-blue/20 font-bold shadow-2xs">
                         <option value="google:fil-PH" selected>Tagalog / Filipino</option>
                         <option value="google:en-US">English (US)</option>
@@ -308,8 +312,20 @@
             
             <div id="bulletin-modal-content" class="text-slate-800 dark:text-slate-200 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-10 font-normal"></div>
 
+            <!-- Official Verified FAQ Banner (AI Replacement Notice) -->
+            <div class="mb-4 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                <div class="flex items-start sm:items-center gap-2.5 text-amber-800 dark:text-amber-300">
+                    <i class="fas fa-triangle-exclamation text-amber-500 shrink-0 text-sm mt-0.5 sm:mt-0"></i>
+                    <span class="font-medium text-xs">Notice: AI responses may have inaccuracies. For legally binding station procedures, advisory protocols, and hotlines, refer to our Official FAQ.</span>
+                </div>
+                <button onclick="openFaqModal('bulletins')" type="button" class="shrink-0 px-3 py-1.5 rounded-xl bg-pnp-blue hover:bg-blue-900 text-white dark:bg-pnp-gold dark:text-slate-950 font-black text-[11px] uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95">
+                    <i class="fas fa-circle-question text-xs"></i>
+                    <span>Open Station FAQ</span>
+                </button>
+            </div>
+
             <!-- Chatbot Section -->
-            <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+            <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
                 <div class="flex items-center justify-between mb-4">
                     <h4 class="text-xs md:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
                         <span class="w-7 h-7 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold flex items-center justify-center">
