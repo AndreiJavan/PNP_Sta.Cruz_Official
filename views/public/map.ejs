@@ -332,7 +332,20 @@
     }
 
     .map-outside-mask {
-        /* High performance solid mask rendering without GPU-heavy blur */
+        opacity: 0.95;
+    }
+
+    /* Leaflet Canvas (Clean Blue Color matching Admin Crime Map) */
+    #leafletMap,
+    .leaflet-container {
+        background-color: #8fa5bc !important;
+        background-image: none !important;
+    }
+
+    html.dark #leafletMap,
+    html.dark .leaflet-container {
+        background-color: #0b1329 !important;
+        background-image: none !important;
     }
 </style>
 
@@ -2213,7 +2226,7 @@
                     const isDark = document.documentElement.classList.contains('dark');
                     L.geoJSON({ type: 'Feature', geometry: { type: 'Polygon', coordinates: maskCoords } }, {
                         style: {
-                            fillColor: isDark ? '#0f172a' : '#f8fafc',
+                            fillColor: isDark ? '#0b1329' : '#8fa5bc',
                             fillOpacity: 1,
                             color: 'transparent',
                             weight: 0,
@@ -2223,7 +2236,7 @@
 
                     const observer = new MutationObserver(() => {
                         const dark = document.documentElement.classList.contains('dark');
-                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0f172a' : '#f8fafc'));
+                        document.querySelectorAll('.map-outside-mask-solid').forEach(el => el.setAttribute('fill', dark ? '#0b1329' : '#8fa5bc'));
                         if (currentTileLayer) {
                             const newUrl = dark
                                 ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'

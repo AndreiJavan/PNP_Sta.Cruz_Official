@@ -21,6 +21,7 @@ router.get('/api/media-proxy', publicController.proxyMedia);
 router.post('/api/translate-tagalog', publicController.translateToTagalog);
 router.post('/api/user/language', publicController.postSetLanguage);
 router.post('/api/chat-article', publicController.chatWithArticle);
+router.post('/api/faq-chat', publicController.chatFaq);
 router.post('/api/sync-facebook', isAuthenticated, syncFacebookPosts);
 
 export default router;

@@ -922,3 +922,466 @@ Assistant:`;
     return res.status(500).json({ error: err.message || 'An unexpected error occurred' });
   }
 };
+
+
+export const FAQ_KNOWLEDGEBASE = [
+  {
+    id: 1,
+    title: "How do I report an ongoing emergency or crime in progress in Santa Cruz?",
+    titleFil: "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?",
+    keywords: ["emergency", "ongoing", "crime", "911", "call", "urgent", "tawag", "saklolo", "tulong", "pulis", "pulisya", "dispatch", "krimen"],
+    summaryEn: "In an ongoing emergency or crime in progress, dial **911** immediately or call the Sta. Cruz Police Station desk directly at **(049) 501-5971** or **0998 598 5667**.\n\nPlease provide:\n• Your exact location (Barangay, street, or landmark)\n• Nature of the incident\n• Suspect description and any weapons\n• Any injuries requiring medical dispatch.",
+    summaryFil: "Sa oras ng agarang emergency o nagaganap na krimen, tumawag agad sa **911** o sa Sta. Cruz Police Station desk sa **(049) 501-5971** o **0998 598 5667**.\n\nIbigay ang:\n• Eksaktong lokasyon (Barangay, kalye, o landmark)\n• Uri ng insidente\n• Deskripsyon ng suspek at armas\n• Mga nasugatan na nangangailangan ng ambulansya.",
+    nearQuestionsEn: [
+      "What are the official emergency hotlines for Santa Cruz, Laguna?",
+      "How do I file an official Police Blotter report?",
+      "Where is the PNP Santa Cruz Municipal Police Station located?"
+    ],
+    nearQuestionsFil: [
+      "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+      "Paano mag-file ng opisyal na Police Blotter report?",
+      "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"
+    ]
+  },
+  {
+    id: 2,
+    title: "What are the official emergency hotlines for Santa Cruz, Laguna?",
+    titleFil: "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+    keywords: ["hotline", "hotlines", "number", "numbers", "contact", "phone", "telepono", "numero", "tawagan", "bfp", "fire", "mdrrmo", "ambulance", "rescue", "bumbero"],
+    summaryEn: "Official Sta. Cruz Emergency Hotlines (24/7 Available):\n• **PNP Sta. Cruz Police Desk:** (049) 501-5971 / 0998 598 5667\n• **National Emergency Hotline:** 911\n• **BFP Fire Station (Sunog):** (049) 501-1911 / 0915 602 2167\n• **MDRRMO Disaster & Ambulance:** (049) 501-2070 / 0939 917 5202\n• **Laguna Provincial Police (PPO):** (049) 501-1647",
+    summaryFil: "Mga Opisyal na Emergency Hotline ng Sta. Cruz (24/7):\n• **PNP Sta. Cruz Police Desk:** (049) 501-5971 / 0998 598 5667\n• **Pambansang Emergency:** 911\n• **BFP Fire Station (Sunog):** (049) 501-1911 / 0915 602 2167\n• **MDRRMO Rescue at Ambulansya:** (049) 501-2070 / 0939 917 5202\n• **Laguna Provincial Police (PPO):** (049) 501-1647",
+    nearQuestionsEn: [
+      "How do I report an ongoing emergency or crime in progress in Santa Cruz?",
+      "Where is the PNP Santa Cruz Municipal Police Station located?",
+      "What assistance does the Women and Children Protection Desk (WCPD) provide?"
+    ],
+    nearQuestionsFil: [
+      "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?",
+      "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?",
+      "Anong tulong ang ibinibigay ng Women and Children Protection Desk (WCPD)?"
+    ]
+  },
+  {
+    id: 3,
+    title: "How do I file an official Police Blotter report?",
+    titleFil: "Paano mag-file ng opisyal na Police Blotter report?",
+    keywords: ["blotter", "file blotter", "magpablotter", "magpa-blotter", "report incident", "magsumbong", "reklamo", "complaint", "extract"],
+    summaryEn: "To file an official Police Blotter:\n1. Personally visit the Sta. Cruz Police Station Investigation Section (1153 A. Mabini St., Poblacion).\n2. Present a valid government-issued ID.\n3. Provide the facts of the incident to the duty investigator (date, time, location, suspect details).\n4. Receive an official Incident Record Form (IRF) or Police Blotter Extract.",
+    summaryFil: "Para mag-file ng opisyal na Police Blotter:\n1. Pumunta personal sa Investigation Section ng Sta. Cruz Police Station (1153 A. Mabini St., Poblacion).\n2. Magdala ng valid government ID.\n3. Isalaysay ang mga detalye ng insidente sa duty investigator (petsa, oras, lugar, pagkakakilanlan).\n4. Kumuha ng kopya ng Incident Record Form (IRF) o Police Blotter Extract.",
+    nearQuestionsEn: [
+      "Can I file a police blotter online or through social media?",
+      "When should I report to the Barangay Lupon versus the Municipal Police Station?",
+      "What valid government IDs and documents are accepted?"
+    ],
+    nearQuestionsFil: [
+      "Maaari ba akong magpa-blotter online o sa social media?",
+      "Kailan dapat dumulog sa Barangay Lupon laban sa Police Station?",
+      "Anu-anong valid government ID ang tinatanggap?"
+    ]
+  },
+  {
+    id: 4,
+    title: "Can I file a police blotter online or through social media?",
+    titleFil: "Maaari ba akong magpa-blotter online o sa social media?",
+    keywords: ["online blotter", "facebook blotter", "social media report", "chat blotter", "blotter online", "magpablotter online"],
+    summaryEn: "No. Under PNP Standard Operating Procedures, official police blotters cannot be filed online, via email, or through social media. Filing requires personal appearance, identity verification, and sworn statements before a duty investigator. However, confidential tips may be messaged to station channels.",
+    summaryFil: "Hindi po. Ayon sa panuntunan ng PNP, hindi maaaring magpa-blotter online o sa social media. Kinakailangan ang personal na pagharap upang mapatunayan ang pagkakakilanlan at manumpa sa salaysay. Maaari namang magpadala ng confidential tips sa aming mga opisyal na numero.",
+    nearQuestionsEn: [
+      "How do I file an official Police Blotter report?",
+      "How can the community submit tips regarding Wanted or Missing Persons?",
+      "Where is the PNP Santa Cruz Municipal Police Station located?"
+    ],
+    nearQuestionsFil: [
+      "Paano mag-file ng opisyal na Police Blotter report?",
+      "Paano magsumite ng impormasyon o tip ukol sa Wanted o Missing Persons?",
+      "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"
+    ]
+  },
+  {
+    id: 5,
+    title: "When should I report to the Barangay Lupon versus the Municipal Police Station?",
+    titleFil: "Kailan dapat dumulog sa Barangay Lupon laban sa Municipal Police Station?",
+    keywords: ["barangay", "lupon", "barangay blotter", "police vs barangay", "katarungang pambarangay", "alitan", "kapitbahay"],
+    summaryEn: "Under the Katarungang Pambarangay Law (R.A. 7160):\n• **Barangay Lupon First:** Minor disputes between residents of the same municipality (light threats, simple slander, small claims, neighbor disputes).\n• **Direct to Police Station:** Heinous crimes, physical injuries, drug offenses, domestic violence (VAWC), cybercrime, or offenses punishable by more than 1 year imprisonment.",
+    summaryFil: "Ayon sa Katarungang Pambarangay Law (R.A. 7160):\n• **Sa Barangay muna:** Maliliit na alitan ng magkakapitbahay sa parehong bayan (simpleng banta, tsismis, hidwaan).\n• **Diretso sa Pulisya:** Mabibigat na krimen, pananakit, droga, pang-aabuso sa kababaihan/bata (VAWC), cybercrime, o mga kasong higit 1 taon ang parusa.",
+    nearQuestionsEn: [
+      "How do I file an official Police Blotter report?",
+      "What assistance does the Women and Children Protection Desk (WCPD) provide?",
+      "How do I report online scams, cyber harassment, or hacking in Santa Cruz?"
+    ],
+    nearQuestionsFil: [
+      "Paano mag-file ng opisyal na Police Blotter report?",
+      "Anong tulong ang ibinibigay ng Women and Children Protection Desk (WCPD)?",
+      "Paano mag-ulat ng online scam, panloloko, o cyber harassment?"
+    ]
+  },
+  {
+    id: 6,
+    title: "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
+    titleFil: "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
+    keywords: ["police clearance", "clearance", "npcs", "apply clearance", "kuha clearance", "requirements clearance", "appointment"],
+    summaryEn: "To apply for a National Police Clearance (NPCS):\n1. Register and book an appointment online at https://pnpclearance.ph selecting Sta. Cruz MPS.\n2. Pay the ₱180 fee via Landbank/e-wallet (free for first-time jobseekers with Barangay certificate).\n3. Bring 2 valid IDs and your appointment slip to the station for photo and biometrics capturing.\nClearance is released in about 10–15 minutes if there is no hit.",
+    summaryFil: "Para kumuha ng National Police Clearance (NPCS):\n1. Mag-rehistro at kumuha ng appointment sa https://pnpclearance.ph at piliin ang Sta. Cruz MPS.\n2. Magbayad ng ₱180 sa Landbank/e-wallet (libre para sa First-Time Jobseekers).\n3. Pumunta sa istasyon dala ang 2 valid ID at appointment slip para sa picture at biometrics.\nMatatapos at maipiprint ang clearance sa loob ng 10-15 minuto kung walang hit.",
+    nearQuestionsEn: [
+      "What valid government IDs and documents are accepted for Police Clearance?",
+      "Can I get a Police Clearance for free under the First-Time Jobseekers Act?",
+      "Where is the PNP Santa Cruz Municipal Police Station located and what are its operating hours?"
+    ],
+    nearQuestionsFil: [
+      "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?",
+      "Libre ba ang clearance para sa First-Time Jobseekers?",
+      "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?"
+    ]
+  },
+  {
+    id: 7,
+    title: "What valid government IDs and documents are accepted for Police Clearance?",
+    titleFil: "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?",
+    keywords: ["valid id", "valid ids", "mga id", "id requirements", "tinatanggap na id", "anong id"],
+    summaryEn: "Bring at least 2 original, valid government-issued IDs, such as:\n• Philippine National ID (PhilID / ePhilID)\n• Passport\n• Driver's License\n• SSS / GSIS UMID Card\n• PRC License\n• Voter's ID or Certificate\n• PhilHealth ID\n• Postal ID\n• Barangay Clearance (with photo, issued within 6 months)",
+    summaryFil: "Magdala ng 2 orihinal at hindi expired na valid ID tulad ng:\n• Philippine National ID (PhilID / ePhilID)\n• Pasaporte\n• Driver's License\n• SSS / GSIS UMID Card\n• PRC License\n• Voter's ID o Certificate\n• PhilHealth ID\n• Postal ID\n• Barangay Clearance na may larawan",
+    nearQuestionsEn: [
+      "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
+      "Can I get a Police Clearance for free under the First-Time Jobseekers Act?",
+      "Is there priority assistance for senior citizens, pregnant women, and PWDs at the station?"
+    ],
+    nearQuestionsFil: [
+      "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
+      "Libre ba ang clearance para sa First-Time Jobseekers?",
+      "May priority assistance ba para sa senior citizens, buntis, at PWD?"
+    ]
+  },
+  {
+    id: 8,
+    title: "Can I get a Police Clearance for free under the First-Time Jobseekers Act?",
+    titleFil: "Libre ba ang police clearance para sa First-Time Jobseekers?",
+    keywords: ["first time jobseeker", "libreng clearance", "free clearance", "ra 11261", "unang trabaho", "fresh graduate"],
+    summaryEn: "Yes! Under the First-Time Jobseekers Assistance Act (R.A. 11261), first-time jobseekers are entitled to one (1) free National Police Clearance. Present an original Barangay Certificate specifying First-Time Jobseeker eligibility and an accomplished Oath of Undertaking upon appointment.",
+    summaryFil: "Opo! Sa ilalim ng R.A. 11261 (First-Time Jobseekers Assistance Act), libre ang unang Police Clearance. Magdala ng orihinal na Barangay Certificate para sa First-Time Jobseeker at Oath of Undertaking sa araw ng appointment.",
+    nearQuestionsEn: [
+      "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
+      "What valid government IDs and documents are accepted for Police Clearance?",
+      "Where is the PNP Santa Cruz Municipal Police Station located and what are its operating hours?"
+    ],
+    nearQuestionsFil: [
+      "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
+      "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?",
+      "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?"
+    ]
+  },
+  {
+    id: 9,
+    title: "Where does the crime data on the MIMPAS Map come from?",
+    titleFil: "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+    keywords: ["crime map data", "datos ng mapa", "saan galing data", "ciras", "blotter records", "map data source"],
+    summaryEn: "Crime Map data is sourced directly from blotter-recorded occurrences encoded in the PNP Crime Information Reporting and Analysis System (CIRAS). Data is verified and updated periodically by station records officers to maintain high spatial accuracy and situational awareness.",
+    summaryFil: "Ang datos sa Crime Map ay nagmumula sa mga naitalang blotter at opisyal na PNP Crime Information Reporting and Analysis System (CIRAS). Ito ay regular na sinusuri ng records division upang matiyak ang kalidad at katumpakan.",
+    nearQuestionsEn: [
+      "Does the Crime Map disclose personal names or exact home addresses?",
+      "How do I search or filter incidents by Barangay, Year, or Category on the Map?",
+      "What is MIMPAS and how does it help Sta. Cruz residents?"
+    ],
+    nearQuestionsFil: [
+      "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?",
+      "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
+      "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?"
+    ]
+  },
+  {
+    id: 10,
+    title: "Does the Crime Map disclose personal names or exact home addresses?",
+    titleFil: "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?",
+    keywords: ["privacy", "data privacy", "names", "pangalan", "tirahan", "address", "confidential", "ra 10173"],
+    summaryEn: "No. Under the Data Privacy Act of 2012 (R.A. 10173), the Crime Map does NOT publish personal names, exact house numbers, or specific victim/suspect identities. Markers are approximate vicinity centroids placed on public streets or barangay sectors for public awareness.",
+    summaryFil: "Hindi po. Alinsunod sa Data Privacy Act (R.A. 10173), HINDI inilalantad ang mga pangalan ng biktima, suspek, o eksaktong numero ng bahay. Ang mga marker ay tinatayang lokasyon sa pampublikong kalsada o barangay para sa kaligtasan ng komunidad.",
+    nearQuestionsEn: [
+      "Where does the crime data on the MIMPAS Map come from?",
+      "How do I search or filter incidents by Barangay, Year, or Category on the Map?",
+      "What is MIMPAS and how does it help Sta. Cruz residents?"
+    ],
+    nearQuestionsFil: [
+      "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+      "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
+      "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?"
+    ]
+  },
+  {
+    id: 11,
+    title: "How do I search or filter incidents by Barangay, Year, or Category on the Map?",
+    titleFil: "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
+    keywords: ["filter map", "filter", "barangay filter", "year filter", "category filter", "paano gamitin ang mapa", "map controls"],
+    summaryEn: "On the Crime Map page (/map):\n1. Use the filter bar at the top to select a specific Barangay (out of 26 barangays).\n2. Select a Calendar Year to observe historical trends.\n3. Filter by crime classification (8-Focus Crimes, Non-Index Crimes, or PSI).\n4. Click any marker or barangay area to view case details.",
+    summaryFil: "Sa Crime Map (/map):\n1. Gamitin ang filter toolbar upang pumili ng partikular na Barangay (sa 26 na barangay).\n2. Pumili ng Taon upang makita ang mga nakaraang talaan.\n3. Pumili ayon sa uri ng insidente (8-Focus Crimes, Non-Index, o PSI).\n4. I-click ang mga marker upang makita ang buod ng insidente.",
+    nearQuestionsEn: [
+      "Where does the crime data on the MIMPAS Map come from?",
+      "Does the Crime Map disclose personal names or exact home addresses?",
+      "Where can I see traffic rerouting and road safety advisories in Santa Cruz?"
+    ],
+    nearQuestionsFil: [
+      "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+      "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?",
+      "Saan makikita ang mga traffic advisory at rerouting sa Santa Cruz?"
+    ]
+  },
+  {
+    id: 12,
+    title: "What assistance does the Women and Children Protection Desk (WCPD) provide?",
+    titleFil: "Anong tulong ang ibinibigay ng Women and Children Protection Desk (WCPD)?",
+    keywords: ["wcpd", "vawc", "women", "children", "babae", "bata", "pang-aabuso", "domestic violence", "battered", "abuse", "safe space"],
+    summaryEn: "The WCPD provides dedicated, confidential assistance for victims of domestic violence (R.A. 9262), child abuse (R.A. 7610), sexual harassment (Safe Spaces Act), and rape. Female police officers conduct sensitive interviews in a private room and assist with Barangay Protection Orders (BPO) and court referrals.",
+    summaryFil: "Ang WCPD ay nagbibigay ng pribado at protektadong tulong para sa mga biktima ng karahasan sa kababaihan at kabataan (VAWC / R.A. 9262, R.A. 7610). Mga babaeng pulis ang nag-iimbestiga sa isang pribadong kwarto at tumutulong sa pagkuha ng Protection Order.",
+    nearQuestionsEn: [
+      "What are the official emergency hotlines for Santa Cruz, Laguna?",
+      "How do I file an official Police Blotter report?",
+      "Is there priority assistance for senior citizens, pregnant women, and PWDs at the station?"
+    ],
+    nearQuestionsFil: [
+      "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+      "Paano mag-file ng opisyal na Police Blotter report?",
+      "May priority assistance ba para sa senior citizens, buntis, at PWD?"
+    ]
+  },
+  {
+    id: 13,
+    title: "How do I report online scams, cyber harassment, or hacking in Santa Cruz?",
+    titleFil: "Paano mag-ulat ng online scam, panloloko, o cyber harassment?",
+    keywords: ["cybercrime", "scam", "online scam", "hacking", "cyber", "hacked", "identity theft", "harassment online", "gcash scam"],
+    summaryEn: "To report online scams or cybercrime:\n1. Preserve digital evidence immediately: uncropped screenshots of chat conversations, sender URLs, transaction reference numbers, and phone numbers.\n2. Visit Sta. Cruz MPS Investigation Section or contact the PNP Anti-Cybercrime Group (RACU 4A) at 0998 598 8116.",
+    summaryFil: "Para sa online scam o cybercrime:\n1. I-save agad ang digital evidence: buong screenshot ng chat, profile link, transaction reference number, at cellphone number.\n2. Pumunta sa Sta. Cruz MPS Investigation Section o makipag-ugnayan sa PNP Anti-Cybercrime Group (RACU 4A) sa 0998 598 8116.",
+    nearQuestionsEn: [
+      "How do I file an official Police Blotter report?",
+      "Can I file a police blotter online or through social media?",
+      "What are the official emergency hotlines for Santa Cruz, Laguna?"
+    ],
+    nearQuestionsFil: [
+      "Paano mag-file ng opisyal na Police Blotter report?",
+      "Maaari ba akong magpa-blotter online o sa social media?",
+      "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?"
+    ]
+  },
+  {
+    id: 14,
+    title: "How can the community submit tips regarding Wanted or Missing Persons?",
+    titleFil: "Paano magsumite ng impormasyon ukol sa Wanted o Missing Persons?",
+    keywords: ["wanted", "missing", "tip", "tips", "nawawala", "wanted person", "missing person", "sumbong"],
+    summaryEn: "Citizens can report information about wanted fugitives or missing persons by calling (049) 501-5971, texting 0998 598 5667, or visiting the station desk. Tipster identities are strictly confidential under police intelligence protocols. Never confront wanted persons yourself.",
+    summaryFil: "Maaaring mag-ulat ng impormasyon sa pamamagitan ng pagtawag sa (049) 501-5971, pag-text sa 0998 598 5667, o personal na pagpunta sa estasyon. Mahigpit na pinangangalagaan ang pagkakakilanlan ng tipster. Huwag subukang hulihin ang suspek mag-isa.",
+    nearQuestionsEn: [
+      "How do I report an ongoing emergency or crime in progress in Santa Cruz?",
+      "What are the official emergency hotlines for Santa Cruz, Laguna?",
+      "Where can I see traffic rerouting and road safety advisories in Santa Cruz?"
+    ],
+    nearQuestionsFil: [
+      "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?",
+      "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+      "Saan makikita ang mga traffic advisory at rerouting sa Santa Cruz?"
+    ]
+  },
+  {
+    id: 15,
+    title: "Where can I see traffic rerouting and road safety advisories in Santa Cruz?",
+    titleFil: "Saan makikita ang mga traffic advisory at rerouting sa Santa Cruz?",
+    keywords: ["traffic", "rerouting", "road closure", "trapiko", "kalsada", "sarado", "advisory", "daan"],
+    summaryEn: "Official traffic rerouting, road closures, and public safety advisories are published on this portal under the Public Advisories page (/bulletins) and News Releases page (/news). You can also follow official PNP Sta. Cruz social media broadcasts.",
+    summaryFil: "Ang mga traffic rerouting, pagsasara ng kalsada, at road safety advisory ay inilalathala sa Public Advisories (/bulletins) at Station News (/news) ng portal na ito, at sa opisyal na Facebook page ng Sta. Cruz MPS.",
+    nearQuestionsEn: [
+      "What are the official emergency hotlines for Santa Cruz, Laguna?",
+      "Where is the PNP Santa Cruz Municipal Police Station located and what are its operating hours?",
+      "How do I report an ongoing emergency or crime in progress in Santa Cruz?"
+    ],
+    nearQuestionsFil: [
+      "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+      "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
+      "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?"
+    ]
+  },
+  {
+    id: 16,
+    title: "Where is the PNP Santa Cruz Municipal Police Station located and what are its operating hours?",
+    titleFil: "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
+    keywords: ["location", "address", "operating hours", "oras", "lugar", "saan", "headquarters", "istasyon"],
+    summaryEn: "Sta. Cruz Municipal Police Station is located at: 1153 A. Mabini St., Poblacion, Santa Cruz, Laguna (beside the Municipal Hall).\n• **Emergency Dispatch & Patrols:** 24/7 continuous operation\n• **Clearance & Administrative Services:** Monday to Friday, 8:00 AM – 5:00 PM.",
+    summaryFil: "Ang Sta. Cruz Police Station ay matatagpuan sa: 1153 A. Mabini St., Poblacion, Santa Cruz, Laguna (katabi ng Munisipyo).\n• **Emergency at Patrols:** 24/7 bukas araw at gabi\n• **Clearance at Administrative Services:** Lunes hanggang Biyernes, 8:00 AM – 5:00 PM.",
+    nearQuestionsEn: [
+      "What are the official emergency hotlines for Santa Cruz, Laguna?",
+      "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
+      "Is there priority assistance for senior citizens, pregnant women, and PWDs at the station?"
+    ],
+    nearQuestionsFil: [
+      "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+      "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
+      "May priority assistance ba para sa senior citizens, buntis, at PWD?"
+    ]
+  },
+  {
+    id: 17,
+    title: "What is MIMPAS and how does it help Sta. Cruz residents?",
+    titleFil: "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?",
+    keywords: ["mimpas", "ano ang mimpas", "system", "portal", "about mimpas", "layunin"],
+    summaryEn: "MIMPAS (Municipal Information Mapping and Police Advisory System) is the official public safety portal developed for Sta. Cruz MPS. It provides interactive crime mapping, verified police bulletins, official emergency hotlines, and station directory access to keep Santa Cruz residents informed and secure.",
+    summaryFil: "Ang MIMPAS ay ang opisyal na digital public safety portal ng Sta. Cruz MPS. Nagbibigay ito ng interactive crime mapping, beripikadong advisories, emergency directory, at mabilis na impormasyon para sa kaligtasan ng buong Sta. Cruz.",
+    nearQuestionsEn: [
+      "Where does the crime data on the MIMPAS Map come from?",
+      "How do I search or filter incidents by Barangay, Year, or Category on the Map?",
+      "Does the Crime Map disclose personal names or exact home addresses?"
+    ],
+    nearQuestionsFil: [
+      "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+      "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
+      "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?"
+    ]
+  },
+  {
+    id: 18,
+    title: "Why does this website prioritize verified FAQs over automated AI chatbots?",
+    titleFil: "Bakit verified FAQs ang prayoridad ng website na ito kaysa AI chatbots?",
+    keywords: ["ai chatbot", "hallucination", "accuracy", "bakit faq", "verified faq", "precision"],
+    summaryEn: "This verified FAQ is maintained by Sta. Cruz MPS to provide 100% legally accurate, official answers directly reflecting PNP Standard Operating Procedures, preventing misinformation or hallucinated answers from automated general-purpose AI bots.",
+    summaryFil: "Pinapanatili ng Sta. Cruz MPS ang verified FAQ na ito upang masigurong 100% tumpak at sumusunod sa batas at PNP SOP ang bawat sagot, at maiwasan ang maling impormasyon mula sa mga hindi opisyal na AI.",
+    nearQuestionsEn: [
+      "What is MIMPAS and how does it help Sta. Cruz residents?",
+      "Where does the crime data on the MIMPAS Map come from?",
+      "How do I report an ongoing emergency or crime in progress in Santa Cruz?"
+    ],
+    nearQuestionsFil: [
+      "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?",
+      "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+      "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?"
+    ]
+  },
+  {
+    id: 19,
+    title: "Is there priority assistance for senior citizens, pregnant women, and PWDs at the station?",
+    titleFil: "May priority assistance ba para sa senior citizens, buntis, at PWD sa estasyon?",
+    keywords: ["senior", "pwd", "pregnant", "buntis", "matanda", "priority", "accessibility", "wheelchair", "ramp"],
+    summaryEn: "Yes. In compliance with R.A. 7277 (Magna Carta for PWDs) and R.A. 9994 (Expanded Senior Citizens Act), Sta. Cruz MPS provides an entrance wheelchair ramp, priority lane, and dedicated seating for senior citizens, pregnant women, and PWDs. Duty personnel assist visitors directly throughout their transaction.",
+    summaryFil: "Opo. Alinsunod sa R.A. 7277 at R.A. 9994, may wheelchair ramp, priority lane, at upuan sa Sta. Cruz MPS para sa senior citizens, buntis, at PWDs. Agad ding umaalalay ang mga naka-duty na pulis sa kanilang transaksyon.",
+    nearQuestionsEn: [
+      "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
+      "Where is the PNP Santa Cruz Municipal Police Station located and what are its operating hours?",
+      "What valid government IDs and documents are accepted for Police Clearance?"
+    ],
+    nearQuestionsFil: [
+      "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
+      "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
+      "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?"
+    ]
+  }
+];
+
+export const chatFaq = async (req: Request, res: Response) => {
+  try {
+    const { question, userMessage, chatHistory, language } = req.body;
+    const query = String(question || userMessage || '').trim();
+    const isFilipino = language === 'fil';
+
+    if (!query) {
+      return res.status(400).json({ error: 'Question parameter is required' });
+    }
+
+    const qLower = query.toLowerCase();
+
+    // 1. Strict Out-of-Scope Detection
+    const explicitOutOfScope = [
+      /\b(recipe|cook|cooking|baking|bake|lutong|ulam|cake|pizza|adobo|sinigang)\b/i,
+      /\b(capital\s+of|president\s+of|weather|climate|panahon|ulan|bagyo|forecast)\b/i,
+      /\b(coding|programming|javascript|python|typescript|html|css|php|react|sql\s+query|debug\s+code)\b/i,
+      /\b(nba|football|soccer|basketball|championship|celebrity|movie|actor|actress|taylor\s+swift|bts|kpop)\b/i,
+      /\b(horoscope|zodiac|fortune|crypto|bitcoin|ethereum|forex\s+trading|lottery|lotto)\b/i,
+      /\b(joke|story|poem|song\s+lyrics|sing\s+a\s+song|kantahan\s+mo\s+ako|tula|kwento)\b/i,
+      /\b(math|homework|algebra|calculus|translate\s+this|who\s+made\s+you)\b/i
+    ];
+
+    const isExplicitOutOfScope = explicitOutOfScope.some(regex => regex.test(qLower));
+
+    // Common stop words to ignore during word-level matching
+    const STOP_WORDS = new Set([
+      'the', 'and', 'for', 'are', 'you', 'can', 'how', 'what', 'who', 'why', 'when', 'where',
+      'with', 'from', 'that', 'this', 'does', 'have', 'your', 'about', 'some', 'there',
+      'ang', 'mga', 'ano', 'may', 'para', 'saan', 'kailan', 'bakit', 'paano', 'sino',
+      'iyon', 'iyan', 'nito', 'nila', 'kung', 'nang', 'alam', 'gusto', 'nais', 'ba', 'po',
+      'inyo', 'ating', 'isang', 'lahat', 'ibang', 'dito', 'doon'
+    ]);
+
+    // Calculate relevance score against FAQ items
+    const scoredFaqs = FAQ_KNOWLEDGEBASE.map(faq => {
+      let score = 0;
+      let keywordMatched = false;
+      const titleLower = faq.title.toLowerCase();
+      const titleFilLower = faq.titleFil.toLowerCase();
+      
+      if (titleLower.includes(qLower) || titleFilLower.includes(qLower)) {
+        score += 20;
+        keywordMatched = true;
+      }
+      
+      faq.keywords.forEach(kw => {
+        const kwLower = kw.toLowerCase();
+        if (kwLower.length > 2 && qLower.includes(kwLower)) {
+          score += 8;
+          keywordMatched = true;
+        }
+      });
+
+      const words = qLower
+        .replace(/[^a-z0-9\s]/gi, ' ')
+        .split(/\s+/)
+        .filter(w => w.length >= 3 && !STOP_WORDS.has(w));
+
+      words.forEach(w => {
+        const rx = new RegExp(`\\b${w}\\b`, 'i');
+        if (rx.test(titleLower) || rx.test(titleFilLower)) score += 3;
+        if (rx.test(faq.summaryEn) || rx.test(faq.summaryFil)) score += 1;
+      });
+
+      return { faq, score, keywordMatched };
+    }).sort((a, b) => b.score - a.score);
+
+    const bestMatch = scoredFaqs[0];
+    const isInScope = !isExplicitOutOfScope && (bestMatch && (bestMatch.keywordMatched || bestMatch.score >= 8));
+
+    if (!isInScope) {
+      const outOfScopeMsg = isFilipino
+        ? "Hindi ko masasagot ang katanungang iyan. Masasagot ko lamang ang mga katanungan na sakop ng opisyal na PNP Sta. Cruz FAQs at mga serbisyo ng ating estasyon ng pulisya."
+        : "I cannot answer that question. I am programmed to only answer questions within the scope of the official PNP Sta. Cruz FAQs and public safety guidelines.";
+
+      const suggestedQuestions = isFilipino
+        ? [
+            "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?",
+            "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+            "Paano kumuha ng National Police Clearance (NPCS)?",
+            "Paano mag-file ng opisyal na Police Blotter report?"
+          ]
+        : [
+            "How do I report an ongoing emergency or crime in progress in Santa Cruz?",
+            "What are the official emergency hotlines for Santa Cruz, Laguna?",
+            "How do I apply for a National Police Clearance (NPCS)?",
+            "How do I file an official Police Blotter report?"
+          ];
+
+      return res.json({
+        success: true,
+        inScope: false,
+        reply: outOfScopeMsg,
+        nearQuestions: suggestedQuestions
+      });
+    }
+
+    // In-scope answer synthesis
+    const matchedFaq = bestMatch.faq;
+    const answer = isFilipino ? matchedFaq.summaryFil : matchedFaq.summaryEn;
+    const nearQuestions = isFilipino ? matchedFaq.nearQuestionsFil : matchedFaq.nearQuestionsEn;
+
+    return res.json({
+      success: true,
+      inScope: true,
+      faqId: matchedFaq.id,
+      topic: isFilipino ? matchedFaq.titleFil : matchedFaq.title,
+      reply: answer,
+      nearQuestions
+    });
+  } catch (err: any) {
+    console.error('FAQ Chatbot error:', err);
+    return res.status(500).json({ error: err.message || 'Error processing FAQ question' });
+  }
+};

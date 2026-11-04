@@ -341,22 +341,7 @@
                     <a href="/about"
                         class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 <%= typeof title !== 'undefined' && title === 'About' ? 'bg-white/20 text-white font-black border-b-2 border-pnp-gold shadow-xs' : 'text-white/90 hover:bg-white/10 hover:text-white font-bold' %>">About</a>
                     
-                    <!-- FAQ Nav Button -->
-                    <button type="button" onclick="openFaqModal()"
-                        class="px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 text-white/90 hover:bg-white/10 hover:text-white font-bold flex items-center gap-1.5 cursor-pointer border border-transparent hover:border-pnp-gold/30"
-                        title="Frequently Asked Questions & Verified Guidelines">
-                        <i class="fas fa-circle-question text-pnp-gold text-xs"></i>
-                        <span>FAQ</span>
-                    </button>
-                    
-                    <% if (locals.user) { %>
-                        <a href="/admin/dashboard"
-                            class="ml-2 px-3.5 py-2 rounded-xl text-xs uppercase tracking-wider font-black text-pnp-gold bg-white/10 hover:bg-pnp-gold hover:text-pnp-blue transition duration-200 flex items-center gap-1.5 border border-pnp-gold/30 shadow-xs"
-                            title="Access Admin Console">
-                            <i class="fas fa-shield-halved text-xs"></i>
-                            <span>Admin Console</span>
-                        </a>
-                    <% } %>
+
                 </nav>
 
                 <!-- Action Buttons -->
@@ -410,22 +395,7 @@
             <a href="/hotlines" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && (title === 'Emergency Hotlines' || title === 'Hotlines') ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">Hotlines</a>
             <a href="/about" class="px-3.5 py-2.5 rounded-xl text-base font-bold text-white hover:bg-white/10 transition <%= typeof title !== 'undefined' && title === 'About' ? 'bg-white/20 text-white font-black border-l-4 border-pnp-gold' : '' %>">About PNP</a>
 
-            <!-- Mobile FAQ Trigger -->
-            <button type="button" onclick="closeMenu(); openFaqModal();"
-                class="w-full text-left px-3.5 py-2.5 rounded-xl text-base font-bold text-pnp-gold hover:bg-white/10 transition flex items-center justify-between cursor-pointer">
-                <span class="flex items-center gap-2.5">
-                    <i class="fas fa-circle-question text-base text-pnp-gold"></i>
-                    <span>Station FAQ & Help</span>
-                </span>
-                <span class="text-[9px] px-2 py-0.5 rounded-md bg-pnp-gold text-pnp-blue font-black uppercase">Verified</span>
-            </button>
 
-            <% if (locals.user) { %>
-                <a href="/admin/dashboard" class="px-3.5 py-2.5 rounded-xl text-base font-black text-pnp-gold hover:bg-white/10 transition pt-3 border-t border-white/10 flex items-center gap-2">
-                    <i class="fas fa-shield-halved text-base"></i>
-                    <span>Admin Dashboard</span>
-                </a>
-            <% } %>
         </nav>
 
         <!-- Mobile Drawer Footer Info -->
@@ -501,6 +471,11 @@
                                 <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
                                 Official FAQ
                             </button>
+                            <button type="button" onclick="openTermsModal(true)"
+                                class="text-xs text-blue-200 hover:text-white transition group flex items-center text-left cursor-pointer">
+                                <i class="fas fa-chevron-right text-[8px] mr-2 text-pnp-gold opacity-0 group-hover:opacity-100 transition"></i>
+                                Terms & Conditions
+                            </button>
                             <% if (locals.user) { %>
                             <a href="/admin/dashboard"
                                 class="text-xs text-pnp-gold hover:text-white transition group flex items-center mt-1">
@@ -572,9 +547,9 @@
             <!-- Floating Actions Container (Every Public Page) -->
             <div class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex flex-col items-end gap-3 pointer-events-none">
                 <% if (locals.user) { %>
-                <!-- Floating Admin Dashboard Button (Desktop only) -->
+                <!-- Floating Admin Dashboard Button (Single Admin Button on Public) -->
                 <a href="/admin/dashboard" title="Admin Dashboard"
-                    class="pointer-events-auto hidden md:flex w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold cursor-pointer">
+                    class="pointer-events-auto flex w-12 h-12 bg-pnp-blue dark:bg-pnp-gold shadow-2xl rounded-full items-center justify-center text-white dark:text-pnp-blue transition-all duration-300 hover:scale-110 active:scale-95 border border-pnp-blue dark:border-pnp-gold cursor-pointer">
                     <i class="fas fa-shield-halved text-lg"></i>
                 </a>
                 <% } %>
@@ -739,6 +714,7 @@
             </script>
     <!-- Station Verified FAQ Modal Partial -->
     <%- include('../partials/faq_modal') %>
+    <%- include('../partials/terms_modal') %>
 </body>
 
 </html>

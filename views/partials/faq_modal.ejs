@@ -1,839 +1,236 @@
 <!-- ========================================================================= -->
-<!-- OFFICIAL PNP STA. CRUZ FAQ MODAL & VERIFIED KNOWLEDGEBASE                -->
-<!-- Provides 100% verified, legally accurate, and station-approved answers   -->
-<!-- to replace inaccurate or hallucinated AI chatbot responses.             -->
+<!-- OFFICIAL PNP STA. CRUZ FAQ CHATBOT MODAL                                 -->
+<!-- Enhanced Design: Station Brand Colors, Distinct Buttons, Header & Footer -->
 <!-- ========================================================================= -->
 
-<div id="faqModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-3 sm:p-5 md:p-6 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
+<div id="faqModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-2 sm:p-4 md:p-6 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
     <!-- Modal Backdrop -->
     <div id="faqModalBackdrop" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity duration-300 opacity-0" onclick="closeFaqModal()"></div>
 
-    <!-- Modal Container -->
-    <div id="faqModalContainer" class="relative bg-white dark:bg-slate-900 w-full max-w-4xl h-[92vh] sm:h-[88vh] rounded-3xl sm:rounded-[2rem] shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col transform transition-all duration-300 scale-95 opacity-0">
+    <!-- Modal Container: Spacious layout with elevated PNP tactical design -->
+    <div id="faqModalContainer" class="relative bg-white dark:bg-slate-900 w-full max-w-5xl xl:max-w-6xl h-[95vh] sm:h-[90vh] rounded-2xl sm:rounded-[2rem] shadow-2xl border-2 border-slate-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col transform transition-all duration-300 scale-95 opacity-0">
         
-        <!-- Top Accent Tactical Stripe -->
-        <div class="h-2 w-full bg-gradient-to-r from-pnp-blue via-pnp-gold to-pnp-blue"></div>
+        <!-- Top Tactical Accent Stripe -->
+        <div class="h-1.5 w-full bg-gradient-to-r from-pnp-blue via-pnp-gold to-pnp-blue shrink-0 shadow-xs"></div>
 
-        <!-- Modal Header -->
-        <div class="px-5 py-4 sm:px-7 sm:py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/90 dark:bg-slate-950/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+        <!-- Modal Header: Deep PNP Police Navy with Gold Accents -->
+        <div class="px-5 py-4 sm:px-7 sm:py-4.5 bg-gradient-to-r from-[#0d2238] via-[#122e4d] to-[#0d2238] dark:from-[#08121f] dark:via-[#0c1a2c] dark:to-[#08121f] text-white border-b-2 border-pnp-gold/40 shadow-md flex items-center justify-between gap-3 shrink-0 relative">
+            <!-- Left: Bot Avatar, Station Badge & Titles -->
             <div class="flex items-center space-x-3.5 min-w-0">
-                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold flex items-center justify-center shrink-0 border border-pnp-blue/20 dark:border-pnp-gold/30 shadow-xs">
-                    <i class="fas fa-circle-question text-xl sm:text-2xl"></i>
+                <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 dark:bg-pnp-gold/15 p-1 flex items-center justify-center border-2 border-pnp-gold shadow-md ring-2 ring-pnp-gold/30 shrink-0">
+                    <img src="/favicon.png" alt="MIMPAS Logo" class="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full"
+                        onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0d2238] animate-pulse shadow-sm" title="Online Station Desk"></span>
                 </div>
-                <div class="min-w-0">
+                <div class="min-w-0 text-left">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h3 id="faqModalTitle" class="text-base sm:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight truncate">
-                            Official Station FAQ
+                        <h3 id="faqModalTitle" class="text-sm sm:text-base font-black text-white uppercase tracking-wider truncate leading-tight drop-shadow-xs">
+                            Sta. Cruz Police FAQ Assistant
                         </h3>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                            <i class="fas fa-badge-check text-[10px]"></i> 100% Verified
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-xs">
+                            <i class="fas fa-shield-check text-[9px] text-emerald-400"></i> Verified Desk
                         </span>
                     </div>
-                    <p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider truncate mt-0.5">
-                        PNP Sta. Cruz, Laguna PPO &bull; Accurate Guidelines & Public Services
+                    <p id="faqModalSubTitle" class="text-[10px] sm:text-[11px] text-blue-100/90 dark:text-pnp-gold/90 font-bold uppercase tracking-wider truncate mt-0.5 flex items-center gap-1.5">
+                        <i class="fas fa-certificate text-pnp-gold text-[9px]"></i>
+                        <span>Strict Scope: Official Station Guidelines & Public Safety Services</span>
                     </p>
                 </div>
             </div>
 
-            <!-- Controls: Language Switch & Close -->
-            <div class="flex items-center space-x-2 self-end sm:self-center shrink-0">
-                <!-- Dual-Language Toggle (EN / FIL) -->
-                <div class="inline-flex items-center p-1 rounded-xl bg-slate-200/80 dark:bg-slate-800 border border-slate-300/80 dark:border-slate-700 text-xs font-black">
-                    <button id="faqLangEnBtn" onclick="setFaqLanguage('en')" type="button"
-                        class="px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all bg-white dark:bg-pnp-gold text-pnp-blue dark:text-slate-950 shadow-xs">
-                        English
-                    </button>
-                    <button id="faqLangFilBtn" onclick="setFaqLanguage('fil')" type="button"
-                        class="px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-                        Filipino
-                    </button>
-                </div>
+            <!-- Right Controls: Distinctly Styled Header Buttons -->
+            <div class="flex items-center space-x-2 shrink-0">
+                <!-- Single Language Toggle Button -->
+                <button id="faqLangToggleBtn" onclick="toggleFaqLanguage()" type="button"
+                    class="px-3.5 py-2 rounded-xl text-[10.5px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 bg-white/15 hover:bg-pnp-gold hover:text-pnp-blue text-white border border-pnp-gold/60 shadow-sm hover:shadow-md hover:shadow-pnp-gold/20 active:scale-95 cursor-pointer backdrop-blur-md flex items-center gap-1.5"
+                    title="Toggle Language (English / Filipino)">
+                    <i class="fas fa-globe text-pnp-gold text-xs"></i>
+                    <span id="faqLangToggleLabel">FIL</span>
+                </button>
+
+                <!-- Reset Chat History Button -->
+                <button type="button" onclick="clearFaqChat()"
+                    class="px-3 py-2 rounded-xl text-[10.5px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 bg-rose-500/15 hover:bg-rose-600 hover:text-white text-rose-200 border border-rose-400/40 shadow-sm active:scale-95 cursor-pointer backdrop-blur-md flex items-center gap-1.5"
+                    title="Clear chat and start over">
+                    <i class="fas fa-rotate-left text-xs"></i>
+                    <span class="hidden sm:inline">Reset</span>
+                </button>
 
                 <!-- Close Button -->
-                <button onclick="closeFaqModal()" type="button" aria-label="Close FAQ Modal"
-                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-950/40 dark:text-slate-300 dark:hover:text-rose-300 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-all cursor-pointer shadow-2xs active:scale-95" title="Close (ESC)">
+                <button onclick="closeFaqModal()" type="button" aria-label="Close FAQ Chatbot"
+                    class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/15 hover:bg-rose-600 hover:text-white text-white border border-white/25 hover:border-rose-400 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-sm active:scale-95 backdrop-blur-md"
+                    title="Close (ESC)">
                     <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Search Bar & Category Controls Bar -->
-        <div class="px-5 py-3.5 sm:px-7 sm:py-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
-            <!-- Search Input with Clear Button -->
-            <div class="relative">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs sm:text-sm"></i>
-                <input type="text" id="faqSearchInput" oninput="filterFaqQuestions()"
-                    placeholder="Search answers (e.g. police clearance, blotter, 911, hotlines, crime map, WCPD)..."
-                    class="w-full pl-11 pr-10 py-2.5 sm:py-3 bg-slate-100/80 hover:bg-slate-100 focus:bg-white dark:bg-slate-950 dark:focus:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pnp-blue/20 dark:focus:ring-pnp-gold/30 focus:border-pnp-blue dark:focus:border-pnp-gold transition shadow-inner">
-                <button id="faqSearchClearBtn" onclick="clearFaqSearch()" type="button"
-                    class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition cursor-pointer"
-                    title="Clear search">
-                    <i class="fas fa-times-circle text-xs"></i>
-                </button>
-            </div>
-
-            <!-- Category Pills Bar & Counter / Expand-Collapse -->
-            <div class="flex items-center justify-between gap-3 overflow-hidden">
-                <!-- Horizontally Scrollable Category Pills -->
-                <div class="flex items-center gap-1.5 overflow-x-auto custom-modal-scrollbar pb-1 text-xs font-bold shrink min-w-0" id="faqCategoryList">
-                    <button type="button" data-faq-cat="all" onclick="setFaqCategory('all')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-black bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 shadow-xs">
-                        <i class="fas fa-layer-group mr-1 text-[9px]"></i> All
-                    </button>
-                    <button type="button" data-faq-cat="emergency" onclick="setFaqCategory('emergency')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-phone-volume mr-1 text-red-500 text-[9px]"></i> Emergencies
-                    </button>
-                    <button type="button" data-faq-cat="blotter" onclick="setFaqCategory('blotter')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-file-signature mr-1 text-blue-500 text-[9px]"></i> Blotter & Reports
-                    </button>
-                    <button type="button" data-faq-cat="clearance" onclick="setFaqCategory('clearance')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-id-card mr-1 text-emerald-500 text-[9px]"></i> Police Clearance
-                    </button>
-                    <button type="button" data-faq-cat="map" onclick="setFaqCategory('map')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-map-marked-alt mr-1 text-amber-500 text-[9px]"></i> Crime Map
-                    </button>
-                    <button type="button" data-faq-cat="bulletins" onclick="setFaqCategory('bulletins')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-bullhorn mr-1 text-purple-500 text-[9px]"></i> Advisories
-                    </button>
-                    <button type="button" data-faq-cat="wcpd" onclick="setFaqCategory('wcpd')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-shield-heart mr-1 text-rose-500 text-[9px]"></i> WCPD & Cyber
-                    </button>
-                    <button type="button" data-faq-cat="general" onclick="setFaqCategory('general')"
-                        class="faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <i class="fas fa-building-shield mr-1 text-cyan-500 text-[9px]"></i> Station Info
-                    </button>
-                </div>
-
-                <!-- Right Action: Expand/Collapse All & Results Count -->
-                <div class="hidden sm:flex items-center gap-2 shrink-0 text-[10px] font-black uppercase tracking-wider">
-                    <span id="faqCountBadge" class="text-slate-400 dark:text-slate-500 whitespace-nowrap">
-                        19 Questions
+        <!-- Chat Conversation Messages Space (Expansive & Spacious) -->
+        <div id="faq-chat-messages" class="flex-grow p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950">
+            <!-- Initial Welcome Assistant Card -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm font-black shadow-xs border border-pnp-gold/30">
+                        <i class="fas fa-shield-halved"></i>
                     </span>
-                    <button id="faqToggleAllBtn" onclick="toggleAllFaqAccordions()" type="button"
-                        class="px-2 py-1 rounded-lg text-slate-600 hover:text-pnp-blue dark:text-slate-400 dark:hover:text-pnp-gold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition cursor-pointer">
-                        Expand All
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Scrollable Questions Accordion Container -->
-        <div id="faqItemsContainer" class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-3.5 custom-modal-scrollbar bg-slate-100/50 dark:bg-slate-950/40">
-
-            <!-- AI Replacement Informational Alert -->
-            <div class="p-3.5 sm:p-4 rounded-2xl bg-blue-50 dark:bg-slate-900 border border-blue-200 dark:border-blue-900/50 flex items-start gap-3 shadow-2xs">
-                <div class="w-8 h-8 rounded-xl bg-pnp-blue/10 dark:bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold flex items-center justify-center shrink-0 mt-0.5">
-                    <i class="fas fa-shield-halved text-sm"></i>
-                </div>
-                <div class="text-xs leading-relaxed">
-                    <p class="font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold text-[11px] mb-0.5">
-                        Authoritative Public Safety Information
-                    </p>
-                    <p class="text-slate-600 dark:text-slate-300 font-medium text-[11px] sm:text-xs">
-                        This official FAQ replaces automated AI assistant outputs to guarantee 100% legal precision, station-verified hotlines, and standard operating procedures directly from the PNP Santa Cruz Municipal Police Station.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Zero Results Placeholder (shown when search has no matches) -->
-            <div id="faqNoResults" class="hidden py-12 text-center flex flex-col items-center justify-center">
-                <div class="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center mb-3 text-xl">
-                    <i class="fas fa-magnifying-glass"></i>
-                </div>
-                <h4 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider mb-1">
-                    No Matching Answers Found
-                </h4>
-                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-4">
-                    Try searching with other keywords or browse categories above. For immediate incident queries, contact our station desk.
-                </p>
-                <div class="flex gap-2">
-                    <button onclick="clearFaqSearch()" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition cursor-pointer">
-                        Clear Search Filter
-                    </button>
-                    <a href="tel:09985985667" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue hover:bg-blue-900 text-white dark:bg-pnp-gold dark:text-slate-950 transition flex items-center gap-1.5">
-                        <i class="fas fa-phone-volume text-xs"></i> Call Station
-                    </a>
-                </div>
-            </div>
-
-            <!-- =================================================================== -->
-            <!-- FAQ ITEMS ACCORDION (19 Comprehensive Station-Verified Questions)    -->
-            <!-- =================================================================== -->
-
-            <!-- ITEM 1: Emergency Reporting -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="emergency"
-                data-keywords="emergency 911 ongoing crime incident report call police dispatch immediate danger mobile patrol">
-                <button type="button" onclick="toggleFaqItem(1)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-phone-volume"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 block mb-0.5">Emergency & Response</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                How do I report an ongoing emergency or crime in progress in Santa Cruz?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-1" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        In an immediate, life-threatening situation or ongoing crime, dial <strong>911</strong> immediately or call the Santa Cruz Municipal Police Station Operations Desk directly at <a href="tel:09985985667" class="text-pnp-blue dark:text-pnp-gold font-black underline hover:opacity-80">0998 598 5667</a> or <a href="tel:0495015971" class="text-pnp-blue dark:text-pnp-gold font-black underline hover:opacity-80">(049) 501-5971</a>.
-                    </p>
-                    <div class="p-3 bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 rounded-r-xl space-y-1 text-xs">
-                        <strong class="text-red-700 dark:text-red-400 uppercase tracking-wider block">When calling, please provide:</strong>
-                        <ul class="list-disc list-inside space-y-0.5 text-slate-700 dark:text-slate-300">
-                            <li>Your exact location (Barangay, landmark, or street name).</li>
-                            <li>Nature of the incident (crime, assault, theft, disturbance, traffic crash).</li>
-                            <li>Description of suspect(s) and any weapons observed.</li>
-                            <li>Injuries requiring emergency medical dispatch (MDRRMO / Red Cross).</li>
-                        </ul>
-                    </div>
-                    <div class="flex items-center gap-2 pt-1 flex-wrap">
-                        <a href="tel:09985985667" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pnp-blue hover:bg-blue-900 text-white dark:bg-pnp-gold dark:text-slate-950 font-black text-xs uppercase tracking-wider transition">
-                            <i class="fas fa-phone-volume"></i> Call Station (0998 598 5667)
-                        </a>
-                        <a href="tel:911" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider transition">
-                            <i class="fas fa-tower-broadcast"></i> Dial 911
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ITEM 2: Emergency Numbers & Directory -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="emergency"
-                data-keywords="hotline numbers emergency contact telephone bfp fire mdrrmo rescue laguna ppo hospital red cross ambulance">
-                <button type="button" onclick="toggleFaqItem(2)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-red-100 text-red-600 dark:bg-red-950/60 dark:text-red-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-address-book"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 block mb-0.5">Emergency & Response</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                What are the official emergency hotlines for Santa Cruz, Laguna?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-2" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        The Sta. Cruz municipal emergency directory includes the following 24/7 dedicated telephone and cellular lines:
-                    </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
-                            <span class="font-black text-slate-900 dark:text-white block">PNP Sta. Cruz Station Desk:</span>
-                            <a href="tel:09985985667" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">0998 598 5667</a> / <a href="tel:0495015971" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">(049) 501-5971</a>
-                        </div>
-                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
-                            <span class="font-black text-slate-900 dark:text-white block">BFP Sta. Cruz (Fire Rescue):</span>
-                            <a href="tel:0495011911" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">(049) 501-1911</a> / <a href="tel:09156022167" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">0915 602 2167</a>
-                        </div>
-                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
-                            <span class="font-black text-slate-900 dark:text-white block">Sta. Cruz MDRRMO (Disaster/Ambulance):</span>
-                            <a href="tel:0495012070" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">(049) 501-2070</a> / <a href="tel:09399175202" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">0939 917 5202</a>
-                        </div>
-                        <div class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60">
-                            <span class="font-black text-slate-900 dark:text-white block">Laguna Provincial Police Office (PPO):</span>
-                            <a href="tel:0495011647" class="text-pnp-blue dark:text-pnp-gold font-bold hover:underline">(049) 501-1647</a>
-                        </div>
-                    </div>
                     <div>
-                        <a href="/hotlines" class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold hover:underline">
-                            <span>Browse Complete Hotlines Directory</span>
-                            <i class="fas fa-arrow-right text-[10px]"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ITEM 3: Police Blotter Procedure -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="blotter"
-                data-keywords="blotter police report extract certificate eblotter ciras filing complaint investigation stolen id requirements">
-                <button type="button" onclick="toggleFaqItem(3)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-file-pen"></i>
+                        <strong class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold block leading-none">
+                            PNP Santa Cruz Police Assistant
+                        </strong>
+                        <span class="text-[9.5px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5">
+                            Official Municipal Police Station Desk &bull; Sta. Cruz, Laguna
                         </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 block mb-0.5">Police Blotter & Reports</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                How do I file an official Police Blotter or Incident Report?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-3" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        To file an official police blotter, proceed directly to the <strong>Investigation and Detective Management Section (IDMS)</strong> desk at the Santa Cruz Municipal Police Station (open 24/7).
-                    </p>
-                    <ol class="list-decimal list-inside space-y-1.5 pl-1">
-                        <li><strong>Present Identification:</strong> Bring at least one valid government-issued ID (e.g., PhilSys National ID, Driver's License, Passport, UMID).</li>
-                        <li><strong>Narrate the Facts:</strong> State the truthful details of the event (date, time, exact location, persons involved, witnesses, and loss/injury).</li>
-                        <li><strong>Entry into e-Blotter:</strong> The duty investigator logs your report into the official PNP Crime Information Reporting and Analysis System (CIRAS / e-Blotter).</li>
-                        <li><strong>Receive Blotter Extract:</strong> An official certified Police Blotter Extract is issued for legal, insurance, employment, or barangay filing purposes.</li>
-                    </ol>
-                </div>
-            </div>
-
-            <!-- ITEM 4: Online Blotter Clarification -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="blotter"
-                data-keywords="online blotter facebook filing internet website complaint sworn legal validity electronic report">
-                <button type="button" onclick="toggleFaqItem(4)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-globe"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 block mb-0.5">Police Blotter & Reports</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Can I file an official police blotter online through this website or Facebook?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-4" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        <strong>No.</strong> In accordance with Philippine criminal procedural law and PNP standard guidelines, an official criminal blotter or sworn complaint <strong>requires physical presence and personal sworn statement</strong> before an authorized police investigator.
-                    </p>
-                    <p class="text-xs">
-                        Social media messages, website comments, or chat queries <strong>do not constitute an official legal blotter</strong>. However, you may submit confidential security tips, information about wanted persons, or request guidance through our station channels.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 5: Barangay vs Police Blotter -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="blotter"
-                data-keywords="barangay jurisdiction lupon tagapamayapa katarungang pambarangay disputes neighbor fight minor crime threshold">
-                <button type="button" onclick="toggleFaqItem(5)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-scale-balanced"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 block mb-0.5">Police Blotter & Reports</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Should I report an incident to the Barangay Hall first or directly to the Police Station?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-5" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        Under the <strong>Katarungang Pambarangay Law (R.A. 7160)</strong>, jurisdiction is determined as follows:
-                    </p>
-                    <ul class="list-disc list-inside space-y-1.5 pl-1 text-xs sm:text-sm">
-                        <li><strong>Report to the Barangay Hall first:</strong> For minor neighborhood disputes, property boundary quarrels, light slander, or offenses punishable by imprisonment of not more than 1 year or fines under ₱5,000 involving residents of the same municipality.</li>
-                        <li><strong>Proceed directly to the Police Station:</strong> For major criminal offenses (robbery, theft, physical injury with weapons, illegal drugs, carnapping, homicide), domestic violence (VAWC), crimes against minors, offenses involving public officers, or when immediate warrantless arrest or investigation is imperative.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- ITEM 6: Police Clearance Step-by-Step -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="clearance"
-                data-keywords="police clearance national clearance npcs appointment application requirements payment gcash cost fee online portal">
-                <button type="button" onclick="toggleFaqItem(6)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-id-card"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block mb-0.5">National Police Clearance</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                How do I apply for a National Police Clearance (NPCS)?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-6" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        Follow these 4 standard steps to secure your official National Police Clearance:
-                    </p>
-                    <div class="space-y-2 text-xs sm:text-sm">
-                        <div class="flex gap-2">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-black shrink-0 text-[10px]">1</span>
-                            <div><strong>Register Online:</strong> Visit the official PNP portal <a href="https://pnpclearance.ph" target="_blank" rel="noopener noreferrer" class="text-pnp-blue dark:text-pnp-gold font-bold underline">https://pnpclearance.ph</a> and register your profile.</div>
-                        </div>
-                        <div class="flex gap-2">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-black shrink-0 text-[10px]">2</span>
-                            <div><strong>Select Station:</strong> Choose <em>"Laguna Police Provincial Office - Santa Cruz Municipal Police Station"</em> as your servicing center.</div>
-                        </div>
-                        <div class="flex gap-2">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-black shrink-0 text-[10px]">3</span>
-                            <div><strong>Pay Fee:</strong> Settle the standard clearance fee (₱150 + transaction fee) via LandBank, GCash, Maya, or 7-Eleven.</div>
-                        </div>
-                        <div class="flex gap-2">
-                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center font-black shrink-0 text-[10px]">4</span>
-                            <div><strong>Biometrics & Releasing:</strong> On your appointment date, proceed to Sta. Cruz Police Station clearance section with 2 valid IDs and your payment reference receipt for instant photo/biometric capture and printing.</div>
-                        </div>
-                    </div>
-                    <div class="pt-2">
-                        <a href="https://pnpclearance.ph" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider transition">
-                            <i class="fas fa-external-link-alt text-[10px]"></i> Open PNP Clearance Portal
-                        </a>
                     </div>
                 </div>
-            </div>
 
-            <!-- ITEM 7: Police Clearance Valid IDs -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="clearance"
-                data-keywords="valid id clearance documents requirements passport philsys umid driver license postal prc senior citizen">
-                <button type="button" onclick="toggleFaqItem(7)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-passport"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block mb-0.5">National Police Clearance</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                What valid IDs are accepted for Police Clearance issuance?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-7" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        Applicants must present at least <strong>two (2) valid original government-issued IDs</strong> containing their photo and signature:
-                    </p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; PhilSys National ID / ePhilID</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; Philippine Passport</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; Driver's License (LTO)</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; SSS / GSIS UMID Card</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; Voter's ID or COMELEC Certificate</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; Postal ID (Digitized)</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; PRC Professional ID</div>
-                        <div class="p-2 bg-slate-50 dark:bg-slate-800/40 rounded-lg">&bull; Senior Citizen ID / PWD ID</div>
+                <p id="faqChatWelcomeMsg" class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                    Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may ask me any question regarding station guidelines, emergency hotlines, police clearance, filing a blotter, or crime mapping.
+                </p>
+
+                <!-- Strict Scope Notice Box -->
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
+                    <i class="fas fa-circle-info text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                    <span>
+                        <strong class="font-bold">Strict Scope Rule:</strong> I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. Questions outside police guidelines will be politely declined.
+                    </span>
+                </div>
+
+                <!-- Initial Suggested Questions -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-sparkles text-pnp-gold text-[10px]"></i>
+                        <span id="faqInitialPromptHeading">Popular Questions You Can Ask:</span>
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="askFaqQuickQuestion('How do I apply for a National Police Clearance (NPCS)?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-id-card text-emerald-500 dark:text-emerald-400 text-xs"></i>
+                            <span>How to get Police Clearance?</span>
+                        </button>
+                        <button type="button" onclick="askFaqQuickQuestion('What are the official emergency hotlines for Santa Cruz, Laguna?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-phone-volume text-rose-500 dark:text-rose-400 text-xs"></i>
+                            <span>Emergency Hotlines (911)</span>
+                        </button>
+                        <button type="button" onclick="askFaqQuickQuestion('How do I file an official Police Blotter report?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-file-pen text-amber-500 dark:text-amber-400 text-xs"></i>
+                            <span>How to file a Police Blotter?</span>
+                        </button>
+                        <button type="button" onclick="askFaqQuickQuestion('Where is the PNP Santa Cruz Police Station located and operating hours?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-clock text-sky-500 dark:text-sky-400 text-xs"></i>
+                            <span>Station Location & Hours</span>
+                        </button>
+                        <button type="button" onclick="askFaqQuickQuestion('Where does the crime data on the MIMPAS Map come from?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-map-location-dot text-indigo-500 dark:text-indigo-400 text-xs"></i>
+                            <span>MIMPAS Crime Map & Privacy</span>
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- ITEM 8: First Time Jobseeker Free Clearance -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="clearance"
-                data-keywords="first time jobseeker free clearance ra 11261 no fee student fresh graduate barangay certificate waiver">
-                <button type="button" onclick="toggleFaqItem(8)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-gift"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 block mb-0.5">National Police Clearance</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Is Police Clearance free for first-time jobseekers?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-8" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        <strong>Yes!</strong> Pursuant to <strong>Republic Act No. 11261 (First Time Jobseekers Assistance Act)</strong>, first-time jobseekers are exempt from paying government clearance fees for one (1) copy.
-                    </p>
-                    <p class="text-xs">
-                        <strong>Requirement:</strong> You must bring an original <em>Barangay Certification</em> issued by your barangay hall stating that you are an official first-time jobseeker and resident of Santa Cruz, Laguna.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 9: Crime Map Data & Purpose -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="map"
-                data-keywords="crime map mimpas geospatial 26 barangays incident density focus index non index heatmap statistical safety">
-                <button type="button" onclick="toggleFaqItem(9)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-map-location-dot"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block mb-0.5">Crime Mapping System</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                What is the MIMPAS Crime Map and what data does it show?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-9" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        The <strong>MIMPAS Crime Map</strong> provides municipal-level geospatial visibility of verified police incidents across all <strong>26 barangays</strong> of Santa Cruz. It helps citizens and barangay officials understand safety patterns and deployment density.
-                    </p>
-                    <ul class="list-disc list-inside space-y-1 text-xs">
-                        <li><strong>8-Focus Crimes (Index Crimes):</strong> Murder, Homicide, Physical Injury, Rape, Robbery, Theft, Carnapping of MV, and MC Theft.</li>
-                        <li><strong>Non-Index Crimes:</strong> Violations of special penal laws and municipal ordinances.</li>
-                        <li><strong>Public Safety Incidents (PSI):</strong> Road traffic vehicular collisions and public safety rescues.</li>
-                    </ul>
-                    <div class="pt-1">
-                        <a href="/map" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pnp-blue hover:bg-blue-900 text-white dark:bg-pnp-gold dark:text-slate-950 font-black text-xs uppercase tracking-wider transition">
-                            <i class="fas fa-map-marked-alt text-xs"></i> View Interactive Crime Map
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ITEM 10: Data Privacy on the Map -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="map"
-                data-keywords="privacy data protection ra 10173 names victims address anonymity confidentiality sensitive information">
-                <button type="button" onclick="toggleFaqItem(10)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-user-shield"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block mb-0.5">Crime Mapping System</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Are private citizen identities or specific house addresses exposed on the map?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-10" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        <strong>No. Never.</strong> In strict compliance with the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>, juvenile protection standards, and PNP operational confidentiality:
-                    </p>
-                    <p class="text-xs">
-                        All names, phone numbers, exact house numbers, and victim/complainant identities are completely redacted. Incident points represent generalized street intersections and barangay centroids to ensure community situational awareness without compromising privacy or ongoing investigations.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 11: How to Filter the Map -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="map"
-                data-keywords="filter map search barangay time date range heatmap toggle layers year month">
-                <button type="button" onclick="toggleFaqItem(11)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-filter"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400 block mb-0.5">Crime Mapping System</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                How can I filter the Crime Map for my specific barangay or date range?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-11" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        On the <a href="/map" class="text-pnp-blue dark:text-pnp-gold font-bold underline">Crime Map page</a>, open the left control drawer (or tap <em>"Show Overview"</em>):
-                    </p>
-                    <ul class="list-disc list-inside space-y-1 text-xs">
-                        <li><strong>Select Barangay:</strong> Choose any of Santa Cruz's 26 barangays (e.g. Bagumbayan, Bubukal, Gatid, Santisima Cruz, Pagsawitan) to zoom directly to its sector.</li>
-                        <li><strong>Select Crime Category:</strong> Choose between All Crimes, Major Crimes (8-Focus), Minor Crimes, or Public Safety Incidents.</li>
-                        <li><strong>Select Timeframe:</strong> Filter by This Year, Specific Month/Year, or All Time.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- ITEM 12: WCPD Assistance -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="wcpd"
-                data-keywords="wcpd women children protection desk domestic violence vawc ra 9262 abuse physical emotional private room female officer">
-                <button type="button" onclick="toggleFaqItem(12)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-person-dress"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 block mb-0.5">WCPD & Special Desks</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Where can victims of Domestic Violence, VAWC, or Child Abuse report in Santa Cruz?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-12" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        The Santa Cruz Municipal Police Station maintains a dedicated <strong>Women and Children Protection Desk (WCPD)</strong> operating 24/7 in a private, confidential counseling room.
-                    </p>
-                    <p class="text-xs">
-                        The WCPD is staffed by specially trained female police officers handling cases under <strong>R.A. 9262 (Anti-Violence Against Women and Their Children)</strong> and <strong>R.A. 7610 (Special Protection of Children Against Abuse)</strong>. The station coordinates directly with the Santa Cruz MSWDO (Municipal Social Welfare and Development Office) for victim protection and temporary shelter.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 13: Cybercrime & Online Scams -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="wcpd"
-                data-keywords="cybercrime scam fraud identity theft online harassment acg screenshots evidence gcash scam facebook hack">
-                <button type="button" onclick="toggleFaqItem(13)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-shield-virus"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 block mb-0.5">WCPD & Special Desks</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                How do I report online scams, identity theft, or cyber harassment?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-13" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        If you are a victim of an online financial scam, phishing, cyber harassment, or account takeover:
-                    </p>
-                    <ol class="list-decimal list-inside space-y-1 text-xs">
-                        <li><strong>Preserve Digital Evidence:</strong> Immediately save uncropped screenshots of chat logs, sender profile links, transaction reference numbers, bank/e-wallet receipts, and phone numbers.</li>
-                        <li><strong>Blotter at Station:</strong> Report to the Sta. Cruz Police Station to have your incident logged for bank/telco coordinate requests.</li>
-                        <li><strong>File with PNP-ACG:</strong> Contact the PNP Anti-Cybercrime Group (ACG) directly at <a href="https://acg.pnp.gov.ph" target="_blank" rel="noopener noreferrer" class="text-pnp-blue dark:text-pnp-gold underline font-bold">https://acg.pnp.gov.ph</a> or hotline <strong>(02) 8414-1560 / 0998 598 8116</strong>.</li>
-                    </ol>
-                </div>
-            </div>
-
-            <!-- ITEM 14: Wanted & Missing Persons Bulletins -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="bulletins"
-                data-keywords="wanted person missing person tip intelligence anonymous reward warrant of arrest informant confidential">
-                <button type="button" onclick="toggleFaqItem(14)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-user-tag"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400 block mb-0.5">Public Advisories</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                How can I submit information or tips regarding a Wanted or Missing Person?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-14" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        If you have verifiable information about a suspect with an outstanding Warrant of Arrest or a missing person featured in our <a href="/bulletins" class="text-pnp-blue dark:text-pnp-gold font-bold underline">Public Advisories</a>:
-                    </p>
-                    <p class="text-xs">
-                        Call or text the Sta. Cruz Police Station Intelligence Desk at <a href="tel:09985985667" class="text-pnp-blue dark:text-pnp-gold font-black underline">0998 598 5667</a>. <strong>Your identity will be treated with absolute confidentiality</strong> under witness protection operational protocols. Do not attempt to confront or apprehend wanted individuals yourself.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 15: Road Closures & Traffic Advisories -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="bulletins"
-                data-keywords="traffic rerouting road closure anilag fiesta weather typhoon storm advisory checkpoint advisory">
-                <button type="button" onclick="toggleFaqItem(15)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-950/60 dark:text-purple-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-route"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-purple-600 dark:text-purple-400 block mb-0.5">Public Advisories</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Where can I verify official traffic rerouting, road closures, or municipal safety alerts?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-15" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        Check the <a href="/bulletins" class="text-pnp-blue dark:text-pnp-gold font-bold underline">Public Advisory</a> and <a href="/news" class="text-pnp-blue dark:text-pnp-gold font-bold underline">News Releases</a> sections of this portal.
-                    </p>
-                    <p class="text-xs">
-                        Advisories regarding town fiesta rerouting, Anilag Festival traffic schemes, national highway maintenance, typhoon disaster alerts, and checkpoint schedules are published here in real time.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 16: Station Location & Operating Hours -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="general"
-                data-keywords="station location address where hours 24/7 open closed holidays pedro guevara poblacion municipal hall">
-                <button type="button" onclick="toggleFaqItem(16)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-950/60 dark:text-cyan-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-building"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block mb-0.5">Station Information</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Where is the Santa Cruz Municipal Police Station located, and what are its operating hours?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-16" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        The Santa Cruz Municipal Police Station is located at <strong>Pedro Guevara Avenue / P. Burgos St., Poblacion, Santa Cruz, Laguna 4009</strong> (situated next to the Santa Cruz Municipal Hall and near the Laguna Provincial Capitol).
-                    </p>
-                    <p class="text-xs">
-                        <strong>Operating Hours:</strong> The station's Operational Desk, Complaints & Blotter Desk, and Mobile Patrol operate <strong>24 hours a day, 7 days a week, 365 days a year</strong>. Administrative services (Clearance releasing, permits) operate during standard government office hours (Monday to Friday, 8:00 AM – 5:00 PM).
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 17: What is MIMPAS -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="general"
-                data-keywords="mimpas acronym meaning portal municipality incident management public advisory project system">
-                <button type="button" onclick="toggleFaqItem(17)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-950/60 dark:text-cyan-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-shield-halved"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block mb-0.5">Station Information</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                What does MIMPAS stand for and what is its mandate?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-17" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        <strong>MIMPAS</strong> stands for <strong>Municipality Incident Management and Public Advisory Sta. Cruz</strong>.
-                    </p>
-                    <p class="text-xs">
-                        It is an official technological initiative engineered for PNP Santa Cruz to strengthen community-police partnership, deliver real-time transparency through geospatial incident heatmaps, provide official advisories, and ensure seamless citizen access to police hotlines and services.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 18: Why FAQ Instead of Inaccurate AI Chatbots -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="general"
-                data-keywords="ai chatbot hallucination inaccuracy replacement official faq reason verified station legal precision">
-                <button type="button" onclick="toggleFaqItem(18)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-950/60 dark:text-cyan-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-check-double"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block mb-0.5">Station Information</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Why does this website prioritize verified FAQs over automated AI chatbots?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-18" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        In law enforcement, emergency response, and legal matters, <strong>accuracy is critical</strong>. Generative AI models can produce hallucinations, incorrect emergency hotlines, or misleading legal instructions.
-                    </p>
-                    <p class="text-xs">
-                        To protect the community from inaccurate advice, this official FAQ is curated, monitored, and maintained directly with PNP standard operating procedures. Every telephone number, clearance requirement, and incident guideline here is 100% verified.
-                    </p>
-                </div>
-            </div>
-
-            <!-- ITEM 19: Police Assistance for Senior Citizens & PWDs -->
-            <div class="faq-item bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs hover:border-pnp-blue/50 dark:hover:border-pnp-gold/50 transition-all duration-200"
-                data-faq-cat="general"
-                data-keywords="senior citizen pwd pregnant express lane priority special assistance ramp accessibility">
-                <button type="button" onclick="toggleFaqItem(19)" class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 focus:outline-none cursor-pointer">
-                    <div class="flex items-center space-x-3 min-w-0">
-                        <span class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-600 dark:bg-cyan-950/60 dark:text-cyan-400 flex items-center justify-center shrink-0 text-xs font-black">
-                            <i class="fas fa-wheelchair"></i>
-                        </span>
-                        <div class="min-w-0">
-                            <span class="text-[9px] font-black uppercase tracking-widest text-cyan-600 dark:text-cyan-400 block mb-0.5">Station Information</span>
-                            <h4 class="faq-q-text text-xs sm:text-sm font-black text-slate-900 dark:text-white leading-snug">
-                                Does the station provide express assistance for Senior Citizens, PWDs, and Pregnant Women?
-                            </h4>
-                        </div>
-                    </div>
-                    <i class="faq-chevron fas fa-chevron-down text-slate-400 text-xs shrink-0 transition-transform duration-300"></i>
-                </button>
-                <div id="faq-answer-19" class="faq-answer hidden px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-800/60 space-y-3 leading-relaxed">
-                    <p class="faq-a-text">
-                        <strong>Yes.</strong> Pursuant to national priority assistance policies, the Santa Cruz Police Station provides designated priority express lanes for <strong>Senior Citizens, Persons with Disabilities (PWD), and Pregnant Women</strong> across all services including blotter recording and clearance processing.
-                    </p>
-                    <p class="text-xs">
-                        Station personnel on duty will immediately assist visitors with mobility impairments at the entrance ramp and assist them throughout their transaction.
-                    </p>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Modal Footer Banner -->
-        <div class="p-4 sm:p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-            <div class="flex items-center space-x-3 text-xs text-slate-600 dark:text-slate-400 text-center sm:text-left">
-                <i class="fas fa-headset text-pnp-blue dark:text-pnp-gold text-base hidden sm:inline"></i>
-                <div>
-                    <span class="font-bold text-slate-900 dark:text-white">Have a question not answered here?</span>
-                    <span class="block text-[11px] text-slate-500">Contact the 24/7 Santa Cruz Police Desk directly.</span>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 flex-wrap justify-center">
-                <a href="/hotlines" class="px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-white transition">
-                    View All Hotlines
-                </a>
-                <a href="tel:09985985667" class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider bg-pnp-blue hover:bg-blue-900 text-white dark:bg-pnp-gold dark:text-slate-950 shadow-sm transition flex items-center gap-1.5 active:scale-95">
-                    <i class="fas fa-phone-volume text-xs"></i>
-                    <span>0998 598 5667</span>
-                </a>
             </div>
         </div>
 
+        <!-- Quick Suggestions Horizontal Toolbar -->
+        <div class="px-4 py-3 sm:px-7 sm:py-3.5 bg-slate-100/90 dark:bg-[#0c1624] border-t border-slate-200/90 dark:border-slate-800 shrink-0 backdrop-blur-sm">
+            <div class="flex items-center gap-2 overflow-x-auto custom-modal-scrollbar pb-1 text-xs">
+                <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-widest text-pnp-blue dark:text-pnp-gold shrink-0 mr-1.5 flex items-center gap-1">
+                    <i class="fas fa-bolt text-pnp-gold"></i> Quick Ask:
+                </span>
+                <button type="button" onclick="askFaqQuickQuestion('How to get a police clearance?')"
+                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-pnp-gold shadow-2xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <i class="fas fa-id-card text-emerald-500 dark:text-emerald-400 text-xs"></i>
+                    <span>Police Clearance</span>
+                </button>
+                <button type="button" onclick="askFaqQuickQuestion('What are the official emergency hotlines?')"
+                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-pnp-gold shadow-2xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <i class="fas fa-phone-volume text-rose-500 dark:text-rose-400 text-xs"></i>
+                    <span>Emergency Hotlines</span>
+                </button>
+                <button type="button" onclick="askFaqQuickQuestion('How to file a police blotter?')"
+                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-pnp-gold shadow-2xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <i class="fas fa-file-pen text-amber-500 dark:text-amber-400 text-xs"></i>
+                    <span>File a Blotter</span>
+                </button>
+                <button type="button" onclick="askFaqQuickQuestion('Where is the station located and what are operating hours?')"
+                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-pnp-gold shadow-2xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <i class="fas fa-clock text-sky-500 dark:text-sky-400 text-xs"></i>
+                    <span>Station Location & Hours</span>
+                </button>
+                <button type="button" onclick="askFaqQuickQuestion('What assistance does WCPD provide?')"
+                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-pnp-gold shadow-2xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <i class="fas fa-shield-heart text-pink-500 dark:text-pink-400 text-xs"></i>
+                    <span>WCPD Desk</span>
+                </button>
+                <button type="button" onclick="askFaqQuickQuestion('How do I report an online scam?')"
+                    class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-pnp-blue hover:text-white dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 font-bold text-xs whitespace-nowrap transition-all duration-200 border border-slate-200 dark:border-slate-700 hover:border-pnp-gold shadow-2xs hover:shadow-md hover:-translate-y-0.5 active:scale-95 flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <i class="fas fa-shield-virus text-indigo-500 dark:text-indigo-400 text-xs"></i>
+                    <span>Report Online Scam</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat Input Bar (Modal Footer) -->
+        <div class="p-4 sm:p-5 md:p-6 bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-t-2 border-slate-200/90 dark:border-slate-800 shrink-0 shadow-lg">
+            <div class="flex items-center gap-2.5 sm:gap-3.5">
+                <input type="text" id="faq-chat-input" placeholder="Ask a question about PNP Sta. Cruz services, clearance, blotters, hotlines..."
+                    class="flex-grow bg-slate-50 focus:bg-white dark:bg-slate-950 dark:focus:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-pnp-blue dark:focus:border-pnp-gold focus:ring-4 focus:ring-pnp-blue/15 dark:focus:ring-pnp-gold/20 transition-all duration-200 shadow-inner"
+                    onkeydown="if(event.key === 'Enter') sendFaqChat()">
+                <button type="button" id="faq-chat-send-btn" onclick="sendFaqChat()"
+                    class="bg-gradient-to-r from-pnp-blue via-[#183657] to-pnp-blue hover:from-[#183657] hover:to-[#10243a] text-white dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold dark:text-slate-950 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 flex items-center justify-center shrink-0 shadow-md shadow-pnp-blue/25 dark:shadow-pnp-gold/30 hover:shadow-lg active:scale-95 cursor-pointer border border-pnp-gold/30">
+                    <i class="fas fa-paper-plane mr-2 text-xs sm:text-sm"></i>
+                    <span>Send</span>
+                </button>
+            </div>
+            <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-2.5 px-1">
+                <span class="flex items-center gap-1.5">
+                    <i class="fas fa-shield-halved text-pnp-gold"></i>
+                    <span>Strict Scope: Answers only questions covered by verified Sta. Cruz police FAQs.</span>
+                </span>
+                <span class="hidden sm:inline">Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[9px] border border-slate-300 dark:border-slate-700">Enter</kbd> to send</span>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- FAQ SCRIPT & INTERACTIVE CONTROLS                                         -->
+<!-- JAVASCRIPT CONTROLLERS FOR FAQ CHATBOT                                   -->
 <!-- ========================================================================= -->
 <script>
-    // Bilingual Text Store for FAQ Items
-    const faqTranslations = {
+    let currentFaqLang = 'en';
+
+    const faqBotTranslations = {
         en: {
-            title: "Official Station FAQ",
-            verifiedBadge: "100% Verified",
-            subTitle: "PNP Sta. Cruz, Laguna PPO • Accurate Guidelines & Public Services",
-            searchPlaceholder: "Search answers (e.g. police clearance, blotter, 911, hotlines, crime map, WCPD)...",
-            authoritativeTitle: "Authoritative Public Safety Information",
-            authoritativeBody: "This official FAQ replaces automated AI assistant outputs to guarantee 100% legal precision, station-verified hotlines, and standard operating procedures directly from the PNP Santa Cruz Municipal Police Station.",
-            expandAll: "Expand All",
-            collapseAll: "Collapse All"
+            title: "Sta. Cruz Police FAQ Assistant",
+            subTitle: "Strict Scope: Official Station Guidelines & Public Safety Services",
+            welcome: "Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may ask me any question regarding station guidelines, emergency hotlines, police clearance, filing a blotter, or crime mapping.",
+            scopeRule: "Strict Scope Rule: I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. Questions outside police guidelines will be politely declined.",
+            popularHeading: "Popular Questions You Can Ask:",
+            inputPlaceholder: "Ask a question about PNP Sta. Cruz services, clearance, blotters, hotlines...",
+            nearHeadingInScope: "Questions near to your inquiry:",
+            nearHeadingOutOfScope: "Questions within my scope that you can ask:",
+            checkingStatus: "Checking official station FAQs...",
+            toggleNextLabel: "FIL",
+            toggleTooltip: "Switch to Filipino"
         },
         fil: {
-            title: "Opisyal na FAQ ng Himpilan",
-            verifiedBadge: "100% Beripikado",
-            subTitle: "PNP Sta. Cruz, Laguna PPO • Tumpak na Gabay at Serbisyong Pampubliko",
-            searchPlaceholder: "Maghanap ng sagot (hal. police clearance, blotter, 911, hotlines, crime map, WCPD)...",
-            authoritativeTitle: "Awtorisadong Impormasyon sa Kaligtasan",
-            authoritativeBody: "Ang opisyal na FAQ na ito ang pumapalit sa automated AI assistant upang tiyakin ang 100% kawastuhan sa batas, beripikadong hotlines, at pamamaraan ng PNP Santa Cruz Municipal Police Station.",
-            expandAll: "Buksan Lahat",
-            collapseAll: "Isara Lahat"
+            title: "Sta. Cruz Police FAQ Assistant",
+            subTitle: "Mahigpit na Saklaw: Opisyal na Gabay at Serbisyong Pulisya Lamang",
+            welcome: "Kumusta! Ako ang iyong opisyal na Sta. Cruz Municipal Police Station FAQ Chatbot. Maaari kang magtanong ukol sa emergency hotlines, police clearance, blotter, crime map, at mga serbisyo ng estasyon.",
+            scopeRule: "Patakaran sa Saklaw: Masasagot ko lamang ang mga katanungan na sakop ng aming opisyal na PNP Sta. Cruz FAQs at mga serbisyo ng estasyon. Ang mga tanong sa labas nito ay magalang na tatanggihan.",
+            popularHeading: "Mga Madalas Itanong na Maaari Mong Subukan:",
+            inputPlaceholder: "Magtanong ukol sa serbisyo ng pulisya, clearance, blotter, o hotlines sa Sta. Cruz...",
+            nearHeadingInScope: "Mga katanungang kaugnay o malapit sa iyong tanong:",
+            nearHeadingOutOfScope: "Mga tanong sa loob ng aking saklaw na maaari mong itanong:",
+            checkingStatus: "Sinisuri ang opisyal na FAQs ng himpilan...",
+            toggleNextLabel: "EN",
+            toggleTooltip: "Lumipat sa Ingles"
         }
     };
 
-    let currentFaqLang = 'en';
-    let currentFaqCategory = 'all';
-    let allFaqExpanded = false;
-
-    // Open FAQ Modal
-    function openFaqModal(categoryOrQuery) {
+    // Open & Close Handlers
+    window.openFaqModal = function(categoryOrQuery) {
         const modal = document.getElementById('faqModal');
         const backdrop = document.getElementById('faqModalBackdrop');
         const container = document.getElementById('faqModalContainer');
@@ -849,23 +246,32 @@
                 container.classList.remove('scale-95', 'opacity-0');
                 container.classList.add('scale-100', 'opacity-100');
             }
+            const input = document.getElementById('faq-chat-input');
+            if (input) input.focus();
         }, 10);
 
+        // Pre-prompt mapping if opened with category
+        const categoryPrompts = {
+            emergency: "What are the official emergency hotlines for Santa Cruz, Laguna?",
+            blotter: "How do I file an official Police Blotter report?",
+            clearance: "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
+            map: "Where does the crime data on the MIMPAS Map come from?",
+            bulletins: "How can the community submit tips regarding Wanted or Missing Persons?",
+            wcpd: "What assistance does the Women and Children Protection Desk (WCPD) provide?",
+            general: "Where is the PNP Santa Cruz Police Station located and operating hours?"
+        };
+
         if (categoryOrQuery) {
-            if (['emergency', 'blotter', 'clearance', 'map', 'bulletins', 'wcpd', 'general', 'all'].includes(categoryOrQuery)) {
-                setFaqCategory(categoryOrQuery);
-            } else {
-                const searchInput = document.getElementById('faqSearchInput');
-                if (searchInput) {
-                    searchInput.value = categoryOrQuery;
-                    filterFaqQuestions();
-                }
+            const prompt = categoryPrompts[categoryOrQuery] || categoryOrQuery;
+            const input = document.getElementById('faq-chat-input');
+            if (input) {
+                input.value = prompt;
+                sendFaqChat();
             }
         }
-    }
+    };
 
-    // Close FAQ Modal
-    function closeFaqModal() {
+    window.closeFaqModal = function() {
         const modal = document.getElementById('faqModal');
         const backdrop = document.getElementById('faqModalBackdrop');
         const container = document.getElementById('faqModalContainer');
@@ -878,157 +284,301 @@
         }
 
         setTimeout(() => {
-            modal.classList.add('hidden');
             modal.classList.remove('flex');
+            modal.classList.add('hidden');
             document.body.style.overflow = '';
-        }, 280);
-    }
+        }, 300);
+    };
 
-    // Toggle specific accordion
-    function toggleFaqItem(id) {
-        const answerEl = document.getElementById(`faq-answer-${id}`);
-        if (!answerEl) return;
-        const itemEl = answerEl.closest('.faq-item');
-        const chevron = itemEl ? itemEl.querySelector('.faq-chevron') : null;
+    // Language Toggle
+    window.toggleFaqLanguage = function() {
+        setFaqLanguage(currentFaqLang === 'en' ? 'fil' : 'en');
+    };
 
-        const isHidden = answerEl.classList.contains('hidden');
-        if (isHidden) {
-            answerEl.classList.remove('hidden');
-            if (chevron) chevron.classList.add('rotate-180', 'text-pnp-blue', 'dark:text-pnp-gold');
-        } else {
-            answerEl.classList.add('hidden');
-            if (chevron) chevron.classList.remove('rotate-180', 'text-pnp-blue', 'dark:text-pnp-gold');
-        }
-    }
-
-    // Category Selector
-    function setFaqCategory(category) {
-        currentFaqCategory = category;
-        
-        // Update pill UI styles
-        document.querySelectorAll('.faq-cat-pill').forEach(btn => {
-            const cat = btn.getAttribute('data-faq-cat');
-            if (cat === category) {
-                btn.className = 'faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-black bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 shadow-xs';
-            } else {
-                btn.className = 'faq-cat-pill px-3 py-1.5 rounded-xl whitespace-nowrap transition-all uppercase tracking-wider text-[10px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700';
-            }
-        });
-
-        filterFaqQuestions();
-    }
-
-    // Filter Questions (Category + Search Query)
-    function filterFaqQuestions() {
-        const searchInput = document.getElementById('faqSearchInput');
-        const clearBtn = document.getElementById('faqSearchClearBtn');
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-        if (clearBtn) {
-            if (query.length > 0) clearBtn.classList.remove('hidden');
-            else clearBtn.classList.add('hidden');
-        }
-
-        const items = document.querySelectorAll('.faq-item');
-        let visibleCount = 0;
-
-        items.forEach(item => {
-            const cat = item.getAttribute('data-faq-cat') || '';
-            const keywords = (item.getAttribute('data-keywords') || '').toLowerCase();
-            const textContent = item.textContent.toLowerCase();
-
-            const matchesCategory = (currentFaqCategory === 'all') || (cat === currentFaqCategory);
-            const matchesQuery = !query || keywords.includes(query) || textContent.includes(query);
-
-            if (matchesCategory && matchesQuery) {
-                item.classList.remove('hidden');
-                visibleCount++;
-            } else {
-                item.classList.add('hidden');
-            }
-        });
-
-        // Toggle No Results View
-        const noResults = document.getElementById('faqNoResults');
-        if (noResults) {
-            if (visibleCount === 0) noResults.classList.remove('hidden');
-            else noResults.classList.add('hidden');
-        }
-
-        // Update count badge
-        const countBadge = document.getElementById('faqCountBadge');
-        if (countBadge) {
-            countBadge.textContent = `${visibleCount} Question${visibleCount === 1 ? '' : 's'}`;
-        }
-    }
-
-    // Clear Search Input
-    function clearFaqSearch() {
-        const searchInput = document.getElementById('faqSearchInput');
-        if (searchInput) {
-            searchInput.value = '';
-            filterFaqQuestions();
-            searchInput.focus();
-        }
-    }
-
-    // Toggle All Accordions
-    function toggleAllFaqAccordions() {
-        allFaqExpanded = !allFaqExpanded;
-        const answers = document.querySelectorAll('.faq-answer');
-        const chevrons = document.querySelectorAll('.faq-chevron');
-        const toggleBtn = document.getElementById('faqToggleAllBtn');
-
-        answers.forEach(a => {
-            if (allFaqExpanded) a.classList.remove('hidden');
-            else a.classList.add('hidden');
-        });
-
-        chevrons.forEach(c => {
-            if (allFaqExpanded) c.classList.add('rotate-180', 'text-pnp-blue', 'dark:text-pnp-gold');
-            else c.classList.remove('rotate-180', 'text-pnp-blue', 'dark:text-pnp-gold');
-        });
-
-        if (toggleBtn) {
-            toggleBtn.textContent = allFaqExpanded 
-                ? (currentFaqLang === 'fil' ? 'Isara Lahat' : 'Collapse All')
-                : (currentFaqLang === 'fil' ? 'Buksan Lahat' : 'Expand All');
-        }
-    }
-
-    // Switch Language (EN / FIL)
     function setFaqLanguage(lang) {
         currentFaqLang = lang;
-        const enBtn = document.getElementById('faqLangEnBtn');
-        const filBtn = document.getElementById('faqLangFilBtn');
+        const t = faqBotTranslations[lang] || faqBotTranslations.en;
 
-        if (lang === 'en') {
-            if (enBtn) {
-                enBtn.className = 'px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all bg-white dark:bg-pnp-gold text-pnp-blue dark:text-slate-950 shadow-xs font-black';
+        const langLabel = document.getElementById('faqLangToggleLabel');
+        const langBtn = document.getElementById('faqLangToggleBtn');
+        if (langLabel) langLabel.textContent = t.toggleNextLabel;
+        if (langBtn) langBtn.setAttribute('title', t.toggleTooltip);
+
+        const titleEl = document.getElementById('faqModalTitle');
+        const subTitleEl = document.getElementById('faqModalSubTitle');
+        const welcomeEl = document.getElementById('faqChatWelcomeMsg');
+        const popularHeadingEl = document.getElementById('faqInitialPromptHeading');
+        const inputEl = document.getElementById('faq-chat-input');
+
+        if (titleEl) titleEl.textContent = t.title;
+        if (subTitleEl) subTitleEl.textContent = t.subTitle;
+        if (welcomeEl) welcomeEl.textContent = t.welcome;
+        if (popularHeadingEl) popularHeadingEl.textContent = t.popularHeading;
+        if (inputEl) inputEl.placeholder = t.inputPlaceholder;
+    }
+
+    // Message Formatting
+    function formatFaqMsg(text) {
+        if (!text) return '';
+        let safe = String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
+        safe = safe.replace(/\n/g, '<br>');
+        return safe;
+    }
+
+    // Append Message to Chat Window with elevated bubble design
+    function appendFaqChatMessage(sender, text, nearQuestions = [], isInScope = true) {
+        const chatBox = document.getElementById('faq-chat-messages');
+        if (!chatBox) return;
+
+        const isUser = sender === 'user';
+        const msgWrapper = document.createElement('div');
+        msgWrapper.className = isUser ? "flex justify-end" : "flex justify-start";
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = isUser
+            ? "bg-gradient-to-r from-pnp-blue via-[#183657] to-pnp-blue dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold text-white dark:text-slate-950 p-4 sm:p-5 rounded-2xl sm:rounded-3xl max-w-[85%] sm:max-w-xl text-left shadow-md font-semibold text-xs sm:text-sm whitespace-pre-wrap leading-relaxed border border-pnp-blue-300/30 dark:border-pnp-gold-600"
+            : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl text-left shadow-sm font-normal text-xs sm:text-sm leading-relaxed space-y-3 relative";
+
+        let inner = '';
+        if (!isUser) {
+            inner += `
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="w-6 h-6 rounded-lg bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 flex items-center justify-center text-[10px] font-black shadow-xs">
+                        <i class="fas fa-shield-halved"></i>
+                    </span>
+                    <strong class="text-xs font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold">Sta. Cruz Police Assistant</strong>
+                </div>
+            `;
+        }
+
+        inner += `<div class="leading-relaxed">${formatFaqMsg(text)}</div>`;
+
+        if (!isUser && nearQuestions && nearQuestions.length > 0) {
+            const t = faqBotTranslations[currentFaqLang] || faqBotTranslations.en;
+            const heading = isInScope ? t.nearHeadingInScope : t.nearHeadingOutOfScope;
+
+            inner += `
+                <div class="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800 text-left">
+                    <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-compass text-pnp-gold text-[10px]"></i>
+                        <span>${heading}</span>
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                        ${nearQuestions.map(q => `
+                            <button type="button" onclick="askFaqQuickQuestion('${q.replace(/'/g, "\\'")}')"
+                                class="text-xs font-bold px-3.5 py-1.5 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800/90 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 flex items-center gap-2 cursor-pointer text-left border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold shadow-2xs hover:shadow-sm hover:-translate-y-0.5">
+                                <i class="fas fa-arrow-turn-down text-[8px] opacity-70"></i>
+                                <span>${q}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        msgDiv.innerHTML = inner;
+        msgWrapper.appendChild(msgDiv);
+        chatBox.appendChild(msgWrapper);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Quick Question Trigger
+    window.askFaqQuickQuestion = function(q) {
+        const input = document.getElementById('faq-chat-input');
+        if (input) input.value = q;
+        sendFaqChat();
+    };
+
+    // Clear Chat
+    window.clearFaqChat = function() {
+        const chatBox = document.getElementById('faq-chat-messages');
+        if (!chatBox) return;
+
+        const t = faqBotTranslations[currentFaqLang] || faqBotTranslations.en;
+
+        chatBox.innerHTML = `
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm font-black shadow-xs border border-pnp-gold/30">
+                        <i class="fas fa-shield-halved"></i>
+                    </span>
+                    <div>
+                        <strong class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold block leading-none">
+                            PNP Santa Cruz Police Assistant
+                        </strong>
+                        <span class="text-[9.5px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5">
+                            Official Municipal Police Station Desk &bull; Sta. Cruz, Laguna
+                        </span>
+                    </div>
+                </div>
+
+                <p id="faqChatWelcomeMsg" class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                    ${t.welcome}
+                </p>
+
+                <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
+                    <i class="fas fa-circle-info text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                    <span>
+                        <strong class="font-bold">Strict Scope Rule:</strong> ${t.scopeRule}
+                    </span>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-sparkles text-pnp-gold text-[10px]"></i>
+                        <span id="faqInitialPromptHeading">${t.popularHeading}</span>
+                    </span>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="askFaqQuickQuestion('How do I apply for a National Police Clearance (NPCS)?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-id-card text-emerald-500 dark:text-emerald-400 text-xs"></i>
+                            <span>How to get Police Clearance?</span>
+                        </button>
+                        <button type="button" onclick="askFaqQuickQuestion('What are the official emergency hotlines for Santa Cruz, Laguna?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-phone-volume text-rose-500 dark:text-rose-400 text-xs"></i>
+                            <span>Emergency Hotlines (911)</span>
+                        </button>
+                        <button type="button" onclick="askFaqQuickQuestion('How do I file an official Police Blotter report?')"
+                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                            <i class="fas fa-file-pen text-amber-500 dark:text-amber-400 text-xs"></i>
+                            <span>How to file a Police Blotter?</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    // Client-side Instant Fallback Evaluator (Preserves offline capabilities)
+    function clientFaqEvaluate(query, lang) {
+        const qLower = query.toLowerCase().trim();
+        const isFil = lang === 'fil';
+
+        const explicitOutOfScope = [
+            /\b(recipe|cook|cooking|baking|bake|lutong|ulam|cake|pizza|adobo|sinigang)\b/i,
+            /\b(capital\s+of|president\s+of|weather|climate|panahon|ulan|bagyo|forecast)\b/i,
+            /\b(coding|programming|javascript|python|typescript|html|css|php|react|sql\s+query|debug\s+code)\b/i,
+            /\b(nba|football|soccer|basketball|championship|celebrity|movie|actor|actress|taylor\s+swift|bts|kpop)\b/i,
+            /\b(horoscope|zodiac|fortune|crypto|bitcoin|ethereum|forex\s+trading|lottery|lotto)\b/i,
+            /\b(joke|story|poem|song\s+lyrics|sing\s+a\s+song|kantahan\s+mo\s+ako|tula|kwento)\b/i,
+            /\b(math|homework|algebra|calculus|translate\s+this|who\s+made\s+you)\b/i
+        ];
+
+        if (explicitOutOfScope.some(rx => rx.test(qLower))) {
+            return {
+                inScope: false,
+                reply: isFil 
+                    ? "Hindi ko masasagot ang katanungang iyan. Masasagot ko lamang ang mga katanungan na sakop ng opisyal na PNP Sta. Cruz FAQs at mga serbisyo ng ating estasyon ng pulisya."
+                    : "I cannot answer that question. I am programmed to only answer questions within the scope of the official PNP Sta. Cruz FAQs and public safety guidelines.",
+                nearQuestions: isFil 
+                    ? ["Paano mag-ulat ng emergency sa Sta. Cruz?", "Ano ang mga opisyal na hotline?", "Paano kumuha ng Police Clearance?", "Paano mag-file ng Police Blotter?"]
+                    : ["How do I report an ongoing emergency in Santa Cruz?", "What are the official emergency hotlines?", "How do I apply for a Police Clearance?", "How do I file an official Police Blotter?"]
+            };
+        }
+
+        const topics = [
+            { id: 1, words: ["emergency", "ongoing", "crime", "saklolo", "tulong", "911", "urgent", "krimen", "dispatch"], answerEn: "In an ongoing emergency or crime in progress, dial **911** immediately or call the Sta. Cruz Police Station desk directly at **(049) 501-5971** or **0998 598 5667**.\n\nPlease provide: your exact location (Barangay, street/landmark), nature of the incident, and descriptions of suspects or any injuries.", answerFil: "Sa oras ng agarang emergency o nagaganap na krimen, tumawag agad sa **911** o sa Sta. Cruz Police Station desk sa **(049) 501-5971** o **0998 598 5667**.\n\nIbigay ang: eksaktong lokasyon (Barangay, kalye/landmark), uri ng insidente, at deskripsyon ng suspek.", nearEn: ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I file an official Police Blotter report?", "Where is the police station located?"], nearFil: ["Ano ang mga opisyal na emergency hotline?", "Paano mag-file ng Police Blotter?", "Saan matatagpuan ang estasyon?"] },
+            { id: 2, words: ["hotline", "hotlines", "number", "numbers", "contact", "phone", "telepono", "numero", "tawag", "bfp", "fire", "mdrrmo"], answerEn: "Official Sta. Cruz Emergency Hotlines:\n• **PNP Sta. Cruz Desk:** (049) 501-5971 / 0998 598 5667\n• **National Emergency Hotline:** 911\n• **BFP Fire Station:** (049) 501-1911 / 0915 602 2167\n• **MDRRMO Disaster & Rescue:** (049) 501-2070 / 0939 917 5202\n• **Laguna PPO:** (049) 501-1647", answerFil: "Mga Opisyal na Emergency Hotline ng Sta. Cruz:\n• **PNP Sta. Cruz Desk:** (049) 501-5971 / 0998 598 5667\n• **Pambansang Emergency:** 911\n• **BFP Fire Station (Sunog):** (049) 501-1911 / 0915 602 2167\n• **MDRRMO Rescue:** (049) 501-2070 / 0939 917 5202", nearEn: ["How do I report an ongoing emergency?", "Where is the police station located?", "What assistance does the WCPD provide?"], nearFil: ["Paano mag-ulat ng emergency?", "Saan matatagpuan ang estasyon?", "Anong tulong ang ibinibigay ng WCPD?"] },
+            { id: 6, words: ["clearance", "npcs", "kuha clearance", "apply clearance", "police clearance", "jobseeker"], answerEn: "To apply for a National Police Clearance (NPCS):\n1. Register online at https://pnpclearance.ph and book an appointment at Sta. Cruz MPS.\n2. Pay ₱180 via Landbank/e-wallet (free for first-time jobseekers with Barangay certificate).\n3. Bring 2 valid IDs and appointment slip to the station for biometrics.\nClearance is released in about 10-15 minutes if there is no hit.", answerFil: "Para kumuha ng National Police Clearance (NPCS):\n1. Mag-rehistro sa https://pnpclearance.ph at pumili ng appointment sa Sta. Cruz MPS.\n2. Magbayad ng ₱180 (libre sa First-Time Jobseekers).\n3. Magdala ng 2 valid ID at appointment slip para sa biometrics.\nMatatapos ito sa loob ng 10-15 minuto kung walang hit.", nearEn: ["What valid government IDs and documents are accepted for Police Clearance?", "Can I get a Police Clearance for free under the First-Time Jobseekers Act?", "Where is the police station located?"], nearFil: ["Anu-anong valid government ID ang tinatanggap?", "Libre ba ang clearance para sa First-Time Jobseekers?", "Saan matatagpuan ang estasyon?"] },
+            { id: 3, words: ["blotter", "magpablotter", "magpa-blotter", "report", "reklamo", "complaint", "katarungang"], answerEn: "To file an official Police Blotter report, personally visit the Sta. Cruz MPS Investigation Section (1153 A. Mabini St., Poblacion) with a valid government ID. An investigator will take your sworn statement and issue an Incident Record Form (IRF) or Blotter Extract.", answerFil: "Para mag-file ng Police Blotter, pumunta personal sa Investigation Section ng Sta. Cruz MPS dala ang valid ID. Kapanayamin ka ng duty investigator at bibigyan ng kopya ng Incident Record Form (IRF).", nearEn: ["Can I file a police blotter online or through social media?", "When should I report to the Barangay Lupon versus the Police Station?", "What valid IDs are accepted?"], nearFil: ["Maaari ba akong magpa-blotter online?", "Kailan dapat sa Barangay Lupon muna?", "Anu-anong valid ID ang tinatanggap?"] },
+            { id: 16, words: ["location", "address", "operating hours", "oras", "lugar", "saan", "istasyon", "headquarters"], answerEn: "Sta. Cruz Municipal Police Station is located at: 1153 A. Mabini St., Poblacion, Santa Cruz, Laguna (beside the Municipal Hall).\n• **Emergency Patrols & Desk:** 24/7 continuous operation\n• **Clearance & Administrative Services:** Monday to Friday, 8:00 AM – 5:00 PM.", answerFil: "Ang Sta. Cruz Police Station ay nasa: 1153 A. Mabini St., Poblacion, Santa Cruz, Laguna (katabi ng Munisipyo).\n• **Emergency Patrols:** 24/7 bukas araw at gabi\n• **Administrative & Clearance Services:** Lunes hanggang Biyernes, 8:00 AM – 5:00 PM.", nearEn: ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a Police Clearance?", "Is there priority assistance for senior citizens, pregnant women, and PWDs?"], nearFil: ["Ano ang mga opisyal na emergency hotline?", "Paano kumuha ng Police Clearance?", "May priority assistance ba para sa PWD at seniors?"] },
+            { id: 9, words: ["crime map", "mapa", "mimpas", "map", "filter map", "cases", "krimen sa mapa"], answerEn: "The MIMPAS Crime Map visualizes official CIRAS blotter-recorded incidents across all 26 barangays of Sta. Cruz, Laguna. You can filter cases by Barangay, Year, and 8-Focus Crime categories. To protect citizen privacy under R.A. 10173, no personal names or exact home addresses are ever displayed.", answerFil: "Ipinapakita ng MIMPAS Crime Map ang mga naitalang blotter sa 26 barangay ng Sta. Cruz. Maaari itong i-filter ayon sa Barangay, Taon, at uri ng krimen. Alinsunod sa Data Privacy Act, walang personal na pangalan o eksaktong tirahan ang inilalabas.", nearEn: ["Does the Crime Map disclose personal names or exact home addresses?", "How do I search or filter incidents by Barangay, Year, or Category on the Map?", "What is MIMPAS and how does it help Sta. Cruz residents?"], nearFil: ["Inilalabas ba sa Crime Map ang personal na pangalan?", "Paano mag-filter sa Mapa?", "Ano ang MIMPAS?"] },
+            { id: 12, words: ["wcpd", "vawc", "women", "children", "babae", "bata", "pang-aabuso", "abuse"], answerEn: "The Women and Children Protection Desk (WCPD) provides private, confidential assistance for victims of domestic violence (R.A. 9262), child abuse (R.A. 7610), and gender harassment. Female investigators conduct interviews in a secure safe space.", answerFil: "Ang WCPD ay nagbibigay ng pribado at protektadong tulong para sa mga biktima ng karahasan sa kababaihan at kabataan (VAWC / R.A. 9262). Mga babaeng pulis ang nag-iimbestiga sa isang pribadong kwarto.", nearEn: ["What are the official emergency hotlines?", "How do I file an official Police Blotter report?", "Is there priority assistance for senior citizens, pregnant women, and PWDs?"], nearFil: ["Ano ang mga emergency hotline?", "Paano mag-file ng Police Blotter?", "May priority assistance ba sa estasyon?"] },
+            { id: 13, words: ["cyber", "scam", "online scam", "hacking", "hacked", "facebook scam", "harassment online"], answerEn: "For online scams or cybercrime: preserve uncropped screenshots of chat messages, sender profile links, and transaction numbers. File an official complaint with the Sta. Cruz MPS Investigation Section or contact the PNP Anti-Cybercrime Group (RACU 4A) at 0998 598 8116.", answerFil: "Para sa online scam: i-save agad ang buong screenshot ng chat, profile link, at transaction reference number. Pumunta sa Sta. Cruz MPS o makipag-ugnayan sa PNP Anti-Cybercrime Group (RACU 4A) sa 0998 598 8116.", nearEn: ["How do I file an official Police Blotter report?", "Can I file a police blotter online?", "What are the official emergency hotlines?"], nearFil: ["Paano mag-file ng Police Blotter?", "Maaari ba magpa-blotter online?", "Ano ang mga emergency hotline?"] }
+        ];
+
+        let bestTopic = null;
+        let highestMatches = 0;
+
+        for (const t of topics) {
+            let matches = 0;
+            for (const w of t.words) {
+                if (qLower.includes(w)) matches++;
             }
-            if (filBtn) {
-                filBtn.className = 'px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold';
-            }
-        } else {
-            if (filBtn) {
-                filBtn.className = 'px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all bg-white dark:bg-pnp-gold text-pnp-blue dark:text-slate-950 shadow-xs font-black';
-            }
-            if (enBtn) {
-                enBtn.className = 'px-2.5 py-1 rounded-lg text-[10px] uppercase tracking-wider transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold';
+            if (matches > highestMatches) {
+                highestMatches = matches;
+                bestTopic = t;
             }
         }
 
-        const t = faqTranslations[lang] || faqTranslations.en;
-        const titleEl = document.getElementById('faqModalTitle');
-        const searchInput = document.getElementById('faqSearchInput');
-        const toggleBtn = document.getElementById('faqToggleAllBtn');
+        if (highestMatches > 0 && bestTopic) {
+            return {
+                inScope: true,
+                reply: isFil ? bestTopic.answerFil : bestTopic.answerEn,
+                nearQuestions: isFil ? bestTopic.nearFil : bestTopic.nearEn
+            };
+        }
 
-        if (titleEl) titleEl.textContent = t.title;
-        if (searchInput) searchInput.placeholder = t.searchPlaceholder;
-        if (toggleBtn) toggleBtn.textContent = allFaqExpanded ? t.collapseAll : t.expandAll;
+        return {
+            inScope: false,
+            reply: isFil 
+                ? "Hindi ko masasagot ang katanungang iyan. Masasagot ko lamang ang mga katanungan na sakop ng opisyal na PNP Sta. Cruz FAQs at mga serbisyo ng ating estasyon ng pulisya."
+                : "I cannot answer that question. I am programmed to only answer questions within the scope of the official PNP Sta. Cruz FAQs and public safety guidelines.",
+            nearQuestions: isFil
+                ? ["Paano mag-ulat ng emergency sa Sta. Cruz?", "Ano ang mga opisyal na hotline?", "Paano kumuha ng Police Clearance?", "Paano mag-file ng Police Blotter?"]
+                : ["How do I report an ongoing emergency in Santa Cruz?", "What are the official emergency hotlines?", "How do I apply for a Police Clearance?", "How do I file an official Police Blotter?"]
+        };
     }
 
-    // Keyboard ESC & Hash / URL Auto-open handler
+    // Send Chat
+    window.sendFaqChat = async function() {
+        const inputEl = document.getElementById('faq-chat-input');
+        const sendBtn = document.getElementById('faq-chat-send-btn');
+        if (!inputEl) return;
+
+        const text = inputEl.value.trim();
+        if (!text) return;
+
+        inputEl.value = '';
+        inputEl.disabled = true;
+        if (sendBtn) sendBtn.disabled = true;
+
+        appendFaqChatMessage('user', text);
+
+        const chatBox = document.getElementById('faq-chat-messages');
+        const indicator = document.createElement('div');
+        indicator.id = 'faq-chat-typing';
+        indicator.className = 'flex justify-start';
+        indicator.innerHTML = `
+            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold italic p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-2">
+                <i class="fas fa-circle-notch fa-spin text-pnp-blue dark:text-pnp-gold"></i>
+                <span>${currentFaqLang === 'fil' ? 'Sinisuri ang opisyal na FAQs ng himpilan...' : 'Checking official station FAQs...'}</span>
+            </div>
+        `;
+        chatBox.appendChild(indicator);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        let res = null;
+        try {
+            res = await fetch('/api/faq-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: text, language: currentFaqLang })
+            }).then(r => r.json());
+        } catch (err) {
+            console.warn('Server chat error, using local matcher:', err);
+        }
+
+        if (!res || !res.reply) {
+            res = clientFaqEvaluate(text, currentFaqLang);
+        }
+
+        const ind = document.getElementById('faq-chat-typing');
+        if (ind) ind.remove();
+
+        appendFaqChatMessage('assistant', res.reply, res.nearQuestions || [], res.inScope !== false);
+
+        inputEl.disabled = false;
+        if (sendBtn) sendBtn.disabled = false;
+        inputEl.focus();
+    };
+
+    // Keyboard ESC Handler
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const modal = document.getElementById('faqModal');

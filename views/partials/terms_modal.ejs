@@ -1,0 +1,571 @@
+<!-- ========================================================================= -->
+<!-- OFFICIAL PNP STA. CRUZ TERMS AND CONDITIONS & JURISDICTION GATE MODAL     -->
+<!-- Enforces mandatory terms acceptance across all public portal pages.       -->
+<!-- Users cannot access public content until terms are accepted.              -->
+<!-- ========================================================================= -->
+
+<div id="jurisdiction-modal"
+    class="fixed inset-0 z-[99999] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-3 sm:p-4 md:p-6"
+    role="dialog" aria-modal="true" aria-labelledby="termsModalTitle">
+    
+    <!-- Modal Backdrop -->
+    <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md transition-opacity duration-300" id="modal-backdrop"></div>
+    
+    <!-- Modal Container -->
+    <div class="relative bg-white dark:bg-slate-900 w-full max-w-3xl sm:max-w-4xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-7 shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-all duration-300 max-h-[90vh] sm:max-h-[85vh] flex flex-col overflow-hidden text-left"
+        id="modal-content">
+        
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between space-x-3 sm:space-x-3.5 mb-3 pb-3 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+            <div class="flex items-center space-x-3 sm:space-x-3.5 min-w-0">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 flex items-center justify-center font-black shadow-md shrink-0">
+                    <i class="fas fa-file-contract text-lg sm:text-xl"></i>
+                </div>
+                <div class="flex-grow min-w-0">
+                    <h3 id="termsModalTitle" class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-tight">
+                        Terms and Conditions
+                    </h3>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-snug truncate">
+                        Sta. Cruz Municipal Police Station Public Information and Crime Mapping System
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Optional Close Button (only displayed in review mode when user has already accepted) -->
+            <button type="button" id="terms-modal-close-btn" onclick="closeTermsModal()"
+                class="hidden w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 items-center justify-center transition-colors shrink-0 cursor-pointer"
+                aria-label="Close Terms">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Terms and Conditions Content Container (Scrollable) -->
+        <div class="flex-1 overflow-y-auto custom-modal-scrollbar pr-2 sm:pr-3 min-h-0 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 p-4 sm:p-5 md:p-6 space-y-5 text-slate-700 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+            
+            <!-- Welcome & Introduction -->
+            <div class="bg-white dark:bg-slate-800/80 rounded-xl p-4 border border-slate-200 dark:border-slate-700/80 shadow-xs space-y-2">
+                <p>
+                    Welcome to the <strong class="text-slate-900 dark:text-white">Sta. Cruz Municipal Police Station Public Information and Crime Mapping System</strong> ("System"). This System is intended to provide the public with accessible information regarding police-related public advisories, bulletins, news and releases, incident information, crime mapping, and statistical or analytical information concerning Sta. Cruz, Laguna.
+                </p>
+                <p class="font-medium text-slate-800 dark:text-slate-200">
+                    By accessing or using this System, you acknowledge that you have read, understood, and agreed to these Terms and Conditions.
+                </p>
+            </div>
+
+            <!-- 1. Purpose of the System -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 1. Purpose of the System
+                </h4>
+                <p>The System is designed to:</p>
+                <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                    <li>Provide public access to official or authorized public advisories, bulletins, news, and releases;</li>
+                    <li>Present recorded incident information through geographic and barangay-based crime mapping;</li>
+                    <li>Provide statistical summaries and visualizations of recorded incidents;</li>
+                    <li>Organize recorded incidents according to applicable classifications, including <strong class="text-slate-800 dark:text-slate-200">8-Focus, Non-Index, and PSI</strong> categories;</li>
+                    <li>Present crime trends and distributions by date, year, barangay, and incident category;</li>
+                    <li>Support public awareness and transparency regarding reported incidents and public safety information; and</li>
+                    <li>Provide analytical information that may assist in understanding general incident patterns and trends.</li>
+                </ul>
+                <p class="mt-2 text-slate-600 dark:text-slate-400 italic">
+                    The System is an information and analytical platform and should not be interpreted as a replacement for official police procedures, investigations, court proceedings, or emergency services.
+                </p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 2. Nature of Incident and Crime Information -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 2. Nature of Incident and Crime Information
+                </h4>
+                <p>Information displayed on the System may include recorded or reported incidents, incident types, dates, barangays or locations, classifications, statistical counts, and related analytical information.</p>
+                <p>The presence of an incident on the System does <strong class="text-slate-900 dark:text-white underline">not</strong> establish that a person is guilty of a crime.</p>
+                <p>An incident record may represent a reported, recorded, encoded, or otherwise documented occurrence and should not be interpreted as a final judicial determination.</p>
+                <p class="font-semibold text-slate-800 dark:text-slate-200">All persons are presumed innocent unless and until proven guilty in accordance with applicable law.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 3. Crime Mapping Information -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 3. Crime Mapping Information
+                </h4>
+                <p>The crime map is provided primarily for public information, situational awareness, statistical visualization, and general understanding of incident distribution.</p>
+                <p>Mapped locations may represent an approximate area, barangay, or administrative location associated with an incident. A map marker should not automatically be interpreted as the exact location where an offense occurred or where a person resides.</p>
+                <p class="text-rose-600 dark:text-rose-400 font-medium">The System should not be used to identify, target, harass, threaten, or discriminate against individuals associated with a reported incident.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 4. Crime Classification and Categories -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 4. Crime Classification and Categories
+                </h4>
+                <p>Recorded incidents may be grouped into classifications such as:</p>
+                <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                    <li><strong class="text-slate-800 dark:text-slate-200">8-Focus</strong></li>
+                    <li><strong class="text-slate-800 dark:text-slate-200">Non-Index</strong></li>
+                    <li><strong class="text-slate-800 dark:text-slate-200">PSI</strong></li>
+                </ul>
+                <p>These classifications are used for organizational, statistical, reporting, or analytical purposes within the System.</p>
+                <p>A classification displayed by the System should not be interpreted as a legal conclusion, determination of culpability, or indication of the seriousness of an individual person's circumstances unless expressly stated by an authorized official source.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 5. Crime Statistics and Trend Analysis -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 5. Crime Statistics and Trend Analysis
+                </h4>
+                <p>The System may display crime counts, monthly trends, barangay distributions, leading incident types, and other statistical summaries.</p>
+                <p>These statistics are based on records available to the System at the time of display and may change as records are added, corrected, updated, reclassified, or removed.</p>
+                <p>Statistical or automated analytical outputs are provided for informational and planning purposes only. They should not be treated as a definitive prediction of future criminal activity or as a substitute for professional police assessment and investigation.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 6. News, Bulletins, and Public Advisories -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 6. News, Bulletins, and Public Advisories
+                </h4>
+                <p>The System may display public bulletins, news, releases, and advisories issued or authorized for public dissemination.</p>
+                <p>Information obtained from linked or external sources may be subject to the terms, availability, and accuracy of those respective sources.</p>
+                <p>Users should verify important or urgent information through the appropriate official police or government channels.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 7. Accuracy and Timeliness -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 7. Accuracy and Timeliness
+                </h4>
+                <p>Reasonable efforts may be made to maintain accurate and updated information. However, the System does not guarantee that every record is complete, current, error-free, or continuously available.</p>
+                <p>Records may be updated to correct errors, reflect new information, or comply with applicable policies and legal requirements.</p>
+                <p>The absence of an incident from the System does not necessarily mean that no incident occurred.</p>
+                <p>Likewise, the presence of an incident record does not necessarily mean that an investigation has been completed or that criminal liability has been established.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 8. Public Use of Information -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 8. Public Use of Information
+                </h4>
+                <p>Information provided through the System may be used for legitimate purposes such as:</p>
+                <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                    <li>Public awareness;</li>
+                    <li>Community safety awareness;</li>
+                    <li>General research and educational purposes;</li>
+                    <li>Understanding incident trends and distributions; and</li>
+                    <li>Accessing publicly disseminated police information.</li>
+                </ul>
+                <p class="text-rose-600 dark:text-rose-400">Users must not use information from the System to harass, threaten, intimidate, stalk, discriminate against, or otherwise harm any individual or organization.</p>
+                <p>Users must not misrepresent System information as an official finding, court decision, warrant, conviction, or final investigative conclusion when it is not expressly identified as such.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 9. Personal and Sensitive Information -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 9. Personal and Sensitive Information
+                </h4>
+                <p>Users should not submit unnecessary personal, confidential, or sensitive information through any public-facing feature of the System.</p>
+                <p>The System may limit the publication or display of information that could unnecessarily expose personal information, compromise an investigation, endanger individuals, or violate applicable privacy requirements.</p>
+                <p>Information displayed publicly should be limited to information considered appropriate and authorized for public dissemination.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 10. Prohibited Activities -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 10. Prohibited Activities
+                </h4>
+                <p>Users shall not:</p>
+                <ul class="list-disc pl-5 space-y-1 text-slate-600 dark:text-slate-300">
+                    <li>Attempt to gain unauthorized access to administrative or restricted areas of the System;</li>
+                    <li>Modify, manipulate, delete, or interfere with System records without authorization;</li>
+                    <li>Circumvent authentication or security mechanisms;</li>
+                    <li>Upload malicious code, files, or content;</li>
+                    <li>Use the System to harass, threaten, stalk, or identify individuals for harmful purposes;</li>
+                    <li>Intentionally submit false or misleading information;</li>
+                    <li>Misrepresent System information as a judicial finding or official determination when it is not;</li>
+                    <li>Attempt to interfere with the availability or operation of the System; or</li>
+                    <li>Use the System for any unlawful purpose.</li>
+                </ul>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 11. Administrative and Restricted Functions -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 11. Administrative and Restricted Functions
+                </h4>
+                <p>Certain functions of the System may be restricted to authorized personnel.</p>
+                <p>Administrative functions may include management of incident records, public bulletins, news or releases, mapping information, and other system records.</p>
+                <p>Unauthorized access, modification, deletion, or manipulation of administrative records is prohibited.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 12. Automated and Analytical Features -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 12. Automated and Analytical Features
+                </h4>
+                <p>The System may provide automated calculations, statistical summaries, trend analysis, pattern identification, or analytical suggestions.</p>
+                <p>Such outputs are intended to assist information review and situational analysis. Automated results may contain limitations or inaccuracies and should be reviewed and interpreted by appropriately authorized personnel before being used for operational, investigative, or administrative decisions.</p>
+                <p>Automated analysis does not independently establish facts, criminal liability, or investigative conclusions.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 13. Emergency Situations -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 13. Emergency Situations
+                </h4>
+                <p class="font-semibold text-rose-600 dark:text-rose-400">This System should not be relied upon as an emergency communication or emergency response service.</p>
+                <p>For emergencies, crimes in progress, immediate threats to life or safety, or situations requiring urgent police assistance, users should contact the appropriate emergency or law-enforcement authorities directly.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 14. External Links and Third-Party Content -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 14. External Links and Third-Party Content
+                </h4>
+                <p>The System may provide links to external websites or platforms for news, announcements, public information, or other related resources.</p>
+                <p>The Sta. Cruz Municipal Police Station is not necessarily responsible for the content, availability, security, or privacy practices of external websites.</p>
+                <p>Users should review the terms and privacy policies of external websites before providing information or interacting with them.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 15. Intellectual Property -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 15. Intellectual Property
+                </h4>
+                <p>Unless otherwise stated, the System's software, interface, design, graphics, logos, and other original materials may be protected by applicable intellectual property laws.</p>
+                <p>Public information may be subject to separate government, copyright, attribution, or other applicable requirements.</p>
+                <p>Nothing in these Terms grants users ownership of the System or its protected materials.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 16. System Availability -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 16. System Availability
+                </h4>
+                <p>The System may occasionally become unavailable due to maintenance, updates, technical problems, network interruptions, security measures, or other circumstances.</p>
+                <p>No guarantee is made that the System will remain continuously available or uninterrupted.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 17. Limitation of Reliance -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 17. Limitation of Reliance
+                </h4>
+                <p>Information provided by the System is intended primarily for public information, awareness, statistical visualization, and general analytical purposes.</p>
+                <p>Users should not make critical legal, investigative, medical, financial, security, or personal decisions solely on the basis of information presented by the System.</p>
+                <p>Where appropriate, users should consult the relevant authorized government agency or official source for confirmation.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 18. Changes to These Terms -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 18. Changes to These Terms
+                </h4>
+                <p>These Terms and Conditions may be updated when necessary to reflect changes in the System, applicable laws, policies, security requirements, or operational procedures.</p>
+                <p>The updated version shall become effective when published through the System unless otherwise stated.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 19. Acceptance of Terms -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 19. Acceptance of Terms
+                </h4>
+                <p>By continuing to access or use the System, you acknowledge that you have read and understood these Terms and Conditions and agree to comply with them.</p>
+                <p class="font-medium text-slate-800 dark:text-slate-200">If you do not agree with these Terms, you should discontinue use of the System.</p>
+            </div>
+
+            <hr class="border-slate-200 dark:border-slate-800">
+
+            <!-- 20. Contact and Official Verification -->
+            <div class="space-y-2">
+                <h4 class="text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight flex items-center">
+                    <span class="w-1.5 h-4 bg-pnp-blue dark:bg-pnp-gold rounded-full mr-2"></span> 20. Contact and Official Verification
+                </h4>
+                <p>For questions regarding information displayed by the System, users should contact the appropriate authorized office of the <strong class="text-slate-900 dark:text-white">Sta. Cruz Municipal Police Station</strong>.</p>
+                <p>For matters involving an active investigation, confidential information, personal records, or other restricted information, users should follow the appropriate official request and verification procedures.</p>
+            </div>
+
+            <!-- Important Notice Banner -->
+            <div class="rounded-xl p-3.5 sm:p-4 bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200">
+                <div class="flex items-start space-x-2.5">
+                    <i class="fas fa-exclamation-triangle text-amber-600 dark:text-amber-400 mt-0.5 text-sm sm:text-base shrink-0"></i>
+                    <div>
+                        <span class="font-black uppercase tracking-wider text-xs sm:text-sm block text-amber-800 dark:text-amber-300 mb-1">Important Notice:</span>
+                        <p class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                            This System is intended to improve public access to information and promote public awareness. Information presented through crime maps, incident records, statistical dashboards, classifications, and analytical features should be interpreted within their intended informational context and should not be treated as a determination of guilt or as a substitute for official investigation, law-enforcement action, or judicial proceedings.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Action Area -->
+        <div class="mt-3 pt-3 border-t border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col space-y-2.5">
+            <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-800/90 rounded-xl px-4 py-2.5 border border-slate-200 dark:border-slate-700 shadow-xs">
+                <label class="flex items-center space-x-2.5 cursor-pointer select-none">
+                    <input type="checkbox" id="agree-terms" class="w-4 h-4 sm:w-5 sm:h-5 rounded text-pnp-blue focus:ring-2 focus:ring-pnp-blue dark:bg-slate-700 border-slate-300 dark:border-slate-600 cursor-pointer shrink-0">
+                    <span class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">I have read, understood, and agree to these Terms and Conditions</span>
+                </label>
+            </div>
+
+            <div id="policy-validation-msg" class="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 flex items-center space-x-2">
+                <i class="fas fa-exclamation-circle text-amber-500 text-sm sm:text-base"></i>
+                <span>Please agree to the Terms and Conditions to proceed to the portal.</span>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-2">
+                <button id="accept-disclaimer" disabled
+                    class="w-full flex-1 bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed font-black py-3 sm:py-3.5 rounded-xl transition-all duration-300 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm">
+                    <i class="fas fa-lock text-xs sm:text-sm"></i>
+                    <span>Proceed to Portal</span>
+                </button>
+                <button type="button" id="decline-disclaimer" onclick="declineTerms()"
+                    class="w-full sm:w-auto px-4 py-2 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors flex items-center justify-center space-x-1.5 cursor-pointer">
+                    <i class="fas fa-arrow-right-from-bracket text-xs"></i>
+                    <span>Decline & Exit</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        let isReviewMode = false;
+
+        function hasAcceptedTerms() {
+            try {
+                return sessionStorage.getItem('staCruzDisclaimerAccepted') === 'true' ||
+                       localStorage.getItem('staCruzDisclaimerAccepted') === 'true';
+            } catch (e) {
+                return false;
+            }
+        }
+
+        window.openTermsModal = function(reviewMode = false) {
+            const modal = document.getElementById('jurisdiction-modal');
+            const content = document.getElementById('modal-content');
+            const closeBtn = document.getElementById('terms-modal-close-btn');
+            const declineBtn = document.getElementById('decline-disclaimer');
+            const acceptBtn = document.getElementById('accept-disclaimer');
+            const agreeCb = document.getElementById('agree-terms');
+            if (!modal || !content) return;
+
+            isReviewMode = Boolean(reviewMode);
+
+            if (isReviewMode) {
+                if (closeBtn) closeBtn.classList.remove('hidden');
+                if (closeBtn) closeBtn.classList.add('flex');
+                if (declineBtn) declineBtn.classList.add('hidden');
+                if (agreeCb) agreeCb.checked = true;
+                updateTermsPolicyUI(true);
+            } else {
+                if (closeBtn) {
+                    closeBtn.classList.remove('flex');
+                    closeBtn.classList.add('hidden');
+                }
+                if (declineBtn) declineBtn.classList.remove('hidden');
+                const accepted = hasAcceptedTerms();
+                if (agreeCb) agreeCb.checked = accepted;
+                updateTermsPolicyUI(accepted);
+            }
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 20);
+        };
+
+        window.closeTermsModal = function() {
+            // In gate mode, closing without agreeing is forbidden
+            if (!isReviewMode && !hasAcceptedTerms()) {
+                const agreeCb = document.getElementById('agree-terms');
+                if (agreeCb && !agreeCb.checked) {
+                    highlightCheckbox();
+                    return;
+                }
+            }
+
+            const modal = document.getElementById('jurisdiction-modal');
+            const content = document.getElementById('modal-content');
+            if (!modal || !content) return;
+
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+                isReviewMode = false;
+            }, 300);
+        };
+
+        window.declineTerms = function() {
+            const confirmed = confirm("You must accept the Terms and Conditions to access the Sta. Cruz Public Safety Portal. Do you wish to leave the portal?");
+            if (confirmed) {
+                try {
+                    sessionStorage.removeItem('staCruzDisclaimerAccepted');
+                    localStorage.removeItem('staCruzDisclaimerAccepted');
+                } catch(e){}
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'https://www.google.com';
+                }
+            }
+        };
+
+        function highlightCheckbox() {
+            const agreeCb = document.getElementById('agree-terms');
+            if (!agreeCb) return;
+            const container = agreeCb.closest('label');
+            if (container) {
+                container.classList.add('ring-2', 'ring-amber-500', 'p-1', 'rounded-lg');
+                setTimeout(() => {
+                    container.classList.remove('ring-2', 'ring-amber-500', 'p-1', 'rounded-lg');
+                }, 1200);
+            }
+        }
+
+        function updateTermsPolicyUI(isAccepted) {
+            const acceptBtn = document.getElementById('accept-disclaimer');
+            const validationMsg = document.getElementById('policy-validation-msg');
+
+            if (isAccepted) {
+                if (validationMsg) {
+                    validationMsg.innerHTML = `
+                        <i class="fas fa-check-circle text-emerald-500 text-sm sm:text-base"></i>
+                        <span class="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400">Terms and Conditions accepted. You may now proceed to the portal.</span>
+                    `;
+                }
+                if (acceptBtn) {
+                    acceptBtn.disabled = false;
+                    acceptBtn.className = 'w-full flex-1 bg-pnp-blue hover:bg-pnp-gold hover:text-pnp-blue text-white font-black py-3 sm:py-3.5 rounded-xl transition-all duration-300 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg cursor-pointer transform active:scale-[0.99]';
+                    acceptBtn.innerHTML = `
+                        <span>Proceed to Portal</span>
+                        <i class="fas fa-arrow-right text-xs sm:text-sm"></i>
+                    `;
+                }
+            } else {
+                if (validationMsg) {
+                    validationMsg.innerHTML = `
+                        <i class="fas fa-exclamation-circle text-amber-500 text-sm sm:text-base"></i>
+                        <span class="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">Please agree to the Terms and Conditions to proceed to the portal.</span>
+                    `;
+                }
+                if (acceptBtn) {
+                    acceptBtn.disabled = true;
+                    acceptBtn.className = 'w-full flex-1 bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed font-black py-3 sm:py-3.5 rounded-xl transition-all duration-300 uppercase tracking-widest text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-sm';
+                    acceptBtn.innerHTML = `
+                        <i class="fas fa-lock text-xs sm:text-sm"></i>
+                        <span>Proceed to Portal</span>
+                    `;
+                }
+            }
+        }
+
+        function initTermsModal() {
+            const acceptBtn = document.getElementById('accept-disclaimer');
+            const agreeTermsCb = document.getElementById('agree-terms');
+            const backdrop = document.getElementById('modal-backdrop');
+
+            if (agreeTermsCb) {
+                agreeTermsCb.addEventListener('change', () => {
+                    updateTermsPolicyUI(agreeTermsCb.checked);
+                });
+            }
+
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', (e) => {
+                    if (!agreeTermsCb || !agreeTermsCb.checked) {
+                        e.preventDefault();
+                        highlightCheckbox();
+                        return;
+                    }
+
+                    try {
+                        sessionStorage.setItem('staCruzDisclaimerAccepted', 'true');
+                        localStorage.setItem('staCruzDisclaimerAccepted', 'true');
+                    } catch (err) {}
+
+                    closeTermsModal();
+                });
+            }
+
+            if (backdrop) {
+                backdrop.addEventListener('click', () => {
+                    if (isReviewMode) {
+                        closeTermsModal();
+                    } else if (!hasAcceptedTerms()) {
+                        highlightCheckbox();
+                    }
+                });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('jurisdiction-modal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        if (isReviewMode) {
+                            closeTermsModal();
+                        } else if (!hasAcceptedTerms()) {
+                            highlightCheckbox();
+                        }
+                    }
+                }
+            });
+
+            // Enforce gate on ANY public page if terms have not yet been accepted
+            if (!hasAcceptedTerms()) {
+                openTermsModal(false);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTermsModal);
+        } else {
+            initTermsModal();
+        }
+    })();
+</script>
+
