@@ -15,7 +15,7 @@
         </h1>
 
         <p class="text-xs sm:text-sm text-blue-100/90 font-medium max-w-2xl mx-auto leading-relaxed">
-            Official safety alerts, community crime warnings, traffic advisories, and cyber awareness directives directly from the Sta. Cruz Municipal Police Station.
+            Official safety alerts, crime advisories, prevention directives, road traffic alerts, and cybercrime warnings directly from the Sta. Cruz Municipal Police Station.
         </p>
     </div>
 </div>
@@ -29,16 +29,13 @@
                 const activeCat = category && category !== 'All' ? category : 'Crime Advisory';
             %>
             <button onclick="setCategoryFilter('Crime Advisory', this)" class="category-pill-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Crime Advisory' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold' %> transition duration-200">
-                Crime Advisories
+                <i class="fas fa-shield-alt mr-1 text-xs"></i> Crime Advisories & Prevention
             </button>
             <button onclick="setCategoryFilter('Traffic Advisory', this)" class="category-pill-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Traffic Advisory' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold' %> transition duration-200">
-                Traffic Advisories
+                <i class="fas fa-traffic-light mr-1 text-xs"></i> Traffic Advisories
             </button>
             <button onclick="setCategoryFilter('Cybercrime Advisory', this)" class="category-pill-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Cybercrime Advisory' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold' %> transition duration-200">
-                Cybercrime Advisories
-            </button>
-            <button onclick="setCategoryFilter('Community Awareness', this)" class="category-pill-btn px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider <%= activeCat === 'Community Awareness' ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-pnp-blue border border-transparent shadow-xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 font-bold' %> transition duration-200">
-                Community Awareness
+                <i class="fas fa-shield-virus mr-1 text-xs"></i> Cybercrime Advisories
             </button>
         </div>
 
@@ -108,10 +105,9 @@
                 } else {
                     const normB = (b.category || '').toLowerCase().trim();
                     const normA = activeCategoryInitial.toLowerCase().trim();
-                    if (normA === 'crime advisory' && (normB === 'crime advisory' || normB === 'crime advisories')) totalMatchingInitial++;
+                    if (normA === 'crime advisory' && (normB === 'crime advisory' || normB === 'crime advisories' || normB.includes('crime') || normB.includes('prevention'))) totalMatchingInitial++;
                     else if (normA === 'traffic advisory' && (normB === 'traffic advisory' || normB === 'traffic advisories')) totalMatchingInitial++;
                     else if (normA === 'cybercrime advisory' && (normB === 'cybercrime advisory' || normB === 'cybercrime advisories' || normB.includes('cyber'))) totalMatchingInitial++;
-                    else if (normA === 'community awareness' && (normB === 'community awareness' || normB.includes('community') || normB.includes('awareness'))) totalMatchingInitial++;
                     else if (normA === normB) totalMatchingInitial++;
                 }
             });
@@ -123,10 +119,9 @@
             } else {
                 const normB = (bulletin.category || '').toLowerCase().trim();
                 const normA = activeCategoryInitial.toLowerCase().trim();
-                if (normA === 'crime advisory' && (normB === 'crime advisory' || normB === 'crime advisories')) isCategoryMatch = true;
+                if (normA === 'crime advisory' && (normB === 'crime advisory' || normB === 'crime advisories' || normB.includes('crime') || normB.includes('prevention'))) isCategoryMatch = true;
                 else if (normA === 'traffic advisory' && (normB === 'traffic advisory' || normB === 'traffic advisories')) isCategoryMatch = true;
                 else if (normA === 'cybercrime advisory' && (normB === 'cybercrime advisory' || normB === 'cybercrime advisories' || normB.includes('cyber'))) isCategoryMatch = true;
-                else if (normA === 'community awareness' && (normB === 'community awareness' || normB.includes('community') || normB.includes('awareness'))) isCategoryMatch = true;
                 else if (normA === normB) isCategoryMatch = true;
             }
             const initiallyShow = isCategoryMatch && (initialAdvisoryCount < 10);
@@ -136,34 +131,33 @@
                 class="bulletin-card group bg-white dark:bg-slate-900 rounded-2xl shadow-xs border border-slate-200/90 dark:border-slate-800 overflow-hidden hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition duration-300 flex flex-col cursor-pointer"
                 style="<%= initiallyShow ? '' : 'display: none !important;' %>"
                 data-category="<%= bulletin.category %>" data-date="<%= bulletin.created_at %>" onclick="openBulletinModal('<%= bulletin.id %>')">
-                <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-                    <div class="h-52 overflow-hidden relative bg-slate-950 shrink-0 border-b border-slate-200/80 dark:border-slate-800">
-                        <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-contain group-hover:scale-105 transition duration-500 pointer-events-none"></video>
-                        <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
-                            <i class="fas fa-play text-white text-3xl opacity-90 group-hover:scale-110 transition duration-300"></i>
-                        </div>
-                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5">
-                                <i class="fas fa-images"></i>
-                                <span>+<%= bulletin.photo_paths.length %></span>
+                <% if ((bulletin.photo_paths && bulletin.photo_paths.length > 0) || bulletin.photo_path || (bulletin.video_paths && bulletin.video_paths.length > 0)) { %>
+                    <% 
+                        const bulletinGridImg = (bulletin.photo_paths && bulletin.photo_paths.length > 0) 
+                            ? bulletin.photo_paths[0] 
+                            : (bulletin.photo_path || '/images/PNP.jpg');
+                    %>
+                    <div class="h-52 overflow-hidden relative bg-slate-950 shrink-0 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-center">
+                        <img src="<%= bulletinGridImg %>" alt="<%= bulletin.title %>"
+                            class="w-full h-full object-contain group-hover:scale-105 transition duration-500 select-none" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                        <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-black/30 pointer-events-none"></div>
+                            <div class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider text-white border border-white/10 shadow flex items-center space-x-1.5 z-10">
+                                <i class="fas fa-video text-pnp-gold"></i>
+                                <span>Video Advisory</span>
+                            </div>
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="w-12 h-12 rounded-full bg-slate-950/75 backdrop-blur-md border border-white/20 text-pnp-gold flex items-center justify-center shadow-xl group-hover:scale-110 group-hover:bg-pnp-blue group-hover:text-white transition-all duration-300">
+                                    <i class="fas fa-play text-base ml-0.5"></i>
+                                </div>
                             </div>
                         <% } %>
-                    </div>
-                <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                    <div class="h-52 overflow-hidden relative bg-slate-950 shrink-0 border-b border-slate-200/80 dark:border-slate-800">
-                        <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>"
-                            class="w-full h-full object-contain group-hover:scale-105 transition duration-500" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                        <% if (bulletin.photo_paths.length > 1) { %>
-                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-bold tracking-widest flex items-center space-x-1.5">
-                                <i class="fas fa-images"></i>
+                        <% if (bulletin.photo_paths && bulletin.photo_paths.length > 1) { %>
+                            <div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md px-2.5 py-1 rounded-full text-white text-[9px] font-black tracking-widest flex items-center space-x-1.5 border border-white/10 shadow-lg z-10">
+                                <i class="fas fa-images text-emerald-400"></i>
                                 <span>+<%= bulletin.photo_paths.length - 1 %></span>
                             </div>
                         <% } %>
-                    </div>
-                <% } else if (bulletin.photo_path) { %>
-                    <div class="h-52 overflow-hidden relative bg-slate-950 shrink-0 border-b border-slate-200/80 dark:border-slate-800">
-                        <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>"
-                            class="w-full h-full object-contain group-hover:scale-105 transition duration-500" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                     </div>
                 <% } else if (bulletin.facebook_url && !bulletin.facebook_url.includes('post_') && !bulletin.facebook_url.includes('undefined')) { %>
                     <div class="h-64 overflow-hidden relative bg-slate-950 shrink-0 flex items-center justify-center border-b border-slate-800/80">
@@ -476,13 +470,11 @@
                 const normCat = cat.toLowerCase().trim();
                 const normCur = currentCategory.toLowerCase().trim();
                 
-                if (normCur === 'crime advisory' && (normCat === 'crime advisory' || normCat === 'crime advisories')) {
+                if (normCur === 'crime advisory' && (normCat === 'crime advisory' || normCat === 'crime advisories' || normCat.includes('crime') || normCat.includes('prevention'))) {
                     matchesCategory = true;
                 } else if (normCur === 'traffic advisory' && (normCat === 'traffic advisory' || normCat === 'traffic advisories')) {
                     matchesCategory = true;
                 } else if (normCur === 'cybercrime advisory' && (normCat === 'cybercrime advisory' || normCat === 'cybercrime advisories' || normCat.includes('cyber'))) {
-                    matchesCategory = true;
-                } else if (normCur === 'community awareness' && (normCat === 'community awareness' || normCat.includes('community') || normCat.includes('awareness'))) {
                     matchesCategory = true;
                 } else if (normCur === normCat) {
                     matchesCategory = true;
@@ -578,20 +570,20 @@
 
             const mediaItems = [];
             
-            if (bulletin.video_paths && bulletin.video_paths.length > 0) {
-                bulletin.video_paths.forEach(url => {
-                    if (url) mediaItems.push({ type: 'video', url });
-                });
-            } else if (bulletin.video_path) {
-                mediaItems.push({ type: 'video', url: bulletin.video_path });
-            }
-
             if (bulletin.photo_paths && bulletin.photo_paths.length > 0) {
                 bulletin.photo_paths.forEach(url => {
                     if (url) mediaItems.push({ type: 'photo', url });
                 });
             } else if (bulletin.photo_path) {
                 mediaItems.push({ type: 'photo', url: bulletin.photo_path });
+            }
+
+            if (bulletin.video_paths && bulletin.video_paths.length > 0) {
+                bulletin.video_paths.forEach(url => {
+                    if (url) mediaItems.push({ type: 'video', url });
+                });
+            } else if (bulletin.video_path) {
+                mediaItems.push({ type: 'video', url: bulletin.video_path });
             }
 
             if (bulletin.facebook_url && !bulletin.facebook_url.includes('post_') && mediaItems.length === 0) {
@@ -614,7 +606,15 @@
                     const displayStyle = isVisible ? 'display: flex;' : 'display: none;';
                     if (item.type === 'video') {
                         return `<div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">
-                                    <video src="${item.url}" controls class="max-w-full max-h-full w-auto h-auto object-contain"></video>
+                                    <video src="${item.url}" poster="/images/PNP.jpg" preload="metadata" playsinline controls class="max-w-full max-h-full w-auto h-auto object-contain video-player-slide" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');"></video>
+                                    <div class="hidden flex flex-col items-center justify-center p-6 text-center">
+                                        <img src="/images/PNP.jpg" class="w-36 h-36 object-contain rounded-xl mb-3 shadow" alt="Station Media">
+                                        <span class="text-xs font-black text-amber-400 uppercase tracking-wider mb-2">Video playback unavailable in browser</span>
+                                        <a href="${item.url}" target="_blank" download class="px-4 py-2 bg-pnp-blue hover:bg-blue-900 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition flex items-center space-x-2">
+                                            <i class="fas fa-external-link-alt"></i>
+                                            <span>Open / Download Video File</span>
+                                        </a>
+                                    </div>
                                 </div>`;
                     } else {
                         return `<div class="w-full h-full min-h-[240px] flex items-center justify-center bg-slate-950 p-2 ${isVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}" style="${displayStyle}" data-slide="${idx}">

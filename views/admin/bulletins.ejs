@@ -1,5 +1,5 @@
 <%
-    const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+    const advisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
     const advisoryCount = bulletins.filter(b => advisoryCategories.includes(b.category)).length;
     const newsCount = bulletins.filter(b => b.category === 'General Announcement').length;
 %>
@@ -61,11 +61,10 @@
                 <div class="relative w-full sm:w-56">
                     <select id="bulletinCategoryFilter" onchange="filterBulletins()" class="w-full pl-5 pr-10 py-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest focus:ring-2 focus:ring-blue-500/20 transition-all cursor-pointer appearance-none shadow-2xs">
                         <option value="All" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category === 'undefined' || !category || category === 'All') ? 'selected' : '' %>>All Categories</option>
-                        <option value="Crime Advisory" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Crime Advisory') ? 'selected' : '' %>>Crime Advisory</option>
+                        <option value="Crime Advisory" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Crime Advisory') ? 'selected' : '' %>>Crime Advisory (Crime Prevention)</option>
                         <option value="Traffic Advisory" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Traffic Advisory') ? 'selected' : '' %>>Traffic Advisory</option>
                         <option value="Cybercrime Advisory" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Cybercrime Advisory') ? 'selected' : '' %>>Cybercrime Advisory</option>
-                        <option value="Community Awareness" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'Community Awareness') ? 'selected' : '' %>>Community Awareness</option>
-                        <option value="General Announcement" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'General Announcement') ? 'selected' : '' %>>General Announcement</option>
+                        <option value="General Announcement" class="bg-white dark:bg-slate-950 text-slate-800 dark:text-white font-black" <%= (typeof category !== 'undefined' && category === 'General Announcement') ? 'selected' : '' %>>General Announcement (News / Operations)</option>
                     </select>
                     <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
                 </div>
@@ -97,20 +96,28 @@
                         <!-- Inside Bulletin Item Container with Enhanced Visible Contrast & Rounded Corners -->
                         <div data-category="<%= bulletin.category %>" class="group bg-slate-50/80 dark:bg-slate-800/70 hover:bg-slate-100/90 dark:hover:bg-slate-800/90 rounded-2xl p-5 sm:p-6 shadow-xs hover:shadow-md border border-slate-200/90 dark:border-slate-700 transition-all duration-300 flex flex-col lg:flex-row items-start lg:items-center gap-6 relative overflow-hidden">
                             <!-- Thumbnail -->
-                            <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
-                                <div class="w-full lg:w-32 h-40 lg:h-24 rounded-xl overflow-hidden shrink-0 bg-black relative">
-                                    <video src="<%= bulletin.video_paths[0] %>" muted class="w-full h-full object-cover group-hover:scale-110 transition duration-700 pointer-events-none"></video>
-                                    <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
-                                        <i class="fas fa-play text-white text-xl"></i>
-                                    </div>
-                                </div>
-                            <% } else if (bulletin.photo_paths && bulletin.photo_paths.length > 0) { %>
-                                <div class="w-full lg:w-32 h-40 lg:h-24 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700">
-                                    <img src="<%= bulletin.photo_paths[0] %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                                </div>
-                            <% } else if (bulletin.photo_path && bulletin.photo_path !== '[]' && !bulletin.photo_path.startsWith('[')) { %>
-                                <div class="w-full lg:w-32 h-40 lg:h-24 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700">
-                                    <img src="<%= bulletin.photo_path %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                            <% if ((bulletin.photo_paths && bulletin.photo_paths.length > 0) || (bulletin.photo_path && bulletin.photo_path !== '[]' && !bulletin.photo_path.startsWith('[')) || (bulletin.video_paths && bulletin.video_paths.length > 0)) { %>
+                                <% 
+                                    const adminRowImg = (bulletin.photo_paths && bulletin.photo_paths.length > 0) 
+                                        ? bulletin.photo_paths[0] 
+                                        : ((bulletin.photo_path && bulletin.photo_path !== '[]' && !bulletin.photo_path.startsWith('[')) 
+                                            ? bulletin.photo_path 
+                                            : '/images/PNP.jpg');
+                                %>
+                                <div class="w-full lg:w-32 h-40 lg:h-24 rounded-xl overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700 relative border border-slate-200 dark:border-slate-700">
+                                    <img src="<%= adminRowImg %>" alt="<%= bulletin.title %>" class="w-full h-full object-cover group-hover:scale-110 transition duration-700" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                                    <% if (bulletin.video_paths && bulletin.video_paths.length > 0) { %>
+                                        <div class="absolute inset-0 bg-black/30 group-hover:bg-black/15 transition-colors pointer-events-none"></div>
+                                        <div class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-slate-950/80 backdrop-blur-md text-[8px] font-black uppercase tracking-wider text-white border border-white/10 shadow flex items-center space-x-1 z-10 pointer-events-none">
+                                            <i class="fas fa-video text-amber-400"></i>
+                                            <span>Video</span>
+                                        </div>
+                                        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                            <div class="w-8 h-8 rounded-full bg-slate-950/75 backdrop-blur-md border border-white/20 text-pnp-gold flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-pnp-blue group-hover:text-white transition-all">
+                                                <i class="fas fa-play text-xs ml-0.5"></i>
+                                            </div>
+                                        </div>
+                                    <% } %>
                                 </div>
                             <% } else if (bulletin.facebook_url && !bulletin.facebook_url.includes('post_') && !bulletin.facebook_url.includes('undefined')) { %>
                                 <div class="w-full lg:w-32 h-40 lg:h-24 rounded-xl overflow-hidden shrink-0 bg-slate-950 border border-blue-500/30 flex items-center justify-center relative group-hover:scale-105 transition duration-500 shadow-2xs">
@@ -989,29 +996,63 @@
                     const p = new Promise(resolve => {
                         const tempVid = document.createElement('video');
                         tempVid.preload = 'metadata';
-                        tempVid.src = URL.createObjectURL(file);
-                        tempVid.onloadedmetadata = function() {
-                            if (tempVid.duration > 180) { // > 3 mins
-                                URL.revokeObjectURL(tempVid.src);
-                                rejected.push(`Video "${file.name}" (${(tempVid.duration/60).toFixed(1)} mins long - Movie videos exceeding 3 minutes are prohibited)`);
-                            } else {
-                                modalMediaItems.push({
-                                    id: Date.now() + Math.random(),
-                                    file: file,
-                                    type: 'video',
-                                    url: tempVid.src,
-                                    name: file.name,
-                                    size: file.size,
-                                    duration: tempVid.duration
-                                });
-                            }
+                        tempVid.muted = true;
+                        tempVid.playsInline = true;
+                        const blobUrl = URL.createObjectURL(file);
+                        tempVid.src = blobUrl;
+
+                        let resolved = false;
+                        const finish = (thumb) => {
+                            if (resolved) return;
+                            resolved = true;
+                            modalMediaItems.push({
+                                id: Date.now() + Math.random(),
+                                file: file,
+                                type: 'video',
+                                url: blobUrl,
+                                thumbnail: thumb || null,
+                                name: file.name,
+                                size: file.size,
+                                duration: tempVid.duration || 0
+                            });
                             resolve();
                         };
+
+                        tempVid.onloadedmetadata = function() {
+                            if (tempVid.duration > 180) { // > 3 mins
+                                URL.revokeObjectURL(blobUrl);
+                                rejected.push(`Video "${file.name}" (${(tempVid.duration/60).toFixed(1)} mins long - Movie videos exceeding 3 minutes are prohibited)`);
+                                resolve();
+                                return;
+                            }
+                            try {
+                                tempVid.currentTime = (tempVid.duration && tempVid.duration >= 1.0) ? 1.0 : Math.max(0.1, (tempVid.duration || 1) / 2);
+                            } catch(e) {
+                                finish(null);
+                            }
+                        };
+
+                        tempVid.onseeked = function() {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = Math.min(tempVid.videoWidth || 640, 640);
+                                canvas.height = Math.round(canvas.width * (tempVid.videoHeight || 360) / (tempVid.videoWidth || 640)) || 360;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(tempVid, 0, 0, canvas.width, canvas.height);
+                                const thumb = canvas.toDataURL('image/jpeg', 0.85);
+                                finish(thumb);
+                            } catch(e) {
+                                finish(null);
+                            }
+                        };
+
                         tempVid.onerror = function() {
-                            URL.revokeObjectURL(tempVid.src);
+                            URL.revokeObjectURL(blobUrl);
                             rejected.push(`Video "${file.name}" (Corrupted or unsupported video format)`);
                             resolve();
                         };
+
+                        setTimeout(() => { finish(null); }, 2500);
                     });
                     videoPromises.push(p);
                 }
@@ -1103,7 +1144,16 @@
             if (img) { img.src = currentItem.url; img.classList.remove('hidden'); }
         } else {
             if (img) img.classList.add('hidden');
-            if (vid) { vid.src = currentItem.url; vid.classList.remove('hidden'); }
+            if (vid) {
+                vid.src = currentItem.url.includes('#t=') ? currentItem.url : currentItem.url + '#t=1.0';
+                vid.poster = currentItem.thumbnail || '/images/PNP.jpg';
+                vid.preload = 'metadata';
+                vid.playsInline = true;
+                if (currentItem.thumbnail) {
+                    vid.poster = currentItem.thumbnail;
+                }
+                vid.classList.remove('hidden');
+            }
         }
 
         if (badge) {
@@ -1338,10 +1388,17 @@
         grid.innerHTML = modalMediaItems.map((item, idx) => `
             <div class="relative group bg-gray-100 dark:bg-slate-950 rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 shadow-md aspect-square flex flex-col justify-between transition-all hover:shadow-xl">
                 <!-- Thumbnail -->
-                <div class="w-full h-full flex items-center justify-center overflow-hidden bg-black/40 cursor-pointer" onclick="openModalFullscreenMediaByIndex(${idx})">
+                <div class="w-full h-full flex items-center justify-center overflow-hidden bg-black/40 cursor-pointer relative" onclick="openModalFullscreenMediaByIndex(${idx})">
                     ${item.type === 'image' 
-                        ? `<img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">`
-                        : `<video src="${item.url}" class="w-full h-full object-cover"></video>`}
+                        ? `<img src="${item.url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='/images/PNP.jpg';">`
+                        : `<div class="relative w-full h-full flex items-center justify-center bg-slate-900 overflow-hidden">
+                             <img src="${item.thumbnail || '/images/PNP.jpg'}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300 select-none" onerror="this.onerror=null; this.src='/images/PNP.jpg';">
+                             <div class="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                               <div class="w-10 h-10 rounded-full bg-slate-950/80 border border-white/20 text-pnp-gold flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-pnp-blue group-hover:text-white transition-all">
+                                 <i class="fas fa-play text-xs ml-0.5"></i>
+                               </div>
+                             </div>
+                           </div>`}
                 </div>
 
                 <!-- TOP BAR OVERLAY: File Number & Trash Button -->
@@ -1755,7 +1812,7 @@
                                             <img id="modalPreviewImg" class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden">
 
                                             <!-- Video Slide -->
-                                            <video id="modalPreviewVid" controls class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden"></video>
+                                            <video id="modalPreviewVid" poster="/images/PNP.jpg" preload="metadata" playsinline controls class="max-h-[230px] max-w-full object-contain rounded-lg shadow-md hidden"></video>
 
                                             <!-- Prev Slide Chevron -->
                                             <button type="button" id="modalPrevSlideBtn" onclick="navigateModalCarousel(-1, event)" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-950 text-white flex items-center justify-center transition-all shadow-xl z-30 border border-white/15 cursor-pointer hover:scale-110 hidden" title="Previous Media">
@@ -1878,10 +1935,9 @@
                             
                             <!-- Category Select for Advisory -->
                             <select name="category" id="publishCategoryAdvisory" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-slate-950 border border-gray-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-pnp-blue dark:focus:ring-pnp-gold outline-none text-xs font-bold text-slate-800 dark:text-white transition cursor-pointer">
-                                <option value="Crime Advisory">Crime Advisory</option>
-                                <option value="Traffic Advisory">Traffic Advisory</option>
-                                <option value="Cybercrime Advisory">Cybercrime Advisory</option>
-                                <option value="Community Awareness">Community Awareness</option>
+                                <option value="Crime Advisory">Crime Advisory (Crime Prevention & Warnings)</option>
+                                <option value="Traffic Advisory">Traffic Advisory (Road & Traffic Safety)</option>
+                                <option value="Cybercrime Advisory">Cybercrime Advisory (Online Scams & Prevention)</option>
                             </select>
 
                             <!-- Locked Category for News -->
@@ -1898,9 +1954,8 @@
                                 <optgroup label="News & Official Releases">
                                     <option value="General Announcement">General Announcement (News / Press Release)</option>
                                 </optgroup>
-                                <optgroup label="Public Advisories & Prevention / Awareness">
+                                <optgroup label="Public Advisories & Prevention">
                                     <option value="Crime Advisory">Crime Advisory (Crime Prevention & Warnings)</option>
-                                    <option value="Community Awareness">Community Awareness (Public Safety & Awareness)</option>
                                     <option value="Traffic Advisory">Traffic Advisory (Road & Traffic Safety)</option>
                                     <option value="Cybercrime Advisory">Cybercrime Advisory (Online Scams & Prevention)</option>
                                 </optgroup>

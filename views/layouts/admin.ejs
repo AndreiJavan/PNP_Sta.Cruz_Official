@@ -136,7 +136,8 @@
         }
 
         .sidebar-item-active {
-            @apply bg-white/20 border-l-4 border-white shadow-[inset_-10px_0_20px_rgba(255, 255, 255, 0.05)];
+            @apply bg-white/20 text-white font-black border-l-4 border-pnp-gold shadow-xs;
+            box-shadow: inset 4px 0 0 0 #C8A415, 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         /* Global scrollbar hiding */
@@ -258,124 +259,128 @@
         </div>
     </div>
 
-    <!-- Fixed Sidebar (Permanently Fixed in Desktop View) -->
+    <!-- Fixed Sidebar (Permanently Fixed in Desktop View with Public Header Animations) -->
     <aside id="sidebar"
-        class="w-64 pnp-gradient-blue text-white hidden lg:flex flex-col fixed top-0 left-0 h-screen z-50 shadow-2xl border-r-4 border-pnp-gold/50 overflow-y-auto justify-between shrink-0">
-        <!-- Brand Header with Logo in White Circle -->
+        class="w-64 pnp-gradient-blue text-white hidden lg:flex flex-col fixed top-0 left-0 h-screen z-50 shadow-2xl border-r-4 border-pnp-gold overflow-y-auto justify-between shrink-0 transition-all duration-300">
+        <!-- Brand Header with Logo in White Circle (Interactive with Public Header Scaling & Glow Animation) -->
         <div class="px-4 py-3.5 border-b border-white/10 flex items-center justify-between shrink-0">
-            <div class="flex items-center space-x-3 min-w-0">
-                <!-- White circular logo container with MIMPAS logo -->
-                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1 shadow-md border border-white/20 shrink-0">
+            <a href="/admin/dashboard" class="flex items-center space-x-3 min-w-0 group cursor-pointer active:scale-95 transition-all duration-200" title="MIMPAS Station Dashboard">
+                <!-- White circular logo container matching Public Header with hover scale animation -->
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center p-1 shadow-md border border-white/20 shrink-0 group-hover:scale-105 group-hover:shadow-lg transition duration-300">
                     <img src="/favicon.png" alt="MIMPAS Logo" class="w-full h-full object-contain rounded-full"
                         onerror="this.onerror=null; this.src='/images/PNP.jpg';">
                 </div>
                 <div class="min-w-0">
-                    <h1 class="text-base font-black tracking-wider leading-none text-white">M I M P A S</h1>
-                    <p class="text-[8px] text-blue-100 uppercase tracking-wider font-bold mt-1 leading-tight">Municipality Incident Management and Public Advisory Sta.Cruz</p>
+                    <h1 class="text-base font-black tracking-wider leading-none text-white group-hover:text-pnp-gold transition-colors duration-200">M I M P A S</h1>
+                    <p class="text-[8px] text-blue-100 uppercase tracking-wider font-bold mt-1 leading-tight truncate">Municipality Incident Management and Public Advisory Sta.Cruz</p>
                 </div>
-            </div>
+            </a>
         </div>
 
-        <!-- Navigation Menu (All items clearly visible, high contrast text) -->
+        <!-- Navigation Menu (All items clearly visible, high contrast text & smooth public-header-style micro-animations) -->
         <nav class="flex-grow px-3 py-2 space-y-1.5 overflow-y-auto flex flex-col justify-start">
             <p class="text-[9.5px] text-blue-200 uppercase tracking-[0.2em] font-black mb-1 px-3">Main Menu</p>
 
             <a href="/admin/dashboard"
                 <%= title === 'Dashboard' ? 'aria-current="page"' : '' %>
-                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Dashboard' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Dashboard' ? 'text-white' : 'text-white/80' %>">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Dashboard' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'Dashboard' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                     <i class="fas fa-chart-line text-xs"></i>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-wider">Dashboard</span>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Dashboard</span>
             </a>
 
             <a href="/admin/bulletins"
                 <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'aria-current="page"' : '' %>
-                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'text-white' : 'text-white/80' %>">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'Bulletins' || title === 'New Bulletin' || title === 'Edit Bulletin' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                     <i class="fas fa-bullhorn text-xs"></i>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-wider">Bulletins</span>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Bulletins</span>
             </a>
 
             <a href="/admin/reports"
                 <%= title === 'Crime Reports' ? 'aria-current="page"' : '' %>
-                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Crime Reports' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Crime Reports' ? 'text-white' : 'text-white/80' %>">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Crime Reports' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'Crime Reports' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                     <i class="fas fa-file-invoice text-xs"></i>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-wider">Crime Reports</span>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Crime Reports</span>
             </a>
 
             <a href="/admin/map"
                 <%= title === 'Map' || title === 'Map Management' ? 'aria-current="page"' : '' %>
-                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Map' || title === 'Map Management' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Map' || title === 'Map Management' ? 'text-white' : 'text-white/80' %>">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Map' || title === 'Map Management' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'Map' || title === 'Map Management' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                     <i class="fas fa-map-location-dot text-xs"></i>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-wider">Crime Map</span>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Crime Map</span>
             </a>
 
             <a href="/admin/hotlines"
                 <%= title === 'Hotlines' ? 'aria-current="page"' : '' %>
-                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Hotlines' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Hotlines' ? 'text-white' : 'text-white/80' %>">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Hotlines' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'Hotlines' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                     <i class="fas fa-phone-volume text-xs"></i>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-wider">Hotlines</span>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Hotlines</span>
             </a>
 
             <% if (user && user.role === 'superadmin') { %>
                 <a href="/admin/users"
                     <%= title === 'Users' ? 'aria-current="page"' : '' %>
-                    class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Users' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                    <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Users' ? 'text-white' : 'text-white/80' %>">
+                    class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Users' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                    <div class="w-7 h-7 rounded-lg <%= title === 'Users' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                         <i class="fas fa-users-cog text-xs"></i>
                     </div>
-                    <span class="text-xs font-bold uppercase tracking-wider">Users</span>
+                    <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Users</span>
                 </a>
             <% } %>
 
             <a href="/admin/archive"
                 <%= title === 'Archive' ? 'aria-current="page"' : '' %>
-                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group <%= title === 'Archive' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
-                <div class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0 <%= title === 'Archive' ? 'text-white' : 'text-white/80' %>">
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'Archive' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'Archive' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
                     <i class="fas fa-box-archive text-xs"></i>
                 </div>
-                <span class="text-xs font-bold uppercase tracking-wider">Archive</span>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Archive</span>
             </a>
         </nav>
 
-        <!-- Sidebar Footer -->
-        <div class="p-3 border-t border-white/10 space-y-1.5 shrink-0">
+        <!-- Sidebar Footer with Public-Header-Style Actions & Micro-Animations -->
+        <div class="p-3 border-t border-white/10 space-y-2 shrink-0">
             <!-- Quick utilities: Dark Theme, Instruction Manual, Public Site -->
-            <div class="flex items-center justify-between gap-1.5 px-1 py-0.5">
-                <button id="darkModeToggle" title="Toggle Theme (Dark / Light)"
-                    class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hover:text-white flex items-center justify-center transition cursor-pointer">
-                    <i class="fas fa-moon text-xs dark:hidden"></i>
-                    <i class="fas fa-sun text-xs hidden dark:block"></i>
+            <div class="flex items-center justify-between gap-1.5 px-0.5">
+                <button id="darkModeToggle" title="Toggle Theme (Dark / Light)" aria-label="Toggle Theme"
+                    class="theme-toggle-btn flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 hover:text-pnp-gold active:scale-95 text-white flex items-center justify-center transition-all duration-200 border border-white/20 shadow-xs cursor-pointer group">
+                    <i class="fas fa-moon text-xs dark:hidden theme-icon-moon group-hover:-rotate-12 transition-transform"></i>
+                    <i class="fas fa-sun text-xs hidden dark:block text-pnp-gold theme-icon-sun group-hover:rotate-45 transition-transform"></i>
                 </button>
-                <button onclick="toggleHelpModal()" title="Instruction Manual"
-                    class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hover:text-white flex items-center justify-center transition cursor-pointer">
-                    <i class="fas fa-question text-xs"></i>
+                <button onclick="toggleHelpModal()" title="Instruction Manual" aria-label="Instruction Manual"
+                    class="flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 hover:text-pnp-gold active:scale-95 text-white flex items-center justify-center transition-all duration-200 border border-white/20 shadow-xs cursor-pointer group">
+                    <i class="fas fa-question text-xs group-hover:scale-110 transition-transform"></i>
                 </button>
-                <a href="/" title="View Public Portal"
-                    class="flex-1 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white hover:text-white flex items-center justify-center transition cursor-pointer">
-                    <i class="fas fa-globe text-xs"></i>
+                <a href="/" title="View Public Portal" aria-label="View Public Portal"
+                    class="flex-1 py-2 rounded-xl bg-white/10 hover:bg-white/20 hover:text-pnp-gold active:scale-95 text-white flex items-center justify-center transition-all duration-200 border border-white/20 shadow-xs cursor-pointer group">
+                    <i class="fas fa-globe text-xs group-hover:scale-110 transition-transform"></i>
                 </a>
             </div>
 
             <button onclick="openChangePasswordModal()"
-                class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition duration-200 group cursor-pointer"
+                class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 hover:text-pnp-gold active:scale-95 text-white transition-all duration-200 group border border-white/20 cursor-pointer shadow-xs hover:translate-x-0.5"
                 title="Change Account Password">
-                <i class="fas fa-key text-[10px] text-white/80 group-hover:scale-105 transition shrink-0"></i>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-white">Change Password</span>
+                <div class="w-6 h-6 rounded-lg bg-white/10 flex items-center justify-center text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20 transition-all duration-200 shrink-0">
+                    <i class="fas fa-key text-[10px]"></i>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-white group-hover:text-pnp-gold transition-colors">Change Password</span>
             </button>
             <a href="/admin/logout" onclick="confirmLogout(event); return false;"
-                class="flex items-center space-x-2.5 px-3 py-2 rounded-lg bg-red-500/20 text-red-200 hover:bg-red-600 hover:text-white transition duration-200 group cursor-pointer"
+                class="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white active:scale-95 transition-all duration-200 group border border-red-500/30 cursor-pointer shadow-xs hover:translate-x-0.5"
                 title="End Administrative Session">
-                <i class="fas fa-sign-out-alt text-[10px] group-hover:scale-105 transition shrink-0"></i>
-                <span class="text-[10px] font-bold uppercase tracking-wider text-red-200 group-hover:text-white">Logout</span>
+                <div class="w-6 h-6 rounded-lg bg-red-500/20 group-hover:bg-red-700/50 flex items-center justify-center text-red-200 group-hover:text-white transition-all duration-200 shrink-0">
+                    <i class="fas fa-sign-out-alt text-[10px] group-hover:translate-x-0.5 transition-transform"></i>
+                </div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-red-200 group-hover:text-white transition-colors">Logout</span>
             </a>
         </div>
     </aside>

@@ -9,7 +9,7 @@ import { createRequire } from 'module';
 import nodemailer from 'nodemailer';
 import { memoryCache } from '../utils/cache.js';
 import { FacebookService } from '../utils/facebookService.js';
-import { classifyCategory } from '../utils/categoryClassifier.js';
+import { classifyCategory, isAdvisoryOrPrevention } from '../utils/categoryClassifier.js';
 import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 import { getLockoutRemainingSeconds, recordFailedAttempt, clearFailedAttempts, formatLockoutDuration } from '../utils/loginSecurity.js';
 import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord, isValidEmail, isValidPassword, isValidHotlineAgency, isValidHotlineCategory, isValidHotlineContactNumber } from '../utils/inputValidator.js';
@@ -283,6 +283,18 @@ export const decodeCustomCategory = (item: any) => {
   if (!item.facebook_url && item.facebook_post_url) {
     item.facebook_url = item.facebook_post_url;
   }
+
+  // Enforce advisory scope: Crime Advisory must focus only on crime advisories or prevention.
+  // If not about an advisory or prevention, it is classified as General Announcement (News) only.
+  if (item && item.category && item.category !== 'Wanted Person' && item.category !== 'Missing Person' && item.category !== 'Recovered Property') {
+    const textToCheck = `${item.title || ''} ${item.body || ''}`;
+    if (!isAdvisoryOrPrevention(textToCheck)) {
+      item.category = 'General Announcement';
+    } else if (item.category === 'Community Awareness' || item.category === 'Public Advisory') {
+      item.category = classifyCategory(textToCheck);
+    }
+  }
+
   return item;
 };
 
@@ -2431,9 +2443,14 @@ export const postCreateBulletin = async (req: Request, res: Response) => {
   }
   rawCategory = rawCategory.trim();
 
-  // Auto-Segregation fallback if category is not explicitly chosen
-  if (!rawCategory || rawCategory === 'Public Advisory') {
+  // Auto-Segregation fallback & Advisory Scope Enforcement
+  if (!rawCategory || rawCategory === 'Public Advisory' || rawCategory === 'Community Awareness') {
     rawCategory = classifyCategory(`${title || ''} ${body || ''}`);
+  } else if (rawCategory === 'Crime Advisory') {
+    // If not about an advisory or prevention, then it is a general announcement or news only
+    if (!isAdvisoryOrPrevention(`${title || ''} ${body || ''}`)) {
+      rawCategory = 'General Announcement';
+    }
   }
 
   const finalFacebookUrl = (facebook_url || facebook_post_url || '').trim();

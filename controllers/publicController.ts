@@ -78,7 +78,7 @@ export const getHome = async (req: Request, res: Response) => {
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
     // Filter out mock data for public advisory, restrict to target categories (now supports Facebook URL advisories too)
-    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
     const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
 
     // Map "General Announcement" bulletins and Facebook news posts to policeNewsList for news releases
@@ -122,7 +122,7 @@ export const getHome = async (req: Request, res: Response) => {
 export const getNews = async (req: Request, res: Response) => {
   try {
     const rawBulletins = await getRawBulletinsCached();
-    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
     const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || (b.facebook_url && !allowedAdvisoryCategories.includes(b.category))) && !b.id.startsWith('bulletin-'));
 
     const newsList = dbBulletins.map((b: any) => {
@@ -367,7 +367,7 @@ export const getBulletins = async (req: Request, res: Response) => {
   try {
     const rawBulletins = await getRawBulletinsCached();
     
-    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
     let bulletins = rawBulletins
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
       .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
