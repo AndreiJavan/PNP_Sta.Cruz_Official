@@ -78,7 +78,7 @@ export const getHome = async (req: Request, res: Response) => {
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person');
 
     // Filter out mock data for public advisory, restrict to target categories (now supports Facebook URL advisories too)
-    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     const filteredBulletins = bulletins.filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
 
     // Map "General Announcement" bulletins and Facebook news posts to policeNewsList for news releases
@@ -122,7 +122,7 @@ export const getHome = async (req: Request, res: Response) => {
 export const getNews = async (req: Request, res: Response) => {
   try {
     const rawBulletins = await getRawBulletinsCached();
-    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     const dbBulletins = rawBulletins.filter((b: any) => b.is_archived !== true && (b.category === 'General Announcement' || (b.facebook_url && !allowedAdvisoryCategories.includes(b.category))) && !b.id.startsWith('bulletin-'));
 
     const newsList = dbBulletins.map((b: any) => {
@@ -367,7 +367,7 @@ export const getBulletins = async (req: Request, res: Response) => {
   try {
     const rawBulletins = await getRawBulletinsCached();
     
-    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory'];
+    const allowedAdvisoryCategories = ['Crime Advisory', 'Traffic Advisory', 'Cybercrime Advisory', 'Community Awareness'];
     let bulletins = rawBulletins
       .filter((b: any) => b.is_archived !== true && b.category !== 'Wanted Person' && b.category !== 'Missing Person')
       .filter((b: any) => !b.id.startsWith('bulletin-') && allowedAdvisoryCategories.includes(b.category));
@@ -640,106 +640,133 @@ export const postSetLanguage = async (req: Request, res: Response) => {
   }
 };
 
-const getDatabaseSummaryCached = async (): Promise<string> => {
-  const cacheKey = 'ai:db_summary';
-  const cached = await memoryCache.get<string>(cacheKey);
+export interface DatabaseStats {
+  totalIncidents: number;
+  byBarangay: Record<string, number>;
+  topBarangays: { name: string; count: number }[];
+  byType: Record<string, number>;
+  topTypes: { name: string; count: number }[];
+  byBarangayTypes: Record<string, Record<string, number>>;
+  summary: string;
+}
+
+export const getDatabaseStats = async (): Promise<DatabaseStats> => {
+  const cacheKey = 'ai:db_stats_v2';
+  const cached = await memoryCache.get<DatabaseStats>(cacheKey);
   if (cached) return cached;
 
-  // If Supabase is not configured, return standard station context immediately
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-    const defaultSummary = `
+  let incidents: any[] = [];
+  try {
+    incidents = await getAllMapPointsCached();
+  } catch (err) {
+    console.warn('Failed to load cached map points for db stats:', err);
+  }
+
+  const byBarangay: Record<string, number> = {};
+  const byType: Record<string, number> = {};
+  const byBarangayTypes: Record<string, Record<string, number>> = {};
+
+  if (Array.isArray(incidents)) {
+    incidents.forEach((p: any) => {
+      const brgy = (p.barangay || '').trim();
+      const type = (p.incident_type || p.crime_type || p.category || '').trim();
+      if (brgy && brgy !== 'Unspecified') {
+        byBarangay[brgy] = (byBarangay[brgy] || 0) + 1;
+        if (!byBarangayTypes[brgy]) byBarangayTypes[brgy] = {};
+        if (type && type !== 'Unspecified') {
+          byBarangayTypes[brgy][type] = (byBarangayTypes[brgy][type] || 0) + 1;
+        }
+      }
+      if (type && type !== 'Unspecified') {
+        byType[type] = (byType[type] || 0) + 1;
+      }
+    });
+  }
+
+  const topBarangays = Object.entries(byBarangay)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count }));
+
+  const topTypes = Object.entries(byType)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, count]) => ({ name, count }));
+
+  let bulletinListText = '• No active bulletins';
+  try {
+    const bulletins = await getRawBulletinsCached();
+    const activeBulletins = (bulletins || []).filter((b: any) => !b.is_archived);
+    if (activeBulletins.length > 0) {
+      bulletinListText = activeBulletins.slice(0, 5).map((b: any) => `• [${b.category}] ${b.title}`).join('\n');
+    }
+  } catch (_) {}
+
+  let hotlineListText = '• Station Desk: (049) 501-5971 / 0928-465-3828 / 0998-598-5667 / 911';
+  try {
+    const hotlines = await getHotlinesCached();
+    if (hotlines && hotlines.length > 0) {
+      hotlineListText = hotlines.map((h: any) => `• ${h.name || h.title || 'Emergency'}: ${h.number || h.phone || h.contact || 'N/A'}`).join('\n');
+    }
+  } catch (_) {}
+
+  let personnelCount = 0;
+  try {
+    const personnel = await getPersonnelCached();
+    personnelCount = personnel?.length || 0;
+  } catch (_) {}
+
+  const topTypesText = topTypes.length > 0 
+    ? topTypes.map(t => `• ${t.name}: ${t.count} reported case(s)`).join('\n') 
+    : '• No cases recorded';
+
+  const topBarangaysText = topBarangays.length > 0
+    ? topBarangays.slice(0, 10).map(b => `• ${b.name}: ${b.count} case(s)`).join('\n')
+    : '• Monitored across all 26 Barangays of Santa Cruz, Laguna';
+
+  const summary = `
 === READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
-• Total Logged Crime/Incident Cases: Active database records
-• Active Station Personnel: Authorized PNP Sta. Cruz officers
+• Total Logged Crime/Incident Cases: ${incidents.length}
+• Active Station Personnel: ${personnelCount}
 • Covered Jurisdictions: All 26 Barangays of Santa Cruz, Laguna
 
-[Emergency Hotlines]
-• Station Desk Hotlines: (049) 501-5971 / 0928-465-3828 / 0998-598-5667
-• National Emergency Hotline: 911
-• BFP Sta. Cruz Fire Station: +63 967 052 8897
-• Red Cross Emergency: +63 2 8790 2300
-`.trim();
-    await memoryCache.set(cacheKey, defaultSummary, 3 * 60 * 1000);
-    return defaultSummary;
-  }
-
-  try {
-    // 2.5 second timeout safeguard so AI response never hangs
-    const timeoutPromise = new Promise<null>((_, reject) => setTimeout(() => reject(new Error('DB Query Timeout')), 2500));
-    const queryPromise = (async () => {
-      const mapSnap = await db.collection('map_points').get();
-      const mapPoints = mapSnap.docs.map((d: any) => d.data());
-
-      const totalIncidents = mapPoints.length;
-      const byType: Record<string, number> = {};
-      const byBarangay: Record<string, number> = {};
-
-      mapPoints.forEach((p: any) => {
-        const type = (p.incident_type || 'Unspecified').trim();
-        const brgy = (p.barangay || 'Unspecified').trim();
-        byType[type] = (byType[type] || 0) + 1;
-        byBarangay[brgy] = (byBarangay[brgy] || 0) + 1;
-      });
-
-      const topTypes = Object.entries(byType)
-        .sort((a, b) => b[1] - a[1])
-        .map(([type, count]) => `• ${type}: ${count} reported case(s)`)
-        .join('\n');
-
-      const topBarangays = Object.entries(byBarangay)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([brgy, count]) => `• ${brgy}: ${count} case(s)`)
-        .join('\n');
-
-      const bulletins = await getRawBulletinsCached();
-      const activeBulletins = bulletins.filter((b: any) => !b.is_archived);
-      const bulletinList = activeBulletins.slice(0, 5).map((b: any) => `• [${b.category}] ${b.title}`).join('\n');
-
-      const hotlines = await getHotlinesCached();
-      const hotlineList = hotlines.map((h: any) => `• ${h.name || h.title || 'Emergency'}: ${h.number || h.phone || h.contact || 'N/A'}`).join('\n');
-
-      const personnel = await getPersonnelCached();
-      const personnelCount = personnel.length;
-
-      return `
-=== READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
-• Total Logged Crime/Incident Cases: ${totalIncidents}
-• Active Station Personnel: ${personnelCount}
-• Active Bulletins/Advisories: ${activeBulletins.length}
-
 [Case Statistics by Category]
-${topTypes || '• No cases recorded'}
+${topTypesText}
 
 [Top Incident Locations by Barangay]
-${topBarangays || '• No cases recorded'}
+${topBarangaysText}
 
 [Active Bulletins & Announcements]
-${bulletinList || '• No active bulletins'}
+${bulletinListText}
 
 [Emergency Hotlines]
-${hotlineList || '• Station Desk: (049) 501-5971 / 0998-598-5667 / 911'}
+${hotlineListText}
 `.trim();
-    })();
 
-    const summary = (await Promise.race([queryPromise, timeoutPromise])) as string;
-    await memoryCache.set(cacheKey, summary, 3 * 60 * 1000);
-    return summary;
-  } catch (err) {
-    console.warn('Database summary unavailable or timed out, using fallback station context:', err);
-    return `
-=== READ-ONLY DATABASE CONTEXT (Sta. Cruz Municipal Police Station) ===
-• Covered Jurisdiction: Santa Cruz, Laguna (26 Barangays)
-• Status: Active 24/7 Mobile & Checkpoint Patrols
-[Emergency Hotlines]
-• Station Desk: (049) 501-5971 / 0928-465-3828 / 0998-598-5667
-• National Emergency: 911
-• Fire Station: +63 967 052 8897
-`.trim();
-  }
+  const stats: DatabaseStats = {
+    totalIncidents: incidents.length,
+    byBarangay,
+    topBarangays,
+    byType,
+    topTypes,
+    byBarangayTypes,
+    summary
+  };
+
+  await memoryCache.set(cacheKey, stats, 3 * 60 * 1000);
+  return stats;
 };
 
-function generateIntelligentArticleResponse(articleTitle: string, articleContent: string, userMessage: string, dbContext: string): string {
+const getDatabaseSummaryCached = async (): Promise<string> => {
+  const stats = await getDatabaseStats();
+  return stats.summary;
+};
+
+function generateIntelligentArticleResponse(
+  articleTitle: string,
+  articleContent: string,
+  userMessage: string,
+  dbContext: string,
+  dbStats?: DatabaseStats
+): string {
   const q = userMessage.toLowerCase().trim();
 
   // 1. Check for out-of-scope queries
@@ -764,9 +791,77 @@ function generateIntelligentArticleResponse(articleTitle: string, articleContent
     return `**Summary of "${articleTitle}":**\n\n${keyPoints || '• Official advisory released by the Sta. Cruz Municipal Police Station.'}\n\n• **Issuing Agency:** Sta. Cruz Municipal Police Station\n• **Official Advice:** Please stay vigilant and refer to official station announcements for updates. If you observe any relevant activity or concern, contact the station desk at **0998 598 5667** or dial **911**.`;
   }
 
-  // 4. Location / Where / Barangay
-  if (/\b(where|location|saan|barangay|place|street|lugar|area)\b/i.test(q)) {
-    const mentionedBrgy = VALID_BARANGAYS.filter(b => (articleContent || '').toLowerCase().includes(b.toLowerCase()) || (articleTitle || '').toLowerCase().includes(b.toLowerCase()));
+  const isTagalog = /\b(kaso|krimen|ilan|bilang|dami|pinakamarami|pinakamataas|marami|anong|aling|saan|bawat)\b/i.test(q);
+
+  // 4. BARANGAY CASE RANKINGS & HIGHEST CASES (Solves the issue where questions like "which barangay have a large amount of cases" previously returned the station address)
+  const isBarangayCaseRankQuery = 
+    /\b(which|what|anong|aling|saan|where|list|pinaka|most|highest|large|largest|high|many|marami|mataas|top|rank|ranking)\b.*\b(barangay|brgy|area|lugar)\b.*\b(case|cases|kaso|crime|crimes|incident|incidents|rate)\b/i.test(q) ||
+    /\b(barangay|brgy|area|lugar)\b.*\b(which|what|anong|aling|most|highest|large|largest|high|many|marami|mataas|top|pinakamarami|pinakamataas)\b.*\b(case|cases|kaso|crime|crimes|incident|incidents|rate)\b/i.test(q) ||
+    /\b(barangay|brgy)\b.*\b(large\s+amount|most\s+cases|highest\s+cases|many\s+cases|maraming\s+kaso|pinakamaraming\s+kaso|crime\s+rate|case\s+count|dami\s+ng\s+kaso)\b/i.test(q) ||
+    /\b(cases|kaso|crime|crimes|incident|incidents)\b.*\b(per|by|in|bawat|sa)\s+(barangay|brgy)\b/i.test(q) ||
+    /\b(which|what|anong|aling)\s+(barangay|brgy)\b.*\b(cases|kaso|crime|crimes|incidents)\b/i.test(q) ||
+    (q.includes('barangay') && (q.includes('cases') || q.includes('kaso')) && (q.includes('large') || q.includes('most') || q.includes('high') || q.includes('amount') || q.includes('marami') || q.includes('highest')));
+
+  if (isBarangayCaseRankQuery) {
+    const topBrgys = dbStats?.topBarangays || [];
+    const totalCases = dbStats?.totalIncidents ?? 0;
+
+    if (topBrgys.length > 0) {
+      const topList = topBrgys.slice(0, 7).map((b, idx) => `• **${idx + 1}. Brgy. ${b.name}:** **${b.count}** recorded case(s)`).join('\n');
+      const highestBrgy = topBrgys[0];
+
+      if (isTagalog) {
+        return `**Mga Barangay na May Pinakamaraming Naitalang Kaso sa Sta. Cruz, Laguna:**\n\nBatay sa opisyal na datos ng insidente mula sa PNP Sta. Cruz Crime Mapping System:\n\n${topList}\n\n• **Pinakamataas na Bilang ng Kaso:** Ang **Brgy. ${highestBrgy.name}** ang kasalukuyang may pinakamaraming naitalang kaso (**${highestBrgy.count}** kaso).\n• **Kabuuang Naitalang Kaso:** **${totalCases}** na insidente sa buong Santa Cruz, Laguna.\n• **MIMPAS Crime Map:** Upang makita ang visual heatmap at cluster pins ng bawat barangay, bisitahin ang interactive **Crime Map** tab.\n• **Emergency at Pulisya:** Para sa agarang tulong o pag-uulat ng krimen sa inyong barangay, tumawag sa Sta. Cruz MPS sa **(049) 501-5971** / **0998 598 5667** o mag-dial ng **911**.`;
+      }
+
+      return `**Barangays with the Highest Number of Reported Cases in Sta. Cruz, Laguna:**\n\nBased on official incident records from the PNP Sta. Cruz Crime Mapping System:\n\n${topList}\n\n• **Highest Incident Area:** **Brgy. ${highestBrgy.name}** currently has the largest amount of recorded cases (**${highestBrgy.count}** case(s)).\n• **Total Logged Cases:** **${totalCases}** incident report(s) across Santa Cruz, Laguna.\n• **Interactive Crime Map:** For full geospatial heatmap density and to filter incidents by category or year, visit the **Crime Map** in the main navigation.\n• **Station Desk & Emergencies:** For police assistance or to report an incident in your barangay, contact the Sta. Cruz Municipal Police Station desk at **(049) 501-5971** / **0998 598 5667** or dial **911**.`;
+    }
+
+    if (isTagalog) {
+      return `**Datos ng mga Kaso sa bawat Barangay (Sta. Cruz, Laguna):**\n\n• **Nasasakupang Hurisdiksyon:** Lahat ng 26 na Barangay ng Santa Cruz, Laguna ay aktibong binabantayan ng PNP Sta. Cruz 24/7.\n• **Status ng mga Kaso:** Sa kasalukuyan, patuloy ang pag-log at pagsubaybay sa mga blotter records. Walang partikular na barangay ang may abnormal na pagdami ng kaso sa aktibong talaan.\n• **Interactive Crime Map:** Upang makita ang visual heatmap, mga pin ng insidente, at ma-filter ang bawat barangay ayon sa taon, bisitahin ang **Crime Map** sa navigation bar.\n• **Tawag sa Estasyon:** Para sa katanungan o pag-file ng blotter sa inyong barangay, tumawag sa Sta. Cruz MPS desk sa **(049) 501-5971** o mag-dial ng **911**.`;
+    }
+
+    return `**Barangay Case Statistics (Sta. Cruz, Laguna):**\n\n• **Covered Jurisdictions:** All 26 Barangays of Santa Cruz, Laguna are actively monitored 24/7 by the PNP Sta. Cruz Municipal Police Station.\n• **Case Monitoring:** Routine patrol units and checkpoint sectors cover all barangays. In the active database, incidents are distributed across sectors and regularly updated via verified blotter entries.\n• **Interactive Crime Map:** To inspect historical incident distributions, heatmaps, and filter specific barangays by year and crime category, please view the **Crime Map** tab.\n• **Station Inquiries:** If you need to report an incident in your barangay or request police assistance, contact the Sta. Cruz MPS Desk at **(049) 501-5971** / **0998 598 5667** or dial **911**.`;
+  }
+
+  // 5. SPECIFIC BARANGAY CASE INQUIRY (e.g. "cases in Gatid", "how many cases in Patimbao")
+  const matchedBrgy = VALID_BARANGAYS.find(b => {
+    const bLower = b.toLowerCase();
+    const clean = bLower.replace(/\s*\(.*\)/, '').trim();
+    return q.includes(bLower) || (clean.length > 3 && q.includes(clean));
+  });
+
+  const isSpecificBrgyCaseQuery = Boolean(
+    matchedBrgy && 
+    /\b(case|cases|kaso|crime|crimes|incident|incidents|rate|ilan|bilang|dami|stats|statistics|safe|ligtas)\b/i.test(q)
+  );
+
+  if (isSpecificBrgyCaseQuery && matchedBrgy) {
+    const brgyCount = dbStats?.byBarangay?.[matchedBrgy] ?? 0;
+    const brgyTypesObj = dbStats?.byBarangayTypes?.[matchedBrgy] || {};
+    const brgyTypesList = Object.entries(brgyTypesObj)
+      .sort((a, b) => b[1] - a[1])
+      .map(([type, cnt]) => `• ${type}: **${cnt}** case(s)`)
+      .join('\n');
+
+    if (isTagalog) {
+      return `**Talaan ng Kaso para sa Brgy. ${matchedBrgy}:**\n\n• **Bilang ng Naitalang Kaso:** **${brgyCount}** kaso sa aktibong database.\n${brgyTypesList ? `• **Mga Uri ng Insidente:**\n${brgyTypesList}\n` : ''}• **Seguridad sa Barangay:** May 24/7 mobile patrols at koordinasyon sa Barangay Tanod para sa kaligtasan ng mga residente.\n• **Crime Map:** Maaari mong tingnan ang lokasyon at mga datos para sa Brgy. ${matchedBrgy} sa **Crime Map** tab.\n• **Emergency:** Tumawag sa **(049) 501-5971** o mag-dial ng **911**.`;
+    }
+
+    return `**Incident Case Statistics for Brgy. ${matchedBrgy}:**\n\n• **Recorded Incidents:** **${brgyCount}** case(s) logged in the Sta. Cruz database.\n${brgyTypesList ? `• **Breakdown by Incident Type:**\n${brgyTypesList}\n` : ''}• **Jurisdiction & Patrols:** Covered by PNP Sta. Cruz sector mobile patrol units and checkpoint details.\n• **Crime Map:** To view pins and spatial density specifically for Brgy. ${matchedBrgy}, select it in the dropdown on the **Crime Map** page.\n• **Emergency Contact:** For police response in Brgy. ${matchedBrgy}, contact the station desk at **(049) 501-5971** or dial **911**.`;
+  }
+
+  // 6. GENERAL LOCATION OF ARTICLE OR POLICE STATION
+  // Strictly exclude queries asking about cases, incidents, numbers, or rankings to prevent misrouting!
+  const isGeneralLocationQuery = 
+    /\b(where|location|saan|place|street|lugar|address|istasyon|headquarters)\b/i.test(q) &&
+    !/\b(case|cases|kaso|crime|crimes|stat|stats|statistics|ilan|bilang|dami|rate|rank)\b/i.test(q);
+
+  if (isGeneralLocationQuery) {
+    const mentionedBrgy = VALID_BARANGAYS.filter(b => 
+      (articleContent || '').toLowerCase().includes(b.toLowerCase()) || 
+      (articleTitle || '').toLowerCase().includes(b.toLowerCase())
+    );
     const locText = mentionedBrgy.length > 0 
       ? mentionedBrgy.map(b => `• **Brgy. ${b}**`).join('\n') 
       : `• Sta. Cruz municipality jurisdiction (Poblacion and surrounding sectors)`;
@@ -774,7 +869,7 @@ function generateIntelligentArticleResponse(articleTitle: string, articleContent
     return `**Location Information:**\n\n${locText}\n• **Lead Police Station:** Sta. Cruz Municipal Police Station (Main HQ: 1153 A. Mabini St., Poblacion)\n• **Active Police Patrols:** Station mobile units and sector checkpoints operate 24/7 across all 26 barangays of Sta. Cruz, Laguna.`;
   }
 
-  // 5. Date / Time / When / Schedule
+  // 7. Date / Time / When / Schedule
   if (/\b(when|date|kailan|time|oras|petsa|schedule|kailan nangyari)\b/i.test(q)) {
     const dateMatch = (articleContent || '').match(/\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}\b/i) ||
                       (articleContent || '').match(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/);
@@ -783,17 +878,17 @@ function generateIntelligentArticleResponse(articleTitle: string, articleContent
     return `**Date & Schedule Details:**\n\n${dateInfo}\n• **Advisory Topic:** ${articleTitle}\n• For questions regarding active advisories or traffic rerouting, the station desk is reachable 24/7 at **(049) 501-5971**.`;
   }
 
-  // 6. Safety Tips / Advice / What to do / Paano mag-ingat
+  // 8. Safety Tips / Advice / What to do / Paano mag-ingat
   if (/\b(tips|tip|advice|paano|gawin|precaution|safety|ingat|iwasan|protect)\b/i.test(q)) {
     return `**Public Safety Advisory Guidelines:**\n\n• **Stay Alert & Vigilant:** Report any suspicious individuals, unattended items, or unusual activities in your neighborhood immediately.\n• **Preserve Evidence / Records:** For online transactions or cybercrime concerns, keep screenshots, transaction IDs, and sender details.\n• **Cooperate with Law Enforcement:** Follow directives from PNP patrol units, traffic marshals, and local barangay tanods.\n• **Emergency Verification:** Verify official advisories directly on this PNP Sta. Cruz portal before forwarding notices to others.\n• **Emergency Dial:** Call **911** or **0998 598 5667** for immediate police assistance.`;
   }
 
-  // 7. Statistics / Crime stats
+  // 9. Overall Statistics / Crime stats
   if (/\b(stat|stats|statistics|crime rate|bilang|ilan|cases|datos|data)\b/i.test(q)) {
     return `**Sta. Cruz Municipal Police Station Statistics Overview:**\n\n${dbContext}\n\n• *For in-depth crime mapping and spatial analytics, you can also view the interactive Crime Map on the main navigation.*`;
   }
 
-  // 8. General question matching content
+  // 10. General question matching content
   const cleanContent = (articleContent || '').replace(/\r?\n+/g, ' ').trim();
   const sentences = cleanContent.match(/[^.!?]+[.!?]+/g) || [cleanContent];
   const words = q.split(/\s+/).filter(w => w.length > 3);
@@ -812,6 +907,172 @@ function generateIntelligentArticleResponse(articleTitle: string, articleContent
   return `**Regarding "${articleTitle}":**\n\n${fallbackExcerpt || '• Official announcement from the Sta. Cruz Municipal Police Station.'}\n\n• **Station Inquiries:** You may contact the police desk directly at **0998 598 5667** or call **911** for immediate emergency assistance.`;
 }
 
+export interface PublicChatSecurityResult {
+  blocked: boolean;
+  category?: 'admin_probe' | 'internal_data_probe' | 'command_injection' | 'code_injection' | 'database_probe' | 'jailbreak_attempt';
+  reason?: string;
+  clientMessage?: string;
+}
+
+/**
+ * Validates public chat queries against security threats, command injection,
+ * scripting, SQL injection, unauthorized administrative probing, and internal data dumps.
+ */
+export function validatePublicInputSecurity(rawInput: string, isFilipino: boolean = false): PublicChatSecurityResult {
+  if (!rawInput || typeof rawInput !== 'string') {
+    return { blocked: false };
+  }
+
+  const text = rawInput.trim();
+  const lower = text.toLowerCase();
+
+  // 1. Administrative Portal, Admin Side & Privilege Escalation Probing
+  const adminPatterns = [
+    /\b(admin|administrator|superadmin|root|superuser)\s*(side|portal|panel|dashboard|login|access|page|route|account|accounts|password|passwords|pass|creds?|credentials?|session|sessions|privilege|privileges|role|roles|data|datas)\b/i,
+    /\b(access|open|enter|reach|login|log\s*in|bypass|hack|crack|escalate|exploit)\s+(to\s+)?(the\s+)?(admin|administrator|superadmin|root|superuser|internal\s+system)\b/i,
+    /\b(bypass\s+(auth|login|security|password|permission|restrictions?))\b/i,
+    /\b(admin_users|user_accounts|system_admin|admin_panel|admin_dashboard|wp-admin)\b/i,
+    /\b(command|coding|code|script)\s+(to|for|in\s+order\s+to)?\s*(access|reach|hack|bypass|enter|dump|view|extract|crack|exploit|infiltrate)\s+(the\s+)?(admin|internal|database|backend|system)\b/i,
+    /\b(use|using|run|execute)\s+(a\s+)?(command|coding|code|script)\s+to\s+(access|reach|hack|bypass|enter|dump|view|extract|crack|exploit|infiltrate)\b/i,
+    /\b(admin\s+mode|root\s+mode|developer\s+mode|god\s+mode|debug\s+mode)\b/i,
+    /\b(how\s+to\s+hack|exploit|penetrate|vulnerability\s+scan)\b/i,
+    /\/?(admin\/(login|dashboard|users|settings|incidents|portal))\b/i,
+    /\b(sudo|su\s+-|runas|privilege\s+escalat(e|ion))\b/i
+  ];
+
+  for (const rx of adminPatterns) {
+    if (rx.test(lower)) {
+      return {
+        blocked: true,
+        category: 'admin_probe',
+        reason: 'Attempted access or probe of internal administrative portal or privileges',
+        clientMessage: isFilipino
+          ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nHindi pinahihintulutan ang pagtatangkang pasukin o siyasatin ang administrative side, internal accounts, o security controls ng estasyon. Ang portal na ito ay eksklusibo para sa opisyal na serbisyong pampubliko ng PNP Sta. Cruz alinsunod sa Republic Act 10175 (Cybercrime Prevention Act of 2012).'
+          : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Inquiries attempting to access, probe, or interact with administrative interfaces, internal user accounts, or privileged controls are strictly prohibited under Republic Act 10175 (Cybercrime Prevention Act of 2012) and PNP IT Security Policy. This portal is strictly for public citizen assistance.'
+      };
+    }
+  }
+
+  // 2. Internal Data, Secrets, Config & Environment Probing
+  const internalDataPatterns = [
+    /\b(internal\s+data(s)?|raw\s+database|db\s+dump|dump\s+database|dump\s+db|leak\s+data|export\s+(database|users|tables|records))\b/i,
+    /\b(show\s+tables|show\s+databases|list\s+databases|show\s+columns|information_schema|pg_catalog|pg_tables|sqlite_master)\b/i,
+    /\b(\.env|dotenv|environment\s+variables?|process\.env|supabase_key|supabase_url|jwt_secret|session_secret|openrouter_api_key|api_key|private_key|secret_key|master_key)\b/i,
+    /\b(credentials|passwords?|db_password|db_user|db_host|connection_string|server_config|server_secret)\b/i,
+    /\b(\/etc\/passwd|\/etc\/shadow|c:\\windows\\system32|web\.config)\b/i
+  ];
+
+  for (const rx of internalDataPatterns) {
+    if (rx.test(lower)) {
+      return {
+        blocked: true,
+        category: 'internal_data_probe',
+        reason: 'Attempted probe of internal database schema, sensitive data, or environment secrets',
+        clientMessage: isFilipino
+          ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nIpinagbabawal ang paghingi o pagsisiyasat ng internal data, server secrets, o database records. Ang lahat ng opisyal na pampublikong datos ng insidente ay bukas at ligtas na makikita sa ating interactive Crime Map.'
+          : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Inquiries seeking internal server configurations, environment keys, credentials, or raw database structures are strictly prohibited under R.A. 10173 (Data Privacy Act) and R.A. 10175 (Cybercrime Prevention Act). Public crime records are accessible via the Crime Map.'
+      };
+    }
+  }
+
+  // 3. Command Injection & Terminal / Shell Syntax
+  const commandPatterns = [
+    /\b(cmd(\.exe)?|powershell(\.exe)?|bash|sh|zsh|csh|tcsh)\b/i,
+    /\b(whoami|systeminfo|ipconfig|ifconfig|netstat|tasklist|killall|pkill|rm\s+-rf|del\s+\/[fqs]|dir\s+[a-z]:|ls\s+-[a-z]+|cat\s+\/|chmod\s+[0-7]+|chown\s+|curl\s+-[a-z]|wget\s+http|nc\s+-[a-z]|nmap)\b/i,
+    /[;&|`]\s*(cat|ls|dir|rm|del|whoami|curl|wget|ping|echo|nc|python|node|bash|sh|powershell)\b/i,
+    /\$\([a-z0-9_\-\s]+\)|\`[a-z0-9_\-\s]+\`/i
+  ];
+
+  for (const rx of commandPatterns) {
+    if (rx.test(text)) {
+      return {
+        blocked: true,
+        category: 'command_injection',
+        reason: 'Command injection or terminal execution syntax detected',
+        clientMessage: isFilipino
+          ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nMay natukoy na command o terminal execution syntax sa iyong tanong. Ang paggamit ng mga command sa chatbot na ito ay mahigpit na ipinagbabawal at awtomatikong naharang ng seguridad ng himpilan.'
+          : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. System command syntax, shell instructions, or command injection attempts are strictly prohibited on this public portal. Your request has been blocked by PNP Cyber Security filters.'
+      };
+    }
+  }
+
+  // 4. Code Injection, Scripting & XSS Exploits
+  const codeInjectionPatterns = [
+    /<\s*script\b[^>]*>/i,
+    /<\s*\/\s*script\s*>/i,
+    /javascript\s*:/i,
+    /vbscript\s*:/i,
+    /data\s*:\s*text\/html/i,
+    /<\s*iframe\b[^>]*>/i,
+    /<\s*object\b[^>]*>/i,
+    /<\s*embed\b[^>]*>/i,
+    /\bon(error|load|click|mouseover|submit|focus|blur|keydown|keyup)\s*=/i,
+    /\b(eval|exec|execSync|Function|setTimeout|setInterval)\s*\(/i,
+    /\b(document\.cookie|window\.location|document\.location|localStorage|sessionStorage)\b/i,
+    /\b(console\.log|alert\(|prompt\(|confirm\()\b/i,
+    /<\?php|{{.+}}|{\%.+\%}/i
+  ];
+
+  for (const rx of codeInjectionPatterns) {
+    if (rx.test(text)) {
+      return {
+        blocked: true,
+        category: 'code_injection',
+        reason: 'Scripting, XSS or code injection syntax detected',
+        clientMessage: isFilipino
+          ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nMay natukoy na code o script injection sa iyong mensahe. Hindi pinahihintulutan ang pagpapatakbo ng script o code sa public chat interface na ito.'
+          : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Code injection, scripting, or unauthorized executable payloads are strictly blocked on this interface.'
+      };
+    }
+  }
+
+  // 5. Database SQL Injection Syntax
+  const sqlInjectionPatterns = [
+    /\b(union(\s+all)?\s+select|select\s+.*?\s+from\s+[a-z0-9_]+|insert\s+into\s+[a-z0-9_]+|delete\s+from\s+[a-z0-9_]+|drop\s+table|alter\s+table|truncate\s+table)\b/i,
+    /['"]\s*(or|and)\s+['"]?[0-9a-z]+['"]?\s*=\s*['"]?[0-9a-z]+['"]?/i,
+    /['"]\s*;\s*--(.*)?$/m,
+    /\bwaitfor\s+delay\s+['"][0-9:]+['"]/i,
+    /\bbenchmark\s*\(\s*[0-9]+,/i
+  ];
+
+  for (const rx of sqlInjectionPatterns) {
+    if (rx.test(text)) {
+      return {
+        blocked: true,
+        category: 'database_probe',
+        reason: 'SQL injection or database manipulation syntax detected',
+        clientMessage: isFilipino
+          ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nMay natukoy na database query o injection syntax. Hindi pinahihintulutan ang pagsasagawa ng database queries sa pamamagitan ng public FAQ assistant.'
+          : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Database query manipulation or SQL injection patterns are strictly blocked by station cyber security.'
+      };
+    }
+  }
+
+  // 6. AI Prompt Injection & Jailbreaking Attempts
+  const jailbreakPatterns = [
+    /\b(ignore\s+(all\s+)?(previous|prior)\s+instructions|disregard\s+(all\s+)?(previous|prior)\s+instructions)\b/i,
+    /\b(you\s+are\s+now\s+(dan|an\s+unrestricted|in\s+developer\s+mode|jailbroken))\b/i,
+    /\b(reveal\s+(your\s+)?(system\s+prompt|developer\s+instructions|initial\s+prompt))\b/i,
+    /\b(bypass\s+(all\s+)?(guardrails|safety\s+filters?|rules))\b/i,
+    /\b(act\s+as\s+a\s+hacker|act\s+as\s+system\s+administrator\s+and\s+execute)\b/i
+  ];
+
+  for (const rx of jailbreakPatterns) {
+    if (rx.test(lower)) {
+      return {
+        blocked: true,
+        category: 'jailbreak_attempt',
+        reason: 'AI prompt injection or guardrail bypass attempt detected',
+        clientMessage: isFilipino
+          ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nAng assistant na ito ay pinoprotektahan ng opisyal na PNP guardrails. Hindi pinahihintulutan ang mga pagtatangkang i-bypass ang mga patakaran ng system.'
+          : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Prompt injection, jailbreak attempts, or instructions attempting to override police security protocols are strictly forbidden.'
+      };
+    }
+  }
+
+  return { blocked: false };
+}
+
 export const chatWithArticle = async (req: Request, res: Response) => {
   try {
     const { articleTitle, articleContent, userMessage, chatHistory } = req.body;
@@ -819,7 +1080,19 @@ export const chatWithArticle = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Missing required parameters' });
     }
 
-    const dbContext = await getDatabaseSummaryCached();
+    // Security pre-flight check
+    const secCheck = validatePublicInputSecurity(userMessage, false);
+    if (secCheck.blocked) {
+      console.warn(`[SECURITY BLOCKED] Article chat violation from ${req.ip || 'unknown'} [${secCheck.category}]: "${String(userMessage).slice(0, 80)}"`);
+      return res.json({
+        success: true,
+        securityBlocked: true,
+        reply: secCheck.clientMessage
+      });
+    }
+
+    const dbStats = await getDatabaseStats();
+    const dbContext = dbStats.summary;
 
     let historyContext = "";
     if (chatHistory && Array.isArray(chatHistory)) {
@@ -843,7 +1116,13 @@ ${dbContext}
 
 === FORMATTING INSTRUCTIONS ===
 1. ACCURATE STATISTICAL ANSWERS: When answering in-scope questions about case statistics, incident counts, barangay breakdowns, or hotline numbers, use the READ-ONLY DATABASE CONTEXT above.
-2. CLEAN & STRUCTURED FORMATTING:
+2. BARANGAY CASE & INCIDENT INQUIRIES: If the user asks which barangay has a large amount of cases, the highest number of cases, or asks about cases in a specific barangay:
+   - Look at the [Top Incident Locations by Barangay] section in the READ-ONLY DATABASE CONTEXT.
+   - Explicitly list the barangays with their case counts in descending order (highest to lowest).
+   - State clearly which barangay currently has the highest/largest number of reported cases.
+   - Mention that detailed heatmaps and category filters can be viewed on the interactive Crime Map.
+   - NEVER answer with the Police Station headquarters address (1153 A. Mabini St.) when the user is asking about which barangay has the most cases or crime rates in barangays.
+3. CLEAN & STRUCTURED FORMATTING:
    - Use bullet points (• or -) or numbered lists (1., 2.) for multiple items or statistics.
    - Use bold text (**like this**) for key numbers, categories, and titles.
    - Add clear line breaks between paragraphs and list items.
@@ -915,7 +1194,7 @@ Assistant:`;
     }
 
     // Fallback: Intelligent server-side synthesis from article content, station hotlines, and DB context
-    const synthesizedReply = generateIntelligentArticleResponse(articleTitle, articleContent, userMessage, dbContext);
+    const synthesizedReply = generateIntelligentArticleResponse(articleTitle, articleContent, userMessage, dbContext, dbStats);
     return res.json({ success: true, reply: synthesizedReply, fallback: true });
   } catch (err: any) {
     console.error('Chat with article endpoint error:', err);
@@ -1266,6 +1545,28 @@ export const FAQ_KNOWLEDGEBASE = [
       "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
       "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?"
     ]
+  },
+  {
+    id: 20,
+    title: "Which barangay in Santa Cruz has the highest number or largest amount of crime cases?",
+    titleFil: "Aling barangay sa Santa Cruz ang may pinakamaraming naitalang kaso ng krimen?",
+    keywords: [
+      "which barangay", "large amount of cases", "most cases", "highest cases", "barangay cases",
+      "crime cases", "pinakamaraming kaso", "maraming kaso", "aling barangay", "anong barangay",
+      "top barangay", "highest crime", "crime rate barangay", "case count", "dami ng kaso"
+    ],
+    summaryEn: "Incident distributions in Santa Cruz, Laguna are actively logged across all 26 barangays on the MIMPAS Crime Map, with high-density commercial centers (such as the Poblacion sectors) historically recording more activity.\n\nTo view real-time ranked incident counts, heatmaps, and filter per barangay:\n1. Open the interactive **Crime Map** (/map) on the navigation bar.\n2. Filter by specific **Barangay** or select a **Year** to see full statistics.\n3. All 26 barangays are actively monitored 24/7 with mobile patrols and checkpoints.\n\nFor police assistance or blotter inquiries in your barangay, contact Sta. Cruz MPS at **(049) 501-5971** or dial **911**.",
+    summaryFil: "Ang bilang ng kaso sa 26 na barangay ng Santa Cruz ay nakatala sa MIMPAS Crime Map, kung saan ang mga matataong sentro tulad ng Poblacion ang kadalasang may mas maraming naitalang ulat.\n\nUpang makita ang opisyal na bilang ng kaso at heatmap sa bawat barangay:\n1. Buksan ang **Crime Map** (/map) sa navigation bar.\n2. Gamitin ang filter para pumili ng **Barangay** o **Taon**.\n3. Lahat ng 26 na barangay ay may 24/7 mobile patrol at checkpoints.\n\nPara sa tulong o blotter, tumawag sa **(049) 501-5971** o mag-dial ng **911**.",
+    nearQuestionsEn: [
+      "Where does the crime data on the MIMPAS Map come from?",
+      "How do I search or filter incidents by Barangay, Year, or Category on the Map?",
+      "Does the Crime Map disclose personal names or exact home addresses?"
+    ],
+    nearQuestionsFil: [
+      "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+      "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
+      "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?"
+    ]
   }
 ];
 
@@ -1277,6 +1578,30 @@ export const chatFaq = async (req: Request, res: Response) => {
 
     if (!query) {
       return res.status(400).json({ error: 'Question parameter is required' });
+    }
+
+    // 0. High-Priority Cyber Security & Access Control Check
+    const secCheck = validatePublicInputSecurity(query, isFilipino);
+    if (secCheck.blocked) {
+      console.warn(`[SECURITY BLOCKED] FAQ chat violation from ${req.ip || 'unknown'} [${secCheck.category}]: "${String(query).slice(0, 80)}"`);
+      return res.json({
+        success: false,
+        inScope: false,
+        securityBlocked: true,
+        category: secCheck.category,
+        reply: secCheck.clientMessage,
+        nearQuestions: isFilipino ? [
+          "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+          "Paano kumuha ng National Police Clearance (NPCS)?",
+          "Paano mag-file ng opisyal na Police Blotter report?",
+          "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"
+        ] : [
+          "What are the official emergency hotlines for Santa Cruz, Laguna?",
+          "How do I apply for a National Police Clearance (NPCS)?",
+          "How do I file an official Police Blotter report?",
+          "Where is the PNP Santa Cruz Municipal Police Station located?"
+        ]
+      });
     }
 
     const qLower = query.toLowerCase();
@@ -1369,8 +1694,20 @@ export const chatFaq = async (req: Request, res: Response) => {
 
     // In-scope answer synthesis
     const matchedFaq = bestMatch.faq;
-    const answer = isFilipino ? matchedFaq.summaryFil : matchedFaq.summaryEn;
+    let answer = isFilipino ? matchedFaq.summaryFil : matchedFaq.summaryEn;
     const nearQuestions = isFilipino ? matchedFaq.nearQuestionsFil : matchedFaq.nearQuestionsEn;
+
+    if (matchedFaq.id === 20) {
+      try {
+        const stats = await getDatabaseStats();
+        if (stats.topBarangays.length > 0) {
+          const topList = stats.topBarangays.slice(0, 5).map((b, i) => `• **${i + 1}. Brgy. ${b.name}:** **${b.count}** case(s)`).join('\n');
+          answer = isFilipino
+            ? `**Mga Barangay na May Pinakamaraming Naitalang Kaso sa Sta. Cruz:**\n\nBatay sa opisyal na talaan ng PNP Sta. Cruz:\n\n${topList}\n\n• **Kabuuang Naitalang Kaso:** **${stats.totalIncidents}** insidente sa 26 na barangay.\n• **MIMPAS Crime Map:** Bisitahin ang **Crime Map** (/map) upang makita ang spatial heatmap at ma-filter ang bawat barangay.\n• **Hotlines:** Tumawag sa **(049) 501-5971** o mag-dial ng **911**.`
+            : `**Barangays with the Highest Number of Reported Cases in Sta. Cruz:**\n\nBased on official PNP Sta. Cruz crime records:\n\n${topList}\n\n• **Total Logged Incidents:** **${stats.totalIncidents}** case(s) across all 26 barangays.\n• **Interactive Crime Map:** Visit the **Crime Map** (/map) to view full heatmap density and filter by barangay.\n• **Hotlines:** For emergencies or inquiries, call **(049) 501-5971** or dial **911**.`;
+        }
+      } catch (_) {}
+    }
 
     return res.json({
       success: true,

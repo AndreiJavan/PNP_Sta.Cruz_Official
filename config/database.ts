@@ -144,6 +144,10 @@ class Query {
 
   async get() {
     try {
+      if (!supabaseUrl || !supabaseKey) {
+        if (this.isCount) return { data: () => ({ count: 0 }) };
+        return { docs: [], empty: true, size: 0 };
+      }
       const sb = getSupabase();
       let q: any;
 
@@ -371,6 +375,9 @@ class Doc {
 
   async get() {
     try {
+      if (!supabaseUrl || !supabaseKey) {
+        return { id: this.id, exists: false, data: () => null };
+      }
       const sb = getSupabase();
       const { data, error } = await sb
         .from(this.table)

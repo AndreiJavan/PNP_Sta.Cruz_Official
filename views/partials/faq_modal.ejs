@@ -33,7 +33,7 @@
                     </div>
                     <p id="faqModalSubTitle" class="text-[10px] sm:text-[11px] text-blue-100/90 dark:text-pnp-gold/90 font-bold uppercase tracking-wider truncate mt-0.5 flex items-center gap-1.5">
                         <i class="fas fa-certificate text-pnp-gold text-[9px]"></i>
-                        <span>Strict Scope: Official Station Guidelines & Public Safety Services</span>
+                        <span>Strict Scope: Official Public Safety Services &bull; Monitored & Secured (R.A. 10175)</span>
                     </p>
                 </div>
             </div>
@@ -89,9 +89,9 @@
 
                 <!-- Strict Scope Notice Box -->
                 <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
-                    <i class="fas fa-circle-info text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                    <i class="fas fa-shield-halved text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
                     <span>
-                        <strong class="font-bold">Strict Scope Rule:</strong> I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. Questions outside police guidelines will be politely declined.
+                        <strong class="font-bold">Strict Scope & Security Rule:</strong> I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. System commands, coding, and attempts to access administrative or internal systems are strictly prohibited under R.A. 10175.
                     </span>
                 </div>
 
@@ -186,7 +186,7 @@
             <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-2.5 px-1">
                 <span class="flex items-center gap-1.5">
                     <i class="fas fa-shield-halved text-pnp-gold"></i>
-                    <span>Strict Scope: Answers only questions covered by verified Sta. Cruz police FAQs.</span>
+                    <span>Strict Scope: Official public FAQs only. System commands, coding, and internal access are strictly restricted (R.A. 10175).</span>
                 </span>
                 <span class="hidden sm:inline">Press <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-[9px] border border-slate-300 dark:border-slate-700">Enter</kbd> to send</span>
             </div>
@@ -203,9 +203,9 @@
     const faqBotTranslations = {
         en: {
             title: "Sta. Cruz Police FAQ Assistant",
-            subTitle: "Strict Scope: Official Station Guidelines & Public Safety Services",
+            subTitle: "Strict Scope: Official Public Safety Services • Monitored & Secured (R.A. 10175)",
             welcome: "Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may ask me any question regarding station guidelines, emergency hotlines, police clearance, filing a blotter, or crime mapping.",
-            scopeRule: "Strict Scope Rule: I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. Questions outside police guidelines will be politely declined.",
+            scopeRule: "Strict Scope & Security Rule: I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. System commands, coding, and attempts to access administrative or internal systems are strictly prohibited under R.A. 10175.",
             popularHeading: "Popular Questions You Can Ask:",
             inputPlaceholder: "Ask a question about PNP Sta. Cruz services, clearance, blotters, hotlines...",
             nearHeadingInScope: "Questions near to your inquiry:",
@@ -216,9 +216,9 @@
         },
         fil: {
             title: "Sta. Cruz Police FAQ Assistant",
-            subTitle: "Mahigpit na Saklaw: Opisyal na Gabay at Serbisyong Pulisya Lamang",
+            subTitle: "Mahigpit na Saklaw: Serbisyong Pampubliko • Protektado at Binabantayan (R.A. 10175)",
             welcome: "Kumusta! Ako ang iyong opisyal na Sta. Cruz Municipal Police Station FAQ Chatbot. Maaari kang magtanong ukol sa emergency hotlines, police clearance, blotter, crime map, at mga serbisyo ng estasyon.",
-            scopeRule: "Patakaran sa Saklaw: Masasagot ko lamang ang mga katanungan na sakop ng aming opisyal na PNP Sta. Cruz FAQs at mga serbisyo ng estasyon. Ang mga tanong sa labas nito ay magalang na tatanggihan.",
+            scopeRule: "Patakaran sa Saklaw at Seguridad: Masasagot ko lamang ang mga katanungan na sakop ng aming opisyal na PNP Sta. Cruz FAQs at mga serbisyong pampulisya. Ang mga system command, coding, at pagpasok sa administrative o internal systems ay mahigpit na ipinagbabawal alinsunod sa R.A. 10175.",
             popularHeading: "Mga Madalas Itanong na Maaari Mong Subukan:",
             inputPlaceholder: "Magtanong ukol sa serbisyo ng pulisya, clearance, blotter, o hotlines sa Sta. Cruz...",
             nearHeadingInScope: "Mga katanungang kaugnay o malapit sa iyong tanong:",
@@ -317,20 +317,182 @@
         if (inputEl) inputEl.placeholder = t.inputPlaceholder;
     }
 
-    // Message Formatting
+    // Client-side Security & Access Control Guard (Prevents command injection, code execution, admin probes)
+    function detectFaqSecurityThreat(rawInput, lang) {
+        if (!rawInput || typeof rawInput !== 'string') return { blocked: false };
+        const text = rawInput.trim();
+        const lower = text.toLowerCase();
+        const isFil = lang === 'fil';
+
+        const adminPatterns = [
+            /\b(admin|administrator|superadmin|root|superuser)\s*(side|portal|panel|dashboard|login|access|page|route|account|accounts|password|passwords|pass|creds?|credentials?|session|sessions|privilege|privileges|role|roles|data|datas)\b/i,
+            /\b(access|open|enter|reach|login|log\s*in|bypass|hack|crack|escalate|exploit)\s+(to\s+)?(the\s+)?(admin|administrator|superadmin|root|superuser|internal\s+system)\b/i,
+            /\b(bypass\s+(auth|login|security|password|permission|restrictions?))\b/i,
+            /\b(admin_users|user_accounts|system_admin|admin_panel|admin_dashboard|wp-admin)\b/i,
+            /\b(command|coding|code|script)\s+(to|for|in\s+order\s+to)?\s*(access|reach|hack|bypass|enter|dump|view|extract|crack|exploit|infiltrate)\s+(the\s+)?(admin|internal|database|backend|system)\b/i,
+            /\b(use|using|run|execute)\s+(a\s+)?(command|coding|code|script)\s+to\s+(access|reach|hack|bypass|enter|dump|view|extract|crack|exploit|infiltrate)\b/i,
+            /\b(admin\s+mode|root\s+mode|developer\s+mode|god\s+mode|debug\s+mode)\b/i,
+            /\b(how\s+to\s+hack|exploit|penetrate|vulnerability\s+scan)\b/i,
+            /\/?(admin\/(login|dashboard|users|settings|incidents|portal))\b/i,
+            /\b(sudo|su\s+-|runas|privilege\s+escalat(e|ion))\b/i
+        ];
+
+        for (const rx of adminPatterns) {
+            if (rx.test(lower)) {
+                return {
+                    blocked: true,
+                    category: 'admin_probe',
+                    clientMessage: isFil
+                        ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nHindi pinahihintulutan ang pagtatangkang pasukin o siyasatin ang administrative side, internal accounts, o security controls ng estasyon. Ang portal na ito ay eksklusibo para sa opisyal na serbisyong pampubliko ng PNP Sta. Cruz alinsunod sa Republic Act 10175 (Cybercrime Prevention Act of 2012).'
+                        : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Inquiries attempting to access, probe, or interact with administrative interfaces, internal user accounts, or privileged controls are strictly prohibited under Republic Act 10175 (Cybercrime Prevention Act of 2012) and PNP IT Security Policy. This portal is strictly for public citizen assistance.',
+                    nearQuestions: isFil
+                        ? ["Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?", "Paano kumuha ng National Police Clearance (NPCS)?", "Paano mag-file ng opisyal na Police Blotter report?", "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"]
+                        : ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a National Police Clearance (NPCS)?", "How do I file an official Police Blotter report?", "Where is the PNP Santa Cruz Municipal Police Station located?"]
+                };
+            }
+        }
+
+        const internalDataPatterns = [
+            /\b(internal\s+data(s)?|raw\s+database|db\s+dump|dump\s+database|dump\s+db|leak\s+data|export\s+(database|users|tables|records))\b/i,
+            /\b(show\s+tables|show\s+databases|list\s+databases|show\s+columns|information_schema|pg_catalog|pg_tables|sqlite_master)\b/i,
+            /\b(\.env|dotenv|environment\s+variables?|process\.env|supabase_key|supabase_url|jwt_secret|session_secret|openrouter_api_key|api_key|private_key|secret_key|master_key)\b/i,
+            /\b(credentials|passwords?|db_password|db_user|db_host|connection_string|server_config|server_secret)\b/i,
+            /\b(\/etc\/passwd|\/etc\/shadow|c:\\windows\\system32|web\.config)\b/i
+        ];
+
+        for (const rx of internalDataPatterns) {
+            if (rx.test(lower)) {
+                return {
+                    blocked: true,
+                    category: 'internal_data_probe',
+                    clientMessage: isFil
+                        ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nIpinagbabawal ang paghingi o pagsisiyasat ng internal data, server secrets, o database records. Ang lahat ng opisyal na pampublikong datos ng insidente ay bukas at ligtas na makikita sa ating interactive Crime Map.'
+                        : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Inquiries seeking internal server configurations, environment keys, credentials, or raw database structures are strictly prohibited under R.A. 10173 (Data Privacy Act) and R.A. 10175 (Cybercrime Prevention Act). Public crime records are accessible via the Crime Map.',
+                    nearQuestions: isFil
+                        ? ["Paano mag-ulat ng agarang emergency?", "Ano ang mga opisyal na emergency hotline?", "Saan nagmumula ang datos ng krimen?", "Saan matatagpuan ang estasyon ng pulisya?"]
+                        : ["How do I report an ongoing emergency?", "What are the official emergency hotlines?", "Where does the crime data on the MIMPAS Map come from?", "Where is the police station located?"]
+                };
+            }
+        }
+
+        const commandPatterns = [
+            /\b(cmd(\.exe)?|powershell(\.exe)?|bash|sh|zsh|csh|tcsh)\b/i,
+            /\b(whoami|systeminfo|ipconfig|ifconfig|netstat|tasklist|killall|pkill|rm\s+-rf|del\s+\/[fqs]|dir\s+[a-z]:|ls\s+-[a-z]+|cat\s+\/|chmod\s+[0-7]+|chown\s+|curl\s+-[a-z]|wget\s+http|nc\s+-[a-z]|nmap)\b/i,
+            /[;&|`]\s*(cat|ls|dir|rm|del|whoami|curl|wget|ping|echo|nc|python|node|bash|sh|powershell)\b/i,
+            /\$\([a-z0-9_\-\s]+\)|\`[a-z0-9_\-\s]+\`/i
+        ];
+
+        for (const rx of commandPatterns) {
+            if (rx.test(text)) {
+                return {
+                    blocked: true,
+                    category: 'command_injection',
+                    clientMessage: isFil
+                        ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nMay natukoy na command o terminal execution syntax sa iyong tanong. Ang paggamit ng mga command sa chatbot na ito ay mahigpit na ipinagbabawal at awtomatikong naharang ng seguridad ng himpilan.'
+                        : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. System command syntax, shell instructions, or command injection attempts are strictly prohibited on this public portal. Your request has been blocked by PNP Cyber Security filters.',
+                    nearQuestions: isFil
+                        ? ["Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?", "Paano kumuha ng National Police Clearance (NPCS)?", "Paano mag-file ng opisyal na Police Blotter report?", "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"]
+                        : ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a National Police Clearance (NPCS)?", "How do I file an official Police Blotter report?", "Where is the PNP Santa Cruz Municipal Police Station located?"]
+                };
+            }
+        }
+
+        const codeInjectionPatterns = [
+            /<\s*script\b[^>]*>/i,
+            /<\s*\/\s*script\s*>/i,
+            /javascript\s*:/i,
+            /vbscript\s*:/i,
+            /data\s*:\s*text\/html/i,
+            /<\s*iframe\b[^>]*>/i,
+            /<\s*object\b[^>]*>/i,
+            /<\s*embed\b[^>]*>/i,
+            /\bon(error|load|click|mouseover|submit|focus|blur|keydown|keyup)\s*=/i,
+            /\b(eval|exec|execSync|Function|setTimeout|setInterval)\s*\(/i,
+            /\b(document\.cookie|window\.location|document\.location|localStorage|sessionStorage)\b/i,
+            /\b(console\.log|alert\(|prompt\(|confirm\()\b/i,
+            /<\?php|{{.+}}|{\%.+\%}/i
+        ];
+
+        for (const rx of codeInjectionPatterns) {
+            if (rx.test(text)) {
+                return {
+                    blocked: true,
+                    category: 'code_injection',
+                    clientMessage: isFil
+                        ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nMay natukoy na code o script injection sa iyong mensahe. Hindi pinahihintulutan ang pagpapatakbo ng script o code sa public chat interface na ito.'
+                        : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Code injection, scripting, or unauthorized executable payloads are strictly blocked on this interface.',
+                    nearQuestions: isFil
+                        ? ["Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?", "Paano kumuha ng National Police Clearance (NPCS)?", "Paano mag-file ng opisyal na Police Blotter report?", "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"]
+                        : ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a National Police Clearance (NPCS)?", "How do I file an official Police Blotter report?", "Where is the PNP Santa Cruz Municipal Police Station located?"]
+                };
+            }
+        }
+
+        const sqlInjectionPatterns = [
+            /\b(union(\s+all)?\s+select|select\s+.*?\s+from\s+[a-z0-9_]+|insert\s+into\s+[a-z0-9_]+|delete\s+from\s+[a-z0-9_]+|drop\s+table|alter\s+table|truncate\s+table)\b/i,
+            /['"]\s*(or|and)\s+['"]?[0-9a-z]+['"]?\s*=\s*['"]?[0-9a-z]+['"]?/i,
+            /['"]\s*;\s*--(.*)?$/m,
+            /\bwaitfor\s+delay\s+['"][0-9:]+['"]/i,
+            /\bbenchmark\s*\(\s*[0-9]+,/i
+        ];
+
+        for (const rx of sqlInjectionPatterns) {
+            if (rx.test(text)) {
+                return {
+                    blocked: true,
+                    category: 'database_probe',
+                    clientMessage: isFil
+                        ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nMay natukoy na database query o injection syntax. Hindi pinahihintulutan ang pagsasagawa ng database queries sa pamamagitan ng public FAQ assistant.'
+                        : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Database query manipulation or SQL injection patterns are strictly blocked by station cyber security.',
+                    nearQuestions: isFil
+                        ? ["Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?", "Paano kumuha ng National Police Clearance (NPCS)?", "Paano mag-file ng opisyal na Police Blotter report?", "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"]
+                        : ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a National Police Clearance (NPCS)?", "How do I file an official Police Blotter report?", "Where is the PNP Santa Cruz Municipal Police Station located?"]
+                };
+            }
+        }
+
+        const jailbreakPatterns = [
+            /\b(ignore\s+(all\s+)?(previous|prior)\s+instructions|disregard\s+(all\s+)?(previous|prior)\s+instructions)\b/i,
+            /\b(you\s+are\s+now\s+(dan|an\s+unrestricted|in\s+developer\s+mode|jailbroken))\b/i,
+            /\b(reveal\s+(your\s+)?(system\s+prompt|developer\s+instructions|initial\s+prompt))\b/i,
+            /\b(bypass\s+(all\s+)?(guardrails|safety\s+filters?|rules))\b/i,
+            /\b(act\s+as\s+a\s+hacker|act\s+as\s+system\s+administrator\s+and\s+execute)\b/i
+        ];
+
+        for (const rx of jailbreakPatterns) {
+            if (rx.test(lower)) {
+                return {
+                    blocked: true,
+                    category: 'jailbreak_attempt',
+                    clientMessage: isFil
+                        ? '⚠️ **BABALA SA SEGURIDAD NG PNP:**\n\nAng assistant na ito ay pinoprotektahan ng opisyal na PNP guardrails. Hindi pinahihintulutan ang mga pagtatangkang i-bypass ang mga patakaran ng system.'
+                        : '⚠️ **PNP STA. CRUZ CYBER SECURITY NOTICE:**\n\nAccess Denied. Prompt injection, jailbreak attempts, or instructions attempting to override police security protocols are strictly forbidden.',
+                    nearQuestions: isFil
+                        ? ["Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?", "Paano kumuha ng National Police Clearance (NPCS)?", "Paano mag-file ng opisyal na Police Blotter report?", "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"]
+                        : ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a National Police Clearance (NPCS)?", "How do I file an official Police Blotter report?", "Where is the PNP Santa Cruz Municipal Police Station located?"]
+                };
+            }
+        }
+
+        return { blocked: false };
+    }
+
+    // Message Formatting with strict HTML entity escaping
     function formatFaqMsg(text) {
         if (!text) return '';
         let safe = String(text)
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
         safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-slate-900 dark:text-white">$1</strong>');
         safe = safe.replace(/\n/g, '<br>');
         return safe;
     }
 
     // Append Message to Chat Window with elevated bubble design
-    function appendFaqChatMessage(sender, text, nearQuestions = [], isInScope = true) {
+    function appendFaqChatMessage(sender, text, nearQuestions = [], isInScope = true, isSecurityAlert = false) {
         const chatBox = document.getElementById('faq-chat-messages');
         if (!chatBox) return;
 
@@ -339,12 +501,26 @@
         msgWrapper.className = isUser ? "flex justify-end" : "flex justify-start";
 
         const msgDiv = document.createElement('div');
-        msgDiv.className = isUser
-            ? "bg-gradient-to-r from-pnp-blue via-[#183657] to-pnp-blue dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold text-white dark:text-slate-950 p-4 sm:p-5 rounded-2xl sm:rounded-3xl max-w-[85%] sm:max-w-xl text-left shadow-md font-semibold text-xs sm:text-sm whitespace-pre-wrap leading-relaxed border border-pnp-blue-300/30 dark:border-pnp-gold-600"
-            : "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl text-left shadow-sm font-normal text-xs sm:text-sm leading-relaxed space-y-3 relative";
+        if (isUser) {
+            msgDiv.className = "bg-gradient-to-r from-pnp-blue via-[#183657] to-pnp-blue dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold text-white dark:text-slate-950 p-4 sm:p-5 rounded-2xl sm:rounded-3xl max-w-[85%] sm:max-w-xl text-left shadow-md font-semibold text-xs sm:text-sm whitespace-pre-wrap leading-relaxed border border-pnp-blue-300/30 dark:border-pnp-gold-600";
+        } else if (isSecurityAlert) {
+            msgDiv.className = "bg-rose-500/10 dark:bg-rose-950/40 text-slate-800 dark:text-rose-100 border-2 border-rose-500/80 dark:border-rose-500/60 border-l-4 border-l-rose-600 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl text-left shadow-lg font-normal text-xs sm:text-sm leading-relaxed space-y-3 relative";
+        } else {
+            msgDiv.className = "bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl text-left shadow-sm font-normal text-xs sm:text-sm leading-relaxed space-y-3 relative";
+        }
 
         let inner = '';
-        if (!isUser) {
+        if (isSecurityAlert) {
+            inner += `
+                <div class="flex items-center gap-2 mb-1 flex-wrap">
+                    <span class="w-6 h-6 rounded-lg bg-rose-600 text-white flex items-center justify-center text-[10px] font-black shadow-xs">
+                        <i class="fas fa-shield-virus"></i>
+                    </span>
+                    <strong class="text-xs font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">PNP Cyber Security Guard</strong>
+                    <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-rose-500/20 text-rose-600 dark:text-rose-300 border border-rose-500/40 font-bold">Access Blocked &bull; R.A. 10175</span>
+                </div>
+            `;
+        } else if (!isUser) {
             inner += `
                 <div class="flex items-center gap-2 mb-1">
                     <span class="w-6 h-6 rounded-lg bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 flex items-center justify-center text-[10px] font-black shadow-xs">
@@ -359,7 +535,7 @@
 
         if (!isUser && nearQuestions && nearQuestions.length > 0) {
             const t = faqBotTranslations[currentFaqLang] || faqBotTranslations.en;
-            const heading = isInScope ? t.nearHeadingInScope : t.nearHeadingOutOfScope;
+            const heading = isSecurityAlert ? (currentFaqLang === 'fil' ? 'Mga awtorisadong katanungan na maaari mong itanong:' : 'Authorized questions you can ask:') : (isInScope ? t.nearHeadingInScope : t.nearHeadingOutOfScope);
 
             inner += `
                 <div class="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800 text-left">
@@ -459,6 +635,17 @@
         const qLower = query.toLowerCase().trim();
         const isFil = lang === 'fil';
 
+        // High-Priority Cyber Security & Access Control Check
+        const secThreat = detectFaqSecurityThreat(query, lang);
+        if (secThreat.blocked) {
+            return {
+                inScope: false,
+                securityBlocked: true,
+                reply: secThreat.clientMessage,
+                nearQuestions: secThreat.nearQuestions
+            };
+        }
+
         const explicitOutOfScope = [
             /\b(recipe|cook|cooking|baking|bake|lutong|ulam|cake|pizza|adobo|sinigang)\b/i,
             /\b(capital\s+of|president\s+of|weather|climate|panahon|ulan|bagyo|forecast)\b/i,
@@ -489,7 +676,8 @@
             { id: 16, words: ["location", "address", "operating hours", "oras", "lugar", "saan", "istasyon", "headquarters"], answerEn: "Sta. Cruz Municipal Police Station is located at: 1153 A. Mabini St., Poblacion, Santa Cruz, Laguna (beside the Municipal Hall).\n• **Emergency Patrols & Desk:** 24/7 continuous operation\n• **Clearance & Administrative Services:** Monday to Friday, 8:00 AM – 5:00 PM.", answerFil: "Ang Sta. Cruz Police Station ay nasa: 1153 A. Mabini St., Poblacion, Santa Cruz, Laguna (katabi ng Munisipyo).\n• **Emergency Patrols:** 24/7 bukas araw at gabi\n• **Administrative & Clearance Services:** Lunes hanggang Biyernes, 8:00 AM – 5:00 PM.", nearEn: ["What are the official emergency hotlines for Santa Cruz, Laguna?", "How do I apply for a Police Clearance?", "Is there priority assistance for senior citizens, pregnant women, and PWDs?"], nearFil: ["Ano ang mga opisyal na emergency hotline?", "Paano kumuha ng Police Clearance?", "May priority assistance ba para sa PWD at seniors?"] },
             { id: 9, words: ["crime map", "mapa", "mimpas", "map", "filter map", "cases", "krimen sa mapa"], answerEn: "The MIMPAS Crime Map visualizes official CIRAS blotter-recorded incidents across all 26 barangays of Sta. Cruz, Laguna. You can filter cases by Barangay, Year, and 8-Focus Crime categories. To protect citizen privacy under R.A. 10173, no personal names or exact home addresses are ever displayed.", answerFil: "Ipinapakita ng MIMPAS Crime Map ang mga naitalang blotter sa 26 barangay ng Sta. Cruz. Maaari itong i-filter ayon sa Barangay, Taon, at uri ng krimen. Alinsunod sa Data Privacy Act, walang personal na pangalan o eksaktong tirahan ang inilalabas.", nearEn: ["Does the Crime Map disclose personal names or exact home addresses?", "How do I search or filter incidents by Barangay, Year, or Category on the Map?", "What is MIMPAS and how does it help Sta. Cruz residents?"], nearFil: ["Inilalabas ba sa Crime Map ang personal na pangalan?", "Paano mag-filter sa Mapa?", "Ano ang MIMPAS?"] },
             { id: 12, words: ["wcpd", "vawc", "women", "children", "babae", "bata", "pang-aabuso", "abuse"], answerEn: "The Women and Children Protection Desk (WCPD) provides private, confidential assistance for victims of domestic violence (R.A. 9262), child abuse (R.A. 7610), and gender harassment. Female investigators conduct interviews in a secure safe space.", answerFil: "Ang WCPD ay nagbibigay ng pribado at protektadong tulong para sa mga biktima ng karahasan sa kababaihan at kabataan (VAWC / R.A. 9262). Mga babaeng pulis ang nag-iimbestiga sa isang pribadong kwarto.", nearEn: ["What are the official emergency hotlines?", "How do I file an official Police Blotter report?", "Is there priority assistance for senior citizens, pregnant women, and PWDs?"], nearFil: ["Ano ang mga emergency hotline?", "Paano mag-file ng Police Blotter?", "May priority assistance ba sa estasyon?"] },
-            { id: 13, words: ["cyber", "scam", "online scam", "hacking", "hacked", "facebook scam", "harassment online"], answerEn: "For online scams or cybercrime: preserve uncropped screenshots of chat messages, sender profile links, and transaction numbers. File an official complaint with the Sta. Cruz MPS Investigation Section or contact the PNP Anti-Cybercrime Group (RACU 4A) at 0998 598 8116.", answerFil: "Para sa online scam: i-save agad ang buong screenshot ng chat, profile link, at transaction reference number. Pumunta sa Sta. Cruz MPS o makipag-ugnayan sa PNP Anti-Cybercrime Group (RACU 4A) sa 0998 598 8116.", nearEn: ["How do I file an official Police Blotter report?", "Can I file a police blotter online?", "What are the official emergency hotlines?"], nearFil: ["Paano mag-file ng Police Blotter?", "Maaari ba magpa-blotter online?", "Ano ang mga emergency hotline?"] }
+            { id: 13, words: ["cyber", "scam", "online scam", "hacking", "hacked", "facebook scam", "harassment online"], answerEn: "For online scams or cybercrime: preserve uncropped screenshots of chat messages, sender profile links, and transaction numbers. File an official complaint with the Sta. Cruz MPS Investigation Section or contact the PNP Anti-Cybercrime Group (RACU 4A) at 0998 598 8116.", answerFil: "Para sa online scam: i-save agad ang buong screenshot ng chat, profile link, at transaction reference number. Pumunta sa Sta. Cruz MPS o makipag-ugnayan sa PNP Anti-Cybercrime Group (RACU 4A) sa 0998 598 8116.", nearEn: ["How do I file an official Police Blotter report?", "Can I file a police blotter online?", "What are the official emergency hotlines?"], nearFil: ["Paano mag-file ng Police Blotter?", "Maaari ba magpa-blotter online?", "Ano ang mga emergency hotline?"] },
+            { id: 20, words: ["which barangay", "barangay cases", "large amount of cases", "most cases", "highest cases", "pinakamaraming kaso", "maraming kaso", "aling barangay", "anong barangay", "crime cases", "dami ng kaso", "cases in"], answerEn: "Incident volumes in Santa Cruz, Laguna are actively tracked across all 26 barangays on the MIMPAS Crime Map. Denser commercial areas such as the Poblacion sectors typically report higher activity.\n\nTo view exact case counts, heatmaps, and filter by individual Barangay:\n• Visit the **Crime Map** (/map) on the top navigation.\n• Select your Barangay in the filter to inspect recorded cases and incident types.\n• For emergency police assistance, call **(049) 501-5971** or dial **911**.", answerFil: "Ang bilang ng kaso sa 26 na barangay ng Santa Cruz ay nakatala sa MIMPAS Crime Map. Ang mga sentro ng kalakalan tulad ng Poblacion ang kadalasang may pinakamaraming naitalang ulat.\n\nPara makita ang eksaktong bilang ng kaso sa bawat barangay:\n• Buksan ang **Crime Map** (/map) sa navigation.\n• Piliin ang Barangay sa filter upang makita ang mga insidente.\n• Para sa emergency, tumawag sa **(049) 501-5971** o mag-dial ng **911**.", nearEn: ["How do I search or filter incidents by Barangay, Year, or Category on the Map?", "Where does the crime data on the MIMPAS Map come from?", "What are the official emergency hotlines for Santa Cruz, Laguna?"], nearFil: ["Paano mag-filter sa Mapa?", "Saan nagmumula ang datos ng krimen?", "Ano ang mga opisyal na emergency hotline?"] }
         ];
 
         let bestTopic = null;
@@ -540,6 +728,16 @@
 
         appendFaqChatMessage('user', text);
 
+        // Client-side Security & Access Control Guard: Instant Interception
+        const secThreat = detectFaqSecurityThreat(text, currentFaqLang);
+        if (secThreat.blocked) {
+            appendFaqChatMessage('assistant', secThreat.clientMessage, secThreat.nearQuestions, false, true);
+            inputEl.disabled = false;
+            if (sendBtn) sendBtn.disabled = false;
+            inputEl.focus();
+            return;
+        }
+
         const chatBox = document.getElementById('faq-chat-messages');
         const indicator = document.createElement('div');
         indicator.id = 'faq-chat-typing';
@@ -571,7 +769,7 @@
         const ind = document.getElementById('faq-chat-typing');
         if (ind) ind.remove();
 
-        appendFaqChatMessage('assistant', res.reply, res.nearQuestions || [], res.inScope !== false);
+        appendFaqChatMessage('assistant', res.reply, res.nearQuestions || [], res.inScope !== false, res.securityBlocked === true);
 
         inputEl.disabled = false;
         if (sendBtn) sendBtn.disabled = false;

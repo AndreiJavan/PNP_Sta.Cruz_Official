@@ -29,14 +29,14 @@ export function isAdvisoryOrPrevention(text: string | undefined | null): boolean
 
   // Positive Advisory & Prevention Signals (English & Tagalog)
   const hasExplicitAdvisoryOrPrevention = (
-    /\b(crime advisory|crime advisories|traffic advisory|traffic advisories|cybercrime advisory|cybercrime advisories|public advisory|safety advisory|security advisory|road safety advisory|safety alert|crime alert|public warning|crime prevention|theft prevention|robbery prevention|scam prevention|accident prevention|safety tips|security tips|precaution|precautions|modus operandi|stay vigilant|vigilance|mag-ingat sa|pag-iingat sa|iwas-krimen|iwas krimen|pag-iwas sa krimen|babala sa publiko|paalala sa publiko|tips sa kaligtasan|road closure|reroute|rerouting|trapiko advisory|scam alert|phishing alert|fake account warning|otp scam)\b/i.test(clean) ||
-    /\b(paalala|babala|mag-ingat|pag-iingat|iwasan|bantayan|magmatyag|alerto|beware|caution|safeguard|prevention|advisory)\b/i.test(clean)
+    /\b(crime advisory|crime advisories|traffic advisory|traffic advisories|cybercrime advisory|cybercrime advisories|community awareness|community advisory|public advisory|safety advisory|security advisory|road safety advisory|safety alert|crime alert|public warning|crime prevention|theft prevention|robbery prevention|scam prevention|accident prevention|safety tips|security tips|precaution|precautions|modus operandi|stay vigilant|vigilance|mag-ingat sa|pag-iingat sa|iwas-krimen|iwas krimen|pag-iwas sa krimen|babala sa publiko|paalala sa publiko|tips sa kaligtasan|road closure|reroute|rerouting|trapiko advisory|scam alert|phishing alert|fake account warning|otp scam|kamalayan sa komunidad)\b/i.test(clean) ||
+    /\b(paalala|babala|mag-ingat|pag-iingat|iwasan|bantayan|magmatyag|alerto|beware|caution|safeguard|prevention|advisory|awareness)\b/i.test(clean)
   );
 
   // If operational/ceremonial narrative, require explicit advisory or prevention signals
   if (hasPureOperationsOrArrests || hasPureProtocolOrCeremony) {
     // Only count as advisory if explicitly headlined or structured as an advisory or prevention guide
-    return /\b(crime advisory|safety advisory|crime prevention|paalala|babala|safety tips|modus operandi|mag-ingat)\b/i.test(clean);
+    return /\b(crime advisory|safety advisory|crime prevention|community awareness|paalala|babala|safety tips|modus operandi|mag-ingat)\b/i.test(clean);
   }
 
   return hasExplicitAdvisoryOrPrevention;
@@ -86,6 +86,15 @@ const CATEGORY_RULES: CategoryKeywords[] = [
       'secure your home', 'paalala', 'babala', 'mag-ingat', 'pag-iingat', 'pag-iwas', 'iwasan',
       'alerto', 'patnubay', 'panawagan', 'bantayan', 'magmatyag', 'safety reminder', 'public warning'
     ]
+  },
+  {
+    category: 'Community Awareness',
+    keywords: [
+      'community awareness', 'community advisory', 'community alert', 'community safety',
+      'barangay advisory', 'neighborhood watch', 'bayanihan', 'community relations',
+      'pulis at komunidad', 'kamalayan', 'kamalayan sa komunidad', 'kamalayang pangkomunidad',
+      'public awareness', 'community engagement', 'civic awareness'
+    ]
   }
 ];
 
@@ -127,7 +136,7 @@ export function classifyCategory(text: string | undefined | null): AdvisoryCateg
   let maxScore = -1;
 
   // Compare advisory categories first
-  const advisoryCats: AdvisoryCategory[] = ['Traffic Advisory', 'Cybercrime Advisory', 'Crime Advisory'];
+  const advisoryCats: AdvisoryCategory[] = ['Traffic Advisory', 'Cybercrime Advisory', 'Crime Advisory', 'Community Awareness'];
   for (const cat of advisoryCats) {
     if (scores[cat] > maxScore) {
       maxScore = scores[cat];
