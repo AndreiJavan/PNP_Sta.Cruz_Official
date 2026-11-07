@@ -242,50 +242,7 @@
             </div>
             <h3 id="news-modal-title" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white leading-tight mb-6 tracking-tight"></h3>
             <div id="news-modal-content" class="text-slate-800 dark:text-slate-200 text-sm md:text-base leading-relaxed space-y-5 whitespace-pre-wrap mb-6 font-normal"></div>
-            <div id="news-modal-fb-container" class="hidden mb-10"></div>
-
-            <!-- Official Verified FAQ Banner (AI Replacement Notice) -->
-            <div class="mb-4 p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
-                <div class="flex items-start sm:items-center gap-2.5 text-amber-800 dark:text-amber-300">
-                    <i class="fas fa-triangle-exclamation text-amber-500 shrink-0 text-sm mt-0.5 sm:mt-0"></i>
-                    <span class="font-medium text-xs">Notice: AI responses may have inaccuracies. For legally binding station procedures and hotlines, refer to our Official FAQ.</span>
-                </div>
-                <button onclick="openFaqModal('general')" type="button" class="shrink-0 px-3 py-1.5 rounded-xl bg-pnp-blue hover:bg-blue-900 text-white dark:bg-pnp-gold dark:text-slate-950 font-black text-[11px] uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95">
-                    <i class="fas fa-circle-question text-xs"></i>
-                    <span>Open Station FAQ</span>
-                </button>
-            </div>
-
-            <!-- Chatbot Section -->
-            <div class="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="text-xs md:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold flex items-center justify-center">
-                            <i class="fas fa-robot text-xs animate-pulse"></i>
-                        </span>
-                        <span>Ask AI Assistant</span>
-                    </h4>
-                    <span class="text-[10px] font-black text-pnp-blue dark:text-pnp-gold bg-blue-50 dark:bg-pnp-gold/15 border border-blue-200 dark:border-pnp-gold/30 px-2.5 py-1 rounded-full uppercase tracking-wider shadow-2xs">Gemini AI</span>
-                </div>
-                
-                <!-- Chat Window -->
-                <div class="bg-slate-100/70 dark:bg-slate-950/40 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col h-[290px] shadow-inner">
-                    <!-- Messages Area -->
-                    <div id="news-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 custom-modal-scrollbar text-xs">
-                        <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-3.5 rounded-2xl text-slate-800 dark:text-slate-200 max-w-[85%] mr-auto shadow-2xs leading-relaxed font-medium">
-                            Hello! I am your AI assistant for this article. Feel free to ask me any questions about the information presented above.
-                        </div>
-                    </div>
-                    
-                    <!-- Input Area -->
-                    <div class="p-3 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex items-center gap-2 shrink-0">
-                        <input type="text" id="news-chat-input" placeholder="Ask about this article..." class="flex-grow bg-slate-50 hover:bg-white focus:bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-pnp-blue/20 focus:border-pnp-blue text-slate-900 dark:text-slate-100 placeholder-slate-400 transition-all shadow-inner" onkeydown="if(event.key === 'Enter') sendNewsChat()">
-                        <button onclick="sendNewsChat()" class="bg-pnp-blue hover:bg-blue-800 text-white dark:bg-pnp-gold dark:hover:bg-yellow-500 dark:text-slate-950 px-4 py-2.5 rounded-xl transition flex items-center justify-center shrink-0 shadow-sm active:scale-95 font-bold">
-                            <i class="fas fa-paper-plane text-xs"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <div id="news-modal-fb-container" class="hidden mb-6"></div>
         </div>
     </div>
 </div>
@@ -604,10 +561,6 @@
             resetTranslationButton('translate-news-modal-btn', 'news-modal-title', 'news-modal-content', article.headline || '', article.fullContent || '', 'tts-news-modal-btn');
         }
 
-        if (typeof clearNewsChat === 'function') {
-            clearNewsChat();
-        }
-
         const modal = document.getElementById('news-modal');
         if (modal) {
             const content = modal.querySelector('.relative');
@@ -624,7 +577,6 @@
 
     function closeNewsModal() {
         if (typeof stopSpeech === 'function') stopSpeech();
-        if (typeof clearNewsChat === 'function') clearNewsChat();
         const modal = document.getElementById('news-modal');
         const content = modal.querySelector('.relative');
 
@@ -634,110 +586,6 @@
         setTimeout(() => {
             modal.classList.add('hidden');
         }, 300);
-    }
-
-    let newsChatHistory = [];
-    
-    function formatChatMessage(text) {
-        if (!text) return '';
-        let safe = String(text)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-        
-        safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold">$1</strong>');
-        safe = safe.replace(/\n/g, '<br>');
-        return safe;
-    }
-    
-    function appendChatMessage(sender, text) {
-        const chatBox = document.getElementById('news-chat-messages');
-        if (!chatBox) return;
-        
-        const isUser = sender === 'user';
-        const msgDiv = document.createElement('div');
-        msgDiv.className = isUser 
-            ? "bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 p-3.5 rounded-2xl max-w-[85%] ml-auto text-left shadow-sm font-semibold whitespace-pre-wrap leading-relaxed"
-            : "bg-white text-slate-900 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3.5 rounded-2xl max-w-[85%] mr-auto text-left shadow-2xs font-normal whitespace-pre-wrap leading-relaxed";
-        
-        msgDiv.innerHTML = formatChatMessage(text);
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-    
-    async function sendNewsChat() {
-        const inputEl = document.getElementById('news-chat-input');
-        if (!inputEl) return;
-        
-        const text = inputEl.value.trim();
-        if (!text) return;
-        
-        inputEl.value = '';
-        inputEl.disabled = true;
-        
-        appendChatMessage('user', text);
-        
-        const chatBox = document.getElementById('news-chat-messages');
-        const indicator = document.createElement('div');
-        indicator.id = 'news-chat-typing';
-        indicator.className = 'text-[10px] text-slate-400 dark:text-slate-400 italic p-1 mr-auto flex items-center gap-1.5';
-        indicator.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i><span>Assistant is thinking...</span>`;
-        chatBox.appendChild(indicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
-        
-        try {
-            const titleEl = document.getElementById('news-modal-title') || document.getElementById('bulletin-modal-title');
-            const contentEl = document.getElementById('news-modal-content') || document.getElementById('bulletin-modal-content');
-            const articleTitle = (titleEl?.textContent || '').trim() || 'News Article';
-            const articleContent = (contentEl?.textContent || '').trim() || 'News details';
-            
-            let res = null;
-            try {
-                res = await fetch('/api/chat-article', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        articleTitle,
-                        articleContent,
-                        userMessage: text,
-                        chatHistory: newsChatHistory
-                    })
-                }).then(r => r.json());
-            } catch (netErr) {
-                console.warn('Server chat error, checking client fallback:', netErr);
-            }
-            
-            const ind = document.getElementById('news-chat-typing');
-            if (ind) ind.remove();
-
-            if (res && res.success && res.reply) {
-                appendChatMessage('assistant', res.reply);
-                newsChatHistory.push({ role: 'user', text });
-                newsChatHistory.push({ role: 'assistant', text: res.reply });
-            } else {
-                appendChatMessage('assistant', res?.error || "For assistance regarding this article, you may reach the Sta. Cruz Police Station desk at (049) 501-5971 or 911.");
-            }
-        } catch (e) {
-            console.error('Chat error:', e);
-            const ind = document.getElementById('news-chat-typing');
-            if (ind) ind.remove();
-            appendChatMessage('assistant', "For assistance regarding this article, you may contact the Sta. Cruz Police Station desk at (049) 501-5971 or 911.");
-        } finally {
-            inputEl.disabled = false;
-            inputEl.focus();
-        }
-    }
-    
-    function clearNewsChat() {
-        newsChatHistory = [];
-        const chatBox = document.getElementById('news-chat-messages');
-        if (chatBox) {
-            chatBox.innerHTML = `
-                <div class="bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl max-w-[85%] mr-auto">
-                    Hello! I am your AI assistant for this article. Feel free to ask me any questions about the information presented above.
-                </div>
-            `;
-        }
     }
 </script>
 
