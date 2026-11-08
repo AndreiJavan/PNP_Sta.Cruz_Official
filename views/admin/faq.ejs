@@ -201,9 +201,11 @@
                         <div class="mt-2 text-xs md:text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/70 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200/60 dark:border-slate-800">
                             <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60 dark:border-slate-800">
                                 <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500">Official Station Answer</span>
-                                <button type="button" onclick="toggleAnswerPreview('<%= faq.id %>')" class="text-xs text-pnp-blue dark:text-pnp-gold font-bold hover:underline">
-                                    <span id="answerToggleText_<%= faq.id %>">Show Filipino</span>
-                                </button>
+                                <% if (faq.summaryFil) { %>
+                                    <button type="button" onclick="toggleAnswerPreview('<%= faq.id %>')" class="text-xs text-pnp-blue dark:text-pnp-gold font-bold hover:underline">
+                                        <span id="answerToggleText_<%= faq.id %>">Show Filipino</span>
+                                    </button>
+                                <% } %>
                             </div>
                             <!-- English Answer -->
                             <div id="answerEn_<%= faq.id %>" class="space-y-1 whitespace-pre-line font-normal">
@@ -218,24 +220,29 @@
                             <% } %>
                         </div>
 
-                        <!-- Keywords & Near Questions Tags -->
+                        <!-- Keywords Tags -->
                         <div class="flex flex-wrap items-center gap-1.5 pt-1">
                             <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mr-1">
                                 <i class="fas fa-tags text-[9px] mr-1"></i> Keywords:
                             </span>
-                            <% (faq.keywords || []).forEach(kw => { %>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                                    <%= kw %>
-                                </span>
-                            <% }) %>
+                            <% if (faq.keywords && faq.keywords.length > 0) { %>
+                                <% faq.keywords.forEach(kw => { %>
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                                        <%= kw %>
+                                    </span>
+                                <% }) %>
+                            <% } else { %>
+                                <span class="text-[10px] text-slate-400 italic">None</span>
+                            <% } %>
                         </div>
 
+                        <!-- Auto-suggested follow-ups display -->
                         <% if ((faq.nearQuestionsEn && faq.nearQuestionsEn.length > 0) || (faq.nearQuestionsFil && faq.nearQuestionsFil.length > 0)) { %>
                             <div class="pt-1">
                                 <details class="group text-xs text-slate-500 dark:text-slate-400">
                                     <summary class="cursor-pointer font-bold text-[10px] uppercase tracking-wider hover:text-pnp-blue dark:hover:text-pnp-gold transition-colors inline-flex items-center gap-1">
                                         <i class="fas fa-chevron-right text-[8px] transition-transform group-open:rotate-90"></i>
-                                        <span>View Suggested Follow-ups (<%= (faq.nearQuestionsEn || []).length %>)</span>
+                                        <span>Auto-Suggested Follow-ups (<%= (faq.nearQuestionsEn || []).length %>)</span>
                                     </summary>
                                     <div class="mt-2 pl-3 border-l-2 border-slate-200 dark:border-slate-700 space-y-1">
                                         <% (faq.nearQuestionsEn || []).forEach(nq => { %>
@@ -271,7 +278,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- ADD NEW FAQ MODAL                                                         -->
+<!-- ADD NEW FAQ MODAL (Display Order & Follow-ups removed; auto-managed)        -->
 <!-- ========================================================================= -->
 <div id="addFaqModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-3 sm:p-4 transition-all duration-300" role="dialog" aria-modal="true">
     <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeAddFaqModal()"></div>
@@ -284,7 +291,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">Add New FAQ Item</h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Create a verified question, answer, keywords, and follow-ups.</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Create a verified question, answer, and search keywords.</p>
                 </div>
             </div>
             <button type="button" onclick="closeAddFaqModal()" class="w-9 h-9 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition">
@@ -295,8 +302,8 @@
         <!-- Modal Body (Form) -->
         <form action="/admin/faq/add" method="POST" class="flex flex-col flex-1 overflow-hidden" onsubmit="return handleFaqSubmit(event, 'add')">
             <div class="p-6 space-y-6 overflow-y-auto flex-1 scrollbar-thin">
-                <!-- Meta Settings Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Meta Settings Grid (2 columns: Category & Keywords) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Category -->
                     <div class="space-y-1.5">
                         <label for="addCategory" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Category</label>
@@ -312,13 +319,6 @@
                             <option value="Traffic">
                             <option value="General">
                         </datalist>
-                    </div>
-
-                    <!-- Display Order -->
-                    <div class="space-y-1.5">
-                        <label for="addDisplayOrder" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Display Order</label>
-                        <input type="number" name="display_order" id="addDisplayOrder" value="<%= faqs.length + 1 %>" min="1"
-                            class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
                     </div>
 
                     <!-- Search Keywords -->
@@ -345,60 +345,74 @@
                     <!-- English Section -->
                     <div id="addSection_en" class="space-y-4">
                         <div class="space-y-1.5">
-                            <label for="addTitle" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Question Title (English) <span class="text-red-500">*</span></span>
-                                <span class="text-[9px] text-slate-400 lowercase font-normal">What citizens ask</span>
-                            </label>
-                            <input type="text" name="title" id="addTitle" required placeholder="e.g. How do I file an official Police Blotter report?"
+                            <div class="flex items-center justify-between">
+                                <label for="addTitle" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Question Title (English) <span class="text-red-500">*</span>
+                                </label>
+                                <span id="addTitleWordBadge" class="text-[10px] font-bold text-slate-400">0 / 100 words (min. 5)</span>
+                            </div>
+                            <input type="text" name="title" id="addTitle" required
+                                placeholder="e.g. How do I file an official Police Blotter report?"
+                                oninput="updateWordBadge('addTitle', 5, 100, true)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
+                            <p id="addTitleFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
                         <div class="space-y-1.5">
-                            <label for="addSummaryEn" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Answer & Advisory Content (English) <span class="text-red-500">*</span></span>
-                                <span class="text-[9px] text-slate-400 lowercase font-normal">Supports markdown bullets & bold text</span>
-                            </label>
-                            <textarea name="summaryEn" id="addSummaryEn" required rows="5" placeholder="Provide step-by-step guidance, required documents, station contact number..."
+                            <div class="flex items-center justify-between">
+                                <label for="addSummaryEn" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Answer & Advisory Content (English) <span class="text-red-500">*</span>
+                                </label>
+                                <span id="addSummaryEnWordBadge" class="text-[10px] font-bold text-slate-400">0 / 300 words (min. 5)</span>
+                            </div>
+                            <textarea name="summaryEn" id="addSummaryEn" required rows="6"
+                                placeholder="Provide step-by-step guidance, required documents, station contact number..."
+                                oninput="updateWordBadge('addSummaryEn', 5, 300, true)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue leading-relaxed"></textarea>
+                            <p id="addSummaryEnFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
-                        <div class="space-y-1.5">
-                            <label for="addNearQuestionsEn" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Suggested Follow-up Questions (1 per line)</span>
-                                <span class="text-[9px] text-slate-400 lowercase font-normal">Shown as prompt chips to citizens</span>
-                            </label>
-                            <textarea name="nearQuestionsEn" id="addNearQuestionsEn" rows="3" placeholder="What documents are needed for a blotter?&#10;Where is Sta. Cruz Police Station located?"
-                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue font-mono"></textarea>
+                        <!-- Auto-suggest note -->
+                        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/70 dark:bg-blue-900/20 text-pnp-blue dark:text-blue-300 text-xs font-medium border border-blue-100 dark:border-blue-900/40">
+                            <i class="fas fa-magic text-pnp-gold"></i>
+                            <span>Follow-up question suggestions are automatically computed by the system based on topic relevance.</span>
                         </div>
                     </div>
 
                     <!-- Filipino Section -->
                     <div id="addSection_fil" class="space-y-4 hidden">
                         <div class="space-y-1.5">
-                            <label for="addTitleFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Katanungan sa Filipino / Tagalog</span>
-                                <span class="text-[9px] text-slate-400 lowercase font-normal">Hal: Paano mag-file ng police blotter?</span>
-                            </label>
-                            <input type="text" name="titleFil" id="addTitleFil" placeholder="Hal: Paano mag-file ng opisyal na Police Blotter report?"
+                            <div class="flex items-center justify-between">
+                                <label for="addTitleFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Katanungan sa Filipino / Tagalog <span class="text-[9px] text-slate-400 lowercase font-normal">(opsyonal)</span>
+                                </label>
+                                <span id="addTitleFilWordBadge" class="text-[10px] font-bold text-slate-400">0 / 100 words (min. 5 kung may laman)</span>
+                            </div>
+                            <input type="text" name="titleFil" id="addTitleFil"
+                                placeholder="Hal: Paano mag-file ng opisyal na Police Blotter report?"
+                                oninput="updateWordBadge('addTitleFil', 5, 100, false)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
+                            <p id="addTitleFilFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
                         <div class="space-y-1.5">
-                            <label for="addSummaryFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Kasagutan at Gabay sa Filipino</span>
-                                <span class="text-[9px] text-slate-400 lowercase font-normal">Malinaw na hakbang at impormasyon</span>
-                            </label>
-                            <textarea name="summaryFil" id="addSummaryFil" rows="5" placeholder="Ibigay ang mga hakbang sa Tagalog..."
+                            <div class="flex items-center justify-between">
+                                <label for="addSummaryFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Kasagutan at Gabay sa Filipino <span class="text-[9px] text-slate-400 lowercase font-normal">(opsyonal)</span>
+                                </label>
+                                <span id="addSummaryFilWordBadge" class="text-[10px] font-bold text-slate-400">0 / 300 words (min. 5 kung may laman)</span>
+                            </div>
+                            <textarea name="summaryFil" id="addSummaryFil" rows="6"
+                                placeholder="Ibigay ang mga hakbang at impormasyon sa Tagalog..."
+                                oninput="updateWordBadge('addSummaryFil', 5, 300, false)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue leading-relaxed"></textarea>
+                            <p id="addSummaryFilFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
-                        <div class="space-y-1.5">
-                            <label for="addNearQuestionsFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Mga Kaugnay na Tanong (1 bawat linya)</span>
-                                <span class="text-[9px] text-slate-400 lowercase font-normal">Mga kaugnay na tanong sa Tagalog</span>
-                            </label>
-                            <textarea name="nearQuestionsFil" id="addNearQuestionsFil" rows="3" placeholder="Ano ang mga kailangan sa blotter?&#10;Saan matatagpuan ang estasyon ng pulisya?"
-                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue font-mono"></textarea>
+                        <!-- Auto-suggest note -->
+                        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/70 dark:bg-blue-900/20 text-pnp-blue dark:text-blue-300 text-xs font-medium border border-blue-100 dark:border-blue-900/40">
+                            <i class="fas fa-magic text-pnp-gold"></i>
+                            <span>Awtomatikong magmumungkahi ang sistema ng mga kaugnay na tanong sa Filipino.</span>
                         </div>
                     </div>
                 </div>
@@ -420,7 +434,7 @@
 </div>
 
 <!-- ========================================================================= -->
-<!-- EDIT FAQ MODAL                                                            -->
+<!-- EDIT FAQ MODAL (Display Order & Follow-ups removed; auto-managed)       -->
 <!-- ========================================================================= -->
 <div id="editFaqModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-3 sm:p-4 transition-all duration-300" role="dialog" aria-modal="true">
     <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onclick="closeEditFaqModal()"></div>
@@ -444,19 +458,12 @@
         <!-- Modal Body (Form) -->
         <form id="editFaqForm" action="/admin/faq/0/edit" method="POST" class="flex flex-col flex-1 overflow-hidden" onsubmit="return handleFaqSubmit(event, 'edit')">
             <div class="p-6 space-y-6 overflow-y-auto flex-1 scrollbar-thin">
-                <!-- Meta Settings Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Meta Settings Grid (2 columns: Category & Keywords) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Category -->
                     <div class="space-y-1.5">
                         <label for="editCategory" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Category</label>
                         <input type="text" name="category" id="editCategory" list="faqCategoryOptions" required placeholder="Category"
-                            class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
-                    </div>
-
-                    <!-- Display Order -->
-                    <div class="space-y-1.5">
-                        <label for="editDisplayOrder" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Display Order</label>
-                        <input type="number" name="display_order" id="editDisplayOrder" min="1"
                             class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
                     </div>
 
@@ -484,54 +491,70 @@
                     <!-- English Section -->
                     <div id="editSection_en" class="space-y-4">
                         <div class="space-y-1.5">
-                            <label for="editTitle" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Question Title (English) <span class="text-red-500">*</span></span>
-                            </label>
+                            <div class="flex items-center justify-between">
+                                <label for="editTitle" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Question Title (English) <span class="text-red-500">*</span>
+                                </label>
+                                <span id="editTitleWordBadge" class="text-[10px] font-bold text-slate-400">0 / 100 words (min. 5)</span>
+                            </div>
                             <input type="text" name="title" id="editTitle" required
+                                oninput="updateWordBadge('editTitle', 5, 100, true)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
+                            <p id="editTitleFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
                         <div class="space-y-1.5">
-                            <label for="editSummaryEn" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Answer & Advisory Content (English) <span class="text-red-500">*</span></span>
-                            </label>
-                            <textarea name="summaryEn" id="editSummaryEn" required rows="5"
+                            <div class="flex items-center justify-between">
+                                <label for="editSummaryEn" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Answer & Advisory Content (English) <span class="text-red-500">*</span>
+                                </label>
+                                <span id="editSummaryEnWordBadge" class="text-[10px] font-bold text-slate-400">0 / 300 words (min. 5)</span>
+                            </div>
+                            <textarea name="summaryEn" id="editSummaryEn" required rows="6"
+                                oninput="updateWordBadge('editSummaryEn', 5, 300, true)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue leading-relaxed"></textarea>
+                            <p id="editSummaryEnFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
-                        <div class="space-y-1.5">
-                            <label for="editNearQuestionsEn" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Suggested Follow-up Questions (1 per line)</span>
-                            </label>
-                            <textarea name="nearQuestionsEn" id="editNearQuestionsEn" rows="3"
-                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue font-mono"></textarea>
+                        <!-- Auto-suggest note -->
+                        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/70 dark:bg-blue-900/20 text-pnp-blue dark:text-blue-300 text-xs font-medium border border-blue-100 dark:border-blue-900/40">
+                            <i class="fas fa-magic text-pnp-gold"></i>
+                            <span>Follow-up question suggestions are automatically managed and synchronized by the system.</span>
                         </div>
                     </div>
 
                     <!-- Filipino Section -->
                     <div id="editSection_fil" class="space-y-4 hidden">
                         <div class="space-y-1.5">
-                            <label for="editTitleFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Katanungan sa Filipino / Tagalog</span>
-                            </label>
+                            <div class="flex items-center justify-between">
+                                <label for="editTitleFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Katanungan sa Filipino / Tagalog <span class="text-[9px] text-slate-400 lowercase font-normal">(opsyonal)</span>
+                                </label>
+                                <span id="editTitleFilWordBadge" class="text-[10px] font-bold text-slate-400">0 / 100 words (min. 5 kung may laman)</span>
+                            </div>
                             <input type="text" name="titleFil" id="editTitleFil"
+                                oninput="updateWordBadge('editTitleFil', 5, 100, false)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue">
+                            <p id="editTitleFilFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
                         <div class="space-y-1.5">
-                            <label for="editSummaryFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Kasagutan at Gabay sa Filipino</span>
-                            </label>
-                            <textarea name="summaryFil" id="editSummaryFil" rows="5"
+                            <div class="flex items-center justify-between">
+                                <label for="editSummaryFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+                                    Kasagutan at Gabay sa Filipino <span class="text-[9px] text-slate-400 lowercase font-normal">(opsyonal)</span>
+                                </label>
+                                <span id="editSummaryFilWordBadge" class="text-[10px] font-bold text-slate-400">0 / 300 words (min. 5 kung may laman)</span>
+                            </div>
+                            <textarea name="summaryFil" id="editSummaryFil" rows="6"
+                                oninput="updateWordBadge('editSummaryFil', 5, 300, false)"
                                 class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue leading-relaxed"></textarea>
+                            <p id="editSummaryFilFeedback" class="text-[11px] text-slate-400 hidden"></p>
                         </div>
 
-                        <div class="space-y-1.5">
-                            <label for="editNearQuestionsFil" class="text-[10px] uppercase font-bold text-slate-400 tracking-widest flex items-center justify-between">
-                                <span>Mga Kaugnay na Tanong (1 bawat linya)</span>
-                            </label>
-                            <textarea name="nearQuestionsFil" id="editNearQuestionsFil" rows="3"
-                                class="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium dark:text-white focus:outline-none focus:ring-2 focus:ring-pnp-blue font-mono"></textarea>
+                        <!-- Auto-suggest note -->
+                        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-blue-50/70 dark:bg-blue-900/20 text-pnp-blue dark:text-blue-300 text-xs font-medium border border-blue-100 dark:border-blue-900/40">
+                            <i class="fas fa-magic text-pnp-gold"></i>
+                            <span>Awtomatikong magmumungkahi ang sistema ng mga kaugnay na tanong sa Filipino.</span>
                         </div>
                     </div>
                 </div>
@@ -662,6 +685,70 @@
         }
     }
 
+    // Word counter and content validation helper
+    function getWordDetails(str) {
+        if (!str || typeof str !== 'string') return { words: 0, hasLetters: false, raw: '' };
+        const raw = str.trim();
+        if (!raw) return { words: 0, hasLetters: false, raw: '' };
+        const hasLetters = /[a-zA-Z\u00C0-\u024F\u1E00-\u1EFF]/.test(raw);
+        const words = raw.split(/\s+/).filter(Boolean).length;
+        return { words, hasLetters, raw };
+    }
+
+    function updateWordBadge(inputId, minWords, maxWords, isRequired = true) {
+        const input = document.getElementById(inputId);
+        const badge = document.getElementById(inputId + 'WordBadge');
+        const feedback = document.getElementById(inputId + 'Feedback');
+        if (!input || !badge) return;
+
+        const { words, hasLetters, raw } = getWordDetails(input.value);
+
+        if (!raw) {
+            badge.className = 'text-[10px] font-bold text-slate-400';
+            badge.innerText = isRequired ? `0 / ${maxWords} words (min. ${minWords})` : `0 / ${maxWords} words (optional)`;
+            if (feedback) feedback.classList.add('hidden');
+            return;
+        }
+
+        if (!hasLetters) {
+            badge.className = 'text-[10px] font-black text-red-500 dark:text-red-400';
+            badge.innerText = `${words} word(s) - Invalid: numbers/symbols only`;
+            if (feedback) {
+                feedback.className = 'text-[11px] font-semibold text-red-500 dark:text-red-400';
+                feedback.innerText = 'Cannot consist only of numbers or spaces. Must contain actual text.';
+                feedback.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (words < minWords) {
+            badge.className = 'text-[10px] font-black text-amber-500 dark:text-amber-400';
+            badge.innerText = `${words} / ${maxWords} words (need at least ${minWords})`;
+            if (feedback) {
+                feedback.className = 'text-[11px] font-semibold text-amber-500 dark:text-amber-400';
+                feedback.innerText = `Please write at least ${minWords} words (currently ${words}).`;
+                feedback.classList.remove('hidden');
+            }
+            return;
+        }
+
+        if (words > maxWords) {
+            badge.className = 'text-[10px] font-black text-red-500 dark:text-red-400';
+            badge.innerText = `${words} / ${maxWords} words (Exceeded max limit!)`;
+            if (feedback) {
+                feedback.className = 'text-[11px] font-semibold text-red-500 dark:text-red-400';
+                feedback.innerText = `Cannot exceed ${maxWords} words (currently ${words} words).`;
+                feedback.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // Perfectly valid
+        badge.className = 'text-[10px] font-black text-emerald-600 dark:text-emerald-400';
+        badge.innerText = `${words} / ${maxWords} words (Valid)`;
+        if (feedback) feedback.classList.add('hidden');
+    }
+
     // Add Modal handlers
     function openAddFaqModal() {
         switchModalTab('add', 'en');
@@ -669,6 +756,13 @@
         if (modal) {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            
+            // Reset word badges
+            updateWordBadge('addTitle', 5, 100, true);
+            updateWordBadge('addSummaryEn', 5, 300, true);
+            updateWordBadge('addTitleFil', 5, 100, false);
+            updateWordBadge('addSummaryFil', 5, 300, false);
+
             setTimeout(() => {
                 const titleInput = document.getElementById('addTitle');
                 if (titleInput) titleInput.focus();
@@ -693,19 +787,21 @@
         if (form) form.action = `/admin/faq/${faq.id}/edit`;
 
         const subTitle = document.getElementById('editModalSubtitle');
-        if (subTitle) subTitle.innerText = `Editing FAQ #${faq.display_order || ''}: ${faq.title.slice(0, 45)}...`;
+        if (subTitle) subTitle.innerText = `Editing: ${faq.title.slice(0, 45)}...`;
 
         document.getElementById('editCategory').value = faq.category || 'General';
-        document.getElementById('editDisplayOrder').value = faq.display_order || 1;
         document.getElementById('editKeywords').value = Array.isArray(faq.keywords) ? faq.keywords.join(', ') : (faq.keywords || '');
 
         document.getElementById('editTitle').value = faq.title || '';
         document.getElementById('editSummaryEn').value = faq.summaryEn || '';
-        document.getElementById('editNearQuestionsEn').value = Array.isArray(faq.nearQuestionsEn) ? faq.nearQuestionsEn.join('\n') : (faq.nearQuestionsEn || '');
-
         document.getElementById('editTitleFil').value = faq.titleFil || '';
         document.getElementById('editSummaryFil').value = faq.summaryFil || '';
-        document.getElementById('editNearQuestionsFil').value = Array.isArray(faq.nearQuestionsFil) ? faq.nearQuestionsFil.join('\n') : (faq.nearQuestionsFil || '');
+
+        // Update word badges with current values
+        updateWordBadge('editTitle', 5, 100, true);
+        updateWordBadge('editSummaryEn', 5, 300, true);
+        updateWordBadge('editTitleFil', 5, 100, false);
+        updateWordBadge('editSummaryFil', 5, 300, false);
 
         const modal = document.getElementById('editFaqModal');
         if (modal) {
@@ -726,26 +822,126 @@
         }
     }
 
-    // Form submit confirmation & validation
+    // Form submit confirmation & rigorous validation
     async function handleFaqSubmit(e, mode) {
         const prefix = mode === 'add' ? 'add' : 'edit';
-        const titleVal = (document.getElementById(`${prefix}Title`).value || '').trim();
-        const summaryVal = (document.getElementById(`${prefix}SummaryEn`).value || '').trim();
+        const titleEl = document.getElementById(`${prefix}Title`);
+        const summaryEnEl = document.getElementById(`${prefix}SummaryEn`);
+        const titleFilEl = document.getElementById(`${prefix}TitleFil`);
+        const summaryFilEl = document.getElementById(`${prefix}SummaryFil`);
 
-        if (titleVal.length < 5) {
+        // 1. Question Title (English) Validation: 5 to 100 words, no spaces/pure numbers
+        const qInfo = getWordDetails(titleEl.value);
+        if (!qInfo.raw) {
             e.preventDefault();
-            alert('Question title must be at least 5 characters long.');
+            alert('Question Title (English) is required.');
             switchModalTab(prefix, 'en');
-            document.getElementById(`${prefix}Title`).focus();
+            titleEl.focus();
+            return false;
+        }
+        if (!qInfo.hasLetters) {
+            e.preventDefault();
+            alert('Question cannot consist only of numbers or spaces. Please enter actual words.');
+            switchModalTab(prefix, 'en');
+            titleEl.focus();
+            return false;
+        }
+        if (qInfo.words < 5) {
+            e.preventDefault();
+            alert(`Question must contain at least 5 words (currently ${qInfo.words} word${qInfo.words === 1 ? '' : 's'}).`);
+            switchModalTab(prefix, 'en');
+            titleEl.focus();
+            return false;
+        }
+        if (qInfo.words > 100) {
+            e.preventDefault();
+            alert(`Question cannot exceed 100 words (currently ${qInfo.words} words).`);
+            switchModalTab(prefix, 'en');
+            titleEl.focus();
             return false;
         }
 
-        if (summaryVal.length < 10) {
+        // 2. Answer Content (English) Validation: 5 to 300 words, no spaces/pure numbers
+        const aInfo = getWordDetails(summaryEnEl.value);
+        if (!aInfo.raw) {
             e.preventDefault();
-            alert('Answer summary must be at least 10 characters long.');
+            alert('Answer Content (English) is required.');
             switchModalTab(prefix, 'en');
-            document.getElementById(`${prefix}SummaryEn`).focus();
+            summaryEnEl.focus();
             return false;
+        }
+        if (!aInfo.hasLetters) {
+            e.preventDefault();
+            alert('Answer cannot consist only of numbers or spaces. Please enter actual words.');
+            switchModalTab(prefix, 'en');
+            summaryEnEl.focus();
+            return false;
+        }
+        if (aInfo.words < 5) {
+            e.preventDefault();
+            alert(`Answer must contain at least 5 words (currently ${aInfo.words} word${aInfo.words === 1 ? '' : 's'}).`);
+            switchModalTab(prefix, 'en');
+            summaryEnEl.focus();
+            return false;
+        }
+        if (aInfo.words > 300) {
+            e.preventDefault();
+            alert(`Answer cannot exceed 300 words (currently ${aInfo.words} words).`);
+            switchModalTab(prefix, 'en');
+            summaryEnEl.focus();
+            return false;
+        }
+
+        // 3. Optional Filipino Question Validation
+        if (titleFilEl && titleFilEl.value.trim()) {
+            const qFilInfo = getWordDetails(titleFilEl.value);
+            if (!qFilInfo.hasLetters) {
+                e.preventDefault();
+                alert('Katanungan sa Filipino cannot consist only of numbers or spaces.');
+                switchModalTab(prefix, 'fil');
+                titleFilEl.focus();
+                return false;
+            }
+            if (qFilInfo.words < 5) {
+                e.preventDefault();
+                alert(`Katanungan sa Filipino must contain at least 5 words (currently ${qFilInfo.words}).`);
+                switchModalTab(prefix, 'fil');
+                titleFilEl.focus();
+                return false;
+            }
+            if (qFilInfo.words > 100) {
+                e.preventDefault();
+                alert(`Katanungan sa Filipino cannot exceed 100 words (currently ${qFilInfo.words}).`);
+                switchModalTab(prefix, 'fil');
+                titleFilEl.focus();
+                return false;
+            }
+        }
+
+        // 4. Optional Filipino Answer Validation
+        if (summaryFilEl && summaryFilEl.value.trim()) {
+            const aFilInfo = getWordDetails(summaryFilEl.value);
+            if (!aFilInfo.hasLetters) {
+                e.preventDefault();
+                alert('Kasagutan sa Filipino cannot consist only of numbers or spaces.');
+                switchModalTab(prefix, 'fil');
+                summaryFilEl.focus();
+                return false;
+            }
+            if (aFilInfo.words < 5) {
+                e.preventDefault();
+                alert(`Kasagutan sa Filipino must contain at least 5 words (currently ${aFilInfo.words}).`);
+                switchModalTab(prefix, 'fil');
+                summaryFilEl.focus();
+                return false;
+            }
+            if (aFilInfo.words > 300) {
+                e.preventDefault();
+                alert(`Kasagutan sa Filipino cannot exceed 300 words (currently ${aFilInfo.words}).`);
+                switchModalTab(prefix, 'fil');
+                summaryFilEl.focus();
+                return false;
+            }
         }
 
         const submitBtn = document.getElementById(`${prefix}FaqSubmitBtn`);
@@ -764,4 +960,3 @@
         }
     });
 </script>
-

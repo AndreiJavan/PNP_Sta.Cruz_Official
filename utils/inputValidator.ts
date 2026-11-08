@@ -463,4 +463,74 @@ export function isValidHotlineContactNumber(number: unknown): { valid: boolean; 
   return { valid: true, normalized: clean };
 }
 
+/**
+ * Validates an FAQ Question.
+ * Rules:
+ * - Must not be empty, blank, or just spaces
+ * - Must not consist solely of numbers or symbols (must contain alphabetic letters)
+ * - Must be between 5 and 100 words
+ */
+export function isValidFaqQuestion(text: unknown, isRequired = true): { valid: boolean; error?: string; wordCount: number; normalized?: string } {
+  if (!text || typeof text !== 'string') {
+    if (!isRequired) return { valid: true, wordCount: 0, normalized: '' };
+    return { valid: false, error: 'Question is required and cannot be empty.', wordCount: 0 };
+  }
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    if (!isRequired) return { valid: true, wordCount: 0, normalized: '' };
+    return { valid: false, error: 'Question cannot be empty or contain only whitespace.', wordCount: 0 };
+  }
 
+  // Must contain alphabetic letters (cannot be only numbers or symbols)
+  if (!/[a-zA-ZÀ-ɏḀ-ỿ]/.test(normalized)) {
+    return { valid: false, error: 'Question cannot consist solely of numbers or symbols. Please provide actual text.', wordCount: 0 };
+  }
+
+  const words = normalized.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+
+  if (wordCount < 5) {
+    return { valid: false, error: `Question must contain at least 5 words (currently ${wordCount} word${wordCount === 1 ? '' : 's'}).`, wordCount };
+  }
+  if (wordCount > 100) {
+    return { valid: false, error: `Question cannot exceed 100 words (currently ${wordCount} words).`, wordCount };
+  }
+
+  return { valid: true, wordCount, normalized };
+}
+
+/**
+ * Validates an FAQ Answer / Summary.
+ * Rules:
+ * - Must not be empty, blank, or just spaces
+ * - Must not consist solely of numbers or symbols (must contain alphabetic letters)
+ * - Must be between 5 and 300 words
+ */
+export function isValidFaqAnswer(text: unknown, isRequired = true): { valid: boolean; error?: string; wordCount: number; normalized?: string } {
+  if (!text || typeof text !== 'string') {
+    if (!isRequired) return { valid: true, wordCount: 0, normalized: '' };
+    return { valid: false, error: 'Answer is required and cannot be empty.', wordCount: 0 };
+  }
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    if (!isRequired) return { valid: true, wordCount: 0, normalized: '' };
+    return { valid: false, error: 'Answer cannot be empty or contain only whitespace.', wordCount: 0 };
+  }
+
+  // Must contain alphabetic letters (cannot be only numbers or symbols)
+  if (!/[a-zA-ZÀ-ɏḀ-ỿ]/.test(normalized)) {
+    return { valid: false, error: 'Answer cannot consist solely of numbers or symbols. Please provide actual text.', wordCount: 0 };
+  }
+
+  const words = normalized.split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+
+  if (wordCount < 5) {
+    return { valid: false, error: `Answer must contain at least 5 words (currently ${wordCount} word${wordCount === 1 ? '' : 's'}).`, wordCount };
+  }
+  if (wordCount > 300) {
+    return { valid: false, error: `Answer cannot exceed 300 words (currently ${wordCount} words).`, wordCount };
+  }
+
+  return { valid: true, wordCount, normalized };
+}

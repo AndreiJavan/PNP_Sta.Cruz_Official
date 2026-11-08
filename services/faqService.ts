@@ -540,6 +540,50 @@ export async function getFaqById(id: string | number): Promise<FAQItem | null> {
 /**
  * Creates a new FAQ item.
  */
+
+/**
+ * Automatically suggests up to 3 relevant follow-up questions for an FAQ item
+ * based on its category, overlapping keywords, or staple station topics.
+ */
+export function generateAutoSuggestedQuestions(
+  item: { title: string; category?: string; keywords?: string[] },
+  existingFaqs: FAQItem[]
+): { nearQuestionsEn: string[]; nearQuestionsFil: string[] } {
+  const cat = (item.category || 'General').toLowerCase().trim();
+  const titleLower = (item.title || '').toLowerCase().trim();
+
+  // 1. Same category (excluding itself)
+  const sameCategory = existingFaqs.filter(f =>
+    f.title.toLowerCase().trim() !== titleLower &&
+    (f.category || 'General').toLowerCase().trim() === cat
+  );
+
+  // 2. Overlapping keywords
+  const kws = (item.keywords || []).map(k => k.toLowerCase().trim()).filter(Boolean);
+  const keywordMatches = existingFaqs.filter(f =>
+    f.title.toLowerCase().trim() !== titleLower &&
+    !sameCategory.some(sc => String(sc.id) === String(f.id)) &&
+    (f.keywords || []).some(k => kws.includes(k.toLowerCase().trim()))
+  );
+
+  // 3. Staple fallback questions
+  const staples = existingFaqs.filter(f =>
+    f.title.toLowerCase().trim() !== titleLower &&
+    !sameCategory.some(sc => String(sc.id) === String(f.id)) &&
+    !keywordMatches.some(km => String(km.id) === String(f.id))
+  );
+
+  const candidates = [...sameCategory, ...keywordMatches, ...staples].slice(0, 3);
+
+  return {
+    nearQuestionsEn: candidates.map(c => c.title).filter(Boolean),
+    nearQuestionsFil: candidates.map(c => c.titleFil || c.title).filter(Boolean)
+  };
+}
+
+/**
+ * Creates a new FAQ item.
+ */
 export async function addFaq(data: {
   title: string;
   titleFil?: string;
@@ -557,13 +601,23 @@ export async function addFaq(data: {
     ? data.keywords 
     : (typeof data.keywords === 'string' ? data.keywords.split(',').map(s => s.trim()).filter(Boolean) : []);
   
-  const nearEnArr = Array.isArray(data.nearQuestionsEn)
+  let nearEnArr = Array.isArray(data.nearQuestionsEn)
     ? data.nearQuestionsEn
     : (typeof data.nearQuestionsEn === 'string' ? data.nearQuestionsEn.split('\n').map(s => s.trim()).filter(Boolean) : []);
   
-  const nearFilArr = Array.isArray(data.nearQuestionsFil)
+  let nearFilArr = Array.isArray(data.nearQuestionsFil)
     ? data.nearQuestionsFil
     : (typeof data.nearQuestionsFil === 'string' ? data.nearQuestionsFil.split('\n').map(s => s.trim()).filter(Boolean) : []);
+
+  // Automatically suggest relevant follow-up questions
+  if (nearEnArr.length === 0) {
+    const auto = generateAutoSuggestedQuestions(
+      { title: data.title, category: data.category, keywords: keywordsArr },
+      currentFaqs
+    );
+    nearEnArr = auto.nearQuestionsEn;
+    nearFilArr = auto.nearQuestionsFil;
+  }
 
   const newId = uuidv4();
   const now = new Date().toISOString();
@@ -636,13 +690,23 @@ export async function updateFaq(id: string | number, data: {
     ? (Array.isArray(data.keywords) ? data.keywords : (typeof data.keywords === 'string' ? data.keywords.split(',').map(s => s.trim()).filter(Boolean) : existing.keywords))
     : existing.keywords;
 
-  const nearEnArr = data.nearQuestionsEn !== undefined
+  let nearEnArr = data.nearQuestionsEn !== undefined
     ? (Array.isArray(data.nearQuestionsEn) ? data.nearQuestionsEn : (typeof data.nearQuestionsEn === 'string' ? data.nearQuestionsEn.split('\n').map(s => s.trim()).filter(Boolean) : existing.nearQuestionsEn))
     : existing.nearQuestionsEn;
 
-  const nearFilArr = data.nearQuestionsFil !== undefined
+  let nearFilArr = data.nearQuestionsFil !== undefined
     ? (Array.isArray(data.nearQuestionsFil) ? data.nearQuestionsFil : (typeof data.nearQuestionsFil === 'string' ? data.nearQuestionsFil.split('\n').map(s => s.trim()).filter(Boolean) : existing.nearQuestionsFil))
     : existing.nearQuestionsFil;
+
+  // Auto-suggest if missing or if category changed
+  if (!nearEnArr || nearEnArr.length === 0 || (data.category && data.category.trim() !== (existing.category || '').trim())) {
+    const auto = generateAutoSuggestedQuestions(
+      { title: data.title || existing.title, category: data.category || existing.category, keywords: keywordsArr },
+      currentFaqs
+    );
+    nearEnArr = auto.nearQuestionsEn;
+    nearFilArr = auto.nearQuestionsFil;
+  }
 
   const updatedItem: FAQItem = {
     ...existing,

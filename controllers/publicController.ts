@@ -7,7 +7,7 @@ import bcrypt from 'bcryptjs';
 import { decodeCustomCategory, getStationPersonnelList } from './adminController.js';
 import { memoryCache } from '../utils/cache.js';
 import { VALID_BARANGAYS } from '../constants/tactical_assets.js';
-import { getFaqs, INITIAL_FAQS, FAQItem } from '../services/faqService.js';
+import { getFaqs, INITIAL_FAQS, FAQItem, generateAutoSuggestedQuestions } from '../services/faqService.js';
 
 // Cached Data Helpers
 const getRawBulletinsCached = async (): Promise<any[]> => {

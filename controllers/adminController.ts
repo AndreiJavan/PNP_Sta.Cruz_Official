@@ -13,7 +13,7 @@ import { classifyCategory, isAdvisoryOrPrevention } from '../utils/categoryClass
 import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 import { getLockoutRemainingSeconds, recordFailedAttempt, clearFailedAttempts, formatLockoutDuration } from '../utils/loginSecurity.js';
 import { getFaqs, getFaqById, addFaq, updateFaq, deleteFaq } from '../services/faqService.js';
-import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord, isValidEmail, isValidPassword, isValidHotlineAgency, isValidHotlineCategory, isValidHotlineContactNumber } from '../utils/inputValidator.js';
+import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord, isValidEmail, isValidPassword, isValidHotlineAgency, isValidHotlineCategory, isValidHotlineContactNumber, isValidFaqQuestion, isValidFaqAnswer } from '../utils/inputValidator.js';
 
 // Robust Gmail SMTP Notification Dispatcher
 function getEmailConfig() {
@@ -4298,29 +4298,45 @@ export const postFaqAdmin = async (req: Request, res: Response) => {
       category,
       keywords,
       summaryEn,
-      summaryFil,
-      nearQuestionsEn,
-      nearQuestionsFil,
-      display_order
+      summaryFil
     } = req.body;
 
-    if (!title || !title.trim()) {
-      return res.status(400).send('Validation Error: Question / Title (English) is required.');
+    // Validate English Question (5 to 100 words, no spaces-only, no pure numbers)
+    const qCheck = isValidFaqQuestion(title, true);
+    if (!qCheck.valid) {
+      return res.status(400).send(`Validation Error: ${qCheck.error}`);
     }
-    if (!summaryEn || !summaryEn.trim()) {
-      return res.status(400).send('Validation Error: Answer / Summary (English) is required.');
+
+    // Validate English Answer (5 to 300 words, no spaces-only, no pure numbers)
+    const aCheck = isValidFaqAnswer(summaryEn, true);
+    if (!aCheck.valid) {
+      return res.status(400).send(`Validation Error: ${aCheck.error}`);
+    }
+
+    // Optional Filipino Question (if provided, must satisfy rules)
+    if (titleFil && String(titleFil).trim()) {
+      const qFilCheck = isValidFaqQuestion(titleFil, false);
+      if (!qFilCheck.valid) {
+        return res.status(400).send(`Validation Error (Filipino Question): ${qFilCheck.error}`);
+      }
+    }
+
+    // Optional Filipino Answer (if provided, must satisfy rules)
+    if (summaryFil && String(summaryFil).trim()) {
+      const aFilCheck = isValidFaqAnswer(summaryFil, false);
+      if (!aFilCheck.valid) {
+        return res.status(400).send(`Validation Error (Filipino Answer): ${aFilCheck.error}`);
+      }
     }
 
     const created = await addFaq({
-      title: title.trim(),
-      titleFil: titleFil ? titleFil.trim() : '',
-      category: category ? category.trim() : 'General',
+      title: qCheck.normalized!,
+      titleFil: titleFil ? String(titleFil).trim() : '',
+      category: category ? String(category).trim() : 'General',
       keywords: keywords ? String(keywords).split(',').map(s => s.trim()).filter(Boolean) : [],
-      summaryEn: summaryEn.trim(),
-      summaryFil: summaryFil ? summaryFil.trim() : '',
-      nearQuestionsEn: nearQuestionsEn ? String(nearQuestionsEn).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
-      nearQuestionsFil: nearQuestionsFil ? String(nearQuestionsFil).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
-      display_order: display_order ? parseInt(display_order, 10) : undefined
+      summaryEn: aCheck.normalized!,
+      summaryFil: summaryFil ? String(summaryFil).trim() : ''
+      // display_order and nearQuestions are automatically handled by the system
     });
 
     await logAction(req, 'FAQ_ADD', `Added FAQ item: ${created.title.slice(0, 50)}`);
@@ -4340,29 +4356,45 @@ export const postEditFaqAdmin = async (req: Request, res: Response) => {
       category,
       keywords,
       summaryEn,
-      summaryFil,
-      nearQuestionsEn,
-      nearQuestionsFil,
-      display_order
+      summaryFil
     } = req.body;
 
-    if (!title || !title.trim()) {
-      return res.status(400).send('Validation Error: Question / Title (English) is required.');
+    // Validate English Question (5 to 100 words, no spaces-only, no pure numbers)
+    const qCheck = isValidFaqQuestion(title, true);
+    if (!qCheck.valid) {
+      return res.status(400).send(`Validation Error: ${qCheck.error}`);
     }
-    if (!summaryEn || !summaryEn.trim()) {
-      return res.status(400).send('Validation Error: Answer / Summary (English) is required.');
+
+    // Validate English Answer (5 to 300 words, no spaces-only, no pure numbers)
+    const aCheck = isValidFaqAnswer(summaryEn, true);
+    if (!aCheck.valid) {
+      return res.status(400).send(`Validation Error: ${aCheck.error}`);
+    }
+
+    // Optional Filipino Question (if provided, must satisfy rules)
+    if (titleFil && String(titleFil).trim()) {
+      const qFilCheck = isValidFaqQuestion(titleFil, false);
+      if (!qFilCheck.valid) {
+        return res.status(400).send(`Validation Error (Filipino Question): ${qFilCheck.error}`);
+      }
+    }
+
+    // Optional Filipino Answer (if provided, must satisfy rules)
+    if (summaryFil && String(summaryFil).trim()) {
+      const aFilCheck = isValidFaqAnswer(summaryFil, false);
+      if (!aFilCheck.valid) {
+        return res.status(400).send(`Validation Error (Filipino Answer): ${aFilCheck.error}`);
+      }
     }
 
     const updated = await updateFaq(id, {
-      title: title.trim(),
-      titleFil: titleFil ? titleFil.trim() : '',
-      category: category ? category.trim() : 'General',
+      title: qCheck.normalized!,
+      titleFil: titleFil ? String(titleFil).trim() : '',
+      category: category ? String(category).trim() : 'General',
       keywords: keywords ? String(keywords).split(',').map(s => s.trim()).filter(Boolean) : [],
-      summaryEn: summaryEn.trim(),
-      summaryFil: summaryFil ? summaryFil.trim() : '',
-      nearQuestionsEn: nearQuestionsEn ? String(nearQuestionsEn).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
-      nearQuestionsFil: nearQuestionsFil ? String(nearQuestionsFil).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
-      display_order: display_order ? parseInt(display_order, 10) : undefined
+      summaryEn: aCheck.normalized!,
+      summaryFil: summaryFil ? String(summaryFil).trim() : ''
+      // display_order and nearQuestions are automatically handled by the system
     });
 
     if (!updated) {
