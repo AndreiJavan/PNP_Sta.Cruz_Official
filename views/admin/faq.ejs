@@ -249,7 +249,7 @@
 
                     <!-- Right Column: Actions -->
                     <div class="flex lg:flex-col items-center gap-2 pt-2 lg:pt-0 shrink-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-700">
-                        <button type="button" onclick="openEditFaqModal(<%= JSON.stringify(faq).replace(/"/g, '&quot;') %>)"
+                        <button type="button" onclick="openEditFaqById('<%= faq.id %>')"
                             class="flex-1 lg:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 text-pnp-blue dark:text-pnp-gold font-bold text-xs uppercase tracking-wider transition">
                             <i class="fas fa-edit text-xs"></i>
                             <span>Edit</span>
@@ -556,6 +556,15 @@
 <!-- CLIENT SCRIPT                                                             -->
 <!-- ========================================================================= -->
 <script>
+    const FAQ_ITEMS = <%- JSON.stringify(faqs) %>;
+
+    function openEditFaqById(id) {
+        const item = FAQ_ITEMS.find(f => String(f.id) === String(id));
+        if (item) {
+            openEditFaqModal(item);
+        }
+    }
+
     let currentCategoryFilter = 'ALL';
 
     // Filter FAQs by Category

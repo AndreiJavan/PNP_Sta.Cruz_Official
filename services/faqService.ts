@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { db } from '../config/database.js';
 import { memoryCache } from '../utils/cache.js';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,6 +22,7 @@ export interface FAQItem {
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
 const FAQS_FILE_PATH = path.join(DATA_DIR, 'faqs.json');
+const TMP_FAQS_FILE_PATH = path.join(os.tmpdir ? os.tmpdir() : '/tmp', 'faqs.json');
 const CACHE_KEY = 'faqs:all';
 
 export const INITIAL_FAQS: FAQItem[] = [
@@ -433,6 +435,16 @@ export const INITIAL_FAQS: FAQItem[] = [
 // Helper to load FAQs from local persistent JSON file if present
 function loadLocalFaqs(): FAQItem[] | null {
   try {
+    if (fs.existsSync(TMP_FAQS_FILE_PATH)) {
+      const data = fs.readFileSync(TMP_FAQS_FILE_PATH, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (_) {}
+
+  try {
     if (fs.existsSync(FAQS_FILE_PATH)) {
       const data = fs.readFileSync(FAQS_FILE_PATH, 'utf-8');
       const parsed = JSON.parse(data);
@@ -446,15 +458,26 @@ function loadLocalFaqs(): FAQItem[] | null {
   return null;
 }
 
-// Helper to save FAQs to local persistent JSON file
+// Helper to save FAQs to local persistent JSON file (resilient to read-only serverless filesystems)
 function saveLocalFaqs(items: FAQItem[]): void {
+  let saved = false;
   try {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     fs.writeFileSync(FAQS_FILE_PATH, JSON.stringify(items, null, 2), 'utf-8');
+    saved = true;
   } catch (e: any) {
-    console.warn('[FAQ SERVICE] Failed to write local faqs.json:', e?.message || e);
+    // EROFS on read-only environments (e.g. Vercel)
+  }
+
+  try {
+    fs.writeFileSync(TMP_FAQS_FILE_PATH, JSON.stringify(items, null, 2), 'utf-8');
+    saved = true;
+  } catch (_) {}
+
+  if (!saved) {
+    console.warn('[FAQ SERVICE] Failed to write local faqs.json to disk or /tmp');
   }
 }
 

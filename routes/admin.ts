@@ -88,6 +88,12 @@ router.post('/archive/:id/restore', restoreArchiveItem);
 router.post('/archive/:id/permanent-delete', permanentlyDeleteArchiveItem);
 
 // Hotlines
+// Station FAQs
+router.get('/faq', getFaqAdmin);
+router.post('/faq/add', postFaqAdmin);
+router.post('/faq/:id/edit', postEditFaqAdmin);
+router.post('/faq/:id/delete', deleteFaqAdmin);
+
 router.get('/hotlines', getHotlines);
 router.post('/hotlines/add', postHotline);
 router.post('/hotlines/:id/edit', postEditHotline);
