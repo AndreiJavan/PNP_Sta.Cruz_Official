@@ -14,13 +14,13 @@
         <div class="h-1.5 w-full bg-gradient-to-r from-pnp-blue via-pnp-gold to-pnp-blue shrink-0 shadow-xs"></div>
 
         <!-- Modal Header: Deep PNP Police Navy with Gold Accents -->
-        <div class="px-5 py-4 sm:px-7 sm:py-4.5 bg-gradient-to-r from-[#001f42] via-[#002855] to-[#001f42] dark:from-[#08121f] dark:via-[#0c1a2c] dark:to-[#08121f] text-white border-b-2 border-pnp-gold/40 shadow-md flex items-center justify-between gap-3 shrink-0 relative">
+        <div class="px-5 py-4 sm:px-7 sm:py-4.5 bg-gradient-to-r from-[#083566] via-[#0D529C] to-[#083566] dark:from-[#08121f] dark:via-[#0c1a2c] dark:to-[#08121f] text-white border-b-2 border-pnp-gold/40 shadow-md flex items-center justify-between gap-3 shrink-0 relative">
             <!-- Left: Bot Avatar, Station Badge & Titles -->
             <div class="flex items-center space-x-3.5 min-w-0">
                 <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 dark:bg-pnp-gold/15 p-1 flex items-center justify-center border-2 border-pnp-gold shadow-md ring-2 ring-pnp-gold/30 shrink-0">
                     <img src="/favicon.png" alt="MIMPAS Logo" class="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full"
                         onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#001f42] animate-pulse shadow-sm" title="Online Station Desk"></span>
+                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#083566] animate-pulse shadow-sm" title="Online Station Desk"></span>
                 </div>
                 <div class="min-w-0 text-left">
                     <div class="flex items-center gap-2 flex-wrap">
@@ -178,7 +178,7 @@
                     class="flex-grow bg-slate-50 focus:bg-white dark:bg-slate-950 dark:focus:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3.5 sm:py-4 text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-pnp-blue dark:focus:border-pnp-gold focus:ring-4 focus:ring-pnp-blue/15 dark:focus:ring-pnp-gold/20 transition-all duration-200 shadow-inner"
                     onkeydown="if(event.key === 'Enter') sendFaqChat()">
                 <button type="button" id="faq-chat-send-btn" onclick="sendFaqChat()"
-                    class="bg-gradient-to-r from-pnp-blue via-[#003875] to-pnp-blue hover:from-[#003875] hover:to-[#10243a] text-white dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold dark:text-slate-950 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 flex items-center justify-center shrink-0 shadow-md shadow-pnp-blue/25 dark:shadow-pnp-gold/30 hover:shadow-lg active:scale-95 cursor-pointer border border-pnp-gold/30">
+                    class="bg-gradient-to-r from-pnp-blue via-[#1264BE] to-pnp-blue hover:from-[#1264BE] hover:to-[#10243a] text-white dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold dark:text-slate-950 px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 flex items-center justify-center shrink-0 shadow-md shadow-pnp-blue/25 dark:shadow-pnp-gold/30 hover:shadow-lg active:scale-95 cursor-pointer border border-pnp-gold/30">
                     <i class="fas fa-paper-plane mr-2 text-xs sm:text-sm"></i>
                     <span>Send</span>
                 </button>
@@ -502,7 +502,7 @@
 
         const msgDiv = document.createElement('div');
         if (isUser) {
-            msgDiv.className = "bg-gradient-to-r from-pnp-blue via-[#003875] to-pnp-blue dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold text-white dark:text-slate-950 p-4 sm:p-5 rounded-2xl sm:rounded-3xl max-w-[85%] sm:max-w-xl text-left shadow-md font-semibold text-xs sm:text-sm whitespace-pre-wrap leading-relaxed border border-pnp-blue-300/30 dark:border-pnp-gold-600";
+            msgDiv.className = "bg-gradient-to-r from-pnp-blue via-[#1264BE] to-pnp-blue dark:from-pnp-gold dark:via-yellow-400 dark:to-pnp-gold text-white dark:text-slate-950 p-4 sm:p-5 rounded-2xl sm:rounded-3xl max-w-[85%] sm:max-w-xl text-left shadow-md font-semibold text-xs sm:text-sm whitespace-pre-wrap leading-relaxed border border-pnp-blue-300/30 dark:border-pnp-gold-600";
         } else if (isSecurityAlert) {
             msgDiv.className = "bg-rose-500/10 dark:bg-rose-950/40 text-slate-800 dark:text-rose-100 border-2 border-rose-500/80 dark:border-rose-500/60 border-l-4 border-l-rose-600 p-4 sm:p-6 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl text-left shadow-lg font-normal text-xs sm:text-sm leading-relaxed space-y-3 relative";
         } else {
