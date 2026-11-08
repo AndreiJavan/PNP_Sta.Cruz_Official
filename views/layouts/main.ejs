@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512x512.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta name="theme-color" content="#1A3A5C">
+    <meta name="theme-color" content="#002855">
     
     <!-- Open Graph & Search Metadata -->
     <meta name="robots" content="index, follow">
@@ -35,30 +35,30 @@
                     colors: {
                         pnp: {
                             blue: {
-                                50: '#EBF1F7',
-                                100: '#D1DEEB',
-                                200: '#A3BDD7',
-                                300: '#759CC3',
-                                400: '#477BAF',
-                                500: '#1A3A5C',
-                                600: '#152E4A',
-                                700: '#102237',
-                                800: '#0A1725',
-                                900: '#050B12',
-                                DEFAULT: '#1A3A5C',
+                                50: '#F0F4F8',
+                                100: '#D9E2EC',
+                                200: '#BCCCDC',
+                                300: '#829AB1',
+                                400: '#2B6CB0',
+                                500: '#002855',
+                                600: '#001F42',
+                                700: '#001733',
+                                800: '#001024',
+                                900: '#000A17',
+                                DEFAULT: '#002855',
                             },
                             gold: {
-                                50: '#FAF7E8',
-                                100: '#F5F0D1',
-                                200: '#EBE1A3',
-                                300: '#E1D275',
-                                400: '#D7C347',
-                                500: '#C8A415',
-                                600: '#A08311',
-                                700: '#78620D',
-                                800: '#504109',
-                                900: '#282104',
-                                DEFAULT: '#C8A415',
+                                50: '#FFFBEB',
+                                100: '#FEF3C7',
+                                200: '#FDE68A',
+                                300: '#FCD34D',
+                                400: '#FBBF24',
+                                500: '#E5A823',
+                                600: '#B88000',
+                                700: '#8C6000',
+                                800: '#614200',
+                                900: '#382500',
+                                DEFAULT: '#E5A823',
                             }
                         }
                     }
@@ -90,23 +90,23 @@
         }
 
         .bg-pnp-blue {
-            background-color: #1A3A5C;
+            background-color: #002855;
         }
 
         .text-pnp-blue {
-            color: #1A3A5C;
+            color: #002855;
         }
 
         .bg-pnp-gold {
-            background-color: #C8A415;
+            background-color: #E5A823;
         }
 
         .text-pnp-gold {
-            color: #C8A415;
+            color: #E5A823;
         }
 
         .border-pnp-gold {
-            border-color: #C8A415;
+            border-color: #E5A823;
         }
 
         /* Border utility fallback for border-gray-150 in both themes */
@@ -118,7 +118,7 @@
         }
 
         .pnp-gradient-blue {
-            background: linear-gradient(135deg, #1A3A5C 0%, #0A1725 100%);
+            background: linear-gradient(135deg, #002855 0%, #001733 100%);
         }
 
         .pnp-card {
@@ -150,7 +150,7 @@
         }
 
         .text-shadow-tactical {
-            text-shadow: 0 0 20px rgba(200, 164, 21, 0.3);
+            text-shadow: 0 0 20px rgba(229, 168, 35, 0.35);
         }
 
         /* Enhanced Modal Scrollbar */
@@ -265,9 +265,9 @@
         }
 
         .barangay-label-tooltip {
-            background: rgba(26, 58, 92, 0.9) !important;
-            border: 1px solid #C8A415 !important;
-            color: #C8A415 !important;
+            background: rgba(0, 40, 85, 0.95) !important;
+            border: 1px solid #E5A823 !important;
+            color: #E5A823 !important;
             font-weight: 900 !important;
             font-size: 8px !important;
             text-transform: uppercase !important;
@@ -278,7 +278,7 @@
         }
 
         .barangay-label-tooltip::before {
-            border-top-color: rgba(26, 58, 92, 0.9) !important;
+            border-top-color: rgba(0, 40, 85, 0.95) !important;
         }
 
         /* Custom PNP Popup Styling */
@@ -286,7 +286,7 @@
             padding: 0;
             overflow: hidden;
             border-radius: 1.5rem;
-            border: 2px solid #C8A415;
+            border: 2px solid #E5A823;
         }
 
         .custom-pnp-popup .leaflet-popup-content {
@@ -295,7 +295,7 @@
         }
 
         .custom-pnp-popup .leaflet-popup-tip {
-            background: #C8A415;
+            background: #E5A823;
         }
 
         #mobileMenu {
@@ -306,7 +306,26 @@
     </style>
 </head>
 
-<body class="bg-[#eaedf2] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col min-h-screen transition-colors duration-300 overflow-x-hidden">
+<body class="bg-[#F4F6F9] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col min-h-screen transition-colors duration-300 overflow-x-hidden">
+        <!-- Official Philippine Government / PNP Topbar (Inspired by pnp.gov.ph / GWT) -->
+    <div class="bg-[#001733] text-white text-[10px] sm:text-[11px] font-bold py-1.5 px-4 border-b border-white/10 hidden sm:block">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <span class="text-white/90 uppercase tracking-wider font-black flex items-center gap-1.5">
+                    <i class="fas fa-landmark text-pnp-gold text-[10px]"></i>
+                    <span>GOVPH</span>
+                </span>
+                <span class="text-white/30">|</span>
+                <span class="text-blue-100/90 tracking-wide font-medium">Philippine National Police &bull; Sta. Cruz MPS</span>
+            </div>
+            <div class="flex items-center space-x-3 text-white/90">
+                <span id="pst-clock" class="flex items-center gap-1.5 text-pnp-gold font-mono font-bold tracking-wider">
+                    <i class="far fa-clock text-[10px]"></i>
+                    <span id="pst-time-text">Philippine Standard Time</span>
+                </span>
+            </div>
+        </div>
+    </div>
     <!-- Header -->
     <header class="bg-pnp-blue text-white sticky top-0 z-50 shadow-2xl border-b-4 border-pnp-gold">
         <div class="container mx-auto px-4">
@@ -715,6 +734,33 @@
     <!-- Station Verified FAQ Modal Partial -->
     <%- include('../partials/faq_modal') %>
     <%- include('../partials/terms_modal') %>
+
+    <!-- Philippine Standard Time Clock Sync (pnp.gov.ph standard) -->
+    <script>
+        function updatePstClock() {
+            const el = document.getElementById('pst-time-text');
+            if (!el) return;
+            try {
+                const now = new Date();
+                const options = { 
+                    timeZone: 'Asia/Manila', 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit',
+                    hour12: true 
+                };
+                el.textContent = 'PST: ' + new Intl.DateTimeFormat('en-PH', options).format(now);
+            } catch (e) {
+                el.textContent = 'Philippine Standard Time';
+            }
+        }
+        updatePstClock();
+        setInterval(updatePstClock, 1000);
+    </script>
 </body>
 
 </html>
