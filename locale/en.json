@@ -17,7 +17,8 @@
     "login": "Login",
     "admin_portal": "Admin Portal",
     "admin_dashboard": "Admin Dashboard",
-    "main_menu": "Main Menu"
+    "main_menu": "Main Menu",
+    "faq": "FAQ"
   },
   "hero": {
     "title": "Welcome to the Community Safety Portal",

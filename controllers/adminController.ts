@@ -12,6 +12,7 @@ import { FacebookService } from '../utils/facebookService.js';
 import { classifyCategory, isAdvisoryOrPrevention } from '../utils/categoryClassifier.js';
 import { createAuthToken, verifyAuthToken } from '../utils/authToken.js';
 import { getLockoutRemainingSeconds, recordFailedAttempt, clearFailedAttempts, formatLockoutDuration } from '../utils/loginSecurity.js';
+import { getFaqs, getFaqById, addFaq, updateFaq, deleteFaq } from '../services/faqService.js';
 import { normalizeWhitespace, isMeaningfulContent, isValidPersonName, isValidTitleOrHeadline, isValidNarrative, isWorkableWord, isValidEmail, isValidPassword, isValidHotlineAgency, isValidHotlineCategory, isValidHotlineContactNumber } from '../utils/inputValidator.js';
 
 // Robust Gmail SMTP Notification Dispatcher
@@ -4267,3 +4268,145 @@ export const debugSingleFacebookPost = async (req: Request, res: Response) => {
 };
 
 
+
+
+// ==========================================
+// FAQ MANAGEMENT (ADMIN CONTROLLERS)
+// ==========================================
+
+export const getFaqAdmin = async (req: Request, res: Response) => {
+  try {
+    const faqs = await getFaqs();
+    const sorted = [...faqs].sort((a, b) => (Number(a.display_order ?? 999)) - (Number(b.display_order ?? 999)));
+    
+    res.render('admin/faq', {
+      title: 'FAQ',
+      faqs: sorted,
+      layout: 'layouts/admin'
+    });
+  } catch (err: any) {
+    console.error('Error loading admin FAQs:', err);
+    res.status(500).send('Error loading FAQs');
+  }
+};
+
+export const postFaqAdmin = async (req: Request, res: Response) => {
+  try {
+    const {
+      title,
+      titleFil,
+      category,
+      keywords,
+      summaryEn,
+      summaryFil,
+      nearQuestionsEn,
+      nearQuestionsFil,
+      display_order
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).send('Validation Error: Question / Title (English) is required.');
+    }
+    if (!summaryEn || !summaryEn.trim()) {
+      return res.status(400).send('Validation Error: Answer / Summary (English) is required.');
+    }
+
+    const created = await addFaq({
+      title: title.trim(),
+      titleFil: titleFil ? titleFil.trim() : '',
+      category: category ? category.trim() : 'General',
+      keywords: keywords ? String(keywords).split(',').map(s => s.trim()).filter(Boolean) : [],
+      summaryEn: summaryEn.trim(),
+      summaryFil: summaryFil ? summaryFil.trim() : '',
+      nearQuestionsEn: nearQuestionsEn ? String(nearQuestionsEn).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
+      nearQuestionsFil: nearQuestionsFil ? String(nearQuestionsFil).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
+      display_order: display_order ? parseInt(display_order, 10) : undefined
+    });
+
+    await logAction(req, 'FAQ_ADD', `Added FAQ item: ${created.title.slice(0, 50)}`);
+    res.redirect('/admin/faq');
+  } catch (err: any) {
+    console.error('Error creating FAQ:', err);
+    res.status(500).send('Error creating FAQ item: ' + (err?.message || err));
+  }
+};
+
+export const postEditFaqAdmin = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      titleFil,
+      category,
+      keywords,
+      summaryEn,
+      summaryFil,
+      nearQuestionsEn,
+      nearQuestionsFil,
+      display_order
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).send('Validation Error: Question / Title (English) is required.');
+    }
+    if (!summaryEn || !summaryEn.trim()) {
+      return res.status(400).send('Validation Error: Answer / Summary (English) is required.');
+    }
+
+    const updated = await updateFaq(id, {
+      title: title.trim(),
+      titleFil: titleFil ? titleFil.trim() : '',
+      category: category ? category.trim() : 'General',
+      keywords: keywords ? String(keywords).split(',').map(s => s.trim()).filter(Boolean) : [],
+      summaryEn: summaryEn.trim(),
+      summaryFil: summaryFil ? summaryFil.trim() : '',
+      nearQuestionsEn: nearQuestionsEn ? String(nearQuestionsEn).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
+      nearQuestionsFil: nearQuestionsFil ? String(nearQuestionsFil).split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [],
+      display_order: display_order ? parseInt(display_order, 10) : undefined
+    });
+
+    if (!updated) {
+      return res.status(404).send('FAQ not found');
+    }
+
+    await logAction(req, 'FAQ_EDIT', `Updated FAQ ID: ${id} (${updated.title.slice(0, 50)})`);
+    res.redirect('/admin/faq');
+  } catch (err: any) {
+    console.error('Error updating FAQ:', err);
+    res.status(500).send('Error updating FAQ item: ' + (err?.message || err));
+  }
+};
+
+export const deleteFaqAdmin = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const existing = await getFaqById(id);
+
+    if (existing) {
+      const adminName = (req.session as any)?.adminName || (req.session as any)?.user?.username || 'Admin';
+      try {
+        await db.collection('recycle_bin').add({
+          category: 'FAQ',
+          title: existing.title || 'Untitled FAQ',
+          original_id: String(id),
+          payload: existing,
+          deleted_by: adminName,
+          deleted_at: new Date().toISOString()
+        });
+      } catch (recycleErr: any) {
+        console.warn('Failed to add deleted FAQ to recycle_bin:', recycleErr?.message || recycleErr);
+      }
+    }
+
+    const deleted = await deleteFaq(id);
+    if (!deleted) {
+      return res.status(404).send('FAQ not found or already deleted');
+    }
+
+    await logAction(req, 'FAQ_DELETE', `Deleted FAQ ID: ${id}`);
+    res.redirect('/admin/faq');
+  } catch (err: any) {
+    console.error('Error deleting FAQ:', err);
+    res.status(500).send('Error deleting FAQ item: ' + (err?.message || err));
+  }
+};

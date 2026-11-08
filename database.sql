@@ -108,6 +108,25 @@ CREATE TABLE public.hotlines (
 );
 
 -- =====================================================
+
+-- =====================================================
+-- FREQUENTLY ASKED QUESTIONS (FAQS)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.faqs (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  title_fil TEXT,
+  category TEXT DEFAULT 'General',
+  keywords JSONB DEFAULT '[]'::jsonb,
+  summary_en TEXT NOT NULL,
+  summary_fil TEXT,
+  near_questions_en JSONB DEFAULT '[]'::jsonb,
+  near_questions_fil JSONB DEFAULT '[]'::jsonb,
+  display_order INTEGER DEFAULT 1,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- AUDIT LOGS
 -- =====================================================
 CREATE TABLE public.audit_logs (

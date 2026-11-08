@@ -326,6 +326,15 @@
                 <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">Hotlines</span>
             </a>
 
+            <a href="/admin/faq"
+                <%= title === 'FAQ' || title === 'Station FAQs' ? 'aria-current="page"' : '' %>
+                class="flex items-center space-x-3 px-3 py-2 rounded-xl transition-all duration-200 group active:scale-95 hover:translate-x-1 cursor-pointer <%= title === 'FAQ' || title === 'Station FAQs' ? 'sidebar-item-active text-white font-black bg-white/20' : 'hover:bg-white/10 text-white/90 font-bold' %>">
+                <div class="w-7 h-7 rounded-lg <%= title === 'FAQ' || title === 'Station FAQs' ? 'bg-pnp-gold/20 text-pnp-gold shadow-xs' : 'bg-white/10 text-white/80 group-hover:text-pnp-gold group-hover:bg-white/20' %> flex items-center justify-center group-hover:scale-110 transition-all duration-200 shrink-0">
+                    <i class="fas fa-circle-question text-xs"></i>
+                </div>
+                <span class="text-xs font-bold uppercase tracking-wider group-hover:text-white transition-colors">FAQ</span>
+            </a>
+
             <% if (user && user.role === 'superadmin') { %>
                 <a href="/admin/users"
                     <%= title === 'Users' ? 'aria-current="page"' : '' %>

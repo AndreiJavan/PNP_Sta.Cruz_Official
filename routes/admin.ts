@@ -7,7 +7,8 @@ import {
   postStationPersonnel, postEditStationPersonnel, deleteStationPersonnel,
   getAuditLogs, approveUser, rejectUser,
   getAITrendsAnalysis, getArchive, restoreArchiveItem, permanentlyDeleteArchiveItem, clearAllArchive,
-  getHeartbeat, debugSingleFacebookPost, getSetup, postSetup, postChangePassword
+  getHeartbeat, debugSingleFacebookPost, getSetup, postSetup, postChangePassword,
+  getFaqAdmin, postFaqAdmin, postEditFaqAdmin, deleteFaqAdmin
 } from '../controllers/adminController.js';
 import { isAuthenticated, isSuperAdmin } from '../middleware/auth.js';
 import upload from '../middleware/upload.js';
