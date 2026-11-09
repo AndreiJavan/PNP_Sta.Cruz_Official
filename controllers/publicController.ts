@@ -456,6 +456,15 @@ export const getFaq = (req: Request, res: Response) => {
   res.redirect('/?faq=1');
 };
 
+export const getFaqsJson = async (req: Request, res: Response) => {
+  try {
+    const faqs = await getFaqs();
+    res.json(faqs);
+  } catch (err: any) {
+    res.status(500).json({ error: 'Failed to fetch FAQs' });
+  }
+};
+
 export const getIncidents = async (req: Request, res: Response) => {
   res.redirect('/?tab=incidents');
 };

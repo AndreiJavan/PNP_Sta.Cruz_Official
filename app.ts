@@ -18,6 +18,7 @@ import { verifyAuthToken } from './utils/authToken.js';
 import publicRoutes from './routes/public.js';
 import adminRoutes from './routes/admin.js';
 import { getHotlinesCached } from './controllers/publicController.js';
+import { getFaqs } from './services/faqService.js';
 
 dotenv.config();
 
@@ -168,7 +169,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Attach Cached Hotlines for Global Layout Footer
+// Attach Cached Hotlines & FAQs for Global Layout
 app.use(async (req, res, next) => {
   if (req.method === 'GET' && !req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|json)$/i) && !req.path.startsWith('/api/')) {
     try {
@@ -176,8 +177,14 @@ app.use(async (req, res, next) => {
     } catch {
       res.locals.footerHotlines = [];
     }
+    try {
+      res.locals.faqs = await getFaqs();
+    } catch {
+      res.locals.faqs = [];
+    }
   } else {
     res.locals.footerHotlines = [];
+    res.locals.faqs = [];
   }
   next();
 });
