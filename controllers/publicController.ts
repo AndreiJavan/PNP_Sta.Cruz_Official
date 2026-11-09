@@ -987,12 +987,13 @@ export const chatFaq = async (req: Request, res: Response) => {
       'inyo', 'ating', 'isang', 'lahat', 'ibang', 'dito', 'doon'
     ]);
 
-    // Calculate relevance score against FAQ items
-    const scoredFaqs = FAQ_KNOWLEDGEBASE.map(faq => {
+    // Calculate relevance score against FAQ items (dynamically fetched from DB / service)
+    const allFaqs = await getFaqs();
+    const scoredFaqs = allFaqs.map(faq => {
       let score = 0;
       let keywordMatched = false;
-      const titleLower = faq.title.toLowerCase();
-      const titleFilLower = faq.titleFil.toLowerCase();
+      const titleLower = (faq.title || '').toLowerCase();
+      const titleFilLower = (faq.titleFil || '').toLowerCase();
       
       if (titleLower.includes(qLower) || titleFilLower.includes(qLower)) {
         score += 20;

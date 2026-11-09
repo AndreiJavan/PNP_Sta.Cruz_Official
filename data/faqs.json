@@ -1,9 +1,9 @@
 [
   {
     "id": "1",
-    "category": "Emergency",
     "title": "How do I report an ongoing emergency or crime in progress in Santa Cruz?",
     "titleFil": "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?",
+    "category": "Emergency",
     "keywords": [
       "emergency",
       "ongoing",
@@ -31,13 +31,15 @@
       "Paano mag-file ng opisyal na Police Blotter report?",
       "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"
     ],
-    "display_order": 1
+    "display_order": 1,
+    "created_at": "2026-11-09T00:35:41.612+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "2",
-    "category": "Emergency",
     "title": "What are the official emergency hotlines for Santa Cruz, Laguna?",
     "titleFil": "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
+    "category": "Emergency",
     "keywords": [
       "hotline",
       "hotlines",
@@ -67,13 +69,15 @@
       "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?",
       "Anong tulong ang ibinibigay ng Women and Children Protection Desk (WCPD)?"
     ],
-    "display_order": 2
+    "display_order": 2,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "3",
-    "category": "Blotter",
     "title": "How do I file an official Police Blotter report?",
     "titleFil": "Paano mag-file ng opisyal na Police Blotter report?",
+    "category": "Blotter",
     "keywords": [
       "blotter",
       "file blotter",
@@ -97,13 +101,15 @@
       "Kailan dapat dumulog sa Barangay Lupon laban sa Police Station?",
       "Anu-anong valid government ID ang tinatanggap?"
     ],
-    "display_order": 3
+    "display_order": 3,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "4",
-    "category": "Blotter",
     "title": "Can I file a police blotter online or through social media?",
     "titleFil": "Maaari ba akong magpa-blotter online o sa social media?",
+    "category": "Blotter",
     "keywords": [
       "online blotter",
       "facebook blotter",
@@ -124,13 +130,15 @@
       "Paano magsumite ng impormasyon o tip ukol sa Wanted o Missing Persons?",
       "Saan matatagpuan ang estasyon ng pulisya sa Sta. Cruz?"
     ],
-    "display_order": 4
+    "display_order": 4,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "5",
-    "category": "Blotter",
     "title": "When should I report to the Barangay Lupon versus the Municipal Police Station?",
     "titleFil": "Kailan dapat dumulog sa Barangay Lupon laban sa Municipal Police Station?",
+    "category": "Blotter",
     "keywords": [
       "barangay",
       "lupon",
@@ -152,13 +160,15 @@
       "Anong tulong ang ibinibigay ng Women and Children Protection Desk (WCPD)?",
       "Paano mag-ulat ng online scam, panloloko, o cyber harassment?"
     ],
-    "display_order": 5
+    "display_order": 5,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "6",
-    "category": "Clearance",
     "title": "How do I apply for a National Police Clearance (NPCS) in Santa Cruz?",
     "titleFil": "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
+    "category": "Clearance",
     "keywords": [
       "police clearance",
       "clearance",
@@ -180,13 +190,15 @@
       "Libre ba ang clearance para sa First-Time Jobseekers?",
       "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?"
     ],
-    "display_order": 6
+    "display_order": 6,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "7",
-    "category": "Clearance",
     "title": "What valid government IDs and documents are accepted for Police Clearance?",
     "titleFil": "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?",
+    "category": "Clearance",
     "keywords": [
       "valid id",
       "valid ids",
@@ -207,13 +219,15 @@
       "Libre ba ang clearance para sa First-Time Jobseekers?",
       "May priority assistance ba para sa senior citizens, buntis, at PWD?"
     ],
-    "display_order": 7
+    "display_order": 7,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "8",
-    "category": "Clearance",
     "title": "Can I get a Police Clearance for free under the First-Time Jobseekers Act?",
     "titleFil": "Libre ba ang police clearance para sa First-Time Jobseekers?",
+    "category": "Clearance",
     "keywords": [
       "first time jobseeker",
       "libreng clearance",
@@ -234,13 +248,15 @@
       "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?",
       "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?"
     ],
-    "display_order": 8
+    "display_order": 8,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "9",
-    "category": "Crime Map",
     "title": "Where does the crime data on the MIMPAS Map come from?",
     "titleFil": "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
+    "category": "Crime Map",
     "keywords": [
       "crime map data",
       "datos ng mapa",
@@ -261,13 +277,15 @@
       "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
       "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?"
     ],
-    "display_order": 9
+    "display_order": 9,
+    "created_at": "2026-11-09T00:35:41.614+00:00",
+    "updated_at": "2026-11-09T00:35:41.614+00:00"
   },
   {
     "id": "10",
-    "category": "Crime Map",
     "title": "Does the Crime Map disclose personal names or exact home addresses?",
     "titleFil": "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?",
+    "category": "Crime Map",
     "keywords": [
       "privacy",
       "data privacy",
@@ -290,13 +308,15 @@
       "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
       "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?"
     ],
-    "display_order": 10
+    "display_order": 10,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "11",
-    "category": "Crime Map",
     "title": "How do I search or filter incidents by Barangay, Year, or Category on the Map?",
     "titleFil": "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
+    "category": "Crime Map",
     "keywords": [
       "filter map",
       "filter",
@@ -318,13 +338,15 @@
       "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?",
       "Saan makikita ang mga traffic advisory at rerouting sa Santa Cruz?"
     ],
-    "display_order": 11
+    "display_order": 11,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "12",
-    "category": "WCPD",
     "title": "What assistance does the Women and Children Protection Desk (WCPD) provide?",
     "titleFil": "Anong tulong ang ibinibigay ng Women and Children Protection Desk (WCPD)?",
+    "category": "WCPD",
     "keywords": [
       "wcpd",
       "vawc",
@@ -350,13 +372,15 @@
       "Paano mag-file ng opisyal na Police Blotter report?",
       "May priority assistance ba para sa senior citizens, buntis, at PWD?"
     ],
-    "display_order": 12
+    "display_order": 12,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "13",
-    "category": "Cybercrime",
     "title": "How do I report online scams, cyber harassment, or hacking in Santa Cruz?",
     "titleFil": "Paano mag-ulat ng online scam, panloloko, o cyber harassment?",
+    "category": "Cybercrime",
     "keywords": [
       "cybercrime",
       "scam",
@@ -380,13 +404,15 @@
       "Maaari ba akong magpa-blotter online o sa social media?",
       "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?"
     ],
-    "display_order": 13
+    "display_order": 13,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "14",
-    "category": "Bulletins",
     "title": "How can the community submit tips regarding Wanted or Missing Persons?",
     "titleFil": "Paano magsumite ng impormasyon ukol sa Wanted o Missing Persons?",
+    "category": "Bulletins",
     "keywords": [
       "wanted",
       "missing",
@@ -409,13 +435,15 @@
       "Ano ang mga opisyal na emergency hotline ng Santa Cruz, Laguna?",
       "Saan makikita ang mga traffic advisory at rerouting sa Santa Cruz?"
     ],
-    "display_order": 14
+    "display_order": 14,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "15",
-    "category": "Traffic",
     "title": "Where can I see traffic rerouting and road safety advisories in Santa Cruz?",
     "titleFil": "Saan makikita ang mga traffic advisory at rerouting sa Santa Cruz?",
+    "category": "Traffic",
     "keywords": [
       "traffic",
       "rerouting",
@@ -438,13 +466,15 @@
       "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
       "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?"
     ],
-    "display_order": 15
+    "display_order": 15,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "16",
-    "category": "General",
     "title": "Where is the PNP Santa Cruz Municipal Police Station located and what are its operating hours?",
     "titleFil": "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
+    "category": "General",
     "keywords": [
       "location",
       "address",
@@ -467,13 +497,15 @@
       "Paano kumuha ng National Police Clearance (NPCS) sa Santa Cruz?",
       "May priority assistance ba para sa senior citizens, buntis, at PWD?"
     ],
-    "display_order": 16
+    "display_order": 16,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "17",
-    "category": "General",
     "title": "What is MIMPAS and how does it help Sta. Cruz residents?",
     "titleFil": "Ano ang MIMPAS at paano ito nakakatulong sa mga residente ng Sta. Cruz?",
+    "category": "General",
     "keywords": [
       "mimpas",
       "ano ang mimpas",
@@ -494,13 +526,15 @@
       "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
       "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?"
     ],
-    "display_order": 17
+    "display_order": 17,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "18",
-    "category": "General",
     "title": "Why does this website prioritize verified FAQs over automated AI chatbots?",
     "titleFil": "Bakit verified FAQs ang prayoridad ng website na ito kaysa AI chatbots?",
+    "category": "General",
     "keywords": [
       "ai chatbot",
       "hallucination",
@@ -521,13 +555,15 @@
       "Saan nagmumula ang datos ng krimen sa MIMPAS Crime Map?",
       "Paano mag-ulat ng agarang emergency o krimen sa Santa Cruz?"
     ],
-    "display_order": 18
+    "display_order": 18,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "19",
-    "category": "General",
     "title": "Is there priority assistance for senior citizens, pregnant women, and PWDs at the station?",
     "titleFil": "May priority assistance ba para sa senior citizens, buntis, at PWD sa estasyon?",
+    "category": "General",
     "keywords": [
       "senior",
       "pwd",
@@ -551,13 +587,15 @@
       "Saan matatagpuan ang estasyon ng pulisya at ano ang operating hours nito?",
       "Anu-anong valid government ID ang tinatanggap para sa Police Clearance?"
     ],
-    "display_order": 19
+    "display_order": 19,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   },
   {
     "id": "20",
-    "category": "Crime Map",
     "title": "Which barangay in Santa Cruz has the highest number or largest amount of crime cases?",
     "titleFil": "Aling barangay sa Santa Cruz ang may pinakamaraming naitalang kaso ng krimen?",
+    "category": "Crime Map",
     "keywords": [
       "which barangay",
       "large amount of cases",
@@ -587,6 +625,8 @@
       "Paano mag-filter ng insidente ayon sa Barangay o Taon sa Mapa?",
       "Inilalabas ba sa Crime Map ang personal na pangalan o tirahan?"
     ],
-    "display_order": 20
+    "display_order": 20,
+    "created_at": "2026-11-09T00:35:41.615+00:00",
+    "updated_at": "2026-11-09T00:35:41.615+00:00"
   }
 ]
