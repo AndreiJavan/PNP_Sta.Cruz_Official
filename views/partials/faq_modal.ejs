@@ -66,7 +66,9 @@
         </div>
 
         <!-- Chat Conversation Messages Space (Expansive & Spacious) -->
-        <div id="faq-chat-messages" class="flex-grow p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950 pb-28">
+        <div id="faq-chat-messages" class="flex-grow p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950">
+            <!-- Bottom spacer anchor for smooth unclipped scrolling -->
+            <div id="faq-chat-anchor" class="h-8 shrink-0 w-full order-last"></div>
             <!-- Initial Welcome Assistant Card -->
             <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
                 <div class="flex items-center gap-3">
@@ -337,6 +339,29 @@
         } catch (e) {
             console.warn('Live FAQ refresh skipped:', e);
         }
+    }
+
+    
+    // Smooth, reliable scroll to bottom so message is never cut off
+    function scrollFaqChatToBottom() {
+        const chatBox = document.getElementById('faq-chat-messages');
+        const anchor = document.getElementById('faq-chat-anchor');
+        if (!chatBox) return;
+
+        requestAnimationFrame(() => {
+            if (anchor) {
+                anchor.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            } else {
+                chatBox.scrollTo({ top: chatBox.scrollHeight + 100, behavior: 'smooth' });
+            }
+        });
+        setTimeout(() => {
+            if (anchor) {
+                anchor.scrollIntoView({ behavior: 'auto', block: 'end' });
+            } else {
+                chatBox.scrollTop = chatBox.scrollHeight + 100;
+            }
+        }, 120);
     }
 
     window.toggleQuickAsk = function(forceState) {
