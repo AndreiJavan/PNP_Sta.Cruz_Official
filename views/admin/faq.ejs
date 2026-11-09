@@ -25,6 +25,56 @@
         </div>
     </div>
 
+    <!-- Action Saved Notification Banner -->
+    <% if (typeof alert !== 'undefined' && alert) { %>
+        <% if (alert === 'added') { %>
+            <div id="faqActionAlert" class="flex items-center justify-between p-4 bg-emerald-500/10 dark:bg-emerald-500/15 border-2 border-emerald-500/40 dark:border-emerald-500/50 rounded-2xl text-emerald-800 dark:text-emerald-200 shadow-sm transition-all duration-300">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                        <i class="fas fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black uppercase tracking-wider text-emerald-900 dark:text-emerald-100">Action Saved: FAQ Added Successfully</h4>
+                        <p class="text-xs text-emerald-700 dark:text-emerald-300 font-medium">The new station question and verified response have been stored in the database and published live.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissFaqAlert()" class="w-8 h-8 rounded-lg hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex items-center justify-center transition cursor-pointer" title="Dismiss Alert">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        <% } else if (alert === 'updated') { %>
+            <div id="faqActionAlert" class="flex items-center justify-between p-4 bg-blue-500/10 dark:bg-blue-500/15 border-2 border-blue-500/40 dark:border-blue-500/50 rounded-2xl text-blue-800 dark:text-blue-200 shadow-sm transition-all duration-300">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black uppercase tracking-wider text-blue-900 dark:text-blue-100">Action Saved: FAQ Updated Successfully</h4>
+                        <p class="text-xs text-blue-700 dark:text-blue-300 font-medium">Your changes have been saved to the database and updated across station channels.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissFaqAlert()" class="w-8 h-8 rounded-lg hover:bg-blue-500/20 text-blue-600 dark:text-blue-300 flex items-center justify-center transition cursor-pointer" title="Dismiss Alert">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        <% } else if (alert === 'deleted') { %>
+            <div id="faqActionAlert" class="flex items-center justify-between p-4 bg-rose-500/10 dark:bg-rose-500/15 border-2 border-rose-500/40 dark:border-rose-500/50 rounded-2xl text-rose-800 dark:text-rose-200 shadow-sm transition-all duration-300">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-lg shadow-sm shrink-0">
+                        <i class="fas fa-trash-can-arrow-up"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-black uppercase tracking-wider text-rose-900 dark:text-rose-100">Action Saved: FAQ Deleted</h4>
+                        <p class="text-xs text-rose-700 dark:text-rose-300 font-medium">The FAQ item has been removed from the active database and archived in the Recycle Bin.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="dismissFaqAlert()" class="w-8 h-8 rounded-lg hover:bg-rose-500/20 text-rose-600 dark:text-rose-300 flex items-center justify-center transition cursor-pointer" title="Dismiss Alert">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        <% } %>
+    <% } %>
+
     <!-- Quick Stats Cards -->
     <% 
         const totalCount = faqs.length;
@@ -950,6 +1000,61 @@
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i> Saving...';
         }
         return true;
+    }
+
+    // Dismiss Action Alert Banner
+    function dismissFaqAlert() {
+        const el = document.getElementById('faqActionAlert');
+        if (el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-10px)';
+            setTimeout(() => el.remove(), 300);
+        }
+    }
+
+    // Auto-clean URL and trigger toast notification on reload
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const actionAlert = urlParams.get('alert');
+        if (actionAlert) {
+            let toastMsg = 'Action has been saved successfully.';
+            let toastIcon = 'fa-circle-check';
+            let toastColor = 'text-emerald-400';
+
+            if (actionAlert === 'added') {
+                toastMsg = 'FAQ added and saved successfully!';
+            } else if (actionAlert === 'updated') {
+                toastMsg = 'FAQ updated and saved successfully!';
+                toastIcon = 'fa-check-double';
+                toastColor = 'text-blue-400';
+            } else if (actionAlert === 'deleted') {
+                toastMsg = 'FAQ deleted and archived successfully!';
+                toastIcon = 'fa-trash-can';
+                toastColor = 'text-rose-400';
+            }
+
+            showFaqToast(toastMsg, toastIcon, toastColor);
+
+            // Clean up the URL query param so refresh doesn't trigger again
+            if (window.history.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+        }
+    });
+
+    function showFaqToast(msg, icon = 'fa-circle-check', color = 'text-emerald-400') {
+        let toast = document.getElementById('faqActionToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'faqActionToast';
+            toast.className = 'fixed bottom-8 right-8 z-[9999] px-5 py-3.5 rounded-2xl bg-slate-900/95 dark:bg-slate-800/95 text-white font-black text-xs uppercase tracking-wider border-2 border-pnp-gold/60 shadow-2xl backdrop-blur-md transition-all duration-300 opacity-0 transform translate-y-4 pointer-events-none flex items-center gap-3';
+            document.body.appendChild(toast);
+        }
+        toast.innerHTML = `<i class="fas ${icon} ${color} text-base"></i><span>${msg}</span>`;
+        toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        }, 4500);
     }
 
     // Keyboard ESC to close modals

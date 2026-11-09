@@ -4276,12 +4276,14 @@ export const debugSingleFacebookPost = async (req: Request, res: Response) => {
 
 export const getFaqAdmin = async (req: Request, res: Response) => {
   try {
+    const alert = req.query.alert ? String(req.query.alert) : null;
     const faqs = await getFaqs();
     const sorted = [...faqs].sort((a, b) => (Number(a.display_order ?? 999)) - (Number(b.display_order ?? 999)));
     
     res.render('admin/faq', {
       title: 'FAQ',
       faqs: sorted,
+      alert,
       layout: 'layouts/admin'
     });
   } catch (err: any) {
@@ -4340,7 +4342,7 @@ export const postFaqAdmin = async (req: Request, res: Response) => {
     });
 
     await logAction(req, 'FAQ_ADD', `Added FAQ item: ${created.title.slice(0, 50)}`);
-    res.redirect('/admin/faq');
+    res.redirect('/admin/faq?alert=added');
   } catch (err: any) {
     console.error('Error creating FAQ:', err);
     res.status(500).send('Error creating FAQ item: ' + (err?.message || err));
@@ -4402,7 +4404,7 @@ export const postEditFaqAdmin = async (req: Request, res: Response) => {
     }
 
     await logAction(req, 'FAQ_EDIT', `Updated FAQ ID: ${id} (${updated.title.slice(0, 50)})`);
-    res.redirect('/admin/faq');
+    res.redirect('/admin/faq?alert=updated');
   } catch (err: any) {
     console.error('Error updating FAQ:', err);
     res.status(500).send('Error updating FAQ item: ' + (err?.message || err));
@@ -4436,7 +4438,7 @@ export const deleteFaqAdmin = async (req: Request, res: Response) => {
     }
 
     await logAction(req, 'FAQ_DELETE', `Deleted FAQ ID: ${id}`);
-    res.redirect('/admin/faq');
+    res.redirect('/admin/faq?alert=deleted');
   } catch (err: any) {
     console.error('Error deleting FAQ:', err);
     res.status(500).send('Error deleting FAQ item: ' + (err?.message || err));
