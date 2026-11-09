@@ -321,6 +321,24 @@
     }
 
     // Toggle Expandable Quick Ask Drawer throughout modal only
+    
+    // Function to dynamically refresh FAQs from database API
+    async function refreshFaqsFromApi() {
+        try {
+            const res = await fetch('/api/faqs?t=' + Date.now());
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    FAQ_DATA = data;
+                    renderCategoryTabs();
+                    renderQuestionsGrid();
+                }
+            }
+        } catch (e) {
+            console.warn('Live FAQ refresh skipped:', e);
+        }
+    }
+
     window.toggleQuickAsk = function(forceState) {
         const drawer = document.getElementById('faqQuickAskDrawer');
         const minBar = document.getElementById('faqQuickAskMinimizedBar');

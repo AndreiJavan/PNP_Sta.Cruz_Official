@@ -526,7 +526,7 @@ export async function getFaqs(): Promise<FAQItem[]> {
     // 3. Fallback to initial verified dataset and persist it
     saveLocalFaqs(INITIAL_FAQS);
     return [...INITIAL_FAQS];
-  }, 5 * 60 * 1000);
+  }, 10 * 1000); // 10s short TTL for real-time reactivity
 }
 
 /**
@@ -660,7 +660,8 @@ export async function addFaq(data: {
   // Update local file and invalidate cache
   const updatedList = [...currentFaqs, newFaq];
   saveLocalFaqs(updatedList);
-  memoryCache.clearNamespace('faqs');
+  await memoryCache.del(CACHE_KEY);
+  await memoryCache.clearNamespace('faqs');
 
   return newFaq;
 }
@@ -742,7 +743,8 @@ export async function updateFaq(id: string | number, data: {
 
   currentFaqs[idx] = updatedItem;
   saveLocalFaqs(currentFaqs);
-  memoryCache.clearNamespace('faqs');
+  await memoryCache.del(CACHE_KEY);
+  await memoryCache.clearNamespace('faqs');
 
   return updatedItem;
 }
@@ -762,7 +764,8 @@ export async function deleteFaq(id: string | number): Promise<boolean> {
   }
 
   saveLocalFaqs(filtered);
-  memoryCache.clearNamespace('faqs');
+  await memoryCache.del(CACHE_KEY);
+  await memoryCache.clearNamespace('faqs');
   return true;
 }
 
