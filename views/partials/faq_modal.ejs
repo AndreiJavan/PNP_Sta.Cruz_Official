@@ -3,37 +3,50 @@
 <!-- Enhanced Design: Station Brand Colors, Non-Overlapping Quick Ask, No Textbox -->
 <!-- ========================================================================= -->
 
-<div id="faqModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-2 sm:p-4 md:p-6 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
+<div id="faqModal"
+    class="fixed inset-0 z-[9999] hidden items-center justify-center p-2 sm:p-4 md:p-6 transition-all duration-300"
+    role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
     <!-- Modal Backdrop -->
-    <div id="faqModalBackdrop" class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity duration-300 opacity-0" onclick="closeFaqModal()"></div>
+    <div id="faqModalBackdrop"
+        class="absolute inset-0 bg-slate-950/85 backdrop-blur-md transition-opacity duration-300 opacity-0"
+        onclick="closeFaqModal()"></div>
 
     <!-- Modal Container: Spacious layout with elevated PNP tactical design -->
-    <div id="faqModalContainer" class="relative bg-white dark:bg-slate-900 w-full max-w-5xl xl:max-w-6xl h-[95vh] sm:h-[90vh] rounded-2xl sm:rounded-[2rem] shadow-2xl border-2 border-slate-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col transform transition-all duration-300 scale-95 opacity-0">
-        
+    <div id="faqModalContainer"
+        class="relative bg-white dark:bg-slate-900 w-full max-w-5xl xl:max-w-6xl h-[95vh] sm:h-[90vh] rounded-2xl sm:rounded-[2rem] shadow-2xl border-2 border-slate-200/80 dark:border-slate-700/80 overflow-hidden flex flex-col transform transition-all duration-300 scale-95 opacity-0">
+
         <!-- Top Tactical Accent Stripe -->
         <div class="h-1.5 w-full bg-gradient-to-r from-pnp-blue via-pnp-gold to-pnp-blue shrink-0 shadow-xs"></div>
 
         <!-- Modal Header: Deep PNP Police Navy with Gold Accents -->
-        <div id="faqModalHeader" class="px-5 py-4 sm:px-7 sm:py-4.5 bg-gradient-to-r from-[#083566] via-[#0D529C] to-[#083566] dark:from-[#08121f] dark:via-[#0c1a2c] dark:to-[#08121f] text-white border-b-2 border-pnp-gold/40 shadow-md flex items-center justify-between gap-3 shrink-0 relative z-20">
+        <div id="faqModalHeader"
+            class="px-5 py-4 sm:px-7 sm:py-4.5 bg-gradient-to-r from-[#083566] via-[#0D529C] to-[#083566] dark:from-[#08121f] dark:via-[#0c1a2c] dark:to-[#08121f] text-white border-b-2 border-pnp-gold/40 shadow-md flex items-center justify-between gap-3 shrink-0 relative z-20">
             <!-- Left: Bot Avatar, Station Badge & Titles -->
             <div class="flex items-center space-x-3.5 min-w-0">
-                <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 dark:bg-pnp-gold/15 p-1 flex items-center justify-center border-2 border-pnp-gold shadow-md ring-2 ring-pnp-gold/30 shrink-0">
+                <div
+                    class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white/10 dark:bg-pnp-gold/15 p-1 flex items-center justify-center border-2 border-pnp-gold shadow-md ring-2 ring-pnp-gold/30 shrink-0">
                     <img src="/favicon.png" alt="MIMPAS Logo" class="w-8 h-8 sm:w-9 sm:h-9 object-contain rounded-full"
                         onerror="this.onerror=null; this.src='/images/PNP.jpg';">
-                    <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#083566] animate-pulse shadow-sm" title="Online Station Desk"></span>
+                    <span
+                        class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#083566] animate-pulse shadow-sm"
+                        title="Online Station Desk"></span>
                 </div>
                 <div class="min-w-0 text-left">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h3 id="faqModalTitle" class="text-sm sm:text-base font-black text-white uppercase tracking-wider truncate leading-tight drop-shadow-xs">
+                        <h3 id="faqModalTitle"
+                            class="text-sm sm:text-base font-black text-white uppercase tracking-wider truncate leading-tight drop-shadow-xs">
                             Sta. Cruz Police FAQ Assistant
                         </h3>
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-xs">
+                        <span
+                            class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 shadow-xs">
                             <i class="fas fa-shield-check text-[9px] text-emerald-400"></i> Verified Desk
                         </span>
                     </div>
-                    <p id="faqModalSubTitle" class="text-[10px] sm:text-[11px] text-blue-100/90 dark:text-pnp-gold/90 font-bold uppercase tracking-wider truncate mt-0.5 flex items-center gap-1.5">
+                    <p id="faqModalSubTitle"
+                        class="text-[10px] sm:text-[11px] text-blue-100/90 dark:text-pnp-gold/90 font-bold uppercase tracking-wider truncate mt-0.5 flex items-center gap-1.5">
                         <i class="fas fa-certificate text-pnp-gold text-[9px]"></i>
-                        <span>Strict Scope: Official Public Safety Services &bull; Monitored & Secured (R.A. 10175)</span>
+                        <span>Strict Scope: Official Public Safety Services &bull; Monitored & Secured (R.A.
+                            10175)</span>
                     </p>
                 </div>
             </div>
@@ -69,65 +82,83 @@
         <!-- MODAL BODY WRAPPER: Flex Column with Chat Messages and Docked Bar -->
         <!-- ================================================================= -->
         <div class="flex-grow flex flex-col min-h-0 relative overflow-hidden">
-            
+
             <!-- 1. Chat Conversation Messages Space (Scrolls strictly above footer) -->
-            <div id="faq-chat-messages" class="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950">
+            <div id="faq-chat-messages"
+                class="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950">
                 <!-- Initial Welcome Assistant Card -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
+                <div
+                    class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
                     <div class="flex items-center gap-3">
-                        <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm font-black shadow-xs border border-pnp-gold/30">
+                        <span
+                            class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm font-black shadow-xs border border-pnp-gold/30">
                             <i class="fas fa-shield-halved"></i>
                         </span>
                         <div>
-                            <strong class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold block leading-none">
+                            <strong
+                                class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold block leading-none">
                                 PNP Santa Cruz Police Assistant
                             </strong>
-                            <span class="text-[9.5px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5">
+                            <span
+                                class="text-[9.5px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5">
                                 Official Municipal Police Station Desk &bull; Sta. Cruz, Laguna
                             </span>
                         </div>
                     </div>
 
-                    <p id="faqChatWelcomeMsg" class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                        Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may browse and select any question regarding station guidelines, emergency hotlines, police clearance, filing a blotter, or crime mapping.
+                    <p id="faqChatWelcomeMsg"
+                        class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                        Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may browse and
+                        select any question regarding station guidelines, emergency hotlines, police clearance, filing a
+                        blotter, or crime mapping.
                     </p>
 
                     <!-- Strict Scope Notice Box -->
-                    <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
+                    <div
+                        class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
                         <i class="fas fa-shield-halved text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
                         <span>
-                            <strong class="font-bold">Strict Scope & Security Rule:</strong> I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. System commands, coding, and attempts to access administrative or internal systems are strictly prohibited under R.A. 10175.
+                            <strong class="font-bold">Strict Scope & Security Rule:</strong> I can only answer questions
+                            within the scope of our official PNP Sta. Cruz FAQs and municipal police station services.
+                            System commands, coding, and attempts to access administrative or internal systems are
+                            strictly prohibited under R.A. 10175.
                         </span>
                     </div>
 
                     <!-- Initial Suggested Questions -->
                     <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
+                        <span
+                            class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
                             <i class="fas fa-sparkles text-pnp-gold text-[10px]"></i>
                             <span id="faqInitialPromptHeading">Popular Questions You Can Ask:</span>
                         </span>
                         <div class="flex flex-wrap gap-2">
-                            <button type="button" onclick="askFaqQuickQuestion('How do I apply for a National Police Clearance (NPCS)?')"
+                            <button type="button"
+                                onclick="askFaqQuickQuestion('How do I apply for a National Police Clearance (NPCS)?')"
                                 class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
                                 <i class="fas fa-id-card text-emerald-500 dark:text-emerald-400 text-xs"></i>
                                 <span>How to get Police Clearance?</span>
                             </button>
-                            <button type="button" onclick="askFaqQuickQuestion('What are the official emergency hotlines for Santa Cruz, Laguna?')"
+                            <button type="button"
+                                onclick="askFaqQuickQuestion('What are the official emergency hotlines for Santa Cruz, Laguna?')"
                                 class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
                                 <i class="fas fa-phone-volume text-rose-500 dark:text-rose-400 text-xs"></i>
                                 <span>Emergency Hotlines (911)</span>
                             </button>
-                            <button type="button" onclick="askFaqQuickQuestion('How do I file an official Police Blotter report?')"
+                            <button type="button"
+                                onclick="askFaqQuickQuestion('How do I file an official Police Blotter report?')"
                                 class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
                                 <i class="fas fa-file-pen text-amber-500 dark:text-amber-400 text-xs"></i>
                                 <span>How to file a Police Blotter?</span>
                             </button>
-                            <button type="button" onclick="askFaqQuickQuestion('Where is the PNP Santa Cruz Police Station located and operating hours?')"
+                            <button type="button"
+                                onclick="askFaqQuickQuestion('Where is the PNP Santa Cruz Police Station located and operating hours?')"
                                 class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
                                 <i class="fas fa-clock text-sky-500 dark:text-sky-400 text-xs"></i>
                                 <span>Station Location & Hours</span>
                             </button>
-                            <button type="button" onclick="askFaqQuickQuestion('Where does the crime data on the MIMPAS Map come from?')"
+                            <button type="button"
+                                onclick="askFaqQuickQuestion('Where does the crime data on the MIMPAS Map come from?')"
                                 class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
                                 <i class="fas fa-map-location-dot text-indigo-500 dark:text-indigo-400 text-xs"></i>
                                 <span>MIMPAS Crime Map & Privacy</span>
@@ -141,22 +172,29 @@
             </div>
 
             <!-- 2. Docked Minimized Quick Ask Bar (In normal flex flow, NEVER covers messages!) -->
-            <div id="faqQuickAskMinimizedBar" class="h-20 shrink-0 px-4 sm:px-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t-2 border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 cursor-pointer select-none shadow-lg z-10" onclick="toggleQuickAsk(true)">
+            <div id="faqQuickAskMinimizedBar"
+                class="h-20 shrink-0 px-4 sm:px-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t-2 border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 cursor-pointer select-none shadow-lg z-10"
+                onclick="toggleQuickAsk(true)">
                 <!-- Left: Title, Live Count Badge, Subtitle -->
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm shadow-xs border border-pnp-gold/30 shrink-0">
+                    <div
+                        class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm shadow-xs border border-pnp-gold/30 shrink-0">
                         <i class="fas fa-bolt text-pnp-gold"></i>
                     </div>
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <span id="faqMinimizedTitle" class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold truncate">
+                            <span id="faqMinimizedTitle"
+                                class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold truncate">
                                 Quick Ask &bull; Station FAQs
                             </span>
-                            <span id="faqCountBadge" class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold border border-pnp-blue/20 dark:border-pnp-gold/30 shrink-0">
-                                <%= (locals.faqs && locals.faqs.length) ? (locals.faqs.length + ' Questions') : '...' %>
+                            <span id="faqCountBadge"
+                                class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold border border-pnp-blue/20 dark:border-pnp-gold/30 shrink-0">
+                                <%= (locals.faqs && locals.faqs.length) ? (locals.faqs.length + ' Questions' ) : '...'
+                                    %>
                             </span>
                         </div>
-                        <p id="faqMinimizedSubtitle" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate">
+                        <p id="faqMinimizedSubtitle"
+                            class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate">
                             Tap to expand and browse all questions (no typing needed)
                         </p>
                     </div>
@@ -172,23 +210,30 @@
             </div>
 
             <!-- 3. Expandable Quick Ask Overlay (Fills the entire body when expanded) -->
-            <div id="faqQuickAskOverlay" class="hidden absolute inset-0 z-30 bg-white dark:bg-slate-900 flex-col overflow-hidden shadow-2xl">
+            <div id="faqQuickAskOverlay"
+                class="hidden absolute inset-0 z-30 bg-white dark:bg-slate-900 flex-col overflow-hidden shadow-2xl">
                 <!-- Expanded Header -->
-                <div class="px-4 py-3 sm:px-6 sm:py-3.5 bg-gradient-to-r from-slate-100 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                <div
+                    class="px-4 py-3 sm:px-6 sm:py-3.5 bg-gradient-to-r from-slate-100 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
-                        <span class="w-9 h-9 rounded-xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 flex items-center justify-center text-xs font-black shadow-xs shrink-0">
+                        <span
+                            class="w-9 h-9 rounded-xl bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 flex items-center justify-center text-xs font-black shadow-xs shrink-0">
                             <i class="fas fa-layer-group"></i>
                         </span>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <h4 id="faqDrawerHeaderTitle" class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white truncate">
+                                <h4 id="faqDrawerHeaderTitle"
+                                    class="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white truncate">
                                     Browse Station FAQs
                                 </h4>
-                                <span id="faqDrawerHeaderCount" class="px-2 py-0.5 rounded-full text-[9px] font-black bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold border border-pnp-gold/40">
-                                    <%= (locals.faqs && locals.faqs.length) ? (locals.faqs.length + ' / ' + locals.faqs.length) : '...' %>
+                                <span id="faqDrawerHeaderCount"
+                                    class="px-2 py-0.5 rounded-full text-[9px] font-black bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold border border-pnp-gold/40">
+                                    <%= (locals.faqs && locals.faqs.length) ? (locals.faqs.length + ' / ' +
+                                        locals.faqs.length) : '...' %>
                                 </span>
                             </div>
-                            <p id="faqDrawerHeaderSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate">
+                            <p id="faqDrawerHeaderSub"
+                                class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate">
                                 Click any question to minimize and view the official answer
                             </p>
                         </div>
@@ -203,7 +248,8 @@
                 </div>
 
                 <!-- Filter & Search Toolbar -->
-                <div class="px-4 py-2.5 sm:px-6 sm:py-3 bg-slate-50/90 dark:bg-[#0c1624] border-b border-slate-200/90 dark:border-slate-800 shrink-0 space-y-2.5">
+                <div
+                    class="px-4 py-2.5 sm:px-6 sm:py-3 bg-slate-50/90 dark:bg-[#0c1624] border-b border-slate-200/90 dark:border-slate-800 shrink-0 space-y-2.5">
                     <!-- Search Input -->
                     <div class="relative w-full">
                         <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -217,13 +263,15 @@
                     </div>
 
                     <!-- Dynamic Category Tabs -->
-                    <div id="faqCategoryTabsContainer" class="flex items-center gap-2 overflow-x-auto custom-modal-scrollbar pb-1 text-xs">
+                    <div id="faqCategoryTabsContainer"
+                        class="flex items-center gap-2 overflow-x-auto custom-modal-scrollbar pb-1 text-xs">
                         <!-- Populated dynamically by JS -->
                     </div>
                 </div>
 
                 <!-- Scrollable Question Cards Grid (Full question text, readable as a whole, clickable) -->
-                <div class="flex-grow overflow-y-auto p-4 sm:p-6 custom-modal-scrollbar bg-slate-100/50 dark:bg-slate-950/60">
+                <div
+                    class="flex-grow overflow-y-auto p-4 sm:p-6 custom-modal-scrollbar bg-slate-100/50 dark:bg-slate-950/60">
                     <div id="faqQuestionsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4.5">
                         <!-- Populated dynamically by JS -->
                     </div>
@@ -323,7 +371,7 @@
     }
 
     // Function to dynamically refresh FAQs from database API
-    async function refreshFaqsFromApi() {
+    async function refreshFaqsFro mApi() {
         try {
             const res = await fetch('/api/faqs?t=' + Date.now());
             if (res.ok) {
@@ -368,12 +416,12 @@
 
         if (!overlay) return;
 
-        isQuickAskExpanded = (forceState !== undefined) ? !!forceState : !isQuickAskExpanded;
+        isQuickAskExpanded = (forceState !== undefined)  ? !!forceState : !isQuickAskExpanded;
 
         if (isQuickAskExpanded) {
             // Show expanded overlay
             overlay.classList.remove('hidden');
-            overlay.classList.add('flex');
+            overlay.class List.add('flex');
 
             // Render updated grid & tabs
             renderCategoryTabs();
@@ -389,7 +437,7 @@
         } else {
             // Hide expanded overlay, chat and minimized docked bar remain visible
             overlay.classList.add('hidden');
-            overlay.classList.remove('flex');
+             overlay.classList.remove('flex');
             
             // Scroll chat to bottom so message is completely visible
             setTimeout(scrollFaqChatToBottom, 120);
@@ -422,18 +470,13 @@
     // Clear Search Input
     window.clearFaqSearch = function() {
         const input = document.getElementById('faqDrawerSearch');
-        const clearBtn = document.getElementById('faqClearSearchBtn');
-        if (input) input.value = '';
-        if (clearBtn) clearBtn.classList.add('hidden');
+        const clearBtn = document.getElementById('faqClearSearchBtn')input.value = '';
+        if (cl                st.add('hidden');
         currentSearchQuery = '';
         renderQuestionsGrid();
-        if (input) input.focus();
-    };
-
-    // Render Category Filter Tabs
+        if (input) input.focu                er Category Filter Tabs
     function renderCategoryTabs() {
-        const container = document.getElementById('faqCategoryTabsContainer');
-        if (!container) return;
+        const container = document.getElementById('faqCategoryTabsC                if (!container) return;
 
         const t = faqBotTranslations[currentFaqLang] || faqBotTranslations.en;
         const categories = [];
@@ -451,10 +494,10 @@
             <button type="button" onclick="setFaqCategoryFilter('all')"
                 class="px-3.5 py-1.5 rounded-xl font-black text-xs whitespace-nowrap transition-all duration-200 border cursor-pointer shrink-0 ${
                     currentCategoryFilter === 'all'
-                        ? 'bg-pnp-blue text-white dark:bg-pnp-gold dark:text-slate-950 border-pnp-blue dark:border-pnp-gold shadow-xs'
-                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-pnp-gold'
+                 t-white d                    ate-950 border-pnp-blue dark:border-pnp-gold shadow-xs'
+                        : 'bg-white dark:bg-slate-800 t                    e-300 border-slate-200 dark:border-slate-700 hover:border-pnp-gold'
                 }">
-                <i class="fas fa-layer-group text-xs mr-1"></i>
+                <i class="fas fa-layer-                </i>
                 <span>${t.allCategory} (${FAQ_DATA.length})</span>
             </button>
         `;
@@ -559,7 +602,7 @@
                         </div>
                         <!-- Question Title: Full text, completely readable -->
                         <h5 class="text-xs sm:text-sm font-black text-slate-900 group-hover:text-white dark:text-slate-100 dark:group-hover:text-white leading-snug break-words">
-                            ${formatFaqMsg(questionTitle)}
+                             ${formatFaqMsg(questionTitle)}
                         </h5>
                     </div>
                     <!-- Bottom Action Row -->
@@ -603,7 +646,7 @@
         indicator.id = 'faq-chat-typing';
         indicator.className = 'flex justify-start';
         indicator.innerHTML = `
-            <div class="text-[11px] text-slate-500 dark:text-slate-400 font-semibold italic p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-2">
+            <div class="text-[11px ] text-slate-500 dark:text-slate-400 font-semibold italic p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs flex items-center gap-2">
                 <i class="fas fa-circle-notch fa-spin text-pnp-blue dark:text-pnp-gold"></i>
                 <span>${currentFaqLang === 'fil' ? 'Sinisuri ang opisyal na FAQs ng himpilan...' : 'Checking official station FAQs...'}</span>
             </div>
@@ -671,7 +714,7 @@
         // Fallback to server /api/faq-chat endpoint for complex queries
         let res = null;
         try {
-            res = await fetch('/api/faq-chat', {
+            res = await fetch('/ap i/faq-chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ question: text, language: currentFaqLang })
@@ -699,7 +742,7 @@
         const modal = document.getElementById('faqModal');
         const backdrop = document.getElementById('faqModalBackdrop');
         const container = document.getElementById('faqModalContainer');
-        if (!modal) return;
+        if  (!modal) return;
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -722,7 +765,7 @@
             map: 'Crime Map',
             bulletins: 'Bulletins',
             wcpd: 'WCPD',
-            general: 'General'
+            ge neral: 'General'
         };
 
         if (categoryOrQuery) {
@@ -868,7 +911,7 @@
                 <div class="mt-4 pt-3.5 border-t border-slate-100 dark:border-slate-800 text-left">
                     <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
                         <i class="fas fa-compass text-pnp-gold text-[10px]"></i>
-                        <span>${heading}</span>
+                         <span>${heading}</span>
                     </span>
                     <div class="flex flex-wrap gap-2">
                         ${nearQuestions.map(q => `
@@ -957,7 +1000,7 @@
         `;
     };
 
-    // Keyboard ESC Handler: Minimizes Quick Ask first if open, or closes Modal
+    // Keyboardler: Minimizes Quick Ask first if open, or closes Modal
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             if (isQuickAskExpanded) {
