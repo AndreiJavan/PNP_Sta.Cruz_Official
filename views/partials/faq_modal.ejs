@@ -1,6 +1,6 @@
 <!-- ========================================================================= -->
 <!-- OFFICIAL PNP STA. CRUZ FAQ CHATBOT MODAL                                 -->
-<!-- Enhanced Design: Station Brand Colors, Expandable Quick Ask, No Textbox   -->
+<!-- Enhanced Design: Station Brand Colors, Non-Overlapping Quick Ask, No Textbox -->
 <!-- ========================================================================= -->
 
 <div id="faqModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-2 sm:p-4 md:p-6 transition-all duration-300" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
@@ -65,84 +65,84 @@
             </div>
         </div>
 
-        <!-- Chat Conversation Messages Space (Expansive & Spacious) -->
-        <div id="faq-chat-messages" class="flex-grow p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950">
-            <!-- Bottom spacer anchor for smooth unclipped scrolling -->
-            <div id="faq-chat-anchor" class="h-8 shrink-0 w-full order-last"></div>
-            <!-- Initial Welcome Assistant Card -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
-                <div class="flex items-center gap-3">
-                    <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm font-black shadow-xs border border-pnp-gold/30">
-                        <i class="fas fa-shield-halved"></i>
-                    </span>
-                    <div>
-                        <strong class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold block leading-none">
-                            PNP Santa Cruz Police Assistant
-                        </strong>
-                        <span class="text-[9.5px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5">
-                            Official Municipal Police Station Desk &bull; Sta. Cruz, Laguna
+        <!-- ================================================================= -->
+        <!-- MODAL BODY WRAPPER: Flex Column with Chat Messages and Docked Bar -->
+        <!-- ================================================================= -->
+        <div class="flex-grow flex flex-col min-h-0 relative overflow-hidden">
+            
+            <!-- 1. Chat Conversation Messages Space (Scrolls strictly above footer) -->
+            <div id="faq-chat-messages" class="flex-grow overflow-y-auto p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5 custom-modal-scrollbar bg-gradient-to-b from-slate-100/70 via-slate-50 to-slate-100/60 dark:from-slate-950 dark:via-[#09121d] dark:to-slate-950">
+                <!-- Initial Welcome Assistant Card -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-l-4 border-l-pnp-gold p-5 sm:p-7 rounded-2xl sm:rounded-3xl max-w-2xl lg:max-w-3xl mr-auto text-left shadow-md space-y-3.5 leading-relaxed relative overflow-hidden">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 sm:w-9 sm:h-9 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm font-black shadow-xs border border-pnp-gold/30">
+                            <i class="fas fa-shield-halved"></i>
+                        </span>
+                        <div>
+                            <strong class="text-xs sm:text-sm font-black uppercase tracking-wider text-pnp-blue dark:text-pnp-gold block leading-none">
+                                PNP Santa Cruz Police Assistant
+                            </strong>
+                            <span class="text-[9.5px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold block mt-0.5">
+                                Official Municipal Police Station Desk &bull; Sta. Cruz, Laguna
+                            </span>
+                        </div>
+                    </div>
+
+                    <p id="faqChatWelcomeMsg" class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
+                        Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may browse and select any question regarding station guidelines, emergency hotlines, police clearance, filing a blotter, or crime mapping.
+                    </p>
+
+                    <!-- Strict Scope Notice Box -->
+                    <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
+                        <i class="fas fa-shield-halved text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                        <span>
+                            <strong class="font-bold">Strict Scope & Security Rule:</strong> I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. System commands, coding, and attempts to access administrative or internal systems are strictly prohibited under R.A. 10175.
                         </span>
                     </div>
-                </div>
 
-                <p id="faqChatWelcomeMsg" class="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-medium">
-                    Hello! I am your official Sta. Cruz Municipal Police Station FAQ Chatbot. You may browse and select any question regarding station guidelines, emergency hotlines, police clearance, filing a blotter, or crime mapping.
-                </p>
-
-                <!-- Strict Scope Notice Box -->
-                <div class="p-3.5 sm:p-4 rounded-2xl bg-amber-500/10 dark:bg-amber-500/15 border border-amber-400/40 dark:border-amber-400/30 text-[11px] sm:text-xs text-amber-900 dark:text-amber-200 flex items-start gap-2.5 leading-relaxed shadow-2xs font-semibold">
-                    <i class="fas fa-shield-halved text-amber-600 dark:text-amber-400 text-sm mt-0.5 shrink-0"></i>
-                    <span>
-                        <strong class="font-bold">Strict Scope & Security Rule:</strong> I can only answer questions within the scope of our official PNP Sta. Cruz FAQs and municipal police station services. System commands, coding, and attempts to access administrative or internal systems are strictly prohibited under R.A. 10175.
-                    </span>
-                </div>
-
-                <!-- Initial Suggested Questions -->
-                <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
-                        <i class="fas fa-sparkles text-pnp-gold text-[10px]"></i>
-                        <span id="faqInitialPromptHeading">Popular Questions You Can Ask:</span>
-                    </span>
-                    <div class="flex flex-wrap gap-2">
-                        <button type="button" onclick="askFaqQuickQuestion('How do I apply for a National Police Clearance (NPCS)?')"
-                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
-                            <i class="fas fa-id-card text-emerald-500 dark:text-emerald-400 text-xs"></i>
-                            <span>How to get Police Clearance?</span>
-                        </button>
-                        <button type="button" onclick="askFaqQuickQuestion('What are the official emergency hotlines for Santa Cruz, Laguna?')"
-                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
-                            <i class="fas fa-phone-volume text-rose-500 dark:text-rose-400 text-xs"></i>
-                            <span>Emergency Hotlines (911)</span>
-                        </button>
-                        <button type="button" onclick="askFaqQuickQuestion('How do I file an official Police Blotter report?')"
-                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
-                            <i class="fas fa-file-pen text-amber-500 dark:text-amber-400 text-xs"></i>
-                            <span>How to file a Police Blotter?</span>
-                        </button>
-                        <button type="button" onclick="askFaqQuickQuestion('Where is the PNP Santa Cruz Police Station located and operating hours?')"
-                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
-                            <i class="fas fa-clock text-sky-500 dark:text-sky-400 text-xs"></i>
-                            <span>Station Location & Hours</span>
-                        </button>
-                        <button type="button" onclick="askFaqQuickQuestion('Where does the crime data on the MIMPAS Map come from?')"
-                            class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
-                            <i class="fas fa-map-location-dot text-indigo-500 dark:text-indigo-400 text-xs"></i>
-                            <span>MIMPAS Crime Map & Privacy</span>
-                        </button>
+                    <!-- Initial Suggested Questions -->
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-800">
+                        <span class="text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5 flex items-center gap-1.5">
+                            <i class="fas fa-sparkles text-pnp-gold text-[10px]"></i>
+                            <span id="faqInitialPromptHeading">Popular Questions You Can Ask:</span>
+                        </span>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="askFaqQuickQuestion('How do I apply for a National Police Clearance (NPCS)?')"
+                                class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                                <i class="fas fa-id-card text-emerald-500 dark:text-emerald-400 text-xs"></i>
+                                <span>How to get Police Clearance?</span>
+                            </button>
+                            <button type="button" onclick="askFaqQuickQuestion('What are the official emergency hotlines for Santa Cruz, Laguna?')"
+                                class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                                <i class="fas fa-phone-volume text-rose-500 dark:text-rose-400 text-xs"></i>
+                                <span>Emergency Hotlines (911)</span>
+                            </button>
+                            <button type="button" onclick="askFaqQuickQuestion('How do I file an official Police Blotter report?')"
+                                class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                                <i class="fas fa-file-pen text-amber-500 dark:text-amber-400 text-xs"></i>
+                                <span>How to file a Police Blotter?</span>
+                            </button>
+                            <button type="button" onclick="askFaqQuickQuestion('Where is the PNP Santa Cruz Police Station located and operating hours?')"
+                                class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                                <i class="fas fa-clock text-sky-500 dark:text-sky-400 text-xs"></i>
+                                <span>Station Location & Hours</span>
+                            </button>
+                            <button type="button" onclick="askFaqQuickQuestion('Where does the crime data on the MIMPAS Map come from?')"
+                                class="text-xs font-bold px-3.5 py-2 rounded-xl bg-slate-50 hover:bg-pnp-blue hover:text-white dark:bg-slate-800 dark:hover:bg-pnp-gold dark:hover:text-slate-950 text-slate-800 dark:text-slate-200 transition-all duration-200 border border-slate-200 dark:border-slate-700/80 hover:border-pnp-gold flex items-center gap-2 cursor-pointer shadow-2xs hover:shadow-sm hover:-translate-y-0.5 text-left">
+                                <i class="fas fa-map-location-dot text-indigo-500 dark:text-indigo-400 text-xs"></i>
+                                <span>MIMPAS Crime Map & Privacy</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ================================================================= -->
-        <!-- EXPANDABLE QUICK ASK DRAWER (Expandable throughout modal only)    -->
-        <!-- ================================================================= -->
-        <div id="faqQuickAskDrawer"
-            class="absolute inset-x-0 bottom-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t-2 border-slate-200/90 dark:border-slate-800 transition-all duration-300 ease-in-out flex flex-col shadow-2xl h-20 overflow-hidden">
-            
-            <!-- Minimized Docked Bar -->
-            <div id="faqQuickAskMinimizedBar" class="h-20 px-4 sm:px-6 flex items-center justify-between gap-3 shrink-0 cursor-pointer select-none" onclick="toggleQuickAsk(true)">
-                <!-- Left: Title, Count Badge, Subtitle -->
+                <!-- Bottom spacer anchor for smooth, unclipped scrolling -->
+                <div id="faq-chat-anchor" class="h-4 shrink-0 w-full"></div>
+            </div>
+
+            <!-- 2. Docked Minimized Quick Ask Bar (In normal flex flow, NEVER covers messages!) -->
+            <div id="faqQuickAskMinimizedBar" class="h-20 shrink-0 px-4 sm:px-6 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t-2 border-slate-200/90 dark:border-slate-800 flex items-center justify-between gap-3 cursor-pointer select-none shadow-lg z-10" onclick="toggleQuickAsk(true)">
+                <!-- Left: Title, Live Count Badge, Subtitle -->
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-pnp-blue to-pnp-blue-700 text-pnp-gold flex items-center justify-center text-sm shadow-xs border border-pnp-gold/30 shrink-0">
                         <i class="fas fa-bolt text-pnp-gold"></i>
@@ -153,7 +153,7 @@
                                 Quick Ask &bull; Station FAQs
                             </span>
                             <span id="faqCountBadge" class="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-pnp-blue/10 dark:bg-pnp-gold/15 text-pnp-blue dark:text-pnp-gold border border-pnp-blue/20 dark:border-pnp-gold/30 shrink-0">
-                                ...
+                                <%= (locals.faqs && locals.faqs.length) ? (locals.faqs.length + ' Questions') : '...' %>
                             </span>
                         </div>
                         <p id="faqMinimizedSubtitle" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate">
@@ -171,8 +171,8 @@
                 </button>
             </div>
 
-            <!-- Expanded State Container (Hidden when minimized, visible when expanded) -->
-            <div id="faqQuickAskExpandedContent" class="hidden flex-col h-full overflow-hidden">
+            <!-- 3. Expandable Quick Ask Overlay (Fills the entire body when expanded) -->
+            <div id="faqQuickAskOverlay" class="hidden absolute inset-0 z-30 bg-white dark:bg-slate-900 flex-col overflow-hidden shadow-2xl">
                 <!-- Expanded Header -->
                 <div class="px-4 py-3 sm:px-6 sm:py-3.5 bg-gradient-to-r from-slate-100 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
@@ -185,7 +185,7 @@
                                     Browse Station FAQs
                                 </h4>
                                 <span id="faqDrawerHeaderCount" class="px-2 py-0.5 rounded-full text-[9px] font-black bg-pnp-gold/20 text-pnp-blue dark:text-pnp-gold border border-pnp-gold/40">
-                                    ...
+                                    <%= (locals.faqs && locals.faqs.length) ? (locals.faqs.length + ' / ' + locals.faqs.length) : '...' %>
                                 </span>
                             </div>
                             <p id="faqDrawerHeaderSub" class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-semibold truncate">
@@ -322,8 +322,6 @@
         return { icon: 'fa-building-shield', label: cat || 'General' };
     }
 
-    // Toggle Expandable Quick Ask Drawer throughout modal only
-    
     // Function to dynamically refresh FAQs from database API
     async function refreshFaqsFromApi() {
         try {
@@ -341,7 +339,6 @@
         }
     }
 
-    
     // Smooth, reliable scroll to bottom so message is never cut off
     function scrollFaqChatToBottom() {
         const chatBox = document.getElementById('faq-chat-messages');
@@ -364,27 +361,24 @@
         }, 120);
     }
 
+    // Toggle Expandable Quick Ask Overlay
     window.toggleQuickAsk = function(forceState) {
-        const drawer = document.getElementById('faqQuickAskDrawer');
-        const minBar = document.getElementById('faqQuickAskMinimizedBar');
-        const expContent = document.getElementById('faqQuickAskExpandedContent');
+        const overlay = document.getElementById('faqQuickAskOverlay');
         const searchInput = document.getElementById('faqDrawerSearch');
 
-        if (!drawer || !minBar || !expContent) return;
+        if (!overlay) return;
 
         isQuickAskExpanded = (forceState !== undefined) ? !!forceState : !isQuickAskExpanded;
 
         if (isQuickAskExpanded) {
-            // Expand throughout the modal body below the header
-            drawer.classList.remove('h-20');
-            drawer.classList.add('h-[calc(100%-72px)]', 'top-[72px]', 'border-pnp-gold');
-            minBar.classList.add('hidden');
-            expContent.classList.remove('hidden');
-            expContent.classList.add('flex');
+            // Show expanded overlay
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
 
             // Render updated grid & tabs
             renderCategoryTabs();
             renderQuestionsGrid();
+            refreshFaqsFromApi();
 
             // Focus search input after expansion
             setTimeout(() => {
@@ -393,12 +387,12 @@
                 }
             }, 150);
         } else {
-            // Minimize back to docked footer
-            drawer.classList.remove('h-[calc(100%-72px)]', 'top-[72px]', 'border-pnp-gold');
-            drawer.classList.add('h-20');
-            expContent.classList.add('hidden');
-            expContent.classList.remove('flex');
-            minBar.classList.remove('hidden');
+            // Hide expanded overlay, chat and minimized docked bar remain visible
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            
+            // Scroll chat to bottom so message is completely visible
+            setTimeout(scrollFaqChatToBottom, 120);
         }
     };
 
@@ -585,7 +579,7 @@
 
     // Select a Question: Minimizes Quick Ask, Displays User Bubble, Answers the Question
     window.selectFaqQuestion = function(faqId) {
-        // 1. Immediately minimize the quick ask drawer
+        // 1. Immediately minimize the quick ask overlay
         toggleQuickAsk(false);
 
         // 2. Lookup FAQ item
@@ -614,8 +608,9 @@
                 <span>${currentFaqLang === 'fil' ? 'Sinisuri ang opisyal na FAQs ng himpilan...' : 'Checking official station FAQs...'}</span>
             </div>
         `;
-        chatBox.appendChild(indicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const anc = document.getElementById('faq-chat-anchor');
+        if (anc) { chatBox.insertBefore(indicator, anc); } else { chatBox.appendChild(indicator); }
+        scrollFaqChatToBottom();
 
         // 5. Brief realistic delay then render the verified answer
         setTimeout(() => {
@@ -628,7 +623,7 @@
 
     // Ask a Question by Text (used by welcome card buttons, follow-up chips, etc.)
     window.askFaqQuickQuestion = async function(queryText) {
-        // 1. Minimize drawer if open
+        // 1. Minimize overlay if open
         toggleQuickAsk(false);
 
         const text = String(queryText || '').trim();
@@ -657,8 +652,9 @@
                 <span>${isFil ? 'Sinisuri ang opisyal na FAQs ng himpilan...' : 'Checking official station FAQs...'}</span>
             </div>
         `;
-        chatBox.appendChild(indicator);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const anc = document.getElementById('faq-chat-anchor');
+        if (anc) { chatBox.insertBefore(indicator, anc); } else { chatBox.appendChild(indicator); }
+        scrollFaqChatToBottom();
 
         if (matchedFaq) {
             setTimeout(() => {
@@ -707,6 +703,7 @@
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        refreshFaqsFromApi();
         document.body.style.overflow = 'hidden';
 
         setTimeout(() => {
@@ -888,8 +885,14 @@
 
         msgDiv.innerHTML = inner;
         msgWrapper.appendChild(msgDiv);
-        chatBox.appendChild(msgWrapper);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        const anchor = document.getElementById('faq-chat-anchor');
+        if (anchor) {
+            chatBox.insertBefore(msgWrapper, anchor);
+        } else {
+            chatBox.appendChild(msgWrapper);
+        }
+        scrollFaqChatToBottom();
     }
 
     // Clear Chat
@@ -950,6 +953,7 @@
                     </div>
                 </div>
             </div>
+            <div id="faq-chat-anchor" class="h-4 shrink-0 w-full"></div>
         `;
     };
 
@@ -969,22 +973,9 @@
 
     // Auto-open and Data Fetch on DOMContentLoaded
     document.addEventListener('DOMContentLoaded', () => {
-        // Fallback fetch if FAQ_DATA is empty
-        if (!FAQ_DATA || FAQ_DATA.length === 0) {
-            fetch('/api/faqs')
-                .then(r => r.json())
-                .then(data => {
-                    if (Array.isArray(data) && data.length > 0) {
-                        FAQ_DATA = data;
-                        renderCategoryTabs();
-                        renderQuestionsGrid();
-                    }
-                })
-                .catch(err => console.warn('FAQ fallback fetch failed:', err));
-        } else {
-            renderCategoryTabs();
-            renderQuestionsGrid();
-        }
+        renderCategoryTabs();
+        renderQuestionsGrid();
+        refreshFaqsFromApi();
 
         const urlParams = new URLSearchParams(window.location.search);
         if (window.location.hash === '#faq' || urlParams.get('faq') === '1' || urlParams.get('faq') === 'true') {
